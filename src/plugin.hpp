@@ -12,7 +12,7 @@ widget::Widget* createPinchZoomOverlay(bool* enabled);
 /** Gestures that must be seen before anything else: scroll-wheel adjustment of sliders, and
 Option-click to clip a scope onto a jack. Added to the Scene and kept as its LAST child, so
 it is offered events ahead of any open menu. */
-widget::Widget* createInterceptOverlay(bool* sliderScroll);
+widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables);
 
 /** The plugin's knob face, shared so an injector's dial matches the knobs it sits among. */
 void druiDrawKnob(NVGcontext* vg, math::Vec c, float r, float angle, int ticks);

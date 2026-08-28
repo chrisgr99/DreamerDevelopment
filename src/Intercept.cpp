@@ -26,6 +26,9 @@ that follows the pointer, leaving the wheel as the only practical route.
 
 #include <ui/Slider.hpp>
 #include <ui/ScrollWidget.hpp>
+#include <app/CableWidget.hpp>
+#include <history.hpp>
+#include <ui/ScrollWidget.hpp>
 #include <app/PortWidget.hpp>
 #include "Injector.hpp"
 #include "WidgetAt.hpp"
@@ -38,11 +41,145 @@ that follows the pointer, leaving the wheel as the only practical route.
 
 struct InterceptOverlay : widget::Widget {
 	bool* sliderScroll = NULL;
+	bool* clickCables = NULL;
+	/** True between the click that picks a cable up and the click that puts it down. Rack
+	believes a drag is in progress the whole time. */
+	bool carrying = false;
+
+
+	/** The cable being carried, if any. Owned by the rack like any other; what makes it
+	"carried" is simply that one of its ends is not connected to anything.
+
+	Injecting a press and withholding the release was the obvious way to do this and it does
+	not work. Rack sets the dragged widget to WHOEVER CONSUMED the press — so consuming the
+	click to stop the port acting on it also replaced the port's drag with ours, and no cable
+	appeared. Not consuming it means the ordinary drag starts and the ordinary release ends it.
+
+	None of that machinery is needed. An incomplete cable draws its loose end at the rack's
+	mouse position all by itself, so carrying one is just a matter of leaving an end unset. The
+	cable is made, moved and completed here, with Rack's own history actions so undo behaves as
+	it always does.
+	*/
+	WeakPtr<app::CableWidget> carried;
+
+	/** Picks up the top cable on this port, or starts a new one from it. */
+	void pickUp(app::PortWidget* port) {
+		if (!port || !port->module)
+			return;
+
+		app::CableWidget* cw = APP->scene->rack->getTopCable(port);
+		if (cw) {
+			// Taking an existing cable off: it becomes incomplete at this end, and the removal
+			// is recorded so undo puts it back where it was.
+			history::CableRemove* h = new history::CableRemove;
+			h->setCable(cw);
+			APP->history->push(h);
+			cw->getPort(port->type) = NULL;
+			cw->updateCable();
+		}
+		else {
+			cw = new app::CableWidget;
+			cw->getPort(port->type) = port;
+			cw->updateCable();
+			APP->scene->rack->addCable(cw);
+		}
+		carried = cw;
+		carrying = true;
+	}
+
+	/** Drops what is being carried onto this port, or discards it if the port cannot take it. */
+	void dropOn(app::PortWidget* port) {
+		carrying = false;
+		app::CableWidget* cw = carried;
+		carried = NULL;
+		if (!cw)
+			return;
+
+		const engine::Port::Type wanted = cw->inputPort ? engine::Port::OUTPUT
+			: engine::Port::INPUT;
+		if (!port || !port->module || port->type != wanted) {
+			discard(cw);
+			return;
+		}
+
+		// An input takes one cable. Rack replaces what is there when you drop on an occupied
+		// input, so this does the same rather than inventing a third behaviour.
+		if (port->type == engine::Port::INPUT) {
+			for (app::CableWidget* other : APP->scene->rack->getCompleteCablesOnPort(port)) {
+				history::CableRemove* h = new history::CableRemove;
+				h->setCable(other);
+				APP->history->push(h);
+				APP->scene->rack->removeCable(other);
+				delete other;
+			}
+		}
+
+		cw->getPort(port->type) = port;
+		cw->updateCable();
+		if (!cw->isComplete()) {
+			discard(cw);
+			return;
+		}
+		history::CableAdd* h = new history::CableAdd;
+		h->setCable(cw);
+		APP->history->push(h);
+	}
+
+	void discard(app::CableWidget* cw) {
+		if (!cw)
+			return;
+		APP->scene->rack->removeCable(cw);
+		delete cw;
+	}
+
+	void cancelCarry() {
+		carrying = false;
+		if (carried)
+			discard(carried);
+		carried = NULL;
+	}
+
+	/** Scrolls the rack when a carried cable is taken to the edge of the view.
+
+	Needed because the pointer cannot leave the window: without it a cable could only ever be
+	dropped on something already on screen. Only while carrying — a rack that slid about
+	whenever the pointer neared an edge would be unusable.
+	*/
+	void autoScrollWhileCarrying() {
+		if (!carrying)
+			return;
+		ui::ScrollWidget* scroll = APP->scene->rackScroll;
+		if (!scroll)
+			return;
+
+		const math::Vec mouse = APP->scene->mousePos;
+		const math::Rect view = scroll->box;
+		const float margin = 45.f;
+		const float speed = 14.f;
+		math::Vec push;
+
+		if (mouse.x < view.pos.x + margin)
+			push.x = -(margin - (mouse.x - view.pos.x));
+		else if (mouse.x > view.pos.x + view.size.x - margin)
+			push.x = margin - (view.pos.x + view.size.x - mouse.x);
+		if (mouse.y < view.pos.y + margin)
+			push.y = -(margin - (mouse.y - view.pos.y));
+		else if (mouse.y > view.pos.y + view.size.y - margin)
+			push.y = margin - (view.pos.y + view.size.y - mouse.y);
+
+		if (push.x == 0.f && push.y == 0.f)
+			return;
+		// Proportional to how far into the margin the pointer is, so easing up to the edge
+		// creeps and pressing into it travels.
+		scroll->offset = scroll->offset.plus(push.div(margin).mult(speed));
+	}
 
 	void step() override {
 		// Cover the scene, or the event system will not offer us events outside our box.
 		if (parent)
 			box.size = parent->box.size;
+
+		autoScrollWhileCarrying();
 
 		// Retake the last place whenever something else has taken it — which is exactly what
 		// happens each time a menu opens. Moving our position in the child list only; the
@@ -131,6 +268,33 @@ struct InterceptOverlay : widget::Widget {
 	the modules, which never sees a press we have claimed on a port.
 	*/
 	void onButton(const ButtonEvent& e) override {
+		// CARRYING: the next click puts the cable down, wherever it lands.
+		if (carrying && e.action == GLFW_PRESS) {
+			if (e.button == GLFW_MOUSE_BUTTON_RIGHT)
+				cancelCarry();
+			else if (e.button == GLFW_MOUSE_BUTTON_LEFT)
+				dropOn(widgetAt<app::PortWidget>(APP->scene, e.pos));
+			e.consume(this);
+			e.stopPropagating();
+			return;
+		}
+		// The carried cable was removed from under us — by an undo, or by its module going
+		// away. Stop carrying rather than pointing at nothing.
+		if (carrying && !carried)
+			carrying = false;
+
+		// PICKING UP: a plain click on a jack takes its cable, or starts a new one.
+		if (clickCables && *clickCables && !carrying
+			&& e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
+			&& (e.mods & RACK_MOD_MASK) == 0) {
+			if (app::PortWidget* port = widgetAt<app::PortWidget>(APP->scene, e.pos)) {
+				pickUp(port);
+				e.consume(this);
+				e.stopPropagating();
+				return;
+			}
+		}
+
 		// A click anywhere puts down a scope that is riding the pointer. It has to be caught
 		// here: a following scope is click-through, so the click lands on whatever is beneath
 		// it — a panel, another module — and would drag that instead of dropping the scope.
@@ -224,6 +388,12 @@ struct InterceptOverlay : widget::Widget {
 	/** Escape deposits a scope riding the pointer. It has to be reachable from here because a
 	following scope is click-through, so it is never the hovered widget itself. */
 	void onHoverKey(const HoverKeyEvent& e) override {
+		if (e.action == GLFW_PRESS && e.key == GLFW_KEY_ESCAPE && carrying) {
+			cancelCarry();
+			e.consume(this);
+			e.stopPropagating();
+			return;
+		}
 		if (e.action == GLFW_PRESS && e.key == GLFW_KEY_ESCAPE && cableFocusActive()) {
 			cableFocusClear();
 			e.consume(this);
@@ -240,8 +410,9 @@ struct InterceptOverlay : widget::Widget {
 };
 
 
-widget::Widget* createInterceptOverlay(bool* sliderScroll) {
+widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables) {
 	InterceptOverlay* overlay = new InterceptOverlay;
 	overlay->sliderScroll = sliderScroll;
+	overlay->clickCables = clickCables;
 	return overlay;
 }

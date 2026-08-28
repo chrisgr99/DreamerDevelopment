@@ -75,6 +75,9 @@ struct DRUIOptions {
 	bool bipolar = true;
 	bool pinchZoom = true;
 	bool sliderScroll = true;
+	/** Click a jack to pick up its cable, click another to drop it — no button held between.
+	Off by default: it changes the most basic gesture in Rack. */
+	bool clickCables = false;
 };
 
 
@@ -114,6 +117,7 @@ struct DRUI : Module {
 		json_object_set_new(rootJ, "bipolar", json_boolean(opt.bipolar));
 		json_object_set_new(rootJ, "pinchZoom", json_boolean(opt.pinchZoom));
 		json_object_set_new(rootJ, "sliderScroll", json_boolean(opt.sliderScroll));
+		json_object_set_new(rootJ, "clickCables", json_boolean(opt.clickCables));
 		// Scopes live in the rack, not in this module, but this module's JSON is where the
 		// patch has room for them. Saving them here means a patch reopens looking at the same
 		// signals, with the same scales, rather than losing every probe on close.
@@ -135,6 +139,7 @@ struct DRUI : Module {
 		read("bipolar", opt.bipolar);
 		read("pinchZoom", opt.pinchZoom);
 		read("sliderScroll", opt.sliderScroll);
+		read("clickCables", opt.clickCables);
 		scopeFromJson(json_object_get(rootJ, "scopes"));
 		injectorFromJson(json_object_get(rootJ, "injectors"));
 	}
@@ -403,7 +408,13 @@ struct DRUIOverlay : widget::TransparentWidget {
 	DRUI* module = NULL;
 	/** Cables already coloured, by engine cable id, so a colour the user changes afterwards
 	is not overwritten on the next frame. */
-	std::set<int64_t> colouredCables;
+	/** Where each cable was last seen to END, so a cable that is re-plugged is recoloured.
+
+	Remembering merely that a cable HAD been coloured meant it kept the colour of the first
+	port it was ever plugged into: move an audio cable to a gate input and it stayed yellow.
+	The colour belongs to the destination, so what has to be remembered is the destination.
+	*/
+	std::map<int64_t, std::string> cableDestination;
 
 	DRUIOverlay() {
 		box.pos = math::Vec();
@@ -442,9 +453,13 @@ struct DRUIOverlay : widget::TransparentWidget {
 			for (CableWidget* cw : APP->scene->rack->getCompleteCables()) {
 				if (!cw->cable || !cw->inputPort)
 					continue;
-				if (colouredCables.count(cw->cable->id))
-					continue;
-				colouredCables.insert(cw->cable->id);
+				const std::string dest = string::f("%lld:%d",
+					(long long) (cw->inputPort->module ? cw->inputPort->module->id : -1),
+					cw->inputPort->portId);
+				auto it = cableDestination.find(cw->cable->id);
+				if (it != cableDestination.end() && it->second == dest)
+					continue;   // Same destination as last time: leave whatever colour it has.
+				cableDestination[cw->cable->id] = dest;
 				std::string name;
 				if (engine::PortInfo* info = cw->inputPort->getPortInfo())
 					name = info->getName();
@@ -695,7 +710,7 @@ struct DRUIWidget : ModuleWidget {
 			pinchOverlay = o;
 		}
 		if (!sliderOverlay && APP->scene) {
-			widget::Widget* o = createInterceptOverlay(&m->opt.sliderScroll);
+			widget::Widget* o = createInterceptOverlay(&m->opt.sliderScroll, &m->opt.clickCables);
 			APP->scene->addChild(o);
 			sliderOverlay = o;
 		}
@@ -735,6 +750,7 @@ struct DRUIWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createBoolPtrMenuItem("Pinch to zoom", "", &m->opt.pinchZoom));
 		menu->addChild(createBoolPtrMenuItem("Scroll wheel adjusts sliders", "", &m->opt.sliderScroll));
+		menu->addChild(createBoolPtrMenuItem("Click to pick up and drop cables", "", &m->opt.clickCables));
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));
