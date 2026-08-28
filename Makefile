@@ -17,3 +17,10 @@ DISTRIBUTABLES += res
 DISTRIBUTABLES += $(wildcard LICENSE*)
 
 include $(RACK_DIR)/plugin.mk
+
+# The pinch monitor talks to NSEvent, so the framework must be linked explicitly. Without it
+# the plugin builds cleanly and then fails to LOAD, because macOS uses a two-level namespace
+# and the Objective-C symbols name no library. ARCH_MAC is defined by the include above.
+ifdef ARCH_MAC
+	LDFLAGS += -framework Cocoa
+endif
