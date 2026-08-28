@@ -41,7 +41,13 @@ static const int DIV_Y = 4;
 // Wcoast SCOPE_HANDLE. Also the shortest the loop-to-scope line may get.
 
 // The values box below the face. A readout, not a settings panel.
-static const float VALUES_HEIGHT = 30.f;
+/** The values box is sized to its text rather than the other way round — see drawValues. */
+static const float VALUES_TEXT_SIZE = 15.f;
+static const float VALUES_PAD = 3.f;
+static const NVGcolor VALUES_GREEN = nvgRGB(0x3d, 0xe0, 0x7a);
+/** Every on-face control. Distinct from the green readouts and the white trace, so what is a
+control and what is a measurement never have to be worked out. */
+static const NVGcolor CONTROL_AMBER = nvgRGB(0xe0, 0xa0, 0x3b);
 // Lower-left transport button: a right-pointing triangle runs, two vertical bars pause.
 static const float TRANSPORT_SIZE = 15.f;
 /** About ten seconds at Rack's 30 Hz default. */
@@ -56,11 +62,26 @@ designed, and then overflowed once the signal reached full amplitude. Measured i
 2048 samples is about 46 ms at 48 kHz — long enough to contain a whole cycle of anything down
 to roughly 20 Hz, so the peak it measures is the real one. */
 static const int AUTOSET_MIN_SAMPLES = 2048;
+/** Units of scroll per step. Raising this slows scrolling proportionally. */
+/** How much of the history a scope reads each frame: enough for a full window plus room to
+find a trigger edge ahead of it. */
+static const int SEARCH_CHUNK = 16384;
+static const float SCROLL_PER_STEP = 30.f;
+/** Panning moves a whole division per step, so it takes less scroll than a nudge of the
+vertical position does. */
+static const float PAN_SCROLL_PER_STEP = 10.f;
+/** A scale step is a whole 1-2-5 jump, so it wants fewer units than a nudge of position. */
+static const float SCALE_SCROLL_PER_STEP = 40.f;
+/** A gesture is considered over after this long with no scroll, which is when the axis it
+locked onto is released. */
+static const double SCROLL_IDLE = 0.25;
 static const float BTN = 14.f;
 static const float BTN_PAD = 4.f;
+/** How far a control sits from the edge of the face it is anchored to. */
+static const float EDGE = 1.f;
 /** How far in from an edge still counts as grabbing it to resize. */
 static const float RESIZE_EDGE = 6.f;
-static const float MIN_W = 120.f, MIN_H = 60.f;
+static const float MIN_W = 70.f, MIN_H = 40.f;
 /** A paused scope wears a red frame, so a held trace can never be mistaken for a live one. */
 static const NVGcolor FRAME_RUN = nvgRGB(0x2f, 0xd0, 0x6a);
 static const NVGcolor FRAME_PAUSED = nvgRGB(0xe0, 0x3b, 0x3b);
@@ -98,6 +119,20 @@ static void setCursorShape(int shape) {
 struct ScopeWidget : ClipWidget {
 	int tapSlot = -1;
 
+	/** Scroll delta banked but not yet spent, so a scale steps once per three units of scroll
+	rather than once per event. */
+	float scrollAccumX = 0.f, scrollAccumY = 0.f;
+	/** The values box, measured while drawing so its frame fits its text. */
+	float valuesW = 120.f, valuesH = 22.f;
+	/** How far the drawn window is shifted back through the captured samples, in divisions.
+	Panning, as the horizontal control on a real scope does. */
+	float timeShift = 0.f;
+	/** Which axis this gesture has claimed: 0 none, 1 sideways, 2 up and down. A trackpad
+	glide is never perfectly straight, so without this a horizontal pan carries a little
+	vertical drift with it and moves the trace while you are trying to scan along it. */
+	int scrollAxis = 0;
+	double lastScrollTime = 0.0;
+
 	int vDivIndex = 6;
 	/** Volts at the vertical centre of the face. Autoset puts the signal's midpoint here, so a
 	unipolar CV riding on an offset is centred rather than sitting off the top. */
@@ -126,6 +161,10 @@ struct ScopeWidget : ClipWidget {
 	int valueMode = 0;
 	/** Hover drives the buttons' visibility, as in Wcoast. */
 	bool hovered = false;
+	/** Owned by the scene while it exists; cleared whenever the pointer leaves the control it
+	belongs to, and in the destructor, or it would outlive the scope. */
+	ui::Tooltip* tooltip = NULL;
+	std::string tooltipText;
 	bool gridShown = true;
 	bool minimized = false;
 	/** Follow mode: the scope rides the pointer, click-through, until a click or Escape
@@ -138,6 +177,11 @@ struct ScopeWidget : ClipWidget {
 	bool resizing = false;
 
 	std::vector<float> scratch;
+	/** What the tap held at the moment of pausing. Panning a paused scope has to re-window
+	this, not the live buffer — the tap goes on filling while the scope is held, so re-reading
+	it would quietly show newer samples than the ones frozen on screen. */
+	std::vector<float> frozenBuf;
+	int frozenCount = 0;
 	/** The last captured sweep, kept so a frozen scope still has something to show. */
 	std::vector<float> lastWin;
 	int lastCount = 0;
@@ -147,14 +191,26 @@ struct ScopeWidget : ClipWidget {
 	/** The face alone. The widget's own box grows to include the values box when it is shown,
 	because Rack only dispatches a click to a child whose box CONTAINS the point — a box drawn
 	outside the widget would be visible and completely unclickable. */
-	float faceHeight = 110.f;
+	/** The face's own width and height. The BOX is not the record of them: minimising replaces
+	the box with a token a few pixels across, so a width kept only there came back as the token's
+	width when the scope was restored. */
+	float faceWidth = 98.f;
+	float faceHeight = 49.f;
 
 	ScopeWidget() {
-		box.size = math::Vec(220, faceHeight);
-		scratch.resize(TAP_BUFFER_SIZE);
+		// Two thirds of what it was. A scope is a thing you clip on beside a jack, and a smaller
+		// one hides less of the rack; it can always be dragged bigger by an edge.
+		// Small on purpose. A scope is usually a peek at a signal, and a small one hides less of
+		// the rack; drag an edge when you want to see more.
+		box.size = math::Vec(faceWidth, faceHeight);
+		// A working window, not the whole history. The buffer now holds eleven seconds, and
+		// copying and searching two megabytes every frame for every scope would cost far more
+		// than the feature is worth.
+		scratch.resize(SEARCH_CHUNK);
 	}
 
 	~ScopeWidget() {
+		destroyTooltip();
 		if (tapSlot >= 0)
 			tapDestroy(tapSlot);
 	}
@@ -163,10 +219,13 @@ struct ScopeWidget : ClipWidget {
 		// Anchored to the port, not to the screen, so the scope follows if the module moves.
 		followPort();
 		if (minimized) {
-			box.size = math::Vec(BTN + BTN_PAD * 2, BTN + BTN_PAD * 2);
+			// Exactly wide enough for the same two buttons, in the same places they occupy on
+			// the full face — see the note on minBox().
+			box.size = math::Vec(EDGE * 2 + BTN * 2 + BTN_PAD, EDGE * 2 + BTN);
 		}
 		else {
-			box.size.y = faceHeight + (valuesShown ? VALUES_HEIGHT + 3.f : 0.f);
+			box.size.x = faceWidth;
+			box.size.y = faceHeight + (valuesShown ? valuesH + 3.f : 0.f);
 		}
 
 		// Follow mode: ride the pointer, just down and right of the tip. A pure position
@@ -205,7 +264,27 @@ struct ScopeWidget : ClipWidget {
 	int gather(float* out, int wanted) {
 		if (tapSlot < 0)
 			return 0;
-		const int have = tapRead(tapSlot, scratch.data(), (int) scratch.size());
+
+		// Where in the history to look: panning moves this back, in divisions of the current
+		// time base, so the same gesture covers the same fraction of the screen at any speed.
+		const int perDiv = std::max(1, wanted / DIV_X);
+		const int shift = (int) (timeShift * perDiv);
+		const int chunk = std::min((int) scratch.size(), std::max(wanted * 3, wanted + 64));
+
+		int have;
+		if (frozen && frozenCount > 0) {
+			// Paused: window the copy taken at the moment of pausing, never the live buffer,
+			// which goes on filling while the scope is held.
+			const int end = math::clamp(frozenCount - shift, 0, frozenCount);
+			have = std::min(chunk, end);
+			if (have <= 0)
+				return 0;
+			std::copy(frozenBuf.begin() + (end - have), frozenBuf.begin() + end,
+				scratch.begin());
+		}
+		else {
+			have = tapReadAt(tapSlot, scratch.data(), chunk, shift);
+		}
 		if (have <= 0)
 			return 0;
 
@@ -215,7 +294,8 @@ struct ScopeWidget : ClipWidget {
 		if (start < 0)
 			start = 0;
 
-		// The newest index an edge may sit at and still leave a full window behind it.
+		// An edge only counts if a whole window follows it; otherwise the few samples left
+		// would be stretched across the face and the time base would be a lie.
 		const int latest = have - (wanted - pre);
 		const float hyst = std::fmax(triggerHyst, 1e-4f);
 
@@ -241,7 +321,16 @@ struct ScopeWidget : ClipWidget {
 			}
 		}
 
-		if (edge >= 0)
+		// PANNED: show where you have panned TO, and do not re-trigger.
+		//
+		// This is why panning appeared to do nothing. The trigger re-anchors the window on an
+		// edge every frame, and on a periodic signal every edge looks like every other — so
+		// moving back through the history landed on a different cycle that drew identically.
+		// A scope being panned is being read, not triggered.
+		if (timeShift > 0.f) {
+			// Nothing else to do: the window already sits where the pan put it.
+		}
+		else if (edge >= 0)
 			start = math::clamp(edge - pre, 0, std::max(0, have - wanted));
 		else if (!triggerAuto)
 			return 0;   // Normal mode shows nothing until an edge arrives
@@ -393,7 +482,7 @@ struct ScopeWidget : ClipWidget {
 		json_object_set_new(rootJ, "offsetY", json_real(offset.y));
 		json_object_set_new(rootJ, "homeX", json_real(homeOffset.x));
 		json_object_set_new(rootJ, "homeY", json_real(homeOffset.y));
-		json_object_set_new(rootJ, "width", json_real(box.size.x));
+		json_object_set_new(rootJ, "width", json_real(faceWidth));
 		json_object_set_new(rootJ, "faceHeight", json_real(faceHeight));
 		json_object_set_new(rootJ, "vDiv", json_integer(vDivIndex));
 		json_object_set_new(rootJ, "vPos", json_real(vPos));
@@ -427,7 +516,7 @@ struct ScopeWidget : ClipWidget {
 		num("offsetY", offset.y);
 		num("homeX", homeOffset.x);
 		num("homeY", homeOffset.y);
-		num("width", box.size.x);
+		num("width", faceWidth);
 		num("faceHeight", faceHeight);
 		integer("vDiv", vDivIndex);
 		num("vPos", vPos);
@@ -500,18 +589,30 @@ struct ScopeWidget : ClipWidget {
 	}
 
 	math::Rect valuesBox() {
-		return math::Rect(math::Vec(0, faceHeight + 3), math::Vec(box.size.x, VALUES_HEIGHT));
+		// Measured while drawing, so the frame hugs whatever is currently in it.
+		return math::Rect(math::Vec(0, faceHeight + 3),
+			math::Vec(std::fmin(box.size.x, valuesW), valuesH));
 	}
 
-	math::Rect closeBox()    { return math::Rect(math::Vec(BTN_PAD, BTN_PAD), math::Vec(BTN, BTN)); }
-	math::Rect minBox()      { return math::Rect(math::Vec(BTN_PAD * 2 + BTN, BTN_PAD), math::Vec(BTN, BTN)); }
-	math::Rect followBox()   { return math::Rect(math::Vec(box.size.x - BTN - BTN_PAD, BTN_PAD), math::Vec(BTN, BTN)); }
-	math::Rect homeBox()     { return math::Rect(math::Vec(box.size.x - BTN * 2 - BTN_PAD * 2, BTN_PAD), math::Vec(BTN, BTN)); }
+	/** Everything is pushed to the very edge of the face, a pixel in. The middle of the window
+	is where the trace lives, and a control sitting in it is covering the reading.
+
+	MINIMISE and CLOSE sit at the top left in exactly the same places whether the scope is open
+	or minimised, because the minimised token is drawn from the same origin and is sized to
+	hold precisely those two buttons. So minimising and restoring can be done repeatedly
+	WITHOUT MOVING THE POINTER: the button stays under it in both states. That is also why
+	minimise is the outer one rather than close, which is the opposite of the convention — the
+	button you will press twice belongs where it does not move — and since both boxes are
+	defined once and used by both states, close can sit outside it without breaking that. */
+	math::Rect closeBox()    { return math::Rect(math::Vec(EDGE, EDGE), math::Vec(BTN, BTN)); }
+	math::Rect minBox()      { return math::Rect(math::Vec(EDGE + BTN + BTN_PAD, EDGE), math::Vec(BTN, BTN)); }
+	math::Rect followBox()   { return math::Rect(math::Vec(box.size.x - BTN - EDGE, EDGE), math::Vec(BTN, BTN)); }
+	math::Rect homeBox()     { return math::Rect(math::Vec(box.size.x - BTN * 2 - BTN_PAD - EDGE, EDGE), math::Vec(BTN, BTN)); }
 	/** The bottom row, left to right: pause/run, A for autoset, T for trigger mode, G for
 	grid — the II A T G row on the Wcoast face. */
-	math::Rect autoBox()     { return math::Rect(math::Vec(BTN_PAD * 2 + TRANSPORT_SIZE, faceHeight - BTN - BTN_PAD), math::Vec(BTN, BTN)); }
-	math::Rect trigBox()     { return math::Rect(math::Vec(BTN_PAD * 3 + TRANSPORT_SIZE + BTN, faceHeight - BTN - BTN_PAD), math::Vec(BTN, BTN)); }
-	math::Rect gridBox()     { return math::Rect(math::Vec(BTN_PAD * 4 + TRANSPORT_SIZE + BTN * 2, faceHeight - BTN - BTN_PAD), math::Vec(BTN, BTN)); }
+	math::Rect autoBox()     { return math::Rect(math::Vec(EDGE + TRANSPORT_SIZE + BTN_PAD, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
+	math::Rect trigBox()     { return math::Rect(math::Vec(EDGE + TRANSPORT_SIZE + BTN_PAD * 2 + BTN, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
+	math::Rect gridBox()     { return math::Rect(math::Vec(EDGE + TRANSPORT_SIZE + BTN_PAD * 3 + BTN * 2, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
 
 	bool atHome() {
 		return offset.minus(homeOffset).norm() < 1.f;
@@ -547,94 +648,128 @@ struct ScopeWidget : ClipWidget {
 	}
 
 	math::Rect transportBox() {
-		return math::Rect(math::Vec(4, faceHeight - TRANSPORT_SIZE - 4),
+		return math::Rect(math::Vec(EDGE, faceHeight - TRANSPORT_SIZE - EDGE),
 			math::Vec(TRANSPORT_SIZE, TRANSPORT_SIZE));
 	}
 
 	void drawValues(NVGcontext* vg) {
 		if (!valuesShown)
 			return;
+
+		std::shared_ptr<window::Font> font = APP->window->loadFont(
+			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
+		if (!font || font->handle < 0)
+			return;
+		const std::string text = valuesText();
+
+		// Measure first, then draw a frame that fits: the box used to be a fixed 30 px tall
+		// with 11 px text floating in the middle of it, which wasted the space and read as an
+		// empty panel with a caption in it.
+		nvgFontFaceId(vg, font->handle);
+		nvgFontSize(vg, VALUES_TEXT_SIZE);
+		float bounds[4] = {};
+		const float textW = nvgTextBounds(vg, 0, 0, text.c_str(), NULL, bounds);
+		valuesW = textW + 2.f * VALUES_PAD + 8.f;
+		valuesH = (bounds[3] - bounds[1]) + 2.f * VALUES_PAD;
+
 		const math::Rect r = valuesBox();
 
 		nvgBeginPath(vg);
 		nvgRoundedRect(vg, r.pos.x, r.pos.y, r.size.x, r.size.y, 3);
-		nvgFillColor(vg, nvgRGBA(0x10, 0x12, 0x16, 0xf0));
+		nvgFillColor(vg, nvgRGB(0x10, 0x12, 0x16));
 		nvgFill(vg);
-		nvgStrokeColor(vg, nvgRGB(0x2f, 0xd0, 0x6a));
+		nvgStrokeColor(vg, VALUES_GREEN);
 		nvgStrokeWidth(vg, 1.2f);
 		nvgStroke(vg);
 
-		// The top-edge triangle: clicking it cycles the mode, as clicking the box does.
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, r.pos.x + r.size.x / 2 - 5, r.pos.y + 1);
-		nvgLineTo(vg, r.pos.x + r.size.x / 2 + 5, r.pos.y + 1);
-		nvgLineTo(vg, r.pos.x + r.size.x / 2, r.pos.y + 6);
-		nvgFillColor(vg, nvgRGBA(0x2f, 0xd0, 0x6a, 0xc0));
-		nvgFill(vg);
-
-		std::shared_ptr<window::Font> font = APP->window->loadFont(
-			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
-		if (font && font->handle >= 0) {
-			nvgFontFaceId(vg, font->handle);
-			nvgFontSize(vg, 11);
-			nvgFillColor(vg, nvgRGB(0xe6, 0xe6, 0xe6));
-			nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-			const std::string text = valuesText();
-			nvgText(vg, r.pos.x + r.size.x / 2, r.pos.y + r.size.y / 2 + 3, text.c_str(), NULL);
-		}
+		// Green, like every other readout in the plugin, so they read as one instrument.
+		nvgFontFaceId(vg, font->handle);
+		nvgFontSize(vg, VALUES_TEXT_SIZE);
+		nvgFillColor(vg, VALUES_GREEN);
+		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+		nvgText(vg, r.pos.x + r.size.x / 2, r.pos.y + r.size.y / 2, text.c_str(), NULL);
 	}
 
-	void drawButton(NVGcontext* vg, math::Rect r, NVGcolor fill, const char* glyph, bool dim) {
+	/** A control is its LETTER, not a disc with a letter in it.
+
+	The discs were solid and sat over the trace, which is the one thing on the face worth
+	seeing. A letter alone covers a fraction as much and is just as easy to hit — the click
+	target is unchanged, since that comes from the box, not from what is drawn in it.
+
+	Amber throughout, which separates the controls at a glance from the green readouts and the
+	white trace, and states nothing about their state. State is carried by brightness: a
+	control that is doing something is full strength, one that is not is dimmed.
+	*/
+	/** The two that CLOSE or HIDE the scope keep a filled disc behind them.
+
+	They are the destructive pair, and a coloured target that cannot be mistaken for a reading
+	is worth the pixels it covers — the rest of the controls only change how the trace is
+	shown, and can afford to be letters.
+	*/
+	void drawDiscButton(NVGcontext* vg, math::Rect r, NVGcolor fill, const char* glyph) {
 		nvgBeginPath(vg);
 		nvgCircle(vg, r.pos.x + r.size.x / 2, r.pos.y + r.size.y / 2, r.size.x / 2);
-		NVGcolor c = fill;
-		c.a = dim ? 0.35f : 1.f;
-		nvgFillColor(vg, c);
+		nvgFillColor(vg, fill);
 		nvgFill(vg);
 
-		if (!glyph || !glyph[0])
-			return;
 		std::shared_ptr<window::Font> font = APP->window->loadFont(
 			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
 		if (font && font->handle >= 0) {
 			nvgFontFaceId(vg, font->handle);
 			nvgFontSize(vg, 10);
-			nvgFillColor(vg, nvgRGBA(0x10, 0x12, 0x16, dim ? 0x60 : 0xff));
+			nvgFillColor(vg, nvgRGB(0x10, 0x12, 0x16));
 			nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 			nvgText(vg, r.pos.x + r.size.x / 2, r.pos.y + r.size.y / 2 + 1, glyph, NULL);
 		}
 	}
 
+	void drawButton(NVGcontext* vg, math::Rect r, NVGcolor fill, const char* glyph, bool dim) {
+		if (!glyph || !glyph[0])
+			return;
+		std::shared_ptr<window::Font> font = APP->window->loadFont(
+			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
+		if (!font || font->handle < 0)
+			return;
+
+		nvgFontFaceId(vg, font->handle);
+		nvgFontSize(vg, 12);
+		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+		nvgFillColor(vg, dim ? nvgRGBA(0xe0, 0xa0, 0x3b, 0x66) : CONTROL_AMBER);
+		nvgText(vg, r.pos.x + r.size.x / 2, r.pos.y + r.size.y / 2, glyph, NULL);
+	}
+
 	/** Close, minimise, follow and home; grid sits with the transport at the bottom. All
 	revealed on hover, as in Wcoast. */
 	void drawButtons(NVGcontext* vg) {
-		if (!hovered || minimized)
+		// Also while FOLLOWING. A following scope is click-through, so the pointer never counts
+		// as hovering it and every control vanished — including the one you had just pressed,
+		// which is why F never appeared lit once it was doing its job.
+		if ((!hovered && !following) || minimized)
 			return;
-		drawButton(vg, closeBox(), nvgRGB(0xe0, 0x3b, 0x3b), "x", false);
-		drawButton(vg, minBox(), nvgRGB(0xe8, 0xb3, 0x2a), "-", false);
-		drawButton(vg, followBox(), following ? nvgRGB(0x2f, 0xd0, 0x6a) : nvgRGB(0xb8, 0xbc, 0xc4), "F", false);
+		drawDiscButton(vg, closeBox(), nvgRGB(0xe0, 0x3b, 0x3b), "x");
+		drawDiscButton(vg, minBox(), nvgRGB(0xe8, 0xb3, 0x2a), "-");
+		// Bright when it can be PRESSED, dim when it cannot. A following scope is click-through,
+		// so while it is carrying there is no way to hit F at all — brightness here says what
+		// is available, not what is switched on.
+		drawButton(vg, followBox(), CONTROL_AMBER, "F", following);
 		// Dimmed while it is already home: there is nothing to send.
-		drawButton(vg, homeBox(), nvgRGB(0xb8, 0xbc, 0xc4), "<", atHome());
-		// Lit while autoset is still waiting for a signal to frame, so a scope opened before
-		// the sound is running does not look like it simply ignored the button.
-		drawButton(vg, autoBox(), autosetPending ? nvgRGB(0x2f, 0xd0, 0x6a) : nvgRGB(0xb8, 0xbc, 0xc4), "A", false);
-		drawButton(vg, trigBox(), triggerAuto ? nvgRGB(0xb8, 0xbc, 0xc4) : nvgRGB(0x2f, 0xd0, 0x6a), "T", false);
-		drawButton(vg, gridBox(), gridShown ? nvgRGB(0xb8, 0xbc, 0xc4) : nvgRGB(0x5a, 0x5f, 0x67), "G", false);
+		drawButton(vg, homeBox(), CONTROL_AMBER, "<", atHome());
+		// Never dimmed. Autoset is an action you can always ask for, and dimming it the moment it
+		// finished — which is within a frame or two — made a working button look disabled.
+		drawButton(vg, autoBox(), CONTROL_AMBER, "A", false);
+		// Normal trigger is the deliberate choice, so that is the lit one.
+		drawButton(vg, trigBox(), CONTROL_AMBER, "T", triggerAuto);
+		drawButton(vg, gridBox(), CONTROL_AMBER, "G", !gridShown);
 	}
 
 	/** Lower-left transport: a right-pointing triangle runs, two vertical bars pause. Shown
 	on hover, as in Wcoast. */
 	void drawTransport(NVGcontext* vg) {
-		if (!hovered)
+		if (!hovered && !following)
 			return;
 		const math::Rect r = transportBox();
 
-		nvgBeginPath(vg);
-		nvgRoundedRect(vg, r.pos.x, r.pos.y, r.size.x, r.size.y, 3);
-		nvgFillColor(vg, nvgRGBA(0x2a, 0x2e, 0x34, 0xd0));
-		nvgFill(vg);
-
-		nvgFillColor(vg, nvgRGB(0xe6, 0xe6, 0xe6));
+		nvgFillColor(vg, CONTROL_AMBER);
 		const float cx = r.pos.x + r.size.x / 2;
 		const float cy = r.pos.y + r.size.y / 2;
 		if (frozen) {
@@ -653,7 +788,22 @@ struct ScopeWidget : ClipWidget {
 		}
 	}
 
-	void draw(const DrawArgs& args) override {
+	/** Drawn in the CABLE layer, not the ordinary one.
+
+	The rack draws its children, then plugs at layer 2 and cables at layer 3 — so a scope drawn
+	normally had cables and their plugs painted over it, and the module panel's own text showed
+	through wherever the face was not opaque. Drawing here, as the rack's last child, puts the
+	scope in front of everything.
+	*/
+	void drawLayer(const DrawArgs& args, int layer) override {
+		if (layer == 3)
+			drawFace(args);
+		widget::OpaqueWidget::drawLayer(args, layer);
+	}
+
+	void draw(const DrawArgs& args) override {}
+
+	void drawFace(const DrawArgs& args) {
 		drawCallout(args.vg);
 
 		if (minimized) {
@@ -661,13 +811,15 @@ struct ScopeWidget : ClipWidget {
 			// the plus that restores it.
 			nvgBeginPath(args.vg);
 			nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 3);
-			nvgFillColor(args.vg, nvgRGBA(0x10, 0x12, 0x16, 0xf0));
+			nvgFillColor(args.vg, nvgRGB(0x10, 0x12, 0x16));
 			nvgFill(args.vg);
 			nvgStrokeColor(args.vg, frozen ? FRAME_PAUSED : FRAME_RUN);
 			nvgStrokeWidth(args.vg, 1.5f);
 			nvgStroke(args.vg);
-			drawButton(args.vg, math::Rect(math::Vec(BTN_PAD, BTN_PAD), math::Vec(BTN, BTN)),
-				nvgRGB(0x2f, 0xd0, 0x6a), "+", false);
+			// The same two buttons, in the same places: restore where minimise was, close beside
+			// it, so neither has moved under the pointer.
+			drawDiscButton(args.vg, minBox(), nvgRGB(0xe8, 0xb3, 0x2a), "+");
+			drawDiscButton(args.vg, closeBox(), nvgRGB(0xe0, 0x3b, 0x3b), "x");
 			OpaqueWidget::draw(args);
 			return;
 		}
@@ -678,7 +830,7 @@ struct ScopeWidget : ClipWidget {
 		// Face
 		nvgBeginPath(args.vg);
 		nvgRoundedRect(args.vg, 0, 0, w, h, 3);
-		nvgFillColor(args.vg, nvgRGBA(0x10, 0x12, 0x16, 0xf0));
+		nvgFillColor(args.vg, nvgRGB(0x10, 0x12, 0x16));
 		nvgFill(args.vg);
 		// A paused scope wears a RED frame. A held trace looks exactly like a live one, so the
 		// frame is the only thing that can tell you which you are reading.
@@ -718,7 +870,17 @@ struct ScopeWidget : ClipWidget {
 		// Capture unless frozen. Freezing HOLDS the last sweep rather than stopping the
 		// drawing — a paused scope whose trace vanishes is showing you nothing, which is the
 		// opposite of what pausing is for.
-		if (tapSlot >= 0 && !frozen) {
+		// Take a copy the moment it is paused, and let it go the moment it runs again.
+		if (frozen && frozenCount == 0 && tapSlot >= 0) {
+			frozenBuf.resize(TAP_BUFFER_SIZE);
+			frozenCount = tapRead(tapSlot, frozenBuf.data(), TAP_BUFFER_SIZE);
+		}
+		else if (!frozen && frozenCount != 0) {
+			frozenCount = 0;
+		}
+
+		// Re-window every frame whether running or paused: paused still has to answer a pan.
+		if (tapSlot >= 0) {
 			const float sampleRate = APP->engine->getSampleRate();
 			const float span = T_DIVS[tDivIndex] * DIV_X;
 			int wanted = (int) (span * sampleRate);
@@ -802,14 +964,74 @@ struct ScopeWidget : ClipWidget {
 
 	void onLeave(const LeaveEvent& e) override {
 		hovered = false;
+		destroyTooltip();
 		setCursorShape(GLFW_ARROW_CURSOR);
+	}
+
+	/** What the control under the pointer does, or nothing if the pointer is not on one.
+
+	Close and minimise are deliberately left out: a red cross and a yellow dash in the corner of
+	a window need no explaining, and a tooltip over them would cover the face every time the
+	pointer crossed on its way somewhere else. So is the readout, which says what it is.
+	*/
+	const char* tipFor(math::Vec pos) {
+		if (minimized)
+			return NULL;
+		if (followBox().contains(pos))
+			return "Follow mouse";
+		if (homeBox().contains(pos))
+			return "Restore";
+		if (autoBox().contains(pos))
+			return "Autoset";
+		if (trigBox().contains(pos))
+			return "Trigger";
+		if (gridBox().contains(pos))
+			return "Grid";
+		if (transportBox().contains(pos))
+			return frozen ? "Run" : "Pause";
+		return NULL;
+	}
+
+	/** Deliberately NOT gated on Rack's own tooltip setting.
+
+	That setting exists because a tooltip on every knob and port gets in the way while
+	patching. Six unlabelled letters on a scope face are a different matter: they have no other
+	explanation, and a scope is our feature rather than part of Rack.
+	*/
+	void updateTooltip(math::Vec pos) {
+		const char* tip = tipFor(pos);
+		if (!tip) {
+			destroyTooltip();
+			return;
+		}
+		if (tooltip && tooltipText == tip)
+			return;
+		destroyTooltip();
+		tooltipText = tip;
+		tooltip = new ui::Tooltip;
+		tooltip->text = tip;
+		// A child of the SCENE, not of this widget: a tooltip positions itself against the
+		// pointer in screen space, and would be dragged around by the scope otherwise.
+		APP->scene->addChild(tooltip);
+	}
+
+	void destroyTooltip() {
+		if (!tooltip)
+			return;
+		APP->scene->removeChild(tooltip);
+		delete tooltip;
+		tooltip = NULL;
+		tooltipText.clear();
 	}
 
 	void onHover(const HoverEvent& e) override {
 		// Click-through while following, so the scope never blocks the knob you are heading
 		// for: not consuming the hover lets the widget beneath receive it.
-		if (following)
+		if (following) {
+			destroyTooltip();
 			return;
+		}
+		updateTooltip(e.pos);
 		setCursorShape(cursorForZone(resizeZoneAt(e.pos)));
 		OpaqueWidget::onHover(e);
 	}
@@ -840,12 +1062,12 @@ struct ScopeWidget : ClipWidget {
 		// Dragging the left or top edge has to move the scope as well as resize it, or the
 		// far edge would walk across the rack while you pull the near one.
 		if (resizeDir.x > 0.f) {
-			box.size.x = std::fmax(MIN_W, box.size.x + d.x);
+			faceWidth = std::fmax(MIN_W, faceWidth + d.x);
 		}
 		else if (resizeDir.x < 0.f) {
-			const float newW = std::fmax(MIN_W, box.size.x - d.x);
-			offset.x += box.size.x - newW;
-			box.size.x = newW;
+			const float newW = std::fmax(MIN_W, faceWidth - d.x);
+			offset.x += faceWidth - newW;
+			faceWidth = newW;
 		}
 		if (resizeDir.y > 0.f) {
 			faceHeight = std::fmax(MIN_H, faceHeight + d.y);
@@ -879,9 +1101,14 @@ struct ScopeWidget : ClipWidget {
 			}
 
 			if (minimized) {
-				// A token ignores clicks except the plus that restores it.
-				if (math::Rect(math::Vec(BTN_PAD, BTN_PAD), math::Vec(BTN, BTN)).contains(e.pos)) {
+				// A token takes only its two buttons, which are where they always are.
+				if (minBox().contains(e.pos)) {
 					minimized = false;
+					e.consume(this);
+					return;
+				}
+				if (closeBox().contains(e.pos)) {
+					detach();   // removed by clipPurgeDead on the next step
 					e.consume(this);
 					return;
 				}
@@ -913,11 +1140,18 @@ struct ScopeWidget : ClipWidget {
 			if (autoBox().contains(e.pos)) {
 				autosetPending = true;
 				autosetBudget = AUTOSET_BUDGET;
+				// Autoset frames what is arriving now, so it also returns to the live end.
+				timeShift = 0.f;
 				e.consume(this);
 				return;
 			}
 			if (trigBox().contains(e.pos)) {
 				triggerAuto ^= true;
+				// Panning suspends the trigger — the window sits where it was put rather than
+				// re-anchoring on an edge. Asking for triggering back has to bring the window
+				// back to the live end too, or the trace would go on drifting and the button
+				// would look broken.
+				timeShift = 0.f;
 				e.consume(this);
 				return;
 			}
@@ -939,6 +1173,9 @@ struct ScopeWidget : ClipWidget {
 			// The transport button runs and pauses. Freeze is NOT on the face click: an
 			// earlier draft of the Wcoast spec said it was, which was misleading.
 			if (transportBox().contains(e.pos)) {
+				// Running again means running from now, not from wherever the pan had reached.
+				if (frozen)
+					timeShift = 0.f;
 				frozen ^= true;
 				e.consume(this);
 				return;
@@ -960,12 +1197,66 @@ struct ScopeWidget : ClipWidget {
 		OpaqueWidget::onButton(e);
 	}
 
+	/** Scroll POSITIONS the trace; it does not scale it.
+
+	Up and down move the trace through the vertical, sideways pans back and forth through the
+	captured samples — the horizontal control of a real scope. The scales belong to the
+	controls on the face, so a scroll can never leave you looking at a signal that has silently
+	changed size.
+
+	Five times slower than it was, and banked rather than stepped per event, because a trackpad
+	glide delivers a stream of small deltas and one step per event ran through the whole range
+	in a single gesture.
+	*/
 	void onHoverScroll(const HoverScrollEvent& e) override {
-		// Vertical scroll steps the vertical scale.
-		if (e.scrollDelta.y > 0.f)
-			vDivIndex = std::max(0, vDivIndex - 1);
-		else if (e.scrollDelta.y < 0.f)
-			vDivIndex = std::min(V_DIV_COUNT - 1, vDivIndex + 1);
+		// Over the readout below the face, scroll changes the SCALES — which is what the
+		// numbers there are. Which scale depends on which of them the pointer is over: the
+		// volts per division on the left, the time base on the right. Positioning the trace is
+		// what scrolling the face itself is for.
+		if (valuesShown && valuesBox().contains(e.pos)) {
+			scrollAccumY += e.scrollDelta.y;
+			const math::Rect r = valuesBox();
+			const bool volts = (e.pos.x < r.pos.x + r.size.x / 2.f);
+			while (std::fabs(scrollAccumY) >= SCALE_SCROLL_PER_STEP) {
+				const float dir = (scrollAccumY > 0.f) ? 1.f : -1.f;
+				scrollAccumY -= dir * SCALE_SCROLL_PER_STEP;
+				if (volts)
+					vDivIndex = math::clamp(vDivIndex - (int) dir, 0, V_DIV_COUNT - 1);
+				else
+					tDivIndex = math::clamp(tDivIndex - (int) dir, 0, T_DIV_COUNT - 1);
+			}
+			e.consume(this);
+			return;
+		}
+
+		// One axis at a time. The axis is claimed by whichever way the gesture is mostly going
+		// when it starts, and held until the scrolling stops for a moment.
+		const double now = APP->window->getFrameTime();
+		if (now - lastScrollTime > SCROLL_IDLE) {
+			scrollAxis = 0;
+			scrollAccumX = 0.f;
+			scrollAccumY = 0.f;
+		}
+		lastScrollTime = now;
+		if (scrollAxis == 0 && (e.scrollDelta.x != 0.f || e.scrollDelta.y != 0.f))
+			scrollAxis = (std::fabs(e.scrollDelta.x) > std::fabs(e.scrollDelta.y)) ? 1 : 2;
+
+		// The banked totals belong to the SCALES, which do step, and are left alone here — the
+		// face applies its scroll directly, so nothing is stored between events.
+
+		// SMOOTH, not stepped. The same distance per unit of scroll as before, applied
+		// continuously — a trace that jumps a quarter of a division at a time reads as a fault
+		// in the scope rather than as movement.
+		if (scrollAxis == 2) {
+			vPos -= (e.scrollDelta.y / SCROLL_PER_STEP) * V_DIVS[vDivIndex] * 0.25f;
+		}
+		if (scrollAxis == 1) {
+			const float perDiv = std::fmax(1.f, T_DIVS[tDivIndex] * APP->engine->getSampleRate());
+			const float maxShift = std::fmax(0.f, tapAvailable(tapSlot) / perDiv - DIV_X);
+			timeShift = math::clamp(timeShift + e.scrollDelta.x / PAN_SCROLL_PER_STEP,
+				0.f, maxShift);
+		}
+
 		e.consume(this);
 	}
 

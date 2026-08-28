@@ -30,7 +30,10 @@ enum InjectorType {
 	INJECT_GATE,     /**< High while the button is held. */
 	INJECT_PULSE,    /**< A single trigger each time the button is pressed. */
 	INJECT_DC,       /**< A steady voltage. */
-	INJECT_LFO,      /**< A repeating waveform at a dialled rate. */
+	INJECT_LFO,      /**< A repeating waveform, 0.01 to 100 Hz. */
+	INJECT_AUDIO,    /**< The same, at audio rates: 1 Hz to 8 kHz. */
+	INJECT_NOTE,     /**< A pitch as one volt per octave, set and shown by note name. */
+	INJECT_AV,       /**< Scales and inverts what a cable is already delivering to the port. */
 	INJECT_TYPES,
 };
 

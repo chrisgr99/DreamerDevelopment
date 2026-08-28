@@ -26,8 +26,13 @@ a mapping some other module has made on that module's params.
 
 
 /** Samples held per tap. A power of two so the ring wraps with a mask rather than a modulo.
-8192 at 48 kHz is 170 ms, enough to search backwards for a trigger edge on a slow signal. */
-static const int TAP_BUFFER_SIZE = 8192;
+
+2^19 is about eleven seconds at 48 kHz, or five and a half at 96 — enough to pause a scope and
+scroll back through what led up to whatever caught your eye. It costs 2 MB per tap, which is
+why the buffer is allocated only for taps that ask for history: an attenuverter reads the
+current sample and never looks back, so it takes none.
+*/
+static const int TAP_BUFFER_SIZE = 1 << 19;
 
 /** Maximum simultaneous taps. Fixed so the audio thread walks a plain array and the UI
 thread never resizes anything underneath it. */
@@ -36,7 +41,7 @@ static const int TAP_MAX = 32;
 
 /** Registers a tap on a port. UI THREAD ONLY. Returns a slot index, or -1 if all slots are
 in use. `isOutput` selects the module's output or input array. */
-int tapCreate(int64_t moduleId, int portId, bool isOutput);
+int tapCreate(int64_t moduleId, int portId, bool isOutput, bool needsHistory = true);
 
 /** Releases a tap. UI THREAD ONLY. Safe while audio is running: the slot is deactivated
 first, and the audio thread skips inactive slots. */
@@ -53,6 +58,13 @@ void tapCaptureAll();
 how many were written, which is `count` unless the tap has not filled that far yet. */
 int tapRead(int slot, float* out, int count);
 
+/** UI THREAD. The same, but ending `offset` samples before the newest — which is how a scope
+pans back through the history without reading all eleven seconds of it every frame. */
+int tapReadAt(int slot, float* out, int count, int offset);
+
+/** How many samples this tap holds that are still worth reading. */
+int tapAvailable(int slot);
+
 /** Total samples this tap has ever captured. Lets the UI tell a silent signal from a dead
 tap, and is the evidence that capture is running at audio rate rather than frame rate. */
 uint64_t tapFrameCount(int slot);
@@ -62,3 +74,11 @@ float tapSampleRate();
 
 /** AUDIO THREAD. Records the engine's current rate, so the UI can turn samples into time. */
 void tapSetSampleRate(float sr);
+
+/** AUDIO THREAD. The tapped port's voltage right now, or zero if the tap is dead.
+
+Separate from the ring buffer because the attenuverter needs THIS sample rather than a window
+of history: it reads what a cable is delivering and injects the difference that turns it into
+the scaled version. Same ParamHandle and the same bounds check as the buffered capture.
+*/
+float tapVoltage(int slot);

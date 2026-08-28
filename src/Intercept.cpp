@@ -25,9 +25,13 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "plugin.hpp"
 
 #include <ui/Slider.hpp>
+#include <ui/ScrollWidget.hpp>
 #include <app/PortWidget.hpp>
 #include "Injector.hpp"
 #include "WidgetAt.hpp"
+#include "Clip.hpp"
+
+#include <cmath>
 
 #include <algorithm>
 
@@ -60,7 +64,40 @@ struct InterceptOverlay : widget::Widget {
 		widget::Widget::step();
 	}
 
+	/** Sideways scroll pans the rack, which "mouse wheel zooms" mode otherwise makes
+	impossible.
+
+	In that mode the rack scroll widget consumes EVERY scroll its children decline: it zooms by
+	the vertical delta — zero for a sideways glide — and then swallows the event, so it never
+	reaches the panning code below it. A horizontal gesture is left doing nothing at all.
+
+	This runs before the rack sees the event, so it can pan and consume first. It acts only on
+	a clearly sideways gesture, only in zoom mode — Rack's own panning is fine in the other —
+	and never over one of our own faces, since a scope steps its time base with sideways
+	scroll.
+	*/
+	bool panSideways(const HoverScrollEvent& e) {
+		if (!settings::mouseWheelZoom)
+			return false;
+		if (std::fabs(e.scrollDelta.x) <= std::fabs(e.scrollDelta.y))
+			return false;
+		ui::ScrollWidget* scroll = APP->scene->rackScroll;
+		if (!scroll)
+			return false;
+		if (widgetAt<ClipWidget>(APP->scene, e.pos))
+			return false;
+
+		// Rack's own step, so panning feels the same in either wheel mode.
+		scroll->offset = scroll->offset.minus(e.scrollDelta);
+		return true;
+	}
+
 	void onHoverScroll(const HoverScrollEvent& e) override {
+		if (panSideways(e)) {
+			e.consume(this);
+			e.stopPropagating();
+			return;
+		}
 		if (!sliderScroll || !*sliderScroll || e.scrollDelta.y == 0.f) {
 			widget::Widget::onHoverScroll(e);
 			return;
@@ -94,6 +131,16 @@ struct InterceptOverlay : widget::Widget {
 	the modules, which never sees a press we have claimed on a port.
 	*/
 	void onButton(const ButtonEvent& e) override {
+		// A click anywhere puts down a scope that is riding the pointer. It has to be caught
+		// here: a following scope is click-through, so the click lands on whatever is beneath
+		// it — a panel, another module — and would drag that instead of dropping the scope.
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
+			&& (e.mods & RACK_MOD_MASK) == 0 && scopeDepositFollowing()) {
+			e.consume(this);
+			e.stopPropagating();
+			return;
+		}
+
 		// A plain click on a cable's pill takes that cable — but NEVER a press that is on a
 		// jack. Claiming those broke dragging a cable off a terminal, which is the single most
 		// common thing anyone does in Rack: the port never saw the press, so the drag became a
@@ -152,9 +199,21 @@ struct InterceptOverlay : widget::Widget {
 				if (weakPort)
 					injectorCreate(weakPort, INJECT_DC);
 			}));
-			menu->addChild(createMenuItem("Waveform", "", [weakPort]() {
+			menu->addChild(createMenuItem("LFO", "", [weakPort]() {
 				if (weakPort)
 					injectorCreate(weakPort, INJECT_LFO);
+			}));
+			menu->addChild(createMenuItem("Audio oscillator", "", [weakPort]() {
+				if (weakPort)
+					injectorCreate(weakPort, INJECT_AUDIO);
+			}));
+			menu->addChild(createMenuItem("Note", "", [weakPort]() {
+				if (weakPort)
+					injectorCreate(weakPort, INJECT_NOTE);
+			}));
+			menu->addChild(createMenuItem("Attenuverter", "", [weakPort]() {
+				if (weakPort)
+					injectorCreate(weakPort, INJECT_AV);
 			}));
 		}
 

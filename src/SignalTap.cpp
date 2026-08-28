@@ -3,6 +3,8 @@
 
 #include <atomic>
 #include <cstring>
+#include <vector>
+#include <algorithm>
 
 
 /** paramIds start here, far above any real param, so a tap can never collide with or steal
@@ -24,7 +26,10 @@ struct SignalTap {
 	int portId = 0;
 	bool isOutput = true;
 
-	float buffer[TAP_BUFFER_SIZE] = {};
+	/** Allocated only when the tap is asked for history, and never freed while the plugin
+	lives: freeing it would have to be co-ordinated with an audio thread that may be reading
+	it, and 2 MB held per slot that has ever carried a scope is the cheaper problem. */
+	std::vector<float> buffer;
 	/** Total samples captured; the ring position is this masked. Released by the audio thread
 	after each sample is written and acquired by the UI thread before reading, which is what
 	makes a torn read impossible. */
@@ -43,7 +48,7 @@ static std::atomic<int> activeCount{0};
 static std::atomic<float> lastSampleRate{48000.f};
 
 
-int tapCreate(int64_t moduleId, int portId, bool isOutput) {
+int tapCreate(int64_t moduleId, int portId, bool isOutput, bool needsHistory) {
 	if (moduleId < 0 || portId < 0)
 		return -1;
 
@@ -55,7 +60,12 @@ int tapCreate(int64_t moduleId, int portId, bool isOutput) {
 		tap.portId = portId;
 		tap.isOutput = isOutput;
 		tap.written.store(0, std::memory_order_relaxed);
-		std::memset(tap.buffer, 0, sizeof(tap.buffer));
+		if (needsHistory) {
+			if ((int) tap.buffer.size() != TAP_BUFFER_SIZE)
+				tap.buffer.assign(TAP_BUFFER_SIZE, 0.f);
+			else
+				std::fill(tap.buffer.begin(), tap.buffer.end(), 0.f);
+		}
 
 		if (!tap.registered) {
 			APP->engine->addParamHandle(&tap.handle);
@@ -126,6 +136,8 @@ void tapCaptureAll() {
 				v = module->inputs[tap.portId].getVoltage();
 		}
 
+		if (tap.buffer.empty())
+			continue;   // A tap with no history: nothing to store.
 		const uint64_t w = tap.written.load(std::memory_order_relaxed);
 		tap.buffer[w & (TAP_BUFFER_SIZE - 1)] = v;
 		tap.written.store(w + 1, std::memory_order_release);
@@ -133,25 +145,70 @@ void tapCaptureAll() {
 }
 
 
-int tapRead(int slot, float* out, int count) {
+float tapVoltage(int slot) {
+	if (slot < 0 || slot >= TAP_MAX)
+		return 0.f;
+	SignalTap& tap = taps[slot];
+	if (!tap.active.load(std::memory_order_acquire))
+		return 0.f;
+	Module* module = tap.handle.module;
+	if (!module)
+		return 0.f;
+	if (tap.isOutput) {
+		if (tap.portId < (int) module->outputs.size())
+			return module->outputs[tap.portId].getVoltage();
+	}
+	else {
+		if (tap.portId < (int) module->inputs.size())
+			return module->inputs[tap.portId].getVoltage();
+	}
+	return 0.f;
+}
+
+
+int tapReadAt(int slot, float* out, int count, int offset) {
 	if (slot < 0 || slot >= TAP_MAX || !out || count <= 0)
 		return 0;
 	SignalTap& tap = taps[slot];
+	if (tap.buffer.empty())
+		return 0;
 	if (count > TAP_BUFFER_SIZE)
 		count = TAP_BUFFER_SIZE;
+	if (offset < 0)
+		offset = 0;
 
 	const uint64_t w = tap.written.load(std::memory_order_acquire);
 	if (w == 0)
 		return 0;
-	if ((uint64_t) count > w)
-		count = (int) w;
+	// The newest sample this read may see.
+	uint64_t end = ((uint64_t) offset >= w) ? 0 : w - offset;
+	if (end == 0)
+		return 0;
+	if ((uint64_t) count > end)
+		count = (int) end;
 
 	// Oldest first, newest last. The audio thread may overwrite the oldest of these while we
-	// copy; on a 170 ms buffer read every frame that cannot reach the samples being drawn.
-	const uint64_t start = w - count;
+	// copy, but only after eleven seconds have gone by, which no frame takes.
+	const uint64_t start = end - count;
 	for (int i = 0; i < count; i++)
 		out[i] = tap.buffer[(start + i) & (TAP_BUFFER_SIZE - 1)];
 	return count;
+}
+
+
+int tapRead(int slot, float* out, int count) {
+	return tapReadAt(slot, out, count, 0);
+}
+
+
+int tapAvailable(int slot) {
+	if (slot < 0 || slot >= TAP_MAX)
+		return 0;
+	SignalTap& tap = taps[slot];
+	if (tap.buffer.empty())
+		return 0;
+	const uint64_t w = tap.written.load(std::memory_order_acquire);
+	return (int) std::min<uint64_t>(w, TAP_BUFFER_SIZE);
 }
 
 
