@@ -148,7 +148,15 @@ static void drawJack(NVGcontext* vg, math::Vec c, float r, NVGcolor color, bool 
 	if (band <= 0.f)
 		return;
 	const float w = band / 3.f;
-	const float ringR = isOutput ? (r - w / 2.f) : (rh + w / 2.f);
+	// Flush against whichever edge it marks, with no colour showing between: an output's
+	// dashes meet the inner edge of the rim stroke (which straddles r, so its inner edge is
+	// at 0.95r), an input's meet the hole. The dashes stay legible because the gaps BETWEEN
+	// them are the jack's colour, not because of any margin on either side.
+	const float ringR = isOutput
+		? (r * 0.95f - w / 2.f)
+		: (rh + w / 2.f);
+	if (ringR <= 0.f)
+		return;
 	const float circ = 2.f * M_PI * ringR;
 	const int n = std::max(6, (int) std::round(circ / (w * 1.6f)));
 	const float step = 2.f * M_PI / n;
@@ -373,6 +381,20 @@ struct DRUIOverlay : widget::TransparentWidget {
 		return module ? module->opt : DRUIOptions();
 	}
 
+	/** A widget's centre in the coordinate system this overlay draws in.
+
+	The ancestor MUST be the RackWidget and not this overlay. getRelativeOffset walks UP
+	from the widget until it meets the ancestor, and this overlay is a SIBLING of the
+	container the modules live in, never an ancestor of anything. Passing `this` therefore
+	never matches, the walk runs all the way to the root, and the result is in scene
+	coordinates — off by the rack's whole scroll offset, which put every jack and dash far
+	outside the window. This overlay sits at the rack's origin, so rack coordinates are its
+	own.
+	*/
+	math::Vec centreOf(widget::Widget* w) {
+		return w->getRelativeOffset(w->box.zeroPos().getCenter(), APP->scene->rack);
+	}
+
 	void step() override {
 		if (!module) {
 			widget::TransparentWidget::step();
@@ -423,7 +445,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 				const float r = std::fmin(p->box.size.x, p->box.size.y) / 2.f;
 				if (r <= 1.f)
 					continue;
-				const math::Vec c = p->getRelativeOffset(p->box.zeroPos().getCenter(), this);
+				const math::Vec c = centreOf(p);
 				const bool isOutput = (p->type == engine::Port::OUTPUT);
 
 				std::string name;
@@ -447,7 +469,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 				const float r = std::fmin(knob->box.size.x, knob->box.size.y) / 2.f;
 				if (r <= 1.f)
 					continue;
-				const math::Vec c = knob->getRelativeOffset(knob->box.zeroPos().getCenter(), this);
+				const math::Vec c = centreOf(knob);
 				float frac = 0.5f;
 				if (engine::ParamQuantity* pq = knob->getParamQuantity())
 					frac = math::clamp(pq->getScaledValue(), 0.f, 1.f);
@@ -463,35 +485,44 @@ struct DRUIOverlay : widget::TransparentWidget {
 			return;
 		const DRUIOptions o = options();
 
-		// Cables first, so a dash never lies over a jack.
-		if (o.cableFlow) {
-			const float time = (float) APP->window->getFrameTime();
-			for (CableWidget* cw : APP->scene->rack->getCompleteCables()) {
-				if (!cw->inputPort || !cw->outputPort)
-					continue;
-				math::Vec p0 = cw->outputPort->getRelativeOffset(
-					cw->outputPort->box.zeroPos().getCenter(), this);
-				math::Vec p1 = cw->inputPort->getRelativeOffset(
-					cw->inputPort->box.zeroPos().getCenter(), this);
-				math::Vec ctrl = cableSlump(p0, p1);
-				// Match the inset the cable's own draw applies to each end.
-				p0 = p0.plus(ctrl.minus(p0).normalize().mult(14.f));
-				p1 = p1.plus(ctrl.minus(p1).normalize().mult(14.f));
-
-				std::string name;
-				if (engine::PortInfo* info = cw->inputPort->getPortInfo())
-					name = info->getName();
-				drawFlowDashes(args.vg, p0, ctrl, p1, 6.f,
-					flowDashLength(guessFamily(name)), time);
-			}
-		}
-
 		if (o.jacks || o.knobs) {
 			for (ModuleWidget* mw : APP->scene->rack->getModules())
 				drawControlsOf(mw, args, o);
 		}
 
 		widget::TransparentWidget::draw(args);
+	}
+
+	/** The flow dashes are drawn here rather than in draw(), because cables are not drawn in
+	the ordinary pass at all: RackWidget draws its children, and only THEN calls
+	drawLayer(3), which is where CableWidget paints. A dash drawn in draw() is therefore
+	painted over by the very cable it belongs to, and vanishes. Drawing in the same layer
+	puts the dashes back on top, since this overlay is the rack's last child.
+	*/
+	void drawLayer(const DrawArgs& args, int layer) override {
+		if (module && layer == 3) {
+			const DRUIOptions o = options();
+			if (o.cableFlow) {
+				const float time = (float) APP->window->getFrameTime();
+				for (CableWidget* cw : APP->scene->rack->getCompleteCables()) {
+					if (!cw->inputPort || !cw->outputPort)
+						continue;
+					math::Vec p0 = centreOf(cw->outputPort);
+					math::Vec p1 = centreOf(cw->inputPort);
+					math::Vec ctrl = cableSlump(p0, p1);
+					// Match the inset the cable's own draw applies to each end.
+					p0 = p0.plus(ctrl.minus(p0).normalize().mult(14.f));
+					p1 = p1.plus(ctrl.minus(p1).normalize().mult(14.f));
+
+					std::string name;
+					if (engine::PortInfo* info = cw->inputPort->getPortInfo())
+						name = info->getName();
+					drawFlowDashes(args.vg, p0, ctrl, p1, 6.f,
+						flowDashLength(guessFamily(name)), time);
+				}
+			}
+		}
+		widget::TransparentWidget::drawLayer(args, layer);
 	}
 };
 
