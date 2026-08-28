@@ -3,7 +3,7 @@
 WHY A MODULE EXISTS AT ALL. A Rack plugin cannot run code until one of its modules is
 placed: plugins are initialised before the scene is created, and there is no callback
 afterwards. So DRUI is a small module whose job is to install an overlay into the scene and
-carry the options. It has no inputs or outputs.
+carry the options. Its only ports are the injectors' hidden outputs.
 
 HOW THE DRAWING REACHES OTHER PEOPLE'S MODULES. The overlay is added as the last child of the
 RackWidget, so it draws after every module and can paint over their jacks and knobs. It lives
@@ -14,6 +14,9 @@ knobs, for instance — is painted before us and would be covered. Knob drawing 
 optional and can be switched off per user.
 */
 #include "plugin.hpp"
+#include "SignalTap.hpp"
+#include "Clip.hpp"
+#include "Injector.hpp"
 
 #include <map>
 #include <set>
@@ -79,10 +82,30 @@ struct DRUI : Module {
 	DRUIOptions opt;
 
 	DRUI() {
-		config(0, 0, 0, 0);
+		// The outputs belong to the injectors. They carry no jacks on the panel: an injector
+		// is cabled from one of them to the port it drives, and both that cable and its plugs
+		// are hidden, because what should be visible is the callout loop at the terminal.
+		config(0, 0, INJECT_MAX, 0);
+		for (int i = 0; i < INJECT_MAX; i++)
+			configOutput(i, string::f("Injector %d", i + 1));
+	}
+
+	/** The engine calls this once per sample, which is what makes an audio-rate capture
+	possible from a plugin at all. Everything expensive is behind one atomic load in
+	tapCaptureAll, so a patch with no scope open pays almost nothing. */
+	void process(const ProcessArgs& args) override {
+		tapSetSampleRate(args.sampleRate);
+		tapCaptureAll();
+		injectorProcessAll(this, args.sampleTime);
 	}
 
 	json_t* dataToJson() override {
+		// Cable colours are saved in the patch, and tracing a cable dims the others by lowering
+		// their alpha, so the true colours have to be back before anything is written. The
+		// trace itself is KEPT: this also runs for the periodic autosave, and dropping it there
+		// would have put the traced cable out every fifteen seconds.
+		cableFocusPrepareSave();
+
 		json_t* rootJ = json_object();
 		json_object_set_new(rootJ, "jacks", json_boolean(opt.jacks));
 		json_object_set_new(rootJ, "knobs", json_boolean(opt.knobs));
@@ -91,6 +114,11 @@ struct DRUI : Module {
 		json_object_set_new(rootJ, "bipolar", json_boolean(opt.bipolar));
 		json_object_set_new(rootJ, "pinchZoom", json_boolean(opt.pinchZoom));
 		json_object_set_new(rootJ, "sliderScroll", json_boolean(opt.sliderScroll));
+		// Scopes live in the rack, not in this module, but this module's JSON is where the
+		// patch has room for them. Saving them here means a patch reopens looking at the same
+		// signals, with the same scales, rather than losing every probe on close.
+		json_object_set_new(rootJ, "scopes", scopeToJson());
+		json_object_set_new(rootJ, "injectors", injectorToJson());
 		return rootJ;
 	}
 
@@ -107,6 +135,8 @@ struct DRUI : Module {
 		read("bipolar", opt.bipolar);
 		read("pinchZoom", opt.pinchZoom);
 		read("sliderScroll", opt.sliderScroll);
+		scopeFromJson(json_object_get(rootJ, "scopes"));
+		injectorFromJson(json_object_get(rootJ, "injectors"));
 	}
 };
 
@@ -233,7 +263,7 @@ static void drawCapDome(NVGcontext* vg, math::Vec c, float cap) {
 }
 
 
-static void drawKnob(NVGcontext* vg, math::Vec c, float r, float angle, int ticks) {
+void druiDrawKnob(NVGcontext* vg, math::Vec c, float r, float angle, int ticks) {
 	const float cap = r * 0.72f;
 
 	drawShadedDisc(vg, c, r, 0.55f,
@@ -422,6 +452,23 @@ struct DRUIOverlay : widget::TransparentWidget {
 			}
 		}
 
+		// A cable in flight takes the colour of the port it came FROM, so it reads as that
+		// signal from the moment it leaves the jack. Rack gives a new cable the next colour in
+		// its own rotating palette, which says nothing about the signal. Recoloured every frame
+		// rather than once, because dragging an existing cable off a port and dropping it back
+		// re-uses the same widget.
+		if (o.cableColor) {
+			for (CableWidget* cw : APP->scene->rack->getIncompleteCables()) {
+				PortWidget* origin = cw->outputPort ? cw->outputPort : cw->inputPort;
+				if (!origin)
+					continue;
+				std::string name;
+				if (engine::PortInfo* info = origin->getPortInfo())
+					name = info->getName();
+				cw->color = familyColor(guessFamily(name));
+			}
+		}
+
 		// Watch for ports that go negative. Nothing declares a port bipolar, so it is learned
 		// by observation and only ever latches on.
 		if (o.bipolar) {
@@ -435,6 +482,15 @@ struct DRUIOverlay : widget::TransparentWidget {
 				}
 			}
 		}
+
+		cableFocusStep();
+
+		// Clips whose port has gone cannot remove themselves while the tree is being walked.
+		clipPurgeDead();
+		// And saved ones re-attach here, once the modules they name have finished loading.
+		scopeRestoreStep();
+		injectorRestoreStep();
+		injectorPurgeStrayCables();
 
 		widget::TransparentWidget::step();
 	}
@@ -478,7 +534,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 					frac = math::clamp(pq->getScaledValue(), 0.f, 1.f);
 				// The knob's OWN angle range, so it still sweeps the arc its author intended.
 				const float angle = knob->minAngle + frac * (knob->maxAngle - knob->minAngle);
-				drawKnob(args.vg, c, r, angle, 7);
+				druiDrawKnob(args.vg, c, r, angle, 7);
 			}
 		}
 	}
@@ -510,6 +566,12 @@ struct DRUIOverlay : widget::TransparentWidget {
 				for (CableWidget* cw : APP->scene->rack->getCompleteCables()) {
 					if (!cw->inputPort || !cw->outputPort)
 						continue;
+					// Any hidden cable takes its dashes with it — one kept out of the way while
+					// another is traced, and an injector's, which is hidden on purpose. The dashes
+					// are drawn by us rather than by Rack, so hiding the cable alone would have
+					// left them crawling along nothing.
+					if (!cw->visible)
+						continue;
 					math::Vec p0 = centreOf(cw->outputPort);
 					math::Vec p1 = centreOf(cw->inputPort);
 					math::Vec ctrl = cableSlump(p0, p1);
@@ -524,6 +586,9 @@ struct DRUIOverlay : widget::TransparentWidget {
 						flowDashLength(guessFamily(name)), time);
 				}
 			}
+			// With the cables, and after them, so the pill sits on top of the cable it belongs
+			// to rather than under the ones crossing it.
+			cableFocusDraw(args.vg);
 		}
 		widget::TransparentWidget::drawLayer(args, layer);
 	}
@@ -568,11 +633,17 @@ struct DRUIPanel : widget::Widget {
 
 
 struct DRUIWidget : ModuleWidget {
-	DRUIOverlay* overlay = NULL;
+	/** WEAK pointers, and that is the whole point. These widgets are added to the rack and the
+	scene, so those own them and delete them with the rest of the tree at shutdown. A raw
+	pointer here meant this destructor then deleted them a second time, and reached through
+	APP->scene->rack to do it while the rack itself was half destroyed. That crashed on quit,
+	inside the module browser's teardown. A WeakPtr goes NULL the moment the widget is gone,
+	so both mistakes become impossible to make. */
+	WeakPtr<DRUIOverlay> overlay;
 	/** Screen-anchored, unlike the rack overlay: it stands in for the whole viewport. */
-	widget::Widget* pinchOverlay = NULL;
+	WeakPtr<widget::Widget> pinchOverlay;
 	/** Also screen-anchored, and kept as the Scene's last child so it sees events first. */
-	widget::Widget* sliderOverlay = NULL;
+	WeakPtr<widget::Widget> sliderOverlay;
 
 	DRUIWidget(DRUI* module) {
 		setModule(module);
@@ -582,6 +653,17 @@ struct DRUIWidget : ModuleWidget {
 		panel->box.size = box.size;
 		setPanel(panel);
 
+		// The injectors' output jacks. Present so their cables are ordinary, complete Rack
+		// cables — which is what makes Rack responsible for removing them when a module goes
+		// away — but invisible, and therefore unclickable, so the panel stays a legend rather
+		// than a patch bay.
+		for (int i = 0; i < INJECT_MAX; i++) {
+			PortWidget* p = createOutput<PJ301MPort>(
+				Vec(box.size.x / 2 - 12, RACK_GRID_HEIGHT - 40), module, i);
+			p->visible = false;
+			addOutput(p);
+		}
+
 		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 	}
@@ -590,39 +672,51 @@ struct DRUIWidget : ModuleWidget {
 		// Install the overlay once the widget is in the scene. This is why the module exists:
 		// a plugin is initialised before the scene is created and gets no callback afterwards,
 		// so a module's step() is the first moment any of this can run.
+		// NOTHING is installed without a module. The module browser builds a preview widget of
+		// every module it shows, and those step like any other — so this used to add a fresh
+		// set of overlays to the rack each time the browser was opened, and then destroy them
+		// when it closed.
+		DRUI* m = dynamic_cast<DRUI*>(module);
+		if (!m) {
+			ModuleWidget::step();
+			return;
+		}
+
 		if (!overlay && APP->scene && APP->scene->rack) {
-			overlay = new DRUIOverlay;
-			overlay->module = dynamic_cast<DRUI*>(module);
+			DRUIOverlay* o = new DRUIOverlay;
+			o->module = m;
 			// Added last, so it draws after every module.
-			APP->scene->rack->addChild(overlay);
+			APP->scene->rack->addChild(o);
+			overlay = o;
 		}
 		if (!pinchOverlay && APP->scene) {
-			DRUI* m = dynamic_cast<DRUI*>(module);
-			if (m) {
-				pinchOverlay = createPinchZoomOverlay(&m->opt.pinchZoom);
-				APP->scene->addChild(pinchOverlay);
-			}
+			widget::Widget* o = createPinchZoomOverlay(&m->opt.pinchZoom);
+			APP->scene->addChild(o);
+			pinchOverlay = o;
 		}
 		if (!sliderOverlay && APP->scene) {
-			DRUI* m = dynamic_cast<DRUI*>(module);
-			if (m) {
-				sliderOverlay = createSliderScrollOverlay(&m->opt.sliderScroll);
-				APP->scene->addChild(sliderOverlay);
-			}
+			widget::Widget* o = createInterceptOverlay(&m->opt.sliderScroll);
+			APP->scene->addChild(o);
+			sliderOverlay = o;
 		}
 		ModuleWidget::step();
 	}
 
+	/** Takes an overlay away, if it is still there. Asks the widget's OWN parent rather than
+	assuming which one it is, so this is safe whether the module is being deleted from a live
+	patch or the whole tree is coming down around it. */
+	static void dropOverlay(widget::Widget* o) {
+		if (!o)
+			return;
+		if (o->parent)
+			o->parent->removeChild(o);
+		delete o;
+	}
+
 	~DRUIWidget() {
-		if (overlay && overlay->parent)
-			APP->scene->rack->removeChild(overlay);
-		delete overlay;
-		if (pinchOverlay && pinchOverlay->parent)
-			APP->scene->removeChild(pinchOverlay);
-		delete pinchOverlay;
-		if (sliderOverlay && sliderOverlay->parent)
-			APP->scene->removeChild(sliderOverlay);
-		delete sliderOverlay;
+		dropOverlay(overlay);
+		dropOverlay(pinchOverlay);
+		dropOverlay(sliderOverlay);
 	}
 
 	void appendContextMenu(Menu* menu) override {
