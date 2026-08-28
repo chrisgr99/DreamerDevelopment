@@ -71,6 +71,7 @@ struct DRUIOptions {
 	bool cableFlow = true;
 	bool bipolar = true;
 	bool pinchZoom = true;
+	bool sliderScroll = true;
 };
 
 
@@ -89,6 +90,7 @@ struct DRUI : Module {
 		json_object_set_new(rootJ, "cableFlow", json_boolean(opt.cableFlow));
 		json_object_set_new(rootJ, "bipolar", json_boolean(opt.bipolar));
 		json_object_set_new(rootJ, "pinchZoom", json_boolean(opt.pinchZoom));
+		json_object_set_new(rootJ, "sliderScroll", json_boolean(opt.sliderScroll));
 		return rootJ;
 	}
 
@@ -104,6 +106,7 @@ struct DRUI : Module {
 		read("cableFlow", opt.cableFlow);
 		read("bipolar", opt.bipolar);
 		read("pinchZoom", opt.pinchZoom);
+		read("sliderScroll", opt.sliderScroll);
 	}
 };
 
@@ -568,6 +571,8 @@ struct DRUIWidget : ModuleWidget {
 	DRUIOverlay* overlay = NULL;
 	/** Screen-anchored, unlike the rack overlay: it stands in for the whole viewport. */
 	widget::Widget* pinchOverlay = NULL;
+	/** Also screen-anchored, and kept as the Scene's last child so it sees events first. */
+	widget::Widget* sliderOverlay = NULL;
 
 	DRUIWidget(DRUI* module) {
 		setModule(module);
@@ -598,6 +603,13 @@ struct DRUIWidget : ModuleWidget {
 				APP->scene->addChild(pinchOverlay);
 			}
 		}
+		if (!sliderOverlay && APP->scene) {
+			DRUI* m = dynamic_cast<DRUI*>(module);
+			if (m) {
+				sliderOverlay = createSliderScrollOverlay(&m->opt.sliderScroll);
+				APP->scene->addChild(sliderOverlay);
+			}
+		}
 		ModuleWidget::step();
 	}
 
@@ -608,6 +620,9 @@ struct DRUIWidget : ModuleWidget {
 		if (pinchOverlay && pinchOverlay->parent)
 			APP->scene->removeChild(pinchOverlay);
 		delete pinchOverlay;
+		if (sliderOverlay && sliderOverlay->parent)
+			APP->scene->removeChild(sliderOverlay);
+		delete sliderOverlay;
 	}
 
 	void appendContextMenu(Menu* menu) override {
@@ -625,6 +640,7 @@ struct DRUIWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createBoolPtrMenuItem("Pinch to zoom", "", &m->opt.pinchZoom));
+		menu->addChild(createBoolPtrMenuItem("Scroll wheel adjusts sliders", "", &m->opt.sliderScroll));
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));
