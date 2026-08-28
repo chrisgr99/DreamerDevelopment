@@ -42,6 +42,12 @@ that follows the pointer, leaving the wheel as the only practical route.
 struct InterceptOverlay : widget::Widget {
 	bool* sliderScroll = NULL;
 	bool* clickCables = NULL;
+	/** What the Option-click menu is allowed to offer, and whether a cable's pill appears at
+	all. Switched off on the face, these simply stop being offered; anything already attached
+	is hidden by its own gate rather than destroyed here. */
+	bool* offerScopes = NULL;
+	bool* offerWidgets = NULL;
+	bool* trace = NULL;
 	/** True between the click that picks a cable up and the click that puts it down. Rack
 	believes a drag is in progress the whole time. */
 	bool carrying = false;
@@ -61,6 +67,30 @@ struct InterceptOverlay : widget::Widget {
 	it always does.
 	*/
 	WeakPtr<app::CableWidget> carried;
+
+	/** Lifts ONE named cable off the end its pill sits on.
+
+	Right-click, because the left clicks are already spoken for: with several cables converging
+	on a jack their pills stack, and clicking steps through them to choose. A second left click
+	could not both rotate and lift, and the case where you most need to name a cable is exactly
+	the case where the rotation matters. So choosing stays on the left button and taking moves
+	to the right.
+	*/
+	void pickUpCable(app::CableWidget* cw, bool atInput) {
+		if (!cw || !cw->cable)
+			return;
+		// The trace goes with it: the cable being carried is no longer one of the ones on
+		// screen to compare against, and leaving the rest hidden would be baffling.
+		cableFocusClear();
+
+		history::CableRemove* h = new history::CableRemove;
+		h->setCable(cw);
+		APP->history->push(h);
+		cw->getPort(atInput ? engine::Port::INPUT : engine::Port::OUTPUT) = NULL;
+		cw->updateCable();
+		carried = cw;
+		carrying = true;
+	}
 
 	/** Picks up the top cable on this port, or starts a new one from it. */
 	void pickUp(app::PortWidget* port) {
@@ -268,6 +298,22 @@ struct InterceptOverlay : widget::Widget {
 	the modules, which never sees a press we have claimed on a port.
 	*/
 	void onButton(const ButtonEvent& e) override {
+		// A pill under the pointer takes a right-click: that lifts the cable it belongs to.
+		// Part of trace assist rather than of click-to-pull, since the pill is what names the
+		// cable and the two only make sense together.
+		if (!carrying && trace && *trace
+			&& e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT
+			&& (e.mods & RACK_MOD_MASK) == 0) {
+			app::CableWidget* pillCable = NULL;
+			bool atInput = false;
+			if (cableFocusPillAt(pillCable, atInput)) {
+				pickUpCable(pillCable, atInput);
+				e.consume(this);
+				e.stopPropagating();
+				return;
+			}
+		}
+
 		// CARRYING: the next click puts the cable down, wherever it lands.
 		if (carrying && e.action == GLFW_PRESS) {
 			if (e.button == GLFW_MOUSE_BUTTON_RIGHT)
@@ -341,16 +387,25 @@ struct InterceptOverlay : widget::Widget {
 		}
 
 		WeakPtr<app::PortWidget> weakPort = port;
+		const bool scopesOn = offerScopes && *offerScopes;
+		const bool widgetsOn = offerWidgets && *offerWidgets;
+		if (!scopesOn && !widgetsOn) {
+			widget::Widget::onButton(e);
+			return;
+		}
+
 		ui::Menu* menu = createMenu();
 		menu->addChild(createMenuLabel("Clip on"));
-		menu->addChild(createMenuItem("Scope", "", [weakPort]() {
-			if (weakPort)
-				scopeCreate(weakPort);
-		}));
+		if (scopesOn) {
+			menu->addChild(createMenuItem("Oscilloscope", "", [weakPort]() {
+				if (weakPort)
+					scopeCreate(weakPort);
+			}));
+		}
 
 		// Injectors drive a port, so they are offered on inputs only. An output is written by
 		// its own module and nothing else may write to it.
-		if (injectorAcceptsPort(port)) {
+		if (widgetsOn && injectorAcceptsPort(port)) {
 			menu->addChild(createMenuItem("Gate button", "", [weakPort]() {
 				if (weakPort)
 					injectorCreate(weakPort, INJECT_GATE);
@@ -410,9 +465,14 @@ struct InterceptOverlay : widget::Widget {
 };
 
 
-widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables) {
+widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
+	bool* offerScopes, bool* offerWidgets, bool* trace) {
+
 	InterceptOverlay* overlay = new InterceptOverlay;
 	overlay->sliderScroll = sliderScroll;
 	overlay->clickCables = clickCables;
+	overlay->offerScopes = offerScopes;
+	overlay->offerWidgets = offerWidgets;
+	overlay->trace = trace;
 	return overlay;
 }

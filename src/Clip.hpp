@@ -21,6 +21,7 @@ static const NVGcolor CLIP_CALLOUT_COLOR = nvgRGB(0x8a, 0x8d, 0x92);
 static const float CLIP_HANDLE = 10.5f;
 
 
+/** Declared here so the gates can tell a scope's handle from an injector's. */
 struct ClipHandleWidget;
 
 
@@ -156,6 +157,10 @@ struct ClipWidget : widget::OpaqueWidget {
 so the handle is offered the click first — the tab sits beside the jack, which would
 otherwise take the press. */
 void clipAddHandle(ClipWidget* clip);
+
+/** Shows or hides a clip AND its grab handle together. The handle is a separate widget owned
+by the rack, so hiding a clip alone would leave its tab floating at the jack. */
+void clipSetVisible(ClipWidget* clip, bool visible);
 
 /** Removes clips that have been detached, and their handles. Called from the overlay's step,
 because a widget cannot safely delete itself while the tree is being walked. */

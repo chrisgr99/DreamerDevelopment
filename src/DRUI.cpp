@@ -1,9 +1,17 @@
-/** DRUI — clearer jacks, cables and knobs across every module in the rack.
+/** DreamRack — the module that switches everything else on.
 
-WHY A MODULE EXISTS AT ALL. A Rack plugin cannot run code until one of its modules is
-placed: plugins are initialised before the scene is created, and there is no callback
-afterwards. So DRUI is a small module whose job is to install an overlay into the scene and
-carry the options. Its only ports are the injectors' hidden outputs.
+Its slug is still DRUI, and must stay so: a patch records the slug, and changing it would
+orphan every patch anyone has saved. DreamRack is only what the module is called.
+
+WHY A MODULE EXISTS AT ALL. A Rack plugin cannot run code until one of its modules is placed:
+plugins are initialised before the scene is created, and there is no callback afterwards. So
+this module's first job is to install the overlays that do the drawing, and its second is to
+carry the settings — one param per feature, shown as a button on its face, because a module
+whose every feature hides in a right-click menu looks like a module that does nothing.
+
+It also owns the audio-rate work: the scope taps and the injectors both ride in its process(),
+which is why bypassing it silences them while everything drawn goes on looking alive. Its only
+ports are the injectors' hidden outputs.
 
 HOW THE DRAWING REACHES OTHER PEOPLE'S MODULES. The overlay is added as the last child of the
 RackWidget, so it draws after every module and can paint over their jacks and knobs. It lives
@@ -72,23 +80,51 @@ struct DRUIOptions {
 	bool knobs = true;
 	bool cableColor = true;
 	bool cableFlow = true;
-	bool bipolar = true;
 	bool pinchZoom = true;
 	bool sliderScroll = true;
 	/** Click a jack to pick up its cable, click another to drop it — no button held between.
 	Off by default: it changes the most basic gesture in Rack. */
 	bool clickCables = false;
+	bool trace = true;
+	bool scopes = true;
+	bool widgets = true;
 };
 
 
 struct DRUI : Module {
+	/** Every feature is a PARAM, not merely an internal flag.
+
+	Params are saved with the patch by Rack itself, carry a right-click menu, and can be
+	mapped to a controller — "map a knob to switch cable tracing" costs nothing to allow now
+	and would break saved patches to add later. The plain booleans below are a mirror of them,
+	kept because the overlays hold pointers to individual flags.
+	*/
+	enum ParamId {
+		P_JACKS, P_KNOBS, P_CABLE_COLOR, P_CABLE_FLOW,
+		P_PINCH, P_SLIDER_SCROLL, P_CLICK_CABLES,
+		// Appended rather than inserted: a param's INDEX is what a saved patch stores, so
+		// putting a new one in the middle would silently shift everything after it.
+		P_TRACE, P_SCOPES, P_WIDGETS, NUM_PARAMS
+	};
+
 	DRUIOptions opt;
 
 	DRUI() {
 		// The outputs belong to the injectors. They carry no jacks on the panel: an injector
 		// is cabled from one of them to the port it drives, and both that cable and its plugs
 		// are hidden, because what should be visible is the callout loop at the terminal.
-		config(0, 0, INJECT_MAX, 0);
+		config(NUM_PARAMS, 0, INJECT_MAX, 0);
+		configSwitch(P_JACKS, 0.f, 1.f, 1.f, "Jacks by signal family", {"Off", "On"});
+		configSwitch(P_KNOBS, 0.f, 1.f, 1.f, "Knobs", {"Off", "On"});
+		configSwitch(P_CABLE_COLOR, 0.f, 1.f, 1.f, "Cable colour by destination", {"Off", "On"});
+		configSwitch(P_CABLE_FLOW, 0.f, 1.f, 1.f, "Animate cable directions", {"Off", "On"});
+		configSwitch(P_PINCH, 0.f, 1.f, 1.f, "Pinch to zoom", {"Off", "On"});
+		configSwitch(P_SLIDER_SCROLL, 0.f, 1.f, 1.f, "Scroll wheel adjusts sliders", {"Off", "On"});
+		// Off by default: it changes the most basic gesture in Rack.
+		configSwitch(P_CLICK_CABLES, 0.f, 1.f, 0.f, "Click to pick up and drop cables", {"Off", "On"});
+		configSwitch(P_TRACE, 0.f, 1.f, 1.f, "Cable trace assist", {"Off", "On"});
+		configSwitch(P_SCOPES, 0.f, 1.f, 1.f, "Oscilloscopes on terminals", {"Off", "On"});
+		configSwitch(P_WIDGETS, 0.f, 1.f, 1.f, "Signal widgets on terminals", {"Off", "On"});
 		for (int i = 0; i < INJECT_MAX; i++)
 			configOutput(i, string::f("Injector %d", i + 1));
 	}
@@ -102,6 +138,21 @@ struct DRUI : Module {
 		injectorProcessAll(this, args.sampleTime);
 	}
 
+	/** Copies the params into the flags the overlays read. Called from the widget's step, on
+	the UI thread, which is where every one of those flags is used. */
+	void syncOptions() {
+		opt.jacks = params[P_JACKS].getValue() > 0.5f;
+		opt.knobs = params[P_KNOBS].getValue() > 0.5f;
+		opt.cableColor = params[P_CABLE_COLOR].getValue() > 0.5f;
+		opt.cableFlow = params[P_CABLE_FLOW].getValue() > 0.5f;
+		opt.pinchZoom = params[P_PINCH].getValue() > 0.5f;
+		opt.sliderScroll = params[P_SLIDER_SCROLL].getValue() > 0.5f;
+		opt.clickCables = params[P_CLICK_CABLES].getValue() > 0.5f;
+		opt.trace = params[P_TRACE].getValue() > 0.5f;
+		opt.scopes = params[P_SCOPES].getValue() > 0.5f;
+		opt.widgets = params[P_WIDGETS].getValue() > 0.5f;
+	}
+
 	json_t* dataToJson() override {
 		// Cable colours are saved in the patch, and tracing a cable dims the others by lowering
 		// their alpha, so the true colours have to be back before anything is written. The
@@ -110,14 +161,6 @@ struct DRUI : Module {
 		cableFocusPrepareSave();
 
 		json_t* rootJ = json_object();
-		json_object_set_new(rootJ, "jacks", json_boolean(opt.jacks));
-		json_object_set_new(rootJ, "knobs", json_boolean(opt.knobs));
-		json_object_set_new(rootJ, "cableColor", json_boolean(opt.cableColor));
-		json_object_set_new(rootJ, "cableFlow", json_boolean(opt.cableFlow));
-		json_object_set_new(rootJ, "bipolar", json_boolean(opt.bipolar));
-		json_object_set_new(rootJ, "pinchZoom", json_boolean(opt.pinchZoom));
-		json_object_set_new(rootJ, "sliderScroll", json_boolean(opt.sliderScroll));
-		json_object_set_new(rootJ, "clickCables", json_boolean(opt.clickCables));
 		// Scopes live in the rack, not in this module, but this module's JSON is where the
 		// patch has room for them. Saving them here means a patch reopens looking at the same
 		// signals, with the same scales, rather than losing every probe on close.
@@ -127,42 +170,29 @@ struct DRUI : Module {
 	}
 
 	void dataFromJson(json_t* rootJ) override {
-		auto read = [&](const char* key, bool& target) {
+		// Migration: patches written before the features became params carry them here. Read
+		// into the params so an old patch opens set up as it was left.
+		auto read = [&](const char* key, int paramId) {
 			json_t* j = json_object_get(rootJ, key);
 			if (j)
-				target = json_boolean_value(j);
+				params[paramId].setValue(json_boolean_value(j) ? 1.f : 0.f);
 		};
-		read("jacks", opt.jacks);
-		read("knobs", opt.knobs);
-		read("cableColor", opt.cableColor);
-		read("cableFlow", opt.cableFlow);
-		read("bipolar", opt.bipolar);
-		read("pinchZoom", opt.pinchZoom);
-		read("sliderScroll", opt.sliderScroll);
-		read("clickCables", opt.clickCables);
+		read("jacks", P_JACKS);
+		read("knobs", P_KNOBS);
+		read("cableColor", P_CABLE_COLOR);
+		read("cableFlow", P_CABLE_FLOW);
+		read("pinchZoom", P_PINCH);
+		read("sliderScroll", P_SLIDER_SCROLL);
+		read("clickCables", P_CLICK_CABLES);
 		scopeFromJson(json_object_get(rootJ, "scopes"));
 		injectorFromJson(json_object_get(rootJ, "injectors"));
 	}
 };
 
 
-/** Whether a port has been seen to go negative.
-
-Nothing in Rack declares a port bipolar, so it is inferred by watching. A port is marked only
-once it has actually swung below zero, which means an idle or unpatched port stays unmarked
-until it runs — an honest limit of observation rather than a bug.
-*/
-static std::map<std::string, bool> bipolarSeen;
-
-static std::string portKey(Module* module, bool isOutput, int portId) {
-	return string::f("%lld:%d:%d", (long long) (module ? module->id : -1), isOutput ? 1 : 0, portId);
-}
-
-
 // ---- Drawing ----
 
-static void drawJack(NVGcontext* vg, math::Vec c, float r, NVGcolor color, bool isOutput,
-	bool isBipolar) {
+static void drawJack(NVGcontext* vg, math::Vec c, float r, NVGcolor color, bool isOutput) {
 
 	const float rh = r * 0.53f;
 
@@ -208,14 +238,6 @@ static void drawJack(NVGcontext* vg, math::Vec c, float r, NVGcolor color, bool 
 		nvgStroke(vg);
 	}
 
-	// BIPOLAR, by a second shape rather than another colour: a small notch at the top, so it
-	// reads alongside the family colour instead of competing with it.
-	if (isBipolar) {
-		nvgBeginPath(vg);
-		nvgCircle(vg, c.x, c.y - r * 0.98f, r * 0.16f);
-		nvgFillColor(vg, nvgRGB(0xff, 0xff, 0xff));
-		nvgFill(vg);
-	}
 }
 
 
@@ -484,29 +506,6 @@ struct DRUIOverlay : widget::TransparentWidget {
 			}
 		}
 
-		// Watch for ports that go negative. Nothing declares a port bipolar, so it is learned
-		// by observation and only ever latches on.
-		if (o.bipolar) {
-			for (ModuleWidget* mw : APP->scene->rack->getModules()) {
-				Module* m = mw->module;
-				if (!m)
-					continue;
-				for (size_t i = 0; i < m->outputs.size(); i++) {
-					if (m->outputs[i].getVoltage() < -0.05f)
-						bipolarSeen[portKey(m, true, (int) i)] = true;
-				}
-			}
-		}
-
-		cableFocusStep();
-
-		// Clips whose port has gone cannot remove themselves while the tree is being walked.
-		clipPurgeDead();
-		// And saved ones re-attach here, once the modules they name have finished loading.
-		scopeRestoreStep();
-		injectorRestoreStep();
-		injectorPurgeStrayCables();
-
 		widget::TransparentWidget::step();
 	}
 
@@ -526,11 +525,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 				if (engine::PortInfo* info = p->getPortInfo())
 					name = info->getName();
 
-				bool bip = false;
-				if (o.bipolar && p->module)
-					bip = bipolarSeen.count(portKey(p->module, isOutput, p->portId)) > 0;
-
-				drawJack(args.vg, c, r, familyColor(guessFamily(name)), isOutput, bip);
+				drawJack(args.vg, c, r, familyColor(guessFamily(name)), isOutput);
 			}
 		}
 
@@ -603,7 +598,8 @@ struct DRUIOverlay : widget::TransparentWidget {
 			}
 			// With the cables, and after them, so the pill sits on top of the cable it belongs
 			// to rather than under the ones crossing it.
-			cableFocusDraw(args.vg);
+			if (o.trace)
+				cableFocusDraw(args.vg);
 		}
 		widget::TransparentWidget::drawLayer(args, layer);
 	}
@@ -614,35 +610,118 @@ struct DRUIOverlay : widget::TransparentWidget {
 
 /** Drawn rather than loaded: this plugin ships no artwork, which keeps it free of any
 licensing entanglement and means there is nothing to keep in step with the code. */
+/** The panel: eight rows, each a switch you can see the state of.
+
+Everything this plugin does used to live in a right-click menu, which meant the module looked
+like it did nothing at all — no use in a screenshot and no use to someone meeting it for the
+first time. The face is now the feature list.
+
+Drawn rather than loaded from artwork, which keeps the plugin free of any licensing
+entanglement and means there is nothing to keep in step with the code.
+*/
+static const float PANEL_W = 6 * RACK_GRID_WIDTH;
+static const float ROW_H = 26.f;
+static const float ROW_TOP = 54.f;
+static const float ROW_X = 3.f;
+/** The button itself: a small round cap, with its label beside it rather than inside it. */
+static const float CAP_R = 5.5f;
+static const float CAP_CX = 11.f;
+
+static const NVGcolor PANEL_BG = nvgRGB(0x16, 0x1a, 0x20);
+static const NVGcolor PANEL_INK = nvgRGB(0xe6, 0xe8, 0xec);
+static const NVGcolor LAMP_ON = nvgRGB(0x3d, 0xe0, 0x7a);
+
+
 struct DRUIPanel : widget::Widget {
 	void draw(const DrawArgs& args) override {
 		nvgBeginPath(args.vg);
 		nvgRect(args.vg, 0, 0, box.size.x, box.size.y);
-		nvgFillColor(args.vg, nvgRGB(0x1a, 0x1e, 0x24));
+		nvgFillColor(args.vg, PANEL_BG);
 		nvgFill(args.vg);
 
 		std::shared_ptr<window::Font> font = APP->window->loadFont(
 			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
-		if (font && font->handle >= 0) {
-			nvgFontFaceId(args.vg, font->handle);
-			nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+		if (!font || font->handle < 0)
+			return;
+		nvgFontFaceId(args.vg, font->handle);
+		nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 
-			nvgFontSize(args.vg, 13);
-			nvgFillColor(args.vg, nvgRGB(0xe6, 0xe8, 0xec));
-			nvgText(args.vg, box.size.x / 2, 22, "DRUI", NULL);
+		// Title band, so the name reads at rack distance.
+		nvgBeginPath(args.vg);
+		nvgRect(args.vg, 0, 0, box.size.x, 28);
+		nvgFillColor(args.vg, nvgRGB(0x24, 0x2a, 0x33));
+		nvgFill(args.vg);
 
-			// A legend for the code the plugin applies, on the one panel that can explain it.
-			nvgFontSize(args.vg, 7.5);
-			nvgFillColor(args.vg, nvgRGB(0x98, 0x9e, 0xa8));
-			const char* lines[] = {"colour", "= signal", "family", "", "ring out", "= output",
-				"ring in", "= input"};
-			float y = 60;
-			for (const char* line : lines) {
-				nvgText(args.vg, box.size.x / 2, y, line, NULL);
-				y += 11;
-			}
-		}
+		nvgFontSize(args.vg, 14);
+		nvgFillColor(args.vg, PANEL_INK);
+		nvgText(args.vg, box.size.x / 2, 14, "DreamRack", NULL);
+
+		nvgFontSize(args.vg, 7);
+		nvgFillColor(args.vg, nvgRGB(0x8a, 0x90, 0x9a));
+		nvgText(args.vg, box.size.x / 2, 40, "OPT-CLICK A JACK", NULL);
+
+		nvgFillColor(args.vg, nvgRGB(0x6d, 0x74, 0x80));
+		nvgText(args.vg, box.size.x / 2, box.size.y - 14, "Dreamer", NULL);
+		nvgText(args.vg, box.size.x / 2, box.size.y - 5, "Development", NULL);
+
 		Widget::draw(args);
+	}
+};
+
+
+/** One feature: a round push button with its name beside it.
+
+The BUTTON is small and the CLICK TARGET is the whole row. Those are deliberately different
+things — a cap five pixels across is something to aim at, and there is no reason to make
+anyone aim when the label belongs to the same control and the row is otherwise empty.
+*/
+struct FeatureButton : app::Switch {
+	std::string label;
+	/** A second line, used only where a caption is too long for the panel's width. Wrapping the
+	few that need it keeps the module narrow, which matters more than uniform captions. */
+	std::string label2;
+
+	FeatureButton() {
+		box.size = math::Vec(PANEL_W - ROW_X * 2, ROW_H - 2.f);
+	}
+
+	void draw(const DrawArgs& args) override {
+		const bool on = getParamQuantity() && getParamQuantity()->getValue() > 0.5f;
+		const float cy = box.size.y / 2.f;
+
+		// A cap with a rim and a lit face, so it reads as something that has been pressed in
+		// rather than as a lamp that happens to be on.
+		nvgBeginPath(args.vg);
+		nvgCircle(args.vg, CAP_CX, cy, CAP_R + 1.5f);
+		nvgFillColor(args.vg, nvgRGB(0x0f, 0x12, 0x17));
+		nvgFill(args.vg);
+
+		nvgBeginPath(args.vg);
+		nvgCircle(args.vg, CAP_CX, cy, CAP_R);
+		nvgFillPaint(args.vg, nvgRadialGradient(args.vg, CAP_CX, cy - 1.f, 0.5f, CAP_R,
+			on ? nvgRGB(0x7d, 0xff, 0xaa) : nvgRGB(0x4a, 0x50, 0x59),
+			on ? nvgRGB(0x24, 0xa8, 0x58) : nvgRGB(0x2a, 0x2f, 0x36)));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, on ? LAMP_ON : nvgRGB(0x1e, 0x22, 0x29));
+		nvgStrokeWidth(args.vg, 1.f);
+		nvgStroke(args.vg);
+
+		std::shared_ptr<window::Font> font = APP->window->loadFont(
+			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
+		if (!font || font->handle < 0)
+			return;
+		nvgFontFaceId(args.vg, font->handle);
+		nvgFontSize(args.vg, 7.5f);
+		nvgFillColor(args.vg, on ? PANEL_INK : nvgRGB(0x83, 0x89, 0x93));
+		nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+		const float tx = CAP_CX + CAP_R + 5.f;
+		if (label2.empty()) {
+			nvgText(args.vg, tx, cy, label.c_str(), NULL);
+		}
+		else {
+			nvgText(args.vg, tx, cy - 4.5f, label.c_str(), NULL);
+			nvgText(args.vg, tx, cy + 4.5f, label2.c_str(), NULL);
+		}
 	}
 };
 
@@ -662,11 +741,35 @@ struct DRUIWidget : ModuleWidget {
 
 	DRUIWidget(DRUI* module) {
 		setModule(module);
-		box.size = Vec(3 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
+		box.size = Vec(PANEL_W, RACK_GRID_HEIGHT);
 
 		DRUIPanel* panel = new DRUIPanel;
 		panel->box.size = box.size;
 		setPanel(panel);
+
+		// Sliders are not here on purpose: they stay a param, saved and mappable, but live in
+		// the right-click menu. Everything else is on the face, so a picture of the panel is a
+		// list of what the module does.
+		struct Row { int param; const char* a; const char* b; };
+		static const Row rows[] = {
+			{DRUI::P_JACKS,         "COLOUR CODE",    "JACKS"},
+			{DRUI::P_CABLE_COLOR,   "COLOUR CODE",    "CABLES"},
+			{DRUI::P_KNOBS,         "CONSISTENT",     "KNOB STYLE"},
+			{DRUI::P_CABLE_FLOW,    "ANIMATE CABLE",  "DIRECTIONS"},
+			// Ordered by what will catch someone's eye first, not by how the code is arranged.
+			{DRUI::P_SCOPES,        "OSCILLOSCOPES",  "ON TERMINALS"},
+			{DRUI::P_WIDGETS,       "SIGNAL WIDGETS", "ON TERMINALS"},
+			{DRUI::P_PINCH,         "PINCH TO ZOOM",  ""},
+			{DRUI::P_TRACE,         "CABLE TRACE",    "ASSIST"},
+			{DRUI::P_CLICK_CABLES,  "CLICK TO PULL",  "CABLES"},
+		};
+		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++) {
+			FeatureButton* b = createParam<FeatureButton>(
+				Vec(ROW_X, ROW_TOP + ROW_H * i), module, rows[i].param);
+			b->label = rows[i].a;
+			b->label2 = rows[i].b;
+			addParam(b);
+		}
 
 		// The injectors' output jacks. Present so their cables are ordinary, complete Rack
 		// cables — which is what makes Rack responsible for removing them when a module goes
@@ -697,6 +800,10 @@ struct DRUIWidget : ModuleWidget {
 			return;
 		}
 
+		// The params are the truth; the flags the overlays read are a copy of them, refreshed
+		// here every frame. Without this the buttons moved and nothing else did.
+		m->syncOptions();
+
 		if (!overlay && APP->scene && APP->scene->rack) {
 			DRUIOverlay* o = new DRUIOverlay;
 			o->module = m;
@@ -710,7 +817,8 @@ struct DRUIWidget : ModuleWidget {
 			pinchOverlay = o;
 		}
 		if (!sliderOverlay && APP->scene) {
-			widget::Widget* o = createInterceptOverlay(&m->opt.sliderScroll, &m->opt.clickCables);
+			widget::Widget* o = createInterceptOverlay(&m->opt.sliderScroll, &m->opt.clickCables,
+				&m->opt.scopes, &m->opt.widgets, &m->opt.trace);
 			APP->scene->addChild(o);
 			sliderOverlay = o;
 		}
@@ -740,17 +848,8 @@ struct DRUIWidget : ModuleWidget {
 			return;
 
 		menu->addChild(new MenuSeparator);
-		menu->addChild(createMenuLabel("Show"));
-		menu->addChild(createBoolPtrMenuItem("Jacks by signal family", "", &m->opt.jacks));
-		menu->addChild(createBoolPtrMenuItem("Bipolar marking", "", &m->opt.bipolar));
-		menu->addChild(createBoolPtrMenuItem("Knobs", "", &m->opt.knobs));
-		menu->addChild(createBoolPtrMenuItem("Cable colour by destination", "", &m->opt.cableColor));
-		menu->addChild(createBoolPtrMenuItem("Cable signal flow", "", &m->opt.cableFlow));
-
-		menu->addChild(new MenuSeparator);
-		menu->addChild(createBoolPtrMenuItem("Pinch to zoom", "", &m->opt.pinchZoom));
-		menu->addChild(createBoolPtrMenuItem("Scroll wheel adjusts sliders", "", &m->opt.sliderScroll));
-		menu->addChild(createBoolPtrMenuItem("Click to pick up and drop cables", "", &m->opt.clickCables));
+		menu->addChild(createBoolPtrMenuItem("Scroll wheel adjusts sliders", "",
+			&m->opt.sliderScroll));
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));

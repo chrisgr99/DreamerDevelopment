@@ -63,5 +63,7 @@ json_t* injectorToJson();
 void injectorFromJson(json_t* arrayJ);
 /** Re-attaches queued injectors. Does nothing once none are waiting. */
 void injectorRestoreStep();
+/** Hides every injector and silences it, or brings them all back. */
+void injectorSetEnabled(bool on);
 /** Removes cables out of DRUI that no injector owns — see the note on the definition. */
 void injectorPurgeStrayCables();

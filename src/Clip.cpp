@@ -89,6 +89,15 @@ void clipAddHandle(ClipWidget* clip) {
 }
 
 
+void clipSetVisible(ClipWidget* clip, bool visible) {
+	if (!clip)
+		return;
+	clip->visible = visible;
+	if (clip->handle)
+		clip->handle->visible = visible;
+}
+
+
 void clipPurgeDead() {
 	std::vector<ClipWidget*> dead;
 	for (widget::Widget* child : APP->scene->rack->children) {

@@ -47,6 +47,9 @@ struct InjectorSlot {
 
 static InjectorSlot slots[INJECT_MAX];
 static std::atomic<int> activeCount{0};
+/** The master switch on DreamRack's face. A switched-off injector is hidden AND silent: one
+that went on driving a port while invisible would be a trap rather than a feature. */
+static std::atomic<bool> injectorsOn{true};
 
 /** A trigger's width. Rack's own convention, and long enough for every module to see it. */
 static const float PULSE_SECONDS = 0.001f;
@@ -55,6 +58,13 @@ static const float PULSE_SECONDS = 0.001f;
 void injectorProcessAll(Module* drui, float sampleTime) {
 	if (activeCount.load(std::memory_order_acquire) <= 0)
 		return;
+	if (!injectorsOn.load(std::memory_order_relaxed)) {
+		for (int i = 0; i < INJECT_MAX && i < (int) drui->outputs.size(); i++) {
+			drui->outputs[i].setChannels(1);
+			drui->outputs[i].setVoltage(0.f);
+		}
+		return;
+	}
 
 	for (int i = 0; i < INJECT_MAX; i++) {
 		InjectorSlot& slot = slots[i];
@@ -1231,6 +1241,15 @@ So the invariant is enforced from the other end: a cable out of DRUI that no inj
 does not exist. Run only once the restore queue is empty, or this would delete the cables the
 injectors are still waiting to adopt.
 */
+void injectorSetEnabled(bool on) {
+	injectorsOn.store(on, std::memory_order_relaxed);
+	for (widget::Widget* child : APP->scene->rack->children) {
+		if (InjectorWidget* inj = dynamic_cast<InjectorWidget*>(child))
+			clipSetVisible(inj, on);
+	}
+}
+
+
 void injectorPurgeStrayCables() {
 	if (!pendingInjectors.empty())
 		return;

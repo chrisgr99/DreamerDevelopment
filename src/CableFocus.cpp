@@ -189,6 +189,21 @@ void cableFocusPrepareSave() {
 }
 
 
+/** The cable whose pill is currently under the pointer, and which of its ends the pill is on.
+
+Exposed so a right-click on the pill can lift THAT cable. The pill is the only thing in Rack
+that says which of several cables converging on a jack you mean, so it is the natural place
+to take one from.
+*/
+bool cableFocusPillAt(app::CableWidget*& cw, bool& atInput) {
+	if (candidates.empty())
+		return false;
+	cw = candidates[turn].cw;
+	atInput = candidates[turn].atInput;
+	return cw != NULL;
+}
+
+
 bool cableFocusActive() {
 	return focusedId >= 0;
 }
