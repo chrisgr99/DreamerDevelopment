@@ -25,6 +25,7 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "plugin.hpp"
 
 #include <ui/Slider.hpp>
+#include <app/ParamWidget.hpp>
 #include <ui/ScrollWidget.hpp>
 #include <app/CableWidget.hpp>
 #include <history.hpp>
@@ -35,6 +36,8 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "Clip.hpp"
 
 #include <cmath>
+#include <vector>
+#include <string>
 
 #include <algorithm>
 
@@ -48,6 +51,32 @@ struct InterceptOverlay : widget::Widget {
 	bool* offerScopes = NULL;
 	bool* offerWidgets = NULL;
 	bool* trace = NULL;
+	/** Draws a pointer into the rack itself, for recordings made with VCV Recorder.
+
+	The Recorder captures Rack's own framebuffer, and the mouse cursor is not in it — macOS
+	composites the cursor over the window afterwards. So a video recorded that way shows cables
+	leaping about with nothing causing them. This draws a pointer where the real one is, flashes
+	it when a button goes down, and names any modifier being held, which is the difference
+	between a demonstration and a conjuring trick.
+	*/
+	bool* demoPointer = NULL;
+	double pressTime = -1e9;
+	bool pressed = false;
+	int pressedButton = 0;
+	/** Where the pointer has been while a button was held, for the drag trail. */
+	std::vector<math::Vec> trail;
+	/** When the wheel last moved, and which way, for the scroll chevrons. */
+	double scrollTime = -1e9;
+	math::Vec scrollDir;
+	/** When the run last changed axis, so a settled gesture may claim a new one. */
+	double scrollDirTime = -1e9;
+	/** The opening movement of a gesture, summed until it is decisive. */
+	math::Vec claim;
+	bool claimed = false;
+	/** The control the wheel was last used on. Rack's knob scroll changes a param WITHOUT
+	dragging anything, so the dragged-widget readout never saw it — turning a knob by wheel
+	showed no value at all, which is the one case where the value matters most. */
+	WeakPtr<app::ParamWidget> scrollParam;
 	/** True between the click that picks a cable up and the click that puts it down. Rack
 	believes a drag is in progress the whole time. */
 	bool carrying = false;
@@ -260,6 +289,40 @@ struct InterceptOverlay : widget::Widget {
 	}
 
 	void onHoverScroll(const HoverScrollEvent& e) override {
+		scrollTime = APP->window->getFrameTime();
+		// The direction is STICKY. A trackpad glide tails off into small ragged deltas, and
+		// taking every one of them made the run flip axis at the end of each gesture — a
+		// horizontal scroll finishing with a flash of vertical. A new axis has to be both
+		// decisive and clearly dominant, and until the gesture has been still for a while the
+		// old one stands.
+		// The direction comes from the WHOLE opening movement, not from its first event.
+		//
+		// A gesture almost never starts cleanly: a horizontal glide begins with a pixel or two
+		// of vertical, and judging from that first delta locked the run — and the scope — to
+		// the wrong axis. Deltas are gathered until they add up to something worth judging, and
+		// the axis is then taken from the sum, which is whichever way the hand was actually
+		// going. Once claimed it holds until the gesture stops.
+		const double now = APP->window->getFrameTime();
+		if (now - scrollDirTime > 0.7) {
+			claim = math::Vec();
+			claimed = false;
+		}
+		scrollDirTime = now;
+		if (!claimed) {
+			claim = claim.plus(e.scrollDelta);
+			if (std::fabs(claim.x) + std::fabs(claim.y) >= 6.f) {
+				scrollDir = claim;
+				claimed = true;
+			}
+		}
+		else if (std::fabs(scrollDir.x) > std::fabs(scrollDir.y)) {
+			scrollDir = math::Vec(e.scrollDelta.x >= 0.f ? 1.f : -1.f, 0.f);
+		}
+		else {
+			scrollDir = math::Vec(0.f, e.scrollDelta.y >= 0.f ? 1.f : -1.f);
+		}
+		scrollParam = widgetAt<app::ParamWidget>(APP->scene, e.pos);
+
 		if (panSideways(e)) {
 			e.consume(this);
 			e.stopPropagating();
@@ -297,7 +360,238 @@ struct InterceptOverlay : widget::Widget {
 	anywhere in Rack is Alt-drag to pan the rack view, and that is on the scroll area behind
 	the modules, which never sees a press we have claimed on a port.
 	*/
+	/** Records the click for the drawn pointer. Never consumes: this only watches. */
+	void notePointerButton(const ButtonEvent& e) {
+		if (e.action == GLFW_PRESS) {
+			pressed = true;
+			pressedButton = e.button;
+			pressTime = APP->window->getFrameTime();
+			trail.clear();
+		}
+		else if (e.action == GLFW_RELEASE) {
+			pressed = false;
+			trail.clear();
+		}
+	}
+
+	/** Colour by button, so a right-click reads as a different act from a left one. */
+	NVGcolor pointerAccent() {
+		return (pressedButton == GLFW_MOUSE_BUTTON_RIGHT)
+			? nvgRGB(0x6c, 0xb8, 0xff) : nvgRGB(0xff, 0xd8, 0x66);
+	}
+
+	/** The param being turned, named and valued.
+
+	A knob moving three degrees is invisible on video, so tutorials put the number beside the
+	pointer instead. Rack will format it for us — the same string its own tooltip shows — so
+	this is the real value rather than an approximation of it.
+	*/
+	static std::string paramText(app::ParamWidget* pw) {
+		if (!pw)
+			return "";
+		engine::ParamQuantity* pq = pw->getParamQuantity();
+		if (!pq)
+			return "";
+		const std::string label = pq->getLabel();
+		const std::string value = pq->getDisplayValueString() + pq->getUnit();
+		return label.empty() ? value : (label + "  " + value);
+	}
+
+	std::string draggedParamText() {
+		return paramText(dynamic_cast<app::ParamWidget*>(APP->event->getDraggedWidget()));
+	}
+
+	/** One chevron, pointing along `dir`, centred at `c`. */
+	static void chevron(NVGcontext* vg, math::Vec c, math::Vec dir, float size, NVGcolor col) {
+		// Perpendicular to the direction, which is where the two arms go.
+		const math::Vec perp = math::Vec(-dir.y, dir.x);
+		const math::Vec tip = c.plus(dir.mult(size * 0.5f));
+		const math::Vec a = c.minus(dir.mult(size * 0.5f)).plus(perp.mult(size));
+		const math::Vec b = c.minus(dir.mult(size * 0.5f)).minus(perp.mult(size));
+
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, a.x, a.y);
+		nvgLineTo(vg, tip.x, tip.y);
+		nvgLineTo(vg, b.x, b.y);
+		nvgStrokeColor(vg, col);
+		nvgStrokeWidth(vg, 3.4f);
+		nvgLineCap(vg, NVG_ROUND);
+		nvgLineJoin(vg, NVG_ROUND);
+		nvgStroke(vg);
+	}
+
+	/** A run of chevrons travelling in the scroll direction, fading in at the back and out at
+	the front, so the group reads as moving rather than as three static marks. */
+	void drawScrollRun(const DrawArgs& args, math::Vec p, float fade, double now) {
+		const bool horizontal = std::fabs(scrollDir.x) > std::fabs(scrollDir.y);
+		math::Vec dir, origin;
+		if (horizontal) {
+			// Rack's horizontal delta is positive when the content moves RIGHT, which sends the
+			// view left — so the run follows the view, which is what the eye is tracking.
+			dir = math::Vec((scrollDir.x >= 0.f) ? -1.f : 1.f, 0.f);
+			origin = math::Vec(p.x, p.y - 24.f);       // above the pointer
+		}
+		else {
+			// Rack's scroll is positive upwards, which is the way the CONTENT moves.
+			dir = math::Vec(0.f, (scrollDir.y >= 0.f) ? -1.f : 1.f);
+			origin = math::Vec(p.x - 20.f, p.y + 6.f); // to its left
+		}
+
+		const float spacing = 14.f;
+		const float span = 36.f;
+		// One spacing per third of a second, so the run travels at a readable pace.
+		const float march = (float) std::fmod(now * 33.0, (double) spacing);
+
+		// No caption. The run was labelled at first, but placing that plate correctly against a
+		// group of chevrons that moves, changes axis and sits on either side of the pointer was
+		// more fuss than it was worth — the demo can say once that the wheel is being used, and
+		// the animation carries it from there.
+
+		for (int i = -3; i <= 3; i++) {
+			const float along = i * spacing + march;
+			if (along < -span || along > span)
+				continue;
+			// Brightest in the middle of the run, gone at either end.
+			const float edge = 1.f - std::fabs(along) / span;
+			const math::Vec c = origin.plus(dir.mult(along));
+			// Brighter than the rest of the pointer furniture: on a busy panel this is the only
+			// sign that the wheel is doing anything at all.
+			chevron(args.vg, c, dir, 6.5f,
+				nvgRGBAf(1.f, 0.92f, 0.55f, std::fmin(1.f, fade * edge * 1.6f)));
+		}
+	}
+
+	/** A label in a dark plate, beside the pointer. */
+	void drawPointerLabel(const DrawArgs& args, math::Vec p, const std::string& text,
+		NVGcolor ink, float dy) {
+
+		std::shared_ptr<window::Font> font = APP->window->loadFont(
+			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
+		if (!font || font->handle < 0 || text.empty())
+			return;
+		nvgFontFaceId(args.vg, font->handle);
+		nvgFontSize(args.vg, 26.f);
+		nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+		const float w = nvgTextBounds(args.vg, 0, 0, text.c_str(), NULL, NULL);
+
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, p.x + 16.f, p.y + dy, w + 18.f, 34.f, 6.f);
+		nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 0xc8));
+		nvgFill(args.vg);
+		nvgFillColor(args.vg, ink);
+		nvgText(args.vg, p.x + 25.f, p.y + dy + 17.f, text.c_str(), NULL);
+	}
+
+	void drawPointer(const DrawArgs& args) {
+		if (!demoPointer || !*demoPointer)
+			return;
+		// Our box sits at the scene's origin, so the scene's mouse position is ours.
+		const math::Vec p = APP->scene->mousePos;
+		const double now = APP->window->getFrameTime();
+		const double age = now - pressTime;
+
+		// THE DRAG TRAIL. Where the pointer has been while the button was down, fading with
+		// distance back — movement, rather than a pointer that appears to teleport.
+		if (pressed) {
+			if (trail.empty() || trail.back().minus(p).norm() > 2.f)
+				trail.push_back(p);
+			if (trail.size() > 40)
+				trail.erase(trail.begin());
+			for (size_t i = 1; i < trail.size(); i++) {
+				const float t = (float) i / trail.size();
+				nvgBeginPath(args.vg);
+				nvgMoveTo(args.vg, trail[i - 1].x, trail[i - 1].y);
+				nvgLineTo(args.vg, trail[i].x, trail[i].y);
+				NVGcolor c = pointerAccent();
+				c.a = 0.55f * t;
+				nvgStrokeColor(args.vg, c);
+				nvgStrokeWidth(args.vg, 3.f * t + 1.f);
+				nvgLineCap(args.vg, NVG_ROUND);
+				nvgStroke(args.vg);
+			}
+		}
+
+		// HELD. A steady halo for as long as the button is down, which is what separates a
+		// press-and-hold from a click: the click's ring is gone in a quarter second, this is
+		// not.
+		if (pressed) {
+			NVGcolor c = pointerAccent();
+			c.a = 0.28f;
+			nvgBeginPath(args.vg);
+			nvgCircle(args.vg, p.x, p.y, 13.f);
+			nvgFillColor(args.vg, c);
+			nvgFill(args.vg);
+			c.a = 0.9f;
+			nvgStrokeColor(args.vg, c);
+			nvgStrokeWidth(args.vg, 1.6f);
+			nvgStroke(args.vg);
+		}
+
+		// SCROLL. A marching run of chevrons, pointing and travelling the way the wheel is
+		// going. Vertical scrolling shows them to the LEFT of the pointer and horizontal
+		// scrolling ABOVE it — never under it, where the arrow and Rack's own hover cursors
+		// would cover them. Movement is what says "scrolling" rather than "something flashed".
+		const double scrollAge = now - scrollTime;
+		if (scrollAge < 0.5)
+			drawScrollRun(args, p, (float) (1.0 - scrollAge / 0.5), now);
+
+		// CLICK. A ring that snaps out and is gone in a quarter second — which is exactly what
+		// distinguishes it from the halo of a held button, which stays.
+		if (age < 0.25) {
+			const float t = (float) (age / 0.25);
+			NVGcolor c = pointerAccent();
+			c.a = 0.9f * (1.f - t);
+			nvgBeginPath(args.vg);
+			nvgCircle(args.vg, p.x, p.y, 6.f + 16.f * t);
+			nvgStrokeColor(args.vg, c);
+			nvgStrokeWidth(args.vg, 2.5f);
+			nvgStroke(args.vg);
+		}
+
+		// The pointer itself: the familiar arrow, white with a dark outline so it reads over
+		// both a pale panel and a dark scope face.
+		nvgBeginPath(args.vg);
+		nvgMoveTo(args.vg, p.x, p.y);
+		nvgLineTo(args.vg, p.x, p.y + 17.f);
+		nvgLineTo(args.vg, p.x + 4.5f, p.y + 13.f);
+		nvgLineTo(args.vg, p.x + 7.5f, p.y + 19.5f);
+		nvgLineTo(args.vg, p.x + 10.5f, p.y + 18.f);
+		nvgLineTo(args.vg, p.x + 7.5f, p.y + 11.5f);
+		nvgLineTo(args.vg, p.x + 12.5f, p.y + 11.f);
+		nvgClosePath(args.vg);
+		nvgFillColor(args.vg, pressed ? pointerAccent() : nvgRGB(0xff, 0xff, 0xff));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGBA(0, 0, 0, 0xcc));
+		nvgStrokeWidth(args.vg, 1.2f);
+		nvgStroke(args.vg);
+
+		// WHAT IS BEING TURNED. A knob moves too little to see on video; its name and value do
+		// not. Shown above the modifier line so both can be up at once.
+		// What is being changed, however it is being changed: dragged, or scrolled.
+		std::string param = draggedParamText();
+		if (param.empty() && scrollAge < 0.9 && scrollParam)
+			param = paramText(scrollParam);
+		if (!param.empty())
+			drawPointerLabel(args, p, param, nvgRGB(0x3d, 0xe0, 0x7a), -10.f);
+
+		// Whatever modifier is held, named. A viewer cannot see a key being pressed, and half
+		// of what this plugin does hangs off Option.
+		// ONLY Option. It is the modifier this plugin's own gestures use, and it is the one a
+		// viewer needs told. The others are not shown deliberately: a screen magnifier holds
+		// keys of its own, and a recording captioned SHIFT or CONTROL every few seconds would
+		// be describing the accessibility tooling rather than the software.
+		if (APP->window->getMods() & GLFW_MOD_ALT)
+			drawPointerLabel(args, p, "OPTION", nvgRGB(0xff, 0xd8, 0x66), 26.f);
+	}
+
+	void draw(const DrawArgs& args) override {
+		widget::Widget::draw(args);
+		// Last child of the scene, so this lands on top of everything — menus included.
+		drawPointer(args);
+	}
+
 	void onButton(const ButtonEvent& e) override {
+		notePointerButton(e);
 		// A pill under the pointer takes a right-click: that lifts the cable it belongs to.
 		// Part of trace assist rather than of click-to-pull, since the pill is what names the
 		// cable and the two only make sense together.
@@ -410,9 +704,13 @@ struct InterceptOverlay : widget::Widget {
 				if (weakPort)
 					injectorCreate(weakPort, INJECT_GATE);
 			}));
-			menu->addChild(createMenuItem("Trigger button", "", [weakPort]() {
+			menu->addChild(createMenuItem("Pulse button", "", [weakPort]() {
 				if (weakPort)
 					injectorCreate(weakPort, INJECT_PULSE);
+			}));
+			menu->addChild(createMenuItem("Clock", "", [weakPort]() {
+				if (weakPort)
+					injectorCreate(weakPort, INJECT_CLOCK);
 			}));
 			menu->addChild(createMenuItem("DC level", "", [weakPort]() {
 				if (weakPort)
@@ -422,13 +720,24 @@ struct InterceptOverlay : widget::Widget {
 				if (weakPort)
 					injectorCreate(weakPort, INJECT_LFO);
 			}));
-			menu->addChild(createMenuItem("Audio oscillator", "", [weakPort]() {
+			menu->addChild(createMenuItem("VFO", "", [weakPort]() {
 				if (weakPort)
 					injectorCreate(weakPort, INJECT_AUDIO);
 			}));
-			menu->addChild(createMenuItem("Note", "", [weakPort]() {
+			// The same oscillator, opened in note mode. Two entries because the two uses are
+			// different — a test tone at 440 Hz, or a note to play something with — and either
+			// can be switched to the other from its own menu.
+			menu->addChild(createMenuItem("Musical note", "", [weakPort]() {
+				if (weakPort)
+					injectorCreate(weakPort, INJECT_AUDIO, true);
+			}));
+			menu->addChild(createMenuItem("Volt/oct", "", [weakPort]() {
 				if (weakPort)
 					injectorCreate(weakPort, INJECT_NOTE);
+			}));
+			menu->addChild(createMenuItem("Noise", "", [weakPort]() {
+				if (weakPort)
+					injectorCreate(weakPort, INJECT_NOISE);
 			}));
 			menu->addChild(createMenuItem("Attenuverter", "", [weakPort]() {
 				if (weakPort)
@@ -466,7 +775,7 @@ struct InterceptOverlay : widget::Widget {
 
 
 widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
-	bool* offerScopes, bool* offerWidgets, bool* trace) {
+	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer) {
 
 	InterceptOverlay* overlay = new InterceptOverlay;
 	overlay->sliderScroll = sliderScroll;
@@ -474,5 +783,6 @@ widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
 	overlay->offerScopes = offerScopes;
 	overlay->offerWidgets = offerWidgets;
 	overlay->trace = trace;
+	overlay->demoPointer = demoPointer;
 	return overlay;
 }

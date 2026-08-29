@@ -88,6 +88,9 @@ struct DRUIOptions {
 	bool trace = true;
 	bool scopes = true;
 	bool widgets = true;
+	/** Draws a pointer into the rack, for videos recorded with VCV Recorder — which cannot see
+	the real cursor. A recording aid rather than a feature, so it lives in the menu. */
+	bool demoPointer = false;
 };
 
 
@@ -506,6 +509,29 @@ struct DRUIOverlay : widget::TransparentWidget {
 			}
 		}
 
+		// ---- Per-frame housekeeping. Everything below has to run every frame, and all of it
+		// was lost in one edit once before: a text replacement that removed the bipolar watcher
+		// swallowed the block that followed it, and the symptom was scopes that saved correctly
+		// and then never came back. Keep it together, and keep this note with it.
+
+		// The three master switches. Scopes and injectors are HIDDEN rather than removed, so
+		// switching one off and on again gives back what was there.
+		scopeSetVisible(o.scopes);
+		injectorSetEnabled(o.widgets);
+
+		if (o.trace)
+			cableFocusStep();
+		else
+			cableFocusClear();
+
+		// Clips whose port has gone cannot remove themselves while the tree is being walked.
+		clipPurgeDead();
+		// Saved scopes and injectors re-attach here, once the modules they name have loaded.
+		scopeRestoreStep();
+		injectorRestoreStep();
+		// And any cable out of DRUI that no injector owns is not a cable at all.
+		injectorPurgeStrayCables();
+
 		widget::TransparentWidget::step();
 	}
 
@@ -818,7 +844,7 @@ struct DRUIWidget : ModuleWidget {
 		}
 		if (!sliderOverlay && APP->scene) {
 			widget::Widget* o = createInterceptOverlay(&m->opt.sliderScroll, &m->opt.clickCables,
-				&m->opt.scopes, &m->opt.widgets, &m->opt.trace);
+				&m->opt.scopes, &m->opt.widgets, &m->opt.trace, &m->opt.demoPointer);
 			APP->scene->addChild(o);
 			sliderOverlay = o;
 		}
@@ -850,6 +876,8 @@ struct DRUIWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createBoolPtrMenuItem("Scroll wheel adjusts sliders", "",
 			&m->opt.sliderScroll));
+		menu->addChild(createBoolPtrMenuItem("Draw pointer (for VCV Recorder)", "",
+			&m->opt.demoPointer));
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));

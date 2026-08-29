@@ -16,27 +16,42 @@ carries its signal, and detach() gives it up.
 
 /** Wcoast CALLOUT_COLOR, the same grey as a scope's frame, so the loop reads as part of the
 instrument rather than as decoration. */
-static const NVGcolor CLIP_CALLOUT_COLOR = nvgRGB(0x8a, 0x8d, 0x92);
+static const NVGcolor CLIP_CALLOUT_COLOR = nvgRGB(0xac, 0xb0, 0xb6);
 /** Wcoast SCOPE_HANDLE, and also the shortest the loop-to-face line may get. */
 static const float CLIP_HANDLE = 10.5f;
 
 
 /** Declared here so the gates can tell a scope's handle from an injector's. */
 struct ClipHandleWidget;
+struct ClipCloseWidget;
 
 
 struct ClipWidget : widget::OpaqueWidget {
 	WeakPtr<app::PortWidget> port;
 	/** Offset from the port's centre, which is what makes the clip follow its module. */
 	math::Vec offset = math::Vec(30, -70);
-	/** The face's own height. The callout aims at the face, which for a scope is shorter than
-	the whole widget once its values box is open. */
+	/** The face's own size, which is NOT always the widget's box.
+	
+	A scope's box grows downwards for its readout and sideways when that readout is wider than
+	the trace, so measuring the callout against the box aimed it at the corner of something the
+	user cannot see. The callout aims at the FACE.
+	
+	Zero width means "the same as the box", which is true of every injector. */
+	float faceWidth = 0.f;
 	float faceHeight = 110.f;
+
+	float faceW() {
+		return (faceWidth > 0.f) ? faceWidth : box.size.x;
+	}
 
 	/** The grab tab where the callout meets the jack. A separate widget because it is drawn
 	OUTSIDE this widget's box, at the jack, and Rack offers a click only to a widget whose box
 	contains it — as part of this widget the tab would be visible but ungrabbable. */
 	ClipHandleWidget* handle = NULL;
+	/** The X that removes this clip, drawn OUTSIDE it at the top left. Outside because a face
+	forty pixels across has no room to spare for a control that is used once. */
+	ClipCloseWidget* closeButton = NULL;
+
 	/** While the tab is being dragged the callout points here, in rack coordinates, instead
 	of at the port, so the loop follows the pointer to wherever it is being taken. */
 	bool retargeting = false;
@@ -80,55 +95,81 @@ struct ClipWidget : widget::OpaqueWidget {
 		return true;
 	}
 
-	/** Where the callout's ring and grab tab sit, in this widget's coordinates. Shared by the
-	drawing and by the handle widget, so what you see is exactly what you can grab. */
-	bool calloutGeometry(math::Vec& ring, float& rr, math::Vec& tab) {
+	/** The centre of whichever side of the FACE is nearest a given point.
+
+	Every callout meets the face here — the trace's and the trigger's alike — so they behave
+	the same way as the widget moves. Aiming at the nearest POINT on an edge instead lets the
+	attachment slide along that edge, which reads as the line crawling round the frame.
+	*/
+	math::Vec nearestSideCentre(math::Vec ring) {
+		const float fw = faceW();
+		const math::Vec sides[4] = {
+			math::Vec(fw / 2.f, 0.f),               // top
+			math::Vec(fw / 2.f, faceHeight),        // bottom
+			math::Vec(0.f, faceHeight / 2.f),       // left
+			math::Vec(fw, faceHeight / 2.f),        // right
+		};
+		int best = 0;
+		float bestDist = sides[0].minus(ring).norm();
+		for (int i = 1; i < 4; i++) {
+			const float d = sides[i].minus(ring).norm();
+			if (d < bestDist) {
+				bestDist = d;
+				best = i;
+			}
+		}
+		return sides[best];
+	}
+
+	/** Where the callout's ring, its grab tab, and the point on the face it aims at sit — all
+	in this widget's coordinates.
+
+	Worked out ONCE, here, and used by both the drawing and the handle widget. It used to be
+	computed in two places from the same copied lines, which is how a tab could end up on a
+	different side of the face from the line it belongs to.
+
+	The face is met at the CENTRE of whichever side is nearest the jack, chosen by comparing
+	the four side centres against the ring. Aiming at the nearest POINT on the edge instead
+	lets the attachment slide along that edge as the face moves, which reads as the line
+	crawling round the frame rather than being fixed to it.
+	*/
+	bool calloutGeometry(math::Vec& ring, float& rr, math::Vec& tab, math::Vec& target) {
 		if (!ringPos(ring, rr))
 			return false;
 
-		// Attach to the CENTRE of the side nearest the jack. Aiming at the nearest POINT on
-		// the edge instead lets the attachment slide along that edge as the face moves, which
-		// reads as the line crawling round the frame rather than being fixed to it. Which side
-		// is nearest is judged in units of the face's own half-width and half-height, so a wide
-		// face does not always answer "left or right".
-		const math::Vec faceCentre = math::Vec(box.size.x / 2.f, faceHeight / 2.f);
-		const math::Vec away = ring.minus(faceCentre);
-		math::Vec target;
-		if (std::fabs(away.x) / (box.size.x / 2.f) > std::fabs(away.y) / (faceHeight / 2.f))
-			target = math::Vec(away.x > 0.f ? box.size.x : 0.f, faceCentre.y);
-		else
-			target = math::Vec(faceCentre.x, away.y > 0.f ? faceHeight : 0.f);
+		target = nearestSideCentre(ring);
 
 		math::Vec dir = target.minus(ring);
 		const float dist = dir.norm();
-		if (dist < 1e-3f)
-			return false;
-		dir = dir.div(dist);
+		if (dist < 1e-3f) {
+			// The jack is right where the face meets it — dragged onto its own terminal. Any
+			// direction will do, and picking one is better than drawing nothing: returning
+			// false here left the callout missing until the widget was moved away again.
+			dir = math::Vec(0.f, -1.f);
+		}
+		else {
+			dir = dir.div(dist);
+		}
 		tab = ring.plus(dir.mult(rr + CLIP_HANDLE / 2.f));
 		return true;
+	}
+
+	bool calloutGeometry(math::Vec& ring, float& rr, math::Vec& tab) {
+		math::Vec target;
+		return calloutGeometry(ring, rr, tab, target);
 	}
 
 	/** Ring around the terminal, a line to this face, and the rounded tab where they meet.
 	Draw BEFORE the face, so the face covers whatever the line runs under. */
 	void drawCallout(NVGcontext* vg) {
-		math::Vec ring, tab;
+		math::Vec ring, tab, target;
 		float rr = 0.f;
-		if (!calloutGeometry(ring, rr, tab))
+		if (!calloutGeometry(ring, rr, tab, target))
 			return;
-
-		const math::Vec faceCentre = math::Vec(box.size.x / 2.f, faceHeight / 2.f);
-		const math::Vec away = ring.minus(faceCentre);
-		math::Vec target;
-		if (std::fabs(away.x) / (box.size.x / 2.f) > std::fabs(away.y) / (faceHeight / 2.f))
-			target = math::Vec(away.x > 0.f ? box.size.x : 0.f, faceCentre.y);
-		else
-			target = math::Vec(faceCentre.x, away.y > 0.f ? faceHeight : 0.f);
 
 		math::Vec dir = target.minus(ring);
 		const float dist = dir.norm();
-		if (dist < 1e-3f)
-			return;
-		dir = dir.div(dist);
+		dir = (dist < 1e-3f) ? math::Vec(0.f, -1.f) : dir.div(dist);
 
 		// The line starts clear of the ring, leaving room for the tab.
 		const math::Vec from = ring.plus(dir.mult(rr));
@@ -157,6 +198,9 @@ struct ClipWidget : widget::OpaqueWidget {
 so the handle is offered the click first — the tab sits beside the jack, which would
 otherwise take the press. */
 void clipAddHandle(ClipWidget* clip);
+
+/** Gives a clip an X centred on its top-left corner, always visible. */
+void clipAddClose(ClipWidget* clip);
 
 /** Shows or hides a clip AND its grab handle together. The handle is a separate widget owned
 by the rack, so hiding a clip alone would leave its tab floating at the jack. */

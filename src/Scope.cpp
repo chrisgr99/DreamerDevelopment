@@ -74,11 +74,20 @@ static const float PAN_SCROLL_PER_STEP = 10.f;
 static const float SCALE_SCROLL_PER_STEP = 40.f;
 /** A gesture is considered over after this long with no scroll, which is when the axis it
 locked onto is released. */
-static const double SCROLL_IDLE = 0.25;
+static const double SCROLL_IDLE = 0.7;
+/** How much scroll it takes to CLAIM an axis, and how far it must beat the other one. A
+trackpad glide tails off into small ragged deltas, and a claim made from those flipped the
+axis at the end of every gesture — a horizontal scroll finishing with a flick of vertical. */
+static const float AXIS_CLAIM_TOTAL = 6.f;
 static const float BTN = 14.f;
 static const float BTN_PAD = 4.f;
 /** How far a control sits from the edge of the face it is anchored to. */
 static const float EDGE = 1.f;
+/** The trigger strip down the left of the face: drawn this wide, but accepting scroll and
+clicks a good deal further in, since five pixels is not a target anyone should have to aim
+at. */
+static const float TRIG_STRIP_W = 10.f;
+static const float TRIG_STRIP_REACH = 10.f;
 /** How far in from an edge still counts as grabbing it to resize. */
 static const float RESIZE_EDGE = 6.f;
 static const float MIN_W = 70.f, MIN_H = 40.f;
@@ -116,6 +125,10 @@ static void setCursorShape(int shape) {
 }
 
 
+/** Defined below, beside the patch-restoring code that also uses it. */
+static PortWidget* findPort(int64_t moduleId, int portId, bool isOutput);
+
+
 struct ScopeWidget : ClipWidget {
 	int tapSlot = -1;
 
@@ -131,6 +144,8 @@ struct ScopeWidget : ClipWidget {
 	glide is never perfectly straight, so without this a horizontal pan carries a little
 	vertical drift with it and moves the trace while you are trying to scan along it. */
 	int scrollAxis = 0;
+	/** The opening movement of the current gesture, summed until it is decisive. */
+	math::Vec axisClaim;
 	double lastScrollTime = 0.0;
 
 	int vDivIndex = 6;
@@ -153,10 +168,80 @@ struct ScopeWidget : ClipWidget {
 	times and would otherwise each look like a separate trigger. */
 	float triggerHyst = 0.05f;
 	bool triggerRising = true;
-	/** Auto free-runs when no edge arrives; Normal waits for one. */
+	/** Whether the trace is triggered at all. Off free-runs: the window is simply the newest
+	samples, which is what you want while hunting for something rather than measuring it.
+	Switched from the strip down the left edge of the face, which replaced the T button. */
+	bool triggerOn = true;
+	/** An EXTERNAL trigger: the scope displays one terminal and triggers on another.
+
+	Its own tap, with its own history, read from the newest end alongside the trace's. Both
+	taps capture the same sample in the same call, so their newest entries are simultaneous —
+	which is what makes the two buffers align without any bookkeeping, as long as both are read
+	from the end rather than by index.
+
+	The threshold is fixed at one volt. That is a gate or a trigger in Rack, which is what an
+	external trigger is nearly always fed, and it removes a level control whose height on the
+	face would have meant nothing: the level belongs to the trigger signal, and the strip is
+	drawn against the trace. */
+	WeakPtr<PortWidget> trigPort;
+	int trigTapSlot = -1;
+	/** The grab tab on the amber link. A separate widget, and a child of the rack, for the same
+	reason the trace's is: it is drawn out at the terminal, outside this widget's box, and Rack
+	offers a click only to a widget whose box contains the point. */
+	widget::Widget* trigHandle = NULL;
+	/** An external trigger read from a saved patch, waiting for its module to appear. Modules
+	arrive over several frames as a patch loads, and the one carrying the trigger may well come
+	after the one carrying the trace. */
+	int64_t pendingTrigModuleId = -1;
+	int pendingTrigPortId = 0;
+	bool pendingTrigIsOutput = true;
+	int pendingTrigBudget = 0;
+	/** True while a link is being dragged out of the strip. */
+	bool linking = false;
+	math::Vec linkPos;
+	bool pressedInStrip = false;
+
+	static constexpr float EXT_TRIG_LEVEL = 1.f;
+	static constexpr float EXT_TRIG_ARM = 0.5f;
+
+	bool externalTrigger() {
+		return trigPort && trigTapSlot >= 0 && tapAlive(trigTapSlot);
+	}
+
+	void dropExternalTrigger() {
+		if (trigTapSlot >= 0)
+			tapDestroy(trigTapSlot);
+		trigTapSlot = -1;
+		trigPort = NULL;
+	}
+
+	void setExternalTrigger(PortWidget* p) {
+		dropExternalTrigger();
+		if (!p || !p->module)
+			return;
+		trigTapSlot = tapCreate(p->module->id, p->portId, p->type == engine::Port::OUTPUT);
+		if (trigTapSlot < 0) {
+			WARN("Scope: no tap slots left for an external trigger");
+			return;
+		}
+		trigPort = p;
+		triggerOn = true;
+		timeShift = 0.f;
+		INFO("Scope: triggering externally from port %d", p->portId);
+	}
+
+	/** Kept so old patches load, and because Normal mode may come back on the strip as a second
+	click state. Nothing sets it now. */
 	bool triggerAuto = true;
 
 	/** The values box: shown by a click on the face, cycling scale -> freq -> peak. */
+	/** Set by a press on the face, cleared on release, with how far the pointer moved in
+	between — which is what tells a click from a drag. */
+	bool pressedOnFace = false;
+	float travelled = 0.f;
+	/** Where the press landed, in face coordinates, so the release can tell what was under it. */
+	math::Vec pressPos;
+
 	bool valuesShown = false;
 	int valueMode = 0;
 	/** Hover drives the buttons' visibility, as in Wcoast. */
@@ -180,6 +265,8 @@ struct ScopeWidget : ClipWidget {
 	/** What the tap held at the moment of pausing. Panning a paused scope has to re-window
 	this, not the live buffer — the tap goes on filling while the scope is held, so re-reading
 	it would quietly show newer samples than the ones frozen on screen. */
+	/** The external trigger's window, read alongside the trace's. */
+	std::vector<float> extScratch;
 	std::vector<float> frozenBuf;
 	int frozenCount = 0;
 	/** The last captured sweep, kept so a frozen scope still has something to show. */
@@ -191,13 +278,13 @@ struct ScopeWidget : ClipWidget {
 	/** The face alone. The widget's own box grows to include the values box when it is shown,
 	because Rack only dispatches a click to a child whose box CONTAINS the point — a box drawn
 	outside the widget would be visible and completely unclickable. */
-	/** The face's own width and height. The BOX is not the record of them: minimising replaces
-	the box with a token a few pixels across, so a width kept only there came back as the token's
-	width when the scope was restored. */
-	float faceWidth = 98.f;
-	float faceHeight = 49.f;
+	// faceWidth and faceHeight are ClipWidget's: the BOX is not the record of them, since
+	// minimising replaces it with a token a few pixels across and the readout can make it wider
+	// than the trace. Set here to this scope's own default size.
 
 	ScopeWidget() {
+		faceWidth = 98.f;
+		faceHeight = 49.f;
 		// Two thirds of what it was. A scope is a thing you clip on beside a jack, and a smaller
 		// one hides less of the rack; it can always be dragged bigger by an edge.
 		// Small on purpose. A scope is usually a peek at a signal, and a small one hides less of
@@ -211,6 +298,12 @@ struct ScopeWidget : ClipWidget {
 
 	~ScopeWidget() {
 		destroyTooltip();
+		if (trigHandle) {
+			if (trigHandle->parent)
+				trigHandle->parent->removeChild(trigHandle);
+			delete trigHandle;
+			trigHandle = NULL;
+		}
 		if (tapSlot >= 0)
 			tapDestroy(tapSlot);
 	}
@@ -218,13 +311,38 @@ struct ScopeWidget : ClipWidget {
 	void step() override {
 		// Anchored to the port, not to the screen, so the scope follows if the module moves.
 		followPort();
+
+		// If the trigger source has gone — its module deleted — fall back to triggering on the
+		// scope's own signal rather than sitting there never triggering.
+		if (trigTapSlot >= 0 && !externalTrigger())
+			dropExternalTrigger();
+
+		// A saved external trigger, re-attached once its module has loaded. Given up on after
+		// about ten seconds, which is what happens when the patch is opened without the plugin
+		// that carried the trigger source.
+		if (pendingTrigModuleId >= 0 && pendingTrigBudget > 0) {
+			if (PortWidget* p = findPort(pendingTrigModuleId, pendingTrigPortId,
+				pendingTrigIsOutput)) {
+
+				setExternalTrigger(p);
+				pendingTrigModuleId = -1;
+			}
+			else if (--pendingTrigBudget <= 0) {
+				WARN("Scope: the module carrying its external trigger never appeared");
+				pendingTrigModuleId = -1;
+			}
+		}
 		if (minimized) {
 			// Exactly wide enough for the same two buttons, in the same places they occupy on
 			// the full face — see the note on minBox().
-			box.size = math::Vec(EDGE * 2 + BTN * 2 + BTN_PAD, EDGE * 2 + BTN);
+			box.size = math::Vec(TRIG_STRIP_W + BTN_PAD * 3 + BTN * 2, EDGE * 2 + BTN);
 		}
 		else {
-			box.size.x = faceWidth;
+			// The readout may be wider than the face — it holds two calibrated scales, and a
+			// narrow scope cannot shrink them. The box grows to whichever is wider, because
+			// Rack only offers a click to a widget whose box CONTAINS the point: a readout
+			// drawn outside the box would be visible and completely unclickable.
+			box.size.x = std::fmax(faceWidth, valuesShown ? valuesW : 0.f);
 			box.size.y = faceHeight + (valuesShown ? valuesH + 3.f : 0.f);
 		}
 
@@ -264,26 +382,36 @@ struct ScopeWidget : ClipWidget {
 	int gather(float* out, int wanted) {
 		if (tapSlot < 0)
 			return 0;
+		// The loop is in the air: the scope is attached to nothing, so there is nothing to
+		// draw. Showing the last sweep would suggest it was still measuring something.
+		if (retargeting)
+			return 0;
 
-		// Where in the history to look: panning moves this back, in divisions of the current
-		// time base, so the same gesture covers the same fraction of the screen at any speed.
+		// Panning is a HORIZONTAL POSITION control, not a different place to trigger.
+		//
+		// The trigger still finds its edge in the newest capture, so the trace stays locked;
+		// the pan then slides the window along from that edge, which is what shows you a
+		// different part of the waveform while the phase holds still. Reading a different
+		// stretch of history instead — which is what this did before — leaves a periodic signal
+		// looking identical wherever you scroll to, because it IS identical.
 		const int perDiv = std::max(1, wanted / DIV_X);
-		const int shift = (int) (timeShift * perDiv);
-		const int chunk = std::min((int) scratch.size(), std::max(wanted * 3, wanted + 64));
+		const int pan = (int) (timeShift * perDiv);
+		// Enough to hold the window, room to find an edge ahead of it, and the pan itself.
+		const int chunk = std::min((int) scratch.size(), wanted * 2 + pan + 64);
 
 		int have;
 		if (frozen && frozenCount > 0) {
 			// Paused: window the copy taken at the moment of pausing, never the live buffer,
-			// which goes on filling while the scope is held.
-			const int end = math::clamp(frozenCount - shift, 0, frozenCount);
-			have = std::min(chunk, end);
+			// which goes on filling while the scope is held. Here the pan can reach the whole
+			// eleven seconds, since nothing is moving.
+			have = std::min(chunk, frozenCount);
 			if (have <= 0)
 				return 0;
-			std::copy(frozenBuf.begin() + (end - have), frozenBuf.begin() + end,
+			std::copy(frozenBuf.begin() + (frozenCount - have), frozenBuf.begin() + frozenCount,
 				scratch.begin());
 		}
 		else {
-			have = tapReadAt(tapSlot, scratch.data(), chunk, shift);
+			have = tapReadAt(tapSlot, scratch.data(), chunk, 0);
 		}
 		if (have <= 0)
 			return 0;
@@ -297,43 +425,66 @@ struct ScopeWidget : ClipWidget {
 		// An edge only counts if a whole window follows it; otherwise the few samples left
 		// would be stretched across the face and the time base would be a lie.
 		const int latest = have - (wanted - pre);
-		const float hyst = std::fmax(triggerHyst, 1e-4f);
 
 		int edge = -1;
 		bool armed = false;
-		for (int i = 1; i <= latest; i++) {
-			const float a = scratch[i - 1], b = scratch[i];
-			if (triggerRising) {
-				if (b < triggerLevel - hyst)
+
+		if (externalTrigger()) {
+			// The trigger signal, read from the newest end so its last sample lines up with the
+			// trace's last sample — that is what aligns the two buffers, since both taps
+			// capture the same sample in the same call but may have started at different times.
+			//
+			// Fixed threshold and fixed arming band: a Rack gate rests at zero and rises to
+			// ten, so one volt catches it, and requiring a return below half a volt first stops
+			// a single edge triggering twice.
+			extScratch.resize(scratch.size());
+			const int extHave = tapReadAt(trigTapSlot, extScratch.data(), have, 0);
+			const int off = have - extHave;
+			// Always the RISING edge. A gate or trigger starts something on its rise, and the
+			// trace of the trigger signal is not on screen — so a choice between rising and
+			// falling would be one the user has no way to make an informed decision about.
+			for (int i = std::max(1, off + 1); i <= latest; i++) {
+				const float a = extScratch[i - 1 - off], b = extScratch[i - off];
+				if (b < EXT_TRIG_ARM)
 					armed = true;
-				else if (armed && a < triggerLevel && b >= triggerLevel) {
+				else if (armed && a < EXT_TRIG_LEVEL && b >= EXT_TRIG_LEVEL) {
 					edge = i;
 					armed = false;
 				}
 			}
-			else {
-				if (b > triggerLevel + hyst)
-					armed = true;
-				else if (armed && a > triggerLevel && b <= triggerLevel) {
-					edge = i;
-					armed = false;
+		}
+		else {
+			// Triggering on the displayed signal itself, at the level the strip sets, armed by
+			// a hysteresis band taken from the signal's own amplitude.
+			const float hyst = std::fmax(triggerHyst, 1e-4f);
+			for (int i = 1; i <= latest; i++) {
+				const float a = scratch[i - 1], b = scratch[i];
+				if (triggerRising) {
+					if (b < triggerLevel - hyst)
+						armed = true;
+					else if (armed && a < triggerLevel && b >= triggerLevel) {
+						edge = i;
+						armed = false;
+					}
+				}
+				else {
+					if (b > triggerLevel + hyst)
+						armed = true;
+					else if (armed && a > triggerLevel && b <= triggerLevel) {
+						edge = i;
+						armed = false;
+					}
 				}
 			}
 		}
 
-		// PANNED: show where you have panned TO, and do not re-trigger.
-		//
-		// This is why panning appeared to do nothing. The trigger re-anchors the window on an
-		// edge every frame, and on a periodic signal every edge looks like every other — so
-		// moving back through the history landed on a different cycle that drew identically.
-		// A scope being panned is being read, not triggered.
-		if (timeShift > 0.f) {
-			// Nothing else to do: the window already sits where the pan put it.
+		if (!triggerOn) {
+			// Free-running: the newest window, offset by however far it has been panned.
+			start = math::clamp(have - wanted - pan, 0, std::max(0, have - wanted));
 		}
-		else if (edge >= 0)
-			start = math::clamp(edge - pre, 0, std::max(0, have - wanted));
-		else if (!triggerAuto)
-			return 0;   // Normal mode shows nothing until an edge arrives
+		else if (edge >= 0) {
+			start = math::clamp(edge - pre - pan, 0, std::max(0, have - wanted));
+		}
 
 		const int count = std::min(wanted, have - start);
 		for (int i = 0; i < count; i++)
@@ -490,6 +641,13 @@ struct ScopeWidget : ClipWidget {
 		json_object_set_new(rootJ, "trigLevel", json_real(triggerLevel));
 		json_object_set_new(rootJ, "trigHyst", json_real(triggerHyst));
 		json_object_set_new(rootJ, "trigRising", json_boolean(triggerRising));
+		json_object_set_new(rootJ, "trigOn", json_boolean(triggerOn));
+		if (trigPort && trigPort->module) {
+			json_object_set_new(rootJ, "extTrigModuleId", json_integer(trigPort->module->id));
+			json_object_set_new(rootJ, "extTrigPortId", json_integer(trigPort->portId));
+			json_object_set_new(rootJ, "extTrigIsOutput",
+				json_boolean(trigPort->type == engine::Port::OUTPUT));
+		}
 		json_object_set_new(rootJ, "trigAuto", json_boolean(triggerAuto));
 		json_object_set_new(rootJ, "ac", json_boolean(acCoupled));
 		json_object_set_new(rootJ, "grid", json_boolean(gridShown));
@@ -524,6 +682,15 @@ struct ScopeWidget : ClipWidget {
 		num("trigLevel", triggerLevel);
 		num("trigHyst", triggerHyst);
 		boolean("trigRising", triggerRising);
+		boolean("trigOn", triggerOn);
+		if (json_t* j = json_object_get(rootJ, "extTrigModuleId")) {
+			pendingTrigModuleId = json_integer_value(j);
+			pendingTrigBudget = 300;
+			if (json_t* k = json_object_get(rootJ, "extTrigPortId"))
+				pendingTrigPortId = json_integer_value(k);
+			if (json_t* k = json_object_get(rootJ, "extTrigIsOutput"))
+				pendingTrigIsOutput = json_boolean_value(k);
+		}
 		boolean("trigAuto", triggerAuto);
 		boolean("ac", acCoupled);
 		boolean("grid", gridShown);
@@ -591,7 +758,7 @@ struct ScopeWidget : ClipWidget {
 	math::Rect valuesBox() {
 		// Measured while drawing, so the frame hugs whatever is currently in it.
 		return math::Rect(math::Vec(0, faceHeight + 3),
-			math::Vec(std::fmin(box.size.x, valuesW), valuesH));
+			math::Vec(valuesW, valuesH));
 	}
 
 	/** Everything is pushed to the very edge of the face, a pixel in. The middle of the window
@@ -604,15 +771,45 @@ struct ScopeWidget : ClipWidget {
 	minimise is the outer one rather than close, which is the opposite of the convention — the
 	button you will press twice belongs where it does not move — and since both boxes are
 	defined once and used by both states, close can sit outside it without breaking that. */
-	math::Rect closeBox()    { return math::Rect(math::Vec(EDGE, EDGE), math::Vec(BTN, BTN)); }
-	math::Rect minBox()      { return math::Rect(math::Vec(EDGE + BTN + BTN_PAD, EDGE), math::Vec(BTN, BTN)); }
-	math::Rect followBox()   { return math::Rect(math::Vec(box.size.x - BTN - EDGE, EDGE), math::Vec(BTN, BTN)); }
-	math::Rect homeBox()     { return math::Rect(math::Vec(box.size.x - BTN * 2 - BTN_PAD - EDGE, EDGE), math::Vec(BTN, BTN)); }
+	math::Rect closeBox()    { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD, EDGE), math::Vec(BTN, BTN)); }
+	math::Rect minBox()      { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD * 2 + BTN, EDGE), math::Vec(BTN, BTN)); }
+	math::Rect followBox()   { return math::Rect(math::Vec(faceWidth - BTN - EDGE, EDGE), math::Vec(BTN, BTN)); }
+	math::Rect homeBox()     { return math::Rect(math::Vec(faceWidth - BTN * 2 - BTN_PAD - EDGE, EDGE), math::Vec(BTN, BTN)); }
 	/** The bottom row, left to right: pause/run, A for autoset, T for trigger mode, G for
 	grid — the II A T G row on the Wcoast face. */
-	math::Rect autoBox()     { return math::Rect(math::Vec(EDGE + TRANSPORT_SIZE + BTN_PAD, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
-	math::Rect trigBox()     { return math::Rect(math::Vec(EDGE + TRANSPORT_SIZE + BTN_PAD * 2 + BTN, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
-	math::Rect gridBox()     { return math::Rect(math::Vec(EDGE + TRANSPORT_SIZE + BTN_PAD * 3 + BTN * 2, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
+	math::Rect autoBox()     { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD * 2 + TRANSPORT_SIZE, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
+	math::Rect acBox()       { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD * 3 + TRANSPORT_SIZE + BTN, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
+	math::Rect gridBox()     { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD * 4 + TRANSPORT_SIZE + BTN * 2, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
+	/** The strip itself, and the wider area that answers to it. */
+	math::Rect trigStrip()   { return math::Rect(math::Vec(0.f, 0.f), math::Vec(TRIG_STRIP_W, faceHeight)); }
+	bool inTrigStrip(math::Vec pos) { return pos.x >= 0.f && pos.x <= TRIG_STRIP_REACH && pos.y >= 0.f && pos.y <= faceHeight; }
+
+	/** Where the trigger marker is drawn, in face coordinates, or false if it is out of view.
+	Shared by the drawing and the hit test, so what you click is what you see. */
+	bool trigMarkerY(float& ty) {
+		if (!triggerOn)
+			return false;
+		const float h = faceHeight;
+		float centre = vPos;
+		if (acCoupled && lastCount > 1) {
+			float sum = 0.f;
+			for (int i = 0; i < lastCount; i++)
+				sum += lastWin[i];
+			centre = sum / lastCount;
+		}
+		const float scale = (h / DIV_Y) / V_DIVS[vDivIndex];
+		ty = h / 2 - (triggerLevel - centre) * scale;
+		return ty > 0.f && ty < h;
+	}
+
+	bool inTrigTriangle(math::Vec pos) {
+		float ty = 0.f;
+		if (!trigMarkerY(ty))
+			return false;
+		const float lo = triggerRising ? ty : ty - TRIG_STRIP_W;
+		const float hi = triggerRising ? ty + TRIG_STRIP_W : ty;
+		return pos.x >= 0.f && pos.x <= TRIG_STRIP_W && pos.y >= lo && pos.y <= hi;
+	}
 
 	bool atHome() {
 		return offset.minus(homeOffset).norm() < 1.f;
@@ -623,9 +820,10 @@ struct ScopeWidget : ClipWidget {
 		math::Vec dir;
 		if (minimized)
 			return dir;
-		if (pos.x <= RESIZE_EDGE)
-			dir.x = -1;
-		else if (pos.x >= box.size.x - RESIZE_EDGE)
+		// No resizing from the LEFT edge: that is the trigger strip, and a resize cursor
+		// appearing over it would promise something the strip does not do. Every other edge and
+		// both right-hand corners still resize.
+		if (pos.x >= faceWidth - RESIZE_EDGE)
 			dir.x = 1;
 		if (pos.y <= RESIZE_EDGE)
 			dir.y = -1;
@@ -648,7 +846,8 @@ struct ScopeWidget : ClipWidget {
 	}
 
 	math::Rect transportBox() {
-		return math::Rect(math::Vec(EDGE, faceHeight - TRANSPORT_SIZE - EDGE),
+		// Clear of the trigger strip, which owns the left edge from top to bottom.
+		return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD, faceHeight - TRANSPORT_SIZE - EDGE),
 			math::Vec(TRANSPORT_SIZE, TRANSPORT_SIZE));
 	}
 
@@ -757,8 +956,8 @@ struct ScopeWidget : ClipWidget {
 		// Never dimmed. Autoset is an action you can always ask for, and dimming it the moment it
 		// finished — which is within a frame or two — made a working button look disabled.
 		drawButton(vg, autoBox(), CONTROL_AMBER, "A", false);
-		// Normal trigger is the deliberate choice, so that is the lit one.
-		drawButton(vg, trigBox(), CONTROL_AMBER, "T", triggerAuto);
+		// Lit is AC; dimmed is DC, which is the resting state of a scope.
+		drawButton(vg, acBox(), CONTROL_AMBER, "AC", !acCoupled);
 		drawButton(vg, gridBox(), CONTROL_AMBER, "G", !gridShown);
 	}
 
@@ -803,8 +1002,71 @@ struct ScopeWidget : ClipWidget {
 
 	void draw(const DrawArgs& args) override {}
 
+	/** Where the trigger link's loop and grab tab sit, in face coordinates.
+
+	The same shape as the trace's callout — a ring round the terminal and a tab on the line —
+	because it is the same kind of attachment and should be handled the same way. It differs
+	only in colour and in where it leaves the face: the middle of the trigger strip, which is
+	the control it belongs to.
+	*/
+	bool trigCalloutGeometry(math::Vec& ring, float& rr, math::Vec& tab) {
+		if (linking) {
+			ring = linkPos.minus(box.pos);
+			rr = 9.f;
+		}
+		else if (externalTrigger()) {
+			ring = trigPort->getRelativeOffset(
+				trigPort->box.zeroPos().getCenter(), APP->scene->rack).minus(box.pos);
+			rr = std::fmin(trigPort->box.size.x, trigPort->box.size.y) / 2.f + 2.f;
+		}
+		else {
+			return false;
+		}
+
+		// The nearest side of the face, exactly as the trace's callout does — leaving from the
+		// strip meant the amber line crossed the picture whenever the trigger source was to the
+		// right of the scope.
+		const math::Vec from = nearestSideCentre(ring);
+		math::Vec dir = from.minus(ring);
+		const float dist = dir.norm();
+		dir = (dist < 1e-3f) ? math::Vec(0.f, -1.f) : dir.div(dist);
+		tab = ring.plus(dir.mult(rr + CLIP_HANDLE / 2.f));
+		return true;
+	}
+
+	void drawTriggerLink(NVGcontext* vg) {
+		math::Vec ring, tab;
+		float rr = 0.f;
+		if (!trigCalloutGeometry(ring, rr, tab))
+			return;
+
+		const math::Vec from = nearestSideCentre(ring);
+		math::Vec dir = from.minus(ring);
+		const float dist = dir.norm();
+		dir = (dist < 1e-3f) ? math::Vec(0.f, -1.f) : dir.div(dist);
+
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, ring.x + dir.x * rr, ring.y + dir.y * rr);
+		nvgLineTo(vg, from.x, from.y);
+		nvgStrokeColor(vg, CONTROL_AMBER);
+		nvgStrokeWidth(vg, 1.6f);
+		nvgStroke(vg);
+
+		nvgBeginPath(vg);
+		nvgCircle(vg, ring.x, ring.y, rr);
+		nvgStrokeWidth(vg, 1.8f);
+		nvgStroke(vg);
+
+		nvgBeginPath(vg);
+		nvgRoundedRect(vg, tab.x - CLIP_HANDLE / 2.f, tab.y - CLIP_HANDLE / 2.f,
+			CLIP_HANDLE, CLIP_HANDLE, 3.f);
+		nvgFillColor(vg, CONTROL_AMBER);
+		nvgFill(vg);
+	}
+
 	void drawFace(const DrawArgs& args) {
 		drawCallout(args.vg);
+		drawTriggerLink(args.vg);
 
 		if (minimized) {
 			// A token: it still drags and still shows its callout, but ignores clicks except
@@ -824,7 +1086,7 @@ struct ScopeWidget : ClipWidget {
 			return;
 		}
 
-		const float w = box.size.x;
+		const float w = faceWidth;
 		const float h = faceHeight;
 
 		// Face
@@ -935,16 +1197,80 @@ struct ScopeWidget : ClipWidget {
 			nvgLineJoin(args.vg, NVG_ROUND);
 			nvgStroke(args.vg);
 
-			// Trigger level, dotted, in the trace's colour.
-			const float ty = h / 2 - (triggerLevel - centreV) * scale;
-			if (ty > 0 && ty < h) {
+			// ZERO VOLTS, dashed and neutral, all the way across. Not the same as the centre of
+			// the face: the vertical position moves, so zero moves with it, and knowing where
+			// it is is what makes an offset signal readable at a glance.
+			const float zy = h / 2 - (0.f - centreV) * scale;
+			if (zy > 0 && zy < h) {
 				nvgBeginPath(args.vg);
 				for (float x = 0; x < w; x += 6) {
-					nvgMoveTo(args.vg, x, ty);
-					nvgLineTo(args.vg, std::fmin(w, x + 3), ty);
+					nvgMoveTo(args.vg, x, zy);
+					nvgLineTo(args.vg, std::fmin(w, x + 3), zy);
 				}
 				nvgStrokeColor(args.vg, nvgRGBA(0xff, 0xff, 0xff, 0x70));
 				nvgStrokeWidth(args.vg, 0.8f);
+				nvgStroke(args.vg);
+			}
+
+			// THE TRIGGER STRIP. A band down the left of the face, always present, with a
+			// triangle whose tip marks the level. The band being permanent is what makes it a
+			// control rather than a decoration: there is somewhere to scroll and click even
+			// when triggering is off and nothing is drawn in it.
+			nvgBeginPath(args.vg);
+			nvgRect(args.vg, 0.f, 0.f, TRIG_STRIP_W, h);
+			// Amber, like every other control on this face — green belongs to the readouts and
+			// to the running frame. Darker than the green band it replaces, because a pale wash
+			// over a dark face was barely there.
+			nvgFillColor(args.vg, nvgRGBA(0xe0, 0xa0, 0x3b, 0x55));
+			nvgFill(args.vg);
+
+			if (triggerOn && externalTrigger()) {
+				// An X, centred. Nothing here is adjustable — the threshold is fixed and the
+				// edge is always the rising one — so a marker with a position or a slope would
+				// be claiming a meaning it does not have. A badge says "the trigger comes from
+				// elsewhere", which is the whole of it.
+				const float cy = h / 2.f;
+				const float cx = TRIG_STRIP_W / 2.f;
+				const float r = 3.5f;
+				nvgBeginPath(args.vg);
+				nvgMoveTo(args.vg, cx - r, cy - r);
+				nvgLineTo(args.vg, cx + r, cy + r);
+				nvgMoveTo(args.vg, cx + r, cy - r);
+				nvgLineTo(args.vg, cx - r, cy + r);
+				nvgStrokeColor(args.vg, CONTROL_AMBER);
+				nvgStrokeWidth(args.vg, 2.f);
+				nvgLineCap(args.vg, NVG_ROUND);
+				nvgStroke(args.vg);
+			}
+			else if (triggerOn) {
+				// Drawn against the trace as SHOWN, not against the raw voltage. With AC
+				// coupling the trace is drawn about its own mean, so a marker placed at the
+				// absolute level pointed at a height the trace never crossed.
+				const float ty = h / 2 - (triggerLevel - centreV) * scale;
+				if (ty > 0 && ty < h) {
+					// A right triangle that DRAWS the edge it triggers on. The tip is at the
+					// trigger point — the inner edge of the band, at the level — the right angle
+					// sits on the frame beside it, and the third corner goes below for a rising
+					// edge and above for a falling one. So the sloping side, read left to right,
+					// is a small picture of the slope being caught.
+					nvgBeginPath(args.vg);
+					nvgMoveTo(args.vg, TRIG_STRIP_W, ty);
+					nvgLineTo(args.vg, 0.f, ty);
+					nvgLineTo(args.vg, 0.f, triggerRising ? ty + TRIG_STRIP_W : ty - TRIG_STRIP_W);
+					nvgClosePath(args.vg);
+					nvgFillColor(args.vg, CONTROL_AMBER);
+					nvgFill(args.vg);
+				}
+
+				// WHERE in time the trigger sits: one division in, which is the pre-trigger.
+				// The level says at what height, this says at what moment, and the trace should
+				// cross the one at the other.
+				const float tx = w / DIV_X;
+				nvgBeginPath(args.vg);
+				nvgMoveTo(args.vg, tx, h);
+				nvgLineTo(args.vg, tx, h - 5.f);
+				nvgStrokeColor(args.vg, CONTROL_AMBER);
+				nvgStrokeWidth(args.vg, 2.f);
 				nvgStroke(args.vg);
 			}
 
@@ -983,8 +1309,14 @@ struct ScopeWidget : ClipWidget {
 			return "Restore";
 		if (autoBox().contains(pos))
 			return "Autoset";
-		if (trigBox().contains(pos))
-			return "Trigger";
+		if (externalTrigger() && inTrigStrip(pos))
+			return "External trigger — right-click to remove";
+		if (inTrigTriangle(pos))
+			return triggerRising ? "Rising edge — click for falling" : "Falling edge — click for rising";
+		if (inTrigStrip(pos))
+			return triggerOn ? "Trigger level — click to free-run" : "Free-running — click to trigger";
+		if (acBox().contains(pos))
+			return acCoupled ? "AC coupled — click for DC" : "DC coupled — click for AC";
 		if (gridBox().contains(pos))
 			return "Grid";
 		if (transportBox().contains(pos))
@@ -1045,12 +1377,58 @@ struct ScopeWidget : ClipWidget {
 	}
 
 	void onDragEnd(const DragEndEvent& e) override {
+		// A link dragged out of the strip lands on whatever jack is under the pointer.
+		if (linking) {
+			linking = false;
+			pressedInStrip = false;
+			if (PortWidget* target = widgetAt<PortWidget>(APP->scene->rack, linkPos))
+				setExternalTrigger(target);
+			return;
+		}
+		// A press in the strip that went nowhere was a click: on the triangle it flips the
+		// edge, anywhere else it switches triggering.
+		if (pressedInStrip) {
+			pressedInStrip = false;
+			if (travelled < 2.f) {
+				if (triggerOn && !externalTrigger() && inTrigTriangle(pressPos)) {
+					triggerRising ^= true;
+				}
+				else {
+					triggerOn ^= true;
+					if (triggerOn)
+						timeShift = 0.f;
+				}
+			}
+			return;
+		}
+
+		// A press on the face that went nowhere was a click: toggle the readout, opening it in
+		// scale mode, because you clicked the wave to inspect it.
+		if (pressedOnFace && travelled < 2.f) {
+			valuesShown ^= true;
+			if (valuesShown)
+				valueMode = 0;
+		}
+		pressedOnFace = false;
+
 		resizing = false;
 		resizeDir = math::Vec();
 	}
 
 	void onDragMove(const DragMoveEvent& e) override {
 		const math::Vec d = e.mouseDelta.div(getAbsoluteZoom());
+		travelled += d.norm();
+
+		// Pulling a trigger link out of the strip: the scope itself must not move with it.
+		if (pressedInStrip) {
+			if (!linking && travelled >= 3.f) {
+				linking = true;
+				linkPos = box.pos.plus(pressPos);
+			}
+			if (linking)
+				linkPos = linkPos.plus(d);
+			return;
+		}
 
 		if (!resizing) {
 			// Plain drag moves the scope. Held-drag is accepted here: it is short, and the
@@ -1080,6 +1458,12 @@ struct ScopeWidget : ClipWidget {
 	}
 
 	void onButton(const ButtonEvent& e) override {
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT
+			&& inTrigStrip(e.pos) && externalTrigger()) {
+			dropExternalTrigger();
+			e.consume(this);
+			return;
+		}
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && following) {
 			following = false;
 			e.consume(this);
@@ -1145,13 +1529,8 @@ struct ScopeWidget : ClipWidget {
 				e.consume(this);
 				return;
 			}
-			if (trigBox().contains(e.pos)) {
-				triggerAuto ^= true;
-				// Panning suspends the trigger — the window sits where it was put rather than
-				// re-anchoring on an edge. Asking for triggering back has to bring the window
-				// back to the live end too, or the trace would go on drifting and the button
-				// would look broken.
-				timeShift = 0.f;
+			if (acBox().contains(e.pos)) {
+				acCoupled ^= true;
 				e.consume(this);
 				return;
 			}
@@ -1180,17 +1559,32 @@ struct ScopeWidget : ClipWidget {
 				e.consume(this);
 				return;
 			}
+			if (inTrigStrip(e.pos)) {
+				// A press here may become a DRAG that pulls an external trigger link out to
+				// another jack, so nothing is decided yet — travel decides, on release.
+				pressedInStrip = true;
+				travelled = 0.f;
+				pressPos = e.pos;
+				e.consume(this);
+				return;
+			}
+			// Both of the strip's clicks — which edge, and triggering on or off — are decided on
+			// RELEASE, in onDragEnd, since either press may instead turn into a drag that pulls
+			// out an external trigger link.
+
 			// A click in the values box, or on its top-edge triangle, steps the mode.
 			if (valuesShown && valuesBox().contains(e.pos)) {
 				valueMode = (valueMode + 1) % 3;
 				e.consume(this);
 				return;
 			}
-			// A click on the face toggles the box, always opening in scale mode, because you
-			// clicked the wave to inspect it.
-			valuesShown ^= true;
-			if (valuesShown)
-				valueMode = 0;
+			// A click on the face toggles the box — but only a CLICK. Deciding here meant every
+			// drag of the scope opened or closed the readout on the way past, since a drag
+			// begins with a press on the face like any other. The press is only noted; the
+			// release decides, by whether the pointer travelled.
+			pressedOnFace = true;
+			travelled = 0.f;
+			pressPos = e.pos;
 			e.consume(this);
 			return;
 		}
@@ -1208,13 +1602,48 @@ struct ScopeWidget : ClipWidget {
 	glide delivers a stream of small deltas and one step per event ran through the whole range
 	in a single gesture.
 	*/
+	/** Shift turns a wheel into horizontal scrolling, for anyone without a trackpad.
+
+	Rack's own scroll widget does this, and only off macOS: on a Mac the window server swaps
+	the axes before Rack ever sees the event, so doing it again here would swap them back. This
+	is copied from ScrollWidget deliberately — a scope that panned with a different gesture
+	from the rack behind it would be a small cruelty.
+	*/
+	math::Vec scrollDeltaFor(const HoverScrollEvent& e) {
+		math::Vec delta = e.scrollDelta;
+#if !defined ARCH_MAC
+		if ((APP->window->getMods() & RACK_MOD_MASK) & GLFW_MOD_SHIFT)
+			delta = delta.flip();
+#endif
+		return delta;
+	}
+
 	void onHoverScroll(const HoverScrollEvent& e) override {
+		const math::Vec delta = scrollDeltaFor(e);
+
+		// Over the trigger strip, scroll sets the LEVEL. A twentieth of a division per step, so
+		// crossing one division costs about what a scale step does.
+		if (inTrigStrip(e.pos) && externalTrigger()) {
+			e.consume(this);   // Fixed threshold: nothing to set.
+			return;
+		}
+		if (inTrigStrip(e.pos)) {
+			scrollAccumY += delta.y;
+			while (std::fabs(scrollAccumY) >= SCROLL_PER_STEP) {
+				const float dir = (scrollAccumY > 0.f) ? 1.f : -1.f;
+				scrollAccumY -= dir * SCROLL_PER_STEP;
+				triggerLevel += dir * V_DIVS[vDivIndex] / 20.f;
+			}
+			e.consume(this);
+			return;
+		}
+
 		// Over the readout below the face, scroll changes the SCALES — which is what the
 		// numbers there are. Which scale depends on which of them the pointer is over: the
 		// volts per division on the left, the time base on the right. Positioning the trace is
 		// what scrolling the face itself is for.
 		if (valuesShown && valuesBox().contains(e.pos)) {
-			scrollAccumY += e.scrollDelta.y;
+			scrollAccumY += delta.y;
 			const math::Rect r = valuesBox();
 			const bool volts = (e.pos.x < r.pos.x + r.size.x / 2.f);
 			while (std::fabs(scrollAccumY) >= SCALE_SCROLL_PER_STEP) {
@@ -1234,12 +1663,21 @@ struct ScopeWidget : ClipWidget {
 		const double now = APP->window->getFrameTime();
 		if (now - lastScrollTime > SCROLL_IDLE) {
 			scrollAxis = 0;
+			axisClaim = math::Vec();
 			scrollAccumX = 0.f;
 			scrollAccumY = 0.f;
 		}
 		lastScrollTime = now;
-		if (scrollAxis == 0 && (e.scrollDelta.x != 0.f || e.scrollDelta.y != 0.f))
-			scrollAxis = (std::fabs(e.scrollDelta.x) > std::fabs(e.scrollDelta.y)) ? 1 : 2;
+		// The axis comes from the WHOLE opening movement, summed until it is decisive — not
+		// from the first event. A horizontal glide almost always starts with a pixel or two of
+		// vertical, and judging on that alone locked the scope to the wrong axis for the rest
+		// of the gesture. Nothing moves until the sum is worth judging, which is right: a
+		// gesture that has not declared itself should not act.
+		if (scrollAxis == 0) {
+			axisClaim = axisClaim.plus(delta);
+			if (std::fabs(axisClaim.x) + std::fabs(axisClaim.y) >= AXIS_CLAIM_TOTAL)
+				scrollAxis = (std::fabs(axisClaim.x) > std::fabs(axisClaim.y)) ? 1 : 2;
+		}
 
 		// The banked totals belong to the SCALES, which do step, and are left alone here — the
 		// face applies its scroll directly, so nothing is stored between events.
@@ -1248,12 +1686,19 @@ struct ScopeWidget : ClipWidget {
 		// continuously — a trace that jumps a quarter of a division at a time reads as a fault
 		// in the scope rather than as movement.
 		if (scrollAxis == 2) {
-			vPos -= (e.scrollDelta.y / SCROLL_PER_STEP) * V_DIVS[vDivIndex] * 0.25f;
+			vPos -= (delta.y / SCROLL_PER_STEP) * V_DIVS[vDivIndex] * 0.25f;
 		}
-		if (scrollAxis == 1) {
+		// Sideways only while PAUSED. A running trace is anchored to its trigger, and panning it
+		// breaks the very relationship the trigger marks describe — the crossing stops being
+		// where they say it is. Paused, there is nothing to anchor to and panning is the point.
+		if (scrollAxis == 1 && frozen) {
 			const float perDiv = std::fmax(1.f, T_DIVS[tDivIndex] * APP->engine->getSampleRate());
-			const float maxShift = std::fmax(0.f, tapAvailable(tapSlot) / perDiv - DIV_X);
-			timeShift = math::clamp(timeShift + e.scrollDelta.x / PAN_SCROLL_PER_STEP,
+			const float reach = (float) frozenCount;
+			const float maxShift = std::fmax(0.f, reach / perDiv - DIV_X);
+			// Negated: scrolling left pulls the trace left, as dragging the paper under a pen
+			// would. Following the raw delta moved it the other way, which reads as the window
+			// travelling rather than the signal.
+			timeShift = math::clamp(timeShift - delta.x / PAN_SCROLL_PER_STEP,
 				0.f, maxShift);
 		}
 
@@ -1308,6 +1753,64 @@ struct ScopeWidget : ClipWidget {
 };
 
 
+/** Shows or hides every scope. Hidden, NOT removed: switching the feature off and on again
+must give back the scopes that were there, with their scales and their places. */
+/** The grab tab on a scope's external trigger link: drag it to another jack to trigger from
+there instead, or drop it clear of any jack to go back to triggering on the scope's own
+signal. The same gesture as the trace's tab, on the same kind of attachment. */
+struct TrigHandleWidget : widget::OpaqueWidget {
+	ScopeWidget* scope = NULL;
+
+	TrigHandleWidget() {
+		box.size = math::Vec(CLIP_HANDLE, CLIP_HANDLE);
+	}
+
+	void step() override {
+		math::Vec ring, tab;
+		float rr = 0.f;
+		visible = scope && scope->parent && scope->visible
+			&& scope->trigCalloutGeometry(ring, rr, tab);
+		if (visible)
+			box.pos = scope->box.pos.plus(tab).minus(box.size.div(2.f));
+		widget::OpaqueWidget::step();
+	}
+
+	/** Nothing of its own: the tab you see is the one the scope draws. */
+	void draw(const DrawArgs& args) override {}
+
+	void onDragStart(const DragStartEvent& e) override {
+		if (e.button != GLFW_MOUSE_BUTTON_LEFT || !scope)
+			return;
+		scope->linking = true;
+		scope->linkPos = box.pos.plus(box.size.div(2.f));
+	}
+
+	void onDragMove(const DragMoveEvent& e) override {
+		if (!scope || !scope->linking)
+			return;
+		scope->linkPos = scope->linkPos.plus(e.mouseDelta.div(getAbsoluteZoom()));
+	}
+
+	void onDragEnd(const DragEndEvent& e) override {
+		if (!scope || !scope->linking)
+			return;
+		scope->linking = false;
+		if (PortWidget* target = widgetAt<PortWidget>(APP->scene->rack, scope->linkPos))
+			scope->setExternalTrigger(target);
+		else
+			scope->dropExternalTrigger();
+	}
+};
+
+
+void scopeSetVisible(bool visible) {
+	for (widget::Widget* child : APP->scene->rack->children) {
+		if (ScopeWidget* scope = dynamic_cast<ScopeWidget*>(child))
+			clipSetVisible(scope, visible);
+	}
+}
+
+
 void scopeCreate(PortWidget* port) {
 	if (!port || !port->module)
 		return;
@@ -1324,6 +1827,14 @@ void scopeCreate(PortWidget* port) {
 	APP->scene->rack->addChild(scope);
 
 	clipAddHandle(scope);
+
+	// The trigger link's tab. Made with the scope and kept for its lifetime — it hides itself
+	// when there is no link, which is simpler than making and destroying it as links come
+	// and go.
+	TrigHandleWidget* th = new TrigHandleWidget;
+	th->scope = scope;
+	scope->trigHandle = th;
+	APP->scene->rack->addChild(th);
 
 	INFO("Scope: probing %s port %d", port->type == engine::Port::OUTPUT ? "output" : "input",
 		port->portId);

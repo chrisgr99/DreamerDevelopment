@@ -2,10 +2,19 @@
 
 ## DreamRack
 
-Brings the DreamRack interface to VCV Rack. One module restyles and extends the whole rack,
-whoever wrote the modules in it.
+DreamRack is a standalone modular synthesizer, and for the last while it has doubled as a test
+bed for modular interface design — trying alternatives to conventions every rack has inherited,
+keeping what turns out to work and discarding what does not. This plugin brings the results to
+VCV Rack.
 
-Every feature is a button on its face, so the panel is the feature list.
+What they add up to is clarity. A patch you can read at a glance: what kind of signal a jack
+carries, whether it is an input or an output, where a cable goes, what a control is set to —
+and never a moment spent wondering which way a signal is flowing. You can tell an input from
+an output without reading a word of the panel, and it reads the same way on every module in
+the rack, whoever wrote it. Less of your attention on working out what is connected to what,
+and more of it left for the patch itself.
+
+You choose which of the features you want, with switches on the panel.
 
 ### Reading the rack
 
@@ -63,3 +72,27 @@ Free and Pro.
 ## Licence
 
 GPL-3.0-or-later. Not affiliated with VCV.
+
+---
+
+## Draft wording — to choose between (delete once settled)
+
+**A. Shorter, leads with what you can read at a glance.**
+
+> What they add up to is clarity. A patch you can read at a glance: what kind of signal a jack
+> carries, where a cable goes, what a control is set to — and never a moment spent wondering
+> which way a signal is flowing. Less of your attention on working out what is connected to
+> what, and more of it left for the patch itself.
+
+**B. The same, plus the input/output and consistency points.**
+
+> What they add up to is clarity. A patch you can read at a glance: what kind of signal a jack
+> carries, whether it is an input or an output, where a cable goes, what a control is set to —
+> and never a moment spent wondering which way a signal is flowing. You can tell an input from
+> an output without reading a word of the panel, and it reads the same way on every module in
+> the rack, whoever wrote it. Less of your attention on working out what is connected to what,
+> and more of it left for the patch itself.
+
+Both say the same things; B adds that direction and port type are legible without panel text,
+and that the reading is the same across every developer's modules. B is longer and repeats
+"at a glance" against "without reading a word", which is the part worth cutting.

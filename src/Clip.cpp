@@ -44,6 +44,11 @@ struct ClipHandleWidget : widget::OpaqueWidget {
 	would look like a rendering fault. */
 	void draw(const DrawArgs& args) override {}
 
+	/** DRAGGED, not clicked. Click-carry was tried and taken out again: the clicks around a
+	terminal are already spoken for — picking a cable up, stepping through the pills that
+	choose one — and a loop that follows the pointer until the next click anywhere turns every
+	one of those into a decision about the loop instead.
+	*/
 	void onDragStart(const DragStartEvent& e) override {
 		if (e.button != GLFW_MOUSE_BUTTON_LEFT || !clip)
 			return;
@@ -79,6 +84,71 @@ struct ClipHandleWidget : widget::OpaqueWidget {
 };
 
 
+/** The X that removes a clip, sitting just outside its top-left corner.
+
+Its own widget, and a child of the rack, for the same reason the grab tab is: Rack offers a
+click only to a widget whose box contains the point, so anything drawn outside a clip's box
+would be visible and unclickable. Its centre sits ON the clip's top-left corner, so it overlaps the frame rather than floating
+away from it. Nothing of the face is there to cover, which is what lets it stay up all the
+time: no appearing and disappearing to chase, and no moment where it is not yet drawn.
+*/
+struct ClipCloseWidget : widget::OpaqueWidget {
+	ClipWidget* clip = NULL;
+
+	ClipCloseWidget() {
+		box.size = math::Vec(13.f, 13.f);
+	}
+
+	void step() override {
+		if (!clip || !clip->parent) {
+			visible = false;
+			widget::OpaqueWidget::step();
+			return;
+		}
+		visible = clip->visible;
+		box.pos = clip->box.pos.minus(box.size.div(2.f));
+		widget::OpaqueWidget::step();
+	}
+
+	void onButton(const ButtonEvent& e) override {
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && clip) {
+			clip->detach();
+			e.consume(this);
+			return;
+		}
+		widget::OpaqueWidget::onButton(e);
+	}
+
+	void draw(const DrawArgs& args) override {
+		const float r = box.size.x / 2.f;
+		nvgBeginPath(args.vg);
+		nvgCircle(args.vg, r, r, r);
+		nvgFillColor(args.vg, nvgRGB(0xe0, 0x3b, 0x3b));
+		nvgFill(args.vg);
+
+		nvgBeginPath(args.vg);
+		nvgMoveTo(args.vg, r - 3.f, r - 3.f);
+		nvgLineTo(args.vg, r + 3.f, r + 3.f);
+		nvgMoveTo(args.vg, r + 3.f, r - 3.f);
+		nvgLineTo(args.vg, r - 3.f, r + 3.f);
+		nvgStrokeColor(args.vg, nvgRGB(0x10, 0x12, 0x16));
+		nvgStrokeWidth(args.vg, 2.f);
+		nvgLineCap(args.vg, NVG_ROUND);
+		nvgStroke(args.vg);
+	}
+};
+
+
+void clipAddClose(ClipWidget* clip) {
+	if (!clip)
+		return;
+	ClipCloseWidget* x = new ClipCloseWidget;
+	x->clip = clip;
+	clip->closeButton = x;
+	APP->scene->rack->addChild(x);
+}
+
+
 void clipAddHandle(ClipWidget* clip) {
 	if (!clip)
 		return;
@@ -95,6 +165,8 @@ void clipSetVisible(ClipWidget* clip, bool visible) {
 	clip->visible = visible;
 	if (clip->handle)
 		clip->handle->visible = visible;
+	if (clip->closeButton)
+		clip->closeButton->visible = visible;
 }
 
 
@@ -112,6 +184,11 @@ void clipPurgeDead() {
 			APP->scene->rack->removeChild(clip->handle);
 			delete clip->handle;
 			clip->handle = NULL;
+		}
+		if (clip->closeButton) {
+			APP->scene->rack->removeChild(clip->closeButton);
+			delete clip->closeButton;
+			clip->closeButton = NULL;
 		}
 		APP->scene->rack->removeChild(clip);
 		delete clip;

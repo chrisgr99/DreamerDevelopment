@@ -28,13 +28,26 @@ static const int INJECT_MAX = 8;
 
 enum InjectorType {
 	INJECT_GATE,     /**< High while the button is held. */
-	INJECT_PULSE,    /**< A single trigger each time the button is pressed. */
+	INJECT_PULSE,    /**< A single pulse each time the button is pressed. */
 	INJECT_DC,       /**< A steady voltage. */
 	INJECT_LFO,      /**< A repeating waveform, 0.01 to 100 Hz. */
 	INJECT_AUDIO,    /**< The same, at audio rates: 1 Hz to 8 kHz. */
 	INJECT_NOTE,     /**< A pitch as one volt per octave, set and shown by note name. */
 	INJECT_AV,       /**< Scales and inverts what a cable is already delivering to the port. */
+	INJECT_NOISE,    /**< White, pink, brown, blue or violet noise. */
+	INJECT_CLOCK,    /**< A stream of pulses at a rate in beats per minute. */
 	INJECT_TYPES,
+};
+
+/** Noise colours, in the usual sense: the slope of the spectrum. White is flat, pink falls
+3 dB per octave, brown 6, and blue and violet rise by the same amounts. */
+enum NoiseColour {
+	NOISE_WHITE,
+	NOISE_PINK,
+	NOISE_BROWN,
+	NOISE_BLUE,
+	NOISE_VIOLET,
+	NOISE_COUNT,
 };
 
 enum InjectorWave {
@@ -51,7 +64,7 @@ DRUI::process, and costs one atomic load when no injector exists. */
 void injectorProcessAll(Module* drui, float sampleTime);
 
 /** Clips an injector onto a port. UI thread. */
-void injectorCreate(app::PortWidget* port, InjectorType type);
+void injectorCreate(app::PortWidget* port, InjectorType type, bool noteMode = false);
 
 /** True if a port can take an injector: inputs only, since a signal is injected INTO
 something. An output is driven by its own module and nothing else may write to it. */

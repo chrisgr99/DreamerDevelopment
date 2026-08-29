@@ -36,6 +36,7 @@ struct InjectorSlot {
 	rather than the port itself is essential: the port already carries our own contribution, so
 	reading it would feed us back into ourselves. */
 	std::atomic<int> sourceTap{-1};
+	std::atomic<int> colour{NOISE_WHITE};
 	/** Raised by a click, lowered by the audio thread when it starts the pulse. A counter
 	rather than a flag so two quick presses both fire. */
 	std::atomic<int> pulseRequests{0};
@@ -43,7 +44,19 @@ struct InjectorSlot {
 	// Audio thread only.
 	float phase = 0.f;
 	float pulseRemaining = 0.f;
+	/** Rises to 1 when the injector is sending and falls to 0 when it is not, over a few
+	milliseconds. Switching a signal in or out instantaneously puts a step into the audio, and
+	a step is a click — audible, and unpleasant through headphones. */
+	float gain = 0.f;
+	/** Filter state for the coloured noises. */
+	float pinkA = 0.f, pinkB = 0.f, pinkC = 0.f;
+	float brown = 0.f;
+	float lastWhite = 0.f;
 };
+
+/** How long the switch-on and switch-off ramps take. Long enough to remove the click, short
+enough that a gate still feels immediate. */
+static const float RAMP_SECONDS = 0.005f;
 
 static InjectorSlot slots[INJECT_MAX];
 static std::atomic<int> activeCount{0};
@@ -58,13 +71,7 @@ static const float PULSE_SECONDS = 0.001f;
 void injectorProcessAll(Module* drui, float sampleTime) {
 	if (activeCount.load(std::memory_order_acquire) <= 0)
 		return;
-	if (!injectorsOn.load(std::memory_order_relaxed)) {
-		for (int i = 0; i < INJECT_MAX && i < (int) drui->outputs.size(); i++) {
-			drui->outputs[i].setChannels(1);
-			drui->outputs[i].setVoltage(0.f);
-		}
-		return;
-	}
+	const bool masterOn = injectorsOn.load(std::memory_order_relaxed);
 
 	for (int i = 0; i < INJECT_MAX; i++) {
 		InjectorSlot& slot = slots[i];
@@ -73,7 +80,18 @@ void injectorProcessAll(Module* drui, float sampleTime) {
 		if (i >= (int) drui->outputs.size())
 			continue;
 
-		if (!slot.enabled.load(std::memory_order_relaxed)) {
+		// The ramp runs whether the injector is sending or not: that is the whole point, since
+		// the fall to silence has to be as gradual as the rise from it.
+		const float target = (masterOn && slot.enabled.load(std::memory_order_relaxed))
+			? 1.f : 0.f;
+		const float rampStep = sampleTime / RAMP_SECONDS;
+		if (slot.gain < target)
+			slot.gain = std::fmin(target, slot.gain + rampStep);
+		else if (slot.gain > target)
+			slot.gain = std::fmax(target, slot.gain - rampStep);
+
+		if (slot.gain <= 0.f && target <= 0.f) {
+			drui->outputs[i].setChannels(1);
 			drui->outputs[i].setVoltage(0.f);
 			continue;
 		}
@@ -106,6 +124,59 @@ void injectorProcessAll(Module* drui, float sampleTime) {
 			case INJECT_NOTE:
 				v = level;
 				break;
+
+			case INJECT_CLOCK: {
+				// Beats per minute to hertz. The pulse is the same width as the button's, so
+				// everything downstream sees the shape it expects however slow the clock is.
+				const float hz = std::fmax(0.01f, slot.rate.load(std::memory_order_relaxed) / 60.f);
+				slot.phase += hz * sampleTime;
+				if (slot.phase >= 1.f) {
+					slot.phase -= std::floor(slot.phase);
+					slot.pulseRemaining = PULSE_SECONDS;
+				}
+				if (slot.pulseRemaining > 0.f) {
+					slot.pulseRemaining -= sampleTime;
+					v = 10.f;
+				}
+			} break;
+
+			case INJECT_NOISE: {
+				// One white sample drives them all; each colour is a filter of it.
+				const float w = random::uniform() * 2.f - 1.f;
+				switch (slot.colour.load(std::memory_order_relaxed)) {
+					case NOISE_PINK: {
+						// Paul Kellett's economy pink filter: three one-pole sections summed,
+						// which tracks a 3 dB per octave fall closely enough to hear as pink.
+						slot.pinkA = 0.99765f * slot.pinkA + w * 0.0990460f;
+						slot.pinkB = 0.96300f * slot.pinkB + w * 0.2965164f;
+						slot.pinkC = 0.57000f * slot.pinkC + w * 1.0526913f;
+						v = (slot.pinkA + slot.pinkB + slot.pinkC + w * 0.1848f) * 0.4f;
+					} break;
+					case NOISE_BROWN: {
+						// White integrated, with a leak so it cannot wander off to a DC offset.
+						slot.brown = math::clamp(slot.brown * 0.995f + w * 0.05f, -1.f, 1.f);
+						v = slot.brown * 3.f;
+					} break;
+					case NOISE_BLUE: {
+						slot.pinkA = 0.99765f * slot.pinkA + w * 0.0990460f;
+						slot.pinkB = 0.96300f * slot.pinkB + w * 0.2965164f;
+						slot.pinkC = 0.57000f * slot.pinkC + w * 1.0526913f;
+						const float pink = (slot.pinkA + slot.pinkB + slot.pinkC + w * 0.1848f) * 0.4f;
+						// Differentiated pink rises 3 dB per octave.
+						v = (pink - slot.lastWhite) * 1.4f;
+						slot.lastWhite = pink;
+					} break;
+					case NOISE_VIOLET: {
+						// Differentiated white rises 6 dB per octave.
+						v = (w - slot.lastWhite) * 0.7f;
+						slot.lastWhite = w;
+					} break;
+					default:
+						v = w;
+						break;
+				}
+				v *= level;
+			} break;
 
 			case INJECT_AV: {
 				// The engine SUMS everything arriving at an input. So to make the port see
@@ -153,7 +224,7 @@ void injectorProcessAll(Module* drui, float sampleTime) {
 		// had ever been disconnected and reconnected went permanently silent. Relying on the
 		// engine's courtesy rather than saying what we produce was the mistake.
 		drui->outputs[i].setChannels(1);
-		drui->outputs[i].setVoltage(v);
+		drui->outputs[i].setVoltage(v * slot.gain);
 
 	}
 }
@@ -265,6 +336,7 @@ struct InjectorWidget : ClipWidget {
 	bool noteMode = false;
 	/** Oscillators only: zero-to-level rather than either side of zero. */
 	bool unipolar = false;
+	NoiseColour colour = NOISE_WHITE;
 	/** Set once a press has travelled far enough to be a reposition rather than a click, so
 	the two gestures never both fire. */
 	bool dragged = false;
@@ -301,6 +373,26 @@ struct InjectorWidget : ClipWidget {
 
 	bool isOscillator() {
 		return type == INJECT_LFO || type == INJECT_AUDIO;
+	}
+
+	bool isClock() {
+		return type == INJECT_CLOCK;
+	}
+
+	void setColour(NoiseColour c) {
+		colour = c;
+		if (slot >= 0)
+			slots[slot].colour.store(c, std::memory_order_relaxed);
+	}
+
+	static const char* colourName(NoiseColour c) {
+		switch (c) {
+			case NOISE_PINK: return "PINK";
+			case NOISE_BROWN: return "BROWN";
+			case NOISE_BLUE: return "BLUE";
+			case NOISE_VIOLET: return "VIOLET";
+			default: return "WHITE";
+		}
 	}
 
 	/** The pitch this injector is sending, as a MIDI note number. Kept as the voltage, since
@@ -500,6 +592,10 @@ struct InjectorWidget : ClipWidget {
 	/** The digits, with as many decimal places as the value is worth and no more: a rate of
 	0.25 Hz and one of 40 Hz should not be shown to the same precision. */
 	std::string digits() {
+		if (type == INJECT_CLOCK)
+			return string::f("%.0f", rate);
+		if (type == INJECT_NOISE)
+			return string::f("%.2f", level);
 		if (type == INJECT_NOTE)
 			return noteName();
 		if (type == INJECT_AUDIO && noteMode)
@@ -518,9 +614,12 @@ struct InjectorWidget : ClipWidget {
 		switch (type) {
 			case INJECT_DC: return "DC";
 			case INJECT_AV: return "AV";
+			case INJECT_NOISE: return colourName(colour);
+			case INJECT_CLOCK: return "CLK";
 			case INJECT_NOTE: return string::f("%.2f", level);
 			case INJECT_LFO: return "LFO";
-			default: return "VFO";
+			case INJECT_AUDIO: return noteMode ? "PITCH" : "VFO";
+			default: return "";
 		}
 	}
 
@@ -531,19 +630,31 @@ struct InjectorWidget : ClipWidget {
 			return string::f("%.0f", rate);
 		if (type == INJECT_AV)
 			return "x";
+		if (type == INJECT_NOISE)
+			return "V";
+		if (type == INJECT_CLOCK)
+			return "BPM";
 		return isOscillator() ? "Hz" : "V";
 	}
 
 	float rateMax() {
-		return (type == INJECT_AUDIO) ? 8000.f : 100.f;
+		if (type == INJECT_AUDIO)
+			return 8000.f;
+		if (type == INJECT_CLOCK)
+			return 999.f;
+		return 100.f;
 	}
 
 	float rateMin() {
-		return (type == INJECT_AUDIO) ? 1.f : 0.01f;
+		if (type == INJECT_AUDIO)
+			return 1.f;
+		if (type == INJECT_CLOCK)
+			return 1.f;
+		return 0.01f;
 	}
 
 	std::string buttonLabel() {
-		return (type == INJECT_GATE) ? "GATE" : "TRIG";
+		return (type == INJECT_GATE) ? "GATE" : "PULSE";
 	}
 
 	/** A small picture of the wave, drawn rather than named. A shape is recognised faster than
@@ -812,6 +923,15 @@ struct InjectorWidget : ClipWidget {
 			return;
 		}
 
+		if (type == INJECT_CLOCK) {
+			// Whole beats per minute, stepped by the place value of the digit under the pointer:
+			// hundreds over the hundreds column, units over the units.
+			rate = math::clamp(std::round(rate + dir * std::fmax(1.f, placeValueAt(pointerX))),
+				rateMin(), rateMax());
+			slots[slot].rate.store(rate, std::memory_order_relaxed);
+			return;
+		}
+
 		if (type == INJECT_AUDIO) {
 			if (noteMode) {
 				setRateNoteNumber(rateNoteNumber() + dir * (pointerX >= dotX ? 12 : 1));
@@ -827,6 +947,11 @@ struct InjectorWidget : ClipWidget {
 			// Unity down through zero to full inversion, and up to twice — the range an
 			// attenuverter's knob usually covers.
 			level = math::clamp(level + dir * step, -2.f, 2.f);
+			slots[slot].level.store(level, std::memory_order_relaxed);
+			return;
+		}
+		if (type == INJECT_NOISE) {
+			level = math::clamp(level + dir * step, 0.f, 10.f);
 			slots[slot].level.store(level, std::memory_order_relaxed);
 			return;
 		}
@@ -933,7 +1058,10 @@ struct InjectorWidget : ClipWidget {
 		// Coming into a type for the first time, start somewhere useful rather than at a value
 		// carried over from what it used to be: 2 Hz is a fine LFO and a silent oscillator.
 		if (was != t) {
-			if (t == INJECT_AUDIO && rate < rateMin())
+			// Concert A, whether it is dialled by frequency or by note. The old test only
+			// corrected a rate BELOW the audio range, so a VFO made from the menu inherited the
+			// LFO's 2 Hz default and started inaudible.
+			if (t == INJECT_AUDIO)
 				rate = 440.f;
 			if (t == INJECT_LFO && rate > 100.f)
 				rate = 2.f;
@@ -941,6 +1069,16 @@ struct InjectorWidget : ClipWidget {
 				setNoteNumber(noteNumber());
 			// Unity gain passes the signal through unchanged, which is the only sane place for
 			// an attenuverter to start.
+			if (t == INJECT_CLOCK) {
+				rate = 120.f;
+				if (slot >= 0)
+					slots[slot].rate.store(rate, std::memory_order_relaxed);
+			}
+			if (t == INJECT_NOISE) {
+				level = 5.f;
+				if (slot >= 0)
+					slots[slot].level.store(level, std::memory_order_relaxed);
+			}
 			if (t == INJECT_AV) {
 				level = 1.f;
 				if (slot >= 0)
@@ -992,6 +1130,21 @@ struct InjectorWidget : ClipWidget {
 				[this]() { setUnipolar(true); }));
 		}
 
+		if (type == INJECT_NOISE) {
+			menu->addChild(new ui::MenuSeparator);
+			menu->addChild(createMenuLabel("Colour"));
+			static const NoiseColour colours[NOISE_COUNT] = {NOISE_WHITE, NOISE_PINK,
+				NOISE_BROWN, NOISE_BLUE, NOISE_VIOLET};
+			static const char* names[NOISE_COUNT] = {"White", "Pink", "Brown (red)",
+				"Blue", "Violet"};
+			for (int i = 0; i < NOISE_COUNT; i++) {
+				const NoiseColour c = colours[i];
+				menu->addChild(createCheckMenuItem(names[i], "",
+					[this, c]() { return colour == c; },
+					[this, c]() { setColour(c); }));
+			}
+		}
+
 		if (type == INJECT_AUDIO) {
 			menu->addChild(new ui::MenuSeparator);
 			menu->addChild(createMenuLabel("Dial by"));
@@ -1036,6 +1189,7 @@ struct InjectorWidget : ClipWidget {
 		json_object_set_new(rootJ, "enabled", json_boolean(enabled));
 		json_object_set_new(rootJ, "noteMode", json_boolean(noteMode));
 		json_object_set_new(rootJ, "unipolar", json_boolean(unipolar));
+		json_object_set_new(rootJ, "colour", json_integer(colour));
 		json_object_set_new(rootJ, "offsetX", json_real(offset.x));
 		json_object_set_new(rootJ, "offsetY", json_real(offset.y));
 		return rootJ;
@@ -1065,6 +1219,8 @@ struct InjectorWidget : ClipWidget {
 			noteMode = json_boolean_value(j);
 		if (json_t* j = json_object_get(rootJ, "unipolar"))
 			setUnipolar(json_boolean_value(j));
+		if (json_t* j = json_object_get(rootJ, "colour"))
+			setColour((NoiseColour) json_integer_value(j));
 		if (json_t* j = json_object_get(rootJ, "offsetX"))
 			offset.x = json_number_value(j);
 		if (json_t* j = json_object_get(rootJ, "offsetY"))
@@ -1151,13 +1307,19 @@ static InjectorWidget* injectorMake(app::PortWidget* port, InjectorType type,
 	inj->setType(type);
 	APP->scene->rack->addChild(inj);
 	clipAddHandle(inj);
+	clipAddClose(inj);
 	INFO("Injector: attached to input port %d in slot %d", port->portId, inj->slot);
 	return inj;
 }
 
 
-void injectorCreate(app::PortWidget* port, InjectorType type) {
-	injectorMake(port, type);
+void injectorCreate(app::PortWidget* port, InjectorType type, bool noteMode) {
+	if (InjectorWidget* inj = injectorMake(port, type)) {
+		if (noteMode && type == INJECT_AUDIO) {
+			inj->noteMode = true;
+			inj->setRateNoteNumber(inj->rateNoteNumber());
+		}
+	}
 }
 
 
