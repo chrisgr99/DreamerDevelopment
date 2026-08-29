@@ -241,6 +241,17 @@ void clipSetVisible(ClipWidget* clip, bool visible);
 because a widget cannot safely delete itself while the tree is being walked. */
 void clipPurgeDead();
 
+/** Whether any part of a clip is under this scene position — the face, its grab tab, or its
+close button.
+
+THE WHOLE FAMILY, not just the face. The tab sits ON the jack and the close button on the
+corner, and both are separate widgets owned by the rack, so a test for the face alone said
+"nothing of ours here" at exactly the two places most likely to be over a terminal. Every
+gesture that searches the rack for a jack asks this first, so nothing done to one of our
+widgets also reaches what is behind it.
+*/
+bool clipFamilyAt(math::Vec scenePos);
+
 /** Puts down any clip that is riding the pointer. True if one was. */
 bool clipDepositFollowing();
 

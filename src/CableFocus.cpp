@@ -11,7 +11,7 @@ cable without touching how Rack draws anything. The originals are kept here and 
 moment the focus is released.
 
 The one hazard in that is a dimmed alpha being SAVED, because a cable's colour is written
-into the patch. So the focus is cleared before any save: DRUI drops it in dataToJson, which
+into the patch. So the focus is cleared before any save: Clarity drops it in dataToJson, which
 runs for a manual save, for the autosave, and on quit.
 */
 #include "plugin.hpp"

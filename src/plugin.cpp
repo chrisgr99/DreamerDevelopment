@@ -5,5 +5,6 @@ Plugin* pluginInstance;
 
 void init(Plugin* p) {
 	pluginInstance = p;
-	p->addModel(modelDRUI);
+	p->addModel(modelClarity);
+	p->addModel(modelTestGear);
 }

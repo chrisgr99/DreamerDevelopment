@@ -50,7 +50,7 @@ void tapDestroy(int slot);
 /** True while the tapped module still exists. Goes false by itself when it is deleted. */
 bool tapAlive(int slot);
 
-/** AUDIO THREAD. Captures one sample for every active tap. Called from DRUI::process, which
+/** AUDIO THREAD. Captures one sample for every active tap. Called from TestGear::process, which
 the engine runs once per sample. */
 void tapCaptureAll();
 

@@ -194,6 +194,13 @@ bool clipDepositFollowing() {
 }
 
 
+bool clipFamilyAt(math::Vec scenePos) {
+	return widgetAt<ClipWidget>(APP->scene, scenePos)
+		|| widgetAt<ClipHandleWidget>(APP->scene, scenePos)
+		|| widgetAt<ClipCloseWidget>(APP->scene, scenePos);
+}
+
+
 int clipFollowingCount() {
 	int n = 0;
 	for (widget::Widget* child : APP->scene->rack->children) {

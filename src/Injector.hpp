@@ -7,7 +7,7 @@ each cable's output into its input, so a cable connected to that port overwrites
 wrote, every sample. It would appear to work on an empty input and fail on a patched one,
 which is the worse of the two failures.
 
-Instead an injector is a real cable, from one of DRUI's own outputs into the target input.
+Instead an injector is a real cable, from one of the Test Gear module's own outputs into the target input.
 The engine supports several cables on one input and SUMS them — the UI simply never offers
 to make one. So an injector adds to whatever is already patched there rather than replacing
 it, and no cable has to be pulled to use one.
@@ -23,7 +23,7 @@ alone.
 */
 #include "plugin.hpp"
 
-/** Injectors that can exist at once, and therefore hidden outputs on DRUI. */
+/** Injectors that can exist at once, and therefore hidden outputs on the Test Gear module. */
 static const int INJECT_MAX = 8;
 
 enum InjectorType {
@@ -60,7 +60,7 @@ enum InjectorWave {
 
 
 /** AUDIO THREAD. Writes every active injector's value to its output. Called from
-DRUI::process, and costs one atomic load when no injector exists. */
+TestGear::process, and costs one atomic load when no injector exists. */
 void injectorProcessAll(Module* drui, float sampleTime);
 
 /** Clips an injector onto a port. UI thread. */
@@ -78,5 +78,5 @@ void injectorFromJson(json_t* arrayJ);
 void injectorRestoreStep();
 /** Hides every injector and silences it, or brings them all back. */
 void injectorSetEnabled(bool on);
-/** Removes cables out of DRUI that no injector owns — see the note on the definition. */
+/** Removes cables out of the Test Gear module that no injector owns — see the note on the definition. */
 void injectorPurgeStrayCables();

@@ -36,6 +36,7 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "Injector.hpp"
 #include "WidgetAt.hpp"
 #include "Clip.hpp"
+#include "Monitor.hpp"
 
 #include <cmath>
 #include <vector>
@@ -291,7 +292,7 @@ struct InterceptOverlay : widget::Widget {
 		ui::ScrollWidget* scroll = APP->scene->rackScroll;
 		if (!scroll)
 			return false;
-		if (widgetAt<ClipWidget>(APP->scene, e.pos))
+		if (clipFamilyAt(e.pos))
 			return false;
 
 		// Rack's own step, so panning feels the same in either wheel mode.
@@ -617,6 +618,14 @@ struct InterceptOverlay : widget::Widget {
 					analyserCreate(weakPort);
 			}));
 		}
+		if (widgetsOn) {
+			// Before the sources, and outside the test below: a monitor listens, so it goes on
+			// an output as readily as on an input.
+			menu->addChild(createMenuItem("Audio monitor", "", [weakPort]() {
+				if (weakPort)
+					monitorCreate(weakPort);
+			}));
+		}
 		if (!widgetsOn || !injectorAcceptsPort(port))
 			return;
 
@@ -745,7 +754,7 @@ struct InterceptOverlay : widget::Widget {
 		// first menu is still open is an ordinary thing to do, and returning early there meant
 		// the note was never taken and our entry never appeared on that menu.
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT
-			&& !widgetAt<ClipWidget>(APP->scene, e.pos)) {
+			&& !clipFamilyAt(e.pos)) {
 			if (app::PortWidget* p = widgetAt<app::PortWidget>(APP->scene, e.pos)) {
 				menuPort = p;
 				menuWait = 3;
@@ -764,7 +773,8 @@ struct InterceptOverlay : widget::Widget {
 		// cable and the two only make sense together.
 		if (!carrying && trace && *trace
 			&& e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT
-			&& (e.mods & RACK_MOD_MASK) == 0) {
+			&& (e.mods & RACK_MOD_MASK) == 0
+			&& !clipFamilyAt(e.pos)) {
 			app::CableWidget* pillCable = NULL;
 			bool atInput = false;
 			if (cableFocusPillAt(pillCable, atInput)) {
@@ -780,7 +790,8 @@ struct InterceptOverlay : widget::Widget {
 			if (e.button == GLFW_MOUSE_BUTTON_RIGHT)
 				cancelCarry();
 			else if (e.button == GLFW_MOUSE_BUTTON_LEFT)
-				dropOn(widgetAt<app::PortWidget>(APP->scene, e.pos));
+				dropOn(clipFamilyAt(e.pos)
+					? NULL : widgetAt<app::PortWidget>(APP->scene, e.pos));
 			e.consume(this);
 			e.stopPropagating();
 			return;
@@ -790,6 +801,22 @@ struct InterceptOverlay : widget::Widget {
 		if (carrying && !carried)
 			carrying = false;
 
+		// A click anywhere puts down a widget that is riding the pointer. It has to be caught
+		// here: a following widget is click-through, so the click lands on whatever is beneath
+		// it — a panel, another module — and would drag that instead of dropping the widget.
+		//
+		// BEFORE the pickup below, and that ordering is the fix for a real bug. A widget rides
+		// just to one side of the pointer, so the pointer is not inside it, so the guard that
+		// keeps clicks off jacks under a widget does not apply — and placing one over a jack
+		// pulled that jack's cable out at the same moment.
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
+			&& (e.mods & RACK_MOD_MASK) == 0
+			&& (clipDepositFollowing() || scopeDepositFollowing())) {
+			e.consume(this);
+			e.stopPropagating();
+			return;
+		}
+
 		// PICKING UP: a plain click on a jack takes its cable, or starts a new one.
 		// NOT through a widget. A scope or an injector sitting over a jack is what the pointer is
 		// on; searching for a PortWidget alone found the jack underneath it and picked up its
@@ -797,24 +824,13 @@ struct InterceptOverlay : widget::Widget {
 		if (clickCables && *clickCables && !carrying
 			&& e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& (e.mods & RACK_MOD_MASK) == 0
-			&& !widgetAt<ClipWidget>(APP->scene, e.pos)) {
+			&& !clipFamilyAt(e.pos)) {
 			if (app::PortWidget* port = widgetAt<app::PortWidget>(APP->scene, e.pos)) {
 				pickUp(port);
 				e.consume(this);
 				e.stopPropagating();
 				return;
 			}
-		}
-
-		// A click anywhere puts down a scope that is riding the pointer. It has to be caught
-		// here: a following scope is click-through, so the click lands on whatever is beneath
-		// it — a panel, another module — and would drag that instead of dropping the scope.
-		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
-			&& (e.mods & RACK_MOD_MASK) == 0
-			&& (clipDepositFollowing() || scopeDepositFollowing())) {
-			e.consume(this);
-			e.stopPropagating();
-			return;
 		}
 
 		// A plain click on a cable's pill takes that cable — but NEVER a press that is on a
@@ -825,6 +841,7 @@ struct InterceptOverlay : widget::Widget {
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& (e.mods & RACK_MOD_MASK) == 0
 			&& !widgetAt<app::PortWidget>(APP->scene, e.pos)
+			&& !clipFamilyAt(e.pos)
 			&& cableFocusClick()) {
 			e.consume(this);
 			e.stopPropagating();
@@ -846,7 +863,7 @@ struct InterceptOverlay : widget::Widget {
 			widget::Widget::onButton(e);
 			return;
 		}
-		app::PortWidget* port = widgetAt<ClipWidget>(APP->scene, e.pos)
+		app::PortWidget* port = clipFamilyAt(e.pos)
 			? NULL : widgetAt<app::PortWidget>(APP->scene, e.pos);
 		if (!port) {
 			widget::Widget::onButton(e);

@@ -275,13 +275,13 @@ bool injectorAcceptsPort(app::PortWidget* port) {
 }
 
 
-/** DRUI's own module, found by the output ports we gave it. There is only ever one that
+/** The Widgets module, found by the output ports we gave it. There is only ever one that
 matters: injectors are cabled from it. */
 static Module* findDruiModule() {
 	for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
 		if (!mw->module || !mw->model || !mw->model->plugin)
 			continue;
-		if (mw->model->plugin->slug == "DreamerDevelopment" && mw->model->slug == "DRUI")
+		if (mw->model->plugin->slug == "DreamerDevelopment" && mw->model->slug == "TestGear")
 			return mw->module;
 	}
 	return NULL;
@@ -291,7 +291,7 @@ static app::PortWidget* findDruiOutputWidget(int slot) {
 	for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
 		if (!mw->model || !mw->model->plugin)
 			continue;
-		if (mw->model->plugin->slug != "DreamerDevelopment" || mw->model->slug != "DRUI")
+		if (mw->model->plugin->slug != "DreamerDevelopment" || mw->model->slug != "TestGear")
 			continue;
 		for (app::PortWidget* p : mw->getPorts()) {
 			if (p->type == engine::Port::OUTPUT && p->portId == slot)
@@ -464,11 +464,11 @@ struct InjectorWidget : ClipWidget {
 	/** Removing the widget is not enough: RackWidget::removeCable only detaches it from the
 	cable container, and CableWidget::onRemove takes away only the plugs. The ENGINE cable is
 	dropped by the widget's DESTRUCTOR, so a widget that is removed and not deleted leaves a
-	live cable behind, still naming DRUI and the target module.
+	live cable behind, still naming the Test Gear module and the target module.
 
 	That is not a leak that stays quiet. The engine asserts that no cable references a module
 	when it is removed, so every abandoned cable turned into an abort the next time either
-	module went away — which for DRUI meant quitting Rack. Rack's own code always deletes
+	module went away — which for that module meant quitting Rack. Rack's own code always deletes
 	immediately after removing, for exactly this reason.
 	*/
 	void removeCable() {
@@ -480,7 +480,7 @@ struct InjectorWidget : ClipWidget {
 		cable = NULL;
 	}
 
-	/** Lays the hidden cable from DRUI's output for this slot to the target input. */
+	/** Lays the hidden cable from the Test Gear module's output for this slot to the target input. */
 	bool connectTo(app::PortWidget* target) {
 		app::PortWidget* source = findDruiOutputWidget(slot);
 		Module* drui = findDruiModule();
@@ -733,7 +733,7 @@ struct InjectorWidget : ClipWidget {
 		nvgStroke(vg);
 	}
 
-	/** Nothing an injector does reaches a port while DRUI is bypassed: bypass stops process(),
+	/** Nothing an injector does reaches a port while the Test Gear module is bypassed: bypass stops process(),
 	which is where the voltage is written — while every widget goes on drawing exactly as
 	before. That is a genuinely confusing state, since the faces, the jacks and the cable
 	dashes all still look alive, so it is worth saying plainly on the face itself. */
@@ -764,7 +764,7 @@ struct InjectorWidget : ClipWidget {
 			nvgFontSize(args.vg, 11.f);
 			nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 			nvgFillColor(args.vg, BYPASS_AMBER);
-			nvgText(args.vg, box.size.x / 2.f, box.size.y / 2.f, "DRUI BYPASSED", NULL);
+			nvgText(args.vg, box.size.x / 2.f, box.size.y / 2.f, "TEST GEAR BYPASSED", NULL);
 			return;
 		}
 		const std::string text = digits();
@@ -1251,7 +1251,7 @@ static bool cableIsOwned(app::CableWidget* cw) {
 	return false;
 }
 
-/** The cable a RESTORED injector should adopt: one already running from a DRUI output into
+/** The cable a RESTORED injector should adopt: one already running from a Test Gear output into
 this port, that no other injector has claimed.
 
 It exists because an injector's cable is an ordinary patch cable, so Rack restores it with the
@@ -1281,7 +1281,7 @@ static InjectorWidget* injectorMake(app::PortWidget* port, InjectorType type,
 		return NULL;
 	Module* drui = findDruiModule();
 	if (!drui) {
-		WARN("Injector: no DRUI module in the patch to inject from");
+		WARN("Injector: no Test Gear module in the patch to inject from");
 		return NULL;
 	}
 
@@ -1404,7 +1404,7 @@ static app::PortWidget* findInputPort(int64_t moduleId, int portId) {
 }
 
 
-/** Removes cables running from DRUI that no injector owns.
+/** Removes cables running from the Test Gear module that no injector owns.
 
 They accumulate because an injector's cable is an ORDINARY patch cable, which is what makes
 Rack responsible for its lifetime — and also means Rack saves it. Reopening a patch therefore
@@ -1412,9 +1412,9 @@ restores every such cable, while only the injectors that were saved come back to
 Anything else — a cable whose injector was removed after the save, or a duplicate laid by an
 earlier bug — is left with no owner: still connected, still injecting, and now visible,
 because the widget that was hiding it is gone. That is what put an apparent jack with cables
-hanging off it on DRUI's panel.
+hanging off it on that module's panel.
 
-So the invariant is enforced from the other end: a cable out of DRUI that no injector claims
+So the invariant is enforced from the other end: a cable out of the Test Gear module that no injector claims
 does not exist. Run only once the restore queue is empty, or this would delete the cables the
 injectors are still waiting to adopt.
 */
@@ -1438,6 +1438,11 @@ void injectorPurgeStrayCables() {
 	for (app::CableWidget* cw : APP->scene->rack->getCompleteCables()) {
 		if (!cw->cable || cw->cable->outputModule != drui)
 			continue;
+		// THE INJECTOR OUTPUTS ONLY. The monitor jack is on the same module and is an ordinary
+		// output that people patch by hand — sweeping it up here deleted a monitor cable the
+		// instant it was made, since no injector will ever claim it.
+		if (cw->cable->outputId >= INJECT_MAX)
+			continue;
 		bool owned = false;
 		for (widget::Widget* child : APP->scene->rack->children) {
 			InjectorWidget* inj = dynamic_cast<InjectorWidget*>(child);
@@ -1451,7 +1456,7 @@ void injectorPurgeStrayCables() {
 	}
 
 	for (app::CableWidget* cw : strays) {
-		INFO("Injector: removing an unowned cable from DRUI output %d", cw->cable->outputId);
+		INFO("Injector: removing an unowned cable from a Test Gear output %d", cw->cable->outputId);
 		APP->scene->rack->removeCable(cw);
 		delete cw;
 	}

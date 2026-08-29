@@ -1,15 +1,23 @@
-/** DreamRack — the module that switches everything else on.
-
-Its slug is still DRUI, and must stay so: a patch records the slug, and changing it would
-orphan every patch anyone has saved. DreamRack is only what the module is called.
+/** The two modules, and the overlay that draws over everyone else's.
 
 WHY A MODULE EXISTS AT ALL. A Rack plugin cannot run code until one of its modules is placed:
-plugins are initialised before the scene is created, and there is no callback afterwards. So
-this module's first job is to install the overlays that do the drawing, and its second is to
-carry the settings — one param per feature, shown as a button on its face, because a module
-whose every feature hides in a right-click menu looks like a module that does nothing.
+plugins are initialised before the scene is created, and there is no callback afterwards. So a
+module's first job is to install the overlays that do the drawing, and its second is to carry
+the settings — one param per feature, shown as a button on its face, because a module whose
+every feature hides in a right-click menu looks like a module that does nothing.
 
-It also owns the audio-rate work: the scope taps and the injectors both ride in its process(),
+WHY TWO OF THEM. They are different kinds of thing. CLARITY changes how every module in the
+rack is drawn and handled — it is ambient, and once switched on you stop thinking about it.
+TEST GEAR is the things you place and attach to a terminal. Someone may well want one and not the
+other, and with a single module there was no way to say so.
+
+They share everything below. The settings live in one structure the overlays read, each module
+writing its own fields; a feature whose module is not in the rack is off, because its group's
+flags are cleared when the last of them goes. The overlays themselves are installed by
+whichever module appears first and taken away when the last one leaves, so either module works
+on its own.
+
+TEST GEAR OWNS THE AUDIO-RATE WORK: the scope taps and the injectors both ride in its process(),
 which is why bypassing it silences them while everything drawn goes on looking alive. Its only
 ports are the injectors' hidden outputs.
 
@@ -25,6 +33,7 @@ optional and can be switched off per user.
 #include "SignalTap.hpp"
 #include "Clip.hpp"
 #include "Injector.hpp"
+#include "Monitor.hpp"
 
 #include <map>
 #include <set>
@@ -75,7 +84,7 @@ static float flowDashLength(const std::string& family) {
 
 // ---- Options, held by the module and persisted with the patch ----
 
-struct DRUIOptions {
+struct Options {
 	bool jacks = true;
 	bool knobs = true;
 	bool cableColor = true;
@@ -94,66 +103,69 @@ struct DRUIOptions {
 };
 
 
-struct DRUI : Module {
+/** ONE set of flags, shared by both modules and read by every overlay.
+
+The overlays hold pointers to individual flags, which is why these are plain booleans rather
+than being read from params directly: a pointer into a module's own storage would dangle the
+moment that module was deleted. Living here, they outlive any module — and a group is cleared
+when the last module that owns it goes, so a feature whose module is not in the rack is off
+rather than stuck at whatever it was last set to.
+*/
+static Options gOpt;
+
+/** How many of each module are in the rack, counted by their widgets. */
+static int gClarityCount = 0;
+static int gTestGearCount = 0;
+
+static void clearClarityOptions() {
+	gOpt.jacks = gOpt.knobs = gOpt.cableColor = gOpt.cableFlow = false;
+	gOpt.pinchZoom = gOpt.sliderScroll = gOpt.clickCables = gOpt.trace = false;
+}
+
+static void clearWidgetOptions() {
+	gOpt.scopes = gOpt.widgets = false;
+}
+
+
+/** Everything the rack is drawn and handled by: colour, animation, and the gestures. */
+struct Clarity : Module {
 	/** Every feature is a PARAM, not merely an internal flag.
 
 	Params are saved with the patch by Rack itself, carry a right-click menu, and can be
 	mapped to a controller — "map a knob to switch cable tracing" costs nothing to allow now
-	and would break saved patches to add later. The plain booleans below are a mirror of them,
-	kept because the overlays hold pointers to individual flags.
+	and would break saved patches to add later.
 	*/
 	enum ParamId {
-		P_JACKS, P_KNOBS, P_CABLE_COLOR, P_CABLE_FLOW,
-		P_PINCH, P_SLIDER_SCROLL, P_CLICK_CABLES,
-		// Appended rather than inserted: a param's INDEX is what a saved patch stores, so
-		// putting a new one in the middle would silently shift everything after it.
-		P_TRACE, P_SCOPES, P_WIDGETS, NUM_PARAMS
+		P_JACKS, P_CABLE_COLOR, P_KNOBS, P_CABLE_FLOW,
+		P_PINCH, P_TRACE, P_CLICK_CABLES, P_SLIDER_SCROLL,
+		NUM_PARAMS
 	};
 
-	DRUIOptions opt;
-
-	DRUI() {
-		// The outputs belong to the injectors. They carry no jacks on the panel: an injector
-		// is cabled from one of them to the port it drives, and both that cable and its plugs
-		// are hidden, because what should be visible is the callout loop at the terminal.
-		config(NUM_PARAMS, 0, INJECT_MAX, 0);
-		configSwitch(P_JACKS, 0.f, 1.f, 1.f, "Jacks by signal family", {"Off", "On"});
-		configSwitch(P_KNOBS, 0.f, 1.f, 1.f, "Knobs", {"Off", "On"});
-		configSwitch(P_CABLE_COLOR, 0.f, 1.f, 1.f, "Cable colour by destination", {"Off", "On"});
+	Clarity() {
+		config(NUM_PARAMS, 0, 0, 0);
+		configSwitch(P_JACKS, 0.f, 1.f, 1.f, "Colour code jacks", {"Off", "On"});
+		configSwitch(P_CABLE_COLOR, 0.f, 1.f, 1.f, "Colour code cables", {"Off", "On"});
+		configSwitch(P_KNOBS, 0.f, 1.f, 1.f, "Consistent knob style", {"Off", "On"});
 		configSwitch(P_CABLE_FLOW, 0.f, 1.f, 1.f, "Animate cable directions", {"Off", "On"});
 		configSwitch(P_PINCH, 0.f, 1.f, 1.f, "Pinch to zoom", {"Off", "On"});
-		configSwitch(P_SLIDER_SCROLL, 0.f, 1.f, 1.f, "Scroll wheel adjusts sliders", {"Off", "On"});
-		// Off by default: it changes the most basic gesture in Rack.
-		configSwitch(P_CLICK_CABLES, 0.f, 1.f, 0.f, "Click to pick up and drop cables", {"Off", "On"});
 		configSwitch(P_TRACE, 0.f, 1.f, 1.f, "Cable trace assist", {"Off", "On"});
-		configSwitch(P_SCOPES, 0.f, 1.f, 1.f, "Oscilloscopes on terminals", {"Off", "On"});
-		configSwitch(P_WIDGETS, 0.f, 1.f, 1.f, "Signal widgets on terminals", {"Off", "On"});
-		for (int i = 0; i < INJECT_MAX; i++)
-			configOutput(i, string::f("Injector %d", i + 1));
-	}
-
-	/** The engine calls this once per sample, which is what makes an audio-rate capture
-	possible from a plugin at all. Everything expensive is behind one atomic load in
-	tapCaptureAll, so a patch with no scope open pays almost nothing. */
-	void process(const ProcessArgs& args) override {
-		tapSetSampleRate(args.sampleRate);
-		tapCaptureAll();
-		injectorProcessAll(this, args.sampleTime);
+		// Off by default: it changes the most basic gesture in Rack.
+		configSwitch(P_CLICK_CABLES, 0.f, 1.f, 0.f, "Click to pull cables", {"Off", "On"});
+		configSwitch(P_SLIDER_SCROLL, 0.f, 1.f, 1.f, "Scroll wheel adjusts sliders",
+			{"Off", "On"});
 	}
 
 	/** Copies the params into the flags the overlays read. Called from the widget's step, on
 	the UI thread, which is where every one of those flags is used. */
 	void syncOptions() {
-		opt.jacks = params[P_JACKS].getValue() > 0.5f;
-		opt.knobs = params[P_KNOBS].getValue() > 0.5f;
-		opt.cableColor = params[P_CABLE_COLOR].getValue() > 0.5f;
-		opt.cableFlow = params[P_CABLE_FLOW].getValue() > 0.5f;
-		opt.pinchZoom = params[P_PINCH].getValue() > 0.5f;
-		opt.sliderScroll = params[P_SLIDER_SCROLL].getValue() > 0.5f;
-		opt.clickCables = params[P_CLICK_CABLES].getValue() > 0.5f;
-		opt.trace = params[P_TRACE].getValue() > 0.5f;
-		opt.scopes = params[P_SCOPES].getValue() > 0.5f;
-		opt.widgets = params[P_WIDGETS].getValue() > 0.5f;
+		gOpt.jacks = params[P_JACKS].getValue() > 0.5f;
+		gOpt.knobs = params[P_KNOBS].getValue() > 0.5f;
+		gOpt.cableColor = params[P_CABLE_COLOR].getValue() > 0.5f;
+		gOpt.cableFlow = params[P_CABLE_FLOW].getValue() > 0.5f;
+		gOpt.pinchZoom = params[P_PINCH].getValue() > 0.5f;
+		gOpt.trace = params[P_TRACE].getValue() > 0.5f;
+		gOpt.clickCables = params[P_CLICK_CABLES].getValue() > 0.5f;
+		gOpt.sliderScroll = params[P_SLIDER_SCROLL].getValue() > 0.5f;
 	}
 
 	json_t* dataToJson() override {
@@ -164,33 +176,92 @@ struct DRUI : Module {
 		cableFocusPrepareSave();
 
 		json_t* rootJ = json_object();
-		// Scopes live in the rack, not in this module, but this module's JSON is where the
-		// patch has room for them. Saving them here means a patch reopens looking at the same
-		// signals, with the same scales, rather than losing every probe on close.
-		json_object_set_new(rootJ, "scopes", scopeToJson());
-		json_object_set_new(rootJ, "injectors", injectorToJson());
-		json_object_set_new(rootJ, "analysers", analyserToJson());
+		json_object_set_new(rootJ, "demoPointer", json_boolean(gOpt.demoPointer));
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
-		// Migration: patches written before the features became params carry them here. Read
-		// into the params so an old patch opens set up as it was left.
-		auto read = [&](const char* key, int paramId) {
-			json_t* j = json_object_get(rootJ, key);
-			if (j)
-				params[paramId].setValue(json_boolean_value(j) ? 1.f : 0.f);
-		};
-		read("jacks", P_JACKS);
-		read("knobs", P_KNOBS);
-		read("cableColor", P_CABLE_COLOR);
-		read("cableFlow", P_CABLE_FLOW);
-		read("pinchZoom", P_PINCH);
-		read("sliderScroll", P_SLIDER_SCROLL);
-		read("clickCables", P_CLICK_CABLES);
+		if (json_t* j = json_object_get(rootJ, "demoPointer"))
+			gOpt.demoPointer = json_boolean_value(j);
+	}
+};
+
+
+/** The things you clip onto a terminal, and the audio-rate work behind them. */
+struct TestGear : Module {
+	/** The injectors' hidden outputs, and then the one real jack on the face. */
+	enum OutputId { O_MONITOR = INJECT_MAX, NUM_OUTPUTS };
+
+	TestGear() {
+		// Most of the outputs belong to the injectors. They carry no jacks on the panel: an
+		// injector is cabled from one of them to the port it drives, and both that cable and
+		// its plugs are hidden, because what should be visible is the callout loop at the
+		// terminal.
+		config(0, 0, NUM_OUTPUTS, 0);
+		for (int i = 0; i < INJECT_MAX; i++)
+			configOutput(i, string::f("Injector %d", i + 1));
+		configOutput(O_MONITOR, "Monitor");
+	}
+
+	/** NO SWITCHES. The widgets used to be gated by two buttons on this face, which said what
+	the module offered but also offered a way to make everything you had attached disappear.
+	Nothing needs gating: a widget exists because you asked for one, and the way not to have
+	one is not to add it. The panel says what is on offer instead. */
+	void syncOptions() {
+		gOpt.scopes = true;
+		gOpt.widgets = true;
+	}
+
+	/** The engine calls this once per sample, which is what makes an audio-rate capture
+	possible from a plugin at all. Everything expensive is behind one atomic load in
+	tapCaptureAll, so a patch with no scope open pays almost nothing.
+
+	ONE MODULE DOES THIS, even if a rack holds several. Capturing twice per sample would write
+	each sample into every tap's ring twice, so a scope would show a signal at double speed.
+	*/
+	void process(const ProcessArgs& args) override {
+		if (owner() != this)
+			return;
+		tapSetSampleRate(args.sampleRate);
+		tapCaptureAll();
+		injectorProcessAll(this, args.sampleTime);
+
+		outputs[O_MONITOR].setChannels(1);
+		outputs[O_MONITOR].setVoltage(monitorMix(args.sampleTime));
+	}
+
+	/** The one instance that speaks for all of them: the lowest module id, which is stable
+	across a session and does not depend on the order widgets happen to step in. */
+	TestGear* owner() {
+		TestGear* best = NULL;
+		for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
+			TestGear* w = dynamic_cast<TestGear*>(mw->module);
+			if (w && (!best || w->id < best->id))
+				best = w;
+		}
+		return best;
+	}
+
+	json_t* dataToJson() override {
+		json_t* rootJ = json_object();
+		// Scopes and injectors live in the RACK, not in this module, but this module's JSON is
+		// where the patch has room for them. Saving them here means a patch reopens looking at
+		// the same signals, with the same scales, rather than losing every probe on close.
+		// Only the owner writes them, or a rack with two of these would restore two of each.
+		if (owner() != this)
+			return rootJ;
+		json_object_set_new(rootJ, "scopes", scopeToJson());
+		json_object_set_new(rootJ, "injectors", injectorToJson());
+		json_object_set_new(rootJ, "analysers", analyserToJson());
+		json_object_set_new(rootJ, "monitors", monitorToJson());
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override {
 		scopeFromJson(json_object_get(rootJ, "scopes"));
 		injectorFromJson(json_object_get(rootJ, "injectors"));
 		analyserFromJson(json_object_get(rootJ, "analysers"));
+		monitorFromJson(json_object_get(rootJ, "monitors"));
 	}
 };
 
@@ -432,7 +503,6 @@ static void drawFlowDashes(NVGcontext* vg, math::Vec p0, math::Vec ctrl, math::V
 over their jacks and knobs. Transparent and event-free: it never consumes a click, so
 everything underneath behaves exactly as it did. */
 struct DRUIOverlay : widget::TransparentWidget {
-	DRUI* module = NULL;
 	/** Cables already coloured, by engine cable id, so a colour the user changes afterwards
 	is not overwritten on the next frame. */
 	/** Where each cable was last seen to END, so a cable that is re-plugged is recoloured.
@@ -448,8 +518,10 @@ struct DRUIOverlay : widget::TransparentWidget {
 		box.size = math::Vec(1e5, 1e5);
 	}
 
-	DRUIOptions options() {
-		return module ? module->opt : DRUIOptions();
+	/** The shared flags. Not a module's own copy: this overlay outlives any one module, and
+	either module can be the one that put it here. */
+	Options options() {
+		return gOpt;
 	}
 
 	/** A widget's centre in the coordinate system this overlay draws in.
@@ -467,11 +539,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 	}
 
 	void step() override {
-		if (!module) {
-			widget::TransparentWidget::step();
-			return;
-		}
-		const DRUIOptions o = options();
+		const Options o = options();
 
 		// Colour newly connected cables by their destination. There is no "cable connected"
 		// hook available to a plugin, so this polls — but only acts once per cable, so a
@@ -520,6 +588,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 		// switching one off and on again gives back what was there.
 		scopeSetVisible(o.scopes);
 		analyserSetVisible(o.scopes);
+		monitorSetVisible(o.widgets);
 		injectorSetEnabled(o.widgets);
 
 		if (o.trace)
@@ -532,14 +601,15 @@ struct DRUIOverlay : widget::TransparentWidget {
 		// Saved scopes and injectors re-attach here, once the modules they name have loaded.
 		scopeRestoreStep();
 		analyserRestoreStep();
+		monitorRestoreStep();
 		injectorRestoreStep();
-		// And any cable out of DRUI that no injector owns is not a cable at all.
+		// And any cable out of the Test Gear module that no injector owns is not a cable at all.
 		injectorPurgeStrayCables();
 
 		widget::TransparentWidget::step();
 	}
 
-	void drawControlsOf(ModuleWidget* mw, const DrawArgs& args, const DRUIOptions& o) {
+	void drawControlsOf(ModuleWidget* mw, const DrawArgs& args, const Options& o) {
 		std::vector<PortWidget*> ports = mw->getPorts();
 		if (o.jacks) {
 			for (PortWidget* p : ports) {
@@ -580,9 +650,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 	}
 
 	void draw(const DrawArgs& args) override {
-		if (!module)
-			return;
-		const DRUIOptions o = options();
+		const Options o = options();
 
 		if (o.jacks || o.knobs) {
 			for (ModuleWidget* mw : APP->scene->rack->getModules())
@@ -599,8 +667,8 @@ struct DRUIOverlay : widget::TransparentWidget {
 	puts the dashes back on top, since this overlay is the rack's last child.
 	*/
 	void drawLayer(const DrawArgs& args, int layer) override {
-		if (module && layer == 3) {
-			const DRUIOptions o = options();
+		if (layer == 3) {
+			const Options o = options();
 			if (o.cableFlow) {
 				const float time = (float) APP->window->getFrameTime();
 				for (CableWidget* cw : APP->scene->rack->getCompleteCables()) {
@@ -663,6 +731,20 @@ static const NVGcolor LAMP_ON = nvgRGB(0x3d, 0xe0, 0x7a);
 
 
 struct DRUIPanel : widget::Widget {
+	/** A smaller line ABOVE the name, where the name is really two words and only the second
+	is the name. Wrapped rather than set on one line because the lettering is what was pushing
+	these panels wider than they need to be. */
+	std::string titleAbove;
+	std::string title;
+	/** Lines under the title, where a module has something to say about how it is used. */
+	std::vector<std::string> hint;
+	/** Named down the face: what this module puts on a terminal, under headings, because a
+	list of thirteen is a list and a list of two groups is a description. */
+	struct LegendItem { std::string text; bool heading; };
+	std::vector<LegendItem> legend;
+	/** Written above the module's one jack, where it has one. */
+	std::string jackLabel;
+
 	void draw(const DrawArgs& args) override {
 		nvgBeginPath(args.vg);
 		nvgRect(args.vg, 0, 0, box.size.x, box.size.y);
@@ -682,13 +764,49 @@ struct DRUIPanel : widget::Widget {
 		nvgFillColor(args.vg, nvgRGB(0x24, 0x2a, 0x33));
 		nvgFill(args.vg);
 
-		nvgFontSize(args.vg, 14);
 		nvgFillColor(args.vg, PANEL_INK);
-		nvgText(args.vg, box.size.x / 2, 14, "DreamRack", NULL);
+		if (titleAbove.empty()) {
+			nvgFontSize(args.vg, 14);
+			nvgText(args.vg, box.size.x / 2, 14, title.c_str(), NULL);
+		}
+		else {
+			nvgFontSize(args.vg, 7.5f);
+			nvgText(args.vg, box.size.x / 2, 8, titleAbove.c_str(), NULL);
+			nvgFontSize(args.vg, 13);
+			nvgText(args.vg, box.size.x / 2, 20, title.c_str(), NULL);
+		}
 
 		nvgFontSize(args.vg, 7);
 		nvgFillColor(args.vg, nvgRGB(0x8a, 0x90, 0x9a));
-		nvgText(args.vg, box.size.x / 2, 40, "OPT-CLICK A JACK", NULL);
+		float hintY = 38.f;
+		for (const std::string& line : hint) {
+			nvgText(args.vg, box.size.x / 2, hintY, line.c_str(), NULL);
+			hintY += 10.f;
+		}
+
+		// What is on offer, listed. A panel carrying two switches says nothing about what the
+		// module actually gives you, and the list is the answer to "what can I clip on?"
+		// without opening a menu to find out.
+		float y = hintY + 8.f;
+		for (const LegendItem& item : legend) {
+			if (item.heading) {
+				y += 5.f;
+				nvgFontSize(args.vg, 7.5f);
+				nvgFillColor(args.vg, PANEL_INK);
+				nvgText(args.vg, box.size.x / 2, y, item.text.c_str(), NULL);
+				nvgFontSize(args.vg, 7);
+				nvgFillColor(args.vg, nvgRGB(0x8a, 0x90, 0x9a));
+				y += 13.f;
+				continue;
+			}
+			nvgText(args.vg, box.size.x / 2, y, item.text.c_str(), NULL);
+			y += 12.f;
+		}
+		if (!jackLabel.empty()) {
+			nvgFillColor(args.vg, PANEL_INK);
+			nvgText(args.vg, box.size.x / 2, box.size.y - 76.f, jackLabel.c_str(), NULL);
+			nvgFillColor(args.vg, nvgRGB(0x8a, 0x90, 0x9a));
+		}
 
 		nvgFillColor(args.vg, nvgRGB(0x6d, 0x74, 0x80));
 		nvgText(args.vg, box.size.x / 2, box.size.y - 14, "Dreamer", NULL);
@@ -756,50 +874,186 @@ struct FeatureButton : app::Switch {
 };
 
 
-struct DRUIWidget : ModuleWidget {
-	/** WEAK pointers, and that is the whole point. These widgets are added to the rack and the
-	scene, so those own them and delete them with the rest of the tree at shutdown. A raw
-	pointer here meant this destructor then deleted them a second time, and reached through
-	APP->scene->rack to do it while the rack itself was half destroyed. That crashed on quit,
-	inside the module browser's teardown. A WeakPtr goes NULL the moment the widget is gone,
-	so both mistakes become impossible to make. */
-	WeakPtr<DRUIOverlay> overlay;
-	/** Screen-anchored, unlike the rack overlay: it stands in for the whole viewport. */
-	WeakPtr<widget::Widget> pinchOverlay;
-	/** Also screen-anchored, and kept as the Scene's last child so it sees events first. */
-	WeakPtr<widget::Widget> sliderOverlay;
+/** The overlays, shared by both modules.
 
-	DRUIWidget(DRUI* module) {
-		setModule(module);
+Installed by whichever module reaches its step() first and taken away when the last module
+goes. They are shared because the features are: a widget chooser on a jack is no use without
+the click handling that opens it, and cable tracing draws in the same pass as the injectors'
+hidden cables. Kept as WEAK pointers, since the rack and the scene own these widgets and
+delete them with the rest of the tree at shutdown — a raw pointer here was deleted a second
+time on quit, reaching through a half-destroyed rack to do it.
+*/
+static WeakPtr<DRUIOverlay> gRackOverlay;
+static WeakPtr<widget::Widget> gPinchOverlay;
+static WeakPtr<widget::Widget> gInterceptOverlay;
+
+
+static void installOverlays() {
+	if (!APP->scene || !APP->scene->rack)
+		return;
+	if (!gRackOverlay) {
+		DRUIOverlay* o = new DRUIOverlay;
+		// Added last, so it draws after every module.
+		APP->scene->rack->addChild(o);
+		gRackOverlay = o;
+	}
+	if (!gPinchOverlay) {
+		widget::Widget* o = createPinchZoomOverlay(&gOpt.pinchZoom);
+		APP->scene->addChild(o);
+		gPinchOverlay = o;
+	}
+	if (!gInterceptOverlay) {
+		widget::Widget* o = createInterceptOverlay(&gOpt.sliderScroll, &gOpt.clickCables,
+			&gOpt.scopes, &gOpt.widgets, &gOpt.trace, &gOpt.demoPointer);
+		APP->scene->addChild(o);
+		gInterceptOverlay = o;
+	}
+}
+
+
+/** Takes an overlay away, if it is still there. Asks the widget's OWN parent rather than
+assuming which one it is, so this is safe whether a module is being deleted from a live patch
+or the whole tree is coming down around it. */
+static void dropOverlay(widget::Widget* o) {
+	if (!o)
+		return;
+	if (o->parent)
+		o->parent->removeChild(o);
+	delete o;
+}
+
+
+static void removeOverlaysIfIdle() {
+	if (gClarityCount > 0 || gTestGearCount > 0)
+		return;
+	dropOverlay(gRackOverlay);
+	dropOverlay(gPinchOverlay);
+	dropOverlay(gInterceptOverlay);
+	gRackOverlay = NULL;
+	gPinchOverlay = NULL;
+	gInterceptOverlay = NULL;
+}
+
+
+/** What both module widgets do the same way: draw a panel, count themselves, and put the
+overlays in place. NOTHING is installed without a module — the module browser builds a preview
+widget of every module it shows, and those step like any other, so this used to add a fresh set
+of overlays to the rack each time the browser was opened.
+*/
+struct DRUIWidgetBase : ModuleWidget {
+	bool counted = false;
+
+	void buildPanel(const char* titleAbove, const char* title,
+		const std::vector<std::string>& hint,
+		const std::vector<DRUIPanel::LegendItem>& legend, const char* jackLabel = "") {
+
 		box.size = Vec(PANEL_W, RACK_GRID_HEIGHT);
-
 		DRUIPanel* panel = new DRUIPanel;
 		panel->box.size = box.size;
+		panel->titleAbove = titleAbove;
+		panel->title = title;
+		panel->hint = hint;
+		panel->legend = legend;
+		panel->jackLabel = jackLabel;
 		setPanel(panel);
+
+		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+	}
+
+	void addRow(int index, int paramId, const char* a, const char* b) {
+		FeatureButton* button = createParam<FeatureButton>(
+			Vec(ROW_X, ROW_TOP + ROW_H * index), module, paramId);
+		button->label = a;
+		button->label2 = b;
+		addParam(button);
+	}
+
+	void countIn(int& counter) {
+		if (counted || !module)
+			return;
+		counted = true;
+		counter++;
+	}
+};
+
+
+struct ClarityWidget : DRUIWidgetBase {
+	ClarityWidget(Clarity* module) {
+		setModule(module);
+		buildPanel("USER INTERFACE", "Clarity", {}, {});
 
 		// Sliders are not here on purpose: they stay a param, saved and mappable, but live in
 		// the right-click menu. Everything else is on the face, so a picture of the panel is a
 		// list of what the module does.
 		struct Row { int param; const char* a; const char* b; };
 		static const Row rows[] = {
-			{DRUI::P_JACKS,         "COLOUR CODE",    "JACKS"},
-			{DRUI::P_CABLE_COLOR,   "COLOUR CODE",    "CABLES"},
-			{DRUI::P_KNOBS,         "CONSISTENT",     "KNOB STYLE"},
-			{DRUI::P_CABLE_FLOW,    "ANIMATE CABLE",  "DIRECTIONS"},
-			// Ordered by what will catch someone's eye first, not by how the code is arranged.
-			{DRUI::P_SCOPES,        "OSCILLOSCOPES",  "ON TERMINALS"},
-			{DRUI::P_WIDGETS,       "SIGNAL WIDGETS", "ON TERMINALS"},
-			{DRUI::P_PINCH,         "PINCH TO ZOOM",  ""},
-			{DRUI::P_TRACE,         "CABLE TRACE",    "ASSIST"},
-			{DRUI::P_CLICK_CABLES,  "CLICK TO PULL",  "CABLES"},
+			{Clarity::P_JACKS,         "COLOUR CODE",   "JACKS"},
+			{Clarity::P_CABLE_COLOR,   "COLOUR CODE",   "CABLES"},
+			{Clarity::P_KNOBS,         "CONSISTENT",    "KNOB STYLE"},
+			{Clarity::P_CABLE_FLOW,    "ANIMATE CABLE", "DIRECTIONS"},
+			{Clarity::P_PINCH,         "PINCH TO ZOOM", ""},
+			{Clarity::P_TRACE,         "CABLE TRACE",   "ASSIST"},
+			{Clarity::P_CLICK_CABLES,  "CLICK TO PULL", "CABLES"},
 		};
-		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++) {
-			FeatureButton* b = createParam<FeatureButton>(
-				Vec(ROW_X, ROW_TOP + ROW_H * i), module, rows[i].param);
-			b->label = rows[i].a;
-			b->label2 = rows[i].b;
-			addParam(b);
+		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
+			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
+	}
+
+	~ClarityWidget() {
+		if (counted)
+			gClarityCount--;
+		if (gClarityCount <= 0)
+			clearClarityOptions();
+		removeOverlaysIfIdle();
+	}
+
+	void step() override {
+		Clarity* m = dynamic_cast<Clarity*>(module);
+		if (!m) {
+			ModuleWidget::step();
+			return;
 		}
+		countIn(gClarityCount);
+		// The params are the truth; the flags the overlays read are a copy of them, refreshed
+		// here every frame. Without this the buttons moved and nothing else did.
+		m->syncOptions();
+		installOverlays();
+		ModuleWidget::step();
+	}
+
+	void appendContextMenu(Menu* menu) override {
+		if (!module)
+			return;
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createBoolPtrMenuItem("Draw pointer (for screen recordings)", "",
+			&gOpt.demoPointer));
+
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));
+		menu->addChild(createMenuLabel("modules; switch them off if that"));
+		menu->addChild(createMenuLabel("matters to you."));
+	}
+};
+
+
+struct TestGearWidget : DRUIWidgetBase {
+	TestGearWidget(TestGear* module) {
+		setModule(module);
+		// The last line is the menu entry's own wording, so the panel and the menu agree.
+		buildPanel("", "Test Gear", {"RIGHT-CLICK ANY", "TERMINAL AND SELECT",
+			"\"WIDGETS\""}, {
+			{"VIEWERS", true},
+			{"SCOPE", false}, {"ANALYSER", false}, {"AUDIO MON", false},
+			{"GENERATORS", true},
+			{"GATE", false}, {"PULSE", false}, {"CLOCK", false}, {"DC LEVEL", false},
+			{"LFO", false}, {"VCO", false}, {"NOTE", false}, {"VOLT/OCT", false},
+			{"NOISE", false}, {"ATTENUVERTER", false},
+		}, "MONITOR OUT");
+
+		// The one jack this module has: the monitors' mixing bus, out to your interface.
+		addOutput(createOutput<PJ301MPort>(
+			Vec(box.size.x / 2 - 12, RACK_GRID_HEIGHT - 68), module, TestGear::O_MONITOR));
 
 		// The injectors' output jacks. Present so their cables are ordinary, complete Rack
 		// cables — which is what makes Rack responsible for removing them when a module goes
@@ -811,84 +1065,29 @@ struct DRUIWidget : ModuleWidget {
 			p->visible = false;
 			addOutput(p);
 		}
+	}
 
-		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+	~TestGearWidget() {
+		if (counted)
+			gTestGearCount--;
+		if (gTestGearCount <= 0)
+			clearWidgetOptions();
+		removeOverlaysIfIdle();
 	}
 
 	void step() override {
-		// Install the overlay once the widget is in the scene. This is why the module exists:
-		// a plugin is initialised before the scene is created and gets no callback afterwards,
-		// so a module's step() is the first moment any of this can run.
-		// NOTHING is installed without a module. The module browser builds a preview widget of
-		// every module it shows, and those step like any other — so this used to add a fresh
-		// set of overlays to the rack each time the browser was opened, and then destroy them
-		// when it closed.
-		DRUI* m = dynamic_cast<DRUI*>(module);
+		TestGear* m = dynamic_cast<TestGear*>(module);
 		if (!m) {
 			ModuleWidget::step();
 			return;
 		}
-
-		// The params are the truth; the flags the overlays read are a copy of them, refreshed
-		// here every frame. Without this the buttons moved and nothing else did.
+		countIn(gTestGearCount);
 		m->syncOptions();
-
-		if (!overlay && APP->scene && APP->scene->rack) {
-			DRUIOverlay* o = new DRUIOverlay;
-			o->module = m;
-			// Added last, so it draws after every module.
-			APP->scene->rack->addChild(o);
-			overlay = o;
-		}
-		if (!pinchOverlay && APP->scene) {
-			widget::Widget* o = createPinchZoomOverlay(&m->opt.pinchZoom);
-			APP->scene->addChild(o);
-			pinchOverlay = o;
-		}
-		if (!sliderOverlay && APP->scene) {
-			widget::Widget* o = createInterceptOverlay(&m->opt.sliderScroll, &m->opt.clickCables,
-				&m->opt.scopes, &m->opt.widgets, &m->opt.trace, &m->opt.demoPointer);
-			APP->scene->addChild(o);
-			sliderOverlay = o;
-		}
+		installOverlays();
 		ModuleWidget::step();
-	}
-
-	/** Takes an overlay away, if it is still there. Asks the widget's OWN parent rather than
-	assuming which one it is, so this is safe whether the module is being deleted from a live
-	patch or the whole tree is coming down around it. */
-	static void dropOverlay(widget::Widget* o) {
-		if (!o)
-			return;
-		if (o->parent)
-			o->parent->removeChild(o);
-		delete o;
-	}
-
-	~DRUIWidget() {
-		dropOverlay(overlay);
-		dropOverlay(pinchOverlay);
-		dropOverlay(sliderOverlay);
-	}
-
-	void appendContextMenu(Menu* menu) override {
-		DRUI* m = dynamic_cast<DRUI*>(module);
-		if (!m)
-			return;
-
-		menu->addChild(new MenuSeparator);
-		menu->addChild(createBoolPtrMenuItem("Scroll wheel adjusts sliders", "",
-			&m->opt.sliderScroll));
-		menu->addChild(createBoolPtrMenuItem("Draw pointer (for VCV Recorder)", "",
-			&m->opt.demoPointer));
-
-		menu->addChild(new MenuSeparator);
-		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));
-		menu->addChild(createMenuLabel("modules; switch them off if that"));
-		menu->addChild(createMenuLabel("matters to you."));
 	}
 };
 
 
-Model* modelDRUI = createModel<DRUI, DRUIWidget>("DRUI");
+Model* modelClarity = createModel<Clarity, ClarityWidget>("Clarity");
+Model* modelTestGear = createModel<TestGear, TestGearWidget>("TestGear");
