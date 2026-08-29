@@ -19,7 +19,7 @@ widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
 void druiDrawKnob(NVGcontext* vg, math::Vec c, float r, float angle, int ticks);
 
 /** A clip-on scope on this port, added to the rack. */
-void scopeCreate(app::PortWidget* port);
+void scopeCreate(app::PortWidget* port, bool place = true);
 /** Deposits a scope riding the pointer in follow mode. True if one was. */
 bool scopeDepositFollowing();
 /** Shows or hides every scope, without removing any. */
@@ -30,6 +30,20 @@ json_t* scopeToJson();
 void scopeFromJson(json_t* arrayJ);
 /** Re-attaches queued scopes. Cheap and does nothing once none are waiting. */
 void scopeRestoreStep();
+
+/** Sets the mouse cursor, cached so it can be called on every hover. */
+void druiSetCursorShape(int shape);
+
+/** A clip-on frequency analyser on this port. Shares the scopes' switch: it is the same
+family of thing — a probe you hang on a terminal to see what is going through it. */
+void analyserCreate(app::PortWidget* port, bool place = true);
+void analyserSetVisible(bool visible);
+/** Offers a trackpad pinch to an analyser under the pointer, which zooms its frequency axis.
+True if one took it, in which case the rack must not zoom as well. */
+bool analyserPinch(float mag);
+json_t* analyserToJson();
+void analyserFromJson(json_t* arrayJ);
+void analyserRestoreStep();
 
 
 /** Following one cable through a tangle: hover an end for a pill, click it to hold that

@@ -25,6 +25,8 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "plugin.hpp"
 
 #include <ui/Slider.hpp>
+#include <ui/Menu.hpp>
+#include <ui/MenuOverlay.hpp>
 #include <app/ParamWidget.hpp>
 #include <ui/ScrollWidget.hpp>
 #include <app/CableWidget.hpp>
@@ -80,6 +82,13 @@ struct InterceptOverlay : widget::Widget {
 	/** True between the click that picks a cable up and the click that puts it down. Rack
 	believes a drag is in progress the whole time. */
 	bool carrying = false;
+	/** A jack that was just right-clicked, and how many frames we will wait for Rack's own
+	menu to appear so ours can be added to it. */
+	WeakPtr<app::PortWidget> menuPort;
+	int menuWait = 0;
+	/** A chooser we opened, waiting to be positioned once its height is known. */
+	WeakPtr<ui::Menu> chooser;
+	math::Vec chooserAt;
 
 
 	/** The cable being carried, if any. Owned by the rack like any other; what makes it
@@ -239,6 +248,8 @@ struct InterceptOverlay : widget::Widget {
 			box.size = parent->box.size;
 
 		autoScrollWhileCarrying();
+		addToPortMenu();
+		placeChooser();
 
 		// Retake the last place whenever something else has taken it — which is exactly what
 		// happens each time a menu opens. Moving our position in the child list only; the
@@ -590,8 +601,164 @@ struct InterceptOverlay : widget::Widget {
 		drawPointer(args);
 	}
 
+	/** The things that can be clipped onto a jack. Shared by the Option-click menu and by the
+	entry added to Rack's own right-click menu, so the two can never drift apart. */
+	static void addClipOnItems(ui::Menu* menu, app::PortWidget* port, bool scopesOn,
+		bool widgetsOn) {
+
+		WeakPtr<app::PortWidget> weakPort = port;
+		if (scopesOn) {
+			menu->addChild(createMenuItem("Scope", "", [weakPort]() {
+				if (weakPort)
+					scopeCreate(weakPort);
+			}));
+			menu->addChild(createMenuItem("Analyser", "", [weakPort]() {
+				if (weakPort)
+					analyserCreate(weakPort);
+			}));
+		}
+		if (!widgetsOn || !injectorAcceptsPort(port))
+			return;
+
+		struct Entry { const char* name; InjectorType type; bool noteMode; };
+		static const Entry entries[] = {
+			{"Gate button", INJECT_GATE, false},
+			{"Pulse button", INJECT_PULSE, false},
+			{"Clock", INJECT_CLOCK, false},
+			{"DC level", INJECT_DC, false},
+			{"LFO", INJECT_LFO, false},
+			{"VCO", INJECT_AUDIO, false},
+			{"Note", INJECT_AUDIO, true},
+			{"Volt/oct", INJECT_NOTE, false},
+			{"Noise", INJECT_NOISE, false},
+			{"Attenuverter", INJECT_AV, false},
+		};
+		for (const Entry& entry : entries) {
+			const InjectorType type = entry.type;
+			const bool noteMode = entry.noteMode;
+			menu->addChild(createMenuItem(entry.name, "", [weakPort, type, noteMode]() {
+				if (weakPort)
+					injectorCreate(weakPort, type, noteMode);
+			}));
+		}
+	}
+
+	/** Adds a Widgets submenu to the port menu Rack has just opened.
+
+	Rack gives a plugin no hook into another module's port menu, so this works by inference: a
+	right-click on a jack is noted, and the menu that appears within the next frame or two is
+	taken to be that jack's. Menus are ordinary widgets and anything added to one is deleted
+	with it, so nothing is left behind.
+
+	If Rack ever changed when that menu is built, our entry would simply stop appearing —
+	visible, and harmless.
+	*/
+	void addToPortMenu() {
+		if (!menuPort || menuWait <= 0)
+			return;
+		menuWait--;
+
+		for (auto it = APP->scene->children.rbegin(); it != APP->scene->children.rend(); it++) {
+			ui::MenuOverlay* overlay = dynamic_cast<ui::MenuOverlay*>(*it);
+			if (!overlay)
+				continue;
+			for (widget::Widget* child : overlay->children) {
+				ui::Menu* menu = dynamic_cast<ui::Menu*>(child);
+				if (!menu)
+					continue;
+				const bool scopesOn = offerScopes && *offerScopes;
+				const bool widgetsOn = offerWidgets && *offerWidgets;
+				if (scopesOn || widgetsOn) {
+					menu->addChild(new ui::MenuSeparator);
+					WeakPtr<app::PortWidget> port = menuPort;
+					// NOT a submenu. A submenu opens beside its parent and our list is long
+					// enough to run off the bottom of the window from a jack low in the rack.
+					// This opens the same chooser Option-click gives, which Rack positions and
+					// fits to the window itself.
+					InterceptOverlay* self = this;
+					menu->addChild(createMenuItem("Widgets…", "", [self, port, scopesOn, widgetsOn]() {
+						if (!port)
+							return;
+						ui::Menu* m = createMenu();
+						addClipOnItems(m, port, scopesOn, widgetsOn);
+						// Positioned on the next frame, once it knows how tall it is.
+						self->chooser = m;
+						self->chooserAt = APP->scene->mousePos;
+					}));
+				}
+				menuPort = NULL;
+				menuWait = 0;
+				return;
+			}
+		}
+	}
+
+	/** Centres our chooser on the pointer, and lifts it clear of the bottom of the window.
+
+	A menu opens with its top at the pointer, so a long list opened from low in the rack runs
+	off the bottom. Centring it vertically puts the middle of the list under the pointer — half
+	the entries are then a shorter reach — and clamping keeps the whole list on screen whatever
+	happens. Done a frame later because a menu does not know its own height until it has laid
+	its children out.
+	*/
+	void placeChooser() {
+		if (!chooser)
+			return;
+		ui::Menu* m = chooser;
+		if (m->box.size.y <= 0.f)
+			return;   // Not laid out yet; try again next frame.
+
+		const float windowH = APP->scene->box.size.y;
+		float y = chooserAt.y - m->box.size.y / 2.f;
+		y = math::clamp(y, 4.f, std::fmax(4.f, windowH - m->box.size.y - 4.f));
+		m->box.pos = math::Vec(chooserAt.x, y);
+		chooser = NULL;
+	}
+
+	/** Whether a menu is open. Ours searches the whole scene for jacks and pills, and a menu
+	drawn over the rack does not hide them from that search — so a click on a menu item that
+	happened to sit over a jack picked up that jack's cable as well as choosing the item. A menu
+	is modal: while one is up, none of the gestures below apply. */
+	/** Whether a menu is actually open.
+
+	VISIBILITY IS THE TEST, not the presence of an overlay. Rack keeps a MenuOverlay in the
+	scene at all times — the module browser lives in one, hidden until it is summoned — so
+	"is there a MenuOverlay?" is true from the moment Rack starts. Asking that question
+	silently switched off everything this overlay does below the guard.
+	*/
+	static bool menuIsOpen() {
+		for (widget::Widget* child : APP->scene->children) {
+			ui::MenuOverlay* overlay = dynamic_cast<ui::MenuOverlay*>(child);
+			if (overlay && overlay->visible && !overlay->requestedDelete)
+				return true;
+		}
+		return false;
+	}
+
 	void onButton(const ButtonEvent& e) override {
 		notePointerButton(e);
+
+		// A right-click on a jack: Rack is about to open its port menu, and ours is added to it
+		// on the next frame or two. NOT consumed — the port's own menu is the point.
+		//
+		// Noted BEFORE the modal check below, because right-clicking a second jack while the
+		// first menu is still open is an ordinary thing to do, and returning early there meant
+		// the note was never taken and our entry never appeared on that menu.
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT
+			&& !widgetAt<ClipWidget>(APP->scene, e.pos)) {
+			if (app::PortWidget* p = widgetAt<app::PortWidget>(APP->scene, e.pos)) {
+				menuPort = p;
+				menuWait = 3;
+			}
+		}
+
+		// A menu is modal for everything that follows: our gestures search the whole scene, and
+		// a menu drawn over the rack does not hide a jack from that search.
+		if (menuIsOpen()) {
+			widget::Widget::onButton(e);
+			return;
+		}
+
 		// A pill under the pointer takes a right-click: that lifts the cable it belongs to.
 		// Part of trace assist rather than of click-to-pull, since the pill is what names the
 		// cable and the two only make sense together.
@@ -624,9 +791,13 @@ struct InterceptOverlay : widget::Widget {
 			carrying = false;
 
 		// PICKING UP: a plain click on a jack takes its cable, or starts a new one.
+		// NOT through a widget. A scope or an injector sitting over a jack is what the pointer is
+		// on; searching for a PortWidget alone found the jack underneath it and picked up its
+		// cable, so clicking a widget to drag it pulled a cable out from beneath.
 		if (clickCables && *clickCables && !carrying
 			&& e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
-			&& (e.mods & RACK_MOD_MASK) == 0) {
+			&& (e.mods & RACK_MOD_MASK) == 0
+			&& !widgetAt<ClipWidget>(APP->scene, e.pos)) {
 			if (app::PortWidget* port = widgetAt<app::PortWidget>(APP->scene, e.pos)) {
 				pickUp(port);
 				e.consume(this);
@@ -639,7 +810,8 @@ struct InterceptOverlay : widget::Widget {
 		// here: a following scope is click-through, so the click lands on whatever is beneath
 		// it — a panel, another module — and would drag that instead of dropping the scope.
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
-			&& (e.mods & RACK_MOD_MASK) == 0 && scopeDepositFollowing()) {
+			&& (e.mods & RACK_MOD_MASK) == 0
+			&& (clipDepositFollowing() || scopeDepositFollowing())) {
 			e.consume(this);
 			e.stopPropagating();
 			return;
@@ -674,7 +846,8 @@ struct InterceptOverlay : widget::Widget {
 			widget::Widget::onButton(e);
 			return;
 		}
-		app::PortWidget* port = widgetAt<app::PortWidget>(APP->scene, e.pos);
+		app::PortWidget* port = widgetAt<ClipWidget>(APP->scene, e.pos)
+			? NULL : widgetAt<app::PortWidget>(APP->scene, e.pos);
 		if (!port) {
 			widget::Widget::onButton(e);
 			return;
@@ -688,62 +861,9 @@ struct InterceptOverlay : widget::Widget {
 			return;
 		}
 
+		// No heading: the list is self-explanatory, and a label only makes it taller.
 		ui::Menu* menu = createMenu();
-		menu->addChild(createMenuLabel("Clip on"));
-		if (scopesOn) {
-			menu->addChild(createMenuItem("Oscilloscope", "", [weakPort]() {
-				if (weakPort)
-					scopeCreate(weakPort);
-			}));
-		}
-
-		// Injectors drive a port, so they are offered on inputs only. An output is written by
-		// its own module and nothing else may write to it.
-		if (widgetsOn && injectorAcceptsPort(port)) {
-			menu->addChild(createMenuItem("Gate button", "", [weakPort]() {
-				if (weakPort)
-					injectorCreate(weakPort, INJECT_GATE);
-			}));
-			menu->addChild(createMenuItem("Pulse button", "", [weakPort]() {
-				if (weakPort)
-					injectorCreate(weakPort, INJECT_PULSE);
-			}));
-			menu->addChild(createMenuItem("Clock", "", [weakPort]() {
-				if (weakPort)
-					injectorCreate(weakPort, INJECT_CLOCK);
-			}));
-			menu->addChild(createMenuItem("DC level", "", [weakPort]() {
-				if (weakPort)
-					injectorCreate(weakPort, INJECT_DC);
-			}));
-			menu->addChild(createMenuItem("LFO", "", [weakPort]() {
-				if (weakPort)
-					injectorCreate(weakPort, INJECT_LFO);
-			}));
-			menu->addChild(createMenuItem("VFO", "", [weakPort]() {
-				if (weakPort)
-					injectorCreate(weakPort, INJECT_AUDIO);
-			}));
-			// The same oscillator, opened in note mode. Two entries because the two uses are
-			// different — a test tone at 440 Hz, or a note to play something with — and either
-			// can be switched to the other from its own menu.
-			menu->addChild(createMenuItem("Musical note", "", [weakPort]() {
-				if (weakPort)
-					injectorCreate(weakPort, INJECT_AUDIO, true);
-			}));
-			menu->addChild(createMenuItem("Volt/oct", "", [weakPort]() {
-				if (weakPort)
-					injectorCreate(weakPort, INJECT_NOTE);
-			}));
-			menu->addChild(createMenuItem("Noise", "", [weakPort]() {
-				if (weakPort)
-					injectorCreate(weakPort, INJECT_NOISE);
-			}));
-			menu->addChild(createMenuItem("Attenuverter", "", [weakPort]() {
-				if (weakPort)
-					injectorCreate(weakPort, INJECT_AV);
-			}));
-		}
+		addClipOnItems(menu, port, scopesOn, widgetsOn);
 
 		e.consume(this);
 		e.stopPropagating();
@@ -764,7 +884,8 @@ struct InterceptOverlay : widget::Widget {
 			e.stopPropagating();
 			return;
 		}
-		if (e.action == GLFW_PRESS && e.key == GLFW_KEY_ESCAPE && scopeDepositFollowing()) {
+		if (e.action == GLFW_PRESS && e.key == GLFW_KEY_ESCAPE
+			&& (clipDepositFollowing() || scopeDepositFollowing())) {
 			e.consume(this);
 			e.stopPropagating();
 			return;

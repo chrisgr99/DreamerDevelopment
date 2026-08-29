@@ -56,6 +56,12 @@ struct ClipWidget : widget::OpaqueWidget {
 	of at the port, so the loop follows the pointer to wherever it is being taken. */
 	bool retargeting = false;
 	math::Vec retargetPos;
+	/** Newly made, and riding the pointer until a click puts it down.
+
+	A widget dropped at a fixed offset from its jack lands wherever that offset happens to
+	point — often over something you were looking at. Carrying it means the first thing you do
+	is choose where it goes, which is what you were going to do anyway. */
+	bool following = false;
 
 	/** Moves whatever carries this clip's signal to a new port. Returns false to refuse, in
 	which case the clip stays where it was. */
@@ -73,11 +79,36 @@ struct ClipWidget : widget::OpaqueWidget {
 
 	/** Anchors to the port. Call from step(). */
 	void followPort() {
+		if (following) {
+			followPointer();
+			return;
+		}
 		if (!port)
 			return;
 		const math::Vec centre = port->getRelativeOffset(
 			port->box.zeroPos().getCenter(), APP->scene->rack);
 		box.pos = centre.plus(offset);
+	}
+
+	/** Rides the pointer, held by the middle of its left edge — or its right edge when there is
+	no room to the right, so a widget made near the edge of the view is still fully visible. */
+	void followPointer() {
+		const math::Vec mouse = APP->scene->rack->getMousePos();
+		const float zoom = APP->scene->rackScroll ? APP->scene->rackScroll->getAbsoluteZoom() : 1.f;
+		const float viewRight = APP->scene->rackScroll
+			? (APP->scene->rackScroll->offset.x + APP->scene->rackScroll->box.size.x) / zoom
+			: mouse.x + box.size.x + 1.f;
+
+		const bool room = (mouse.x + box.size.x + 8.f) < viewRight;
+		box.pos = math::Vec(room ? mouse.x + 4.f : mouse.x - box.size.x - 4.f,
+			mouse.y - box.size.y / 2.f);
+
+		// Keep the offset in step, so putting it down leaves it exactly where it is drawn.
+		if (port) {
+			const math::Vec centre = port->getRelativeOffset(
+				port->box.zeroPos().getCenter(), APP->scene->rack);
+			offset = box.pos.minus(centre);
+		}
 	}
 
 	bool ringPos(math::Vec& outCentre, float& outRadius) {
@@ -209,3 +240,9 @@ void clipSetVisible(ClipWidget* clip, bool visible);
 /** Removes clips that have been detached, and their handles. Called from the overlay's step,
 because a widget cannot safely delete itself while the tree is being walked. */
 void clipPurgeDead();
+
+/** Puts down any clip that is riding the pointer. True if one was. */
+bool clipDepositFollowing();
+
+/** How many clips are riding the pointer. Diagnostic. */
+int clipFollowingCount();

@@ -1,5 +1,6 @@
 /** The grab handle shared by everything that clips onto a terminal — see Clip.hpp. */
 #include "Clip.hpp"
+#include <ui/ScrollWidget.hpp>
 #include "WidgetAt.hpp"
 
 #include <vector>
@@ -79,7 +80,17 @@ struct ClipHandleWidget : widget::OpaqueWidget {
 		}
 		if (target == clip->port)
 			return;
-		clip->reattach(target);
+
+		// STAY WHERE IT IS. The position is held as an offset from the port, so re-attaching to
+		// a different terminal would otherwise fling the widget across the rack to keep that
+		// offset — often landing on top of something the user was looking at. The offset is
+		// recomputed instead, so the connection moves and the face does not.
+		const math::Vec keep = clip->box.pos;
+		if (!clip->reattach(target))
+			return;
+		const math::Vec centre = target->getRelativeOffset(
+			target->box.zeroPos().getCenter(), APP->scene->rack);
+		clip->offset = keep.minus(centre);
 	}
 };
 
@@ -167,6 +178,30 @@ void clipSetVisible(ClipWidget* clip, bool visible) {
 		clip->handle->visible = visible;
 	if (clip->closeButton)
 		clip->closeButton->visible = visible;
+}
+
+
+bool clipDepositFollowing() {
+	bool any = false;
+	for (widget::Widget* child : APP->scene->rack->children) {
+		ClipWidget* clip = dynamic_cast<ClipWidget*>(child);
+		if (clip && clip->following) {
+			clip->following = false;
+			any = true;
+		}
+	}
+	return any;
+}
+
+
+int clipFollowingCount() {
+	int n = 0;
+	for (widget::Widget* child : APP->scene->rack->children) {
+		ClipWidget* clip = dynamic_cast<ClipWidget*>(child);
+		if (clip && clip->following)
+			n++;
+	}
+	return n;
 }
 
 

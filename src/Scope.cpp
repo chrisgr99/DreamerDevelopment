@@ -7,6 +7,7 @@ module and follows if the module is moved.
 #include "plugin.hpp"
 #include "SignalTap.hpp"
 #include "WidgetAt.hpp"
+#include <ui/ScrollWidget.hpp>
 #include "Clip.hpp"
 
 #include <GLFW/glfw3.h>
@@ -31,8 +32,17 @@ static const float T_DIVS[] = {
 static const int T_DIV_COUNT = 14;
 
 // Roughly 10 by 4, the aspect the spec calls for.
-static const int DIV_X = 10;
-static const int DIV_Y = 4;
+/** A division is a FIXED size on screen, not a fraction of the face.
+
+So the scales set magnification and the window size sets how much you see, which are two
+different questions and now have two different controls. Sizing a division as a fraction of
+the face made them one: enlarging a scope magnified a signal that was already framed, and a
+trace running off the top clipped exactly the same however big you made the window — the one
+remedy anybody actually reaches for.
+
+Twelve pixels is close to what the default face showed before, so existing scopes look much as
+they did; they simply reveal more when dragged out. */
+static const float PX_PER_DIV = 12.f;
 
 // The callout: ring at the jack, line to the scope, and a rounded grab tab where they meet.
 // Wcoast CALLOUT_COLOR, the scope's own border grey, so it reads as part of the frame rather
@@ -90,6 +100,7 @@ static const float TRIG_STRIP_W = 10.f;
 static const float TRIG_STRIP_REACH = 10.f;
 /** How far in from an edge still counts as grabbing it to resize. */
 static const float RESIZE_EDGE = 6.f;
+static const float LEFT_RESIZE_EDGE = 3.f;
 static const float MIN_W = 70.f, MIN_H = 40.f;
 /** A paused scope wears a red frame, so a held trace can never be mistaken for a live one. */
 static const NVGcolor FRAME_RUN = nvgRGB(0x2f, 0xd0, 0x6a);
@@ -122,6 +133,13 @@ static void setCursorShape(int shape) {
 	current = shape;
 	if (APP && APP->window && APP->window->win)
 		glfwSetCursor(APP->window->win, cursorFor(shape));
+}
+
+
+/** The same cursor, shared with the analyser: the two resize alike, so they should say so
+alike. The cursor cache above is what makes this cheap enough to call every hover. */
+void druiSetCursorShape(int shape) {
+	setCursorShape(shape);
 }
 
 
@@ -252,9 +270,9 @@ struct ScopeWidget : ClipWidget {
 	std::string tooltipText;
 	bool gridShown = true;
 	bool minimized = false;
-	/** Follow mode: the scope rides the pointer, click-through, until a click or Escape
-	deposits it where the pointer was. */
-	bool following = false;
+	// `following` is ClipWidget's now, shared with the injectors: a new widget rides the
+	// pointer until it is put down, and the scope's F button uses the same state to pick one up
+	// again.
 	/** The spot beside its terminal that the home button returns it to. */
 	math::Vec homeOffset = math::Vec(30, -70);
 	/** Which edge or corner is being dragged, as (x, y) in {-1, 0, 1}. */
@@ -294,6 +312,32 @@ struct ScopeWidget : ClipWidget {
 		// copying and searching two megabytes every frame for every scope would cost far more
 		// than the feature is worth.
 		scratch.resize(SEARCH_CHUNK);
+	}
+
+	/** How many divisions fit across and down. This is what changes when the window is
+	resized: the division itself is a fixed size, so a bigger scope shows more of the signal
+	rather than the same signal larger. */
+	/** The voltage at the vertical centre of the face.
+
+	AC coupling follows the signal's own mean, so a small waveform riding on a large offset is
+	readable; otherwise it is the vertical position. Shared, because the grid, the trace and
+	the trigger marker must all agree about it or they describe different pictures.
+	*/
+	float centreVolts() {
+		if (acCoupled && lastCount > 1) {
+			float sum = 0.f;
+			for (int i = 0; i < lastCount; i++)
+				sum += lastWin[i];
+			return sum / lastCount;
+		}
+		return vPos;
+	}
+
+	float divsX() {
+		return std::fmax(1.f, faceW() / PX_PER_DIV);
+	}
+	float divsY() {
+		return std::fmax(1.f, faceHeight / PX_PER_DIV);
 	}
 
 	~ScopeWidget() {
@@ -394,7 +438,7 @@ struct ScopeWidget : ClipWidget {
 		// different part of the waveform while the phase holds still. Reading a different
 		// stretch of history instead — which is what this did before — leaves a periodic signal
 		// looking identical wherever you scroll to, because it IS identical.
-		const int perDiv = std::max(1, wanted / DIV_X);
+		const int perDiv = std::max(1, (int) (wanted / divsX()));
 		const int pan = (int) (timeShift * perDiv);
 		// Enough to hold the window, room to find an edge ahead of it, and the pan itself.
 		const int chunk = std::min((int) scratch.size(), wanted * 2 + pan + 64);
@@ -417,7 +461,7 @@ struct ScopeWidget : ClipWidget {
 			return 0;
 
 		// A little pre-trigger, so the edge itself is visible rather than sitting on the frame.
-		const int pre = wanted / DIV_X;
+		const int pre = (int) (wanted / divsX());
 		int start = have - wanted;
 		if (start < 0)
 			start = 0;
@@ -539,7 +583,7 @@ struct ScopeWidget : ClipWidget {
 		// left as headroom. Asking for the peak to occupy a fixed fraction and then rounding
 		// the 1-2-5 scale up threw that fraction away: a 7.9 V peak asked for 6 V per division
 		// and got 10, which drew the whole signal inside two fifths of the face.
-		const float wantPerDiv = peak / ((DIV_Y / 2.f) * 0.9f);
+		const float wantPerDiv = peak / ((divsY() / 2.f) * 0.9f);
 		vDivIndex = 0;
 		for (int i = 0; i < V_DIV_COUNT; i++) {
 			vDivIndex = i;
@@ -579,7 +623,7 @@ struct ScopeWidget : ClipWidget {
 			const float periodSamples = (float) (last - first) / (crossings - 1);
 			const float sampleRate = APP->engine->getSampleRate();
 			const float wantSpan = periodSamples / sampleRate * 3.f;   // about three cycles
-			const float wantT = wantSpan / DIV_X;
+			const float wantT = wantSpan / divsX();
 			tDivIndex = T_DIV_COUNT - 1;
 			for (int i = 0; i < T_DIV_COUNT; i++) {
 				if (T_DIVS[i] >= wantT) {
@@ -797,7 +841,7 @@ struct ScopeWidget : ClipWidget {
 				sum += lastWin[i];
 			centre = sum / lastCount;
 		}
-		const float scale = (h / DIV_Y) / V_DIVS[vDivIndex];
+		const float scale = PX_PER_DIV / V_DIVS[vDivIndex];
 		ty = h / 2 - (triggerLevel - centre) * scale;
 		return ty > 0.f && ty < h;
 	}
@@ -820,10 +864,13 @@ struct ScopeWidget : ClipWidget {
 		math::Vec dir;
 		if (minimized)
 			return dir;
-		// No resizing from the LEFT edge: that is the trigger strip, and a resize cursor
-		// appearing over it would promise something the strip does not do. Every other edge and
-		// both right-hand corners still resize.
-		if (pos.x >= faceWidth - RESIZE_EDGE)
+		// The LEFT edge resizes from its outermost few pixels only. The trigger strip owns the
+		// rest of that column, and the press test below reaches the resize check first — so a
+		// full-width resize zone there would swallow every click meant for the strip. Three
+		// pixels is enough to grab and leaves the strip most of its width.
+		if (pos.x <= LEFT_RESIZE_EDGE)
+			dir.x = -1;
+		else if (pos.x >= faceWidth - RESIZE_EDGE)
 			dir.x = 1;
 		if (pos.y <= RESIZE_EDGE)
 			dir.y = -1;
@@ -1100,30 +1147,51 @@ struct ScopeWidget : ClipWidget {
 		nvgStrokeWidth(args.vg, 1.5f);
 		nvgStroke(args.vg);
 
-		// Graticule: light divisions, brighter centre cross. The divisions are what make a
-		// calibrated scale readable.
+		// Graticule anchored to what it MEASURES, not to the window.
+		//
+		// A division is one volts-per-division tall and one time-base wide, so counting
+		// divisions and multiplying by the scale gives you the value — but only if the lines
+		// fall at exact multiples of it. Anchored to the middle of the face they did not: zero
+		// volts sits wherever the vertical position puts it, so every line stood at some
+		// arbitrary voltage and the counting told you nothing.
+		//
+		// So the horizontal lines are hung from ZERO VOLTS and the vertical ones from the
+		// TRIGGER POINT. Three lines above zero is now exactly three divisions of signal, and
+		// four lines right of the trigger is exactly four of the time base.
+		//
+		// Every fifth line is brighter, which lets you count in fives rather than tracking
+		// single lines. Zero itself is left to the dashed line that already marks it.
 		if (!gridShown)
 			goto afterGrid;
-		nvgStrokeWidth(args.vg, 0.6f);
-		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0xff, 0xff, 0x22));
-		nvgBeginPath(args.vg);
-		for (int i = 1; i < DIV_X; i++) {
-			nvgMoveTo(args.vg, w * i / DIV_X, 0);
-			nvgLineTo(args.vg, w * i / DIV_X, h);
-		}
-		for (int i = 1; i < DIV_Y; i++) {
-			nvgMoveTo(args.vg, 0, h * i / DIV_Y);
-			nvgLineTo(args.vg, w, h * i / DIV_Y);
-		}
-		nvgStroke(args.vg);
+		{
+			const float gScale = PX_PER_DIV / V_DIVS[vDivIndex];
+			const float zeroY = h / 2.f + centreVolts() * gScale;
+			const float trigX = PX_PER_DIV;
 
-		nvgBeginPath(args.vg);
-		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0xff, 0xff, 0x40));
-		nvgMoveTo(args.vg, 0, h / 2);
-		nvgLineTo(args.vg, w, h / 2);
-		nvgMoveTo(args.vg, w / 2, 0);
-		nvgLineTo(args.vg, w / 2, h);
-		nvgStroke(args.vg);
+			for (int pass = 0; pass < 2; pass++) {
+				const bool major = (pass == 1);
+				nvgBeginPath(args.vg);
+				nvgStrokeWidth(args.vg, major ? 0.8f : 0.6f);
+				nvgStrokeColor(args.vg, major ? nvgRGBA(0xff, 0xff, 0xff, 0x3a)
+					: nvgRGBA(0xff, 0xff, 0xff, 0x18));
+
+				for (int i = -400; i <= 400; i++) {
+					if (i == 0 || (major != (i % 5 == 0)))
+						continue;
+					const float x = trigX + i * PX_PER_DIV;
+					if (x > 0.f && x < w) {
+						nvgMoveTo(args.vg, x, 0.f);
+						nvgLineTo(args.vg, x, h);
+					}
+					const float y = zeroY + i * PX_PER_DIV;
+					if (y > 0.f && y < h) {
+						nvgMoveTo(args.vg, 0.f, y);
+						nvgLineTo(args.vg, w, y);
+					}
+				}
+				nvgStroke(args.vg);
+			}
+		}
 
 	afterGrid:
 		if (autosetPending)
@@ -1144,7 +1212,7 @@ struct ScopeWidget : ClipWidget {
 		// Re-window every frame whether running or paused: paused still has to answer a pan.
 		if (tapSlot >= 0) {
 			const float sampleRate = APP->engine->getSampleRate();
-			const float span = T_DIVS[tDivIndex] * DIV_X;
+			const float span = T_DIVS[tDivIndex] * divsX();
 			int wanted = (int) (span * sampleRate);
 			wanted = math::clamp(wanted, 8, TAP_BUFFER_SIZE / 2);
 
@@ -1161,16 +1229,10 @@ struct ScopeWidget : ClipWidget {
 			// What sits at the vertical centre. AC coupling follows the signal's own mean, so a
 			// small waveform on a large DC offset is readable; otherwise it is the vertical
 			// position, which autoset sets to the signal's midpoint.
-			float centreV = vPos;
-			if (acCoupled) {
-				float sum = 0.f;
-				for (int i = 0; i < count; i++)
-					sum += lastWin[i];
-				centreV = sum / count;
-			}
+			const float centreV = centreVolts();
 
 			const float perDiv = V_DIVS[vDivIndex];
-			const float scale = (h / DIV_Y) / perDiv;
+			const float scale = PX_PER_DIV / perDiv;
 
 			// CLIP TO THE FACE. Without this a signal larger than the current scale draws
 			// straight out of the scope and across the rack. A real scope clips: the trace
@@ -1265,7 +1327,7 @@ struct ScopeWidget : ClipWidget {
 				// WHERE in time the trigger sits: one division in, which is the pre-trigger.
 				// The level says at what height, this says at what moment, and the trace should
 				// cross the one at the other.
-				const float tx = w / DIV_X;
+				const float tx = PX_PER_DIV;
 				nvgBeginPath(args.vg);
 				nvgMoveTo(args.vg, tx, h);
 				nvgLineTo(args.vg, tx, h - 5.f);
@@ -1694,7 +1756,7 @@ struct ScopeWidget : ClipWidget {
 		if (scrollAxis == 1 && frozen) {
 			const float perDiv = std::fmax(1.f, T_DIVS[tDivIndex] * APP->engine->getSampleRate());
 			const float reach = (float) frozenCount;
-			const float maxShift = std::fmax(0.f, reach / perDiv - DIV_X);
+			const float maxShift = std::fmax(0.f, reach / perDiv - divsX());
 			// Negated: scrolling left pulls the trace left, as dragging the paper under a pen
 			// would. Following the raw delta moved it the other way, which reads as the window
 			// travelling rather than the signal.
@@ -1811,7 +1873,7 @@ void scopeSetVisible(bool visible) {
 }
 
 
-void scopeCreate(PortWidget* port) {
+void scopeCreate(PortWidget* port, bool place) {
 	if (!port || !port->module)
 		return;
 
@@ -1824,6 +1886,11 @@ void scopeCreate(PortWidget* port) {
 		delete scope;
 		return;
 	}
+	// Made under the pointer and carried until it is put down, rather than landing at a fixed
+	// offset from the jack — which is often on top of something. NOT when restoring a patch:
+	// those already have a place, and carrying them would hand the user a fistful of widgets
+	// riding the pointer the moment a patch opened.
+	scope->following = place;
 	APP->scene->rack->addChild(scope);
 
 	clipAddHandle(scope);
@@ -1943,7 +2010,7 @@ void scopeRestoreStep() {
 		PendingScope& p = pending[i];
 		PortWidget* port = findPort(p.moduleId, p.portId, p.isOutput);
 		if (port) {
-			scopeCreate(port);
+			scopeCreate(port, false);
 			// scopeCreate appends, so the scope just made is the last one that has our port.
 			for (auto it = APP->scene->rack->children.rbegin();
 				it != APP->scene->rack->children.rend(); it++) {

@@ -309,11 +309,13 @@ from the readouts is the point. */
 static const float INJ_SIZE = 46.f;
 /** The readout injectors are a panel meter — digits first, sized so they can be read at the
 same distance as a module's own display rather than squinted at. */
-static const float READ_W = 84.f;
+static const float READ_W = 56.f;
 /** Sized to the digits rather than the digits to it: the window is the height of a digit plus
 a couple of pixels top and bottom. */
-static const float READ_H = 26.f;
+static const float READ_H = 32.f;
 static const float READ_PAD = 2.f;
+/** The type label: bigger and bolder than the unit, because it is what the widget IS. */
+static const float TYPE_SIZE = 11.f;
 /** Units of scroll per step, so one trackpad glide does not run the whole range. */
 static const float SCROLL_PER_STEP = 3.f;
 
@@ -353,6 +355,7 @@ struct InjectorWidget : ClipWidget {
 	injector could show rather than the one it is showing, so the frame does not breathe in and
 	out as the digits change. */
 	float wantWidth = READ_W;
+	float wantHeight = READ_H;
 	/** The cable carrying this injector's signal. Owned by Rack, not by us. */
 	WeakPtr<app::CableWidget> cable;
 
@@ -408,11 +411,20 @@ struct InjectorWidget : ClipWidget {
 			slots[slot].level.store(level, std::memory_order_relaxed);
 	}
 
+	/** A note name at a FIXED width: letter, accidental column, then two columns of octave.
+
+	A natural gets a space where the sharp would be, and the octave is right-aligned in two
+	columns so that -1 does not shift it either. Without that the octave digit moved left and
+	right as you scrolled through sharps, so the field under the pointer kept changing and a
+	scroll meant to step octaves would suddenly step semitones.
+	*/
 	static std::string nameOfNote(int n) {
 		static const char* names[12] = {"C", "C#", "D", "D#", "E", "F",
 			"F#", "G", "G#", "A", "A#", "B"};
 		n = math::clamp(n, 0, 127);
-		return string::f("%s%d", names[n % 12], n / 12 - 1);
+		const std::string name = names[n % 12];
+		const std::string accidental = (name.size() > 1) ? "#" : " ";
+		return string::f("%s%s%2d", name.substr(0, 1).c_str(), accidental.c_str(), n / 12 - 1);
 	}
 
 	std::string noteName() {
@@ -573,6 +585,10 @@ struct InjectorWidget : ClipWidget {
 
 	void step() override {
 		updateSourceTap();
+		if (isReadout() && wantHeight > 0.f && std::fabs(box.size.y - wantHeight) > 0.5f) {
+			box.size.y = wantHeight;
+			faceHeight = box.size.y;
+		}
 		if (isReadout() && wantWidth > 0.f && std::fabs(box.size.x - wantWidth) > 0.5f) {
 			// Grow and shrink to the LEFT, keeping the right edge where it is. A value going
 			// from 9.99 to 10.00 needs another digit, and moving the right edge would carry the
@@ -618,7 +634,7 @@ struct InjectorWidget : ClipWidget {
 			case INJECT_CLOCK: return "CLK";
 			case INJECT_NOTE: return string::f("%.2f", level);
 			case INJECT_LFO: return "LFO";
-			case INJECT_AUDIO: return noteMode ? "PITCH" : "VFO";
+			case INJECT_AUDIO: return noteMode ? "PITCH" : "VCO";
 			default: return "";
 		}
 	}
@@ -754,80 +770,98 @@ struct InjectorWidget : ClipWidget {
 		const std::string text = digits();
 		const std::string u = unit();
 
-		// A narrow column on the right carries what the widget is producing, above the unit it
-		// is measured in. Everything left of that column is digits.
+		// STACKED: what it is on top, the value beneath. Side by side made the widget wide, and
+		// these float over the rack — a tall narrow one covers less of what is behind it, and
+		// the two lines are read in the order you want them anyway.
 		nvgFontFaceId(args.vg, font->handle);
-		nvgFontSize(args.vg, 9.f);
-		// Wide enough for the widest thing the column carries: for an oscillator that is the
-		// wave glyph AND the word beside it, since a sine at 5 Hz and one at 5 kHz are
-		// otherwise identical on the face.
-		const float labelW = nvgTextBounds(args.vg, 0, 0, typeLabel().c_str(), NULL, NULL);
-		const float topW = isOscillator() ? (10.f + 2.f + labelW) : labelW;
-		const float rightW = std::fmax(std::fmax(
-			nvgTextBounds(args.vg, 0, 0, u.c_str(), NULL, NULL), topW), 12.f) + 2.f;
+		nvgFontSize(args.vg, TYPE_SIZE);
+		const std::string label = typeLabel();
+		float lb[4] = {};
+		const float labelW = label.empty() ? 0.f
+			: nvgTextBounds(args.vg, 0, 0, label.c_str(), NULL, lb);
+		const float labelH = label.empty() ? 0.f : (lb[3] - lb[1]);
+		const float glyphW = isOscillator() ? 12.f : 0.f;
 
-		// Sized by MEASURING the digits, not by assuming the font size is their height. A font
-		// size is the em, and a digit fills only about seven tenths of it — which is why asking
-		// for a 30 px font in a 38 px window left the digits looking lost in it.
+		nvgFontSize(args.vg, 9.f);
+		float ub[4] = {};
+		const float unitW = nvgTextBounds(args.vg, 0, 0, u.c_str(), NULL, ub) + 3.f;
+
+		// Two pixels above the label, two between label and digits, two below — and measured
+		// from the INK rather than from the line box, since a font's line box carries space
+		// above and below the letters that would read here as a wider gap than asked for.
+		const float topY = READ_PAD + labelH / 2.f;
+		const float digitsTop = READ_PAD + labelH + 2.f;
+		const float digitsH = std::fmax(6.f, box.size.y - digitsTop - READ_PAD);
+
+		// The digits are sized by MEASURING them: a font size is the em, and a digit fills only
+		// about seven tenths of it.
 		float size = 20.f;
 		nvgFontSize(args.vg, size);
 		float bounds[4] = {};
 		nvgTextBounds(args.vg, 0, 0, text.c_str(), NULL, bounds);
 		const float measured = bounds[3] - bounds[1];
-		const float availH = box.size.y - 2.f * READ_PAD;
 		if (measured > 0.f) {
-			size *= availH / measured;
+			size *= digitsH / measured;
 			nvgFontSize(args.vg, size);
 		}
-		float w = nvgTextBounds(args.vg, 0, 0, text.c_str(), NULL, NULL);
-		// The captions' column, and the gap the digits keep from it.
-		const float colX = box.size.x - READ_PAD - rightW;
-		const float DIGIT_GAP = 3.f;
-		const float availW = colX - DIGIT_GAP - READ_PAD;
-		if (w > availW && w > 0.f) {
-			size *= availW / w;
-			nvgFontSize(args.vg, size);
-			w = nvgTextBounds(args.vg, 0, 0, text.c_str(), NULL, NULL);
+		const float w = nvgTextBounds(args.vg, 0, 0, text.c_str(), NULL, NULL);
+
+		// As wide as the wider of the two rows, and no wider.
+		wantWidth = READ_PAD + std::fmax(glyphW + labelW, w + unitW) + READ_PAD;
+		wantHeight = digitsTop + digitsH + READ_PAD;
+
+		// The title is CENTRED over the widget, glyph and word together, so it reads as a
+		// heading rather than as another left-aligned field.
+		const NVGcolor small = nvgRGBA(0x3d, 0xe0, 0x7a, 0xdd);
+		const float titleW = glyphW + labelW;
+		const float titleX = (box.size.x - titleW) / 2.f;
+		if (isOscillator()) {
+			drawWaveGlyph(args.vg, wave,
+				math::Rect(math::Vec(titleX, topY - 4.f), math::Vec(10.f, 8.f)),
+				small, unipolar);
+		}
+		if (!label.empty()) {
+			nvgFontSize(args.vg, TYPE_SIZE);
+			nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+			nvgFillColor(args.vg, LIT_GREEN);
+			// Bold by overdrawing: there is no bold monospace to hand, and swapping to a
+			// proportional face would move the digits about as the value changed.
+			for (int i = 0; i < 3; i++)
+				nvgText(args.vg, titleX + glyphW + i * 0.35f, topY, label.c_str(), NULL);
 		}
 
-		// Right-aligned against the caption column, so the gap is the same three pixels whether
-		// the value reads 0.25 or -10.00. Left-aligning left every spare pixel sitting between
-		// the last digit and the caption, which is exactly where it was most visible.
-		const float x0 = std::fmax(READ_PAD, colX - DIGIT_GAP - w);
-		const float y = box.size.y / 2.f;
+		const float x0 = READ_PAD;
+		nvgFontSize(args.vg, size);
+		float ink[4] = {};
+		nvgTextBounds(args.vg, 0, 0, text.c_str(), NULL, ink);
+		// Place by the ink's own centre: text is drawn from a baseline, and centring on the
+		// line box leaves the guard space above the digits that made the title look adrift.
+		const float digitsY = digitsTop + digitsH / 2.f - (ink[1] + ink[3]) / 2.f;
 		nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 		nvgFillColor(args.vg, enabled ? LIT_GREEN : nvgRGBA(0x3d, 0xe0, 0x7a, 0x55));
-
-		// Bold by overdrawing. Rack ships no bold monospace, and swapping to a proportional
-		// bold would move the digits about as the value changes — which matters here, because
-		// where the decimal point sits is what decides the scroll step.
 		for (int i = 0; i < 3; i++)
-			nvgText(args.vg, x0 + i * 0.35f, y, text.c_str(), NULL);
+			nvgText(args.vg, x0 + i * 0.35f, digitsY, text.c_str(), NULL);
 
-		// Remember where the point landed, for the scroll.
+		// Where the decimal point landed, for the two scroll rates. Measured rather than
+		// assumed, and fixed in place because the value is formatted to a constant width.
+		const float charW = nvgTextBounds(args.vg, 0, 0, "0", NULL, NULL);
 		const size_t dot = text.find('.');
-		dotX = (dot == std::string::npos)
-			? x0 + w - nvgTextBounds(args.vg, 0, 0, "0", NULL, NULL)
-			: x0 + nvgTextBounds(args.vg, 0, 0, text.c_str(), text.c_str() + dot, NULL);
-		lastDigitW = nvgTextBounds(args.vg, 0, 0, "0", NULL, NULL);
+		if (usingNotes()) {
+			// The boundary sits after the note name and its accidental column, so the left two
+			// columns always step semitones and the right two always step octaves.
+			dotX = x0 + charW * 2.f;
+		}
+		else if (dot == std::string::npos) {
+			dotX = x0 + w - charW;
+		}
+		else {
+			dotX = x0 + nvgTextBounds(args.vg, 0, 0, text.c_str(), text.c_str() + dot, NULL);
+		}
 
-		// The right column: what it produces on top, the unit underneath.
-		const float rx = box.size.x - READ_PAD;
-		const NVGcolor small = nvgRGBA(0x3d, 0xe0, 0x7a, 0xcc);
 		nvgFontSize(args.vg, 9.f);
 		nvgTextAlign(args.vg, NVG_ALIGN_RIGHT | NVG_ALIGN_MIDDLE);
 		nvgFillColor(args.vg, small);
-
-		const float topY = box.size.y * 0.32f;
-		nvgText(args.vg, rx, topY, typeLabel().c_str(), NULL);
-		if (isOscillator()) {
-			// The glyph sits to the left of the word, both on the top row.
-			drawWaveGlyph(args.vg, wave,
-				math::Rect(math::Vec(rx - labelW - 2.f - 10.f, topY - 4.f),
-					math::Vec(10.f, 8.f)), small, unipolar);
-		}
-
-		nvgText(args.vg, rx, box.size.y * 0.72f, u.c_str(), NULL);
+		nvgText(args.vg, box.size.x - READ_PAD, digitsY, u.c_str(), NULL);
 	}
 
 	void drawButton(const DrawArgs& args) {
@@ -905,81 +939,59 @@ struct InjectorWidget : ClipWidget {
 		e.consume(this);
 	}
 
-	/** One step of the value, its size taken from WHERE the pointer is.
+	/** One step of the value. ONE size, whatever the value is.
 
-	Over the digits left of the decimal point the step is a tenth, over those right of it a
-	hundredth — the pointer is already on the digit whose size it should change, so there is no
-	coarse-or-fine mode to remember.
+	Stepping by the place value of the digit under the pointer sounded better than it was: the
+	digits move as the value changes — gaining a decimal place, losing one — so the column
+	under the pointer changes underneath you, and the same gesture starts moving the value by
+	ten or a hundred times as much without warning. A single step is slower to cross a wide
+	range and entirely predictable, which is the better trade for a control you adjust by feel.
 
-	Two things need more than that. An audio oscillator spans 1 Hz to 8 kHz, where tenths would
-	take four thousand steps to cross, so each digit steps by its OWN place value: over the
-	thousands it moves in thousands, over the units in units. And a note has no decimal point at
-	all, so the octave digit at the end moves by octaves and the rest by semitones.
+	Notes are the exception, and only because a semitone and an octave are both natural units:
+	the octave digit steps octaves, the note name steps semitones.
 	*/
 	void stepValue(int dir, float pointerX) {
 		if (type == INJECT_NOTE) {
-			// The last character is the octave; everything before it names the note.
 			setNoteNumber(noteNumber() + dir * (pointerX >= dotX ? 12 : 1));
 			return;
 		}
-
-		if (type == INJECT_CLOCK) {
-			// Whole beats per minute, stepped by the place value of the digit under the pointer:
-			// hundreds over the hundreds column, units over the units.
-			rate = math::clamp(std::round(rate + dir * std::fmax(1.f, placeValueAt(pointerX))),
-				rateMin(), rateMax());
-			slots[slot].rate.store(rate, std::memory_order_relaxed);
+		if (type == INJECT_AUDIO && noteMode) {
+			setRateNoteNumber(rateNoteNumber() + dir * (pointerX >= dotX ? 12 : 1));
 			return;
 		}
 
-		if (type == INJECT_AUDIO) {
-			if (noteMode) {
-				setRateNoteNumber(rateNoteNumber() + dir * (pointerX >= dotX ? 12 : 1));
-				return;
-			}
-			rate = math::clamp(rate + dir * placeValueAt(pointerX), rateMin(), rateMax());
-			slots[slot].rate.store(rate, std::memory_order_relaxed);
-			return;
-		}
-
-		const float step = (pointerX < dotX) ? 0.1f : 0.01f;
-		if (type == INJECT_AV) {
-			// Unity down through zero to full inversion, and up to twice — the range an
-			// attenuverter's knob usually covers.
-			level = math::clamp(level + dir * step, -2.f, 2.f);
-			slots[slot].level.store(level, std::memory_order_relaxed);
-			return;
-		}
-		if (type == INJECT_NOISE) {
-			level = math::clamp(level + dir * step, 0.f, 10.f);
-			slots[slot].level.store(level, std::memory_order_relaxed);
-			return;
-		}
-		if (type == INJECT_DC) {
-			level = math::clamp(level + dir * step, -10.f, 10.f);
-			slots[slot].level.store(level, std::memory_order_relaxed);
-		}
-		else {
-			rate = math::clamp(rate + dir * step, rateMin(), rateMax());
-			slots[slot].rate.store(rate, std::memory_order_relaxed);
+		// Left of the point is ten times the step right of it. The point is fixed, so which side
+		// you are on cannot change while you scroll.
+		const bool coarse = (pointerX < dotX);
+		switch (type) {
+			case INJECT_CLOCK:
+				rate = math::clamp(std::round(rate + dir * (coarse ? 10.f : 1.f)),
+					rateMin(), rateMax());
+				slots[slot].rate.store(rate, std::memory_order_relaxed);
+				break;
+			case INJECT_AUDIO:
+				rate = math::clamp(rate + dir * (coarse ? 10.f : 0.1f), rateMin(), rateMax());
+				slots[slot].rate.store(rate, std::memory_order_relaxed);
+				break;
+			case INJECT_LFO:
+				rate = math::clamp(rate + dir * (coarse ? 0.1f : 0.01f), rateMin(), rateMax());
+				slots[slot].rate.store(rate, std::memory_order_relaxed);
+				break;
+			case INJECT_AV:
+				level = math::clamp(level + dir * (coarse ? 0.1f : 0.01f), -2.f, 2.f);
+				slots[slot].level.store(level, std::memory_order_relaxed);
+				break;
+			case INJECT_NOISE:
+				level = math::clamp(level + dir * (coarse ? 0.1f : 0.01f), 0.f, 10.f);
+				slots[slot].level.store(level, std::memory_order_relaxed);
+				break;
+			default:
+				level = math::clamp(level + dir * (coarse ? 0.1f : 0.01f), -10.f, 10.f);
+				slots[slot].level.store(level, std::memory_order_relaxed);
+				break;
 		}
 	}
 
-	/** The place value of the digit under the pointer: 1000 over the thousands column, 1 over
-	the units, 0.1 over the first decimal. Worked out from the digit width, which is safe to do
-	because the readout font is monospaced. */
-	float placeValueAt(float pointerX) {
-		if (lastDigitW <= 0.f)
-			return 1.f;
-		// Whole digits to the left of the point, counted outwards from it.
-		const float fromDot = dotX - pointerX;
-		if (fromDot >= 0.f) {
-			const int place = (int) (fromDot / lastDigitW);
-			return std::pow(10.f, (float) place);
-		}
-		const int place = (int) (-fromDot / lastDigitW);
-		return std::pow(10.f, -(float) (place + 1));
-	}
 
 	/** A press starts BOTH possibilities: it may become a reposition or stay a click. Which it
 	was is decided on release, by whether the pointer travelled. */
@@ -1264,7 +1276,7 @@ and then failed, because its slot was already in use — so a port could only ev
 The engine sums cables on an input, which is the whole reason injectors work this way, and
 stacking a DC offset under a waveform is exactly what that is for. */
 static InjectorWidget* injectorMake(app::PortWidget* port, InjectorType type,
-	bool adopt = false) {
+	bool adopt = false, bool place = true) {
 	if (!injectorAcceptsPort(port))
 		return NULL;
 	Module* drui = findDruiModule();
@@ -1305,6 +1317,9 @@ static InjectorWidget* injectorMake(app::PortWidget* port, InjectorType type,
 
 	inj->port = port;
 	inj->setType(type);
+	// Carried until it is put down — but not when a patch is being restored, since those
+	// already have a place.
+	inj->following = place;
 	APP->scene->rack->addChild(inj);
 	clipAddHandle(inj);
 	clipAddClose(inj);
@@ -1451,7 +1466,7 @@ void injectorRestoreStep() {
 		PendingInjector& p = pendingInjectors[i];
 		app::PortWidget* port = findInputPort(p.moduleId, p.portId);
 		if (port && findDruiModule()) {
-			if (InjectorWidget* inj = injectorMake(port, INJECT_GATE, true))
+			if (InjectorWidget* inj = injectorMake(port, INJECT_GATE, true, false))
 				inj->fromJson(p.stateJ);
 			json_decref(p.stateJ);
 			pendingInjectors.erase(pendingInjectors.begin() + i);

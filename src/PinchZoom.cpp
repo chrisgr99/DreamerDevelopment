@@ -71,6 +71,14 @@ struct PinchZoomOverlay : widget::TransparentWidget {
 		drui::pinchInit();
 
 		const float mag = drui::pinchTake();
+		// AN ANALYSER UNDER THE POINTER TAKES THE PINCH FIRST, and zooms its frequency axis
+		// rather than the rack. Pinching over a display to look closer at what it shows is the
+		// same gesture meaning the same thing one level in — and zooming the rack instead
+		// makes the picture bigger without showing any more of it.
+		if (mag != 0.f && !active && analyserPinch(mag)) {
+			widget::TransparentWidget::step();
+			return;
+		}
 		if (mag != 0.f) {
 			if (!active) {
 				active = true;

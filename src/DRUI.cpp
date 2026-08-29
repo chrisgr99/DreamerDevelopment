@@ -169,6 +169,7 @@ struct DRUI : Module {
 		// signals, with the same scales, rather than losing every probe on close.
 		json_object_set_new(rootJ, "scopes", scopeToJson());
 		json_object_set_new(rootJ, "injectors", injectorToJson());
+		json_object_set_new(rootJ, "analysers", analyserToJson());
 		return rootJ;
 	}
 
@@ -189,6 +190,7 @@ struct DRUI : Module {
 		read("clickCables", P_CLICK_CABLES);
 		scopeFromJson(json_object_get(rootJ, "scopes"));
 		injectorFromJson(json_object_get(rootJ, "injectors"));
+		analyserFromJson(json_object_get(rootJ, "analysers"));
 	}
 };
 
@@ -517,6 +519,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 		// The three master switches. Scopes and injectors are HIDDEN rather than removed, so
 		// switching one off and on again gives back what was there.
 		scopeSetVisible(o.scopes);
+		analyserSetVisible(o.scopes);
 		injectorSetEnabled(o.widgets);
 
 		if (o.trace)
@@ -528,6 +531,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 		clipPurgeDead();
 		// Saved scopes and injectors re-attach here, once the modules they name have loaded.
 		scopeRestoreStep();
+		analyserRestoreStep();
 		injectorRestoreStep();
 		// And any cable out of DRUI that no injector owns is not a cable at all.
 		injectorPurgeStrayCables();
