@@ -76,15 +76,15 @@ The crawl states direction only. It is not synchronised with the signal, and say
 
 ### Cable trace assist
 
-Hover either end of a cable and a small pill appears on it. Click the pill and that cable stays bright while every other cable in the rack is hidden, which is how you follow one lead through a tangle. Click again to put it back.
+Hover either end of a cable and a small handle appears on it. Click the handle and that cable stays bright while every other cable in the rack is hidden, which is how you follow one lead through a tangle. Click again to put it back.
 
-<img src="images/cable-trace.gif" width="420" alt="Six cables cross each other. The pointer reaches a cable end, a pill appears on it, and a click leaves that one cable on screen alone. A second click brings the others back.">
+<img src="images/cable-trace.gif" width="420" alt="Six cables cross each other. The pointer reaches a cable end, a handle appears on it, and a click leaves that one cable on screen alone. A second click brings the others back.">
 
 *The others are hidden rather than dimmed, so what is left is one legible lead.*
 
-Where several cables converge on one jack, clicking the pill steps through them one at a time.
+Where several cables converge on one jack, clicking the handle steps through them one at a time.
 
-**Right-click the pill** to lift that particular cable off its jack — useful when the cable you want is the one underneath four others.
+**Right-click the handle** to lift that particular cable off its jack — useful when the cable you want is the one underneath four others.
 
 ### Add cables without dragging
 
