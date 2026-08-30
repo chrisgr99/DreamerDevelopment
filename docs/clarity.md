@@ -100,7 +100,6 @@ Pinching over an analyser zooms **its** frequency axis instead, since that is th
 
 ## The right-click menu
 
-- **Scroll wheel adjusts sliders** — a hundred steps across a slider's full range, or a thousand with Shift held. A param like the rest, so it is saved and mappable; it lives in the menu because it is a preference rather than a feature of the patch.
 - **Draw pointer (for screen recordings)** — draws a pointer into the rack, with clicks, drags and scrolling shown. Screen recorders capture the window and not the system cursor, so a recording of a patch being worked on otherwise shows things happening with nothing touching them.
 - **Show tips again** — forgets every "Don't show this again". The answers are kept beside Rack's own settings rather than in the patch, since whether you want to be told something is about you and not about the work.
 
