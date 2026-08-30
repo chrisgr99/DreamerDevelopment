@@ -104,7 +104,7 @@ An output can hold several cables, and a click can only take one of them. Clicki
 
 <img src="images/cable-cycle.gif" width="440" alt="A jack with a yellow cable and a blue one on it. A click takes the yellow one, a second click swaps it for the blue one, and moving away carries the blue cable off.">
 
-Starting a second cable at an output that already has one — the case the gesture could not reach at all before:
+Starting a second cable at an output that already has one:
 
 <img src="images/cable-stack.gif" width="440" alt="A jack with one cable on it. A click picks that cable up, a second click swaps it for a new cable hanging from the jack, and that new cable is carried down and connected to a free input, leaving two cables out of the one jack.">
 
