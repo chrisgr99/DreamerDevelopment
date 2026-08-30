@@ -76,7 +76,22 @@ def curve_points(p0, ctrl, p1, samples=60):
     return pts, cum
 
 
-def cable(p0, p1, colour, thickness=CABLE_W, ctrl=None):
+def point_on(pts, cum, s):
+    """The point `s` along a sampled curve."""
+    if s <= 0:
+        return pts[0]
+    if s >= cum[-1]:
+        return pts[-1]
+    i = 1
+    while i < len(cum) - 1 and cum[i] < s:
+        i += 1
+    seg = cum[i] - cum[i - 1]
+    f = (s - cum[i - 1]) / seg if seg > 0 else 0.0
+    return (pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * f,
+            pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * f)
+
+
+def cable(p0, p1, colour, thickness=CABLE_W, ctrl=None, opacity=1.0):
     """The lead itself: a dark outline with the coloured core inside it.
 
     `ctrl` overrides where it hangs. The swatches use a shallow curve rather than the real
@@ -85,10 +100,11 @@ def cable(p0, p1, colour, thickness=CABLE_W, ctrl=None):
     if ctrl is None:
         ctrl = slump(p0, p1)
     d = (f'M {p0[0]:.1f} {p0[1]:.1f} Q {ctrl[0]:.1f} {ctrl[1]:.1f} {p1[0]:.1f} {p1[1]:.1f}')
-    return (f'<path d="{d}" fill="none" stroke="#0b0d10" stroke-width="{thickness + 3:.1f}" '
-            f'stroke-linecap="round"/>\n  '
+    return (f'<g opacity="{opacity:.2f}">'
+            f'<path d="{d}" fill="none" stroke="#0b0d10" stroke-width="{thickness + 3:.1f}" '
+            f'stroke-linecap="round"/>'
             f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="{thickness:.1f}" '
-            f'stroke-linecap="round"/>')
+            f'stroke-linecap="round"/></g>')
 
 
 def flow_dashes(p0, p1, dash_units, time_s, thickness=CABLE_W, ctrl=None):

@@ -54,7 +54,10 @@ def trace():
             # with one lead on it.
             if focus is not None and i != focus:
                 continue
-            parts.append(art.cable(p0, p1, colour))
+            # Rack draws cables at half opacity by default, and the pill at full — which is
+            # what makes a pill stand out from the cable it belongs to. The lit cable goes to
+            # full strength, as trace assist puts the global opacity up while it holds one.
+            parts.append(art.cable(p0, p1, colour, opacity=1.0 if focus is not None else 0.55))
             parts.append(art.plug(p0[0], p0[1], colour))
             parts.append(art.plug(p1[0], p1[1], colour))
         if show_pill:
@@ -68,18 +71,25 @@ def trace():
     p0, p1, _ = cables[traced]
     ctrl = art.slump(p0, p1)
     pts, cum = art.curve_points(p0, ctrl, p1)
-    pill_at = pts[-6]
+    total = cum[-1]
+    pill_at = art.point_on(pts, cum, total - 22.0)   # The middle of where the pill is drawn.
 
+    # The timing is the whole difficulty here. A pill is a short fat piece of cable in the
+    # cable's own colour, which is subtle by design — it has to be, since it appears under the
+    # pointer while you are looking at something else. On a loop that means it needs LONGER
+    # than feels necessary, or a reader watching the tangle misses it entirely and sees the
+    # cables vanish for no reason.
     shots = []
-    shots += [scene(None, False, (pill_at[0] - 90, pill_at[1] + 60))] * 5      # The tangle.
-    steps = 6
+    shots += [scene(None, False, (pill_at[0] - 110, pill_at[1] + 70))] * 6    # The tangle.
+    steps = 8
     for i in range(1, steps + 1):                                             # Reaching in.
         t = i / steps
         shots.append(scene(None, False,
-                           (pill_at[0] - 90 * (1 - t), pill_at[1] + 60 * (1 - t))))
-    shots += [scene(None, True, pill_at)] * 4                                 # The pill.
-    shots += [scene(traced, True, pill_at, click=True)] * 3                   # Clicked.
-    shots += [scene(traced, True, pill_at)] * 10                              # One lead.
+                           (pill_at[0] - 110 * (1 - t), pill_at[1] + 70 * (1 - t))))
+    shots += [scene(None, True, pill_at)] * 12                                # The pill, held.
+    shots += [scene(None, True, pill_at, click=True)] * 2                     # The click.
+    shots += [scene(traced, True, pill_at, click=True)] * 2
+    shots += [scene(traced, True, pill_at)] * 14                              # One lead.
     shots += [scene(None, True, pill_at, click=True)] * 3                     # Clicked again.
     shots += [scene(None, False, (pill_at[0] - 40, pill_at[1] + 30))] * 6     # Back.
 
