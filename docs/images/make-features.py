@@ -43,7 +43,7 @@ def trace():
     frames = HERE / "_trace"
     frames.mkdir(exist_ok=True)
 
-    def scene(focus, show_pill, pointer_at, click=False):
+    def scene(focus, show_pill, pointer_at, click=False, caption=False):
         parts = []
         for p in outs:
             parts.append(art.jack(p[0], p[1], 18, "#8a909a", True))
@@ -63,6 +63,12 @@ def trace():
         if show_pill:
             p0, p1, colour = cables[traced]
             parts.append(art.pill(p0, p1, colour, lit=(focus is not None), at_input=True))
+        if caption:
+            # Named for what it does rather than what it looks like: someone meeting this for
+            # the first time has no reason to call a short fat piece of cable a pill.
+            parts.append(art.label(20, 26, 'Click the "cable view" button', 15, anchor="start"))
+            parts.append(art.label(20, 45, 'that appears', 15, anchor="start"))
+            parts.append(art.arrow(232, 40, pill_at[0] - 12, pill_at[1] - 10))
         if pointer_at:
             parts.append(art.pointer(pointer_at[0], pointer_at[1], click=click))
         return art.svg(W, H, "\n  ".join(parts))
@@ -86,8 +92,8 @@ def trace():
         t = i / steps
         shots.append(scene(None, False,
                            (pill_at[0] - 110 * (1 - t), pill_at[1] + 70 * (1 - t))))
-    shots += [scene(None, True, pill_at)] * 12                                # The pill, held.
-    shots += [scene(None, True, pill_at, click=True)] * 2                     # The click.
+    shots += [scene(None, True, pill_at, caption=True)] * 14                  # The pill, named.
+    shots += [scene(None, True, pill_at, click=True, caption=True)] * 2        # The click.
     shots += [scene(traced, True, pill_at, click=True)] * 2
     shots += [scene(traced, True, pill_at)] * 14                              # One lead.
     shots += [scene(None, True, pill_at, click=True)] * 3                     # Clicked again.

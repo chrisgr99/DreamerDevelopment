@@ -239,6 +239,20 @@ def knob(cx, cy, r, angle_deg, ticks=7):
     return "\n  ".join(parts)
 
 
+def arrow(x0, y0, x1, y1, colour="#e6e8ec"):
+    """A curved arrow from a caption to the thing it is talking about. Curved rather than
+    straight so it does not read as one more cable."""
+    mx, my = (x0 + x1) / 2.0, min(y0, y1) - 26.0
+    ang = math.atan2(y1 - my, x1 - mx)
+    tip = 11.0
+    left = (x1 - tip * math.cos(ang - 0.42), y1 - tip * math.sin(ang - 0.42))
+    right = (x1 - tip * math.cos(ang + 0.42), y1 - tip * math.sin(ang + 0.42))
+    return (f'<path d="M {x0:.1f} {y0:.1f} Q {mx:.1f} {my:.1f} {x1:.1f} {y1:.1f}" fill="none" '
+            f'stroke="{colour}" stroke-width="2.2" stroke-linecap="round"/>\n  '
+            f'<path d="M {x1:.1f} {y1:.1f} L {left[0]:.1f} {left[1]:.1f} '
+            f'L {right[0]:.1f} {right[1]:.1f} Z" fill="{colour}"/>')
+
+
 def label(x, y, text, size=15, colour="#e6e8ec", anchor="middle"):
     return (f'<text x="{x:.1f}" y="{y:.1f}" font-family="Helvetica, Arial, sans-serif" '
             f'font-size="{size}" fill="{colour}" text-anchor="{anchor}">{text}</text>')
