@@ -44,6 +44,8 @@ Rack saves cable colours in the patch. Change one by hand and it is left alone f
 
 ### Consistent knob style
 
+<img src="images/knob-turn.gif" width="300" alt="A knob with its pointer and grip ticks turning from one end of its travel to the other.">
+
 Draws one knob face over every knob in the rack, whatever the plugin. Knobs are drawn on top of each module, so a module that draws its own light-emitting ring around a knob will have it covered. If that matters to you, switch this off; the note is repeated in the right-click menu.
 
 ### Animate cable directions
@@ -61,6 +63,8 @@ The crawl states direction only. It is not synchronised with the signal, and say
 ### Cable trace assist
 
 Hover either end of a cable and a small pill appears on it. Click the pill and that cable stays bright while every other cable in the rack is hidden, which is how you follow one lead through a tangle. Click again to put it back.
+
+<img src="images/cable-trace.gif" width="420" alt="Six cables cross each other. The pointer reaches a cable end, a pill appears on it, and a click leaves that one cable on screen alone. A second click brings the others back.">
 
 Where several cables converge on one jack, clicking the pill steps through them one at a time.
 

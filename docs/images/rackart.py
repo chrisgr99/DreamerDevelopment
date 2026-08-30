@@ -157,6 +157,72 @@ def pointer(x, y, held=False, click=False):
     return "\n  ".join(parts)
 
 
+def pill(p0, p1, colour, lit=False, at_input=True):
+    """The pill that swells out of a cable end, from CableFocus.cpp: a short fat round-capped
+    stroke in the cable's colour, with a white ring on the one being traced."""
+    ctrl = slump(p0, p1)
+    pts, cum = curve_points(p0, ctrl, p1)
+    total = cum[-1]
+
+    def along(s):
+        s = total - s if at_input else s
+        i = 1
+        while i < len(cum) - 1 and cum[i] < s:
+            i += 1
+        seg = cum[i] - cum[i - 1]
+        f = (s - cum[i - 1]) / seg if seg > 0 else 0.0
+        return (pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * f,
+                pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * f)
+
+    a, b = along(16.0), along(28.0)
+    out = [f'<path d="M {a[0]:.1f} {a[1]:.1f} L {b[0]:.1f} {b[1]:.1f}" fill="none" '
+           f'stroke="{colour}" stroke-width="11" stroke-linecap="round"/>',
+           f'<path d="M {a[0]:.1f} {a[1]:.1f} L {b[0]:.1f} {b[1]:.1f}" fill="none" '
+           f'stroke="#000" stroke-opacity="0.47" stroke-width="1.2" stroke-linecap="round"/>']
+    if lit:
+        out.append(f'<circle cx="{(a[0] + b[0]) / 2:.1f}" cy="{(a[1] + b[1]) / 2:.1f}" '
+                   f'r="8.25" fill="none" stroke="#fff" stroke-width="1.4"/>')
+    return "\n  ".join(out)
+
+
+def knob(cx, cy, r, angle_deg, ticks=7):
+    """The knob face, from druiDrawKnob(): a blue shaded rim, a brushed cap, and a pointer
+    with its grip ticks, all turning together."""
+    cap = r * 0.72
+    gid = f"k{int(cx)}{int(cy)}"
+    parts = [
+        f'<defs>'
+        f'<radialGradient id="{gid}rim" cx="50%" cy="50%" r="50%">'
+        f'<stop offset="55%" stop-color="#006da8"/><stop offset="100%" stop-color="#003d62"/>'
+        f'</radialGradient>'
+        f'<radialGradient id="{gid}core" cx="50%" cy="50%" r="50%">'
+        f'<stop offset="0%" stop-color="#1688cc"/><stop offset="100%" stop-color="#006da8"/>'
+        f'</radialGradient>'
+        f'<radialGradient id="{gid}cap" cx="50%" cy="50%" r="50%">'
+        f'<stop offset="40%" stop-color="#4c5058"/><stop offset="62%" stop-color="#5a5f67"/>'
+        f'<stop offset="100%" stop-color="#6b7079"/>'
+        f'</radialGradient></defs>',
+        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="url(#{gid}rim)"/>',
+        f'<circle cx="{cx}" cy="{cy}" r="{r * 0.55:.1f}" fill="url(#{gid}core)"/>',
+        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="#6fa8d6" '
+        f'stroke-width="{r * 0.077:.2f}"/>',
+        f'<circle cx="{cx}" cy="{cy}" r="{cap:.1f}" fill="url(#{gid}cap)"/>',
+        f'<circle cx="{cx}" cy="{cy}" r="{cap:.1f}" fill="none" stroke="#b8b8bc" '
+        f'stroke-width="{r * 0.06:.2f}"/>',
+    ]
+    inner = [f'<line x1="0" y1="0" x2="0" y2="{-cap:.1f}" stroke="#b8b8bc" '
+             f'stroke-width="{r * 0.12:.2f}" stroke-linecap="round"/>']
+    for k in range(ticks):
+        frac = 0.5 if ticks == 1 else k / (ticks - 1)
+        a = (frac - 0.5) * 2.0 * math.radians(150.0)
+        inner.append(f'<line x1="{math.sin(a) * r * 0.78:.2f}" y1="{-math.cos(a) * r * 0.78:.2f}" '
+                     f'x2="{math.sin(a) * r * 1.04:.2f}" y2="{-math.cos(a) * r * 1.04:.2f}" '
+                     f'stroke="#fff" stroke-width="{r * 0.1:.2f}"/>')
+    parts.append(f'<g transform="translate({cx} {cy}) rotate({angle_deg:.1f})">'
+                 + "".join(inner) + '</g>')
+    return "\n  ".join(parts)
+
+
 def label(x, y, text, size=15, colour="#e6e8ec", anchor="middle"):
     return (f'<text x="{x:.1f}" y="{y:.1f}" font-family="Helvetica, Arial, sans-serif" '
             f'font-size="{size}" fill="{colour}" text-anchor="{anchor}">{text}</text>')
