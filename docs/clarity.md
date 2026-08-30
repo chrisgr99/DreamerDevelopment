@@ -74,6 +74,10 @@ Where several cables converge on one jack, clicking the pill steps through them 
 
 You no longer have to hold the button down to move a cable.
 
+<img src="images/cable-new.gif" width="440" alt="A click on an empty terminal starts a cable, which follows the pointer across with no button held and is connected with a second click.">
+
+Moving one that is already patched works the same way:
+
 <img src="images/cable-pull.gif" width="440" alt="A cable is picked up from one input with a single click, follows the pointer across with no button held, and is dropped on another input with a second click.">
 
 Click a jack to pick up its cable, move, and click another jack to drop it. Or press, drag and release as you always have — a release after any movement lands the cable, connecting it if it is over a jack. Both gestures are live at once, so whichever you do is right, and you can start one way and finish the other. Right-click cancels either way, and the rack scrolls itself when a carried cable reaches the edge of the view.

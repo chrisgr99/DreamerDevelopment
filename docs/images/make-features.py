@@ -63,7 +63,10 @@ def trace():
         if show_pill:
             p0, p1, colour = cables[traced]
             parts.append(art.pill(p0, p1, colour, lit=(focus is not None), at_input=True))
-        if caption:
+        if caption == "restore":
+            parts.append(art.label(W / 2.0, 34, "Click it again to bring", 15))
+            parts.append(art.label(W / 2.0, 53, "the other cables back", 15))
+        elif caption:
             # Named for what it does rather than what it looks like: someone meeting this for
             # the first time has no reason to call a short fat piece of cable a pill.
             parts.append(art.label(330, 30, 'Click the "cable view"', 15, anchor="end"))
@@ -97,9 +100,13 @@ def trace():
     shots += [scene(None, True, pill_at, caption=True)] * 30                  # The pill, named.
     shots += [scene(None, True, pill_at, click=True, caption=True)] * 2        # The click.
     shots += [scene(traced, True, pill_at, click=True)] * 2
-    shots += [scene(traced, True, pill_at)] * 14                              # One lead.
-    shots += [scene(None, True, pill_at, click=True)] * 3                     # Clicked again.
-    shots += [scene(None, False, (pill_at[0] - 40, pill_at[1] + 30))] * 6     # Back.
+    # A beat on the one lead before anything else is said — that silence IS the feature, and
+    # a caption arriving on top of it would be talking over the thing being demonstrated.
+    shots += [scene(traced, True, pill_at)] * 20                              # One lead.
+    shots += [scene(traced, True, pill_at, caption="restore")] * 26           # The way back.
+    shots += [scene(traced, True, pill_at, click=True, caption="restore")] * 2
+    shots += [scene(None, True, pill_at, click=True)] * 2                     # Clicked again.
+    shots += [scene(None, False, (pill_at[0] - 40, pill_at[1] + 30))] * 8     # Back.
 
     for i, shot in enumerate(shots, start=1):
         art.render(shot, frames / f"{i:03d}.png", width=W)
@@ -198,8 +205,63 @@ def pull():
     art.animate(frames, HERE / "cable-pull.gif", fps)
 
 
+def new_cable():
+    """Starting a cable at an empty terminal, carrying it, and connecting it — the other half
+    of the gesture, where there is no cable to pick up until you make one."""
+    fps = 12
+    w, h = 470, 250
+    out = (90.0, 70.0)
+    inp = (380.0, 70.0)
+    colour = art.FAMILIES["audio"][0]
+
+    frames = HERE / "_new"
+    frames.mkdir(exist_ok=True)
+
+    def scene(end, pointer_at, click=False, caption=None, caption_at=None):
+        parts = [
+            art.jack(out[0], out[1], 20, colour, True),
+            art.jack(inp[0], inp[1], 20, colour, False),
+        ]
+        if end is not None:
+            parts.append(art.cable(out, end, colour))
+            parts.append(art.plug(out[0], out[1], colour))
+            parts.append(art.plug(end[0], end[1], colour))
+        if caption:
+            parts.append(art.label(caption_at[0], caption_at[1], caption, 15))
+        parts.append(art.pointer(pointer_at[0], pointer_at[1], click=click))
+        return art.svg(w, h, "\n  ".join(parts))
+
+    start = "Click an empty terminal to start a cable"
+    finish = "Click another terminal to connect it"
+    start_at = (w / 2.0 - 40, 30)
+    finish_at = (w / 2.0 + 10, 30)
+
+    shots = []
+    for i in range(10):                                   # Approaching an empty jack.
+        t = i / 9
+        shots.append(scene(None, (out[0] - 70 * (1 - t), out[1] + 60 * (1 - t)),
+                           caption=start, caption_at=start_at))
+    shots += [scene(None, out, caption=start, caption_at=start_at)] * 16
+    shots += [scene(None, out, click=True, caption=start, caption_at=start_at)] * 3
+
+    steps = 10                                            # The new cable follows the pointer.
+    for i in range(1, steps + 1):
+        t = i / steps
+        x = out[0] + (inp[0] - out[0]) * t
+        y = out[1] + 34 * (t * (1 - t) * 4)
+        shots.append(scene((x, y), (x, y), caption=finish, caption_at=finish_at))
+    shots += [scene(inp, inp, caption=finish, caption_at=finish_at)] * 16
+    shots += [scene(inp, inp, click=True, caption=finish, caption_at=finish_at)] * 3
+    shots += [scene(inp, (inp[0] + 40, inp[1] + 40))] * 8
+
+    for i, shot in enumerate(shots, start=1):
+        art.render(shot, frames / f"{i:03d}.png", width=w)
+    art.animate(frames, HERE / "cable-new.gif", fps)
+
+
 if __name__ == "__main__":
     trace()
     knobs()
     pull()
-    print("wrote cable-trace.gif, knob-turn.gif and cable-pull.gif")
+    new_cable()
+    print("wrote cable-trace.gif, knob-turn.gif, cable-pull.gif and cable-new.gif")
