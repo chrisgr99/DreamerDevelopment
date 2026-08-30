@@ -29,6 +29,17 @@ Because the naming is read from the port itself, this works on modules nobody ha
 
 A cable takes the colour of the family of the port it **arrives** at, so where it is going is visible from either end. Re-plug it somewhere else and it takes the new colour. A cable in flight is coloured from the port it left, so it reads as that signal from the moment it leaves the jack.
 
+| Family | Cable |
+| --- | --- |
+| Audio | <img src="images/cable-audio.png" width="240"> |
+| CV | <img src="images/cable-cv.png" width="240"> |
+| Gate and trigger | <img src="images/cable-trigger.png" width="240"> |
+| Pitch | <img src="images/cable-pitch.png" width="240"> |
+
+Dragging an audio cable onto a gate input, and the colour following it:
+
+<img src="images/cable-replug.gif" width="420" alt="A cable is dragged from an audio input to a gate input; it stays yellow while it is carried, and turns blue when it is dropped.">
+
 Rack saves cable colours in the patch. Change one by hand and it is left alone from then on.
 
 ### Consistent knob style
@@ -38,6 +49,10 @@ Draws one knob face over every knob in the rack, whatever the plugin. Knobs are 
 ### Animate cable directions
 
 Dashes crawl along every cable from source to destination. Dash length is keyed to the destination's family — fine for audio, coarse for gates — so a glance tells you both the direction and roughly what is travelling.
+
+<img src="images/cable-flow.gif" width="420" alt="Dashes crawling along a cable from a port labelled Output to a port labelled Input.">
+
+The crawl states direction only. It is not synchronised with the signal, and says nothing about what the signal is doing.
 
 ---
 
