@@ -41,6 +41,7 @@ that follows the pointer, leaving the wheel as the only practical route.
 
 #include <algorithm>
 #include <list>
+#include <vector>
 
 #include <cmath>
 #include <vector>
@@ -120,6 +121,37 @@ struct InterceptOverlay : widget::Widget {
 	*/
 	WeakPtr<app::CableWidget> carried;
 
+	/** THE UNDO ENTRY FOR TAKING A CABLE OFF, MADE BUT NOT YET PUSHED.
+
+	It has to be made at the moment the cable is lifted, since that is when its old ports are
+	still known — but it must not be pushed until the gesture has decided what it is. Clicking
+	round the cycle below lifts and replaces cables several times over, and pushing as we went
+	would leave an undo entry per click for a gesture the user thinks of as one act.
+	*/
+	history::CableRemove* pendingRemove = NULL;
+	/** The port the carried cable was taken off, so it can be put back on it. */
+	WeakPtr<app::PortWidget> carriedFrom;
+	/** True while the carried cable is one WE made, so putting it back means deleting it. */
+	bool carriedIsNew = false;
+
+	/** Clicking the same jack again reaches past the cable on top of it.
+
+	An output can hold several cables and a click could only ever take the one on top, so the
+	other cables under it — and starting a NEW cable from an output that already has one, which
+	is ordinary practice — were unreachable. Rack answers this with a modifier key. Repeated
+	clicks answer it without one: each click on the same jack, with the pointer still on it,
+	swaps what is in your hand for the next thing that jack can offer — the cables on it in
+	turn, then a new cable, then nothing, then round again.
+
+	Nothing has to be labelled, because the states already look different: a held cable is
+	drawn at full strength while the rest are at half, an existing cable still runs to wherever
+	its far end is plugged, and a new one hangs from the jack you clicked.
+	*/
+	WeakPtr<app::PortWidget> cyclePort;
+	std::vector<app::CableWidget*> cycleCables;
+	int cycleIndex = -1;
+	math::Vec cycleAt;
+
 	/** Lifts ONE named cable off the end its pill sits on.
 
 	Right-click, because the left clicks are already spoken for: with several cables converging
@@ -135,14 +167,20 @@ struct InterceptOverlay : widget::Widget {
 		// screen to compare against, and leaving the rest hidden would be baffling.
 		cableFocusClear();
 
+		// Provisional, like every other pickup: the undo entry is made now, while the cable's
+		// old ports are still known, and pushed only if the cable is actually put somewhere.
 		history::CableRemove* h = new history::CableRemove;
 		h->setCable(cw);
-		APP->history->push(h);
+		delete pendingRemove;
+		pendingRemove = h;
+		carriedIsNew = false;
+		carriedFrom = atInput ? cw->inputPort : cw->outputPort;
 		cw->getPort(atInput ? engine::Port::INPUT : engine::Port::OUTPUT) = NULL;
 		cw->updateCable();
 		carried = cw;
 		carrying = true;
 		carryStart = APP->scene->getMousePos();
+		endCycle();
 	}
 
 	/** Picks up the top cable on this port, or starts a new one from it. */
@@ -151,31 +189,126 @@ struct InterceptOverlay : widget::Widget {
 			return;
 
 		app::CableWidget* cw = APP->scene->rack->getTopCable(port);
-		if (cw) {
-			// Taking an existing cable off: it becomes incomplete at this end, and the removal
-			// is recorded so undo puts it back where it was.
-			history::CableRemove* h = new history::CableRemove;
-			h->setCable(cw);
-			APP->history->push(h);
-			cw->getPort(port->type) = NULL;
-			cw->updateCable();
-		}
-		else {
-			cw = new app::CableWidget;
-			cw->getPort(port->type) = port;
-			cw->updateCable();
-			APP->scene->rack->addCable(cw);
-		}
+		if (cw)
+			liftExisting(cw, port);
+		else
+			liftNew(port);
+
+		// The click starts a cycle on this jack: another click here, without the pointer
+		// leaving it, reaches the next thing the jack can offer.
+		cyclePort = port;
+		cycleCables = APP->scene->rack->getCompleteCablesOnPort(port);
+		// Top first, to match the cable the first click actually took.
+		std::reverse(cycleCables.begin(), cycleCables.end());
+		cycleIndex = cw ? 0 : cycleCables.size();
+		cycleAt = APP->scene->getMousePos();
+	}
+
+	/** Takes a cable off this end of the port, keeping the undo entry back until the gesture
+	is over. */
+	void liftExisting(app::CableWidget* cw, app::PortWidget* port) {
+		history::CableRemove* h = new history::CableRemove;
+		h->setCable(cw);
+		delete pendingRemove;
+		pendingRemove = h;
+		carriedIsNew = false;
+		carriedFrom = port;
+
+		cw->getPort(port->type) = NULL;
+		cw->updateCable();
 		carried = cw;
 		carrying = true;
 		carryStart = APP->scene->getMousePos();
 	}
 
+	/** Starts a new cable at this port, with its other end in the hand. */
+	void liftNew(app::PortWidget* port) {
+		app::CableWidget* cw = new app::CableWidget;
+		cw->getPort(port->type) = port;
+		cw->updateCable();
+		APP->scene->rack->addCable(cw);
+		delete pendingRemove;
+		pendingRemove = NULL;
+		carriedIsNew = true;
+		carriedFrom = port;
+		carried = cw;
+		carrying = true;
+		carryStart = APP->scene->getMousePos();
+	}
+
+	/** Puts back whatever is in the hand, leaving no trace in the undo history: a cable we
+	made is deleted, and one we lifted goes back on the port it came from. */
+	void returnHeld() {
+		app::CableWidget* cw = carried;
+		carried = NULL;
+		carrying = false;
+		if (!cw) {
+			delete pendingRemove;
+			pendingRemove = NULL;
+			return;
+		}
+		if (carriedIsNew) {
+			discard(cw);
+		}
+		else if (carriedFrom) {
+			cw->getPort(carriedFrom->type) = carriedFrom;
+			cw->updateCable();
+		}
+		else {
+			// Nowhere to put it back: the module it came from has gone. Letting go of it is
+			// the only honest thing left, and the withheld undo entry describes exactly that.
+			if (pendingRemove) {
+				APP->history->push(pendingRemove);
+				pendingRemove = NULL;
+			}
+			discard(cw);
+		}
+		delete pendingRemove;
+		pendingRemove = NULL;
+	}
+
+	/** One click further round: the cables on the jack in turn, then a new cable, then an
+	empty hand, then back to the first. The jack is read afresh each time round, so a cable
+	added or removed meanwhile is accounted for. */
+	void advanceCycle() {
+		app::PortWidget* port = cyclePort;
+		if (!port)
+			return;
+		returnHeld();
+
+		const int cables = (int) cycleCables.size();
+		cycleIndex++;
+		if (cycleIndex > cables + 1) {
+			cycleCables = APP->scene->rack->getCompleteCablesOnPort(port);
+			std::reverse(cycleCables.begin(), cycleCables.end());
+			cycleIndex = 0;
+		}
+
+		if (cycleIndex < (int) cycleCables.size())
+			liftExisting(cycleCables[cycleIndex], port);
+		else if (cycleIndex == (int) cycleCables.size())
+			liftNew(port);
+		// Otherwise the hand is empty, which is a state of the cycle rather than the end of it.
+	}
+
+	void endCycle() {
+		cyclePort = NULL;
+		cycleCables.clear();
+		cycleIndex = -1;
+	}
+
 	/** Drops what is being carried onto this port, or discards it if the port cannot take it. */
 	void dropOn(app::PortWidget* port) {
 		carrying = false;
+		endCycle();
 		app::CableWidget* cw = carried;
 		carried = NULL;
+		// NOW the removal is recorded: the gesture has decided what it was, so undo has one
+		// entry for it rather than one per click of the cycle.
+		if (pendingRemove) {
+			APP->history->push(pendingRemove);
+			pendingRemove = NULL;
+		}
 		if (!cw)
 			return;
 
@@ -216,11 +349,11 @@ struct InterceptOverlay : widget::Widget {
 		delete cw;
 	}
 
+	/** Right-click while carrying: put back what is in the hand and leave the patch as it was.
+	Nothing reaches the undo history, because nothing happened. */
 	void cancelCarry() {
-		carrying = false;
-		if (carried)
-			discard(carried);
-		carried = NULL;
+		returnHeld();
+		endCycle();
 	}
 
 	/** Scrolls the rack when a carried cable, or a widget's connection, is taken to the edge of
@@ -895,13 +1028,28 @@ struct InterceptOverlay : widget::Widget {
 			return;
 		}
 
-		// CARRYING: the next click puts the cable down, wherever it lands.
+		// CARRYING: the next click puts the cable down, wherever it lands — except on the jack
+		// the cycle belongs to, where it reaches the next thing that jack can offer. Dropping a
+		// cable back exactly where it came from does nothing, so that click was free to mean
+		// something else.
 		if (carrying && e.action == GLFW_PRESS) {
-			if (e.button == GLFW_MOUSE_BUTTON_RIGHT)
+			if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
 				cancelCarry();
-			else if (e.button == GLFW_MOUSE_BUTTON_LEFT)
-				dropOn(clipFamilyAt(e.pos)
-					? NULL : widgetAt<app::PortWidget>(APP->scene, e.pos));
+			}
+			else if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+				app::PortWidget* under = clipFamilyAt(e.pos)
+					? NULL : widgetAt<app::PortWidget>(APP->scene, e.pos);
+				// STILL ON THE JACK is the whole test. Six pixels of tolerance was the first
+				// attempt and it is too mean: a new cable's loose end sits at the pointer, so
+				// with the pointer pinned to one spot the cable has no length and its loop
+				// hangs inside the jack, where it cannot be seen. Anywhere on the jack, and
+				// the state you are in is visible.
+				const bool stillThere = cyclePort && under == cyclePort;
+				if (stillThere)
+					advanceCycle();
+				else
+					dropOn(under);
+			}
 			e.consume(this);
 			e.stopPropagating();
 			return;
@@ -936,6 +1084,15 @@ struct InterceptOverlay : widget::Widget {
 			&& (e.mods & RACK_MOD_MASK) == 0
 			&& !clipFamilyAt(e.pos)) {
 			if (app::PortWidget* port = widgetAt<app::PortWidget>(APP->scene, e.pos)) {
+				// Empty-handed but still on the jack we were cycling: this is the next step
+				// round, not a new gesture, or the cycle could never come back to its start.
+				if (cyclePort && port == cyclePort) {
+					advanceCycle();
+					e.consume(this);
+					e.stopPropagating();
+					return;
+				}
+				endCycle();
 				pickUp(port);
 				e.consume(this);
 				e.stopPropagating();

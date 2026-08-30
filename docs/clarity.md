@@ -86,6 +86,20 @@ Moving one that is already patched works the same way:
 
 Click a jack to pick up its cable, move, and click another jack to drop it. Or press, drag and release as you always have — a release after any movement lands the cable, connecting it if it is over a jack. Both gestures are live at once, so whichever you do is right, and you can start one way and finish the other. Right-click cancels either way, and the rack scrolls itself when a carried cable reaches the edge of the view.
 
+### Reaching past the cable on top
+
+An output can hold several cables, and a click can only take one of them. Clicking the same jack again — with the pointer still on it — swaps what is in your hand for the next thing that jack can offer: the cables on it in turn, then a new cable, then an empty hand, then round to the first again.
+
+<img src="images/cable-cycle.gif" width="440" alt="A jack with two cables on it. Clicking it takes the top cable, clicking again takes the one below, clicking again starts a new cable, and clicking again leaves the hand empty.">
+
+Nothing has to be labelled, because the states already look different. A cable in your hand is drawn at full strength while the others drop to half, and it still runs to wherever its far end is plugged. A new cable hangs from the jack you clicked.
+
+This is what Rack answers with a modifier key. Repeated clicks answer it without one, and they also reach the cables underneath the top one, which a modifier does not.
+
+Nothing is written to the undo history until the cable is actually put somewhere, so a cycle of four clicks leaves one entry rather than four. Right-clicking while carrying puts the cable back where it came from.
+
+### The note
+
 A note appears beside the jack each time a cable comes off one, because nobody would guess that letting go of the button is allowed. It stays until you close it, it moves to the new jack if you pick up another cable, and it keeps appearing until you tick **Don't show this again** and press OK. **Show tips again** in the right-click menu brings it back.
 
 This is the one feature that ships **on** and still has a switch, which is the opposite of how it started. There is nothing to choose between the two gestures, so the switch is not really a choice — it is there because one behaviour does differ from stock Rack, and because a gesture this fundamental should have a visible way out. The difference: a click on a jack that never moves picks the cable up, where Rack would do nothing.

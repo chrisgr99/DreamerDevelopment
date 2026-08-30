@@ -259,9 +259,76 @@ def new_cable():
     art.animate(frames, HERE / "cable-new.gif", fps)
 
 
+def cycle():
+    """Clicking the same jack over and over, reaching past the cable on top of it.
+
+    The states tell themselves apart without labels, and this is what each one looks like: a
+    lifted cable is at full strength with no plug on its loose end, and still runs to wherever
+    its far end is plugged; the cables left alone are at half; and a new cable, whose two ends
+    are both at the pointer, hangs from the jack as a loop, which is what the sag does to a
+    cable of no length.
+    """
+    fps = 12
+    w, h = 470, 330
+    out = (110.0, 70.0)
+    in_a = (400.0, 70.0)
+    in_b = (400.0, 160.0)
+    colour = art.FAMILIES["audio"][0]
+
+    frames = HERE / "_cycle"
+    frames.mkdir(exist_ok=True)
+
+    # The pointer sits low on the jack for the new-cable state, since a new cable's loose end
+    # is wherever the pointer is: pinned to the jack's centre it would have no length at all,
+    # and its loop would hang inside the jack where nobody could see it.
+    def scene(held, caption, click=False):
+        """held: None, "a", "b" or "new"."""
+        at = (out[0], out[1] + 15.0) if held == "new" else out
+        parts = [
+            art.jack(out[0], out[1], 20, colour, True),
+            art.jack(in_a[0], in_a[1], 20, colour, False),
+            art.jack(in_b[0], in_b[1], 20, colour, False),
+        ]
+        for name, far in (("a", in_a), ("b", in_b)):
+            if held == name:
+                # Lifted: this end is in the hand, so it runs from its far end to the pointer
+                # and carries no plug here.
+                parts.append(art.cable(far, at, colour))
+                parts.append(art.plug(far[0], far[1], colour))
+            else:
+                parts.append(art.cable(out, far, colour, opacity=0.5 if held else 1.0))
+                parts.append(art.plug(out[0], out[1], colour))
+                parts.append(art.plug(far[0], far[1], colour))
+        if held == "new":
+            parts.append(art.cable(out, at, colour))
+            parts.append(art.plug(out[0], out[1], colour))
+        parts.append(art.label(w / 2.0, 28, caption, 15))
+        parts.append(art.pointer(at[0], at[1], click=click))
+        return art.svg(w, h, "\n  ".join(parts))
+
+    steps = [
+        (None, "Click to pick up the top cable"),
+        ("a", "Click again to pick up the cable below it"),
+        ("b", "Click again to create a new cable"),
+        ("new", "Click again to cancel"),
+        (None, "Click again and you are back at the top cable"),
+    ]
+
+    shots = []
+    for held, caption in steps:
+        # Long enough to read the line, then the click that carries out what it says.
+        shots += [scene(held, caption)] * 26
+        shots += [scene(held, caption, click=True)] * 3
+
+    for i, shot in enumerate(shots, start=1):
+        art.render(shot, frames / f"{i:03d}.png", width=w)
+    art.animate(frames, HERE / "cable-cycle.gif", fps)
+
+
 if __name__ == "__main__":
     trace()
     knobs()
     pull()
     new_cable()
-    print("wrote cable-trace.gif, knob-turn.gif, cable-pull.gif and cable-new.gif")
+    cycle()
+    print("wrote the trace, knob, pull, new-cable and cycle animations")
