@@ -46,8 +46,9 @@ using namespace rack;
 
 
 // ---- The signal-family colour code. Colour carries FAMILY, shape carries DIRECTION. ----
-// A jack told apart only by hue cannot be told apart in peripheral vision, under
-// magnification, or by anyone whose colour vision differs. Never fold one into the other.
+// Two readings, two cues, and never one cue carrying both: a jack has to answer "what kind of
+// signal" and "which way does it go" at once, and folding them together would make each answer
+// depend on reading the other.
 
 static NVGcolor familyColor(const std::string& family) {
 	if (family == "audio")   return nvgRGB(0xf3, 0xc4, 0x0b);   // yellow

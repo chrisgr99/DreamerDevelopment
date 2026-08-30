@@ -12,14 +12,16 @@ Place one anywhere in the rack. There is no need for a second — one module dri
 
 Every jack in the rack gets a coloured ring by signal family, guessed from the port's own name:
 
-| Colour | Family | Ports named like |
-| --- | --- | --- |
-| Yellow | Audio | anything not matched below |
-| Orange | CV | CV, MOD, FM |
-| Light blue | Gate and trigger | GATE, TRIG, CLOCK, CLK, RESET, SYNC |
-| Green | Pitch | V/OCT, PITCH, NOTE |
+| Family | Input | Output | Ports named like |
+| --- | :---: | :---: | --- |
+| Audio | <img src="images/jack-audio-in.png" width="44"> | <img src="images/jack-audio-out.png" width="44"> | anything not matched below |
+| CV | <img src="images/jack-cv-in.png" width="44"> | <img src="images/jack-cv-out.png" width="44"> | CV, MOD, FM |
+| Gate and trigger | <img src="images/jack-trigger-in.png" width="44"> | <img src="images/jack-trigger-out.png" width="44"> | GATE, TRIG, CLOCK, CLK, RESET, SYNC |
+| Pitch | <img src="images/jack-pitch-in.png" width="44"> | <img src="images/jack-pitch-out.png" width="44"> | V/OCT, PITCH, NOTE |
 
-The same ring says which way the signal goes: it hugs the **outer edge** of an output and the **hole** of an input. Direction is carried by shape and family by colour, deliberately — a jack told apart only by hue cannot be told apart in peripheral vision, under magnification, or by anyone whose colour vision differs.
+The same ring says which way the signal goes: it hugs the **outer edge** of an output and the **hole** of an input. Shape carries direction and colour carries family, so the two readings never have to compete for the same cue.
+
+The pictures above are drawn by `docs/images/make-jacks.py`, from the same geometry the plugin uses, so they can be redrawn when the drawing changes rather than being screenshots that quietly go out of date.
 
 Because the naming is read from the port itself, this works on modules nobody has described by hand, including plugins released after this one.
 
