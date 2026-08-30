@@ -2,6 +2,8 @@
 
 User interface clarity: this module changes how the rack is drawn and handled. It does nothing to the sound and nothing to your patch: every feature is about reading what is in front of you and getting hold of it.
 
+<img src="images/clarity-knobs.jpg" width="760" alt="A rack holding Test Gear, Clarity, two Fundamental modules, an Instruo tona and an audio interface. Every knob across all of them wears the same face, the jacks carry their family colours, and a cable runs across with dashes crawling along it.">
+
 Place one anywhere in the rack. There is no need for a second — one module drives the whole rack, and its panel is the feature list under the heading **Features**. Each row is a switch, lit when the feature is on.
 
 ---
@@ -46,9 +48,9 @@ Rack saves cable colours in the patch. Change one by hand and it is left alone f
 
 <img src="images/knob-turn.gif" width="300" alt="A knob with its pointer and grip ticks turning back and forth.">
 
-Draws one knob face over every knob in the rack, whatever the plugin. Fundamental's knobs, Instruo's and this plugin's own, all reading the same way:
+Draws one knob face over every knob in the rack, whatever the plugin. Two Fundamental modules and an Instruo, all reading the same way:
 
-<img src="images/clarity-knobs.jpg" width="700" alt="A rack holding Test Gear, Clarity, two Fundamental modules, an Instruo tòna and an audio interface. Every knob across all of them wears the same face, the jacks carry their family colours, and a cable runs across with dashes crawling along it."> Knobs are drawn on top of each module, so a module that draws its own light-emitting ring around a knob will have it covered. If that matters to you, switch this off; the note is repeated in the right-click menu.
+<img src="images/clarity-knobs-crop.jpg" width="620" alt="Close up on the knobs of two Fundamental modules and an Instruo tona, every one of them wearing the same face."> Knobs are drawn on top of each module, so a module that draws its own light-emitting ring around a knob will have it covered. If that matters to you, switch this off; the note is repeated in the right-click menu.
 
 ### Animate cable directions
 
