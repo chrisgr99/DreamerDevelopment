@@ -52,7 +52,7 @@ Draws one knob face over every knob in the rack, whatever the plugin.
 
 <img src="images/knob-turn.gif" width="300" alt="A knob with its pointer and grip ticks turning back and forth.">
 
-*The face, with its pointer and grip ticks. Rack knobs are turned by dragging, so the pointer holds still while the knob moves under it.*
+*The face, with its pointer and grip ticks.*
 
 <img src="images/clarity-knobs-crop.jpg" width="620" alt="Close up on the knobs of two Fundamental modules and an Instruo tona, every one of them wearing the same face.">
 
