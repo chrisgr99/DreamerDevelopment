@@ -405,6 +405,15 @@ struct InterceptOverlay : widget::Widget {
 		placeChooser();
 		hintStep();
 
+		// THE CYCLE ENDS WHEN THE POINTER LEAVES THE JACK, and it has to be noticed here
+		// rather than at the next click. Taking a cable away and bringing it back to where it
+		// came from is how anyone undoes a pickup by hand — and that click has to put the
+		// cable down, not carry on stepping through the jack's cables as though the pointer
+		// had never left.
+		if (cyclePort && widgetAt<app::PortWidget>(APP->scene, APP->scene->getMousePos())
+			!= cyclePort)
+			endCycle();
+
 		// Retake the last place whenever something else has taken it — which is exactly what
 		// happens each time a menu opens. Moving our position in the child list only; the
 		// parent link is untouched, so this is not an add or a remove.

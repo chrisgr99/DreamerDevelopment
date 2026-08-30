@@ -325,10 +325,92 @@ def cycle():
     art.animate(frames, HERE / "cable-cycle.gif", fps)
 
 
+def stack():
+    """Starting a SECOND cable at an output that already has one.
+
+    This is the case the old gesture could not reach at all: a click took the cable that was
+    there and there was no way to ask for another. One more click is the whole answer.
+    """
+    fps = 12
+    w, h = 470, 330
+    out = (110.0, 70.0)
+    in_top = (400.0, 70.0)
+    in_low = (400.0, 200.0)
+    colour = art.FAMILIES["audio"][0]
+
+    frames = HERE / "_stack"
+    frames.mkdir(exist_ok=True)
+
+    def scene(state, caption, at=None, click=False):
+        """state: None, "held" or "new"."""
+        # Low on the jack while a new cable is being made: its loose end is wherever the
+        # pointer is, so at the jack's centre it would have no length and nothing to see.
+        at = at or ((out[0], out[1] + 15.0) if state == "new" else out)
+        parts = [
+            art.jack(out[0], out[1], 20, colour, True),
+            art.jack(in_top[0], in_top[1], 20, colour, False),
+            art.jack(in_low[0], in_low[1], 20, colour, False),
+        ]
+        if state == "held":
+            parts.append(art.cable(in_top, at, colour))
+            parts.append(art.plug(in_top[0], in_top[1], colour))
+        else:
+            parts.append(art.cable(out, in_top, colour, opacity=0.5 if state else 1.0))
+            parts.append(art.plug(out[0], out[1], colour))
+            parts.append(art.plug(in_top[0], in_top[1], colour))
+        if state == "new":
+            parts.append(art.cable(out, at, colour))
+            parts.append(art.plug(out[0], out[1], colour))
+        parts.append(art.label(w / 2.0, 28, caption, 15))
+        parts.append(art.pointer(at[0], at[1], click=click))
+        return art.svg(w, h, "\n  ".join(parts))
+
+    first = "Click to pick up the cable"
+    second = "Click again to get a new cable"
+    third = "Carry it and click to connect it"
+
+    shots = []
+    shots += [scene(None, first)] * 26
+    shots += [scene(None, first, click=True)] * 3
+    shots += [scene("held", second)] * 26
+    shots += [scene("held", second, click=True)] * 3
+    shots += [scene("new", third)] * 18                   # A new cable, hanging from the jack.
+
+    steps = 10                                            # Carried down to the free input.
+    start = (out[0], out[1] + 15.0)
+    for i in range(1, steps + 1):
+        t = i / steps
+        shots.append(scene("new", third,
+                           at=(start[0] + (in_low[0] - start[0]) * t,
+                               start[1] + (in_low[1] - start[1]) * t)))
+    shots += [scene("new", third, at=in_low, click=True)] * 3
+
+    # Connected: two cables out of the one jack, which is what this was for.
+    def done(caption):
+        parts = [
+            art.jack(out[0], out[1], 20, colour, True),
+            art.jack(in_top[0], in_top[1], 20, colour, False),
+            art.jack(in_low[0], in_low[1], 20, colour, False),
+            art.cable(out, in_top, colour), art.plug(out[0], out[1], colour),
+            art.plug(in_top[0], in_top[1], colour),
+            art.cable(out, in_low, colour), art.plug(in_low[0], in_low[1], colour),
+            art.label(w / 2.0, 28, caption, 15),
+            art.pointer(in_low[0] + 30, in_low[1] + 30),
+        ]
+        return art.svg(w, h, "\n  ".join(parts))
+
+    shots += [done("Two cables out of the one jack")] * 16
+
+    for i, shot in enumerate(shots, start=1):
+        art.render(shot, frames / f"{i:03d}.png", width=w)
+    art.animate(frames, HERE / "cable-stack.gif", fps)
+
+
 if __name__ == "__main__":
     trace()
     knobs()
     pull()
     new_cable()
     cycle()
-    print("wrote the trace, knob, pull, new-cable and cycle animations")
+    stack()
+    print("wrote the trace, knob, pull, new-cable, cycle and stack animations")

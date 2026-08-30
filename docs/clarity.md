@@ -92,6 +92,10 @@ An output can hold several cables, and a click can only take one of them. Clicki
 
 <img src="images/cable-cycle.gif" width="440" alt="A jack with a yellow cable and a blue one on it. A click takes the yellow one, a second click swaps it for the blue one, and moving away carries the blue cable off.">
 
+Starting a second cable at an output that already has one — the case the gesture could not reach at all before:
+
+<img src="images/cable-stack.gif" width="440" alt="A jack with one cable on it. A click picks that cable up, a second click swaps it for a new cable hanging from the jack, and that new cable is carried down and connected to a free input, leaving two cables out of the one jack.">
+
 Nothing has to be labelled, because the states already look different. A cable in your hand is drawn at full strength while the others drop to half, and it still runs to wherever its far end is plugged. A new cable hangs from the jack you clicked.
 
 This is what Rack answers with a modifier key. Repeated clicks answer it without one, and they also reach the cables underneath the top one, which a modifier does not.
