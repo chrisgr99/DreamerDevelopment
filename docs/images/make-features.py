@@ -107,19 +107,22 @@ def knobs():
     frames = HERE / "_knob"
     frames.mkdir(exist_ok=True)
 
+    # BACK AND FORTH, twice. One sweep from end to end reads as a demonstration of the travel;
+    # a knob worked to and fro reads as somebody using it, which is what the pointer resting on
+    # it with the button down is meant to say.
     lo, hi = -135.0, 135.0
     shots = []
-    for i in range(26):
-        # Ease in and out, so it reads as a hand rather than a motor.
-        t = i / 25
-        eased = 0.5 - 0.5 * math.cos(math.pi * t)
-        angle = lo + (hi - lo) * eased
-        body = "\n  ".join([
-            art.knob(150, 88, 46, angle),
-            art.pointer(150 + 30, 88 + 18, held=True),
-        ])
-        shots.append(art.svg(w, h, body))
-    shots += [shots[-1]] * 6
+    legs = [(lo, hi), (hi, lo), (lo, hi), (hi, lo)]
+    for start, end in legs:
+        for i in range(14):
+            # Eased at both ends, so it reads as a hand rather than a motor.
+            t = i / 13
+            eased = 0.5 - 0.5 * math.cos(math.pi * t)
+            body = "\n  ".join([
+                art.knob(150, 88, 46, start + (end - start) * eased),
+                art.pointer(150 + 30, 88 + 18, held=True),
+            ])
+            shots.append(art.svg(w, h, body))
 
     for i, shot in enumerate(shots, start=1):
         art.render(shot, frames / f"{i:03d}.png", width=w)
