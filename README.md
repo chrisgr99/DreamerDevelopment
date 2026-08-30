@@ -1,98 +1,58 @@
 # Dreamer Development — VCV Rack modules
 
-## DreamRack
+**[Clarity](docs/clarity.md)** changes how the whole rack is drawn and handled. **[Test Gear](docs/test-gear.md)** puts instruments on your terminals: scopes, a frequency analyser, a monitor to listen through, and a set of signal generators.
 
-DreamRack is a standalone modular synthesizer, and for the last while it has doubled as a test
-bed for modular interface design — trying alternatives to conventions every rack has inherited,
-keeping what turns out to work and discarding what does not. This plugin brings the results to
-VCV Rack.
-
-What they add up to is clarity. A patch you can read at a glance: what kind of signal a jack
-carries, whether it is an input or an output, where a cable goes, what a control is set to —
-and never a moment spent wondering which way a signal is flowing. You can tell an input from
-an output without reading a word of the panel, and it reads the same way on every module in
-the rack, whoever wrote it. Less of your attention on working out what is connected to what,
-and more of it left for the patch itself.
-
-You choose which of the features you want, with switches on the panel.
-
-### Reading the rack
-
-- **Jacks coloured by signal family** — audio, CV, gate and pitch each get their own colour.
-- **Input or output at a glance** — a dashed ring hugs the outer edge of an output and the
-  hole of an input. Shape carries direction, colour carries family: a jack told apart only by
-  hue cannot be told apart in peripheral vision, under magnification, or by anyone whose
-  colour vision differs.
-- **Cables coloured by their destination**, so where a cable is going is visible from either
-  end, and recoloured when you re-plug them.
-- **Animated cable directions** — dashes crawl from source to destination, their length keyed
-  to the destination's signal family.
-- **One consistent knob** across every plugin.
-
-### Handling cables
-
-- **Cable trace assist** — hover a cable end for a pill, click it to hold that one cable
-  bright and hide every other cable in the rack. Where several cables converge, clicking steps
-  through them; right-click the pill to lift that particular cable off.
-- **Click to pull cables** — click a jack to pick up its cable and click another to drop it,
-  with no button held in between. The rack scrolls itself when a carried cable reaches the
-  edge of the view. Off by default, since it changes Rack's most basic gesture.
-
-### Instruments that clip onto a terminal
-
-- **Oscilloscopes on terminals** — Option-click a jack and clip on a scope. It captures at the
-  engine's sample rate, not the frame rate, keeps about eleven seconds of history to pan back
-  through, and frames the signal for you when it opens. It follows the module it is attached
-  to, and saves with the patch.
-- **Signal widgets on terminals** — clip a gate button, a trigger button, a DC level, an LFO,
-  an audio oscillator dialled by frequency or by note, a note source in volts per octave, or
-  an attenuverter onto any input. They sum with whatever is already patched there, so nothing
-  has to be unplugged to try something.
-
-### Elsewhere
-
-- **Pinch to zoom** on a trackpad, with no modifier held.
-- **Scroll wheel adjusts sliders**, in menus and anywhere else they appear — in the module's
-  right-click menu.
-
-Place one DreamRack module anywhere in your patch to switch it on. It exists because a Rack
-plugin cannot run until a module of its own is placed; its process() is also where the scope
-capture and the signal widgets run, so bypassing it silences both.
-
-## Building
-
-Needs the Rack SDK:
-
-    RACK_DIR=../Rack-SDK make
-    RACK_DIR=../Rack-SDK make install
-
-Built against the official SDK rather than any modified Rack, so it runs on stock VCV Rack
-Free and Pro.
-
-## Licence
-
-GPL-3.0-or-later. Not affiliated with VCV.
+They are separate because they are different kinds of thing. Clarity is ambient — it has many tricks to make things clearer and less effortful. Test Gear is what you reach for. Each works without the other.
 
 ---
 
-## Draft wording — to choose between (delete once settled)
+## Clarity
 
-**A. Shorter, leads with what you can read at a glance.**
+A patch you can read at a glance: what kind of signal a jack carries, whether it is an input or an output, where a cable goes, and which way the signal is flowing. It reads the same way on every module in the rack, whoever wrote it. Less of your attention on working out what is connected to what, and more of it left for the patch itself.
 
-> What they add up to is clarity. A patch you can read at a glance: what kind of signal a jack
-> carries, where a cable goes, what a control is set to — and never a moment spent wondering
-> which way a signal is flowing. Less of your attention on working out what is connected to
-> what, and more of it left for the patch itself.
+Each feature is a switch on the panel, so how much the module does is up to you.
 
-**B. The same, plus the input/output and consistency points.**
+### Reading the rack
 
-> What they add up to is clarity. A patch you can read at a glance: what kind of signal a jack
-> carries, whether it is an input or an output, where a cable goes, what a control is set to —
-> and never a moment spent wondering which way a signal is flowing. You can tell an input from
-> an output without reading a word of the panel, and it reads the same way on every module in
-> the rack, whoever wrote it. Less of your attention on working out what is connected to what,
-> and more of it left for the patch itself.
+- **Jacks coloured by signal family** — yellow for audio, orange for control voltage, blue for gates and triggers, and green for pitch as volt per octave.
+- **Input or output at a glance** — a dashed ring hugs the outer edge of an output and the hole of an input. Shape carries direction, colour carries family.
+- **Cables coloured by their destination**, so you know at a glance what a cable is being used for, regardless of the type of source it came from.
+- **Animated cable directions** — dashes slowly crawl from source to destination, so you know which way the signal is flowing even if you can only see the middle of the cable.
+- **One consistent knob** across every plugin. Your rack looks and feels more coherent.
 
-Both say the same things; B adds that direction and port type are legible without panel text,
-and that the reading is the same across every developer's modules. B is longer and repeats
-"at a glance" against "without reading a word", which is the part worth cutting.
+### Handling cables
+
+- **Cable trace assist** — hover a cable end and a pill appears on it; click the pill to hold that one cable bright and hide every other cable in the rack. Where several cables converge, clicking steps through them; right-click the pill to lift that particular cable off. Click on any module's panel to bring every cable back.
+- **Add cables without dragging** — you no longer have to hold the button down. Click a jack to pick up its cable and click another to drop it, or drag and release exactly as you always have; releasing over a jack connects it. Both gestures are live at once, so there is nothing to learn, and it can be restful over a long distance. The rack scrolls itself when a carried cable reaches the edge of the view.
+- **Pinch to zoom** the rack on a trackpad.
+
+---
+
+## Test Gear
+
+Right-click any terminal, choose **Widgets** at the top of the menu, and clip an instrument onto it. It follows the pointer until you click to place it. Everything you attach follows the module it is attached to, is saved with the patch, and can be moved to another terminal by dragging the loop at its jack. A viewer on an output with nothing patched to it still works: the output is woken with a hidden cable, since a module does not compute an output that nothing is connected to.
+
+### Viewers
+
+- **Scope** — captures at the engine's sample rate, not the frame rate, keeps about eleven seconds of history to pan back through, and frames the signal for you when it opens. Triggering is a strip down its left edge; drag a link from that strip to another jack to trigger from somewhere else.
+- **Analyser** — a spectrum on a logarithmic frequency axis, with the peak read out as a note as well as a frequency, and ticks on its harmonics. Press **W** for a waterfall: the same spectrum with time as the second axis. Pinch to zoom the frequency axis, scroll sideways to pan it.
+- **Audio monitor** — hear any point in the patch. Patch Monitor out to your interface once, and every monitor you attach after that is audible through it, each with its own level and mute. They sum, so you can hear a modulator under the sound it is shaping.
+
+### Generators
+
+Gate, pulse, clock, DC level, LFO, VCO, note, volt per octave, noise and an attenuverter. They work on a terminal that already has a cable in it — a generator adds to what is there rather than replacing it, so nothing has to be unplugged to try something.
+
+---
+
+## Building
+
+Set `RACK_DIR` to your Rack SDK and run `make`. Requires a C++11 compiler.
+
+```
+RACK_DIR=/path/to/Rack-SDK make
+```
+
+## Licence
+
+GPL-3.0-or-later. No artwork ships with the plugin — every panel and every face is drawn in code.
+

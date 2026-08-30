@@ -34,6 +34,8 @@ optional and can be switched off per user.
 #include "Clip.hpp"
 #include "Injector.hpp"
 #include "Monitor.hpp"
+#include "Hint.hpp"
+#include "Sink.hpp"
 
 #include <map>
 #include <set>
@@ -149,8 +151,13 @@ struct Clarity : Module {
 		configSwitch(P_CABLE_FLOW, 0.f, 1.f, 1.f, "Animate cable directions", {"Off", "On"});
 		configSwitch(P_PINCH, 0.f, 1.f, 1.f, "Pinch to zoom", {"Off", "On"});
 		configSwitch(P_TRACE, 0.f, 1.f, 1.f, "Cable trace assist", {"Off", "On"});
-		// Off by default: it changes the most basic gesture in Rack.
-		configSwitch(P_CLICK_CABLES, 0.f, 1.f, 0.f, "Click to pull cables", {"Off", "On"});
+		// ON, and not on the panel. It began as an alternative to Rack's drag, which is why it
+		// shipped off and wore a switch — but a release after any movement now lands the cable
+		// exactly as a drag always did, so holding the button and not holding it are the same
+		// gesture and there is nothing to choose between. What is left is a switch in the menu,
+		// for the one case that still differs: a click on a jack that never moves picks the
+		// cable up, where Rack would do nothing.
+		configSwitch(P_CLICK_CABLES, 0.f, 1.f, 1.f, "Click to pull cables", {"Off", "On"});
 		configSwitch(P_SLIDER_SCROLL, 0.f, 1.f, 1.f, "Scroll wheel adjusts sliders",
 			{"Off", "On"});
 	}
@@ -197,10 +204,13 @@ struct TestGear : Module {
 		// injector is cabled from one of them to the port it drives, and both that cable and
 		// its plugs are hidden, because what should be visible is the callout loop at the
 		// terminal.
-		config(0, 0, NUM_OUTPUTS, 0);
+		config(0, SINK_MAX, NUM_OUTPUTS, 0);
 		for (int i = 0; i < INJECT_MAX; i++)
 			configOutput(i, string::f("Injector %d", i + 1));
 		configOutput(O_MONITOR, "Monitor");
+		// The sinks: hidden inputs that a watched output can be cabled to, so that it computes.
+		for (int i = 0; i < SINK_MAX; i++)
+			configInput(i, string::f("Sink %d", i + 1));
 	}
 
 	/** NO SWITCHES. The widgets used to be gated by two buttons on this face, which said what
@@ -605,6 +615,9 @@ struct DRUIOverlay : widget::TransparentWidget {
 		injectorRestoreStep();
 		// And any cable out of the Test Gear module that no injector owns is not a cable at all.
 		injectorPurgeStrayCables();
+		// Outputs being watched by a viewer are woken with a hidden cable, since a module does
+		// not compute an output that nothing is patched to.
+		sinkStep();
 
 		widget::TransparentWidget::step();
 	}
@@ -719,7 +732,7 @@ entanglement and means there is nothing to keep in step with the code.
 */
 static const float PANEL_W = 6 * RACK_GRID_WIDTH;
 static const float ROW_H = 26.f;
-static const float ROW_TOP = 54.f;
+static const float ROW_TOP = 62.f;
 static const float ROW_X = 3.f;
 /** The button itself: a small round cap, with its label beside it rather than inside it. */
 static const float CAP_R = 5.5f;
@@ -729,6 +742,22 @@ static const NVGcolor PANEL_BG = nvgRGB(0x16, 0x1a, 0x20);
 static const NVGcolor PANEL_INK = nvgRGB(0xe6, 0xe8, 0xec);
 static const NVGcolor LAMP_ON = nvgRGB(0x3d, 0xe0, 0x7a);
 
+/** PROPORTIONAL FACES, not the monospaced one Rack uses on its own panels.
+
+A fixed-width face is right where digits must not shift as they change — the instrument faces
+use it for exactly that. It is the wrong face for words: every letter is set in a slot wide
+enough for the widest one, so the spacing fights the shapes and a caption is harder to read
+than it needs to be. A module called Clarity should not be the hardest thing on the rack to
+read.
+*/
+static std::shared_ptr<window::Font> panelFont() {
+	return APP->window->loadFont(asset::system("res/fonts/DejaVuSans.ttf"));
+}
+
+static std::shared_ptr<window::Font> panelTitleFont() {
+	return APP->window->loadFont(asset::system("res/fonts/Nunito-Bold.ttf"));
+}
+
 
 struct DRUIPanel : widget::Widget {
 	/** A smaller line ABOVE the name, where the name is really two words and only the second
@@ -736,8 +765,11 @@ struct DRUIPanel : widget::Widget {
 	these panels wider than they need to be. */
 	std::string titleAbove;
 	std::string title;
-	/** Lines under the title, where a module has something to say about how it is used. */
+	/** Lines about how the module is used. Set BELOW the list: the list is what the panel is
+	for, and the instruction is a footnote to it rather than a preamble. */
 	std::vector<std::string> hint;
+	/** A heading over the list, where the list needs naming. */
+	std::string legendTitle;
 	/** Named down the face: what this module puts on a terminal, under headings, because a
 	list of thirteen is a list and a list of two groups is a description. */
 	struct LegendItem { std::string text; bool heading; };
@@ -751,66 +783,101 @@ struct DRUIPanel : widget::Widget {
 		nvgFillColor(args.vg, PANEL_BG);
 		nvgFill(args.vg);
 
-		std::shared_ptr<window::Font> font = APP->window->loadFont(
-			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
+		std::shared_ptr<window::Font> font = panelFont();
+		std::shared_ptr<window::Font> titleFace = panelTitleFont();
 		if (!font || font->handle < 0)
 			return;
 		nvgFontFaceId(args.vg, font->handle);
 		nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 
-		// Title band, so the name reads at rack distance.
+		// Title band, so the name reads at rack distance. INSIDE the border, not under it: drawn
+		// to the panel's own edge it covered the green line along the top, which read as a
+		// border someone had forgotten to finish.
 		nvgBeginPath(args.vg);
-		nvgRect(args.vg, 0, 0, box.size.x, 28);
+		nvgRect(args.vg, 4.f, 4.f, box.size.x - 8.f, 25.f);
 		nvgFillColor(args.vg, nvgRGB(0x24, 0x2a, 0x33));
 		nvgFill(args.vg);
 
 		nvgFillColor(args.vg, PANEL_INK);
+		if (titleFace && titleFace->handle >= 0)
+			nvgFontFaceId(args.vg, titleFace->handle);
 		if (titleAbove.empty()) {
-			nvgFontSize(args.vg, 14);
+			nvgFontSize(args.vg, 15);
 			nvgText(args.vg, box.size.x / 2, 14, title.c_str(), NULL);
 		}
 		else {
-			nvgFontSize(args.vg, 7.5f);
+			nvgFontSize(args.vg, 8.5f);
 			nvgText(args.vg, box.size.x / 2, 8, titleAbove.c_str(), NULL);
-			nvgFontSize(args.vg, 13);
+			nvgFontSize(args.vg, 14);
 			nvgText(args.vg, box.size.x / 2, 20, title.c_str(), NULL);
 		}
+		nvgFontFaceId(args.vg, font->handle);
 
-		nvgFontSize(args.vg, 7);
-		nvgFillColor(args.vg, nvgRGB(0x8a, 0x90, 0x9a));
-		float hintY = 38.f;
-		for (const std::string& line : hint) {
-			nvgText(args.vg, box.size.x / 2, hintY, line.c_str(), NULL);
-			hintY += 10.f;
+		// A rule under the title, and another under the list below: the panel has three things
+		// on it — what this is, how to use it, and what there is — and the lines say so without
+		// spending a word.
+		auto rule = [&](float y, NVGcolor color) {
+			nvgBeginPath(args.vg);
+			nvgMoveTo(args.vg, 10.f, y);
+			nvgLineTo(args.vg, box.size.x - 10.f, y);
+			nvgStrokeColor(args.vg, color);
+			nvgStrokeWidth(args.vg, 1.f);
+			nvgStroke(args.vg);
+		};
+		float y = 40.f;
+		// Green under the title, tying the head of the panel to its border. The rule further
+		// down stays white: that one separates one kind of text from another rather than
+		// closing off the title.
+		if (!legend.empty() || !hint.empty() || !legendTitle.empty())
+			rule(33.f, LAMP_ON);
+
+		if (!legendTitle.empty()) {
+			if (titleFace && titleFace->handle >= 0)
+				nvgFontFaceId(args.vg, titleFace->handle);
+			nvgFontSize(args.vg, 13.f);
+			nvgFillColor(args.vg, PANEL_INK);
+			nvgText(args.vg, box.size.x / 2, y + 4.f, legendTitle.c_str(), NULL);
+			nvgFontFaceId(args.vg, font->handle);
+			y += 17.f;
 		}
 
 		// What is on offer, listed. A panel carrying two switches says nothing about what the
 		// module actually gives you, and the list is the answer to "what can I clip on?"
 		// without opening a menu to find out.
-		float y = hintY + 8.f;
+		// One list, no groupings. Naming the two kinds meant two headings competing with the
+		// thirteen names they introduced, on a panel whose whole job is to name them.
+		nvgFontSize(args.vg, 9.f);
+		nvgFillColor(args.vg, PANEL_INK);
 		for (const LegendItem& item : legend) {
-			if (item.heading) {
-				y += 5.f;
-				nvgFontSize(args.vg, 7.5f);
-				nvgFillColor(args.vg, PANEL_INK);
-				nvgText(args.vg, box.size.x / 2, y, item.text.c_str(), NULL);
-				nvgFontSize(args.vg, 7);
-				nvgFillColor(args.vg, nvgRGB(0x8a, 0x90, 0x9a));
-				y += 13.f;
-				continue;
-			}
 			nvgText(args.vg, box.size.x / 2, y, item.text.c_str(), NULL);
 			y += 12.f;
 		}
-		if (!jackLabel.empty()) {
-			nvgFillColor(args.vg, PANEL_INK);
-			nvgText(args.vg, box.size.x / 2, box.size.y - 76.f, jackLabel.c_str(), NULL);
-			nvgFillColor(args.vg, nvgRGB(0x8a, 0x90, 0x9a));
+		if (!hint.empty()) {
+			rule(y - 3.f, nvgRGBA(0xe6, 0xe8, 0xec, 0x7f));
+			y += 10.f;
+			nvgFontSize(args.vg, 8.5f);
+			for (const std::string& line : hint) {
+				nvgText(args.vg, box.size.x / 2, y, line.c_str(), NULL);
+				y += 11.f;
+			}
 		}
 
-		nvgFillColor(args.vg, nvgRGB(0x6d, 0x74, 0x80));
-		nvgText(args.vg, box.size.x / 2, box.size.y - 14, "Dreamer", NULL);
-		nvgText(args.vg, box.size.x / 2, box.size.y - 5, "Development", NULL);
+		if (!jackLabel.empty())
+			nvgText(args.vg, box.size.x / 2, box.size.y - 76.f, jackLabel.c_str(), NULL);
+
+		// Clear of the border along the foot, which the lower line used to sit on top of.
+		nvgFontSize(args.vg, 8.f);
+		nvgFillColor(args.vg, nvgRGB(0x8a, 0x90, 0x9a));
+		nvgText(args.vg, box.size.x / 2, box.size.y - 24, "Dreamer", NULL);
+		nvgText(args.vg, box.size.x / 2, box.size.y - 14, "Development", NULL);
+
+		// LAST, so nothing is drawn over it — the band along the top used to hide the whole of
+		// its top edge.
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, 3.f, 3.f, box.size.x - 6.f, box.size.y - 6.f, 6.f);
+		nvgStrokeColor(args.vg, LAMP_ON);
+		nvgStrokeWidth(args.vg, 1.2f);
+		nvgStroke(args.vg);
 
 		Widget::draw(args);
 	}
@@ -854,12 +921,11 @@ struct FeatureButton : app::Switch {
 		nvgStrokeWidth(args.vg, 1.f);
 		nvgStroke(args.vg);
 
-		std::shared_ptr<window::Font> font = APP->window->loadFont(
-			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
+		std::shared_ptr<window::Font> font = panelFont();
 		if (!font || font->handle < 0)
 			return;
 		nvgFontFaceId(args.vg, font->handle);
-		nvgFontSize(args.vg, 7.5f);
+		nvgFontSize(args.vg, 8.5f);
 		nvgFillColor(args.vg, on ? PANEL_INK : nvgRGB(0x83, 0x89, 0x93));
 		nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 		const float tx = CAP_CX + CAP_R + 5.f;
@@ -926,6 +992,7 @@ static void dropOverlay(widget::Widget* o) {
 static void removeOverlaysIfIdle() {
 	if (gClarityCount > 0 || gTestGearCount > 0)
 		return;
+	hintDismiss();
 	dropOverlay(gRackOverlay);
 	dropOverlay(gPinchOverlay);
 	dropOverlay(gInterceptOverlay);
@@ -945,7 +1012,8 @@ struct DRUIWidgetBase : ModuleWidget {
 
 	void buildPanel(const char* titleAbove, const char* title,
 		const std::vector<std::string>& hint,
-		const std::vector<DRUIPanel::LegendItem>& legend, const char* jackLabel = "") {
+		const std::vector<DRUIPanel::LegendItem>& legend, const char* jackLabel = "",
+		const char* legendTitle = "") {
 
 		box.size = Vec(PANEL_W, RACK_GRID_HEIGHT);
 		DRUIPanel* panel = new DRUIPanel;
@@ -953,6 +1021,7 @@ struct DRUIWidgetBase : ModuleWidget {
 		panel->titleAbove = titleAbove;
 		panel->title = title;
 		panel->hint = hint;
+		panel->legendTitle = legendTitle;
 		panel->legend = legend;
 		panel->jackLabel = jackLabel;
 		setPanel(panel);
@@ -981,20 +1050,24 @@ struct DRUIWidgetBase : ModuleWidget {
 struct ClarityWidget : DRUIWidgetBase {
 	ClarityWidget(Clarity* module) {
 		setModule(module);
-		buildPanel("USER INTERFACE", "Clarity", {}, {});
+		buildPanel("", "Clarity", {}, {}, "", "Features");
 
 		// Sliders are not here on purpose: they stay a param, saved and mappable, but live in
 		// the right-click menu. Everything else is on the face, so a picture of the panel is a
 		// list of what the module does.
 		struct Row { int param; const char* a; const char* b; };
 		static const Row rows[] = {
-			{Clarity::P_JACKS,         "COLOUR CODE",   "JACKS"},
-			{Clarity::P_CABLE_COLOR,   "COLOUR CODE",   "CABLES"},
-			{Clarity::P_KNOBS,         "CONSISTENT",    "KNOB STYLE"},
-			{Clarity::P_CABLE_FLOW,    "ANIMATE CABLE", "DIRECTIONS"},
-			{Clarity::P_PINCH,         "PINCH TO ZOOM", ""},
-			{Clarity::P_TRACE,         "CABLE TRACE",   "ASSIST"},
-			{Clarity::P_CLICK_CABLES,  "CLICK TO PULL", "CABLES"},
+			{Clarity::P_JACKS,         "Colour code",   "jacks"},
+			{Clarity::P_CABLE_COLOR,   "Colour code",   "cables"},
+			{Clarity::P_KNOBS,         "Consistent",    "knob style"},
+			{Clarity::P_CABLE_FLOW,    "Animate cable", "directions"},
+			{Clarity::P_PINCH,         "Pinch to zoom", ""},
+			{Clarity::P_TRACE,         "Cable trace",   "assist"},
+			// Back on the face, and not because it needs choosing — it is on by default and
+			// both gestures work at once. It is here because this panel is the list of what
+			// the module does, and because a gesture this fundamental should have a visible
+			// way out if it ever gets in the way of something we have not thought of.
+			{Clarity::P_CLICK_CABLES,  "Add cables",    "without dragging"},
 		};
 		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
@@ -1028,6 +1101,7 @@ struct ClarityWidget : DRUIWidgetBase {
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createBoolPtrMenuItem("Draw pointer (for screen recordings)", "",
 			&gOpt.demoPointer));
+		menu->addChild(createMenuItem("Show tips again", "", []() { hintResetAll(); }));
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));
@@ -1041,19 +1115,27 @@ struct TestGearWidget : DRUIWidgetBase {
 	TestGearWidget(TestGear* module) {
 		setModule(module);
 		// The last line is the menu entry's own wording, so the panel and the menu agree.
-		buildPanel("", "Test Gear", {"RIGHT-CLICK ANY", "TERMINAL AND SELECT",
-			"\"WIDGETS\""}, {
-			{"VIEWERS", true},
-			{"SCOPE", false}, {"ANALYSER", false}, {"AUDIO MON", false},
-			{"GENERATORS", true},
-			{"GATE", false}, {"PULSE", false}, {"CLOCK", false}, {"DC LEVEL", false},
-			{"LFO", false}, {"VCO", false}, {"NOTE", false}, {"VOLT/OCT", false},
-			{"NOISE", false}, {"ATTENUVERTER", false},
-		}, "MONITOR OUT");
+		buildPanel("", "Test Gear",
+			{"Right-click any", "terminal and select", "\"Widgets\". It follows",
+			"the pointer. Click", "to place it."}, {
+			{"Scope", false}, {"Analyser", false}, {"Audio monitor", false},
+			{"Gate", false}, {"Pulse", false}, {"Clock", false}, {"DC level", false},
+			{"LFO", false}, {"VCO", false}, {"Note", false}, {"Volt/oct", false},
+			{"Noise", false}, {"Attenuverter", false},
+		}, "Monitor out", "Widgets");
 
 		// The one jack this module has: the monitors' mixing bus, out to your interface.
 		addOutput(createOutput<PJ301MPort>(
 			Vec(box.size.x / 2 - 12, RACK_GRID_HEIGHT - 68), module, TestGear::O_MONITOR));
+
+		// The sink jacks, hidden like the injectors' — nothing reads them; they exist so a cable
+		// can be laid into them, which is what makes an output compute. See Sink.cpp.
+		for (int i = 0; i < SINK_MAX; i++) {
+			PortWidget* p = createInput<PJ301MPort>(
+				Vec(box.size.x / 2 - 12, RACK_GRID_HEIGHT - 40), module, i);
+			p->visible = false;
+			addInput(p);
+		}
 
 		// The injectors' output jacks. Present so their cables are ordinary, complete Rack
 		// cables — which is what makes Rack responsible for removing them when a module goes

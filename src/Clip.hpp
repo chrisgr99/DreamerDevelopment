@@ -71,6 +71,15 @@ struct ClipWidget : widget::OpaqueWidget {
 	virtual void detach() {
 		port = NULL;
 	}
+	/** Whether this clip is only useful when the port is really producing something.
+
+	A viewer reads a signal; a generator makes one. Rack modules skip computing an output with
+	no cable in it, so the viewers — and only the viewers — need that output woken up. See
+	Sink.cpp. */
+	virtual bool needsSignal() {
+		return false;
+	}
+
 	/** Whether this clip can attach to a port at all. Injectors refuse outputs: a signal is
 	injected INTO something. */
 	virtual bool acceptsPort(app::PortWidget* target) {
@@ -257,3 +266,6 @@ bool clipDepositFollowing();
 
 /** How many clips are riding the pointer. Diagnostic. */
 int clipFollowingCount();
+
+/** Whether a clip's grab tab is being dragged right now. */
+bool clipRetargeting();

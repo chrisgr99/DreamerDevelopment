@@ -50,19 +50,28 @@ struct ClipHandleWidget : widget::OpaqueWidget {
 	choose one — and a loop that follows the pointer until the next click anywhere turns every
 	one of those into a decision about the loop instead.
 	*/
+	/** Where the tab was held, relative to the pointer, so it does not jump on the first move. */
+	math::Vec grabOffset;
+
 	void onDragStart(const DragStartEvent& e) override {
 		if (e.button != GLFW_MOUSE_BUTTON_LEFT || !clip)
 			return;
 		clip->retargeting = true;
 		clip->retargetPos = box.pos.plus(box.size.div(2.f));
+		grabOffset = clip->retargetPos.minus(APP->scene->rack->getMousePos());
 	}
 
+	/** FROM THE POINTER, not by accumulating deltas.
+
+	Deltas describe how far the mouse moved, and while the view is auto-scrolling at the edge
+	the rack also moves underneath it — so a tab positioned by adding up deltas drifts away
+	from the pointer exactly when it is being taken somewhere off screen. Reading the pointer's
+	position in rack coordinates each time is right under any scroll or zoom.
+	*/
 	void onDragMove(const DragMoveEvent& e) override {
 		if (!clip || !clip->retargeting)
 			return;
-		// Rack reports drag movement in screen pixels, so it has to be divided by the rack's
-		// zoom to become rack distance — otherwise the tab outruns the pointer when zoomed in.
-		clip->retargetPos = clip->retargetPos.plus(e.mouseDelta.div(getAbsoluteZoom()));
+		clip->retargetPos = APP->scene->rack->getMousePos().plus(grabOffset);
 	}
 
 	void onDragEnd(const DragEndEvent& e) override {
@@ -198,6 +207,16 @@ bool clipFamilyAt(math::Vec scenePos) {
 	return widgetAt<ClipWidget>(APP->scene, scenePos)
 		|| widgetAt<ClipHandleWidget>(APP->scene, scenePos)
 		|| widgetAt<ClipCloseWidget>(APP->scene, scenePos);
+}
+
+
+bool clipRetargeting() {
+	for (widget::Widget* child : APP->scene->rack->children) {
+		ClipWidget* clip = dynamic_cast<ClipWidget*>(child);
+		if (clip && clip->retargeting)
+			return true;
+	}
+	return false;
 }
 
 

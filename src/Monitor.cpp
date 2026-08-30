@@ -121,6 +121,10 @@ static const float MON_MIN_DB = -60.f, MON_MAX_DB = 6.f;
 
 
 struct MonitorWidget : ClipWidget {
+	bool needsSignal() override {
+		return true;
+	}
+
 	int slot = -1;
 	int tapSlot = -1;
 	/** Where a press landed and how far it has travelled, so a drag that moves the widget is

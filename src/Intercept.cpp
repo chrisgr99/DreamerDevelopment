@@ -37,6 +37,10 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "WidgetAt.hpp"
 #include "Clip.hpp"
 #include "Monitor.hpp"
+#include "Hint.hpp"
+
+#include <algorithm>
+#include <list>
 
 #include <cmath>
 #include <vector>
@@ -83,6 +87,15 @@ struct InterceptOverlay : widget::Widget {
 	/** True between the click that picks a cable up and the click that puts it down. Rack
 	believes a drag is in progress the whole time. */
 	bool carrying = false;
+	/** Where the carry began, so a RELEASE can be told apart from a click.
+
+	This is what makes holding the button and not holding it the same gesture. Rack's way is
+	press, drag, release; ours is click, move, click. They differ only in what the release
+	means — and if the pointer has travelled since the press, the release plainly ends a drag,
+	so it lands the cable. If it has not, the press was a click and the cable stays in hand.
+	Nobody has to know which mode they are in, because both are true at once.
+	*/
+	math::Vec carryStart;
 	/** A jack that was just right-clicked, and how many frames we will wait for Rack's own
 	menu to appear so ours can be added to it. */
 	WeakPtr<app::PortWidget> menuPort;
@@ -129,6 +142,7 @@ struct InterceptOverlay : widget::Widget {
 		cw->updateCable();
 		carried = cw;
 		carrying = true;
+		carryStart = APP->scene->getMousePos();
 	}
 
 	/** Picks up the top cable on this port, or starts a new one from it. */
@@ -154,6 +168,7 @@ struct InterceptOverlay : widget::Widget {
 		}
 		carried = cw;
 		carrying = true;
+		carryStart = APP->scene->getMousePos();
 	}
 
 	/** Drops what is being carried onto this port, or discards it if the port cannot take it. */
@@ -208,14 +223,16 @@ struct InterceptOverlay : widget::Widget {
 		carried = NULL;
 	}
 
-	/** Scrolls the rack when a carried cable is taken to the edge of the view.
+	/** Scrolls the rack when a carried cable, or a widget's connection, is taken to the edge of
+	the view.
 
 	Needed because the pointer cannot leave the window: without it a cable could only ever be
-	dropped on something already on screen. Only while carrying — a rack that slid about
+	dropped on something already on screen, and a scope could only ever be moved to a terminal
+	that happened to be in view. Only while something is in hand — a rack that slid about
 	whenever the pointer neared an edge would be unusable.
 	*/
 	void autoScrollWhileCarrying() {
-		if (!carrying)
+		if (!carrying && !clipRetargeting())
 			return;
 		ui::ScrollWidget* scroll = APP->scene->rackScroll;
 		if (!scroll)
@@ -251,6 +268,7 @@ struct InterceptOverlay : widget::Widget {
 		autoScrollWhileCarrying();
 		addToPortMenu();
 		placeChooser();
+		hintStep();
 
 		// Retake the last place whenever something else has taken it — which is exactly what
 		// happens each time a menu opens. Moving our position in the child list only; the
@@ -678,28 +696,97 @@ struct InterceptOverlay : widget::Widget {
 				const bool scopesOn = offerScopes && *offerScopes;
 				const bool widgetsOn = offerWidgets && *offerWidgets;
 				if (scopesOn || widgetsOn) {
-					menu->addChild(new ui::MenuSeparator);
 					WeakPtr<app::PortWidget> port = menuPort;
 					// NOT a submenu. A submenu opens beside its parent and our list is long
 					// enough to run off the bottom of the window from a jack low in the rack.
 					// This opens the same chooser Option-click gives, which Rack positions and
 					// fits to the window itself.
 					InterceptOverlay* self = this;
-					menu->addChild(createMenuItem("Widgets…", "", [self, port, scopesOn, widgetsOn]() {
-						if (!port)
-							return;
-						ui::Menu* m = createMenu();
-						addClipOnItems(m, port, scopesOn, widgetsOn);
-						// Positioned on the next frame, once it knows how tall it is.
-						self->chooser = m;
-						self->chooserAt = APP->scene->mousePos;
-					}));
+					ui::MenuItem* item = createMenuItem("Widgets…", "",
+						[self, port, scopesOn, widgetsOn]() {
+							if (!port)
+								return;
+							ui::Menu* m = createMenu();
+							addClipOnItems(m, port, scopesOn, widgetsOn);
+							// Positioned on the next frame, once it knows how tall it is.
+							self->chooser = m;
+							self->chooserAt = APP->scene->mousePos;
+						});
+					ui::MenuSeparator* separator = new ui::MenuSeparator;
+					menu->addChild(item);
+					menu->addChild(separator);
+
+					// AT THE TOP, above Rack's own entries and divided from them. This menu
+					// belongs to the port rather than to us, so adding to the foot was the
+					// polite place — but the foot is where the entries nobody reaches live, and
+					// the whole point of this one is that it is the way in. Widgets are added
+					// far more often than a port's colour is changed.
+					//
+					// Rack's menu lays its children out in list order, so moving the two nodes
+					// to the front is all this takes; splice keeps the widgets themselves and
+					// their ownership untouched.
+					std::list<widget::Widget*>& entries = menu->children;
+					auto itemAt = std::find(entries.begin(), entries.end(),
+						(widget::Widget*) item);
+					auto separatorAt = std::find(entries.begin(), entries.end(),
+						(widget::Widget*) separator);
+					if (itemAt != entries.end() && separatorAt != entries.end()) {
+						entries.splice(entries.begin(), entries, itemAt);
+						entries.splice(std::next(entries.begin()), entries, separatorAt);
+					}
 				}
 				menuPort = NULL;
 				menuWait = 0;
 				return;
 			}
 		}
+	}
+
+	/** Whether Rack is dragging a cable out of a port right now, and what the switch was set to
+	last frame — the two things the notes are triggered by. */
+	bool wasDraggingCable = false;
+	/** A note owed for the carry in progress, waiting for the pull to declare a direction. */
+	bool hintPending = false;
+	bool wasClickCables = false;
+	bool seenClickCables = false;
+
+	/** The note, offered as a cable is picked up and dragged.
+
+	AN OFFER, NOT A CORRECTION. Both gestures are right — the note exists only because nobody
+	would guess that letting go of the button is allowed, and it says so while a cable is in
+	the hand, which is the one moment that is worth knowing.
+	*/
+	void hintStep() {
+		if (!clickCables || !*clickCables)
+			return;
+		if (!carrying) {
+			hintPending = false;
+			wasDraggingCable = false;
+			return;
+		}
+		// A cable has just come off a port, however it was taken.
+		if (carrying && !wasDraggingCable)
+			hintPending = true;
+
+		// WAIT FOR A DIRECTION. At the moment of pickup the hand has not gone anywhere yet, so
+		// there is no far side to put the note on. Twenty pixels is enough to know.
+		const math::Vec travel = APP->scene->getMousePos().minus(carryStart);
+		if (hintPending && travel.norm() >= 20.f) {
+			hintPending = false;
+			// Short, because it is read with a cable in hand and half an eye. Anchored to the
+			// terminal it came off, since that is where the eye already is.
+			hintShow("letGo", {
+				"Hint: you don't need to hold down the mouse button!",
+				"Release it and the cable will still follow. Click to",
+				"connect it to the new terminal.",
+				"",
+				"With the Clarity module, you can click a terminal to",
+				"pick up a cable. It will follow the pointer. Click on",
+				"another terminal to connect it. You can also drag",
+				"cables as usual in VCV.",
+			}, carryStart, travel);
+		}
+		wasDraggingCable = carrying;
 	}
 
 	/** Centres our chooser on the pointer, and lifts it clear of the bottom of the window.
@@ -747,6 +834,12 @@ struct InterceptOverlay : widget::Widget {
 	void onButton(const ButtonEvent& e) override {
 		notePointerButton(e);
 
+		// A note on screen owns its own clicks, like a menu does.
+		if (hintCovers(e.pos)) {
+			widget::Widget::onButton(e);
+			return;
+		}
+
 		// A right-click on a jack: Rack is about to open its port menu, and ours is added to it
 		// on the next frame or two. NOT consumed — the port's own menu is the point.
 		//
@@ -783,6 +876,23 @@ struct InterceptOverlay : widget::Widget {
 				e.stopPropagating();
 				return;
 			}
+		}
+
+		// CARRYING, and the button comes UP after moving: that was a drag, so the cable lands
+		// wherever it was let go — over a port it connects, and anywhere else it stays in hand
+		// rather than being thrown away, since letting go halfway across the rack is not a
+		// decision to discard a cable.
+		if (carrying && e.action == GLFW_RELEASE && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+			const float travelled = APP->scene->getMousePos().minus(carryStart).norm();
+			if (travelled >= 4.f) {
+				app::PortWidget* target = clipFamilyAt(e.pos)
+					? NULL : widgetAt<app::PortWidget>(APP->scene, e.pos);
+				if (target)
+					dropOn(target);
+			}
+			e.consume(this);
+			e.stopPropagating();
+			return;
 		}
 
 		// CARRYING: the next click puts the cable down, wherever it lands.

@@ -78,6 +78,10 @@ static const NVGcolor ANA_AMBER = nvgRGB(0xe0, 0xa0, 0x3b);
 
 
 struct AnalyserWidget : ClipWidget {
+	bool needsSignal() override {
+		return true;
+	}
+
 	int tapSlot = -1;
 	bool averaging = true;
 	bool harmonics = true;

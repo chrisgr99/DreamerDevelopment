@@ -72,6 +72,19 @@ designed, and then overflowed once the signal reached full amplitude. Measured i
 2048 samples is about 46 ms at 48 kHz — long enough to contain a whole cycle of anything down
 to roughly 20 Hz, so the peak it measures is the real one. */
 static const int AUTOSET_MIN_SAMPLES = 2048;
+/** The window autoset actually wants: the same 4096 it reads, every time it runs.
+
+WHY THE WHOLE WINDOW. A scope attached to a terminal and a scope with A pressed on it were
+choosing different time bases, and the reason was simply that the first one ran early — the
+tap had been alive for a few frames and held 3328 samples where the later run had 4096. Fewer
+samples means fewer counted cycles and a different mean, so both the time base and the trigger
+level came out elsewhere. Waiting for the full window costs about eighty-five milliseconds at
+48 kHz, and makes attaching a scope and pressing A the same act.
+*/
+static const int AUTOSET_WINDOW = 4096;
+/** Frames to wait for that full window before settling for what has arrived. Only reached if
+the engine is stopped or crawling; otherwise the window fills in about three frames. */
+static const int AUTOSET_PATIENCE = 60;
 /** Units of scroll per step. Raising this slows scrolling proportionally. */
 /** How much of the history a scope reads each frame: enough for a full window plus room to
 find a trigger edge ahead of it. */
@@ -148,6 +161,10 @@ static PortWidget* findPort(int64_t moduleId, int portId, bool isOutput);
 
 
 struct ScopeWidget : ClipWidget {
+	bool needsSignal() override {
+		return true;
+	}
+
 	int tapSlot = -1;
 
 	/** Scroll delta banked but not yet spent, so a scale steps once per three units of scroll
@@ -176,6 +193,8 @@ struct ScopeWidget : ClipWidget {
 	the sound is running would retry for ever, and it would be impossible to tell that from a
 	broken autoset. */
 	int autosetBudget = AUTOSET_BUDGET;
+	/** Frames spent waiting for the window to fill. */
+	int autosetWaited = 0;
 	bool frozen = false;
 	bool acCoupled = false;
 
@@ -543,10 +562,17 @@ struct ScopeWidget : ClipWidget {
 			return;
 		const int have = tapRead(tapSlot, scratch.data(), 4096);
 
-		// Not enough yet to judge a peak by. Keep waiting WITHOUT spending the budget: the tap
-		// is plainly working, it simply has not filled.
-		if (have >= 1 && have < AUTOSET_MIN_SAMPLES)
-			return;
+		// Not the full window yet. Keep waiting WITHOUT spending the give-up budget: the tap is
+		// plainly working, it simply has not filled. Waiting matters even once there is enough
+		// to judge a peak by, because the time base is measured from how many cycles fit in
+		// the window — see AUTOSET_WINDOW.
+		if (have >= 1 && have < AUTOSET_WINDOW) {
+			autosetWaited++;
+			const bool patienceGone = autosetWaited > AUTOSET_PATIENCE
+				&& have >= AUTOSET_MIN_SAMPLES;
+			if (!patienceGone)
+				return;
+		}
 
 		if (have < 1) {
 			// No samples AT ALL is a different matter from a signal that is silent or still
@@ -658,8 +684,13 @@ struct ScopeWidget : ClipWidget {
 			tapDestroy(tapSlot);
 		tapSlot = slot;
 		port = target;
+		// EXACTLY what pressing A does, including returning to the live end: a scope moved to
+		// another terminal is looking at a different signal, and a pan into the history of the
+		// last one has nothing to do with it.
 		autosetPending = true;
 		autosetBudget = AUTOSET_BUDGET;
+		autosetWaited = 0;
+		timeShift = 0.f;
 		INFO("Scope: re-probing %s port %d",
 			target->type == engine::Port::OUTPUT ? "output" : "input", target->portId);
 		return true;
@@ -1586,6 +1617,7 @@ struct ScopeWidget : ClipWidget {
 			if (autoBox().contains(e.pos)) {
 				autosetPending = true;
 				autosetBudget = AUTOSET_BUDGET;
+				autosetWaited = 0;
 				// Autoset frames what is arriving now, so it also returns to the live end.
 				timeShift = 0.f;
 				e.consume(this);
