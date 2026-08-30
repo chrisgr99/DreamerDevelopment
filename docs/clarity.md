@@ -4,6 +4,8 @@ User interface clarity: this module changes how the rack is drawn and handled. I
 
 <img src="images/clarity-knobs.jpg" width="760" alt="A rack holding Test Gear, Clarity, two Fundamental modules, an Instruo tona and an audio interface. Every knob across all of them wears the same face, the jacks carry their family colours, and a cable runs across with dashes crawling along it.">
 
+*A rack with Clarity in it: one knob face across three different plugins, jacks coloured by what they carry, and a cable with its dashes crawling towards where it goes.*
+
 Place one anywhere in the rack. There is no need for a second — one module drives the whole rack, and its panel is the feature list under the heading **Features**. Each row is a switch, lit when the feature is on.
 
 ---
@@ -46,17 +48,25 @@ Rack saves cable colours in the patch. Change one by hand and it is left alone f
 
 ### Consistent knob style
 
+Draws one knob face over every knob in the rack, whatever the plugin.
+
 <img src="images/knob-turn.gif" width="300" alt="A knob with its pointer and grip ticks turning back and forth.">
 
-Draws one knob face over every knob in the rack, whatever the plugin. Two Fundamental modules and an Instruo, all reading the same way:
+*The face, with its pointer and grip ticks. Rack knobs are turned by dragging, so the pointer holds still while the knob moves under it.*
 
-<img src="images/clarity-knobs-crop.jpg" width="620" alt="Close up on the knobs of two Fundamental modules and an Instruo tona, every one of them wearing the same face."> Knobs are drawn on top of each module, so a module that draws its own light-emitting ring around a knob will have it covered. If that matters to you, switch this off; the note is repeated in the right-click menu.
+<img src="images/clarity-knobs-crop.jpg" width="620" alt="Close up on the knobs of two Fundamental modules and an Instruo tona, every one of them wearing the same face.">
+
+*Two Fundamental modules and an Instruo, all reading the same way.*
+
+Knobs are drawn on top of each module, so a module that draws its own light-emitting ring around a knob will have it covered. If that matters to you, switch this off; the note is repeated in the right-click menu.
 
 ### Animate cable directions
 
 Dashes crawl along every cable from source to destination. Dash length is keyed to the destination's family — fine for audio, coarse for gates — so a glance tells you both the direction and roughly what is travelling.
 
 <img src="images/cable-flow.gif" width="420" alt="Dashes crawling along a cable from a port labelled Output to a port labelled Input.">
+
+*The crawl runs from the output towards the input, whichever way the cable happens to lie on screen.*
 
 The crawl states direction only. It is not synchronised with the signal, and says nothing about what the signal is doing.
 
@@ -70,13 +80,15 @@ Hover either end of a cable and a small pill appears on it. Click the pill and t
 
 <img src="images/cable-trace.gif" width="420" alt="Six cables cross each other. The pointer reaches a cable end, a pill appears on it, and a click leaves that one cable on screen alone. A second click brings the others back.">
 
+*The others are hidden rather than dimmed, so what is left is one legible lead.*
+
 Where several cables converge on one jack, clicking the pill steps through them one at a time.
 
 **Right-click the pill** to lift that particular cable off its jack — useful when the cable you want is the one underneath four others.
 
 ### Add cables without dragging
 
-You no longer have to hold the button down to move a cable.
+You no longer have to hold the button down to move a cable. Starting one where there is none:
 
 <img src="images/cable-new.gif" width="440" alt="A click on an empty terminal starts a cable, which follows the pointer across with no button held and is connected with a second click.">
 
