@@ -188,20 +188,22 @@ struct InterceptOverlay : widget::Widget {
 		if (!port || !port->module)
 			return;
 
-		app::CableWidget* cw = APP->scene->rack->getTopCable(port);
-		if (cw)
-			liftExisting(cw, port);
-		else
-			liftNew(port);
-
-		// The click starts a cycle on this jack: another click here, without the pointer
-		// leaving it, reaches the next thing the jack can offer.
+		// THE LIST IS READ FIRST, before anything is lifted. Reading it afterwards left the
+		// cable now in the hand out of it — so the second cable sat at index 0 while the first
+		// was being held, and the next click stepped past it to a new cable. The cable on top
+		// has to be index 0 of the same list the cycle walks.
 		cyclePort = port;
 		cycleCables = APP->scene->rack->getCompleteCablesOnPort(port);
-		// Top first, to match the cable the first click actually took.
+		// Top first: Rack keeps them in the order they were made, and the last is the one a
+		// click lands on.
 		std::reverse(cycleCables.begin(), cycleCables.end());
-		cycleIndex = cw ? 0 : cycleCables.size();
+		cycleIndex = 0;
 		cycleAt = APP->scene->getMousePos();
+
+		if (!cycleCables.empty())
+			liftExisting(cycleCables[0], port);
+		else
+			liftNew(port);
 	}
 
 	/** Takes a cable off this end of the port, keeping the undo entry back until the gesture

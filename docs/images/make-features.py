@@ -260,65 +260,65 @@ def new_cable():
 
 
 def cycle():
-    """Clicking the same jack over and over, reaching past the cable on top of it.
+    """Clicking the same jack twice: the cable on top, then the one under it, then away.
 
-    The states tell themselves apart without labels, and this is what each one looks like: a
-    lifted cable is at full strength with no plug on its loose end, and still runs to wherever
-    its far end is plugged; the cables left alone are at half; and a new cable, whose two ends
-    are both at the pointer, hangs from the jack as a loop, which is what the sag does to a
-    cable of no length.
+    Two colours, because the point is WHICH cable is in your hand and two yellow ones cannot
+    say that. The states tell themselves apart without labels: the cable being held is at full
+    strength while the other drops to half, and it runs from its far end to the pointer.
     """
     fps = 12
     w, h = 470, 330
     out = (110.0, 70.0)
-    in_a = (400.0, 70.0)
-    in_b = (400.0, 160.0)
-    colour = art.FAMILIES["audio"][0]
+    in_top = (400.0, 70.0)
+    in_low = (400.0, 190.0)
+    yellow = art.FAMILIES["audio"][0]
+    blue = art.FAMILIES["trigger"][0]
 
     frames = HERE / "_cycle"
     frames.mkdir(exist_ok=True)
 
-    # The pointer sits low on the jack for the new-cable state, since a new cable's loose end
-    # is wherever the pointer is: pinned to the jack's centre it would have no length at all,
-    # and its loop would hang inside the jack where nobody could see it.
-    def scene(held, caption, click=False):
-        """held: None, "a", "b" or "new"."""
-        at = (out[0], out[1] + 15.0) if held == "new" else out
+    def scene(held, caption, at=None, click=False):
+        """held: None, "top" or "low"."""
+        at = at or out
         parts = [
-            art.jack(out[0], out[1], 20, colour, True),
-            art.jack(in_a[0], in_a[1], 20, colour, False),
-            art.jack(in_b[0], in_b[1], 20, colour, False),
+            art.jack(out[0], out[1], 20, yellow, True),
+            art.jack(in_top[0], in_top[1], 20, yellow, False),
+            art.jack(in_low[0], in_low[1], 20, blue, False),
         ]
-        for name, far in (("a", in_a), ("b", in_b)):
+        for name, far, colour in (("top", in_top, yellow), ("low", in_low, blue)):
             if held == name:
-                # Lifted: this end is in the hand, so it runs from its far end to the pointer
-                # and carries no plug here.
+                # In the hand: it runs from its far end to the pointer, at full strength and
+                # with no plug on the end being carried.
                 parts.append(art.cable(far, at, colour))
                 parts.append(art.plug(far[0], far[1], colour))
             else:
                 parts.append(art.cable(out, far, colour, opacity=0.5 if held else 1.0))
                 parts.append(art.plug(out[0], out[1], colour))
                 parts.append(art.plug(far[0], far[1], colour))
-        if held == "new":
-            parts.append(art.cable(out, at, colour))
-            parts.append(art.plug(out[0], out[1], colour))
         parts.append(art.label(w / 2.0, 28, caption, 15))
         parts.append(art.pointer(at[0], at[1], click=click))
         return art.svg(w, h, "\n  ".join(parts))
 
-    steps = [
-        (None, "Click to pick up the top cable"),
-        ("a", "Click again to pick up the cable below it"),
-        ("b", "Click again to create a new cable"),
-        ("new", "Click again to cancel"),
-        (None, "Click again and you are back at the top cable"),
-    ]
+    first = "Click to pick up the top cable"
+    second = "Click again to pick up the cable below it"
+    away = "Move away and you are carrying it"
 
     shots = []
-    for held, caption in steps:
-        # Long enough to read the line, then the click that carries out what it says.
-        shots += [scene(held, caption)] * 26
-        shots += [scene(held, caption, click=True)] * 3
+    shots += [scene(None, first)] * 26                    # Both cables, nothing held.
+    shots += [scene(None, first, click=True)] * 3
+    shots += [scene("top", second)] * 26                  # The yellow one, still on the jack.
+    shots += [scene("top", second, click=True)] * 3
+    shots += [scene("low", second)] * 8                   # Swapped for the blue one.
+    shots += [scene("low", away)] * 18
+
+    # Carried off the jack, which is what ends the cycle: from here the next click puts it
+    # down somewhere.
+    steps = 10
+    for i in range(1, steps + 1):
+        t = i / steps
+        pos = (out[0] + 150.0 * t, out[1] + 90.0 * t)
+        shots.append(scene("low", away, at=pos))
+    shots += [scene("low", away, at=(out[0] + 150.0, out[1] + 90.0))] * 12
 
     for i, shot in enumerate(shots, start=1):
         art.render(shot, frames / f"{i:03d}.png", width=w)

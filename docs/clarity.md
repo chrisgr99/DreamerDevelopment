@@ -90,7 +90,7 @@ Click a jack to pick up its cable, move, and click another jack to drop it. Or p
 
 An output can hold several cables, and a click can only take one of them. Clicking the same jack again — with the pointer still on it — swaps what is in your hand for the next thing that jack can offer: the cables on it in turn, then a new cable, then an empty hand, then round to the first again.
 
-<img src="images/cable-cycle.gif" width="440" alt="A jack with two cables on it. Clicking it takes the top cable, clicking again takes the one below, clicking again starts a new cable, and clicking again leaves the hand empty.">
+<img src="images/cable-cycle.gif" width="440" alt="A jack with a yellow cable and a blue one on it. A click takes the yellow one, a second click swaps it for the blue one, and moving away carries the blue cable off.">
 
 Nothing has to be labelled, because the states already look different. A cable in your hand is drawn at full strength while the others drop to half, and it still runs to wherever its far end is plugged. A new cable hangs from the jack you clicked.
 
