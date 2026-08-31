@@ -42,3 +42,10 @@ include $(RACK_DIR)/plugin.mk
 ifdef ARCH_MAC
 	LDFLAGS += -framework Cocoa
 endif
+
+# OpenGL has to be named on Windows. The pinch overlay photographs the frame with
+# glReadPixels; macOS and Linux resolve that at load time, and MinGW does not — it linked
+# everything else and stopped at that one symbol.
+ifdef ARCH_WIN
+	LDFLAGS += -lopengl32
+endif
