@@ -44,12 +44,39 @@ Gate, pulse, clock, DC level, LFO, VCO, note, volt per octave, noise and an atte
 
 ---
 
-## Building
+## Installing
 
-Set `RACK_DIR` to your Rack SDK and run `make`. Requires a C++11 compiler.
+Download the file for your platform from the [latest release](https://github.com/chrisgr99/DreamerDevelopment/releases/latest):
+
+| Your computer | File |
+| --- | --- |
+| Mac with Apple silicon | `DreamerDevelopment-2.0.0-mac-arm64.vcvplugin` |
+| Mac with an Intel processor | `DreamerDevelopment-2.0.0-mac-x64.vcvplugin` |
+| Windows | `DreamerDevelopment-2.0.0-win-x64.vcvplugin` |
+| Linux | `DreamerDevelopment-2.0.0-lin-x64.vcvplugin` |
+
+Put the downloaded file in Rack's plugins folder:
+
+| | |
+| --- | --- |
+| Mac | `~/Library/Application Support/Rack2/plugins-mac-arm64/` (or `plugins-mac-x64/` on an Intel Mac) |
+| Windows | `%USERPROFILE%\Documents\Rack2\plugins-win-x64\` |
+| Linux | `~/.local/share/Rack2/plugins-lin-x64/` |
+
+Then start Rack. It unpacks the file on startup and the two modules appear in the browser under
+Dreamer Development. The downloaded file is replaced by a folder of the same name, which is
+what unpacking looks like.
+
+To remove the plugin, delete that folder and restart Rack.
+
+## Building from source
+
+For development, or for a platform with no package. Set `RACK_DIR` to your Rack SDK and run
+`make`. Requires a C++11 compiler.
 
 ```
-RACK_DIR=/path/to/Rack-SDK make
+RACK_DIR=/path/to/Rack-SDK make          # build
+RACK_DIR=/path/to/Rack-SDK make install  # build and copy into the plugins folder
 ```
 
 ## Licence
