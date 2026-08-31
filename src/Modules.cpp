@@ -158,7 +158,8 @@ struct Clarity : Module {
 		// gesture and there is nothing to choose between. What is left is a switch in the menu,
 		// for the one case that still differs: a click on a jack that never moves picks the
 		// cable up, where Rack would do nothing.
-		configSwitch(P_CLICK_CABLES, 0.f, 1.f, 1.f, "Click to pull cables", {"Off", "On"});
+		configSwitch(P_CLICK_CABLES, 0.f, 1.f, 1.f, "Add and move cables without dragging",
+			{"Off", "On"});
 		configSwitch(P_SLIDER_SCROLL, 0.f, 1.f, 1.f, "Scroll wheel adjusts sliders",
 			{"Off", "On"});
 	}
@@ -1068,7 +1069,10 @@ struct ClarityWidget : DRUIWidgetBase {
 			// both gestures work at once. It is here because this panel is the list of what
 			// the module does, and because a gesture this fundamental should have a visible
 			// way out if it ever gets in the way of something we have not thought of.
-			{Clarity::P_CLICK_CABLES,  "Add cables",    "without dragging"},
+			// Two lines is all a row has, and "Add and move cables without dragging" does not
+			// fit in them at this width. The panel says the short form; the param's own name,
+			// which is what a hover and the right-click menu show, says the whole thing.
+			{Clarity::P_CLICK_CABLES,  "Add and move",  "cables"},
 		};
 		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
@@ -1102,7 +1106,7 @@ struct ClarityWidget : DRUIWidgetBase {
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createBoolPtrMenuItem("Draw pointer (for screen recordings)", "",
 			&gOpt.demoPointer));
-		menu->addChild(createMenuItem("Show tips again", "", []() { hintResetAll(); }));
+		menu->addChild(createMenuItem("Show hints again", "", []() { hintResetAll(); }));
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));

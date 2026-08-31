@@ -17,13 +17,13 @@ Each feature is a switch on the panel, so how much the module does is up to you.
 - **Jacks coloured by signal family** — yellow for audio, orange for control voltage, blue for gates and triggers, and green for pitch as volt per octave.
 - **Input or output at a glance** — a dashed ring hugs the outer edge of an output and the hole of an input. Shape carries direction, colour carries family.
 - **Cables coloured by their destination**, so you know at a glance what a cable is being used for, regardless of the type of source it came from.
-- **Animated cable directions** — dashes slowly crawl from source to destination, so you know which way the signal is flowing even if you can only see the middle of the cable.
+- **Animated cable directions** — dashes drift slowly from source to destination, so you know which way the signal is flowing even if you can only see the middle of the cable.
 - **One consistent knob** across every plugin. Your rack looks and feels more coherent.
 
 ### Handling cables
 
 - **Cable trace assist** — hover a cable end and a pill appears on it; click the pill to hold that one cable bright and hide every other cable in the rack. Where several cables converge, clicking steps through them; right-click the pill to lift that particular cable off. Click on any module's panel to bring every cable back.
-- **Add cables without dragging** — you no longer have to hold the button down. Click a jack to pick up its cable and click another to drop it, or drag and release exactly as you always have; releasing over a jack connects it. Both gestures are live at once, so there is nothing to learn, and it can be restful over a long distance. The rack scrolls itself when a carried cable reaches the edge of the view.
+- **Add and move cables without dragging** — you no longer have to hold the button down. Click a jack to pick up its cable and click another to drop it, or drag and release exactly as you always have; releasing over a jack connects it. Both gestures are live at once, so there is nothing to learn, and it can be restful over a long distance. The rack scrolls itself when a carried cable reaches the edge of the view.
 - **Pinch to zoom** the rack on a trackpad.
 
 ---

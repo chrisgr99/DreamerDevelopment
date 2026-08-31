@@ -76,6 +76,18 @@ def curve_points(p0, ctrl, p1, samples=60):
     return pts, cum
 
 
+def embedded(path):
+    """A picture as a data URI.
+
+    Referenced by filename it does not render: the SVG is written to a temporary file and the
+    reference resolves against wherever that happens to be. Embedding sidesteps the question.
+    """
+    import base64
+    data = base64.b64encode(Path(path).read_bytes()).decode("ascii")
+    kind = "jpeg" if str(path).lower().endswith((".jpg", ".jpeg")) else "png"
+    return f"data:image/{kind};base64,{data}"
+
+
 def point_on(pts, cum, s):
     """The point `s` along a sampled curve."""
     if s <= 0:
@@ -254,6 +266,8 @@ def arrow(x0, y0, x1, y1, colour="#e6e8ec"):
 
 
 def label(x, y, text, size=15, colour="#e6e8ec", anchor="middle"):
+    """Text. The colour argument comes before the anchor because captions change colour more
+    often than they change alignment."""
     return (f'<text x="{x:.1f}" y="{y:.1f}" font-family="Helvetica, Arial, sans-serif" '
             f'font-size="{size}" fill="{colour}" text-anchor="{anchor}">{text}</text>')
 
@@ -265,12 +279,16 @@ def svg(width, height, body, background=PANEL_BG):
             f'  {body}\n</svg>\n')
 
 
-def render(svg_text, out_png, width=None):
+def render(svg_text, out_png, width=None, height=None):
+    """SVG to PNG at whatever size is asked for. Vector in, so the video can be drawn at 1080p
+    from the same scenes the manual draws at 460 wide, with nothing enlarged."""
     tmp = Path(out_png).with_suffix(".tmp.svg")
     tmp.write_text(svg_text)
     cmd = ["rsvg-convert", "-o", str(out_png)]
     if width:
         cmd += ["-w", str(width)]
+    if height:
+        cmd += ["-h", str(height)]
     subprocess.run(cmd + [str(tmp)], check=True)
     tmp.unlink()
 

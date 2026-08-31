@@ -72,6 +72,18 @@ static const int WF_ROWS = 160;
 grab that works on one works on the other. */
 static const float ANA_RESIZE_EDGE = 6.f;
 static const float ANA_MIN_W = 90.f, ANA_MIN_H = 50.f;
+/** How far the widget's box extends BEYOND its drawn face.
+
+Rack offers a press to a widget whose box contains the point, and a box that ends exactly at the
+drawn edge does not contain that edge — `Rect::contains` is half-open. So a press aimed at the
+right or bottom border landed outside the analyser and reached the module underneath, which then
+began a module drag. The face is drawn at the same size as before; the widget simply claims a
+few pixels more, and the resize borders now sit comfortably inside it. */
+static const float ANA_GRAB = 6.f;
+
+/** The transport, in the same place and at the same size as the scope's. */
+static const float ANA_TRANSPORT = 15.f;
+static const float ANA_EDGE = 3.f;
 
 static const NVGcolor ANA_GREEN = nvgRGB(0x3d, 0xe0, 0x7a);
 static const NVGcolor ANA_AMBER = nvgRGB(0xe0, 0xa0, 0x3b);
@@ -113,6 +125,8 @@ struct AnalyserWidget : ClipWidget {
 	float viewMaxHz = 0.f;
 
 	bool waterfall = false;
+	/** Stopped: the display holds whatever it was showing. */
+	bool frozen = false;
 	std::vector<uint8_t> wfPixels;
 	int wfImage = -1;
 	bool wfDirty = false;
@@ -120,7 +134,7 @@ struct AnalyserWidget : ClipWidget {
 	AnalyserWidget() {
 		faceWidth = 150.f;
 		faceHeight = 74.f;
-		box.size = math::Vec(faceWidth, faceHeight);
+		sizeBox();
 		input.resize(FFT_SIZE, 0.f);
 		spectrum.resize(FFT_SIZE * 2, 0.f);
 		mags.assign(FFT_SIZE / 2, 0.f);
@@ -162,7 +176,9 @@ struct AnalyserWidget : ClipWidget {
 
 	/** One transform per frame, windowed and averaged into the running spectrum. */
 	void analyse() {
-		if (tapSlot < 0 || retargeting)
+		// PAUSED holds the last spectrum on screen: the averaged magnitudes are left as they
+		// are, and no row is added to the waterfall, so the picture stops where it was.
+		if (tapSlot < 0 || retargeting || frozen)
 			return;
 		const int have = tapRead(tapSlot, input.data(), FFT_SIZE);
 		if (have < FFT_SIZE)
@@ -275,9 +291,20 @@ struct AnalyserWidget : ClipWidget {
 		wfDirty = true;
 	}
 
-	/** Clear of the bottom-left resize corner, so the corner is still grabbable. */
+	void sizeBox() {
+		box.size = math::Vec(faceWidth + ANA_GRAB, faceHeight + ANA_GRAB);
+	}
+
+	/** Lower left, as on the scope. */
+	math::Rect transportBox() {
+		return math::Rect(math::Vec(ANA_EDGE, faceHeight - ANA_TRANSPORT - ANA_EDGE),
+			math::Vec(ANA_TRANSPORT, ANA_TRANSPORT));
+	}
+
+	/** Beside the transport, and clear of the bottom-left resize corner. */
 	math::Rect wfBox() {
-		return math::Rect(math::Vec(7.f, faceHeight - 21.f), math::Vec(13.f, 13.f));
+		return math::Rect(math::Vec(ANA_EDGE + ANA_TRANSPORT + 4.f, faceHeight - 21.f),
+			math::Vec(13.f, 13.f));
 	}
 
 	/** Which edge or corner the pointer is on, exactly as the scope decides it: any of the
@@ -292,8 +319,6 @@ struct AnalyserWidget : ClipWidget {
 			dir.y = -1;
 		else if (pos.y >= faceHeight - ANA_RESIZE_EDGE)
 			dir.y = 1;
-		if (pos.y > faceHeight)
-			return math::Vec();
 		return dir;
 	}
 
@@ -488,6 +513,7 @@ struct AnalyserWidget : ClipWidget {
 		nvgRestore(args.vg);
 
 		drawWaterfallButton(args.vg);
+		drawTransport(args.vg);
 
 		// The reading: the note first, because that is the answer to the question anyone
 		// patches this in to ask, and the frequency beside it for the ones who want it exact.
@@ -621,6 +647,27 @@ struct AnalyserWidget : ClipWidget {
 	of history on it or it does not, so dimming the W said nothing the display was not already
 	saying, and made the one control on the face hard to find.
 	*/
+	/** A right-pointing triangle runs, two bars pause — the scope's transport exactly. */
+	void drawTransport(NVGcontext* vg) {
+		const math::Rect r = transportBox();
+		const float cx = r.pos.x + r.size.x / 2.f;
+		const float cy = r.pos.y + r.size.y / 2.f;
+		nvgFillColor(vg, ANA_AMBER);
+		if (frozen) {
+			nvgBeginPath(vg);
+			nvgMoveTo(vg, cx - 3.f, cy - 4.f);
+			nvgLineTo(vg, cx + 4.f, cy);
+			nvgLineTo(vg, cx - 3.f, cy + 4.f);
+			nvgFill(vg);
+		}
+		else {
+			nvgBeginPath(vg);
+			nvgRect(vg, cx - 3.5f, cy - 4.f, 2.5f, 8.f);
+			nvgRect(vg, cx + 1.f, cy - 4.f, 2.5f, 8.f);
+			nvgFill(vg);
+		}
+	}
+
 	void drawWaterfallButton(NVGcontext* vg) {
 		std::shared_ptr<window::Font> font = APP->window->loadFont(
 			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
@@ -660,7 +707,7 @@ struct AnalyserWidget : ClipWidget {
 			offset.y += faceHeight - newH;
 			faceHeight = newH;
 		}
-		box.size = math::Vec(faceWidth, faceHeight);
+		sizeBox();
 	}
 
 	bool resizing = false;
@@ -679,6 +726,12 @@ struct AnalyserWidget : ClipWidget {
 				viewMaxHz = 0.f;
 			}));
 			menu->addChild(createMenuItem("Remove", "", [this]() { detach(); }));
+			e.consume(this);
+			return;
+		}
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
+			&& transportBox().contains(e.pos)) {
+			frozen ^= true;
 			e.consume(this);
 			return;
 		}
@@ -724,6 +777,7 @@ struct AnalyserWidget : ClipWidget {
 		json_object_set_new(rootJ, "average", json_boolean(averaging));
 		json_object_set_new(rootJ, "harmonics", json_boolean(harmonics));
 		json_object_set_new(rootJ, "waterfall", json_boolean(waterfall));
+		json_object_set_new(rootJ, "frozen", json_boolean(frozen));
 		json_object_set_new(rootJ, "viewMinHz", json_real(viewMinHz));
 		json_object_set_new(rootJ, "viewMaxHz", json_real(viewMaxHz));
 		return rootJ;
@@ -745,9 +799,10 @@ struct AnalyserWidget : ClipWidget {
 		boolean("average", averaging);
 		boolean("harmonics", harmonics);
 		boolean("waterfall", waterfall);
+		boolean("frozen", frozen);
 		num("viewMinHz", viewMinHz);
 		num("viewMaxHz", viewMaxHz);
-		box.size = math::Vec(faceWidth, faceHeight);
+		sizeBox();
 	}
 };
 

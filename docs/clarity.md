@@ -1,12 +1,14 @@
 # Clarity
 
-User interface clarity: this module changes how the rack is drawn and handled. It does nothing to the sound and nothing to your patch: every feature is about reading what is in front of you and getting hold of it.
+Clarity changes how the rack is drawn and how you interact with it. It does not process audio and does not alter the patch.
 
-<img src="images/clarity-knobs.jpg" width="760" alt="A rack holding Test Gear, Clarity, two Fundamental modules, an Instruo tona and an audio interface. Every knob across all of them wears the same face, the jacks carry their family colours, and a cable runs across with dashes crawling along it.">
+The interaction features were developed on a trackpad and are designed for one. All of them work with a mouse except pinch to zoom, which requires a trackpad gesture.
 
-*A rack with Clarity in it: one knob face across three different plugins, jacks coloured by what they carry, and a cable with its dashes crawling towards where it goes.*
+<img src="images/clarity-knobs.jpg" width="760" alt="A rack holding Test Gear, Clarity, two Fundamental modules, an Instruo tona and an audio interface. Every knob across all of them is drawn with the same face, the jacks show their family colours, and a cable crosses the rack with dashes drifting along it.">
 
-Place one anywhere in the rack. There is no need for a second — one module drives the whole rack, and its panel is the feature list under the heading **Features**. Each row is a switch, lit when the feature is on.
+*A rack running Clarity: one knob face across three plugins, jacks coloured by signal family, and a cable whose dashes drift towards its destination.*
+
+Place one anywhere in the rack. A second has no effect. The panel lists the features under the heading **Features**, one switch per row, lit when that feature is enabled.
 
 ---
 
@@ -14,7 +16,7 @@ Place one anywhere in the rack. There is no need for a second — one module dri
 
 ### Colour code jacks
 
-Every jack in the rack gets a coloured ring by signal family, guessed from the port's own name:
+Every jack in the rack is given a coloured ring for its signal family, determined from the port's name:
 
 | Family | Input | Output | Ports named like |
 | --- | :---: | :---: | --- |
@@ -23,15 +25,15 @@ Every jack in the rack gets a coloured ring by signal family, guessed from the p
 | Gate and trigger | <img src="images/jack-trigger-in.png" width="44"> | <img src="images/jack-trigger-out.png" width="44"> | GATE, TRIG, CLOCK, CLK, RESET, SYNC |
 | Pitch | <img src="images/jack-pitch-in.png" width="44"> | <img src="images/jack-pitch-out.png" width="44"> | V/OCT, PITCH, NOTE |
 
-The same ring says which way the signal goes: it hugs the **outer edge** of an output and the **hole** of an input. Shape carries direction and colour carries family, so the two readings never have to compete for the same cue.
+The same ring also indicates direction: it is drawn against the **outer edge** on an output, and against the **hole** on an input. Colour indicates the signal family; position indicates the direction.
 
-The pictures above are drawn by `docs/images/make-jacks.py`, from the same geometry the plugin uses, so they can be redrawn when the drawing changes rather than being screenshots that quietly go out of date.
+The port name is read from the module itself, so this applies to modules with no entry in any list, including plugins released after this one.
 
-Because the naming is read from the port itself, this works on modules nobody has described by hand, including plugins released after this one.
+The pictures above are drawn by `docs/images/make-jacks.py`, from the same geometry the plugin uses.
 
 ### Colour code cables
 
-A cable takes the colour of the family of the port it **arrives** at, so where it is going is visible from either end. Re-plug it somewhere else and it takes the new colour. A cable in flight is coloured from the port it left, so it reads as that signal from the moment it leaves the jack.
+A cable is drawn in the colour of the family of the port it **arrives** at. Reconnected elsewhere, it is redrawn in the colour of the new destination. A cable being carried is drawn in the colour of the port it was taken from.
 
 | Family | Cable |
 | --- | --- |
@@ -40,11 +42,11 @@ A cable takes the colour of the family of the port it **arrives** at, so where i
 | Gate and trigger | <img src="images/cable-trigger.png" width="240"> |
 | Pitch | <img src="images/cable-pitch.png" width="240"> |
 
-Pulling an audio cable onto a gate input, and the colour following it:
+An audio cable moved to a gate input, and the resulting change of colour:
 
 <img src="images/cable-replug.gif" width="420" alt="A cable is pulled from an audio input to a gate input; it stays yellow while it is carried, and turns blue when it is dropped.">
 
-Rack saves cable colours in the patch. Change one by hand and it is left alone from then on.
+Rack stores cable colours in the patch. A colour set manually is not overwritten.
 
 ### Consistent knob style
 
@@ -54,21 +56,21 @@ Draws one knob face over every knob in the rack, whatever the plugin.
 
 *The face, with its pointer and grip ticks.*
 
-<img src="images/clarity-knobs-crop.jpg" width="620" alt="Close up on the knobs of two Fundamental modules and an Instruo tona, every one of them wearing the same face.">
+<img src="images/clarity-knobs-crop.jpg" width="620" alt="Close up on the knobs of two Fundamental modules and an Instruo tona, every one of them drawn with the same face.">
 
-*Two Fundamental modules and an Instruo, all reading the same way.*
+*Two Fundamental modules and an Instruo, drawn the same way.*
 
-Knobs are drawn on top of each module, so a module that draws its own light-emitting ring around a knob will have it covered. If that matters to you, switch this off; the note is repeated in the right-click menu.
+Knobs are drawn over each module, so a module that draws an illuminated ring around a knob will have that ring obscured. Disable this feature in that case; the same note appears in the right-click menu.
 
 ### Animate cable directions
 
-Dashes crawl along every cable from source to destination. Dash length is keyed to the destination's family — fine for audio, coarse for gates — so a glance tells you both the direction and roughly what is travelling.
+Dashes drift along every cable from source to destination. Dash length is set by the destination's signal family — short for audio, long for gates — so the dashes indicate both the direction and the family.
 
-<img src="images/cable-flow.gif" width="420" alt="Dashes crawling along a cable from a port labelled Output to a port labelled Input.">
+<img src="images/cable-flow.gif" width="420" alt="Dashes drifting along a cable from a port labelled Output to a port labelled Input.">
 
-*The crawl runs from the output towards the input, whichever way the cable happens to lie on screen.*
+*The drift runs from the output towards the input, in whatever direction the cable lies on screen.*
 
-The crawl states direction only. It is not synchronised with the signal, and says nothing about what the signal is doing.
+The drift indicates direction only. It is not synchronised with the signal and does not represent its amplitude, rate or content.
 
 ---
 
@@ -76,70 +78,70 @@ The crawl states direction only. It is not synchronised with the signal, and say
 
 ### Cable trace assist
 
-Hover either end of a cable and a small handle appears on it. Click the handle and that cable stays bright while every other cable in the rack is hidden, which is how you follow one lead through a tangle. Click again to put it back.
+Hovering either end of a cable displays a small handle on it. Clicking the handle leaves that cable at full opacity and hides every other cable in the rack. Clicking any module panel restores them.
 
-<img src="images/cable-trace.gif" width="420" alt="Six cables cross each other. The pointer reaches a cable end, a handle appears on it, and a click leaves that one cable on screen alone. A second click brings the others back.">
+<img src="images/cable-trace.gif" width="420" alt="Six cables cross each other. The pointer reaches a cable end, a handle appears on it, and a click leaves that one cable on screen alone. A click on a module panel brings the others back.">
 
-*The others are hidden rather than dimmed, so what is left is one legible lead.*
+*The other cables are hidden, not dimmed.*
 
-Where several cables converge on one jack, clicking the handle steps through them one at a time.
+Where several cables meet at one jack, repeated clicks on the handle select each of them in turn.
 
-**Right-click the handle** to lift that particular cable off its jack — useful when the cable you want is the one underneath four others.
+**Right-click the handle** to disconnect that cable from its jack.
 
-### Add cables without dragging
+### Add and move cables without dragging
 
-You no longer have to hold the button down to move a cable. Starting one where there is none:
+The mouse button does not have to be held down. Creating a cable at an unconnected terminal:
 
 <img src="images/cable-new.gif" width="440" alt="A click on an empty terminal starts a cable, which follows the pointer across with no button held and is connected with a second click.">
 
-Moving one that is already patched works the same way:
+Moving a cable that is already connected:
 
 <img src="images/cable-pull.gif" width="440" alt="A cable is picked up from one input with a single click, follows the pointer across with no button held, and is dropped on another input with a second click.">
 
-Click a jack to pick up its cable, move, and click another jack to drop it. Or press, drag and release as you always have — a release after any movement lands the cable, connecting it if it is over a jack. Both gestures are live at once, so whichever you do is right, and you can start one way and finish the other. Right-click cancels either way, and the rack scrolls itself when a carried cable reaches the edge of the view.
+Click a jack to take its cable, move the pointer, and click another jack to connect it. Press, drag and release also works: a release after any movement places the cable, connecting it if the pointer is over a jack. Both gestures are active at the same time, and a connection may be started with one and completed with the other. Right-click cancels either. The rack scrolls when a carried cable reaches the edge of the view.
 
-### Reaching past the cable on top
+One behaviour differs from unmodified Rack: a click on a jack with no movement takes the cable, where Rack takes no action.
 
-An output can hold several cables, and a click can only take one of them. Clicking the same jack again — with the pointer still on it — swaps what is in your hand for the next thing that jack can offer: the cables on it in turn, then a new cable, then an empty hand, then round to the first again.
+### Several cables on one jack
 
-<img src="images/cable-cycle.gif" width="440" alt="A jack with a yellow cable and a blue one on it. A click takes the yellow one, a second click swaps it for the blue one, and moving away carries the blue cable off.">
+An output can hold several cables, and a click takes the topmost one. Clicking the same jack again, with the pointer still over it, replaces the carried cable with the next one the jack holds: each cable in turn, then a new cable, then no cable, then the first again.
 
-Starting a second cable at an output that already has one:
+<img src="images/jack-pick-two.gif" width="440" alt="A jack with a yellow cable and a blue one on it. A click picks up the yellow one, and a second click swaps it for the blue one.">
 
-<img src="images/cable-stack.gif" width="440" alt="A jack with one cable on it. A click picks that cable up, a second click swaps it for a new cable hanging from the jack, and that new cable is carried down and connected to a free input, leaving two cables out of the one jack.">
+*One click for the topmost cable, a second for the one below it.*
 
-Nothing has to be labelled, because the states already look different. A cable in your hand is drawn at full strength while the others drop to half, and it still runs to wherever its far end is plugged. A new cable hangs from the jack you clicked.
+Creating a third cable at the same jack, with both existing cables still connected:
 
-This is what Rack answers with a modifier key. Repeated clicks answer it without one, and they also reach the cables underneath the top one, which a modifier does not.
+<img src="images/jack-new-from-two.gif" width="440" alt="The same jack with both cables connected. Three clicks reach past the yellow cable and the blue one to a new cable, which is carried down and connected to a free input.">
 
-Nothing is written to the undo history until the cable is actually put somewhere, so a cycle of four clicks leaves one entry rather than four. Right-clicking while carrying puts the cable back where it came from.
+*The third click produces a new cable. Neither existing cable is disconnected.*
 
-### The note
+The states are not labelled. A carried cable is drawn at full opacity while the others are drawn at half, and it remains connected at its far end; a new cable is drawn from the clicked jack to the pointer.
 
-A note appears beside the jack each time a cable comes off one, because nobody would guess that letting go of the button is allowed. It stays until you close it, it moves to the new jack if you pick up another cable, and it keeps appearing until you tick **Don't show this again** and press OK. **Show tips again** in the right-click menu brings it back.
+Rack provides this through a modifier key. Repeated clicks provide it without one, and also select the cables below the topmost.
 
-This is the one feature that ships **on** and still has a switch, which is the opposite of how it started. There is nothing to choose between the two gestures, so the switch is not really a choice — it is there because one behaviour does differ from stock Rack, and because a gesture this fundamental should have a visible way out. The difference: a click on a jack that never moves picks the cable up, where Rack would do nothing.
+Nothing is written to the undo history until the cable is placed, so four clicks produce one entry. Right-clicking while carrying returns the cable to the port it was taken from.
 
 ### Pinch to zoom
 
-Pinch on a trackpad to zoom the rack. The rack is photographed once when the gesture starts and that picture is scaled while you pinch, with the real zoom applied when you let go — so nothing re-rasterises during the gesture and it stays smooth in a large patch. The picture softens as you zoom in and sharpens the moment you release.
+<img src="images/pinch-zoom.gif" width="380" alt="Two circles standing for fingers move apart on a rack and the view grows between them, then move together and it shrinks.">
 
-Pinching over an analyser zooms **its** frequency axis instead, since that is the thing under your fingers.
+Pinch on a trackpad to zoom the rack. The rack is captured as an image once when the gesture begins, and that image is scaled during the gesture, with the zoom level applied on release; no module is redrawn while the gesture is in progress. The image is correspondingly less sharp as the zoom increases, and is redrawn at full resolution on release.
+
+Pinching with the pointer over an analyser zooms that analyser's frequency axis instead of the rack.
 
 ---
 
 ## The right-click menu
 
-- **Draw pointer (for screen recordings)** — draws a pointer into the rack, with clicks, drags and scrolling shown. Screen recorders capture the window and not the system cursor, so a recording of a patch being worked on otherwise shows things happening with nothing touching them.
-- **Show tips again** — forgets every "Don't show this again". The answers are kept beside Rack's own settings rather than in the patch, since whether you want to be told something is about you and not about the work.
+- **Draw pointer (for screen recordings)** — draws a pointer into the rack, indicating clicks, drags and scrolling. Screen recorders capture the window contents and not the system cursor.
 
 ---
 
 ## Notes
 
-**One module is enough.** A second changes nothing; the last one you take out switches the features off.
+**One module is sufficient.** A second has no effect; removing the last one disables the features.
 
-**Nothing here touches audio.** Clarity has no ports and does no processing. Bypassing it stops nothing, because there is nothing in the signal path to stop.
+**No audio processing.** Clarity has no ports and performs no processing. Bypassing it has no effect.
 
-**The features are params**, so they are saved with the patch, they can be mapped to a controller, and they show up in Rack's own right-click menu for each switch.
-
+**The features are parameters**, so they are saved with the patch, can be mapped to a controller, and appear in Rack's own right-click menu for each switch.
