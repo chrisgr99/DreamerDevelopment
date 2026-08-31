@@ -1,0 +1,109 @@
+# Builds the plugin for every platform VCV Rack runs on, and attaches the packages to a
+# release when a version tag is pushed.
+#
+# WHY THIS EXISTS. A plugin built on one machine runs on one architecture. This produces all
+# four without owning the hardware: GitHub's runners cover Apple Silicon, Intel Mac, Windows
+# and Linux, and each one downloads the Rack SDK for its own platform and runs `make dist`.
+#
+# It is also the only test that the source compiles anywhere but macOS.
+#
+#   Push a tag:   git tag v2.0.0 && git push origin v2.0.0
+#   Or run it by hand from the Actions tab, which builds without releasing.
+
+name: Build
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  # Pinned deliberately. An SDK that changes under the build is a variable nobody asked for;
+  # raise this when you have tested against the new one.
+  RACK_SDK_VERSION: 2.6.4
+
+jobs:
+  build:
+    name: ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      # One platform failing should not hide the results of the others.
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: mac-arm64, runner: macos-14 }
+          - { arch: mac-x64, runner: macos-13 }
+          - { arch: win-x64, runner: windows-latest }
+          - { arch: lin-x64, runner: ubuntu-22.04 }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools (macOS)
+        if: startsWith(matrix.arch, 'mac')
+        run: brew install jq zstd
+
+      - name: Install build tools (Linux)
+        if: startsWith(matrix.arch, 'lin')
+        run: sudo apt-get update && sudo apt-get install -y build-essential jq zstd
+
+      # Windows builds with MinGW, which is what Rack itself is built with. The shell for
+      # every later Windows step has to be this one, or make runs under PowerShell and fails.
+      - name: Install build tools (Windows)
+        if: startsWith(matrix.arch, 'win')
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            git
+            make
+            unzip
+            zip
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-jq
+            mingw-w64-x86_64-zstd
+
+      - name: Download the Rack SDK
+        shell: bash
+        run: |
+          curl -fL -o rack-sdk.zip \
+            "https://vcvrack.com/downloads/Rack-SDK-${RACK_SDK_VERSION}-${{ matrix.arch }}.zip"
+          unzip -q rack-sdk.zip
+
+      - name: Build (macOS and Linux)
+        if: "!startsWith(matrix.arch, 'win')"
+        run: RACK_DIR=$PWD/Rack-SDK make dist
+
+      - name: Build (Windows)
+        if: startsWith(matrix.arch, 'win')
+        shell: msys2 {0}
+        run: RACK_DIR=$PWD/Rack-SDK make dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.arch }}
+          path: dist/*.vcvplugin
+
+  release:
+    # Only for a tag. A run started by hand builds and stops, which is what you want while
+    # finding out whether the source compiles at all.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: packages
+
+      - name: Attach the packages to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: packages/*/*.vcvplugin
+          # Drafted rather than published: the notes are worth writing by hand, and a release
+          # is public the moment it appears.
+          draft: true
+          generate_release_notes: true

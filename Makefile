@@ -10,10 +10,28 @@
 
 RACK_DIR ?= ../Rack-SDK
 
-SOURCES += $(wildcard src/*.cpp)
-SOURCES += $(wildcard src/*.mm)
+# WHICH PLATFORM, decided before the SDK is included. ARCH_MAC is set by the SDK's arch.mk,
+# which is pulled in by plugin.mk at the bottom of this file — too late to choose sources
+# with. The same test arch.mk makes is made here instead, honouring CROSS_COMPILE so that a
+# Windows or Linux build cross-compiled on a Mac is still seen as Windows or Linux.
+ifdef CROSS_COMPILE
+	TARGET_MACHINE := $(CROSS_COMPILE)
+else
+	TARGET_MACHINE := $(shell $(CC) -dumpmachine)
+endif
 
-DISTRIBUTABLES += res
+SOURCES += $(wildcard src/*.cpp)
+
+# Objective-C++ ONLY ON MACOS. The SDK has a build rule for .mm on every platform, and a
+# Windows or Linux compiler handed one either refuses it or wants an Objective-C runtime that
+# is not installed. On those platforms src/pinch_other.cpp supplies the same three functions.
+ifneq (,$(findstring -darwin,$(TARGET_MACHINE)))
+	SOURCES += $(wildcard src/*.mm)
+endif
+
+# NO res DIRECTORY. Every panel and every face is drawn in code, so the plugin ships no
+# artwork. Listing res here worked on this machine, where an empty res/ happened to exist, and
+# failed on a clean checkout — which is what the VCV Library builds from.
 DISTRIBUTABLES += $(wildcard LICENSE*)
 
 include $(RACK_DIR)/plugin.mk

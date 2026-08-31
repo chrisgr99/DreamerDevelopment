@@ -52,12 +52,4 @@ double pinchIdleTime() {
 
 }
 
-#else
-
-namespace drui {
-void pinchInit() {}
-float pinchTake() { return 0.f; }
-double pinchIdleTime() { return 1e9; }
-}
-
 #endif
