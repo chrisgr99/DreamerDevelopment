@@ -1,46 +1,58 @@
 # Dreamer Development — VCV Rack modules
 
-**[Clarity](docs/clarity.md)** changes how the whole rack is drawn and handled. **[Test Gear](docs/test-gear.md)** puts instruments on your terminals: scopes, a frequency analyser, a monitor to listen through, and a set of signal generators.
+## A note from the author
 
-They are separate because they are different kinds of thing. Clarity is ambient — it has many tricks to make things clearer and less effortful. Test Gear is what you reach for. Each works without the other.
+I made these features for my own use in VCV Rack. As I have got older my eyesight is not as good, and I have difficulty reading faceplates and following cables across a patch. I work on a trackpad, where dragging a cable means keeping the pad pressed from beginning to end. Also, I wanted to pinch to zoom.
+
+Having built them, I have put them in a plugin in case anyone else finds them useful. They are not offered as a better way to use Rack. They are the way I use it, and every one of them is a switch you can turn off.
+
+---
+
+**[Clarity](docs/clarity.md)** changes how the whole rack is drawn and how you interact with it. **[Test Gear](docs/test-gear.md)** attaches instruments to terminals: oscilloscopes, a frequency analyser, an audio monitor, and a set of signal generators.
+
+They are separate modules because they do different things. Clarity applies to the whole rack and is set once. Test Gear is used a widget at a time. Each works without the other.
 
 ---
 
 ## Clarity
 
-A patch you can read at a glance: what kind of signal a jack carries, whether it is an input or an output, where a cable goes, and which way the signal is flowing. It reads the same way on every module in the rack, whoever wrote it. Less of your attention on working out what is connected to what, and more of it left for the patch itself.
+Clarity shows what kind of signal a jack carries, whether it is an input or an output, where a cable goes, and which way the signal is flowing. It applies to every module in the rack, whichever plugin drew it.
 
-Each feature is a switch on the panel, so how much the module does is up to you.
+Each feature is a switch on the panel and can be turned off.
 
 ### Reading the rack
 
-- **Jacks coloured by signal family** — yellow for audio, orange for control voltage, blue for gates and triggers, and green for pitch as volt per octave.
-- **Input or output at a glance** — a dashed ring hugs the outer edge of an output and the hole of an input. Shape carries direction, colour carries family.
-- **Cables coloured by their destination**, so you know at a glance what a cable is being used for, regardless of the type of source it came from.
-- **Animated cable directions** — dashes drift slowly from source to destination, so you know which way the signal is flowing even if you can only see the middle of the cable.
-- **One consistent knob** across every plugin. Your rack looks and feels more coherent.
+- **Jacks coloured by signal family** — yellow for audio, orange for control voltage, blue for gates and triggers, green for pitch as volt per octave. The family is determined from the port's name.
+- **Input or output shown by the same ring** — it is drawn against the outer edge on an output and against the hole on an input. Colour indicates the family; position indicates the direction.
+- **Cables coloured by their destination**, so a cable's colour indicates what it is being used for rather than what produced the signal.
+- **Animated cable directions** — dashes drift from source to destination, so the direction can be read from any part of the cable.
+- **One knob face across every plugin.**
 
 ### Handling cables
 
-- **Cable trace assist** — hover a cable end and a pill appears on it; click the pill to hold that one cable bright and hide every other cable in the rack. Where several cables converge, clicking steps through them; right-click the pill to lift that particular cable off. Click on any module's panel to bring every cable back.
-- **Add and move cables without dragging** — you no longer have to hold the button down. Click a jack to pick up its cable and click another to drop it, or drag and release exactly as you always have; releasing over a jack connects it. Both gestures are live at once, so there is nothing to learn, and it can be restful over a long distance. The rack scrolls itself when a carried cable reaches the edge of the view.
+- **Cable trace assist** — hovering a cable end displays a handle on it. Clicking the handle leaves that cable at full opacity and hides every other cable in the rack; clicking any module panel restores them. Where several cables meet at one jack, repeated clicks select each in turn. Right-clicking the handle disconnects that cable.
+- **Add and move cables without dragging** — click a jack to take its cable and click another to connect it, or press, drag and release as before; a release over a jack connects it. Both gestures are active at the same time. The rack scrolls when a carried cable reaches the edge of the view.
 - **Pinch to zoom** the rack on a trackpad.
 
 ---
 
 ## Test Gear
 
-Right-click any terminal, choose **Widgets** at the top of the menu, and clip an instrument onto it. It follows the pointer until you click to place it. Everything you attach follows the module it is attached to, is saved with the patch, and can be moved to another terminal by dragging the loop at its jack. A viewer on an output with nothing patched to it still works: the output is woken with a hidden cable, since a module does not compute an output that nothing is connected to.
+*The Test Gear manual is incomplete: the module is released and working, but its documentation is still being written.*
+
+Right-click any terminal and choose **Widgets**, the first entry on the menu. The widget follows the pointer until a click places it. Each one is anchored to its port, is saved with the patch, and can be moved to another terminal by dragging the handle at its jack.
+
+A viewer attached to an output with nothing connected to it still receives a signal: a hidden cable is connected to that output, because a module does not compute an output that nothing is connected to.
 
 ### Viewers
 
-- **Scope** — captures at the engine's sample rate, not the frame rate, keeps about eleven seconds of history to pan back through, and frames the signal for you when it opens. Triggering is a strip down its left edge; drag a link from that strip to another jack to trigger from somewhere else.
-- **Analyser** — a spectrum on a logarithmic frequency axis, with the peak read out as a note as well as a frequency, and ticks on its harmonics. Press **W** for a waterfall: the same spectrum with time as the second axis. Pinch to zoom the frequency axis, scroll sideways to pan it.
-- **Audio monitor** — hear any point in the patch. Patch Monitor out to your interface once, and every monitor you attach after that is audible through it, each with its own level and mute. They sum, so you can hear a modulator under the sound it is shaping.
+- **Scope** — captures at the engine's sample rate rather than the frame rate, retains about eleven seconds of history, and sets its scales from the signal when it is attached. Triggering is controlled by a strip down its left edge; dragging a link from that strip to another jack triggers from that signal instead.
+- **Analyser** — a spectrum on a logarithmic frequency axis, with the peak reported as a note as well as a frequency, and ticks marking its harmonics. **W** switches to a waterfall: the same spectrum with time as the second axis. Pinch zooms the frequency axis and scrolling sideways pans it.
+- **Audio monitor** — connect Monitor out to an audio interface once, and every monitor attached after that is audible through it, each with its own level and mute. They are summed, so several can be listened to at once.
 
 ### Generators
 
-Gate, pulse, clock, DC level, LFO, VCO, note, volt per octave, noise and an attenuverter. They work on a terminal that already has a cable in it — a generator adds to what is there rather than replacing it, so nothing has to be unplugged to try something.
+Gate, pulse, clock, DC level, LFO, VCO, note, volt per octave, noise and an attenuverter. They attach to a terminal that already has a cable connected: the engine sums several cables into one input, so a generator adds to what is there rather than replacing it.
 
 ---
 

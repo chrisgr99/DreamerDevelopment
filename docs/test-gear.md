@@ -1,22 +1,24 @@
 # Test Gear
 
-Test gear for your rack: instruments you clip onto a terminal, where the signal is, instead of patching a lead across the rack to a module that shows you one.
+Test Gear attaches instruments to terminals: instruments are placed at the point in the patch being measured, rather than being patched to a module elsewhere in the rack.
 
-Place one Test Gear module anywhere. Its panel lists what is on offer and carries the one jack these need, MONITOR OUT.
+*This manual is incomplete. The module is finished and released; the illustrations and several sections have still to be written.*
+
+Place one Test Gear module anywhere in the rack. Its panel lists the widgets and carries the module's one jack, Monitor out.
 
 ## Adding a widget
 
-**Right-click any terminal and select "Widgets"** — the first entry on the menu — then choose from the list. The widget follows your pointer until you click to place it, so the first thing you do is decide where it goes rather than finding it landed on something you were looking at.
+**Right-click any terminal and select "Widgets"**, the first entry on the menu, then choose from the list. The widget follows the pointer until a click places it.
 
-Option-clicking a terminal opens the same chooser without going through the menu.
+Option-clicking a terminal opens the same list without going through the menu.
 
 Every widget behaves the same way once attached:
 
-- A **loop** at the jack, joined to the face by a line, shows what it is attached to. Drag the small tab on that loop to another jack to move it there; drop it away from any jack to remove it. The face stays where you put it.
-- The **red X** at the top-left corner removes it.
-- **Drag the face** to move it. It is anchored to the port, not the screen, so it travels with the module and scrolls and zooms with the rack.
-- Dragging the loop's tab to a terminal **off the edge of the view** scrolls the rack, exactly as carrying a cable does.
-- Everything is **saved with the patch**, including where it sits and how it is set up.
+- A **loop** at the jack, joined to the face by a line, shows which port it is attached to. Drag the small tab on that loop to another jack to move it there, or away from any jack to remove it. The face stays where it was placed.
+- The **red cross** at the top-left corner removes it.
+- **Drag the face** to move it. It is anchored to the port rather than to the screen, so it moves with the module and scrolls and zooms with the rack.
+- Dragging the loop's tab towards a terminal **off the edge of the view** scrolls the rack, as carrying a cable does.
+- The widget is **saved with the patch**, including its position and its settings.
 
 ---
 
@@ -24,77 +26,78 @@ Every widget behaves the same way once attached:
 
 ## Scope
 
-Captures at the engine's sample rate rather than the frame rate — a 440 Hz tone sampled thirty times a second is not a small picture of a waveform, it is noise. About eleven seconds of history is kept, so a paused trace can be scrolled back through.
+Captures at the engine's sample rate rather than the frame rate. About eleven seconds of history is retained, so a paused trace can be scrolled back through.
 
-A scope arrives set up: it frames the signal for you the moment it has a full window to judge, which is exactly what pressing **A** does later. Moving it to another terminal does the same again. A scope restored from a patch does not — the scales you saved are the settings.
+A scope sets its scales from the signal when it is attached, once it has a full window to measure, which is what pressing **A** does subsequently. Moving it to another terminal repeats this. A scope restored from a patch does not: the saved scales are the settings.
 
-**Controls**, along the bottom and revealed on hover: transport (run and pause), **F** follow, **<** home, **A** autoset, **AC** coupling, **G** grid. Autoset frames the signal for you, and runs once when a scope opens.
+**Controls**, along the bottom and displayed on hover: transport (run and pause), **F** follow, **<** home, **A** autoset, **AC** coupling, **G** grid.
 
-**Scrolling** the face moves the trace: sideways to pan through history when paused, vertically to move it up and down. One axis at a time, claimed from the way the gesture starts. Over the readout below the face, scrolling changes the scales instead — volts per division on the left, time base on the right.
+**Scrolling** the face moves the trace: sideways to pan through the history when paused, vertically to move it up and down. One axis at a time, determined by the direction the gesture begins in. Over the readout below the face, scrolling changes the scales instead — volts per division on the left, time base on the right.
 
 **Resizing**: drag any edge or corner.
 
 ### Triggering
 
-The left ten pixels of the face are the trigger strip. Click it to switch triggering on and off. Drag up and down in it to set the level, marked by an amber triangle; click the triangle to flip between rising and falling edges.
+The left ten pixels of the face are the trigger strip. Click it to enable and disable triggering. Drag up and down within it to set the level, which is marked by an amber triangle; click the triangle to switch between the rising and falling edge.
 
-**External triggering**: drag from the strip to any other jack in the rack and drop. An amber loop attaches there, and the trace is then triggered by that signal rising through 1 V — the standard gate threshold, so a gate or clock does what you expect. Its triangle becomes a cross, since the level is fixed. Right-click the strip to drop the external trigger; the loop's own tab moves or removes it, like any other.
+**External triggering**: drag from the strip to any other jack and release. An amber loop attaches there, and the trace is then triggered when that signal rises through 1 V, the standard gate threshold. The triangle becomes a cross, since the level is fixed. Right-click the strip to remove the external trigger; the loop's own tab moves or removes it, as with any other attachment.
 
 ## Analyser
 
-A spectrum on a logarithmic frequency axis, so octaves are equal distances and a harmonic series has a shape you can learn. The window is 8192 samples, taken from the same history the scopes use, which is why its resolution does not depend on what any scope on the same signal is set to.
+A spectrum on a logarithmic frequency axis, so that octaves occupy equal distances. The window is 8192 samples, taken from the same history the scopes use, so its resolution does not depend on the settings of any scope on the same signal.
 
-- **The peak is read as a note** as well as a frequency — "A4 440.2" — which makes it a tuner. The peak is refined between bins, since a bin is about six hertz wide.
-- **Amber ticks** mark the harmonics of the peak, so a filter removing them or a waveshaper adding them is visible at a glance.
-- **Averaged** by default. A raw spectrum flickers too hard to read; the average settles in a few frames and still follows a change. Switch it off in the right-click menu.
+- **The peak is reported as a note** as well as a frequency — "A4 440.2". The peak is interpolated between bins, which are about six hertz apart.
+- **Amber ticks** mark the harmonics of the peak.
+- **Averaged** by default. An unaveraged spectrum changes too rapidly to read; the average settles within a few frames and still follows a change. It can be disabled in the right-click menu.
 
-**W** switches on the **waterfall**: the same spectrum with time as the second axis, newest row at the top. Where a spectrum says what is in a sound, a waterfall says what it is doing — a filter sweeping, an envelope opening, a sequence moving. It draws from the raw spectrum rather than the average, so events stay crisp.
+**W** switches on the **waterfall**: the same spectrum with time as the second axis, the newest row at the top. It is drawn from the unaveraged spectrum, so short events are not smeared across several rows.
 
-**Pinch** on the face to zoom the frequency axis about the pointer, and **scroll sideways** to pan it, so a region of interest can fill the face instead of being a sliver beside a top octave that carries nothing. The waterfall keeps its history through this: rows are stored across the whole range and the view is drawn as a crop of them. **Full range** in the right-click menu goes back out.
+**Pinch** on the face zooms the frequency axis about the pointer, and **scrolling sideways** pans it. The waterfall retains its history through this: rows are stored across the whole range and the view is drawn as a crop of them. **Full range** in the right-click menu returns to the full span.
+
+The **transport** in the lower left holds the display: the averaged spectrum is left as it is and the waterfall stops adding rows.
 
 ## Audio monitor
 
-Hear any point in the patch. Patch **MONITOR OUT** to your audio interface once; every monitor you attach after that is audible through it.
+Connect **Monitor out** to an audio interface once; every monitor attached after that is audible through it.
 
-- **Click the face** to mute. **Scroll** to set the level, in decibel-and-a-half steps, from -60 dB to +6 dB.
-- **They sum.** The jack is a mixing bus, not a switch, so several at once lets you hear a modulator under the sound it is shaping rather than flipping between them.
-- **It listens to outputs as readily as inputs**, and nothing is inserted into the signal path — a monitor cannot change what it is listening to.
-- The bus is DC-blocked at about 20 Hz, so CV is safe to monitor: an envelope resting at five volts would otherwise be a DC offset on a loudspeaker.
+- **Click the face** to mute. **Scroll** to set the level, in steps of one and a half decibels, from -60 dB to +6 dB.
+- **Monitors are summed.** The jack is a mixing bus rather than a switch, so several points in a patch can be listened to at the same time.
+- **A monitor reads the port's voltage directly**, so it can be attached to an output as well as an input, and nothing is inserted into the signal path.
+- The bus is DC-blocked at about 20 Hz, so control voltages can be monitored: an envelope resting at five volts would otherwise be a constant offset at the interface.
 
 ---
 
 # Generators
 
-Generators attach to **inputs**. They work on a terminal that already has a cable in it: the engine sums several cables into one input, so a generator adds to what is there rather than replacing it, and nothing has to be unplugged to try something.
+Generators attach to **inputs**. They can be attached to a terminal that already has a cable connected: the engine sums several cables into one input, so a generator adds to what is there rather than replacing it.
 
-Each has a **readout** you scroll to change — coarse to the left of the decimal point, fine to the right, at a tenth the rate.
+Each has a **readout** which scrolling changes — coarse to the left of the decimal point, fine to the right, at a tenth of the rate.
 
-| Widget | What it sends |
+| Widget | Output |
 | --- | --- |
 | **Gate button** | 10 V while the button is held |
 | **Pulse button** | One 1 ms pulse per press |
 | **Clock** | A stream of pulses, set in beats per minute |
-| **DC level** | A steady voltage |
+| **DC level** | A constant voltage |
 | **LFO** | A repeating waveform, 0.01 to 100 Hz. Right-click for the shape and for unipolar or bipolar |
 | **VCO** | The same at audio rates, 1 Hz to 8 kHz, set in hertz. Defaults to A4 |
 | **Note** | A VCO set by note name rather than by frequency |
-| **Volt/oct** | A pitch as a control voltage, one volt per octave, shown as a note |
-| **Noise** | White, pink, brown, blue or violet, chosen from the right-click menu |
-| **Attenuverter** | Scales and inverts what the cable is already delivering to that port |
+| **Volt/oct** | A pitch as a control voltage, one volt per octave, displayed as a note |
+| **Noise** | White, pink, brown, blue or violet, selected from the right-click menu |
+| **Attenuverter** | Scales and inverts the signal already arriving at that port |
 
-Switching one on or off ramps over a few milliseconds rather than stepping, because a step is a click.
+Switching a generator on or off ramps its level over a few milliseconds rather than stepping, since a step produces an audible click.
 
 ---
 
 ## Notes
 
-**Watching a bare output wakes it up.** Nearly every module skips computing an output that has no cable in it, so a viewer on an unpatched jack would see nothing. Attaching one lays a hidden cable from that output into this module, which is what makes the source compute; it goes when the viewer goes, or when you patch a real cable there. The cost is that a module which behaves differently while its output is empty — one that normals the signal elsewhere — will behave as though it has been patched, because it has.
+**A viewer on an unconnected output.** Most modules do not compute an output that has no cable connected to it, so a viewer attached to one would receive nothing. Attaching a viewer connects a hidden cable from that output to this module, which causes the source to compute; the cable is removed when the viewer is removed, or when a cable is connected to that output. A module that behaves differently while its output is unconnected — one that normals the signal elsewhere — will behave as though it has been connected, because it has.
 
-**One Test Gear module runs everything.** A second is harmless but does nothing; if you have several, the first one does the work and the saving.
+**One Test Gear module is sufficient.** A second has no effect; where there are several, the first performs the processing and saves the widgets.
 
-**Bypassing it silences the widgets** — the generators and the monitor both ride in its process — while everything drawn goes on looking alive. A generator says WIDGETS BYPASSED on its face when that happens.
+**Bypassing it silences the widgets.** The generators and the monitor are processed by this module, so bypassing it stops them, while everything drawn continues to be displayed. A generator displays WIDGETS BYPASSED on its face in that state.
 
-**Eight generators and sixteen monitors** can exist at once, along with thirty-two taps shared by the scopes, analysers and monitors.
+**Eight generators and sixteen monitors** can exist at once, with thirty-two signal taps shared between the scopes, analysers and monitors.
 
-**The hidden outputs.** A generator is a real cable from one of this module's outputs into the port it drives, which is what makes Rack responsible for cleaning it up. The cable and its plugs are hidden, because what you should see is the loop at the terminal rather than a lead running across the rack.
-
+**The hidden outputs.** A generator is a real cable from one of this module's outputs to the port it drives, which is what makes Rack responsible for removing it when a module is deleted. The cable and its plugs are hidden.
