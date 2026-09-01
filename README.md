@@ -62,10 +62,10 @@ Download the file for your platform from the [latest release](https://github.com
 
 | Your computer | File |
 | --- | --- |
-| Mac with Apple silicon | `DreamerDevelopment-2.0.0-mac-arm64.vcvplugin` |
-| Mac with an Intel processor | `DreamerDevelopment-2.0.0-mac-x64.vcvplugin` |
-| Windows | `DreamerDevelopment-2.0.0-win-x64.vcvplugin` |
-| Linux | `DreamerDevelopment-2.0.0-lin-x64.vcvplugin` |
+| Mac with Apple silicon | `DreamerDevelopment-2.0.1-mac-arm64.vcvplugin` |
+| Mac with an Intel processor | `DreamerDevelopment-2.0.1-mac-x64.vcvplugin` |
+| Windows | `DreamerDevelopment-2.0.1-win-x64.vcvplugin` |
+| Linux | `DreamerDevelopment-2.0.1-lin-x64.vcvplugin` |
 
 Put the downloaded file in Rack's plugins folder:
 
