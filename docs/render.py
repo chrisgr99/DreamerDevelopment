@@ -118,8 +118,8 @@ def convert(md):
     return "\n".join(out)
 
 
-def render(name):
-    md = (HERE / f"{name}.md").read_text()
+def render(name, source=None):
+    md = (source or HERE / f"{name}.md").read_text()
     title = md.split("\n", 1)[0].lstrip("# ").strip()
     page = (f"<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
             f"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
@@ -133,3 +133,6 @@ def render(name):
 if __name__ == "__main__":
     for name in ("clarity", "test-gear"):
         render(name)
+    # The README lives at the repository root; its page is written here with the manuals so
+    # that one folder holds everything readable in a browser.
+    render("readme", HERE.parent / "README.md")

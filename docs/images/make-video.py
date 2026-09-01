@@ -172,6 +172,7 @@ def encode(frames, out, audio):
     # something before it has the whole thing.
     cmd += ["-vf", f"pad={VIDEO_W}:{VIDEO_H}:(ow-iw)/2:(oh-ih)/2:color=0x161a20,fps=30",
             "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p",
+            "-profile:v", "high", "-level", "4.0",
             "-g", "15", "-movflags", "+faststart", str(out)]
     subprocess.run(cmd, check=True)
     for f in frames.glob("*.png"):
@@ -309,7 +310,7 @@ SCREEN_FROM = 0.0
 # How long the excerpt runs on screen. The recording is a few seconds of a steady rack with
 # its scopes running, so it is CROSSFADED INTO ITSELF to reach this length: a plain repeat
 # jumps at the seam, and a jump reads as a fault in the video rather than as a loop.
-SCREEN_LENGTH = 26.0
+SCREEN_LENGTH = 23.5
 SCREEN_FADE = 0.7
 
 
@@ -338,7 +339,8 @@ def render_screen_section(slug, title, line):
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-loop", "1",
                     "-i", str(work / "card.png"), "-t", f"{card_seconds:.3f}",
                     "-vf", "fps=30", "-c:v", "libx264", "-preset", "slow", "-crf", "18",
-                    "-pix_fmt", "yuv420p", str(work / "card.mp4")], check=True)
+                    "-pix_fmt", "yuv420p",
+                    "-profile:v", "high", "-level", "4.0", str(work / "card.mp4")], check=True)
 
     # The excerpt, scaled to the frame, its own audio dropped — the narration owns the track.
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{SCREEN_FROM}",
@@ -346,6 +348,7 @@ def render_screen_section(slug, title, line):
                     "-vf", f"scale=-2:{VIDEO_H},pad={VIDEO_W}:{VIDEO_H}:(ow-iw)/2:0:"
                            f"color=0x161a20,fps=30",
                     "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p",
+                    "-profile:v", "high", "-level", "4.0",
                     str(work / "once.mp4")], check=True)
 
     # Lengthened by crossfading it into itself, over and over, until it covers the words.
@@ -370,7 +373,8 @@ def render_screen_section(slug, title, line):
                                     capture_output=True, text=True).stdout.strip())
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(current),
                     "-t", f"{SCREEN_LENGTH}", "-c:v", "libx264", "-preset", "slow",
-                    "-crf", "18", "-pix_fmt", "yuv420p", str(work / "screen.mp4")], check=True)
+                    "-crf", "18", "-pix_fmt", "yuv420p",
+                    "-profile:v", "high", "-level", "4.0", str(work / "screen.mp4")], check=True)
 
     # What is said over the recording: the rest of the phrases, one after another, then
     # silence for whatever is left of it.
@@ -445,6 +449,7 @@ def join(parts, out):
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
                     "-i", str(listing),
                     "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p",
+                    "-profile:v", "high", "-level", "4.0",
                     "-g", "15", "-c:a", "aac", "-b:a", "192k",
                     "-movflags", "+faststart", str(out)], check=True)
     listing.unlink()
