@@ -37,6 +37,8 @@ optional and can be switched off per user.
 #include "Hint.hpp"
 #include "Sink.hpp"
 
+#include "Palette.hpp"
+
 #include <map>
 #include <set>
 #include <vector>
@@ -51,11 +53,12 @@ using namespace rack;
 // depend on reading the other.
 
 static NVGcolor familyColor(const std::string& family) {
-	if (family == "audio")   return nvgRGB(0xf3, 0xc4, 0x0b);   // yellow
-	if (family == "cv")      return nvgRGB(0xff, 0x73, 0x00);   // orange
-	if (family == "trigger") return nvgRGB(0x5a, 0xa0, 0xe6);   // light blue
-	if (family == "pitch")   return nvgRGB(0x39, 0xa8, 0x5a);   // green
-	return nvgRGB(0xf3, 0xc4, 0x0b);
+	// The four are settings now, not constants — see Palette.hpp for why they are kept beside
+	// Rack's own settings rather than in the patch.
+	if (family == "cv")      return paletteColor(FAM_CV);
+	if (family == "trigger") return paletteColor(FAM_TRIGGER);
+	if (family == "pitch")   return paletteColor(FAM_PITCH);
+	return paletteColor(FAM_AUDIO);
 }
 
 /** Rack has no concept of signal family, but it does expose port names. Guessing from the
@@ -995,6 +998,7 @@ static void removeOverlaysIfIdle() {
 	if (gClarityCount > 0 || gTestGearCount > 0)
 		return;
 	hintDismiss();
+	paletteDismiss();
 	dropOverlay(gRackOverlay);
 	dropOverlay(gPinchOverlay);
 	dropOverlay(gInterceptOverlay);
@@ -1107,6 +1111,10 @@ struct ClarityWidget : DRUIWidgetBase {
 		menu->addChild(createBoolPtrMenuItem("Draw pointer (for screen recordings)", "",
 			&gOpt.demoPointer));
 		menu->addChild(createMenuItem("Show hints again", "", []() { hintResetAll(); }));
+		// The colours are a setting because the eyes looking at them are not the eyes they
+		// were chosen for. Named for what it changes rather than for the word "settings",
+		// which says nothing about which settings.
+		menu->addChild(createMenuItem("Jack and cable colours\u2026", "", []() { paletteShow(); }));
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));

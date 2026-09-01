@@ -38,6 +38,7 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "Clip.hpp"
 #include "Monitor.hpp"
 #include "Hint.hpp"
+#include "Palette.hpp"
 
 #include <algorithm>
 #include <list>
@@ -979,7 +980,7 @@ struct InterceptOverlay : widget::Widget {
 		notePointerButton(e);
 
 		// A note on screen owns its own clicks, like a menu does.
-		if (hintCovers(e.pos)) {
+		if (hintCovers(e.pos) || paletteCovers(e.pos)) {
 			widget::Widget::onButton(e);
 			return;
 		}
