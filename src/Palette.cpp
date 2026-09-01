@@ -7,12 +7,12 @@
 // The dialogue's own metrics, deliberately the same shape as the hint's: same width, same
 // padding, same buttons. Two dialogues from one plugin that look like two dialogues from two
 // plugins is worse than either of them alone.
-static const float PAL_W = 280.f;
+static const float PAL_W = 320.f;
 static const float PAL_PAD = 14.f;
 static const float PAL_TITLE = 15.f;
 static const float PAL_TEXT = 11.f;
 static const float PAL_SWATCH_H = 32.f;
-static const float PAL_SWATCH_GAP = 8.f;
+static const float PAL_SWATCH_GAP = 6.f;
 /** The row of names under the swatches. */
 static const float PAL_SWATCH_LABEL = 15.f;
 /** The wheel: hue around it, saturation out from the middle. */
@@ -41,6 +41,7 @@ static const NVGcolor PAL_DEFAULT[NUM_FAMILIES] = {
 	nvgRGB(0xff, 0x73, 0x00),   // cv, orange
 	nvgRGB(0x5a, 0xa0, 0xe6),   // trigger, light blue
 	nvgRGB(0x39, 0xa8, 0x5a),   // pitch, green
+	nvgRGB(0xff, 0x3c, 0xc8),   // MPX, magenta
 };
 
 static const char* PAL_NAME[NUM_FAMILIES] = {
@@ -48,11 +49,12 @@ static const char* PAL_NAME[NUM_FAMILIES] = {
 	"CV",
 	"Gate",
 	"Pitch",
+	"MPX",
 };
 
 /** The key each colour is saved under. Separate from the display name so the file survives the
 display name being reworded. */
-static const char* PAL_KEY[NUM_FAMILIES] = {"audio", "cv", "trigger", "pitch"};
+static const char* PAL_KEY[NUM_FAMILIES] = {"audio", "cv", "trigger", "pitch", "mpx"};
 
 static NVGcolor palette[NUM_FAMILIES];
 static bool paletteLoaded = false;

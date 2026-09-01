@@ -18,6 +18,10 @@ enum Family {
 	FAM_CV,
 	FAM_TRIGGER,
 	FAM_PITCH,
+	/** MPX: a whole instrument on one cable, from the Modular Polyphonic Expression plugin.
+	Not a signal family in the sense the others are — nothing about it is a voltage — which is
+	exactly why it wants a colour of its own rather than being guessed at as one of them. */
+	FAM_MPX,
 	NUM_FAMILIES
 };
 

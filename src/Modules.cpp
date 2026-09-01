@@ -55,6 +55,7 @@ using namespace rack;
 static NVGcolor familyColor(const std::string& family) {
 	// The four are settings now, not constants — see Palette.hpp for why they are kept beside
 	// Rack's own settings rather than in the patch.
+	if (family == "mpx")     return paletteColor(FAM_MPX);
 	if (family == "cv")      return paletteColor(FAM_CV);
 	if (family == "trigger") return paletteColor(FAM_TRIGGER);
 	if (family == "pitch")   return paletteColor(FAM_PITCH);
@@ -65,6 +66,11 @@ static NVGcolor familyColor(const std::string& family) {
 name is what makes this useful on plugins nobody has described by hand. */
 static std::string guessFamily(const std::string& name) {
 	const std::string n = string::uppercase(name);
+	// FIRST, and it has to be. An MPX jack is called something like "MPX note in", and the
+	// pitch test below would claim it on the word NOTE — which is how a cable carrying a whole
+	// instrument came out green.
+	if (n.find("MPX") != std::string::npos)
+		return "mpx";
 	if (n.find("V/OCT") != std::string::npos || n.find("PITCH") != std::string::npos
 		|| n.find("NOTE") != std::string::npos)
 		return "pitch";
@@ -84,6 +90,10 @@ static float flowDashLength(const std::string& family) {
 		return 1.6f;
 	if (family == "trigger")
 		return 5.6f;
+	// MPX carries events rather than a signal, so the dashes are long and sparse: what travels
+	// on it is notes, not a stream.
+	if (family == "mpx")
+		return 7.5f;
 	return 3.4f;
 }
 

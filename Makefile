@@ -49,3 +49,26 @@ endif
 ifdef ARCH_WIN
 	LDFLAGS += -lopengl32
 endif
+
+# DEVELOPMENT INSTALL — see the same target in the MPX plugin for the whole story. Briefly:
+# `make install` copies a package that Rack unpacks on startup, and one copied while Rack is
+# running can be cleared at shutdown without ever being unpacked, so the next start silently
+# loads the old build. And the copy has to UNLINK first: writing over an existing dylib leaves
+# macOS holding a code signature against pages that have changed, and the kernel then kills Rack
+# on load rather than reporting anything.
+RACK_USER_DIR ?= $(HOME)/Library/Application Support/Rack2
+PLUGIN_DIR = $(RACK_USER_DIR)/plugins-mac-arm64/$(SLUG)
+
+dev: $(TARGET)
+	@rm -f "$(RACK_USER_DIR)/plugins-mac-arm64/"$(SLUG)-*.vcvplugin
+	@codesign --force --sign - $(TARGET) 2>/dev/null || true
+	@mkdir -p "$(PLUGIN_DIR)"
+	@rm -f "$(PLUGIN_DIR)/plugin.dylib"
+	@cp $(TARGET) "$(PLUGIN_DIR)/plugin.dylib"
+	@cp plugin.json "$(PLUGIN_DIR)/"
+	@cp LICENSE "$(PLUGIN_DIR)/" 2>/dev/null || true
+	@xattr -c "$(PLUGIN_DIR)/plugin.dylib" 2>/dev/null || true
+	@codesign -v "$(PLUGIN_DIR)/plugin.dylib" && echo "signature valid"
+	@echo "installed to $(PLUGIN_DIR)"
+
+.PHONY: dev
