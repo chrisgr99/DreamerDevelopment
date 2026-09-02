@@ -11,10 +11,10 @@ from pathlib import Path
 
 # ---- The signal families, from familyColor() ----
 FAMILIES = {
-    "audio": ("#f3c40b", "Audio", 1.6),
-    "cv": ("#ff7300", "CV", 3.4),
-    "trigger": ("#5aa0e6", "Gate and trigger", 5.6),
-    "pitch": ("#39a85a", "Pitch", 3.4),
+    "audio": ("#c91847", "Audio", 1.6),
+    "cv": ("#0c8e15", "CV", 3.4),
+    "trigger": ("#0986ad", "Gate and trigger", 5.6),
+    "pitch": ("#c9b70e", "Pitch", 3.4),
 }
 
 PANEL_BG = "#161a20"

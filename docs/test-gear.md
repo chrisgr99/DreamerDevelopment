@@ -1,23 +1,23 @@
 # Test Gear
 
-Test Gear attaches instruments to terminals: instruments are placed at the point in the patch being measured, rather than being patched to a module elsewhere in the rack.
+Test Gear attaches instruments to ports: instruments are placed at the point in the patch being measured, rather than being patched to a module elsewhere in the rack.
 
 *This manual is incomplete. The module is finished and released; the illustrations and several sections have still to be written.*
 
-Place one Test Gear module anywhere in the rack. Its panel lists the widgets and carries the module's one jack, Monitor out.
+Place one Test Gear module anywhere in the rack. Its panel lists the widgets and carries the module's one port, Monitor out.
 
 ## Adding a widget
 
-**Right-click any terminal and select "Widgets"**, the first entry on the menu, then choose from the list. The widget follows the pointer until a click places it.
+**Right-click any port and select "Widgets"**, the first entry on the menu, then choose from the list. The widget follows the pointer until a click places it.
 
-Option-clicking a terminal opens the same list without going through the menu.
+Option-clicking a port opens the same list without going through the menu.
 
 Every widget behaves the same way once attached:
 
-- A **loop** at the jack, joined to the face by a line, shows which port it is attached to. Drag the small tab on that loop to another jack to move it there, or away from any jack to remove it. The face stays where it was placed.
+- A **loop** at the port, joined to the face by a line, shows which port it is attached to. Drag the small tab on that loop to another port to move it there, or away from any port to remove it. The face stays where it was placed.
 - The **red cross** at the top-left corner removes it.
 - **Drag the face** to move it. It is anchored to the port rather than to the screen, so it moves with the module and scrolls and zooms with the rack.
-- Dragging the loop's tab towards a terminal **off the edge of the view** scrolls the rack, as carrying a cable does.
+- Dragging the loop's tab towards a port **off the edge of the view** scrolls the rack, as carrying a cable does.
 - The widget is **saved with the patch**, including its position and its settings.
 
 ---
@@ -28,7 +28,7 @@ Every widget behaves the same way once attached:
 
 Captures at the engine's sample rate rather than the frame rate. About eleven seconds of history is retained, so a paused trace can be scrolled back through.
 
-A scope sets its scales from the signal when it is attached, once it has a full window to measure, which is what pressing **A** does subsequently. Moving it to another terminal repeats this. A scope restored from a patch does not: the saved scales are the settings.
+A scope sets its scales from the signal when it is attached, once it has a full window to measure, which is what pressing **A** does subsequently. Moving it to another port repeats this. A scope restored from a patch does not: the saved scales are the settings.
 
 **Controls**, along the bottom and displayed on hover: transport (run and pause), **F** follow, **<** home, **A** autoset, **AC** coupling, **G** grid.
 
@@ -40,7 +40,7 @@ A scope sets its scales from the signal when it is attached, once it has a full 
 
 The left ten pixels of the face are the trigger strip. Click it to enable and disable triggering. Drag up and down within it to set the level, which is marked by an amber triangle; click the triangle to switch between the rising and falling edge.
 
-**External triggering**: drag from the strip to any other jack and release. An amber loop attaches there, and the trace is then triggered when that signal rises through 1 V, the standard gate threshold. The triangle becomes a cross, since the level is fixed. Right-click the strip to remove the external trigger; the loop's own tab moves or removes it, as with any other attachment.
+**External triggering**: drag from the strip to any other port and release. An amber loop attaches there, and the trace is then triggered when that signal rises through 1 V, the standard gate threshold. The triangle becomes a cross, since the level is fixed. Right-click the strip to remove the external trigger; the loop's own tab moves or removes it, as with any other attachment.
 
 ## Analyser
 
@@ -61,7 +61,7 @@ The **transport** in the lower left holds the display: the averaged spectrum is 
 Connect **Monitor out** to an audio interface once; every monitor attached after that is audible through it.
 
 - **Click the face** to mute. **Scroll** to set the level, in steps of one and a half decibels, from -60 dB to +6 dB.
-- **Monitors are summed.** The jack is a mixing bus rather than a switch, so several points in a patch can be listened to at the same time.
+- **Monitors are summed.** The port is a mixing bus rather than a switch, so several points in a patch can be listened to at the same time.
 - **A monitor reads the port's voltage directly**, so it can be attached to an output as well as an input, and nothing is inserted into the signal path.
 - The bus is DC-blocked at about 20 Hz, so control voltages can be monitored: an envelope resting at five volts would otherwise be a constant offset at the interface.
 
@@ -69,7 +69,7 @@ Connect **Monitor out** to an audio interface once; every monitor attached after
 
 # Generators
 
-Generators attach to **inputs**. They can be attached to a terminal that already has a cable connected: the engine sums several cables into one input, so a generator adds to what is there rather than replacing it.
+Generators attach to **inputs**. They can be attached to a port that already has a cable connected: the engine sums several cables into one input, so a generator adds to what is there rather than replacing it.
 
 Each has a **readout** which scrolling changes — coarse to the left of the decimal point, fine to the right, at a tenth of the rate.
 

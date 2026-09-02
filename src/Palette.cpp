@@ -3,6 +3,8 @@
 #include <cmath>
 #include <vector>
 #include <cstdio>
+#include <cstring>
+#include <map>
 
 // The dialogue's own metrics, deliberately the same shape as the hint's: same width, same
 // padding, same buttons. Two dialogues from one plugin that look like two dialogues from two
@@ -34,9 +36,32 @@ static const NVGcolor PAL_FIELD = nvgRGB(0x16, 0x1a, 0x20);
 
 // ---- the palette itself --------------------------------------------------------------------
 
-/** The colours the plugin has always used. Kept as the reset target rather than as the values,
-so "put it back" means something exact. */
+/** THE DEFAULT: Omri Cohen's colours. Yellow for pitch and clock rates, blue for gates and
+triggers, green for modulation, red for audio. The four values are the ones the convention
+actually circulates with, taken from the Omri Cohen preset that ships with Inklen's Cable
+Colour Key, rather than being eyeballed from a description of it.
+
+They were not the first defaults. The first ones were chosen here, and they disagreed with this
+scheme about the colour that matters most: yellow meant audio rather than pitch. Anyone who had
+learned the common convention — and it is common because Omri Cohen's tutorials are how a great
+many people learned Rack at all — read every patch backwards, which is worse than having no
+colour code. Three people said so independently on the forum before the module was a week old.
+A colour code is a shared language or it is nothing, so this one now speaks the language that
+was already being spoken.
+
+The original set is still there, under "Colour scheme", and every colour can be changed. Kept
+as the reset target rather than as the values, so "put it back" means something exact. */
 static const NVGcolor PAL_DEFAULT[NUM_FAMILIES] = {
+	nvgRGB(0xc9, 0x18, 0x47),   // audio, red
+	nvgRGB(0x0c, 0x8e, 0x15),   // cv, green
+	nvgRGB(0x09, 0x86, 0xad),   // trigger, blue
+	nvgRGB(0xc9, 0xb7, 0x0e),   // pitch, yellow
+	nvgRGB(0xff, 0x3c, 0xc8),   // MPX, magenta — no convention covers it
+};
+
+/** The colours this plugin shipped with, kept because some people have built patches around
+them and because they are still the clearer set on a dark rack. */
+static const NVGcolor PAL_DREAMER[NUM_FAMILIES] = {
 	nvgRGB(0xf3, 0xc4, 0x0b),   // audio, yellow
 	nvgRGB(0xff, 0x73, 0x00),   // cv, orange
 	nvgRGB(0x5a, 0xa0, 0xe6),   // trigger, light blue
@@ -58,6 +83,50 @@ static const char* PAL_KEY[NUM_FAMILIES] = {"audio", "cv", "trigger", "pitch", "
 
 static NVGcolor palette[NUM_FAMILIES];
 static bool paletteLoaded = false;
+/** Bumped whenever a colour or a categorisation changes, so that anything holding a decision
+it made from the old ones can tell that it has to make it again. */
+static uint64_t paletteGen = 1;
+
+/** THE OTHER TWO THINGS THE FILE HOLDS, both about categorisation rather than about colour.
+
+`rules` is a list the user writes: a piece of text to look for in a port's name, and the family
+a port whose name contains it belongs to. Theirs are asked before ours, in the order written,
+so a scheme can be replaced wholesale rather than only added to.
+
+`overrides` is what the port's own menu writes: one exact port of one exact module, named by
+plugin, model, direction and number, so it survives the module being moved, copied, or loaded
+into another patch. */
+struct PaletteRule {
+	std::string match;   /**< Already upper case, so the test is a plain find. */
+	int family = 0;
+};
+static std::vector<PaletteRule> paletteRules;
+static std::map<std::string, int> paletteOverrides;
+
+
+static int familyFromKey(const char* key) {
+	if (!key)
+		return -1;
+	for (int i = 0; i < NUM_FAMILIES; i++) {
+		if (std::strcmp(key, PAL_KEY[i]) == 0)
+			return i;
+	}
+	return -1;
+}
+
+/** Names one port of one model, for the overrides map. The plugin and model slugs rather than
+anything to do with the widget in front of us: the same port of the same module is the same
+port in every patch, which is the whole point of remembering it. */
+static std::string portKey(app::PortWidget* port) {
+	if (!port || !port->module)
+		return "";
+	rack::plugin::Model* model = port->module->model;
+	if (!model || !model->plugin)
+		return "";
+	return model->plugin->slug + "/" + model->slug
+		+ (port->type == engine::Port::OUTPUT ? "/out/" : "/in/")
+		+ std::to_string(port->portId);
+}
 
 
 static std::string paletteFilePath() {
@@ -101,13 +170,69 @@ static void paletteLoad() {
 		if (colorJ && json_is_string(colorJ))
 			parseHex(json_string_value(colorJ), palette[i]);
 	}
+
+	// The user's own name rules. Anything malformed is passed over rather than failing the
+	// file: a rule the reader cannot make sense of should cost that rule and nothing else.
+	paletteRules.clear();
+	json_t* rulesJ = json_object_get(rootJ, "rules");
+	if (rulesJ && json_is_array(rulesJ)) {
+		size_t index;
+		json_t* ruleJ;
+		json_array_foreach(rulesJ, index, ruleJ) {
+			if (!json_is_object(ruleJ))
+				continue;
+			json_t* matchJ = json_object_get(ruleJ, "match");
+			json_t* familyJ = json_object_get(ruleJ, "family");
+			if (!matchJ || !json_is_string(matchJ) || !familyJ || !json_is_string(familyJ))
+				continue;
+			const int family = familyFromKey(json_string_value(familyJ));
+			const std::string match = json_string_value(matchJ);
+			if (family < 0 || match.empty())
+				continue;
+			PaletteRule rule;
+			rule.match = string::uppercase(match);
+			rule.family = family;
+			paletteRules.push_back(rule);
+		}
+	}
+
+	paletteOverrides.clear();
+	json_t* portsJ = json_object_get(rootJ, "ports");
+	if (portsJ && json_is_object(portsJ)) {
+		const char* key;
+		json_t* valueJ;
+		json_object_foreach(portsJ, key, valueJ) {
+			if (!json_is_string(valueJ))
+				continue;
+			const int family = familyFromKey(json_string_value(valueJ));
+			if (family >= 0)
+				paletteOverrides[key] = family;
+		}
+	}
 	json_decref(rootJ);
+	paletteGen++;
 }
 
 static void paletteSave() {
 	json_t* rootJ = json_object();
 	for (int i = 0; i < NUM_FAMILIES; i++)
 		json_object_set_new(rootJ, PAL_KEY[i], json_string(toHex(palette[i]).c_str()));
+
+	// Written back whether or not this run changed them, so that saving a colour cannot lose
+	// rules the user typed in by hand.
+	json_t* rulesJ = json_array();
+	for (const PaletteRule& rule : paletteRules) {
+		json_t* ruleJ = json_object();
+		json_object_set_new(ruleJ, "match", json_string(rule.match.c_str()));
+		json_object_set_new(ruleJ, "family", json_string(PAL_KEY[rule.family]));
+		json_array_append_new(rulesJ, ruleJ);
+	}
+	json_object_set_new(rootJ, "rules", rulesJ);
+
+	json_t* portsJ = json_object();
+	for (const auto& pair : paletteOverrides)
+		json_object_set_new(portsJ, pair.first.c_str(), json_string(PAL_KEY[pair.second]));
+	json_object_set_new(rootJ, "ports", portsJ);
 
 	system::createDirectories(asset::user("DreamerDevelopment"));
 	FILE* file = std::fopen(paletteFilePath().c_str(), "w");
@@ -124,6 +249,108 @@ NVGcolor paletteColor(int family) {
 	if (family < 0 || family >= NUM_FAMILIES)
 		return palette[FAM_AUDIO];
 	return palette[family];
+}
+
+/** The built-in guess. Rack has no concept of signal family, but it does expose port names,
+and guessing from the name is what makes the colour code work on plugins nobody has described
+by hand. */
+static int paletteGuess(const std::string& name) {
+	const std::string n = string::uppercase(name);
+	// FIRST, and it has to be. An MPX port is called something like "MPX note in", and the
+	// pitch test below would claim it on the word NOTE — which is how a cable carrying a whole
+	// instrument came out green.
+	if (n.find("MPX") != std::string::npos)
+		return FAM_MPX;
+	if (n.find("V/OCT") != std::string::npos || n.find("PITCH") != std::string::npos
+		|| n.find("NOTE") != std::string::npos)
+		return FAM_PITCH;
+	if (n.find("GATE") != std::string::npos || n.find("TRIG") != std::string::npos
+		|| n.find("CLOCK") != std::string::npos || n.find("CLK") != std::string::npos
+		|| n.find("RESET") != std::string::npos || n.find("SYNC") != std::string::npos)
+		return FAM_TRIGGER;
+	if (n.find("CV") != std::string::npos || n.find("MOD") != std::string::npos
+		|| n.find("FM") != std::string::npos)
+		return FAM_CV;
+	return FAM_AUDIO;
+}
+
+int paletteFamilyForName(const std::string& name) {
+	if (!paletteLoaded)
+		paletteLoad();
+	const std::string n = string::uppercase(name);
+	for (const PaletteRule& rule : paletteRules) {
+		if (n.find(rule.match) != std::string::npos)
+			return rule.family;
+	}
+	return paletteGuess(name);
+}
+
+int palettePortOverride(app::PortWidget* port) {
+	if (!paletteLoaded)
+		paletteLoad();
+	// Asked for every port of every module on every frame, so the ordinary case — nobody has
+	// overridden anything — costs a test rather than a string being built and looked up.
+	if (paletteOverrides.empty())
+		return -1;
+	const std::string key = portKey(port);
+	if (key.empty())
+		return -1;
+	auto it = paletteOverrides.find(key);
+	return it == paletteOverrides.end() ? -1 : it->second;
+}
+
+void paletteSetPortOverride(app::PortWidget* port, int family) {
+	if (!paletteLoaded)
+		paletteLoad();
+	const std::string key = portKey(port);
+	if (key.empty())
+		return;
+	if (family < 0 || family >= NUM_FAMILIES)
+		paletteOverrides.erase(key);
+	else
+		paletteOverrides[key] = family;
+	paletteGen++;
+	paletteSave();
+}
+
+int paletteFamilyForPort(app::PortWidget* port) {
+	const int override_ = palettePortOverride(port);
+	if (override_ >= 0)
+		return override_;
+	std::string name;
+	if (port) {
+		if (engine::PortInfo* info = port->getPortInfo())
+			name = info->getName();
+	}
+	return paletteFamilyForName(name);
+}
+
+
+/** THE SCHEMES. Asked for by Ohmer, who named the one that is now the default. */
+static const PaletteScheme PAL_SCHEMES[] = {
+	{"omri", "Omri Cohen (default)"},
+	{"dreamer", "Dreamer Development"},
+	{NULL, NULL},
+};
+
+const PaletteScheme* paletteSchemes() {
+	return PAL_SCHEMES;
+}
+
+void paletteApplyScheme(const char* key) {
+	if (!paletteLoaded)
+		paletteLoad();
+	const NVGcolor* from = (key && std::strcmp(key, "dreamer") == 0) ? PAL_DREAMER : PAL_DEFAULT;
+	for (int i = 0; i < NUM_FAMILIES; i++)
+		palette[i] = from[i];
+	paletteGen++;
+	paletteSave();
+}
+
+uint64_t paletteGeneration() {
+	if (!paletteLoaded)
+		paletteLoad();
+	return paletteGen;
 }
 
 const char* paletteName(int family) {
@@ -256,6 +483,7 @@ struct PaletteWidget : widget::OpaqueWidget {
 	swatch, and there is no way to judge it against a patch you cannot see. */
 	void apply() {
 		palette[selected] = hsvToRgb(h, s, v);
+		paletteGen++;
 	}
 
 	void layout() {
@@ -435,7 +663,7 @@ struct PaletteWidget : widget::OpaqueWidget {
 		nvgFontSize(args.vg, PAL_TITLE);
 		nvgFillColor(args.vg, PAL_INK);
 		nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
-		nvgText(args.vg, PAL_PAD, PAL_PAD + PAL_TITLE / 2.f, "Jack and cable colours", NULL);
+		nvgText(args.vg, PAL_PAD, PAL_PAD + PAL_TITLE / 2.f, "Port and cable colours", NULL);
 
 		nvgFontFaceId(args.vg, body->handle);
 		nvgFontSize(args.vg, PAL_TEXT);
@@ -535,12 +763,14 @@ struct PaletteWidget : widget::OpaqueWidget {
 		if (btnDefaults.contains(e.pos)) {
 			for (int i = 0; i < NUM_FAMILIES; i++)
 				palette[i] = PAL_DEFAULT[i];
+			paletteGen++;
 			select(selected);
 			return;
 		}
 		if (btnCancel.contains(e.pos)) {
 			for (int i = 0; i < NUM_FAMILIES; i++)
 				palette[i] = entry[i];
+			paletteGen++;
 			paletteDismiss();
 			return;
 		}
@@ -590,6 +820,7 @@ struct PaletteWidget : widget::OpaqueWidget {
 			e.consume(this);
 			for (int i = 0; i < NUM_FAMILIES; i++)
 				palette[i] = entry[i];
+			paletteGen++;
 			paletteDismiss();
 			return;
 		}

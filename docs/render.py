@@ -7,7 +7,8 @@ Writes clarity.html and test-gear.html beside their markdown, so the relative im
 them keep working. Open the file directly; no server is needed.
 
 A small converter rather than a dependency: the manuals use headings, paragraphs, rules,
-tables, lists, bold, italics, code spans and raw HTML image tags, and that is the whole of it.
+tables, lists, bold, italics, code spans, fenced blocks and raw HTML image tags, and that is
+the whole of it.
 """
 import html
 import re
@@ -30,6 +31,8 @@ p { margin: 0 0 1.1rem; }
 hr { border: 0; border-top: 1px solid #d8dce1; margin: 2.5rem 0; }
 img { max-width: 100%; height: auto; display: block; margin: 1rem 0; }
 em { color: #5b636d; font-style: italic; }
+pre { background: #f2f4f6; padding: .8em 1em; border-radius: 4px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
 code { font: .9em ui-monospace, Menlo, monospace; background: #f2f4f6;
        padding: .1em .35em; border-radius: 3px; }
 table { border-collapse: collapse; margin: 1.25rem 0; }
@@ -43,6 +46,7 @@ li { margin: 0 0 .5rem; }
   hr { border-top-color: #2c313a; }
   em { color: #9aa1ac; }
   code { background: #232830; }
+  pre { background: #232830; }
   th, td { border-color: #2c313a; }
   th { background: #1d2127; }
 }
@@ -80,6 +84,18 @@ def convert(md):
             level = len(line) - len(line.lstrip("#"))
             out.append(f"<h{level}>{inline(line[level:].strip())}</h{level}>")
             i += 1
+            continue
+
+        # A fenced block, held verbatim. Everything inside is escaped and nothing in it is
+        # read as markup: it is there to be copied into a file, so it has to arrive as typed.
+        if line.startswith("```"):
+            i += 1
+            block = []
+            while i < len(lines) and not lines[i].startswith("```"):
+                block.append(html.escape(lines[i]))
+                i += 1
+            i += 1
+            out.append("<pre><code>" + "\n".join(block) + "</code></pre>")
             continue
 
         if re.fullmatch(r'-{3,}', line.strip()):

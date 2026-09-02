@@ -4,9 +4,9 @@ Clarity changes how the rack is drawn and how you interact with it. It does not 
 
 The interaction features were developed on a trackpad and are designed for one. All of them work with a mouse except pinch to zoom, which requires a trackpad gesture.
 
-<img src="images/clarity-knobs.jpg" width="760" alt="A rack holding Test Gear, Clarity, two Fundamental modules, an Instruo tona and an audio interface. Every knob across all of them is drawn with the same face, the jacks show their family colours, and a cable crosses the rack with dashes drifting along it.">
+<img src="images/clarity-knobs.jpg" width="760" alt="A rack holding Test Gear, Clarity, two Fundamental modules, an Instruo tona and an audio interface. Every knob across all of them is drawn with the same face, the ports show their family colours, and a cable crosses the rack with dashes drifting along it.">
 
-*A rack running Clarity: one knob face across three plugins, jacks coloured by signal family, and a cable whose dashes drift towards its destination.*
+*A rack running Clarity: one knob face across three plugins, ports coloured by signal family, and a cable whose dashes drift towards its destination.*
 
 Place one anywhere in the rack. A second has no effect. The panel lists the features under the heading **Features**, one switch per row, lit when that feature is enabled.
 
@@ -14,9 +14,9 @@ Place one anywhere in the rack. A second has no effect. The panel lists the feat
 
 ## Reading the rack
 
-### Colour code jacks
+### Colour code ports
 
-Every jack in the rack is given a coloured ring for its signal family, determined from the port's name:
+Every port in the rack is given a coloured ring for its signal family, determined from the port's name:
 
 | Family | Input | Output | Ports named like |
 | --- | :---: | :---: | --- |
@@ -24,6 +24,8 @@ Every jack in the rack is given a coloured ring for its signal family, determine
 | CV | <img src="images/jack-cv-in.png" width="44"> | <img src="images/jack-cv-out.png" width="44"> | CV, MOD, FM |
 | Gate and trigger | <img src="images/jack-trigger-in.png" width="44"> | <img src="images/jack-trigger-out.png" width="44"> | GATE, TRIG, CLOCK, CLK, RESET, SYNC |
 | Pitch | <img src="images/jack-pitch-in.png" width="44"> | <img src="images/jack-pitch-out.png" width="44"> | V/OCT, PITCH, NOTE |
+
+A fifth family, **MPX**, is given to ports named for the Modular Polyphonic Expression plugin, whose cables carry note events rather than a voltage. It is drawn in magenta, and has no pictures here.
 
 The same ring also indicates direction: it is drawn against the **outer edge** on an output, and against the **hole** on an input. Colour indicates the signal family; position indicates the direction.
 
@@ -44,9 +46,55 @@ A cable is drawn in the colour of the family of the port it **arrives** at. Reco
 
 An audio cable moved to a gate input, and the resulting change of colour:
 
-<img src="images/cable-replug.gif" width="420" alt="A cable is pulled from an audio input to a gate input; it stays yellow while it is carried, and turns blue when it is dropped.">
+<img src="images/cable-replug.gif" width="420" alt="A cable is pulled from an audio input to a gate input; it stays red while it is carried, and turns blue when it is dropped.">
 
 Rack stores cable colours in the patch. A colour set manually is not overwritten.
+
+Switching **Colour code cables** off puts every cable back to the colour it had before, as does removing the last Clarity module. **Put cable colours back** on the right-click menu does the same without switching anything off. The switch is off by default: cable colours belong to the patch, and a module that changed them the moment it was placed would be taking a decision that is not its to take.
+
+### Choosing the colours
+
+**Port and cable colours…** on the right-click menu opens a chooser: five swatches across the top, a colour wheel with hue around it and saturation out from the centre, and a brightness bar under it.
+
+The colours are stored in `<Rack user folder>/DreamerDevelopment/colours.json`, beside Rack's own settings rather than in the patch. They describe the person looking rather than the work, so opening somebody else's patch does not change how your rack is coloured.
+
+**Colour scheme** on the right-click menu replaces all five at once:
+
+| Scheme | Audio | CV | Gate | Pitch |
+| --- | --- | --- | --- | --- |
+| Omri Cohen (default) | red | green | blue | yellow |
+| Dreamer Development | yellow | orange | blue | green |
+
+The first is the convention used in Omri Cohen's tutorials, which is the one most widely seen, and it is what this plugin uses. The second is the set it shipped with; the two disagree about yellow, which means audio in one and pitch in the other.
+
+### Correcting a family
+
+The family is guessed from the port's name, and a name does not always say. A port called "Rate" is modulation on one module and a clock on the next.
+
+**Right-click the port** and use **Signal family** to set it, or **Automatic** to go back to guessing. The choice is stored against the module's model rather than against the patch, so a port corrected once is correct in every patch that uses that module.
+
+To categorise by name instead, add a `rules` list to `colours.json`. Each rule gives a piece of text to look for in the port's name and the family a port matching it belongs to. Rules are tested in the order written, before the built-in list, and the text is matched anywhere in the name without regard to case.
+
+```json
+{
+  "audio": "#c91847",
+  "cv": "#0c8e15",
+  "trigger": "#0986ad",
+  "pitch": "#c9b70e",
+  "mpx": "#ff3cc8",
+  "rules": [
+    { "match": "bpm", "family": "pitch" },
+    { "match": "rate", "family": "cv" }
+  ],
+  "ports": {
+    "Venom/AD_ASR/out/3": "cv"
+  }
+}
+```
+
+The family names are `audio`, `cv`, `trigger`, `pitch` and `mpx`. The `ports` block is what the port's own menu writes; the key names the plugin, the model, the direction and the port number. A rule the reader cannot make sense of is passed over, and the rest of the file is still read.
+
+The file is read once, when the first colour is needed. Rack must be restarted after editing it by hand.
 
 ### Consistent knob style
 
@@ -84,39 +132,39 @@ Hovering either end of a cable displays a small handle on it. Clicking the handl
 
 *The other cables are hidden, not dimmed.*
 
-Where several cables meet at one jack, repeated clicks on the handle select each of them in turn.
+Where several cables meet at one port, repeated clicks on the handle select each of them in turn.
 
-**Right-click the handle** to disconnect that cable from its jack.
+**Right-click the handle** to disconnect that cable from its port.
 
 ### Add and move cables without dragging
 
-The mouse button does not have to be held down. Creating a cable at an unconnected terminal:
+The mouse button does not have to be held down. Creating a cable at an unconnected port:
 
-<img src="images/cable-new.gif" width="440" alt="A click on an empty terminal starts a cable, which follows the pointer across with no button held and is connected with a second click.">
+<img src="images/cable-new.gif" width="440" alt="A click on an empty port starts a cable, which follows the pointer across with no button held and is connected with a second click.">
 
 Moving a cable that is already connected:
 
 <img src="images/cable-pull.gif" width="440" alt="A cable is picked up from one input with a single click, follows the pointer across with no button held, and is dropped on another input with a second click.">
 
-Click a jack to take its cable, move the pointer, and click another jack to connect it. Press, drag and release also works: a release after any movement places the cable, connecting it if the pointer is over a jack. Both gestures are active at the same time, and a connection may be started with one and completed with the other. Right-click cancels either. The rack scrolls when a carried cable reaches the edge of the view.
+Click a port to take its cable, move the pointer, and click another port to connect it. Press, drag and release also works: a release after any movement places the cable, connecting it if the pointer is over a port. Both gestures are active at the same time, and a connection may be started with one and completed with the other. Right-click cancels either. The rack scrolls when a carried cable reaches the edge of the view.
 
-One behaviour differs from unmodified Rack: a click on a jack with no movement takes the cable, where Rack takes no action.
+One behaviour differs from unmodified Rack: a click on a port with no movement takes the cable, where Rack takes no action.
 
-### Several cables on one jack
+### Several cables on one port
 
-An output can hold several cables, and a click takes the topmost one. Clicking the same jack again, with the pointer still over it, replaces the carried cable with the next one the jack holds: each cable in turn, then a new cable, then no cable, then the first again.
+An output can hold several cables, and a click takes the topmost one. Clicking the same port again, with the pointer still over it, replaces the carried cable with the next one the port holds: each cable in turn, then a new cable, then no cable, then the first again.
 
-<img src="images/jack-pick-two.gif" width="440" alt="A jack with a yellow cable and a blue one on it. A click picks up the yellow one, and a second click swaps it for the blue one.">
+<img src="images/jack-pick-two.gif" width="440" alt="A port with a red cable and a blue one on it. A click picks up the red one, and a second click swaps it for the blue one.">
 
 *One click for the topmost cable, a second for the one below it.*
 
-Creating a third cable at the same jack, with both existing cables still connected:
+Creating a third cable at the same port, with both existing cables still connected:
 
-<img src="images/jack-new-from-two.gif" width="440" alt="The same jack with both cables connected. Three clicks reach past the yellow cable and the blue one to a new cable, which is carried down and connected to a free input.">
+<img src="images/jack-new-from-two.gif" width="440" alt="The same port with both cables connected. Three clicks reach past the red cable and the blue one to a new cable, which is carried down and connected to a free input.">
 
 *The third click produces a new cable. Neither existing cable is disconnected.*
 
-The states are not labelled. A carried cable is drawn at full opacity while the others are drawn at half, and it remains connected at its far end; a new cable is drawn from the clicked jack to the pointer.
+The states are not labelled. A carried cable is drawn at full opacity while the others are drawn at half, and it remains connected at its far end; a new cable is drawn from the clicked port to the pointer.
 
 Rack provides this through a modifier key. Repeated clicks provide it without one, and also select the cables below the topmost.
 
@@ -135,6 +183,11 @@ Pinching with the pointer over an analyser zooms that analyser's frequency axis 
 ## The right-click menu
 
 - **Draw pointer (for screen recordings)** — draws a pointer into the rack, indicating clicks, drags and scrolling. Screen recorders capture the window contents and not the system cursor.
+- **Draw movement trail** — the trail the drawn pointer leaves behind it while a button is held. Separate from the pointer itself, so one can be had without the other.
+- **Show hints again** — brings back the hints that are shown once and then dismissed.
+- **Port and cable colours…** — the colour chooser, described above.
+- **Colour scheme** — replaces all five colours with a named scheme.
+- **Put cable colours back** — restores every cable to the colour it had before Clarity coloured it.
 
 ---
 

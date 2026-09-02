@@ -10,10 +10,10 @@ import subprocess
 from pathlib import Path
 
 FAMILIES = {
-    "audio": "#f3c40b",
-    "cv": "#ff7300",
-    "trigger": "#5aa0e6",
-    "pitch": "#39a85a",
+    "audio": "#c91847",
+    "cv": "#0c8e15",
+    "trigger": "#0986ad",
+    "pitch": "#c9b70e",
 }
 
 R = 40.0                 # Jack radius, in a 100x100 viewBox.

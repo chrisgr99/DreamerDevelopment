@@ -149,10 +149,33 @@ static void setCursorShape(int shape) {
 }
 
 
+/** Frames left before the cursor is given back. Two rather than one, so that whether the rack
+steps before or after it dispatches a frame's hover cannot make the shape flicker. */
+static int cursorHold = 0;
+
 /** The same cursor, shared with the analyser: the two resize alike, so they should say so
 alike. The cursor cache above is what makes this cheap enough to call every hover. */
 void druiSetCursorShape(int shape) {
 	setCursorShape(shape);
+	cursorHold = 2;
+}
+
+
+/** PUT BACK EACH FRAME BY WHOEVER DID NOT CLAIM IT.
+
+Handing the cursor back on leaving was the obvious way and it does not hold: a leave event is
+not delivered when the widget under the pointer is deleted, hidden, or scrolled out from under
+it, and the pointer is then stuck as a resize arrow over the whole rack with nothing to click to
+get it back. Reported on Linux by contemporaryinsanity.
+
+So nobody hands it back. Anything that wants a shape asks for one every frame it wants it, and
+this — called after the frame's events, from the overlay that draws over the rack — returns it
+to an arrow the first frame nothing asks. */
+void druiCursorStep() {
+	if (cursorHold > 0)
+		cursorHold--;
+	else
+		setCursorShape(GLFW_ARROW_CURSOR);
 }
 
 

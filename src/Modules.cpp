@@ -52,47 +52,19 @@ using namespace rack;
 // signal" and "which way does it go" at once, and folding them together would make each answer
 // depend on reading the other.
 
-static NVGcolor familyColor(const std::string& family) {
-	// The four are settings now, not constants — see Palette.hpp for why they are kept beside
-	// Rack's own settings rather than in the patch.
-	if (family == "mpx")     return paletteColor(FAM_MPX);
-	if (family == "cv")      return paletteColor(FAM_CV);
-	if (family == "trigger") return paletteColor(FAM_TRIGGER);
-	if (family == "pitch")   return paletteColor(FAM_PITCH);
-	return paletteColor(FAM_AUDIO);
-}
-
-/** Rack has no concept of signal family, but it does expose port names. Guessing from the
-name is what makes this useful on plugins nobody has described by hand. */
-static std::string guessFamily(const std::string& name) {
-	const std::string n = string::uppercase(name);
-	// FIRST, and it has to be. An MPX jack is called something like "MPX note in", and the
-	// pitch test below would claim it on the word NOTE — which is how a cable carrying a whole
-	// instrument came out green.
-	if (n.find("MPX") != std::string::npos)
-		return "mpx";
-	if (n.find("V/OCT") != std::string::npos || n.find("PITCH") != std::string::npos
-		|| n.find("NOTE") != std::string::npos)
-		return "pitch";
-	if (n.find("GATE") != std::string::npos || n.find("TRIG") != std::string::npos
-		|| n.find("CLOCK") != std::string::npos || n.find("CLK") != std::string::npos
-		|| n.find("RESET") != std::string::npos || n.find("SYNC") != std::string::npos)
-		return "trigger";
-	if (n.find("CV") != std::string::npos || n.find("MOD") != std::string::npos
-		|| n.find("FM") != std::string::npos)
-		return "cv";
-	return "audio";
-}
+/** Which family a port belongs to, and what colour that is, both live in Palette.cpp — the
+guess, the user's rules and the per-port overrides are one question with one answer, and
+having part of it here meant a port could be drawn in one family and its cable in another. */
 
 /** Flow-dash length per family, in cable widths: gate coarse, audio fine. */
-static float flowDashLength(const std::string& family) {
-	if (family == "audio")
+static float flowDashLength(int family) {
+	if (family == FAM_AUDIO)
 		return 1.6f;
-	if (family == "trigger")
+	if (family == FAM_TRIGGER)
 		return 5.6f;
 	// MPX carries events rather than a signal, so the dashes are long and sparse: what travels
 	// on it is notes, not a stream.
-	if (family == "mpx")
+	if (family == FAM_MPX)
 		return 7.5f;
 	return 3.4f;
 }
@@ -116,6 +88,8 @@ struct Options {
 	/** Draws a pointer into the rack, for videos recorded with VCV Recorder — which cannot see
 	the real cursor. A recording aid rather than a feature, so it lives in the menu. */
 	bool demoPointer = false;
+	/** The trail the pointer leaves while a button is down, switched on its own. */
+	bool demoTrail = true;
 };
 
 
@@ -159,8 +133,12 @@ struct Clarity : Module {
 
 	Clarity() {
 		config(NUM_PARAMS, 0, 0, 0);
-		configSwitch(P_JACKS, 0.f, 1.f, 1.f, "Colour code jacks", {"Off", "On"});
-		configSwitch(P_CABLE_COLOR, 0.f, 1.f, 1.f, "Colour code cables", {"Off", "On"});
+		configSwitch(P_JACKS, 0.f, 1.f, 1.f, "Colour code ports", {"Off", "On"});
+		// OFF BY DEFAULT, alone among these. Everything else Clarity does is drawn over the
+		// rack and changes nothing; a cable's colour is the cable's own and is saved with the
+		// patch. A module that alters somebody's work the moment it is placed has taken a
+		// decision that was not its to take.
+		configSwitch(P_CABLE_COLOR, 0.f, 1.f, 0.f, "Colour code cables", {"Off", "On"});
 		configSwitch(P_KNOBS, 0.f, 1.f, 1.f, "Consistent knob style", {"Off", "On"});
 		configSwitch(P_CABLE_FLOW, 0.f, 1.f, 1.f, "Animate cable directions", {"Off", "On"});
 		configSwitch(P_PINCH, 0.f, 1.f, 1.f, "Pinch to zoom", {"Off", "On"});
@@ -199,12 +177,15 @@ struct Clarity : Module {
 
 		json_t* rootJ = json_object();
 		json_object_set_new(rootJ, "demoPointer", json_boolean(gOpt.demoPointer));
+		json_object_set_new(rootJ, "demoTrail", json_boolean(gOpt.demoTrail));
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
 		if (json_t* j = json_object_get(rootJ, "demoPointer"))
 			gOpt.demoPointer = json_boolean_value(j);
+		if (json_t* j = json_object_get(rootJ, "demoTrail"))
+			gOpt.demoTrail = json_boolean_value(j);
 	}
 };
 
@@ -537,6 +518,9 @@ struct DRUIOverlay : widget::TransparentWidget {
 	The colour belongs to the destination, so what has to be remembered is the destination.
 	*/
 	std::map<int64_t, std::string> cableDestination;
+	/** What each cable's colour was before we touched it, so it can be given back. */
+	std::map<int64_t, NVGcolor> originalCableColors;
+	bool colouredLastFrame = false;
 
 	DRUIOverlay() {
 		box.pos = math::Vec();
@@ -569,7 +553,30 @@ struct DRUIOverlay : widget::TransparentWidget {
 		// Colour newly connected cables by their destination. There is no "cable connected"
 		// hook available to a plugin, so this polls — but only acts once per cable, so a
 		// colour changed afterwards by hand survives.
+		//
+		// AND THE COLOUR IT HAD IS KEPT. A cable's colour is the cable's own, saved with the
+		// patch, so recolouring one is a change to somebody's work and not a way of drawing it.
+		// Switching the feature off, or removing the module, puts every one of them back.
+		// Reported by technochitlin, whose patch went yellow on load.
+		// After this frame's events, so a shape claimed during one is seen before it is given
+		// back. See druiCursorStep.
+		druiCursorStep();
+
+		if (!o.cableColor && colouredLastFrame) {
+			restoreCableColors();
+			colouredLastFrame = false;
+		}
 		if (o.cableColor) {
+			colouredLastFrame = true;
+			// A NEW PALETTE MEANS EVERY DECISION BELOW IS STALE. The loop leaves a cable alone
+			// while it still arrives where it did, which is what keeps this cheap — and which
+			// meant that changing the colours repainted nothing until each cable was unplugged
+			// and plugged back in. Forgetting where they went makes them all be decided again,
+			// on the next frame and once only.
+			if (colouredGeneration != paletteGeneration()) {
+				colouredGeneration = paletteGeneration();
+				cableDestination.clear();
+			}
 			for (CableWidget* cw : APP->scene->rack->getCompleteCables()) {
 				if (!cw->cable || !cw->inputPort)
 					continue;
@@ -580,10 +587,9 @@ struct DRUIOverlay : widget::TransparentWidget {
 				if (it != cableDestination.end() && it->second == dest)
 					continue;   // Same destination as last time: leave whatever colour it has.
 				cableDestination[cw->cable->id] = dest;
-				std::string name;
-				if (engine::PortInfo* info = cw->inputPort->getPortInfo())
-					name = info->getName();
-				cw->color = familyColor(guessFamily(name));
+				if (originalCableColors.find(cw->cable->id) == originalCableColors.end())
+					originalCableColors[cw->cable->id] = cw->color;
+				cw->color = paletteColor(paletteFamilyForPort(cw->inputPort));
 			}
 		}
 
@@ -597,10 +603,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 				PortWidget* origin = cw->outputPort ? cw->outputPort : cw->inputPort;
 				if (!origin)
 					continue;
-				std::string name;
-				if (engine::PortInfo* info = origin->getPortInfo())
-					name = info->getName();
-				cw->color = familyColor(guessFamily(name));
+				cw->color = paletteColor(paletteFamilyForPort(origin));
 			}
 		}
 
@@ -637,11 +640,43 @@ struct DRUIOverlay : widget::TransparentWidget {
 		widget::TransparentWidget::step();
 	}
 
+	/** WHETHER THIS IS ACTUALLY ON SCREEN, which is not what isVisible() answers.
+
+	isVisible() reports the widget's own flag and nothing else. Rack's drawing walks the tree,
+	so a widget inside a HIDDEN CONTAINER is never drawn while still reporting itself visible —
+	and a module that hides a group of controls together, as several do, had them drawn over by
+	us. Reported by DaveVenom against Venom Envelope Factory.
+
+	So the whole chain up to the module is asked, not just the leaf. */
+	static bool reallyVisible(widget::Widget* w, widget::Widget* upTo) {
+		for (widget::Widget* p = w; p && p != upTo->parent; p = p->parent) {
+			if (!p->isVisible())
+				return false;
+		}
+		return true;
+	}
+
+	/** The palette the cable colours below were decided from. */
+	uint64_t colouredGeneration = 0;
+
+	/** Puts every cable back to the colour it had before this module was in the rack. */
+	void restoreCableColors() {
+		for (CableWidget* cw : APP->scene->rack->getCompleteCables()) {
+			if (!cw->cable)
+				continue;
+			auto it = originalCableColors.find(cw->cable->id);
+			if (it != originalCableColors.end())
+				cw->color = it->second;
+		}
+		originalCableColors.clear();
+		cableDestination.clear();
+	}
+
 	void drawControlsOf(ModuleWidget* mw, const DrawArgs& args, const Options& o) {
 		std::vector<PortWidget*> ports = mw->getPorts();
 		if (o.jacks) {
 			for (PortWidget* p : ports) {
-				if (!p->isVisible())
+				if (!reallyVisible(p, mw))
 					continue;
 				const float r = std::fmin(p->box.size.x, p->box.size.y) / 2.f;
 				if (r <= 1.f)
@@ -649,11 +684,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 				const math::Vec c = centreOf(p);
 				const bool isOutput = (p->type == engine::Port::OUTPUT);
 
-				std::string name;
-				if (engine::PortInfo* info = p->getPortInfo())
-					name = info->getName();
-
-				drawJack(args.vg, c, r, familyColor(guessFamily(name)), isOutput);
+				drawJack(args.vg, c, r, paletteColor(paletteFamilyForPort(p)), isOutput);
 			}
 		}
 
@@ -661,7 +692,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 			std::vector<ParamWidget*> params = mw->getParams();
 			for (ParamWidget* pw : params) {
 				Knob* knob = dynamic_cast<Knob*>(pw);
-				if (!knob || !knob->isVisible())
+				if (!knob || !reallyVisible(knob, mw))
 					continue;
 				const float r = std::fmin(knob->box.size.x, knob->box.size.y) / 2.f;
 				if (r <= 1.f)
@@ -715,11 +746,8 @@ struct DRUIOverlay : widget::TransparentWidget {
 					p0 = p0.plus(ctrl.minus(p0).normalize().mult(14.f));
 					p1 = p1.plus(ctrl.minus(p1).normalize().mult(14.f));
 
-					std::string name;
-					if (engine::PortInfo* info = cw->inputPort->getPortInfo())
-						name = info->getName();
 					drawFlowDashes(args.vg, p0, ctrl, p1, 6.f,
-						flowDashLength(guessFamily(name)), time);
+						flowDashLength(paletteFamilyForPort(cw->inputPort)), time);
 				}
 			}
 			// With the cables, and after them, so the pill sits on top of the cable it belongs
@@ -985,7 +1013,8 @@ static void installOverlays() {
 	}
 	if (!gInterceptOverlay) {
 		widget::Widget* o = createInterceptOverlay(&gOpt.sliderScroll, &gOpt.clickCables,
-			&gOpt.scopes, &gOpt.widgets, &gOpt.trace, &gOpt.demoPointer);
+			&gOpt.scopes, &gOpt.widgets, &gOpt.trace, &gOpt.demoPointer,
+			&gOpt.demoTrail);
 		APP->scene->addChild(o);
 		gInterceptOverlay = o;
 	}
@@ -1009,6 +1038,10 @@ static void removeOverlaysIfIdle() {
 		return;
 	hintDismiss();
 	paletteDismiss();
+	// Before the overlay goes, since it holds what the colours were. A patch that had Clarity
+	// in it and no longer does should look the way it did before.
+	if (gRackOverlay)
+		gRackOverlay->restoreCableColors();
 	dropOverlay(gRackOverlay);
 	dropOverlay(gPinchOverlay);
 	dropOverlay(gInterceptOverlay);
@@ -1073,7 +1106,7 @@ struct ClarityWidget : DRUIWidgetBase {
 		// list of what the module does.
 		struct Row { int param; const char* a; const char* b; };
 		static const Row rows[] = {
-			{Clarity::P_JACKS,         "Colour code",   "jacks"},
+			{Clarity::P_JACKS,         "Colour code",   "ports"},
 			{Clarity::P_CABLE_COLOR,   "Colour code",   "cables"},
 			{Clarity::P_KNOBS,         "Consistent",    "knob style"},
 			{Clarity::P_CABLE_FLOW,    "Animate cable", "directions"},
@@ -1120,11 +1153,26 @@ struct ClarityWidget : DRUIWidgetBase {
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createBoolPtrMenuItem("Draw pointer (for screen recordings)", "",
 			&gOpt.demoPointer));
+		menu->addChild(createBoolPtrMenuItem("Draw movement trail", "", &gOpt.demoTrail));
 		menu->addChild(createMenuItem("Show hints again", "", []() { hintResetAll(); }));
 		// The colours are a setting because the eyes looking at them are not the eyes they
 		// were chosen for. Named for what it changes rather than for the word "settings",
 		// which says nothing about which settings.
-		menu->addChild(createMenuItem("Jack and cable colours\u2026", "", []() { paletteShow(); }));
+		menu->addChild(createMenuItem("Port and cable colours\u2026", "", []() { paletteShow(); }));
+		// The ready-made schemes, beside the chooser rather than inside it: picking a
+		// convention somebody else has taught you is a different act from mixing a colour.
+		menu->addChild(createSubmenuItem("Colour scheme", "", [](Menu* sub) {
+			for (const PaletteScheme* scheme = paletteSchemes(); scheme->key; scheme++) {
+				const char* key = scheme->key;
+				sub->addChild(createMenuItem(scheme->name, "", [key]() {
+					paletteApplyScheme(key);
+				}));
+			}
+		}));
+		menu->addChild(createMenuItem("Put cable colours back", "", []() {
+			if (gRackOverlay)
+				gRackOverlay->restoreCableColors();
+		}));
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));
@@ -1139,7 +1187,7 @@ struct TestGearWidget : DRUIWidgetBase {
 		setModule(module);
 		// The last line is the menu entry's own wording, so the panel and the menu agree.
 		buildPanel("", "Test Gear",
-			{"Right-click any", "terminal and select", "\"Widgets\". It follows",
+			{"Right-click any", "port and select", "\"Widgets\". It follows",
 			"the pointer. Click", "to place it."}, {
 			{"Scope", false}, {"Analyser", false}, {"Audio monitor", false},
 			{"Gate", false}, {"Pulse", false}, {"Clock", false}, {"DC level", false},

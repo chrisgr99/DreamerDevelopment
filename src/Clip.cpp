@@ -83,7 +83,7 @@ struct ClipHandleWidget : widget::OpaqueWidget {
 		if (!target || !target->module || !clip->acceptsPort(target)) {
 			// Dropped away from any jack it can use: it is no longer attached to anything,
 			// which is the same as not being there.
-			INFO("Clip: dropped off its terminal, removing");
+			INFO("Clip: dropped off its port, removing");
 			clip->detach();
 			return;
 		}

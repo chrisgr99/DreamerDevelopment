@@ -32,11 +32,18 @@ cable's colour, so a fully transparent cable still cast a visible shadow; and ou
 dashes are drawn by us, not by Rack, so they would have kept crawling along cables that had
 otherwise vanished. Hiding the widget removes the cable, its outline and its shadow together,
 and the dashes are skipped for anything hidden. */
-/** How near the pointer must be to a pill's centre for it to be offered, in rack pixels.
+/** How near the pointer must be to the pill's BODY for it to be offered, in rack pixels.
 
-Kept smaller than the gap between the pill and the jack. At 13 the claimed area reached back
-over the jack itself, so a press meant for the terminal could be taken by a pill instead. */
-static const float PILL_REACH = 8.f;
+Measured to the whole length of the pill rather than to its centre. Measuring to the centre
+made the target an eight-pixel circle inside something drawn twenty-three long and eleven
+wide, so a pointer plainly on the pill — at either end of it — raised nothing, and the
+complaint was that some cables have no handle at all rather than that the handle is small.
+Which cables it happened on depended on the angle the cable left the port at, which is why it
+looked like certain modules. Reported by DaveVenom.
+
+Half the drawn width plus a little. It does not need to be more: the pill is now as big a
+target as it looks. */
+static const float PILL_REACH = 7.f;
 /** Where the pill sits, measured along the cable from where the cable is DRAWN to start —
 which is already 14 px out from the jack's centre, because Rack insets both ends. So zero
 here puts the pill against the jack without reaching into the jack's own click radius. */
@@ -112,22 +119,46 @@ static bool cableCurve(app::CableWidget* cw, math::Vec& p0, math::Vec& c, math::
 
 /** Walks in from one end until it has travelled `along` pixels of curve. Stepping along the
 curve rather than measuring straight-line distance matters on a deeply slumped cable, where
-the two differ by a lot. */
+the two differ by a lot.
+
+LANDS EXACTLY ON THE DISTANCE ASKED FOR, by interpolating within the step that crosses it.
+Returning the first sample past the mark instead put the pill wherever the sampling happened
+to fall, which on a long cable was several times further out than asked — far enough that the
+two ends of the pill were computed as the same point and it was drawn as a dot. A patch spread
+across the screen is exactly where tracing a cable is wanted, so this failed hardest where it
+was needed most. */
 static math::Vec pointAlong(math::Vec p0, math::Vec c, math::Vec p1, bool fromInput,
 	float along) {
 
-	const int steps = 48;
+	const int steps = 96;
 	math::Vec prev = fromInput ? p1 : p0;
 	float travelled = 0.f;
 	for (int i = 1; i <= steps; i++) {
 		const float t = (float) i / steps;
 		const math::Vec pt = quadAt(p0, c, p1, fromInput ? 1.f - t : t);
-		travelled += pt.minus(prev).norm();
+		const float seg = pt.minus(prev).norm();
+		if (travelled + seg >= along) {
+			if (seg <= 0.f)
+				return pt;
+			return prev.plus(pt.minus(prev).mult((along - travelled) / seg));
+		}
+		travelled += seg;
 		prev = pt;
-		if (travelled >= along)
-			return pt;
 	}
 	return prev;
+}
+
+
+/** How far `p` is from the segment `a`—`b`. The pill is a stroked line, so this is the
+distance to the pill itself rather than to a point somewhere inside it. */
+static float distanceToSegment(math::Vec p, math::Vec a, math::Vec b) {
+	const math::Vec ab = b.minus(a);
+	const float len2 = ab.x * ab.x + ab.y * ab.y;
+	if (len2 <= 0.f)
+		return p.minus(a).norm();
+	float t = (p.minus(a).x * ab.x + p.minus(a).y * ab.y) / len2;
+	t = math::clamp(t, 0.f, 1.f);
+	return p.minus(a.plus(ab.mult(t))).norm();
 }
 
 
@@ -204,6 +235,22 @@ bool cableFocusPillAt(app::CableWidget*& cw, bool& atInput) {
 }
 
 
+/** Where the pill the next click would take is drawn, in the rack's own coordinates.
+
+Wanted by the press handler, which has to decide between the pill and a terminal lying under
+it. See the note there. */
+bool cableFocusPillPos(math::Vec& out) {
+	if (candidates.empty())
+		return false;
+	const HoverCandidate& hc = candidates[turn];
+	math::Vec p0, c, p1;
+	if (!hc.cw || !cableCurve(hc.cw, p0, c, p1))
+		return false;
+	out = pointAlong(p0, c, p1, hc.atInput, PILL_START + PILL_LENGTH / 2.f);
+	return true;
+}
+
+
 bool cableFocusActive() {
 	return focusedId >= 0;
 }
@@ -239,9 +286,9 @@ void cableFocusStep() {
 			continue;
 		for (int end = 0; end < 2; end++) {
 			const bool atInput = (end == 1);
-			const math::Vec pill = pointAlong(p0, c, p1, atInput,
-				PILL_START + PILL_LENGTH / 2.f);
-			if (pill.minus(mouse).norm() < PILL_REACH) {
+			const math::Vec a = pointAlong(p0, c, p1, atInput, PILL_START);
+			const math::Vec b = pointAlong(p0, c, p1, atInput, PILL_START + PILL_LENGTH);
+			if (distanceToSegment(mouse, a, b) < PILL_REACH) {
 				HoverCandidate hc;
 				hc.cw = cw;
 				hc.atInput = atInput;

@@ -13,6 +13,9 @@ reason.
 */
 #include "plugin.hpp"
 
+#include <app/PortWidget.hpp>
+#include <string>
+
 enum Family {
 	FAM_AUDIO,
 	FAM_CV,
@@ -27,6 +30,46 @@ enum Family {
 
 /** The colour for a family. Loads the saved palette the first time it is asked. */
 NVGcolor paletteColor(int family);
+
+/** WHICH FAMILY A PORT BELONGS TO, which is the other half of the colour code and the half
+that was not configurable.
+
+Three things are asked in order, so the more particular always beats the more general:
+
+  1. an override the user has set on THIS port of THIS module, which is exact and final
+  2. the user's own name rules, read from the same file as the colours
+  3. the built-in guess from the port's name
+
+Rack has no concept of a signal family, so the guess is all there is to work from by default —
+and a guess is wrong sometimes. One and two are how it gets put right, and both are kept
+beside Rack's settings rather than in the patch: which family a module's port belongs to is a
+fact about the module, true in every patch that uses it, so correcting it once corrects it
+everywhere. */
+int paletteFamilyForPort(app::PortWidget* port);
+
+/** The family a bare port name guesses to, with the user's rules applied. For the ports of a
+module that is not loaded, and for cables in flight. */
+int paletteFamilyForName(const std::string& name);
+
+/** The override on this port, or -1 for none. */
+int palettePortOverride(app::PortWidget* port);
+/** Sets or clears it, and writes the file. Pass -1 to go back to guessing. */
+void paletteSetPortOverride(app::PortWidget* port, int family);
+
+/** A number that changes whenever any colour or any categorisation does.
+
+The cable colouring remembers which port each cable arrives at and leaves a cable alone while
+that has not changed, since recolouring every cable in the rack on every frame is work for
+nothing. That memory is about destinations, so it could not see a change of PALETTE: choosing
+a new scheme left every cable in the rack painted in the old one until it was unplugged and
+plugged back in. This is how it knows to forget what it decided. */
+uint64_t paletteGeneration();
+
+/** Replaces the five colours with a named scheme and saves. */
+void paletteApplyScheme(const char* key);
+/** The schemes on offer: keys and display names, ending in a NULL key. */
+struct PaletteScheme { const char* key; const char* name; };
+const PaletteScheme* paletteSchemes();
 /** What the family is called on the panel and in the dialogue. */
 const char* paletteName(int family);
 

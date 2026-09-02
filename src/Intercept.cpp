@@ -51,6 +51,25 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include <algorithm>
 
 
+/** Whether a press at `pos` is meant for a cable's pill rather than for a terminal under it.
+
+True when there is no terminal under the press at all, and true as well when there is one but
+the pill is drawn nearer to the press than the terminal's own centre — measured in the rack's
+coordinates, so it holds at any zoom. */
+static bool pillBeatsPortAt(math::Vec pos) {
+	app::PortWidget* port = widgetAt<app::PortWidget>(APP->scene, pos);
+	if (!port)
+		return true;
+	math::Vec pill;
+	if (!cableFocusPillPos(pill))
+		return false;
+	const math::Vec mouse = APP->scene->rack->getMousePos();
+	const math::Vec centre = port->getRelativeOffset(port->box.size.div(2.f),
+		APP->scene->rack);
+	return pill.minus(mouse).norm() < centre.minus(mouse).norm();
+}
+
+
 struct InterceptOverlay : widget::Widget {
 	bool* sliderScroll = NULL;
 	bool* clickCables = NULL;
@@ -69,6 +88,8 @@ struct InterceptOverlay : widget::Widget {
 	between a demonstration and a conjuring trick.
 	*/
 	bool* demoPointer = NULL;
+	/** The drag trail, switched separately from the pointer itself. */
+	bool* demoTrail = NULL;
 	double pressTime = -1e9;
 	bool pressed = false;
 	int pressedButton = 0;
@@ -401,6 +422,25 @@ struct InterceptOverlay : widget::Widget {
 		if (parent)
 			box.size = parent->box.size;
 
+		// WHETHER A BUTTON IS ACTUALLY DOWN, asked of the window rather than counted from
+		// events.
+		//
+		// Counting releases did not work and could not be made to. Rack LOCKS THE CURSOR while
+		// a knob is being turned, and while it is locked Rack dispatches no button events at
+		// all — so the release that ended a knob drag never arrived, the pointer stayed drawn
+		// as held, and it took a click somewhere else to clear it. Reported by DaveVenom.
+		//
+		// The window knows, so the window is asked. Nothing can get this stuck.
+		if (APP->window && APP->window->win) {
+			const bool down =
+				glfwGetMouseButton(APP->window->win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS
+				|| glfwGetMouseButton(APP->window->win, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+			if (!down && pressed) {
+				pressed = false;
+				trail.clear();
+			}
+		}
+
 		autoScrollWhileCarrying();
 		addToPortMenu();
 		placeChooser();
@@ -667,7 +707,11 @@ struct InterceptOverlay : widget::Widget {
 
 		// THE DRAG TRAIL. Where the pointer has been while the button was down, fading with
 		// distance back — movement, rather than a pointer that appears to teleport.
-		if (pressed) {
+		//
+		// On its own switch. It is the one part of the drawn pointer that leaves a mark behind
+		// the pointer rather than on it, and somebody recording a patch being built wanted the
+		// pointer without it. Asked for by DaveVenom.
+		if (pressed && demoTrail && *demoTrail) {
 			if (trail.empty() || trail.back().minus(p).norm() > 2.f)
 				trail.push_back(p);
 			if (trail.size() > 40)
@@ -742,10 +786,20 @@ struct InterceptOverlay : widget::Widget {
 
 		// WHAT IS BEING TURNED. A knob moves too little to see on video; its name and value do
 		// not. Shown above the modifier line so both can be up at once.
-		// What is being changed, however it is being changed: dragged, or scrolled.
-		std::string param = draggedParamText();
-		if (param.empty() && scrollAge < 0.9 && scrollParam)
-			param = paramText(scrollParam);
+		//
+		// NOT WHILE A MENU IS OPEN, and not for the right button. A right press on a knob makes
+		// it the dragged widget for as long as the button is held, and Rack opens the knob's own
+		// menu under the pointer at the same moment — so the readout was laid over the menu it
+		// was competing with. Reported by DaveVenom on Windows. Neither case is one the readout
+		// is for: it is there to show a value being changed, and a menu being opened changes
+		// nothing.
+		std::string param;
+		if (!menuIsOpen()) {
+			if (pressedButton != GLFW_MOUSE_BUTTON_RIGHT)
+				param = draggedParamText();
+			if (param.empty() && scrollAge < 0.9 && scrollParam)
+				param = paramText(scrollParam);
+		}
 		if (!param.empty())
 			drawPointerLabel(args, p, param, nvgRGB(0x3d, 0xe0, 0x7a), -10.f);
 
@@ -880,6 +934,43 @@ struct InterceptOverlay : widget::Widget {
 						entries.splice(std::next(entries.begin()), entries, separatorAt);
 					}
 				}
+				// AND WHICH FAMILY THIS PORT IS, at the foot.
+				//
+				// The colour code guesses from the port's name, and a guess is wrong sometimes:
+				// a port called "Rate" is modulation on one module and a clock on the next, and
+				// no rule reads both correctly. This is where it gets put right, on the port
+				// itself, where the person who can see that it is wrong already is. The choice
+				// is remembered against the model rather than against the patch, so a port
+				// corrected once is correct in every patch that uses that module.
+				//
+				// At the foot deliberately, unlike the widgets entry above: this is done once
+				// for a module and then never again, so it should not be in the way.
+				{
+					WeakPtr<app::PortWidget> port = menuPort;
+					menu->addChild(new ui::MenuSeparator);
+					menu->addChild(createSubmenuItem("Signal family", "",
+						[port](ui::Menu* sub) {
+							sub->addChild(createCheckMenuItem("Automatic", "",
+								[port]() {
+									return port && palettePortOverride(port) < 0;
+								},
+								[port]() {
+									if (port)
+										paletteSetPortOverride(port, -1);
+								}));
+							for (int family = 0; family < NUM_FAMILIES; family++) {
+								sub->addChild(createCheckMenuItem(paletteName(family), "",
+									[port, family]() {
+										return port && palettePortOverride(port) == family;
+									},
+									[port, family]() {
+										if (port)
+											paletteSetPortOverride(port, family);
+									}));
+							}
+						}));
+				}
+
 				menuPort = NULL;
 				menuWait = 0;
 				return;
@@ -923,11 +1014,11 @@ struct InterceptOverlay : widget::Widget {
 			hintShow("letGo", {
 				"Hint: you don't need to hold down the mouse button!",
 				"Release it and the cable will still follow. Click to",
-				"connect it to the new terminal.",
+				"connect it to the new port.",
 				"",
-				"With the Clarity module, you can click a terminal to",
+				"With the Clarity module, you can click a port to",
 				"pick up a cable. It will follow the pointer. Click on",
-				"another terminal to connect it. You can also drag",
+				"another port to connect it. You can also drag",
 				"cables as usual in VCV.",
 			}, carryStart, travel);
 		}
@@ -1112,15 +1203,23 @@ struct InterceptOverlay : widget::Widget {
 			}
 		}
 
-		// A plain click on a cable's pill takes that cable — but NEVER a press that is on a
-		// jack. Claiming those broke dragging a cable off a terminal, which is the single most
-		// common thing anyone does in Rack: the port never saw the press, so the drag became a
-		// module drag. The pill sits outside the jack, so a press over a jack is always meant
-		// for the jack.
+		// A plain click on a cable's pill takes that cable — unless the press belongs to a
+		// terminal instead.
+		//
+		// WHICHEVER IS NEARER, rather than the terminal always. Refusing every press that landed
+		// on a terminal at all was the first rule, and it was too broad: a terminal's clickable
+		// box is square and larger than the jack drawn in it, so where modules are packed
+		// closely a pill can lie over the corner of a neighbouring terminal's box and the trace
+		// then does nothing at all, with the terminal it was refused to being one the pointer is
+		// nowhere near. Reported by DaveVenom.
+		//
+		// The terminal still wins a press that is genuinely on it, which is what matters:
+		// dragging a cable off a terminal is the commonest gesture in Rack and must never be
+		// taken by a pill.
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& (e.mods & RACK_MOD_MASK) == 0
-			&& !widgetAt<app::PortWidget>(APP->scene, e.pos)
 			&& !clipFamilyAt(e.pos)
+			&& pillBeatsPortAt(e.pos)
 			&& cableFocusClick()) {
 			e.consume(this);
 			e.stopPropagating();
@@ -1192,7 +1291,7 @@ struct InterceptOverlay : widget::Widget {
 
 
 widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
-	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer) {
+	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer, bool* demoTrail) {
 
 	InterceptOverlay* overlay = new InterceptOverlay;
 	overlay->sliderScroll = sliderScroll;
@@ -1201,5 +1300,6 @@ widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
 	overlay->offerWidgets = offerWidgets;
 	overlay->trace = trace;
 	overlay->demoPointer = demoPointer;
+	overlay->demoTrail = demoTrail;
 	return overlay;
 }

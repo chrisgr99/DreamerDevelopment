@@ -287,7 +287,7 @@ def new_cable():
 def cycle():
     """Clicking the same jack twice: the cable on top, then the one under it, then away.
 
-    Two colours, because the point is WHICH cable is in your hand and two yellow ones cannot
+    Two colours, because the point is WHICH cable is in your hand and two of one colour cannot
     say that. The states tell themselves apart without labels: the cable being held is at full
     strength while the other drops to half, and it runs from its far end to the pointer.
     """
@@ -296,19 +296,19 @@ def cycle():
     out = (110.0, 70.0)
     in_top = (400.0, 70.0)
     in_low = (400.0, 190.0)
-    yellow = art.FAMILIES["audio"][0]
-    blue = art.FAMILIES["trigger"][0]
+    audio = art.FAMILIES["audio"][0]
+    gate = art.FAMILIES["trigger"][0]
 
 
     def scene(held, caption, at=None, click=False):
         """held: None, "top" or "low"."""
         at = at or out
         parts = [
-            art.jack(out[0], out[1], 20, yellow, True),
-            art.jack(in_top[0], in_top[1], 20, yellow, False),
-            art.jack(in_low[0], in_low[1], 20, blue, False),
+            art.jack(out[0], out[1], 20, audio, True),
+            art.jack(in_top[0], in_top[1], 20, audio, False),
+            art.jack(in_low[0], in_low[1], 20, gate, False),
         ]
-        for name, far, colour in (("top", in_top, yellow), ("low", in_low, blue)):
+        for name, far, colour in (("top", in_top, audio), ("low", in_low, gate)):
             if held == name:
                 # In the hand: it runs from its far end to the pointer, at full strength and
                 # with no plug on the end being carried.
@@ -329,9 +329,9 @@ def cycle():
     shots = []
     shots += [scene(None, first)] * 26                    # Both cables, nothing held.
     shots += [scene(None, first, click=True)] * 3
-    shots += [scene("top", second)] * 26                  # The yellow one, still on the jack.
+    shots += [scene("top", second)] * 26                  # The audio one, still on the port.
     shots += [scene("top", second, click=True)] * 3
-    shots += [scene("low", second)] * 8                   # Swapped for the blue one.
+    shots += [scene("low", second)] * 8                   # Swapped for the gate one.
     shots += [scene("low", away)] * 18
 
     # Carried off the jack, which is what ends the cycle: from here the next click puts it
@@ -424,8 +424,8 @@ def stack():
 
 
 def replug():
-    """The pointer takes a cable off a yellow audio input and drops it on a blue gate input,
-    and the cable turns blue: the colour belongs to where a cable GOES."""
+    """The pointer takes a cable off an audio input and drops it on a gate input, and the cable
+    changes to the gate colour: the colour belongs to where a cable GOES."""
     w, h = 460, 300
     fps = 12
     src = (70.0, 72.0)          # The audio output it comes from.
@@ -674,7 +674,7 @@ def trace_parts_builders():
 def _two_cable_jack():
     """The scene shared by both halves of the several-cables section.
 
-    Both start from the SAME patch — a yellow lead and a blue one on one output, and a free
+    Both start from the SAME patch — an audio lead and a gate one on one output, and a free
     input below them. Showing the second half on a jack with only one cable made it look as
     though something had to be unplugged before a new cable could be started, which is the
     opposite of what the feature does.
@@ -684,20 +684,20 @@ def _two_cable_jack():
     in_top = (400.0, 60.0)
     in_low = (400.0, 150.0)
     in_free = (400.0, 250.0)
-    yellow = art.FAMILIES["audio"][0]
-    blue = art.FAMILIES["trigger"][0]
+    audio = art.FAMILIES["audio"][0]
+    gate = art.FAMILIES["trigger"][0]
 
     def scene(held, caption, at=None, click=False, new_end=None):
         """held: None, "top", "low"; new_end: where a newly made cable is being carried."""
         at = at or out
         parts = [
-            art.jack(out[0], out[1], 20, yellow, True),
-            art.jack(in_top[0], in_top[1], 20, yellow, False),
-            art.jack(in_low[0], in_low[1], 20, blue, False),
-            art.jack(in_free[0], in_free[1], 20, yellow, False),
+            art.jack(out[0], out[1], 20, audio, True),
+            art.jack(in_top[0], in_top[1], 20, audio, False),
+            art.jack(in_low[0], in_low[1], 20, gate, False),
+            art.jack(in_free[0], in_free[1], 20, audio, False),
         ]
         busy = held is not None or new_end is not None
-        for name, far, colour in (("top", in_top, yellow), ("low", in_low, blue)):
+        for name, far, colour in (("top", in_top, audio), ("low", in_low, gate)):
             if held == name:
                 parts.append(art.cable(far, at, colour))
                 parts.append(art.plug(far[0], far[1], colour))
@@ -706,8 +706,8 @@ def _two_cable_jack():
                 parts.append(art.plug(out[0], out[1], colour))
                 parts.append(art.plug(far[0], far[1], colour))
         if new_end is not None:
-            parts.append(art.cable(out, new_end, yellow))
-            parts.append(art.plug(out[0], out[1], yellow))
+            parts.append(art.cable(out, new_end, audio))
+            parts.append(art.plug(out[0], out[1], audio))
         parts.append(art.label(w / 2.0, 26, caption, 15))
         parts.append(art.pointer(at[0], at[1], click=click))
         return art.svg(w, h, "\n  ".join(parts))
