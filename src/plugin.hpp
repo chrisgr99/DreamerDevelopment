@@ -14,7 +14,8 @@ widget::Widget* createPinchZoomOverlay(bool* enabled);
 Option-click to clip a scope onto a jack. Added to the Scene and kept as its LAST child, so
 it is offered events ahead of any open menu. */
 widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
-	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer, bool* demoTrail);
+	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer,
+	bool* demoValues);
 
 /** The plugin's knob face, shared so an injector's dial matches the knobs it sits among. */
 void druiDrawKnob(NVGcontext* vg, math::Vec c, float r, float angle, int ticks);

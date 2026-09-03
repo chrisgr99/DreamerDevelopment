@@ -15,6 +15,7 @@ reason.
 
 #include <app/PortWidget.hpp>
 #include <string>
+#include <vector>
 
 enum Family {
 	FAM_AUDIO,
@@ -65,11 +66,25 @@ a new scheme left every cable in the rack painted in the old one until it was un
 plugged back in. This is how it knows to forget what it decided. */
 uint64_t paletteGeneration();
 
-/** Replaces the five colours with a named scheme and saves. */
+/** Replaces the colours AND the name rules with a named set, and saves.
+
+A set is both halves together, because they are one answer: a scheme decides what the families
+look like, and the rules decide what belongs to each. Choosing one and keeping the other's rules
+would be a state nobody asked for. Per-port overrides are left alone — they name particular
+ports of particular modules and are true whatever the colours are. */
 void paletteApplyScheme(const char* key);
-/** The schemes on offer: keys and display names, ending in a NULL key. */
+/** The sets on offer: keys and display names, ending in a NULL key. */
 struct PaletteScheme { const char* key; const char* name; };
 const PaletteScheme* paletteSchemes();
+
+/** The names of the alternative sets sitting beside colours.json — any other .json file in the
+same folder. Sharing a set is sending somebody a file. */
+std::vector<std::string> paletteFileSets();
+/** Loads one of those by name, as paletteApplyScheme loads a built-in one. */
+void paletteApplyFileSet(const std::string& name);
+/** Writes the colours, rules and overrides now in force to a file of that name beside
+colours.json, so a set that has been worked out by hand can be kept and passed on. */
+void paletteSaveAs(const std::string& name);
 /** What the family is called on the panel and in the dialogue. */
 const char* paletteName(int family);
 

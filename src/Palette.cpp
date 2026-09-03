@@ -1,5 +1,7 @@
 #include "Palette.hpp"
 
+#include <osdialog.h>
+
 #include <cmath>
 #include <vector>
 #include <cstdio>
@@ -101,6 +103,53 @@ struct PaletteRule {
 	int family = 0;
 };
 static std::vector<PaletteRule> paletteRules;
+/** The rules version the file in force was written from, and whether reading it changed
+anything — which is when it is worth writing back. */
+static int paletteFileVersion = 0;
+static bool paletteMerged = false;
+
+/** THE RULES THE PLUGIN COMES WITH, and the only place they are written down.
+
+They are the file's starting contents rather than something hidden in the code that the file
+merely adds to. A user who opens colours.json sees exactly what decides a port's family, in the
+order it is decided, and can change a rule, reorder them, or take one out — which is what a
+configuration file is for. It also means nothing in here can drift from what is written out.
+
+ORDER MATTERS AND IS PRESERVED. An MPX port is called something like "MPX note in", and the
+pitch rule below would claim it on the word NOTE — which is how a cable carrying a whole
+instrument came out green. First match wins, so MPX is first. */
+/** THE VERSION OF THIS TABLE, and the one written into the file.
+
+A rule added in a later release reaches nobody who has already run the plugin, because the file
+is written once and is the authority from then on. So the file says which version of the table
+it was made from, and a file older than the table has the rules added since merged into it —
+each one placed where it belongs among the ones already there, since first match wins and a rule
+in the wrong place is worse than a rule missing.
+
+Only rules NEWER than the file are considered, which is what makes a deletion stick: a rule the
+user has taken out does not come back, because their file is already at or past the version that
+introduced it. A file with no version at all is treated as version nought, which is right — it
+was written before any of this and predates every rule. */
+static const int PAL_RULES_VERSION = 2;
+
+static const struct { const char* match; int family; int since; } PAL_DEFAULT_RULES[] = {
+	{"MPX", FAM_MPX, 1},
+	{"V/OCT", FAM_PITCH, 1}, {"PITCH", FAM_PITCH, 1}, {"NOTE", FAM_PITCH, 1},
+	{"GATE", FAM_TRIGGER, 1}, {"TRIG", FAM_TRIGGER, 1}, {"CLOCK", FAM_TRIGGER, 1},
+	{"CLK", FAM_TRIGGER, 1}, {"RESET", FAM_TRIGGER, 1}, {"SYNC", FAM_TRIGGER, 1},
+	// BPM IS A PITCH, whatever it is driving. A BPM control voltage is exponential and doubles
+	// per volt — nought volts is 120, one volt is 240, minus one is 60 — which is volt per
+	// octave in every respect except that the thing it sets is a tempo rather than a note. It
+	// belongs with V/Oct because it IS V/Oct, and the convention we follow already colours it
+	// that way. Suggested on the forum.
+	//
+	// AFTER the trigger rules, so that a port called "BPM clock", which sends pulses, is still
+	// read as a clock. Only a BPM port that is not also named as a clock lands here.
+	{"BPM", FAM_PITCH, 2},
+	{"CV", FAM_CV, 1}, {"MOD", FAM_CV, 1}, {"FM", FAM_CV, 1},
+};
+static const int NUM_DEFAULT_RULES =
+	(int) (sizeof(PAL_DEFAULT_RULES) / sizeof(PAL_DEFAULT_RULES[0]));
 static std::map<std::string, int> paletteOverrides;
 
 
@@ -150,19 +199,51 @@ static std::string toHex(NVGcolor c) {
 	return buf;
 }
 
-static void paletteLoad() {
-	for (int i = 0; i < NUM_FAMILIES; i++)
-		palette[i] = PAL_DEFAULT[i];
-	paletteLoaded = true;
+/** Reads a palette document into the palette, the rules and the overrides. Shared by the file
+that is in force and by any other set chosen from beside it, so the two cannot read the same
+document differently. */
+/** Whether a rule with this text is already in the list. Case is not part of a rule. */
+static void paletteRulesToDefault();
 
-	FILE* file = std::fopen(paletteFilePath().c_str(), "r");
-	if (!file)
-		return;
-	json_error_t error;
-	json_t* rootJ = json_loadf(file, 0, &error);
-	std::fclose(file);
-	if (!rootJ)
-		return;
+static bool paletteHasRule(const std::string& match) {
+	const std::string want = string::uppercase(match);
+	for (const PaletteRule& rule : paletteRules) {
+		if (string::uppercase(rule.match) == want)
+			return true;
+	}
+	return false;
+}
+
+/** Brings in the default rules added since the file was written, each one placed where it
+belongs: immediately before the first later default rule the file already has, so its position
+relative to the rules around it is the one the table intends. Appended only if nothing that
+follows it is there. */
+static void paletteMergeNewRules(int fileVersion) {
+	for (int i = 0; i < NUM_DEFAULT_RULES; i++) {
+		if (PAL_DEFAULT_RULES[i].since <= fileVersion)
+			continue;
+		if (paletteHasRule(PAL_DEFAULT_RULES[i].match))
+			continue;
+
+		size_t at = paletteRules.size();
+		for (int j = i + 1; j < NUM_DEFAULT_RULES; j++) {
+			const std::string later = string::uppercase(PAL_DEFAULT_RULES[j].match);
+			for (size_t k = 0; k < paletteRules.size(); k++) {
+				if (string::uppercase(paletteRules[k].match) == later && k < at) {
+					at = k;
+					break;
+				}
+			}
+		}
+		PaletteRule rule;
+		rule.match = PAL_DEFAULT_RULES[i].match;
+		rule.family = PAL_DEFAULT_RULES[i].family;
+		paletteRules.insert(paletteRules.begin() + at, rule);
+		paletteMerged = true;
+	}
+}
+
+static void paletteReadInto(json_t* rootJ) {
 	for (int i = 0; i < NUM_FAMILIES; i++) {
 		json_t* colorJ = json_object_get(rootJ, PAL_KEY[i]);
 		// A key that is missing or malformed leaves that family at its default rather than
@@ -196,6 +277,25 @@ static void paletteLoad() {
 		}
 	}
 
+	// A FILE WITH NO VERSION IS VERSION ONE, not nought. It was written by the build that put
+	// the rules in the file in the first place, and that build's table is version one — so its
+	// rules are all present and none of them is "new". Reading it as nought would restore
+	// every rule the owner had deliberately deleted, which is the opposite of what a merge is
+	// for. Only rules genuinely added since are brought in.
+	paletteFileVersion = 1;
+	if (json_t* versionJ = json_object_get(rootJ, "version"))
+		paletteFileVersion = (int) json_integer_value(versionJ);
+	paletteMerged = false;
+	if (paletteRules.empty()) {
+		// No rules written at all — an early file, from before they were saved. The built-in
+		// list is what it has been running on, so write that down rather than leaving a file
+		// that describes nothing.
+		paletteRulesToDefault();
+		paletteMerged = true;
+	}
+	else
+		paletteMergeNewRules(paletteFileVersion);
+
 	paletteOverrides.clear();
 	json_t* portsJ = json_object_get(rootJ, "ports");
 	if (portsJ && json_is_object(portsJ)) {
@@ -209,12 +309,49 @@ static void paletteLoad() {
 				paletteOverrides[key] = family;
 		}
 	}
-	json_decref(rootJ);
-	paletteGen++;
 }
 
-static void paletteSave() {
+static void paletteSave();
+
+static void paletteLoad() {
+	for (int i = 0; i < NUM_FAMILIES; i++)
+		palette[i] = PAL_DEFAULT[i];
+	paletteLoaded = true;
+
+	FILE* file = std::fopen(paletteFilePath().c_str(), "r");
+	if (!file) {
+		for (int i = 0; i < NUM_DEFAULT_RULES; i++) {
+			PaletteRule rule;
+			rule.match = PAL_DEFAULT_RULES[i].match;
+			rule.family = PAL_DEFAULT_RULES[i].family;
+			paletteRules.push_back(rule);
+		}
+		// NOTHING THERE YET, so write it. The file was only ever created when somebody changed
+		// a colour, which meant that anyone wanting to edit it by hand — the whole reason it is
+		// a file rather than a setting buried in a patch — had to first find the chooser and
+		// change something at random to make one appear. A file that documents its own format
+		// by existing is worth the one write.
+		paletteSave();
+		return;
+	}
+	json_error_t error;
+	json_t* rootJ = json_loadf(file, 0, &error);
+	std::fclose(file);
+	if (!rootJ)
+		return;
+	paletteReadInto(rootJ);
+	json_decref(rootJ);
+	paletteGen++;
+	// Written back when the merge added something, or when the file simply predates the
+	// current table — so the same merge is not worked out again on every launch.
+	if (paletteMerged || paletteFileVersion != PAL_RULES_VERSION)
+		paletteSave();
+}
+
+/** The palette, the rules and the overrides as a document. */
+static json_t* paletteToJson() {
 	json_t* rootJ = json_object();
+	json_object_set_new(rootJ, "version", json_integer(PAL_RULES_VERSION));
 	for (int i = 0; i < NUM_FAMILIES; i++)
 		json_object_set_new(rootJ, PAL_KEY[i], json_string(toHex(palette[i]).c_str()));
 
@@ -233,7 +370,11 @@ static void paletteSave() {
 	for (const auto& pair : paletteOverrides)
 		json_object_set_new(portsJ, pair.first.c_str(), json_string(PAL_KEY[pair.second]));
 	json_object_set_new(rootJ, "ports", portsJ);
+	return rootJ;
+}
 
+static void paletteSave() {
+	json_t* rootJ = paletteToJson();
 	system::createDirectories(asset::user("DreamerDevelopment"));
 	FILE* file = std::fopen(paletteFilePath().c_str(), "w");
 	if (file) {
@@ -243,6 +384,7 @@ static void paletteSave() {
 	json_decref(rootJ);
 }
 
+
 NVGcolor paletteColor(int family) {
 	if (!paletteLoaded)
 		paletteLoad();
@@ -251,38 +393,31 @@ NVGcolor paletteColor(int family) {
 	return palette[family];
 }
 
-/** The built-in guess. Rack has no concept of signal family, but it does expose port names,
-and guessing from the name is what makes the colour code work on plugins nobody has described
-by hand. */
+/** The built-in guess, from the same table the file is written from — so the behaviour of a
+plugin whose file has no rules is exactly the behaviour of one whose file has the defaults. */
 static int paletteGuess(const std::string& name) {
 	const std::string n = string::uppercase(name);
-	// FIRST, and it has to be. An MPX port is called something like "MPX note in", and the
-	// pitch test below would claim it on the word NOTE — which is how a cable carrying a whole
-	// instrument came out green.
-	if (n.find("MPX") != std::string::npos)
-		return FAM_MPX;
-	if (n.find("V/OCT") != std::string::npos || n.find("PITCH") != std::string::npos
-		|| n.find("NOTE") != std::string::npos)
-		return FAM_PITCH;
-	if (n.find("GATE") != std::string::npos || n.find("TRIG") != std::string::npos
-		|| n.find("CLOCK") != std::string::npos || n.find("CLK") != std::string::npos
-		|| n.find("RESET") != std::string::npos || n.find("SYNC") != std::string::npos)
-		return FAM_TRIGGER;
-	if (n.find("CV") != std::string::npos || n.find("MOD") != std::string::npos
-		|| n.find("FM") != std::string::npos)
-		return FAM_CV;
+	for (int i = 0; i < NUM_DEFAULT_RULES; i++) {
+		if (n.find(PAL_DEFAULT_RULES[i].match) != std::string::npos)
+			return PAL_DEFAULT_RULES[i].family;
+	}
 	return FAM_AUDIO;
 }
 
 int paletteFamilyForName(const std::string& name) {
 	if (!paletteLoaded)
 		paletteLoad();
+	// AN EMPTY LIST MEANS THE BUILT-IN ONES, not "no rules at all". A file written before the
+	// defaults were put in it has "rules": [], and reading that as "everything is audio" would
+	// have recoloured every rack that already had one.
+	if (paletteRules.empty())
+		return paletteGuess(name);
 	const std::string n = string::uppercase(name);
 	for (const PaletteRule& rule : paletteRules) {
 		if (n.find(rule.match) != std::string::npos)
 			return rule.family;
 	}
-	return paletteGuess(name);
+	return FAM_AUDIO;
 }
 
 int palettePortOverride(app::PortWidget* port) {
@@ -326,25 +461,135 @@ int paletteFamilyForPort(app::PortWidget* port) {
 }
 
 
-/** THE SCHEMES. Asked for by Ohmer, who named the one that is now the default. */
+/** THE SETS. Each is a palette AND the rules that decide which family a port belongs to.
+
+Three are built in. Anything else is a file: any other .json beside colours.json is offered by
+its filename, so making a set is saving one and sharing a set is sending somebody a file. */
 static const PaletteScheme PAL_SCHEMES[] = {
-	{"omri", "Omri Cohen (default)"},
-	{"dreamer", "Dreamer Development"},
+	{"default", "Default"},
+	{"dreamrack", "DreamRack"},
 	{NULL, NULL},
+};
+
+/** DreamRack's own colours, which are where this colour code came from: Clarity was built to
+put on a Rack patch what DreamRack already did with its own cords. */
+static const NVGcolor PAL_DREAMRACK[NUM_FAMILIES] = {
+	nvgRGB(0xf3, 0xc4, 0x0b),   // audio, yellow
+	nvgRGB(0xff, 0x73, 0x00),   // control, orange
+	nvgRGB(0x5a, 0xa0, 0xe6),   // trigger, light blue
+	nvgRGB(0x39, 0xa8, 0x5a),   // pitch, green
+	nvgRGB(0xff, 0x3c, 0xc8),   // MPX, magenta
 };
 
 const PaletteScheme* paletteSchemes() {
 	return PAL_SCHEMES;
 }
 
+/** Puts the built-in rules back, whatever the file had. */
+static void paletteRulesToDefault() {
+	paletteRules.clear();
+	for (int i = 0; i < NUM_DEFAULT_RULES; i++) {
+		PaletteRule rule;
+		rule.match = PAL_DEFAULT_RULES[i].match;
+		rule.family = PAL_DEFAULT_RULES[i].family;
+		paletteRules.push_back(rule);
+	}
+}
+
 void paletteApplyScheme(const char* key) {
 	if (!paletteLoaded)
 		paletteLoad();
-	const NVGcolor* from = (key && std::strcmp(key, "dreamer") == 0) ? PAL_DREAMER : PAL_DEFAULT;
+	const NVGcolor* from = PAL_DEFAULT;
+	if (key && std::strcmp(key, "dreamrack") == 0)
+		from = PAL_DREAMRACK;
 	for (int i = 0; i < NUM_FAMILIES; i++)
 		palette[i] = from[i];
+	// EVERY SET CARRIES THE SAME NAME RULES for now. They differ in what the families look
+	// like, not in what belongs to them — a port called GATE is a gate whoever is looking. A
+	// set that wanted its own rules would be a file, which is what files are for.
+	paletteRulesToDefault();
 	paletteGen++;
 	paletteSave();
+}
+
+
+/** The folder colours.json lives in. */
+static std::string paletteDir() {
+	return asset::user("DreamerDevelopment");
+}
+
+/** Whether a file is a palette document rather than merely a .json in the same folder.
+
+IT HAS TO BE READ TO KNOW. The folder is ours and other things live in it — the hints the plugin
+used to keep were a hints.json, and that was duly offered as a set of colours called "hints".
+A file named .json says nothing about what is in it, so the test is that it holds at least one
+of the five families. */
+static bool looksLikePalette(const std::string& path) {
+	FILE* file = std::fopen(path.c_str(), "r");
+	if (!file)
+		return false;
+	json_error_t error;
+	json_t* rootJ = json_loadf(file, 0, &error);
+	std::fclose(file);
+	if (!rootJ)
+		return false;
+	bool ok = false;
+	if (json_is_object(rootJ)) {
+		for (int i = 0; i < NUM_FAMILIES && !ok; i++) {
+			json_t* colorJ = json_object_get(rootJ, PAL_KEY[i]);
+			ok = colorJ && json_is_string(colorJ);
+		}
+	}
+	json_decref(rootJ);
+	return ok;
+}
+
+std::vector<std::string> paletteFileSets() {
+	std::vector<std::string> out;
+	for (const std::string& path : system::getEntries(paletteDir())) {
+		const std::string name = system::getStem(path);
+		if (system::getExtension(path) != ".json" || name == "colours")
+			continue;
+		if (!looksLikePalette(path))
+			continue;
+		out.push_back(name);
+	}
+	std::sort(out.begin(), out.end());
+	return out;
+}
+
+void paletteApplyFileSet(const std::string& name) {
+	const std::string path = paletteDir() + "/" + name + ".json";
+	FILE* file = std::fopen(path.c_str(), "r");
+	if (!file)
+		return;
+	json_error_t error;
+	json_t* rootJ = json_loadf(file, 0, &error);
+	std::fclose(file);
+	if (!rootJ)
+		return;
+	paletteReadInto(rootJ);
+	json_decref(rootJ);
+	paletteGen++;
+	// Written straight back to colours.json, so the chosen set IS the one in force and there is
+	// no second place for the answer to live.
+	paletteSave();
+}
+
+void paletteSaveAs(const std::string& name) {
+	if (!paletteLoaded)
+		paletteLoad();
+	if (name.empty())
+		return;
+	system::createDirectories(paletteDir());
+	const std::string path = paletteDir() + "/" + name + ".json";
+	json_t* rootJ = paletteToJson();
+	FILE* file = std::fopen(path.c_str(), "w");
+	if (file) {
+		json_dumpf(rootJ, file, JSON_INDENT(2));
+		std::fclose(file);
+	}
+	json_decref(rootJ);
 }
 
 uint64_t paletteGeneration() {
@@ -438,7 +683,7 @@ struct PaletteWidget : widget::OpaqueWidget {
 	math::Rect swatch[NUM_FAMILIES];
 	math::Rect wheel;      /**< The square the wheel is inscribed in. */
 	math::Rect bar;
-	math::Rect btnDefaults, btnCancel, btnDone;
+	math::Rect btnDefaults, btnSaveAs, btnCancel, btnDone;
 	/** 0 while dragging on the wheel, 1 while dragging the bar, -1 otherwise. */
 	int dragging = -1;
 
@@ -501,6 +746,13 @@ struct PaletteWidget : widget::OpaqueWidget {
 		bar = math::Rect(math::Vec(PAL_PAD, y),
 			math::Vec(PAL_W - 2.f * PAL_PAD, PAL_BAR_H));
 		y += PAL_BAR_H + 16.f;
+
+		// SAVE AS ON ITS OWN LINE. It is not one of the three ways out of the dialogue — it
+		// keeps what is on screen and leaves you here — and putting it in that row would have
+		// made four buttons where the eye expects to find Cancel and Done.
+		btnSaveAs = math::Rect(math::Vec(PAL_PAD, y),
+			math::Vec(PAL_W - 2.f * PAL_PAD, PAL_BTN_H));
+		y += PAL_BTN_H + 10.f;
 
 		btnDefaults = math::Rect(math::Vec(PAL_PAD, y), math::Vec(64.f, PAL_BTN_H));
 		btnDone = math::Rect(math::Vec(PAL_W - PAL_PAD - 52.f, y), math::Vec(52.f, PAL_BTN_H));
@@ -692,6 +944,7 @@ struct PaletteWidget : widget::OpaqueWidget {
 		drawWheel(args);
 		drawBar(args);
 
+		drawButton(args, btnSaveAs, "Save these colours as a named set\u2026", false);
 		drawButton(args, btnDefaults, "Defaults", false);
 		drawButton(args, btnCancel, "Cancel", false);
 		drawButton(args, btnDone, "Done", true);
@@ -758,6 +1011,28 @@ struct PaletteWidget : widget::OpaqueWidget {
 		if (grab.contains(e.pos)) {
 			dragging = 1;
 			setFromBar(e.pos);
+			return;
+		}
+		// KEEPS WHAT IS ON SCREEN AS A NEW FILE, and does not touch the one in force. Mixing a
+		// palette and then having to choose between keeping it and keeping the one you had is
+		// a choice nobody should be made to make: the set is written under its own name, and
+		// whether it also becomes the current one is still Done's business.
+		if (btnSaveAs.contains(e.pos)) {
+			char* typed = osdialog_prompt(OSDIALOG_INFO,
+				"Name for this set of colours and rules:", "My colours");
+			if (typed) {
+				std::string name = typed;
+				std::free(typed);
+				// A name is a filename, so the characters a filename cannot hold come out.
+				std::string clean;
+				for (char c : name) {
+					if (c == '/' || c == '\\' || c == ':' || c == '.')
+						continue;
+					clean += c;
+				}
+				if (!clean.empty())
+					paletteSaveAs(clean);
+			}
 			return;
 		}
 		if (btnDefaults.contains(e.pos)) {

@@ -37,7 +37,6 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "WidgetAt.hpp"
 #include "Clip.hpp"
 #include "Monitor.hpp"
-#include "Hint.hpp"
 #include "Palette.hpp"
 
 #include <algorithm>
@@ -88,13 +87,11 @@ struct InterceptOverlay : widget::Widget {
 	between a demonstration and a conjuring trick.
 	*/
 	bool* demoPointer = NULL;
-	/** The drag trail, switched separately from the pointer itself. */
-	bool* demoTrail = NULL;
+	/** The value readout, switched separately from both. */
+	bool* demoValues = NULL;
 	double pressTime = -1e9;
 	bool pressed = false;
 	int pressedButton = 0;
-	/** Where the pointer has been while a button was held, for the drag trail. */
-	std::vector<math::Vec> trail;
 	/** When the wheel last moved, and which way, for the scroll chevrons. */
 	double scrollTime = -1e9;
 	math::Vec scrollDir;
@@ -107,6 +104,31 @@ struct InterceptOverlay : widget::Widget {
 	dragging anything, so the dragged-widget readout never saw it — turning a knob by wheel
 	showed no value at all, which is the one case where the value matters most. */
 	WeakPtr<app::ParamWidget> scrollParam;
+	/** What that parameter read before the wheel reached it, and whether it has moved since.
+
+	THE READOUT IS FOR A VALUE BEING CHANGED, and a wheel over a knob does not always change
+	one: Rack only lets the wheel turn a knob when "knob scroll" is switched on, and scrolling
+	the RACK moves the modules under a pointer that has not moved at all — so parameter after
+	parameter passed beneath it and each was announced as though it had been turned. Reported
+	from the forum.
+
+	Asking whether the value actually moved answers it exactly, and keeps answering it whatever
+	Rack decides the wheel should do to a knob in some later version. */
+	float scrollParamWas = 0.f;
+	bool scrollParamMoved = false;
+	/** The readout that lingers: what it said, when it was last true, and where it sat. */
+	std::string valueText;
+	double valueTime = -1e9;
+	math::Vec valuePos;
+	/** THE WIDEST IT HAS BEEN for the control being turned, and which control that is.
+
+	A unit lives on the end of the value — "1.2 V" — so padding the part after the point to a
+	fixed number of characters does not hold the width: two decimals and a unit is already wider
+	than the pad, and the plate grew and shrank as Rack changed its mind about how many figures
+	to show. A high-water mark holds it. The plate widens once, the first time a value needs the
+	room, and then stays there for as long as you are on that control. */
+	WeakPtr<app::ParamWidget> valueOwner;
+	size_t valueWidth = 0;
 	/** True between the click that picks a cable up and the click that puts it down. Rack
 	believes a drag is in progress the whole time. */
 	bool carrying = false;
@@ -435,16 +457,24 @@ struct InterceptOverlay : widget::Widget {
 			const bool down =
 				glfwGetMouseButton(APP->window->win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS
 				|| glfwGetMouseButton(APP->window->win, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-			if (!down && pressed) {
+			if (!down && pressed)
 				pressed = false;
-				trail.clear();
+		}
+
+		// Whether the wheel actually turned the parameter it was over. Watched here rather than
+		// decided in the scroll handler, because Rack changes the value after we have seen the
+		// event — so the answer is only known on the frame after.
+		if (scrollParam) {
+			engine::ParamQuantity* pq = scrollParam->getParamQuantity();
+			if (pq && pq->getValue() != scrollParamWas) {
+				scrollParamMoved = true;
+				scrollParamWas = pq->getValue();
 			}
 		}
 
 		autoScrollWhileCarrying();
 		addToPortMenu();
 		placeChooser();
-		hintStep();
 
 		// THE CYCLE ENDS WHEN THE POINTER LEAVES THE JACK, and it has to be noticed here
 		// rather than at the next click. Taking a cable away and bringing it back to where it
@@ -523,7 +553,17 @@ struct InterceptOverlay : widget::Widget {
 			claimed = false;
 		}
 		scrollDirTime = now;
-		if (!claimed) {
+		// A MOUSE WHEEL HAS NO SIDEWAYS COMPONENT AT ALL, so there is nothing to be sticky
+		// about: a delta with no x is vertical, now, rather than after enough movement has
+		// been gathered to be sure. Waiting left the axis at whatever a previous trackpad
+		// gesture had claimed, which is how a plain wheel came to be drawn as a sideways
+		// scroll.
+		if (e.scrollDelta.x == 0.f && e.scrollDelta.y != 0.f) {
+			scrollDir = math::Vec(0.f, e.scrollDelta.y >= 0.f ? 1.f : -1.f);
+			claimed = true;
+			claim = math::Vec();
+		}
+		else if (!claimed) {
 			claim = claim.plus(e.scrollDelta);
 			if (std::fabs(claim.x) + std::fabs(claim.y) >= 6.f) {
 				scrollDir = claim;
@@ -536,7 +576,17 @@ struct InterceptOverlay : widget::Widget {
 		else {
 			scrollDir = math::Vec(0.f, e.scrollDelta.y >= 0.f ? 1.f : -1.f);
 		}
-		scrollParam = widgetAt<app::ParamWidget>(APP->scene, e.pos);
+		// The parameter under the pointer, and what it reads BEFORE this event goes any
+		// further. Our overlay is offered the scroll first, so this is the value as it was.
+		{
+			app::ParamWidget* under = widgetAt<app::ParamWidget>(APP->scene, e.pos);
+			if (under != scrollParam) {
+				scrollParam = under;
+				scrollParamMoved = false;
+				engine::ParamQuantity* pq = under ? under->getParamQuantity() : NULL;
+				scrollParamWas = pq ? pq->getValue() : 0.f;
+			}
+		}
 
 		if (panSideways(e)) {
 			e.consume(this);
@@ -581,11 +631,11 @@ struct InterceptOverlay : widget::Widget {
 			pressed = true;
 			pressedButton = e.button;
 			pressTime = APP->window->getFrameTime();
-			trail.clear();
+			// Whatever the last value was, it is not what this click is about.
+			valueText.clear();
 		}
 		else if (e.action == GLFW_RELEASE) {
 			pressed = false;
-			trail.clear();
 		}
 	}
 
@@ -601,6 +651,78 @@ struct InterceptOverlay : widget::Widget {
 	pointer instead. Rack will format it for us — the same string its own tooltip shows — so
 	this is the real value rather than an approximation of it.
 	*/
+	/** PADS A NUMBER SO ITS DECIMAL POINT DOES NOT MOVE.
+
+	Rack formats a value to a number of significant figures, not to a number of decimal places,
+	so turning one knob walks through 9.99, 10.0, 10.05 — three different widths. The readout is
+	centred over the pointer, so every one of those re-centred the whole plate: the number
+	shuffled left and right while you were trying to read it, which is the one thing it must not
+	do.
+
+	The face is ShareTechMono, in which every character is the same width, so this is a matter
+	of counting rather than of measuring.
+
+	AND THE COUNT COMES FROM THE CONTROL, not from a number picked once and applied to
+	everything. Padding every value to six characters left of the point suited a knob that runs
+	to thousands and pushed a knob that runs from nought to one a long way off to the right for
+	no reason at all. The parameter knows its own ends, and the same arithmetic Rack uses to
+	turn a value into a displayed one turns those ends into the widest integer part this control
+	can ever show. */
+	static float displayValueOf(engine::ParamQuantity* pq, float v) {
+		if (pq->displayBase == 0.f) {
+			// Linear.
+		}
+		else if (pq->displayBase < 0.f)
+			v = std::log(v) / std::log(-pq->displayBase);
+		else
+			v = std::pow(pq->displayBase, v);
+		return v * pq->displayMultiplier + pq->displayOffset;
+	}
+
+	/** How many characters the part before the point can ever need, sign included. */
+	static int integerWidthOf(engine::ParamQuantity* pq) {
+		const float ends[2] = {
+			displayValueOf(pq, pq->getMinValue()),
+			displayValueOf(pq, pq->getMaxValue()),
+		};
+		int width = 1;
+		for (int i = 0; i < 2; i++) {
+			if (!std::isfinite(ends[i]))
+				continue;
+			int digits = 1;
+			float a = std::fabs(ends[i]);
+			while (a >= 10.f && digits < 8) {
+				a /= 10.f;
+				digits++;
+			}
+			if (ends[i] < 0.f)
+				digits++;      // room for the sign
+			width = std::max(width, digits);
+		}
+		return width;
+	}
+
+	static std::string alignAroundPoint(const std::string& value, int headWidth) {
+		size_t dot = std::string::npos;
+		for (size_t i = 0; i + 1 < value.size(); i++) {
+			if (value[i] == '.' && std::isdigit((unsigned char) value[i + 1])) {
+				dot = i;
+				break;
+			}
+		}
+		if (dot == std::string::npos)
+			return value;
+		std::string head = value.substr(0, dot);
+		std::string tail = value.substr(dot);
+		while ((int) head.size() < headWidth)
+			head = " " + head;
+		// The right side only has to stop the string changing length; four covers a point and
+		// three decimals, and a unit simply makes it longer for every value alike.
+		while (tail.size() < 4)
+			tail += " ";
+		return head + tail;
+	}
+
 	static std::string paramText(app::ParamWidget* pw) {
 		if (!pw)
 			return "";
@@ -608,7 +730,8 @@ struct InterceptOverlay : widget::Widget {
 		if (!pq)
 			return "";
 		const std::string label = pq->getLabel();
-		const std::string value = pq->getDisplayValueString() + pq->getUnit();
+		const std::string value = alignAroundPoint(
+			pq->getDisplayValueString() + pq->getUnit(), integerWidthOf(pq));
 		return label.empty() ? value : (label + "  " + value);
 	}
 
@@ -644,7 +767,12 @@ struct InterceptOverlay : widget::Widget {
 			// Rack's horizontal delta is positive when the content moves RIGHT, which sends the
 			// view left — so the run follows the view, which is what the eye is tracking.
 			dir = math::Vec((scrollDir.x >= 0.f) ? -1.f : 1.f, 0.f);
-			origin = math::Vec(p.x, p.y - 24.f);       // above the pointer
+			// BELOW the pointer, clear of the arrow. It used to run above, which is where the
+			// value readout now sits — so a sideways scroll marched a line of chevrons straight
+			// across the digits, and they flickered in and out as the run travelled. The
+			// readout is the thing being read, so it keeps the space above and the chevrons
+			// move. Thirty-two clears the drawn arrow, which reaches twenty down.
+			origin = math::Vec(p.x, p.y + 32.f);
 		}
 		else {
 			// Rack's scroll is positive upwards, which is the way the CONTENT moves.
@@ -676,64 +804,69 @@ struct InterceptOverlay : widget::Widget {
 		}
 	}
 
-	/** A label in a dark plate, beside the pointer. */
+	/** A label in a dark plate. CENTRED ABOVE THE TIP when `above`, and beside the pointer
+	otherwise.
+
+	Above and centred for the value being changed, because that is the one you are reading: the
+	tip of the pointer is where the eye already is, and a plate hanging off to the right meant
+	looking away from the control being turned to read what it now says. Above it also cannot
+	be under the hand, whichever way round the mouse is being held.
+
+	Beside is kept for the modifier line, which is a caption rather than something you read. */
 	void drawPointerLabel(const DrawArgs& args, math::Vec p, const std::string& text,
-		NVGcolor ink, float dy) {
+		NVGcolor ink, float dy, bool above = false, float alpha = 1.f) {
 
 		std::shared_ptr<window::Font> font = APP->window->loadFont(
 			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
 		if (!font || font->handle < 0 || text.empty())
 			return;
 		nvgFontFaceId(args.vg, font->handle);
-		nvgFontSize(args.vg, 26.f);
+		// HALF THE SIZE IT WAS. Twenty-six point was a caption for a video watched across a
+		// room; read at a desk it was larger than anything else on the panel and took more of
+		// the rack than the control it was describing.
+		nvgFontSize(args.vg, 13.f);
 		nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 		const float w = nvgTextBounds(args.vg, 0, 0, text.c_str(), NULL, NULL);
+		const float plateW = w + 10.f;
+		const float plateH = 18.f;
+
+		const float x = above ? (p.x - plateW / 2.f) : (p.x + 16.f);
+		// Six pixels of air over the control, and never off the top of the window: a readout
+		// that has gone above the edge of the screen is a readout nobody can read.
+		const float y = above ? std::fmax(2.f, p.y - plateH - 6.f) : (p.y + dy);
 
 		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, p.x + 16.f, p.y + dy, w + 18.f, 34.f, 6.f);
-		nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 0xc8));
+		nvgRoundedRect(args.vg, x, y, plateW, plateH, 3.5f);
+		nvgFillColor(args.vg, nvgRGBA(0, 0, 0, (int) (0xc8 * alpha)));
 		nvgFill(args.vg);
+		ink.a = alpha;
 		nvgFillColor(args.vg, ink);
-		nvgText(args.vg, p.x + 25.f, p.y + dy + 17.f, text.c_str(), NULL);
+		nvgText(args.vg, x + 5.f, y + plateH / 2.f, text.c_str(), NULL);
 	}
 
 	void drawPointer(const DrawArgs& args) {
-		if (!demoPointer || !*demoPointer)
+		// TWO SWITCHES, NOT ONE. The drawn pointer with its rings, and the readout of what is
+		// being turned, are two different things that shared a switch because both were built
+		// for the same afternoon's video. Only the first is about a recording; the second
+		// answers "what did I just set that to", which is worth having with nothing being
+		// filmed at all.
+		//
+		// There was a third — a trail behind the pointer — and it is gone. Every operating
+		// system offers pointer trails already, and doing the same thing worse inside one
+		// plugin is not worth the switch it would need.
+		const bool clicks = demoPointer && *demoPointer;
+		const bool values = demoValues && *demoValues;
+		if (!clicks && !values)
 			return;
 		// Our box sits at the scene's origin, so the scene's mouse position is ours.
 		const math::Vec p = APP->scene->mousePos;
 		const double now = APP->window->getFrameTime();
 		const double age = now - pressTime;
 
-		// THE DRAG TRAIL. Where the pointer has been while the button was down, fading with
-		// distance back — movement, rather than a pointer that appears to teleport.
-		//
-		// On its own switch. It is the one part of the drawn pointer that leaves a mark behind
-		// the pointer rather than on it, and somebody recording a patch being built wanted the
-		// pointer without it. Asked for by DaveVenom.
-		if (pressed && demoTrail && *demoTrail) {
-			if (trail.empty() || trail.back().minus(p).norm() > 2.f)
-				trail.push_back(p);
-			if (trail.size() > 40)
-				trail.erase(trail.begin());
-			for (size_t i = 1; i < trail.size(); i++) {
-				const float t = (float) i / trail.size();
-				nvgBeginPath(args.vg);
-				nvgMoveTo(args.vg, trail[i - 1].x, trail[i - 1].y);
-				nvgLineTo(args.vg, trail[i].x, trail[i].y);
-				NVGcolor c = pointerAccent();
-				c.a = 0.55f * t;
-				nvgStrokeColor(args.vg, c);
-				nvgStrokeWidth(args.vg, 3.f * t + 1.f);
-				nvgLineCap(args.vg, NVG_ROUND);
-				nvgStroke(args.vg);
-			}
-		}
-
 		// HELD. A steady halo for as long as the button is down, which is what separates a
 		// press-and-hold from a click: the click's ring is gone in a quarter second, this is
 		// not.
-		if (pressed) {
+		if (pressed && clicks) {
 			NVGcolor c = pointerAccent();
 			c.a = 0.28f;
 			nvgBeginPath(args.vg);
@@ -750,25 +883,50 @@ struct InterceptOverlay : widget::Widget {
 		// going. Vertical scrolling shows them to the LEFT of the pointer and horizontal
 		// scrolling ABOVE it — never under it, where the arrow and Rack's own hover cursors
 		// would cover them. Movement is what says "scrolling" rather than "something flashed".
+		// SCROLL. Only when the wheel is actually turning something. The chevrons were shown
+		// for any wheel movement at all, so scrolling the rack — where the wheel moves the view
+		// and changes nothing — marched them across the screen for no reason. The same fault as
+		// the value readout had, and it takes the same answer: did the parameter move.
 		const double scrollAge = now - scrollTime;
-		if (scrollAge < 0.5)
+		if (scrollAge < 0.5 && clicks && scrollParam && scrollParamMoved)
 			drawScrollRun(args, p, (float) (1.0 - scrollAge / 0.5), now);
 
-		// CLICK. A ring that snaps out and is gone in a quarter second — which is exactly what
-		// distinguishes it from the halo of a held button, which stays.
-		if (age < 0.25) {
-			const float t = (float) (age / 0.25);
+		// CLICK. A ring that snaps out and is gone in a third of a second — which is exactly
+		// what distinguishes it from the halo of a held button, which stays.
+		//
+		// The size it was, drawn better. Reaching fifty pixels was too much of the screen for
+		// a click: what wanted improving was how the ring MOVES, not how much room it takes.
+		// So it is back to about twenty-six across, and keeps the things that made it easier to
+		// follow — it opens fast and slows the way something struck does, thins as it grows so
+		// the ring reads as spreading rather than as a circle being drawn, and holds its
+		// brightness a little past the middle of its life instead of fading from the start.
+		if (age < 0.35 && clicks) {
+			const float t = (float) (age / 0.35);
+			// Fast out, slowing: the shape of something struck.
+			const float grow = 1.f - (1.f - t) * (1.f - t);
+			const float fade = std::pow(1.f - t, 0.7f);
+			const float r = 6.f + 20.f * grow;
+
 			NVGcolor c = pointerAccent();
-			c.a = 0.9f * (1.f - t);
+			c.a = 0.16f * fade;
 			nvgBeginPath(args.vg);
-			nvgCircle(args.vg, p.x, p.y, 6.f + 16.f * t);
+			nvgCircle(args.vg, p.x, p.y, r);
+			nvgFillPaint(args.vg, nvgRadialGradient(args.vg, p.x, p.y, r * 0.35f, r,
+				nvgRGBA(0, 0, 0, 0), c));
+			nvgFill(args.vg);
+
+			c.a = 0.85f * fade;
+			nvgBeginPath(args.vg);
+			nvgCircle(args.vg, p.x, p.y, r);
 			nvgStrokeColor(args.vg, c);
-			nvgStrokeWidth(args.vg, 2.5f);
+			nvgStrokeWidth(args.vg, 3.f * (1.f - t) + 1.2f);
 			nvgStroke(args.vg);
 		}
 
 		// The pointer itself: the familiar arrow, white with a dark outline so it reads over
-		// both a pale panel and a dark scope face.
+		// both a pale panel and a dark scope face. Only when the clicks are being animated —
+		// the readout on its own is for somebody who can see their real cursor perfectly well.
+		if (clicks) {
 		nvgBeginPath(args.vg);
 		nvgMoveTo(args.vg, p.x, p.y);
 		nvgLineTo(args.vg, p.x, p.y + 17.f);
@@ -783,6 +941,7 @@ struct InterceptOverlay : widget::Widget {
 		nvgStrokeColor(args.vg, nvgRGBA(0, 0, 0, 0xcc));
 		nvgStrokeWidth(args.vg, 1.2f);
 		nvgStroke(args.vg);
+		}
 
 		// WHAT IS BEING TURNED. A knob moves too little to see on video; its name and value do
 		// not. Shown above the modifier line so both can be up at once.
@@ -793,15 +952,54 @@ struct InterceptOverlay : widget::Widget {
 		// was competing with. Reported by DaveVenom on Windows. Neither case is one the readout
 		// is for: it is there to show a value being changed, and a menu being opened changes
 		// nothing.
-		std::string param;
-		if (!menuIsOpen()) {
+		// IT STAYS FOR A SECOND AND THEN FADES, rather than vanishing the instant the knob is
+		// let go. Letting go is when you look at what you set it to, and a readout that is gone
+		// by then has been shown for exactly the part of the gesture where you were watching
+		// your hand instead. A second at full strength, then half a second going.
+		//
+		// UNLESS SOMETHING ELSE HAPPENS. Turning another control replaces it at once, and any
+		// press anywhere clears it — a click is somebody attending to something else, and a
+		// value hanging over the thing they are now doing is in the way.
+		//
+		// It also stops following the pointer once the hand has left: it stays over the control
+		// it belongs to rather than drifting across the rack with the cursor.
+		if (values && !menuIsOpen()) {
+			app::ParamWidget* active = NULL;
 			if (pressedButton != GLFW_MOUSE_BUTTON_RIGHT)
-				param = draggedParamText();
-			if (param.empty() && scrollAge < 0.9 && scrollParam)
-				param = paramText(scrollParam);
+				active = dynamic_cast<app::ParamWidget*>(APP->event->getDraggedWidget());
+			if (!active && scrollAge < 0.5 && scrollParam && scrollParamMoved)
+				active = scrollParam;
+			if (active) {
+				if (active != valueOwner) {
+					valueOwner = active;
+					valueWidth = 0;   // A different control starts its own measure.
+				}
+				std::string text = paramText(active);
+				if (text.size() > valueWidth)
+					valueWidth = text.size();
+				while (text.size() < valueWidth)
+					text += " ";
+				valueText = text;
+				valueTime = now;
+				// ABOVE THE CONTROL, not above the pointer. What you are reading belongs to the
+				// knob, and a plate that hangs over the cursor moves with every twitch of the
+				// hand while the thing it describes stays still. Anchored to the middle of the
+				// control's top edge it sits in one place for the whole gesture, and it is
+				// obvious which control it is talking about when several are close together.
+				//
+				// Asked of the widget rather than worked out, so the rack's zoom is already in
+				// it: the offset comes back in the scene's own coordinates, which are ours.
+				valuePos = active->getAbsoluteOffset(
+					math::Vec(active->box.size.x / 2.f, 0.f));
+			}
+			const double age = now - valueTime;
+			if (!valueText.empty() && age < 1.5) {
+				const float alpha = (age <= 1.0) ? 1.f
+					: (float) ((1.5 - age) / 0.5);
+				drawPointerLabel(args, valuePos, valueText,
+					nvgRGB(0x3d, 0xe0, 0x7a), -10.f, true, alpha);
+			}
 		}
-		if (!param.empty())
-			drawPointerLabel(args, p, param, nvgRGB(0x3d, 0xe0, 0x7a), -10.f);
 
 		// Whatever modifier is held, named. A viewer cannot see a key being pressed, and half
 		// of what this plugin does hangs off Option.
@@ -809,7 +1007,7 @@ struct InterceptOverlay : widget::Widget {
 		// viewer needs told. The others are not shown deliberately: a screen magnifier holds
 		// keys of its own, and a recording captioned SHIFT or CONTROL every few seconds would
 		// be describing the accessibility tooling rather than the software.
-		if (APP->window->getMods() & GLFW_MOD_ALT)
+		if (clicks && (APP->window->getMods() & GLFW_MOD_ALT))
 			drawPointerLabel(args, p, "OPTION", nvgRGB(0xff, 0xd8, 0x66), 26.f);
 	}
 
@@ -980,9 +1178,7 @@ struct InterceptOverlay : widget::Widget {
 
 	/** Whether Rack is dragging a cable out of a port right now, and what the switch was set to
 	last frame — the two things the notes are triggered by. */
-	bool wasDraggingCable = false;
 	/** A note owed for the carry in progress, waiting for the pull to declare a direction. */
-	bool hintPending = false;
 	bool wasClickCables = false;
 	bool seenClickCables = false;
 
@@ -992,38 +1188,6 @@ struct InterceptOverlay : widget::Widget {
 	would guess that letting go of the button is allowed, and it says so while a cable is in
 	the hand, which is the one moment that is worth knowing.
 	*/
-	void hintStep() {
-		if (!clickCables || !*clickCables)
-			return;
-		if (!carrying) {
-			hintPending = false;
-			wasDraggingCable = false;
-			return;
-		}
-		// A cable has just come off a port, however it was taken.
-		if (carrying && !wasDraggingCable)
-			hintPending = true;
-
-		// WAIT FOR A DIRECTION. At the moment of pickup the hand has not gone anywhere yet, so
-		// there is no far side to put the note on. Twenty pixels is enough to know.
-		const math::Vec travel = APP->scene->getMousePos().minus(carryStart);
-		if (hintPending && travel.norm() >= 20.f) {
-			hintPending = false;
-			// Short, because it is read with a cable in hand and half an eye. Anchored to the
-			// terminal it came off, since that is where the eye already is.
-			hintShow("letGo", {
-				"Hint: you don't need to hold down the mouse button!",
-				"Release it and the cable will still follow. Click to",
-				"connect it to the new port.",
-				"",
-				"With the Clarity module, you can click a port to",
-				"pick up a cable. It will follow the pointer. Click on",
-				"another port to connect it. You can also drag",
-				"cables as usual in VCV.",
-			}, carryStart, travel);
-		}
-		wasDraggingCable = carrying;
-	}
 
 	/** Centres our chooser on the pointer, and lifts it clear of the bottom of the window.
 
@@ -1071,7 +1235,7 @@ struct InterceptOverlay : widget::Widget {
 		notePointerButton(e);
 
 		// A note on screen owns its own clicks, like a menu does.
-		if (hintCovers(e.pos) || paletteCovers(e.pos)) {
+		if (paletteCovers(e.pos)) {
 			widget::Widget::onButton(e);
 			return;
 		}
@@ -1291,7 +1455,8 @@ struct InterceptOverlay : widget::Widget {
 
 
 widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
-	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer, bool* demoTrail) {
+	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer,
+	bool* demoValues) {
 
 	InterceptOverlay* overlay = new InterceptOverlay;
 	overlay->sliderScroll = sliderScroll;
@@ -1300,6 +1465,6 @@ widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
 	overlay->offerWidgets = offerWidgets;
 	overlay->trace = trace;
 	overlay->demoPointer = demoPointer;
-	overlay->demoTrail = demoTrail;
+	overlay->demoValues = demoValues;
 	return overlay;
 }

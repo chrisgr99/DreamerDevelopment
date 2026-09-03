@@ -23,7 +23,9 @@ Every port in the rack is given a coloured ring for its signal family, determine
 | Audio | <img src="images/jack-audio-in.png" width="44"> | <img src="images/jack-audio-out.png" width="44"> | anything not matched below |
 | CV | <img src="images/jack-cv-in.png" width="44"> | <img src="images/jack-cv-out.png" width="44"> | CV, MOD, FM |
 | Gate and trigger | <img src="images/jack-trigger-in.png" width="44"> | <img src="images/jack-trigger-out.png" width="44"> | GATE, TRIG, CLOCK, CLK, RESET, SYNC |
-| Pitch | <img src="images/jack-pitch-in.png" width="44"> | <img src="images/jack-pitch-out.png" width="44"> | V/OCT, PITCH, NOTE |
+| Pitch | <img src="images/jack-pitch-in.png" width="44"> | <img src="images/jack-pitch-out.png" width="44"> | V/OCT, PITCH, NOTE, BPM |
+
+BPM is in the pitch family because a BPM control voltage is volt per octave: it doubles per volt, so nought volts is 120 beats per minute, one volt is 240 and minus one is 60. The only difference from a note is what it sets. A port named as both, such as "BPM clock", is read as a clock, since the trigger rules are tested first.
 
 A fifth family, **MPX**, is given to ports named for the Modular Polyphonic Expression plugin, whose cables carry note events rather than a voltage. It is drawn in magenta, and has no pictures here.
 

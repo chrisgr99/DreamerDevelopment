@@ -30,11 +30,12 @@ knobs, for instance — is painted before us and would be covered. Knob drawing 
 optional and can be switched off per user.
 */
 #include "plugin.hpp"
+
+#include <osdialog.h>
 #include "SignalTap.hpp"
 #include "Clip.hpp"
 #include "Injector.hpp"
 #include "Monitor.hpp"
-#include "Hint.hpp"
 #include "Sink.hpp"
 
 #include "Palette.hpp"
@@ -88,8 +89,8 @@ struct Options {
 	/** Draws a pointer into the rack, for videos recorded with VCV Recorder — which cannot see
 	the real cursor. A recording aid rather than a feature, so it lives in the menu. */
 	bool demoPointer = false;
-	/** The trail the pointer leaves while a button is down, switched on its own. */
-	bool demoTrail = true;
+	/** The name and value of whatever is being turned, above the pointer. */
+	bool demoValues = false;
 };
 
 
@@ -128,6 +129,7 @@ struct Clarity : Module {
 	enum ParamId {
 		P_JACKS, P_CABLE_COLOR, P_KNOBS, P_CABLE_FLOW,
 		P_PINCH, P_TRACE, P_CLICK_CABLES, P_SLIDER_SCROLL,
+		P_ANIMATE_CLICKS, P_SHOW_VALUES,
 		NUM_PARAMS
 	};
 
@@ -153,6 +155,20 @@ struct Clarity : Module {
 			{"Off", "On"});
 		configSwitch(P_SLIDER_SCROLL, 0.f, 1.f, 1.f, "Scroll wheel adjusts sliders",
 			{"Off", "On"});
+		// ON THE PANEL NOW, not in the menu. They were menu items because they are recording
+		// aids rather than features — but a recording aid is exactly the thing you want to
+		// reach for mid-take, and a parameter can be switched from a controller while a menu
+		// item cannot. This panel is also the list of what the module does, and two of the
+		// things it does were not on it.
+		configSwitch(P_ANIMATE_CLICKS, 0.f, 1.f, 0.f, "Animate clicks", {"Off", "On"});
+		// BOTH OFF. They are drawn over somebody's rack and neither is wanted until it is
+		// asked for; a module that starts animating the pointer the moment it is placed has
+		// decided something that was not its to decide.
+		// ITS OWN SWITCH, and not only for recordings. A knob's name and value set large above
+		// the pointer while it is being turned is worth having whether or not anything is being
+		// filmed — it is the one part of this that answers "what did I just set that to"
+		// without leaning towards the panel. So it does not depend on the pointer being drawn.
+		configSwitch(P_SHOW_VALUES, 0.f, 1.f, 0.f, "Show pop-up on adjust", {"Off", "On"});
 	}
 
 	/** Copies the params into the flags the overlays read. Called from the widget's step, on
@@ -166,6 +182,8 @@ struct Clarity : Module {
 		gOpt.trace = params[P_TRACE].getValue() > 0.5f;
 		gOpt.clickCables = params[P_CLICK_CABLES].getValue() > 0.5f;
 		gOpt.sliderScroll = params[P_SLIDER_SCROLL].getValue() > 0.5f;
+		gOpt.demoPointer = params[P_ANIMATE_CLICKS].getValue() > 0.5f;
+		gOpt.demoValues = params[P_SHOW_VALUES].getValue() > 0.5f;
 	}
 
 	json_t* dataToJson() override {
@@ -176,16 +194,17 @@ struct Clarity : Module {
 		cableFocusPrepareSave();
 
 		json_t* rootJ = json_object();
-		json_object_set_new(rootJ, "demoPointer", json_boolean(gOpt.demoPointer));
-		json_object_set_new(rootJ, "demoTrail", json_boolean(gOpt.demoTrail));
 		return rootJ;
 	}
 
 	void dataFromJson(json_t* rootJ) override {
-		if (json_t* j = json_object_get(rootJ, "demoPointer"))
-			gOpt.demoPointer = json_boolean_value(j);
-		if (json_t* j = json_object_get(rootJ, "demoTrail"))
-			gOpt.demoTrail = json_boolean_value(j);
+		// Patches written before these became parameters carried them here instead.
+		if (json_t* j = json_object_get(rootJ, "demoPointer")) {
+			// One switch became three. Anybody who had the pointer drawn was getting the value
+			// readout with it, so they keep it.
+			params[P_ANIMATE_CLICKS].setValue(json_boolean_value(j) ? 1.f : 0.f);
+			params[P_SHOW_VALUES].setValue(json_boolean_value(j) ? 1.f : 0.f);
+		}
 	}
 };
 
@@ -196,6 +215,8 @@ struct TestGear : Module {
 	enum OutputId { O_MONITOR = INJECT_MAX, NUM_OUTPUTS };
 
 	TestGear() {
+		instances().push_back(this);
+		elect();
 		// Most of the outputs belong to the injectors. They carry no jacks on the panel: an
 		// injector is cabled from one of them to the port it drives, and both that cable and
 		// its plugs are hidden, because what should be visible is the callout loop at the
@@ -207,6 +228,17 @@ struct TestGear : Module {
 		// The sinks: hidden inputs that a watched output can be cabled to, so that it computes.
 		for (int i = 0; i < SINK_MAX; i++)
 			configInput(i, string::f("Sink %d", i + 1));
+	}
+
+	~TestGear() {
+		std::vector<TestGear*>& all = instances();
+		for (size_t i = 0; i < all.size(); i++) {
+			if (all[i] == this) {
+				all.erase(all.begin() + i);
+				break;
+			}
+		}
+		elect();
 	}
 
 	/** NO SWITCHES. The widgets used to be gated by two buttons on this face, which said what
@@ -225,8 +257,44 @@ struct TestGear : Module {
 	ONE MODULE DOES THIS, even if a rack holds several. Capturing twice per sample would write
 	each sample into every tap's ring twice, so a scope would show a signal at double speed.
 	*/
+	/** EVERY INSTANCE, kept as they are made rather than looked for.
+
+	This was a walk of every module widget in the rack, with a dynamic_cast on each, ONCE PER
+	SAMPLE — forty-four thousand times a second, times however many modules the patch holds. On
+	a patch of any size that is whole percents of a core spent deciding which of the Test Gear
+	modules is in charge, and it was being spent with nothing attached and nothing to do. It is
+	what the four and a half percent was, and why the figure grew with the size of the patch.
+
+	It was also reaching into the widget tree from the audio thread, which is not ours to touch
+	from there. Neither the cost nor the hazard is needed: the modules can simply say when they
+	arrive and leave. */
+	static std::vector<TestGear*>& instances() {
+		static std::vector<TestGear*> all;
+		return all;
+	}
+	static TestGear* elected;
+
+	/** The lowest module id, which is stable across a session and does not depend on the order
+	widgets happen to step in. */
+	static void elect() {
+		elected = NULL;
+		for (TestGear* t : instances()) {
+			if (!elected || t->id < elected->id)
+				elected = t;
+		}
+	}
+
+	/** Ids are handed out by the engine AFTER a module is built, so the election cannot be
+	settled at construction. Re-run rarely — a few times a second — which costs a walk of a
+	list that almost always holds one thing. */
+	int electIn = 0;
+
 	void process(const ProcessArgs& args) override {
-		if (owner() != this)
+		if (--electIn <= 0) {
+			electIn = 2048;
+			elect();
+		}
+		if (elected != this)
 			return;
 		tapSetSampleRate(args.sampleRate);
 		tapCaptureAll();
@@ -236,16 +304,10 @@ struct TestGear : Module {
 		outputs[O_MONITOR].setVoltage(monitorMix(args.sampleTime));
 	}
 
-	/** The one instance that speaks for all of them: the lowest module id, which is stable
-	across a session and does not depend on the order widgets happen to step in. */
+	/** The one instance that speaks for all of them. */
 	TestGear* owner() {
-		TestGear* best = NULL;
-		for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
-			TestGear* w = dynamic_cast<TestGear*>(mw->module);
-			if (w && (!best || w->id < best->id))
-				best = w;
-		}
-		return best;
+		elect();
+		return elected;
 	}
 
 	json_t* dataToJson() override {
@@ -270,6 +332,9 @@ struct TestGear : Module {
 		monitorFromJson(json_object_get(rootJ, "monitors"));
 	}
 };
+
+
+TestGear* TestGear::elected = NULL;
 
 
 // ---- Drawing ----
@@ -1062,7 +1127,7 @@ static void installOverlays() {
 	if (!gInterceptOverlay) {
 		widget::Widget* o = createInterceptOverlay(&gOpt.sliderScroll, &gOpt.clickCables,
 			&gOpt.scopes, &gOpt.widgets, &gOpt.trace, &gOpt.demoPointer,
-			&gOpt.demoTrail);
+			&gOpt.demoValues);
 		APP->scene->addChild(o);
 		gInterceptOverlay = o;
 	}
@@ -1084,7 +1149,6 @@ static void dropOverlay(widget::Widget* o) {
 static void removeOverlaysIfIdle() {
 	if (gClarityCount > 0 || gTestGearCount > 0)
 		return;
-	hintDismiss();
 	paletteDismiss();
 	// Before the overlay goes, since it holds what the colours were. A patch that had Clarity
 	// in it and no longer does should look the way it did before.
@@ -1168,6 +1232,10 @@ struct ClarityWidget : DRUIWidgetBase {
 			// fit in them at this width. The panel says the short form; the param's own name,
 			// which is what a hover and the right-click menu show, says the whole thing.
 			{Clarity::P_CLICK_CABLES,  "Add and move",  "cables"},
+			// The recording aids, last: they are the two switches somebody who never records
+			// anything will never touch, and a panel should read in the order it matters.
+			{Clarity::P_ANIMATE_CLICKS, "Animate",      "clicks"},
+			{Clarity::P_SHOW_VALUES,    "Show pop-up",  "on adjust"},
 		};
 		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
@@ -1199,27 +1267,31 @@ struct ClarityWidget : DRUIWidgetBase {
 		if (!module)
 			return;
 		menu->addChild(new MenuSeparator);
-		menu->addChild(createBoolPtrMenuItem("Draw pointer (for screen recordings)", "",
-			&gOpt.demoPointer));
-		menu->addChild(createBoolPtrMenuItem("Draw movement trail", "", &gOpt.demoTrail));
-		menu->addChild(createMenuItem("Show hints again", "", []() { hintResetAll(); }));
 		// The colours are a setting because the eyes looking at them are not the eyes they
 		// were chosen for. Named for what it changes rather than for the word "settings",
 		// which says nothing about which settings.
-		menu->addChild(createMenuItem("Port and cable colours\u2026", "", []() { paletteShow(); }));
-		// The ready-made schemes, beside the chooser rather than inside it: picking a
-		// convention somebody else has taught you is a different act from mixing a colour.
-		menu->addChild(createSubmenuItem("Colour scheme", "", [](Menu* sub) {
+		// ONE ENTRY FOR ALL OF IT. There were three, and every one of them had the word colour
+		// in its name while doing something different — which set do you want, mix your own,
+		// put the cables back. A set is what the module is choosing between; mixing your own is
+		// how a new one is made, so it belongs in the same list rather than beside it.
+		menu->addChild(createSubmenuItem("Colour and rule sets", "", [](Menu* sub) {
 			for (const PaletteScheme* scheme = paletteSchemes(); scheme->key; scheme++) {
 				const char* key = scheme->key;
 				sub->addChild(createMenuItem(scheme->name, "", [key]() {
 					paletteApplyScheme(key);
 				}));
 			}
-		}));
-		menu->addChild(createMenuItem("Put cable colours back", "", []() {
-			if (gRackOverlay)
-				gRackOverlay->restoreCableColors();
+			const std::vector<std::string> files = paletteFileSets();
+			for (size_t i = 0; i < files.size(); i++) {
+				const std::string name = files[i];
+				sub->addChild(createMenuItem(name, "", [name]() {
+					paletteApplyFileSet(name);
+				}));
+			}
+			sub->addChild(new MenuSeparator);
+			// The chooser, which is where a set of your own comes from — and where it is saved
+			// under a name, with the colours it would save on the screen in front of you.
+			sub->addChild(createMenuItem("Custom colours\u2026", "", []() { paletteShow(); }));
 		}));
 
 		menu->addChild(new MenuSeparator);

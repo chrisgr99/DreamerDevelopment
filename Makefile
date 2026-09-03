@@ -69,6 +69,16 @@ dev: $(TARGET)
 	@cp LICENSE "$(PLUGIN_DIR)/" 2>/dev/null || true
 	@xattr -c "$(PLUGIN_DIR)/plugin.dylib" 2>/dev/null || true
 	@codesign -v "$(PLUGIN_DIR)/plugin.dylib" && echo "signature valid"
+# EVERY SYMBOL OF OURS HAS TO BE DEFINED, and the compiler will not say so. A plugin is loaded
+# into Rack's flat namespace, so a function that is declared and called but never defined links
+# without a word and fails at dlopen — the whole plugin does not appear, both modules vanish
+# from the browser, and the only trace is a line in Rack's log. It cost a session's work being
+# invisible once. This is a second's work at every build.
+	@if nm -u "$(PLUGIN_DIR)/plugin.dylib" | c++filt \
+		| grep -E "palette|drui|cableFocus|clip[A-Z]|scope[A-Z]|monitor[A-Z]|injector"; then \
+		echo "^^ UNDEFINED SYMBOLS OF OURS — the plugin will not load"; \
+		exit 1; \
+	fi
 	@echo "installed to $(PLUGIN_DIR)"
 
 .PHONY: dev
