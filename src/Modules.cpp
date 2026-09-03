@@ -517,7 +517,25 @@ struct DRUIOverlay : widget::TransparentWidget {
 	port it was ever plugged into: move an audio cable to a gate input and it stayed yellow.
 	The colour belongs to the destination, so what has to be remembered is the destination.
 	*/
-	std::map<int64_t, std::string> cableDestination;
+	/** WHAT WE LAST DID TO EACH CABLE: where it was going, and the colour we gave it.
+
+	The colour is half of it, and the half that was missing. Remembering only the destination
+	made the memo a claim about the PATCH — "this cable still arrives where it did, so leave
+	it" — and that claim was true in a case where the colour had been changed behind our backs:
+	Rack keeps a cable's id when it is picked up and put down again, so lifting a cable off a
+	port and dropping it back on the same port left the destination unchanged while the carry
+	had repainted it in the colour of the port it came from. The loop then skipped it and the
+	cable stayed wrong.
+
+	Remembering the colour too makes the memo a claim about US — "this is what we set, and it
+	is still what is there" — which is a thing we can actually know. Anything that changes a
+	cable's colour, by any route we have not thought of, is noticed and put right on the next
+	frame. */
+	struct Applied {
+		std::string dest;
+		NVGcolor color;
+	};
+	std::map<int64_t, Applied> cableDestination;
 	/** What each cable's colour was before we touched it, so it can be given back. */
 	std::map<int64_t, NVGcolor> originalCableColors;
 	bool colouredLastFrame = false;
@@ -568,11 +586,10 @@ struct DRUIOverlay : widget::TransparentWidget {
 		}
 		if (o.cableColor) {
 			colouredLastFrame = true;
-			// A NEW PALETTE MEANS EVERY DECISION BELOW IS STALE. The loop leaves a cable alone
-			// while it still arrives where it did, which is what keeps this cheap — and which
-			// meant that changing the colours repainted nothing until each cable was unplugged
-			// and plugged back in. Forgetting where they went makes them all be decided again,
-			// on the next frame and once only.
+			// A NEW PALETTE MEANS EVERY DECISION BELOW IS STALE. The loop leaves alone a cable
+			// that is still ours and still going where it was, which is what keeps this cheap.
+			// Forgetting what we did makes every cable be decided again, on the next frame and
+			// once only.
 			if (colouredGeneration != paletteGeneration()) {
 				colouredGeneration = paletteGeneration();
 				cableDestination.clear();
@@ -584,12 +601,18 @@ struct DRUIOverlay : widget::TransparentWidget {
 					(long long) (cw->inputPort->module ? cw->inputPort->module->id : -1),
 					cw->inputPort->portId);
 				auto it = cableDestination.find(cw->cable->id);
-				if (it != cableDestination.end() && it->second == dest)
-					continue;   // Same destination as last time: leave whatever colour it has.
-				cableDestination[cw->cable->id] = dest;
+				if (it != cableDestination.end() && it->second.dest == dest
+					&& sameColor(it->second.color, cw->color)) {
+					continue;   // Ours, unchanged, and still going where it was.
+				}
 				if (originalCableColors.find(cw->cable->id) == originalCableColors.end())
 					originalCableColors[cw->cable->id] = cw->color;
-				cw->color = paletteColor(paletteFamilyForPort(cw->inputPort));
+				const NVGcolor want = paletteColor(paletteFamilyForPort(cw->inputPort));
+				cw->color = want;
+				Applied applied;
+				applied.dest = dest;
+				applied.color = want;
+				cableDestination[cw->cable->id] = applied;
 			}
 		}
 
@@ -598,11 +621,28 @@ struct DRUIOverlay : widget::TransparentWidget {
 		// its own rotating palette, which says nothing about the signal. Recoloured every frame
 		// rather than once, because dragging an existing cable off a port and dropping it back
 		// re-uses the same widget.
+		//
+		// AND IT FORGETS WHERE THE CABLE WENT. The loop above leaves a cable alone while it
+		// still arrives where it did, which is what makes it cheap. But picking a cable up and
+		// putting it back on the same port re-uses the same cable, so the destination had not
+		// changed — the loop skipped it and it kept the colour it was carrying, which is the
+		// colour of the port it came FROM. Dragged out fresh it was right; picked up and
+		// dropped back it was wrong.
+		//
+		// A cable in flight has no destination, so the memory of one is simply not true any
+		// more. Dropping it is both the fix and the honest bookkeeping.
 		if (o.cableColor) {
 			for (CableWidget* cw : APP->scene->rack->getIncompleteCables()) {
 				PortWidget* origin = cw->outputPort ? cw->outputPort : cw->inputPort;
 				if (!origin)
 					continue;
+				// Recorded HERE rather than on completion: by the time a cable is complete
+				// this loop has already painted it, and what would be kept as "the colour it
+				// had before we touched it" would be a colour we gave it.
+				if (cw->cable
+					&& originalCableColors.find(cw->cable->id) == originalCableColors.end()) {
+					originalCableColors[cw->cable->id] = cw->color;
+				}
 				cw->color = paletteColor(paletteFamilyForPort(origin));
 			}
 		}
@@ -658,6 +698,14 @@ struct DRUIOverlay : widget::TransparentWidget {
 
 	/** The palette the cable colours below were decided from. */
 	uint64_t colouredGeneration = 0;
+
+	/** Whether two colours are the same one. Ours come from the palette rather than from
+	arithmetic, so they compare exactly; the epsilon is only against a patch reloading a colour
+	that was written out and read back as decimal. */
+	static bool sameColor(NVGcolor a, NVGcolor b) {
+		return std::fabs(a.r - b.r) < 0.002f && std::fabs(a.g - b.g) < 0.002f
+			&& std::fabs(a.b - b.b) < 0.002f && std::fabs(a.a - b.a) < 0.002f;
+	}
 
 	/** Puts every cable back to the colour it had before this module was in the rack. */
 	void restoreCableColors() {
