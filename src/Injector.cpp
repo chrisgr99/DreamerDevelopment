@@ -18,6 +18,11 @@ Everything the audio thread READS is atomic and written only by the UI thread. E
 audio thread OWNS — phase, and how much of a pulse is left to emit — is touched by nothing
 else, so it needs no protection at all.
 */
+/** How many cables into one port a mute will cancel. */
+static const int SOURCE_TAPS = 4;
+
+/** How long the switch-on and switch-off ramps take. Long enough to remove the click, short
+enough that a gate still feels immediate. */
 struct InjectorSlot {
 	std::atomic<bool> active{false};
 	std::atomic<int> type{INJECT_GATE};
@@ -32,10 +37,15 @@ struct InjectorSlot {
 	/** Unipolar: the waveform swings from zero up to the level instead of either side of it.
 	Same shape, shifted and halved — which is what a modulation source usually wants. */
 	std::atomic<bool> unipolar{false};
-	/** The attenuverter's tap on whatever is feeding the port, and its gain. Reading the SOURCE
-	rather than the port itself is essential: the port already carries our own contribution, so
-	reading it would feed us back into ourselves. */
-	std::atomic<int> sourceTap{-1};
+	/** Taps on whatever is feeding the port. Reading the SOURCES rather than the port itself is
+	essential: the port already carries our own contribution, so reading it would feed us back
+	into ourselves.
+
+	SEVERAL, because a mute has to cancel everything arriving. An attenuverter scales one signal
+	and uses the first; a mute that silenced one of three cables would not be doing what its
+	button says. Four is more than anyone puts on one input, and the cost of each is a tap with
+	no history. */
+	std::atomic<int> sourceTap[SOURCE_TAPS];
 	std::atomic<int> colour{NOISE_WHITE};
 	/** Raised by a click, lowered by the audio thread when it starts the pulse. A counter
 	rather than a flag so two quick presses both fire. */
@@ -54,8 +64,6 @@ struct InjectorSlot {
 	float lastWhite = 0.f;
 };
 
-/** How long the switch-on and switch-off ramps take. Long enough to remove the click, short
-enough that a gate still feels immediate. */
 static const float RAMP_SECONDS = 0.005f;
 
 static InjectorSlot slots[INJECT_MAX];
@@ -99,6 +107,15 @@ void injectorProcessAll(Module* drui, float sampleTime) {
 		const int type = slot.type.load(std::memory_order_relaxed);
 		const float level = slot.level.load(std::memory_order_relaxed);
 		float v = 0.f;
+		/** The answer for each channel, for the two types that answer a signal rather than
+		making one. Cleared each sample: sixteen floats costs nothing beside the work of
+		reading them. */
+		float poly[engine::PORT_MAX_CHANNELS] = {0.f};
+		bool usePoly = false;
+		/** How many channels this injector is producing. One for everything that makes a signal
+		of its own — a generator has no reason to be polyphonic — and as many as are arriving for
+		the two that ANSWER a signal. */
+		int channels = 1;
 
 		switch (type) {
 			case INJECT_GATE:
@@ -183,10 +200,22 @@ void injectorProcessAll(Module* drui, float sampleTime) {
 				// gain * x when a cable is delivering x, inject (gain - 1) * x and let the
 				// summing do the arithmetic — no re-routing, and the user's cable stays exactly
 				// where they put it.
-				const int src = slot.sourceTap.load(std::memory_order_relaxed);
-				if (src >= 0)
-					v = (level - 1.f) * tapVoltage(src);
+				//
+				// EVERY CHANNEL. Attenuating the first channel of a chord and leaving the rest
+				// alone is not attenuating the chord.
+				const int src = slot.sourceTap[0].load(std::memory_order_relaxed);
+				if (src >= 0) {
+					channels = std::max(1, tapChannels(src));
+					for (int c = 0; c < channels; c++)
+						poly[c] = (level - 1.f) * tapVoltage(src, c);
+				}
+				usePoly = true;
 			} break;
+
+			case INJECT_SWITCH:
+				// NOTHING AT ALL. A mute works by taking the cables out, not by cancelling what
+				// they carry — see the note on the widget for why cancelling cannot work.
+				break;
 
 			case INJECT_LFO:
 			// An audio oscillator is an LFO that is allowed to go fast. Same phase, same
@@ -223,8 +252,14 @@ void injectorProcessAll(Module* drui, float sampleTime) {
 		// when the first cable arrives — but removing a cable sets it back to 0, so a slot that
 		// had ever been disconnected and reconnected went permanently silent. Relying on the
 		// engine's courtesy rather than saying what we produce was the mistake.
-		drui->outputs[i].setChannels(1);
-		drui->outputs[i].setVoltage(v * slot.gain);
+		drui->outputs[i].setChannels(channels);
+		if (usePoly) {
+			for (int c = 0; c < channels; c++)
+				drui->outputs[i].setVoltage(poly[c] * slot.gain, c);
+		}
+		else {
+			drui->outputs[i].setVoltage(v * slot.gain);
+		}
 
 	}
 }
@@ -240,6 +275,8 @@ static bool slotAcquireAt(int i) {
 	slots[i].pulseRemaining = 0.f;
 	slots[i].pulseRequests.store(0, std::memory_order_relaxed);
 	slots[i].gate.store(false, std::memory_order_relaxed);
+	for (int k = 0; k < SOURCE_TAPS; k++)
+		slots[i].sourceTap[k].store(-1, std::memory_order_relaxed);
 	slots[i].enabled.store(true, std::memory_order_relaxed);
 	slots[i].active.store(true, std::memory_order_release);
 	activeCount.fetch_add(1, std::memory_order_release);
@@ -254,6 +291,8 @@ static int slotAcquire() {
 		slots[i].pulseRemaining = 0.f;
 		slots[i].pulseRequests.store(0, std::memory_order_relaxed);
 		slots[i].gate.store(false, std::memory_order_relaxed);
+		for (int k = 0; k < SOURCE_TAPS; k++)
+			slots[i].sourceTap[k].store(-1, std::memory_order_relaxed);
 		slots[i].enabled.store(true, std::memory_order_relaxed);
 		slots[i].active.store(true, std::memory_order_release);
 		activeCount.fetch_add(1, std::memory_order_release);
@@ -342,6 +381,18 @@ struct InjectorWidget : ClipWidget {
 	/** Set once a press has travelled far enough to be a reposition rather than a click, so
 	the two gestures never both fire. */
 	bool dragged = false;
+	/** Where the press landed, so a click can be told apart by WHERE as well as by whether it
+	moved. */
+	math::Vec pressPos;
+	/** The two small things on the title row that can be pressed, measured while drawing
+	because both are sized from the font and move with the title. An empty rectangle means
+	this injector has neither. */
+	math::Rect waveHit, polarityHit;
+	/** Which of them the pointer is over: nothing, the shape, or the polarity. DRAWN RATHER
+	THAN A TOOLTIP WIDGET. Rack's tooltip is a widget added to the scene, which is one more
+	thing with a lifetime to get wrong when the rack is torn down; a few pixels drawn while the
+	pointer is here has no lifetime at all. */
+	int hovering = 0;
 	/** Where the decimal point was last drawn, in this widget's coordinates, so a scroll can
 	tell which side of it the pointer is on. Measured during drawing rather than guessed,
 	because the digits are scaled to fit and the point moves with them. */
@@ -365,14 +416,43 @@ struct InjectorWidget : ClipWidget {
 	}
 
 	bool isReadout() {
-		return type != INJECT_GATE && type != INJECT_PULSE;
+		return type != INJECT_GATE && type != INJECT_PULSE && type != INJECT_SWITCH;
 	}
 
-	/** The tap on whatever is feeding our port. Only an attenuverter has one. */
-	int sourceTapSlot = -1;
-	/** What that tap is currently pointed at, so it is only rebuilt when the patch changes. */
-	int64_t sourceModuleId = -1;
-	int sourcePortId = -1;
+	/** WHY A MUTE TAKES THE CABLES OUT RATHER THAN CANCELLING THEM.
+	
+	The obvious way is the attenuverter's: the engine sums everything arriving at an input, so
+	sending the exact opposite of what a cable delivers leaves nothing. It works for a control
+	voltage and it cannot work for anything else.
+	
+	Rack decides the order it processes modules in, and a plugin has no say. So the value we
+	read from the source may be the one it produced a sample ago, while the destination reads
+	the one it produces now — and the difference of a signal with itself one sample back is a
+	high-pass filter. Audio comes through thinner and quieter instead of stopping. A gate, flat
+	except at its edges, comes through as a spike at every rise and fall: silent until something
+	happens, and then a click. Moving Test Gear later in the order only moves the error to the
+	other side of the sum.
+	
+	A mute whose behaviour depends on what is travelling down the cable is not a mute. So the
+	cables are taken out, held, and put back — exact for audio, for gates, for polyphony, and
+	needing no assumptions about anything.
+	
+	HELD BY NAME, NOT BY POINTER. A patch saved while muted has no cables to save, so what was
+	taken is written into this widget's own state and put back from that. Module and port
+	numbers survive being written to a file; widget pointers do not. */
+	struct HeldCable {
+		int64_t outModuleId = -1;
+		int outPortId = 0;
+		int64_t inModuleId = -1;
+		int inPortId = 0;
+		NVGcolor colour = nvgRGB(0x80, 0x80, 0x80);
+	};
+	std::vector<HeldCable> held;
+
+	/** The taps on whatever is feeding our port. Only an attenuverter has them. */
+	std::vector<int> sourceTapSlots;
+	/** What those taps are pointed at, so they are only rebuilt when the patch changes. */
+	std::vector<std::pair<int64_t, int> > sourceKeys;
 
 	bool isOscillator() {
 		return type == INJECT_LFO || type == INJECT_AUDIO;
@@ -452,6 +532,15 @@ struct InjectorWidget : ClipWidget {
 	}
 
 	~InjectorWidget() {
+		// NOT FROM HERE. A destructor runs both when somebody removes this widget and when Rack
+		// is exiting and tearing the whole rack down — and putting cables back means asking the
+		// rack for modules, which during its own destruction is reading freed memory.
+		//
+		// Removal by hand goes through detach(), which is where the cables are put back and
+		// where the application is known to be alive. What is left here is a patch being
+		// replaced wholesale, and then the held cables belong to a patch that is going anyway:
+		// the one being loaded brings its own, and a patch saved while a switch was off carries
+		// its held list with it.
 		releaseSourceTap();
 		slotRelease(slot);
 		removeCable();
@@ -527,6 +616,10 @@ struct InjectorWidget : ClipWidget {
 	}
 
 	void detach() override {
+		// NOTHING IS TAKEN AWAY WITH US. A mute removed while it is muting must put the cables
+		// back first, or they are gone with no way left to ask for them.
+		if (!held.empty())
+			restoreCables();
 		removeCable();
 		port = NULL;
 	}
@@ -537,54 +630,140 @@ struct InjectorWidget : ClipWidget {
 	— and an attenuverter clipped on before the cable is patched should simply start working
 	when it arrives, not need to be attached again.
 	*/
-	void updateSourceTap() {
-		if (type != INJECT_AV || !port) {
-			releaseSourceTap();
-			return;
+	/** THE LIGHT IS ON WHEN THE SWITCH IS ON, and on means the signal is getting through.
+	
+	The other way round reads as a mute, and a mute is the wrong idea for most of what travels
+	down a cable: nobody mutes a gate, they switch it off. One word and one polarity that mean
+	the same thing whatever the signal is. */
+	bool isOn() {
+		return slot < 0 || slots[slot].enabled.load(std::memory_order_relaxed);
+	}
+
+	/** A port by the numbers that name it, or nothing when the module has gone. */
+	static app::PortWidget* portByIds(int64_t moduleId, int portId, bool isOutput) {
+		app::ModuleWidget* mw = APP->scene->rack->getModule(moduleId);
+		if (!mw)
+			return NULL;
+		for (app::PortWidget* pw : mw->getPorts()) {
+			if (pw->portId == portId && (pw->type == engine::Port::OUTPUT) == isOutput)
+				return pw;
 		}
+		return NULL;
+	}
+
+	/** Takes every cable arriving at our port, ours excepted, and holds it.
+
+	EVERY FRAME WHILE MUTED, not once when the button goes down: a cable patched into a muted
+	port is a cable into a muted port, and leaving it sounding would make the button mean
+	"whatever was here a moment ago" rather than "this port". */
+	void takeCables() {
 		Module* drui = findDruiModule();
-		app::CableWidget* feeding = NULL;
+		std::vector<app::CableWidget*> take;
 		for (app::CableWidget* cw : APP->scene->rack->getCompleteCables()) {
 			if (!cw->cable || cw->inputPort != port)
 				continue;
-			// Our own injections are not the signal being attenuated.
 			if (cw->cable->outputModule == drui)
-				continue;
-			feeding = cw;
-			break;
+				continue;   // our own injector's cable is not what is being muted
+			take.push_back(cw);
 		}
+		for (size_t k = 0; k < take.size(); k++) {
+			app::CableWidget* cw = take[k];
+			HeldCable h;
+			h.outModuleId = cw->cable->outputModule->id;
+			h.outPortId = cw->cable->outputId;
+			h.inModuleId = cw->cable->inputModule->id;
+			h.inPortId = cw->cable->inputId;
+			h.colour = cw->color;
+			held.push_back(h);
+			APP->scene->rack->removeCable(cw);
+			delete cw;
+		}
+	}
 
-		if (!feeding) {
+	/** Puts back everything that was taken. A cable whose module has gone in the meantime is
+	dropped rather than resurrected onto nothing. */
+	void restoreCables() {
+		for (size_t i = 0; i < held.size(); i++) {
+			app::PortWidget* out = portByIds(held[i].outModuleId, held[i].outPortId, true);
+			app::PortWidget* in = portByIds(held[i].inModuleId, held[i].inPortId, false);
+			if (!out || !in) {
+				WARN("Mute: a cable's module has gone; not putting it back");
+				continue;
+			}
+			app::CableWidget* cw = new app::CableWidget;
+			cw->outputPort = out;
+			cw->inputPort = in;
+			cw->color = held[i].colour;
+			cw->updateCable();
+			APP->scene->rack->addCable(cw);
+		}
+		held.clear();
+	}
+
+	void updateSourceTap() {
+		const bool wantsSources = (type == INJECT_AV);
+		if (!wantsSources || !port) {
 			releaseSourceTap();
 			return;
 		}
-		const int64_t mid = feeding->cable->outputModule->id;
-		const int pid = feeding->cable->outputId;
-		if (sourceTapSlot >= 0 && mid == sourceModuleId && pid == sourcePortId)
+
+		const size_t want = 1;
+
+		Module* drui = findDruiModule();
+		std::vector<std::pair<int64_t, int> > keys;
+		for (app::CableWidget* cw : APP->scene->rack->getCompleteCables()) {
+			if (!cw->cable || cw->inputPort != port)
+				continue;
+			// Our own injection is not part of what is arriving from elsewhere.
+			if (cw->cable->outputModule == drui)
+				continue;
+			keys.push_back(std::make_pair(cw->cable->outputModule->id, cw->cable->outputId));
+			if (keys.size() >= want)
+				break;
+		}
+
+		if (keys.empty()) {
+			releaseSourceTap();
+			return;
+		}
+		if (keys == sourceKeys)
 			return;
 
 		releaseSourceTap();
-		// No history: an attenuverter reads this sample and never looks back, so it need not
-		// carry two megabytes of buffer.
-		sourceTapSlot = tapCreate(mid, pid, true, false);
-		sourceModuleId = mid;
-		sourcePortId = pid;
-		if (slot >= 0)
-			slots[slot].sourceTap.store(sourceTapSlot, std::memory_order_relaxed);
+		for (size_t k = 0; k < keys.size(); k++) {
+			// No history: these read this sample and never look back, so they need not carry
+			// two megabytes of buffer each.
+			const int tap = tapCreate(keys[k].first, keys[k].second, true, false);
+			sourceTapSlots.push_back(tap);
+			if (slot >= 0 && (int) k < SOURCE_TAPS)
+				slots[slot].sourceTap[k].store(tap, std::memory_order_relaxed);
+		}
+		sourceKeys = keys;
 	}
 
 	void releaseSourceTap() {
-		if (slot >= 0)
-			slots[slot].sourceTap.store(-1, std::memory_order_relaxed);
-		if (sourceTapSlot >= 0)
-			tapDestroy(sourceTapSlot);
-		sourceTapSlot = -1;
-		sourceModuleId = -1;
-		sourcePortId = -1;
+		if (slot >= 0) {
+			for (int k = 0; k < SOURCE_TAPS; k++)
+				slots[slot].sourceTap[k].store(-1, std::memory_order_relaxed);
+		}
+		for (size_t k = 0; k < sourceTapSlots.size(); k++) {
+			if (sourceTapSlots[k] >= 0)
+				tapDestroy(sourceTapSlots[k]);
+		}
+		sourceTapSlots.clear();
+		sourceKeys.clear();
 	}
 
 	void step() override {
 		updateSourceTap();
+		// A mute is not a signal: it is the presence or absence of cables, kept in step with
+		// the button every frame.
+		if (type == INJECT_SWITCH) {
+			if (!isOn())
+				takeCables();
+			else if (!held.empty())
+				restoreCables();
+		}
 		if (isReadout() && wantHeight > 0.f && std::fabs(box.size.y - wantHeight) > 0.5f) {
 			box.size.y = wantHeight;
 			faceHeight = box.size.y;
@@ -670,6 +849,8 @@ struct InjectorWidget : ClipWidget {
 	}
 
 	std::string buttonLabel() {
+		if (type == INJECT_SWITCH)
+			return "SWITCH";
 		return (type == INJECT_GATE) ? "GATE" : "PULSE";
 	}
 
@@ -813,12 +994,34 @@ struct InjectorWidget : ClipWidget {
 		// The title is CENTRED over the widget, glyph and word together, so it reads as a
 		// heading rather than as another left-aligned field.
 		const NVGcolor small = nvgRGBA(0x3d, 0xe0, 0x7a, 0xdd);
-		const float titleW = glyphW + labelW;
+		// A letter's width for the polarity mark, on an oscillator and nowhere else.
+		const float polW = isOscillator() ? 8.f : 0.f;
+		const float titleW = glyphW + labelW + polW;
 		const float titleX = (box.size.x - titleW) / 2.f;
+		waveHit = math::Rect();
+		polarityHit = math::Rect();
 		if (isOscillator()) {
+			// POLARITY, THEN THE SHAPE, THEN THE NAME. The two things that can be pressed are
+			// kept apart by putting the glyph between them, so the polarity letter cannot be
+			// mistaken for the first letter of the name.
+			//
+			// B or U rather than a symbol: at this size a plus over a minus is a smudge, and a
+			// letter says which mode it is in rather than needing to be decoded.
+			nvgFontSize(args.vg, TYPE_SIZE);
+			nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+			nvgFillColor(args.vg, small);
+			nvgText(args.vg, titleX + 1.f, topY, unipolar ? "U" : "B", NULL);
+			polarityHit = math::Rect(math::Vec(titleX - 1.f, topY - 7.f),
+				math::Vec(polW + 2.f, 14.f));
+
 			drawWaveGlyph(args.vg, wave,
-				math::Rect(math::Vec(titleX, topY - 4.f), math::Vec(10.f, 8.f)),
+				math::Rect(math::Vec(titleX + polW, topY - 4.f), math::Vec(10.f, 8.f)),
 				small, unipolar);
+			// PRESSED, NOT ONLY CHOSEN FROM A MENU. The shape is the control: a waveform is a
+			// thing you try one after another, and a menu makes trying four of them four
+			// journeys. The hit area is generous around a glyph this small.
+			waveHit = math::Rect(math::Vec(titleX + polW - 2.f, topY - 7.f),
+				math::Vec(glyphW + 4.f, 14.f));
 		}
 		if (!label.empty()) {
 			nvgFontSize(args.vg, TYPE_SIZE);
@@ -827,7 +1030,7 @@ struct InjectorWidget : ClipWidget {
 			// Bold by overdrawing: there is no bold monospace to hand, and swapping to a
 			// proportional face would move the digits about as the value changed.
 			for (int i = 0; i < 3; i++)
-				nvgText(args.vg, titleX + glyphW + i * 0.35f, topY, label.c_str(), NULL);
+				nvgText(args.vg, titleX + polW + glyphW + i * 0.35f, topY, label.c_str(), NULL);
 		}
 
 		const float x0 = READ_PAD;
@@ -876,9 +1079,13 @@ struct InjectorWidget : ClipWidget {
 		nvgStrokeWidth(args.vg, 1.6f);
 		nvgStroke(args.vg);
 
-		const bool lit = (type == INJECT_GATE && slot >= 0)
-			? slots[slot].gate.load(std::memory_order_relaxed)
-			: false;
+		// The lamp is on when the button is DOING something: a gate held high, or a mute
+		// cancelling what the cables are delivering.
+		bool lit = false;
+		if (slot >= 0 && type == INJECT_GATE)
+			lit = slots[slot].gate.load(std::memory_order_relaxed);
+		else if (type == INJECT_SWITCH)
+			lit = isOn();
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, c.x, c.y - 3.f, r * 0.52f);
 		nvgFillColor(args.vg, lit ? LIT_GREEN : nvgRGB(0x3d, 0x42, 0x4a));
@@ -898,7 +1105,72 @@ struct InjectorWidget : ClipWidget {
 		}
 	}
 
+	/** A STUB OF EACH CABLE, NOT THE WHOLE OF IT.
+	
+	Drawing the whole hanging curve was tried and abandoned: it has to match Rack's own maths in
+	a coordinate system that is not the one this widget draws in, and a cable that hangs almost
+	where it used to is worse than one that plainly is not there.
+	
+	A stub says everything that matters and cannot be wrong by much. It leaves the port in the
+	direction the cable went, in the colour that cable was — so a switch that is off shows what
+	is waiting on the other side of it, and which of several cables they are. */
+	void drawHeldCables(NVGcontext* vg) {
+		if (held.empty() || !port)
+			return;
+		widget::Widget* rack = APP->scene->rack;
+		const math::Vec here = port->getRelativeOffset(
+			port->box.zeroPos().getCenter(), rack).minus(box.pos);
+
+		for (size_t i = 0; i < held.size(); i++) {
+			// The far end: whichever of the two the cable's other end is on.
+			const bool farIsOutput = !(held[i].outModuleId == (port->module ? port->module->id : -1)
+				&& held[i].outPortId == port->portId);
+			app::PortWidget* far = farIsOutput
+				? portByIds(held[i].outModuleId, held[i].outPortId, true)
+				: portByIds(held[i].inModuleId, held[i].inPortId, false);
+			if (!far)
+				continue;
+			const math::Vec there = far->getRelativeOffset(
+				far->box.zeroPos().getCenter(), rack).minus(box.pos);
+
+			// TOWARDS THE SAG, NOT TOWARDS THE FAR JACK. A cable leaves a port heading for the
+			// bottom of its own curve, which is why a stub aimed straight at the other end
+			// pointed visibly wrong. This is Rack's own slump point — the midpoint of the two
+			// ends dropped by an amount that grows with the distance between them — and it is
+			// the same point Rack uses to angle the plug, so the stub leaves at the angle the
+			// cable left at.
+			const float span = here.minus(there).norm();
+			math::Vec slump = here.plus(there).div(2.f);
+			slump.y += (1.f - settings::cableTension) * (150.f + span);
+
+			math::Vec dir = slump.minus(here);
+			if (dir.norm() < 1.f)
+				continue;
+			dir = dir.normalize();
+			// A little way clear of the jack, and only far enough to be seen. A stub says a
+			// cable was here; it does not have to imply where it went.
+			const math::Vec a = here.plus(dir.mult(9.f));
+			const math::Vec b = here.plus(dir.mult(21.f));
+
+			nvgLineCap(vg, NVG_ROUND);
+			nvgBeginPath(vg);
+			nvgMoveTo(vg, a.x, a.y);
+			nvgLineTo(vg, b.x, b.y);
+			nvgStrokeColor(vg, color::mult(held[i].colour, 0.6f));
+			nvgStrokeWidth(vg, 6.f);
+			nvgStroke(vg);
+			nvgBeginPath(vg);
+			nvgMoveTo(vg, a.x, a.y);
+			nvgLineTo(vg, b.x, b.y);
+			nvgStrokeColor(vg, held[i].colour);
+			nvgStrokeWidth(vg, 4.f);
+			nvgStroke(vg);
+		}
+	}
+
 	void draw(const DrawArgs& args) override {
+		drawHeldCables(args.vg);
+		drawHint(args.vg);
 		drawCallout(args.vg);
 		if (isReadout())
 			drawReadout(args);
@@ -1000,6 +1272,14 @@ struct InjectorWidget : ClipWidget {
 			dragged = false;
 	}
 
+	/** The wave and the polarity are cycled forwards. There are four waveforms and two
+	polarities: a list that short is quicker to walk than to choose from. */
+	void nextWave() {
+		wave = (InjectorWave) ((wave + 1) % WAVE_COUNT);
+		if (slot >= 0)
+			slots[slot].wave.store(wave, std::memory_order_relaxed);
+	}
+
 	void onDragMove(const DragMoveEvent& e) override {
 		if (e.button != GLFW_MOUSE_BUTTON_LEFT)
 			return;
@@ -1022,8 +1302,17 @@ struct InjectorWidget : ClipWidget {
 			slots[slot].gate.store(false, std::memory_order_relaxed);
 		// A click that did not travel switches a readout in or out of circuit. The buttons act
 		// on the press instead, since a gate has to rise the moment it is pressed.
-		if (!dragged && isReadout() && e.button == GLFW_MOUSE_BUTTON_LEFT)
-			setEnabled(!enabled);
+		if (!dragged && isReadout() && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+			// WHERE IT LANDED DECIDES WHAT IT MEANT. The two small marks on the title row own
+			// their own clicks; everything else on the face is the old one, which puts the
+			// injector in or out of circuit.
+			if (waveHit.size.x > 0.f && waveHit.contains(pressPos))
+				nextWave();
+			else if (polarityHit.size.x > 0.f && polarityHit.contains(pressPos))
+				setUnipolar(!unipolar);
+			else
+				setEnabled(!enabled);
+		}
 		dragged = false;
 	}
 
@@ -1039,7 +1328,56 @@ struct InjectorWidget : ClipWidget {
 			slots[slot].enabled.store(on, std::memory_order_relaxed);
 	}
 
+	void onHover(const HoverEvent& e) override {
+		hovering = 0;
+		if (waveHit.size.x > 0.f && waveHit.contains(e.pos))
+			hovering = 1;
+		else if (polarityHit.size.x > 0.f && polarityHit.contains(e.pos))
+			hovering = 2;
+		ClipWidget::onHover(e);
+	}
+
+	void onLeave(const LeaveEvent& e) override {
+		hovering = 0;
+		ClipWidget::onLeave(e);
+	}
+
+	/** A word about the small mark under the pointer, above the widget so it covers neither the
+	title it explains nor the digits. */
+	void drawHint(NVGcontext* vg) {
+		if (!hovering)
+			return;
+		const char* text = (hovering == 1) ? "Click for waveform" : "Click for polarity";
+		std::shared_ptr<window::Font> font = APP->window->loadFont(
+			asset::system("res/fonts/ShareTechMono-Regular.ttf"));
+		if (!font || font->handle < 0)
+			return;
+		nvgFontFaceId(vg, font->handle);
+		nvgFontSize(vg, 9.f);
+		float bounds[4] = {0.f, 0.f, 0.f, 0.f};
+		nvgTextBounds(vg, 0.f, 0.f, text, NULL, bounds);
+		const float w = bounds[2] - bounds[0] + 10.f;
+		const float h = 14.f;
+		const float x = (box.size.x - w) / 2.f;
+		const float y = -h - 4.f;
+
+		nvgBeginPath(vg);
+		nvgRoundedRect(vg, x, y, w, h, 3.f);
+		nvgFillColor(vg, nvgRGBA(0x10, 0x12, 0x16, 0xf0));
+		nvgFill(vg);
+		nvgStrokeColor(vg, nvgRGBA(0xac, 0xb0, 0xb6, 0xc0));
+		nvgStrokeWidth(vg, 1.f);
+		nvgStroke(vg);
+
+		nvgFillColor(vg, nvgRGB(0xd8, 0xdc, 0xe2));
+		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+		nvgText(vg, x + w / 2.f, y + h / 2.f + 0.5f, text, NULL);
+	}
+
 	void onButton(const ButtonEvent& e) override {
+		// Noted on the way past, and not consumed: the press still starts a possible drag.
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT)
+			pressPos = e.pos;
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
 			ui::Menu* menu = createMenu();
 			appendContextMenu(menu);
@@ -1052,6 +1390,17 @@ struct InjectorWidget : ClipWidget {
 				// Held, not toggled: pressed is high and released is low, which is what a gate
 				// button on a panel does.
 				slots[slot].gate.store(e.action == GLFW_PRESS, std::memory_order_relaxed);
+				e.consume(this);
+				return;
+			}
+			if (type == INJECT_SWITCH && e.action == GLFW_PRESS) {
+				// A TOGGLE, not a hold. Muting a port is a state you leave it in while you
+				// listen to the rest of the patch, not something to keep a finger on. The
+				// injector's own enabled flag is the switch, so the mute arrives and leaves on
+				// the same few-millisecond ramp as everything else and never clicks.
+				const bool was = slots[slot].enabled.load(std::memory_order_relaxed);
+				slots[slot].enabled.store(!was, std::memory_order_relaxed);
+				enabled = !was;
 				e.consume(this);
 				return;
 			}
@@ -1204,10 +1553,51 @@ struct InjectorWidget : ClipWidget {
 		json_object_set_new(rootJ, "colour", json_integer(colour));
 		json_object_set_new(rootJ, "offsetX", json_real(offset.x));
 		json_object_set_new(rootJ, "offsetY", json_real(offset.y));
+
+		// WHAT A MUTE IS HOLDING. Rack writes the cables it can see, and a muted port's cables
+		// are not among them — so they are written here, and put back from here. Without this,
+		// saving a patch while something was muted would lose those cables for good.
+		if (!held.empty()) {
+			json_t* heldJ = json_array();
+			for (size_t i = 0; i < held.size(); i++) {
+				json_t* hJ = json_object();
+				json_object_set_new(hJ, "outModuleId", json_integer(held[i].outModuleId));
+				json_object_set_new(hJ, "outPortId", json_integer(held[i].outPortId));
+				json_object_set_new(hJ, "inModuleId", json_integer(held[i].inModuleId));
+				json_object_set_new(hJ, "inPortId", json_integer(held[i].inPortId));
+				json_object_set_new(hJ, "colour", json_integer(
+					((int) (held[i].colour.r * 255.f) << 16)
+					| ((int) (held[i].colour.g * 255.f) << 8)
+					| (int) (held[i].colour.b * 255.f)));
+				json_array_append_new(heldJ, hJ);
+			}
+			json_object_set_new(rootJ, "held", heldJ);
+		}
 		return rootJ;
 	}
 
 	void fromJson(json_t* rootJ) {
+		if (json_t* heldJ = json_object_get(rootJ, "held")) {
+			held.clear();
+			size_t i;
+			json_t* hJ;
+			json_array_foreach(heldJ, i, hJ) {
+				HeldCable h;
+				if (json_t* j = json_object_get(hJ, "outModuleId"))
+					h.outModuleId = json_integer_value(j);
+				if (json_t* j = json_object_get(hJ, "outPortId"))
+					h.outPortId = json_integer_value(j);
+				if (json_t* j = json_object_get(hJ, "inModuleId"))
+					h.inModuleId = json_integer_value(j);
+				if (json_t* j = json_object_get(hJ, "inPortId"))
+					h.inPortId = json_integer_value(j);
+				if (json_t* j = json_object_get(hJ, "colour")) {
+					const int c = json_integer_value(j);
+					h.colour = nvgRGB((c >> 16) & 0xff, (c >> 8) & 0xff, c & 0xff);
+				}
+				held.push_back(h);
+			}
+		}
 		if (json_t* j = json_object_get(rootJ, "type"))
 			setType((InjectorType) json_integer_value(j));
 		if (json_t* j = json_object_get(rootJ, "wave")) {

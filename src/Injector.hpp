@@ -36,6 +36,7 @@ enum InjectorType {
 	INJECT_AV,       /**< Scales and inverts what a cable is already delivering to the port. */
 	INJECT_NOISE,    /**< White, pink, brown, blue or violet noise. */
 	INJECT_CLOCK,    /**< A stream of pulses at a rate in beats per minute. */
+	INJECT_SWITCH,   /**< Breaks and remakes the connection into the port. */
 	INJECT_TYPES,
 };
 
