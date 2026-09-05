@@ -95,7 +95,14 @@ void tapDestroy(int slot) {
 	// First, so the audio thread stops looking at the handle before it is unbound.
 	if (tap.active.exchange(false, std::memory_order_acq_rel))
 		activeCount.fetch_sub(1, std::memory_order_release);
-	if (tap.registered)
+	// UNBOUND ONCE. Rack asserts on a handle that is unbound twice, and destroying a tap twice
+	// is not an unreasonable thing for a caller to do — a widget that lets go of its tap when
+	// it detaches and again when it is deleted was doing exactly that, and it took Rack down
+	// while a patch was being loaded.
+	//
+	// The handle stays REGISTERED with the engine either way: it is added once and reused, and
+	// clearing that flag would have the next tap add the same handle a second time.
+	if (tap.registered && tap.handle.moduleId >= 0)
 		APP->engine->updateParamHandle(&tap.handle, -1, 0, false);
 }
 
@@ -145,24 +152,42 @@ void tapCaptureAll() {
 }
 
 
-float tapVoltage(int slot) {
+/** The port this tap is on, or nothing. Bounds-checked every time rather than trusted from
+registration: a module can be replaced by one with fewer ports. */
+static engine::Port* tapPort(int slot) {
 	if (slot < 0 || slot >= TAP_MAX)
-		return 0.f;
+		return NULL;
 	SignalTap& tap = taps[slot];
 	if (!tap.active.load(std::memory_order_acquire))
-		return 0.f;
+		return NULL;
 	Module* module = tap.handle.module;
 	if (!module)
+		return NULL;
+	if (tap.isOutput)
+		return (tap.portId < (int) module->outputs.size())
+			? &module->outputs[tap.portId] : NULL;
+	return (tap.portId < (int) module->inputs.size())
+		? &module->inputs[tap.portId] : NULL;
+}
+
+
+float tapVoltage(int slot) {
+	engine::Port* p = tapPort(slot);
+	return p ? p->getVoltage() : 0.f;
+}
+
+
+float tapVoltage(int slot, int channel) {
+	engine::Port* p = tapPort(slot);
+	if (!p || channel < 0 || channel >= p->getChannels())
 		return 0.f;
-	if (tap.isOutput) {
-		if (tap.portId < (int) module->outputs.size())
-			return module->outputs[tap.portId].getVoltage();
-	}
-	else {
-		if (tap.portId < (int) module->inputs.size())
-			return module->inputs[tap.portId].getVoltage();
-	}
-	return 0.f;
+	return p->getVoltage(channel);
+}
+
+
+int tapChannels(int slot) {
+	engine::Port* p = tapPort(slot);
+	return p ? p->getChannels() : 0;
 }
 
 

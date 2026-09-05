@@ -54,6 +54,15 @@ bool tapAlive(int slot);
 the engine runs once per sample. */
 void tapCaptureAll();
 
+/** The port's voltage on one channel, and how many channels it is carrying.
+
+POLYPHONY IS NOT THE SCOPE'S PROBLEM BUT IT IS EVERYBODY ELSE'S. A picture of a waveform is drawn
+from the first channel and nobody minds. But anything that ANSWERS a signal — an attenuverter
+scaling it, a mute cancelling it — has to answer every channel, or it does its work on the first
+note of a chord and leaves the rest untouched. */
+float tapVoltage(int slot, int channel);
+int tapChannels(int slot);
+
 /** UI THREAD. Copies the most recent samples into `out`, oldest first, newest last. Returns
 how many were written, which is `count` unless the tap has not filled that far yet. */
 int tapRead(int slot, float* out, int count);
