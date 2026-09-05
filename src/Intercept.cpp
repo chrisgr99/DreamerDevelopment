@@ -37,6 +37,7 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "WidgetAt.hpp"
 #include "Clip.hpp"
 #include "Monitor.hpp"
+#include "Meter.hpp"
 #include "Palette.hpp"
 
 #include <algorithm>
@@ -1040,18 +1041,28 @@ struct InterceptOverlay : widget::Widget {
 				if (weakPort)
 					monitorCreate(weakPort);
 			}));
+			// A voltmeter reads, so it belongs here too: either end of a cable will do.
+			menu->addChild(createMenuItem("Voltmeter", "", [weakPort]() {
+				if (weakPort)
+					meterCreate(weakPort);
+			}));
 		}
 		if (!widgetsOn || !injectorAcceptsPort(port))
 			return;
 
 		struct Entry { const char* name; InjectorType type; bool noteMode; };
+		// THE ORDER IS THE ORDER THEY ARE REACHED FOR. The switch follows the instruments
+		// because, like them, it is about a signal that is already there rather than one being
+		// made; then the two oscillators, which are the sources wanted most often. The rest
+		// follow in the order they always have.
 		static const Entry entries[] = {
+			{"Switch", INJECT_SWITCH, false},
+			{"LFO", INJECT_LFO, false},
+			{"VCO", INJECT_AUDIO, false},
 			{"Gate button", INJECT_GATE, false},
 			{"Pulse button", INJECT_PULSE, false},
 			{"Clock", INJECT_CLOCK, false},
 			{"DC level", INJECT_DC, false},
-			{"LFO", INJECT_LFO, false},
-			{"VCO", INJECT_AUDIO, false},
 			{"Note", INJECT_AUDIO, true},
 			{"Volt/oct", INJECT_NOTE, false},
 			{"Noise", INJECT_NOISE, false},

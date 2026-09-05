@@ -8,7 +8,7 @@ Having built them, I have put them in a plugin in case anyone else finds them us
 
 ---
 
-**[Clarity](docs/clarity.md)** changes how the whole rack is drawn and how you interact with it. **[Test Gear](docs/test-gear.md)** attaches instruments to ports: oscilloscopes, a frequency analyser, an audio monitor, and a set of signal generators.
+**[Clarity](docs/clarity.md)** changes how the whole rack is drawn and how you interact with it. **[Test Gear](docs/test-gear.md)** attaches instruments to ports, and takes no rack space to do it: oscilloscopes, a frequency analyser, an audio monitor, a voltmeter, a switch, and a set of signal generators.
 
 They are separate modules because they do different things. Clarity applies to the whole rack and is set once. Test Gear is used a widget at a time. Each works without the other.
 
@@ -49,10 +49,15 @@ A viewer attached to an output with nothing connected to it still receives a sig
 - **Scope** — captures at the engine's sample rate rather than the frame rate, retains about eleven seconds of history, and sets its scales from the signal when it is attached. Triggering is controlled by a strip down its left edge; dragging a link from that strip to another port triggers from that signal instead.
 - **Analyser** — a spectrum on a logarithmic frequency axis, with the peak reported as a note as well as a frequency, and ticks marking its harmonics. **W** switches to a waterfall: the same spectrum with time as the second axis. Pinch zooms the frequency axis and scrolling sideways pans it.
 - **Audio monitor** — connect Monitor out to an audio interface once, and every monitor attached after that is audible through it, each with its own level and mute. They are summed, so several can be listened to at once.
+- **Voltmeter** — the voltage on a terminal, or the peak of the last quarter second, in one readout that a click turns over. The peak is taken at the engine's rate rather than the frame rate, so it catches what an eye cannot.
 
 ### Generators
 
-Gate, pulse, clock, DC level, LFO, VCO, note, volt per octave, noise and an attenuverter. They attach to a port that already has a cable connected: the engine sums several cables into one input, so a generator adds to what is there rather than replacing it.
+A switch, an LFO, a VCO, gate and pulse buttons, a clock, a DC level, a note, a volt per octave, noise and an attenuverter. They attach to a port that already has a cable connected: the engine sums several cables into one input, so a generator adds to what is there rather than replacing it.
+
+On the LFO and the VCO, the shape drawn on the readout is the control — click it for the next waveform, and the letter beside it for bipolar or unipolar.
+
+The **switch** is the exception among them, since it turns something off rather than adding something. Its light is on when the signal is getting through. It works by taking the cables out of the port and holding them, drawing each as a short stub in its own colour so you can see what is waiting, and putting them back when it goes on again — which is exact for audio, gates and polyphony alike, where cancelling the signal is not.
 
 ---
 

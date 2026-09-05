@@ -65,6 +65,15 @@ Connect **Monitor out** to an audio interface once; every monitor attached after
 - **A monitor reads the port's voltage directly**, so it can be attached to an output as well as an input, and nothing is inserted into the signal path.
 - The bus is DC-blocked at about 20 Hz, so control voltages can be monitored: an envelope resting at five volts would otherwise be a constant offset at the interface.
 
+## Voltmeter
+
+Reads the voltage on a terminal, on an input or an output alike, and inserts nothing into the signal.
+
+- **One number, and a word above it saying which.** **VOLTS** is the voltage at this moment; **PEAK** is the largest reading of the last quarter of a second, held so it can be read. **Click the face** to change over; the right-click menu offers the same choice by name.
+- **The peak is found at the engine's rate**, not at the frame rate. A meter that looked once a frame would catch one sample in eight hundred of an audio signal and report whatever it happened to land on. It is the largest reading *by size*, shown with its sign, so a signal swinging to minus eight reads −8.
+- **Always the same width**: a sign, two digits, a point and two decimals. A reading past ninety-nine volts is held there rather than taking a third digit, since a number that changes width as it moves is one the eye cannot rest on.
+- **Polyphonic cables** are read on the first channel, and the word says so — `VOLTS 1/4` on a cable of four.
+
 ---
 
 # Generators
@@ -79,14 +88,27 @@ Each has a **readout** which scrolling changes — coarse to the left of the dec
 | **Pulse button** | One 1 ms pulse per press |
 | **Clock** | A stream of pulses, set in beats per minute |
 | **DC level** | A constant voltage |
-| **LFO** | A repeating waveform, 0.01 to 100 Hz. Right-click for the shape and for unipolar or bipolar |
-| **VCO** | The same at audio rates, 1 Hz to 8 kHz, set in hertz. Defaults to A4 |
+| **LFO** | A repeating waveform, 0.01 to 100 Hz. **Click the shape** on the readout to change it, and the **B** or **U** beside it for bipolar or unipolar |
+| **VCO** | The same at audio rates, 1 Hz to 8 kHz, set in hertz. Defaults to A4. The same two marks change its shape and polarity |
 | **Note** | A VCO set by note name rather than by frequency |
 | **Volt/oct** | A pitch as a control voltage, one volt per octave, displayed as a note |
 | **Noise** | White, pink, brown, blue or violet, selected from the right-click menu |
 | **Attenuverter** | Scales and inverts the signal already arriving at that port |
+| **Switch** | Breaks and remakes the connection into that port |
 
 Switching a generator on or off ramps its level over a few milliseconds rather than stepping, since a step produces an audible click.
+
+## Switch
+
+Not a generator, though it lives among them: it turns the connection into a port on and off.
+
+- **The light is on when the switch is on**, and on means the signal is getting through. A mute is the wrong idea for most of what travels down a cable — nobody mutes a gate, they switch it off — so one word and one polarity mean the same thing whatever the signal is.
+- **It takes the cables out and holds them**, and puts them back when it goes on again. Nothing is altered, so switching it back on leaves the patch exactly as it was.
+- **A cable that is held is drawn as a short stub** leaving the port in its own colour, at the angle the cable left at, so you can see what is waiting on the other side and which of several cables they are.
+- **A cable patched into a port while its switch is off** is taken as well. The button means "this port", not "whatever was here when you pressed it".
+- **It survives saving.** Rack writes the cables it can see, and a switched-off port's are not among them, so they are written into the switch's own state and put back from there.
+
+**Why it does not cancel the signal instead.** The obvious way is the attenuverter's: the engine sums everything arriving at an input, so sending the exact opposite of what a cable delivers leaves nothing. It works for a control voltage and it cannot work for anything else. Rack decides the order it processes modules in and a plugin has no say, so the value read from the source may be the one it produced a sample ago while the destination reads the one it produces now — and the difference of a signal with itself one sample back is a high-pass filter. Audio comes through thinner and quieter rather than stopping, and a gate, flat except at its edges, comes through as a spike at every rise and fall.
 
 ---
 
@@ -98,6 +120,6 @@ Switching a generator on or off ramps its level over a few milliseconds rather t
 
 **Bypassing it silences the widgets.** The generators and the monitor are processed by this module, so bypassing it stops them, while everything drawn continues to be displayed. A generator displays WIDGETS BYPASSED on its face in that state.
 
-**Eight generators and sixteen monitors** can exist at once, with thirty-two signal taps shared between the scopes, analysers and monitors.
+**Eight generators, sixteen monitors and sixteen voltmeters** can exist at once, with thirty-two signal taps shared between the scopes, analysers, monitors and voltmeters.
 
 **The hidden outputs.** A generator is a real cable from one of this module's outputs to the port it drives, which is what makes Rack responsible for removing it when a module is deleted. The cable and its plugs are hidden.
