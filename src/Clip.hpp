@@ -102,7 +102,19 @@ struct ClipWidget : widget::OpaqueWidget {
 	/** Rides the pointer, held by the middle of its left edge — or its right edge when there is
 	no room to the right, so a widget made near the edge of the view is still fully visible. */
 	void followPointer() {
-		const math::Vec mouse = APP->scene->rack->getMousePos();
+		// THE POINTER RACK WAS TOLD ABOUT, not the one the operating system is holding.
+		//
+		// RackWidget::getMousePos reports where the real cursor is, which is right for a hand on
+		// a mouse and wrong for anything driving the interface by events — a scripted demo, or
+		// any other tool that moves a pointer of its own. A widget riding the real cursor was
+		// laid down wherever the viewer's hand happened to be resting, a long way from the port
+		// it belongs to. The scene's mouse position is set by hover events, so it follows a
+		// hand and an injected pointer alike.
+		widget::Widget* rackWidget = APP->scene->rack;
+		const float rackZoom = rackWidget->getAbsoluteZoom();
+		const math::Vec mouse = APP->scene->mousePos
+			.minus(rackWidget->getAbsoluteOffset(math::Vec(0.f, 0.f)))
+			.div(rackZoom > 0.f ? rackZoom : 1.f);
 		const float zoom = APP->scene->rackScroll ? APP->scene->rackScroll->getAbsoluteZoom() : 1.f;
 		const float viewRight = APP->scene->rackScroll
 			? (APP->scene->rackScroll->offset.x + APP->scene->rackScroll->box.size.x) / zoom

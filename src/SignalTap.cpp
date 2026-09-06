@@ -11,6 +11,18 @@
 a mapping another module has made on the tapped module's params. */
 static const int TAP_PARAM_ID_BASE = 1000000;
 
+/** ONE ID PER HANDLE, NEVER REUSED — not one per slot.
+
+A handle the engine has taken back is abandoned rather than freed, because there is no way to
+ask the engine whether it still holds one. An abandoned handle may still be BOUND, and while it
+is, it occupies its module and parameter id. Numbering by slot meant the replacement handle for
+that slot asked for the very key its own abandoned predecessor was sitting on; the engine, told
+not to overwrite, left the new one unbound; and the tap read nothing at all. An attenuverter
+that had stopped attenuating was the first sign of it.
+
+Counting instead of reusing costs one integer and cannot collide. */
+static int gNextParamId = 0;
+
 
 struct SignalTap {
 	/** Written by the UI thread, read every sample by the audio thread. The ONLY gate: the
@@ -18,11 +30,14 @@ struct SignalTap {
 	creation and first on destruction. */
 	std::atomic<bool> active{false};
 
-	/** The engine owns this while it is registered, and NULLs its `module` field when the
-	tapped module is removed — which is the whole reason a handle is used instead of a
-	pointer. Set before `active` becomes true and not touched again while it is true. */
-	engine::ParamHandle handle;
-	bool registered = false;
+	/** The engine owns this once it has been added, and NULLs its `module` field when the
+	tapped module is removed — which is the whole reason a handle is used instead of a pointer.
+	Set before `active` becomes true and not touched again while it is true.
+
+	A POINTER, AND NEVER GIVEN BACK. See the note above tapCreate: a handle can only be handed
+	to the engine, never taken from it, so a slot whose handle the engine has already discarded
+	takes a fresh one and abandons the old. */
+	engine::ParamHandle* handle = NULL;
 	int portId = 0;
 	bool isOutput = true;
 
@@ -48,6 +63,30 @@ static std::atomic<int> activeCount{0};
 static std::atomic<float> lastSampleRate{48000.f};
 
 
+/** Whether the engine still holds this tap's handle, bound where we last bound it.
+
+RACK'S THREE RULES, WHICH BETWEEN THEM LEAVE ONE SAFE MOVE. addParamHandle asserts on a handle
+the engine already holds; updateParamHandle and removeParamHandle assert on one it does not; and
+there is no way to ask whether it holds a given handle. Any of those assertions takes the whole
+application down.
+
+What makes this hard is that the engine DOES discard them: loading a patch empties its list, and
+nothing tells a plugin that it happened. A flag of our own is then a lie, and both ways of
+believing it have crashed Rack today — trusting it crashed on the update, and clearing it
+crashed on the add that followed.
+
+So the flag is replaced by a question the engine can actually answer. A handle bound to a module
+and parameter can be looked up by that pair: if the answer is ours, the engine still has it and
+it may be rebound. Anything else — no answer, somebody else's handle, or a handle of ours that
+is bound to nothing and therefore cannot be looked up at all — is treated as lost. A lost handle
+is abandoned rather than freed, since the engine may still be holding it, and the slot starts
+again with a new one. That costs a few dozen bytes on each patch load and cannot assert. */
+static bool engineHolds(SignalTap& tap) {
+	return tap.handle && tap.handle->moduleId >= 0
+		&& APP->engine->getParamHandle(tap.handle->moduleId, tap.handle->paramId) == tap.handle;
+}
+
+
 int tapCreate(int64_t moduleId, int portId, bool isOutput, bool needsHistory) {
 	if (moduleId < 0 || portId < 0)
 		return -1;
@@ -67,15 +106,21 @@ int tapCreate(int64_t moduleId, int portId, bool isOutput, bool needsHistory) {
 				std::fill(tap.buffer.begin(), tap.buffer.end(), 0.f);
 		}
 
-		if (!tap.registered) {
-			APP->engine->addParamHandle(&tap.handle);
-			tap.registered = true;
+		// The one the engine is known to have, or a new one it certainly has not.
+		if (!engineHolds(tap))
+			tap.handle = NULL;
+		if (!tap.handle) {
+			tap.handle = new engine::ParamHandle;
+			APP->engine->addParamHandle(tap.handle);
 		}
 		// overwrite = false: if anything else already holds a handle on this pair we yield
-		// rather than break it. With a paramId this high that should never happen.
-		APP->engine->updateParamHandle(&tap.handle, moduleId,
-			TAP_PARAM_ID_BASE + i, false);
-		if (!tap.handle.module)
+		// rather than break it. With an id this high, and never reused, that cannot happen.
+		APP->engine->updateParamHandle(tap.handle, moduleId,
+			TAP_PARAM_ID_BASE + (gNextParamId++), false);
+		if (!tap.handle->module)
+			WARN("Tap: the engine would not bind slot %d to module %lld", i,
+				(long long) moduleId);
+		if (!tap.handle->module)
 			return -1;
 
 		// Last, and with release ordering, so the audio thread cannot see an active slot
@@ -92,18 +137,15 @@ void tapDestroy(int slot) {
 	if (slot < 0 || slot >= TAP_MAX)
 		return;
 	SignalTap& tap = taps[slot];
-	// First, so the audio thread stops looking at the handle before it is unbound.
+	// The audio thread stops looking at the handle, and that is all that happens.
+	//
+	// THE BINDING IS LEFT ALONE DELIBERATELY. Unbinding it is a call that asserts if the engine
+	// has already discarded the handle, which is every patch load, and it buys nothing: nothing
+	// reads a tap that is not active, and leaving it bound is what lets the next tap on this
+	// slot recognise its own handle and reuse it instead of abandoning it. The engine unbinds
+	// it by itself when the module it points at goes away.
 	if (tap.active.exchange(false, std::memory_order_acq_rel))
 		activeCount.fetch_sub(1, std::memory_order_release);
-	// UNBOUND ONCE. Rack asserts on a handle that is unbound twice, and destroying a tap twice
-	// is not an unreasonable thing for a caller to do — a widget that lets go of its tap when
-	// it detaches and again when it is deleted was doing exactly that, and it took Rack down
-	// while a patch was being loaded.
-	//
-	// The handle stays REGISTERED with the engine either way: it is added once and reused, and
-	// clearing that flag would have the next tap add the same handle a second time.
-	if (tap.registered && tap.handle.moduleId >= 0)
-		APP->engine->updateParamHandle(&tap.handle, -1, 0, false);
 }
 
 
@@ -111,7 +153,7 @@ bool tapAlive(int slot) {
 	if (slot < 0 || slot >= TAP_MAX)
 		return false;
 	SignalTap& tap = taps[slot];
-	return tap.active.load(std::memory_order_acquire) && tap.handle.module != NULL;
+	return tap.active.load(std::memory_order_acquire) && tap.handle && tap.handle->module;
 }
 
 
@@ -126,7 +168,7 @@ void tapCaptureAll() {
 			continue;
 		// NULL the moment the engine removes that module, under the lock that keeps this
 		// thread out — so this test is the invalidation, not merely a guess at it.
-		Module* module = tap.handle.module;
+		Module* module = tap.handle ? tap.handle->module : NULL;
 		if (!module)
 			continue;
 
@@ -160,7 +202,7 @@ static engine::Port* tapPort(int slot) {
 	SignalTap& tap = taps[slot];
 	if (!tap.active.load(std::memory_order_acquire))
 		return NULL;
-	Module* module = tap.handle.module;
+	Module* module = tap.handle ? tap.handle->module : NULL;
 	if (!module)
 		return NULL;
 	if (tap.isOutput)

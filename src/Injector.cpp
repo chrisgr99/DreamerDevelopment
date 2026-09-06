@@ -1300,8 +1300,17 @@ struct InjectorWidget : ClipWidget {
 	void onDragEnd(const DragEndEvent& e) override {
 		if (slot >= 0 && type == INJECT_GATE)
 			slots[slot].gate.store(false, std::memory_order_relaxed);
-		// A click that did not travel switches a readout in or out of circuit. The buttons act
-		// on the press instead, since a gate has to rise the moment it is pressed.
+		// The switch, on the same terms: a click that did not travel throws it, a drag only
+		// moves it. The injector's own enabled flag is the switch, so the connection is broken
+		// and remade on the same few-millisecond ramp as everything else and never clicks.
+		if (!dragged && type == INJECT_SWITCH && e.button == GLFW_MOUSE_BUTTON_LEFT
+			&& slot >= 0) {
+			const bool was = slots[slot].enabled.load(std::memory_order_relaxed);
+			slots[slot].enabled.store(!was, std::memory_order_relaxed);
+			enabled = !was;
+		}
+		// A click that did not travel switches a readout in or out of circuit. The gate and the
+		// pulse act on the press instead, since a gate has to rise the moment it is pressed.
 		if (!dragged && isReadout() && e.button == GLFW_MOUSE_BUTTON_LEFT) {
 			// WHERE IT LANDED DECIDES WHAT IT MEANT. The two small marks on the title row own
 			// their own clicks; everything else on the face is the old one, which puts the
@@ -1395,12 +1404,12 @@ struct InjectorWidget : ClipWidget {
 			}
 			if (type == INJECT_SWITCH && e.action == GLFW_PRESS) {
 				// A TOGGLE, not a hold. Muting a port is a state you leave it in while you
-				// listen to the rest of the patch, not something to keep a finger on. The
-				// injector's own enabled flag is the switch, so the mute arrives and leaves on
-				// the same few-millisecond ramp as everything else and never clicks.
-				const bool was = slots[slot].enabled.load(std::memory_order_relaxed);
-				slots[slot].enabled.store(!was, std::memory_order_relaxed);
-				enabled = !was;
+				// listen to the rest of the patch, not something to keep a finger on.
+				//
+				// THROWN ON RELEASE, though, and only if the pointer stayed put: switching on
+				// the press meant that nudging the switch to a tidier spot on the panel also
+				// broke or remade the connection under it. The press is still consumed, so this
+				// widget is the one being dragged; onDragEnd decides which it was.
 				e.consume(this);
 				return;
 			}

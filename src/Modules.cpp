@@ -37,6 +37,7 @@ optional and can be switched off per user.
 #include "Injector.hpp"
 #include "Monitor.hpp"
 #include "Meter.hpp"
+#include "Freq.hpp"
 #include "Sink.hpp"
 
 #include "Palette.hpp"
@@ -303,8 +304,9 @@ struct TestGear : Module {
 
 		outputs[O_MONITOR].setChannels(1);
 		outputs[O_MONITOR].setVoltage(monitorMix(args.sampleTime));
-		// Reads only: a meter takes nothing out of the signal and puts nothing into it.
+		// Read only: a meter takes nothing out of the signal and puts nothing into it.
 		meterProcess(args.sampleTime);
+		freqProcess(args.sampleTime);
 	}
 
 	/** The one instance that speaks for all of them. */
@@ -326,6 +328,7 @@ struct TestGear : Module {
 		json_object_set_new(rootJ, "analysers", analyserToJson());
 		json_object_set_new(rootJ, "monitors", monitorToJson());
 		json_object_set_new(rootJ, "meters", meterToJson());
+		json_object_set_new(rootJ, "freqs", freqToJson());
 		return rootJ;
 	}
 
@@ -335,6 +338,7 @@ struct TestGear : Module {
 		analyserFromJson(json_object_get(rootJ, "analysers"));
 		monitorFromJson(json_object_get(rootJ, "monitors"));
 		meterFromJson(json_object_get(rootJ, "meters"));
+		freqFromJson(json_object_get(rootJ, "freqs"));
 	}
 };
 
@@ -728,6 +732,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 		analyserSetVisible(o.scopes);
 		monitorSetVisible(o.widgets);
 		meterSetVisible(o.widgets);
+		freqSetVisible(o.widgets);
 		injectorSetEnabled(o.widgets);
 
 		if (o.trace)
@@ -742,6 +747,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 		analyserRestoreStep();
 		monitorRestoreStep();
 		meterRestoreStep();
+		freqRestoreStep();
 		injectorRestoreStep();
 		// And any cable out of the Test Gear module that no injector owns is not a cable at all.
 		injectorPurgeStrayCables();
@@ -1317,7 +1323,7 @@ struct TestGearWidget : DRUIWidgetBase {
 			{"Right-click any", "port and select", "\"Widgets\". It follows",
 			"the pointer. Click", "to place it."}, {
 			{"Scope", false}, {"Analyser", false}, {"Audio monitor", false},
-			{"Voltmeter", false}, {"Switch", false},
+			{"Voltmeter", false}, {"Frequency", false}, {"Switch", false},
 			{"LFO", false}, {"VCO", false},
 			{"Gate", false}, {"Pulse", false}, {"Clock", false}, {"DC level", false},
 			{"Note", false}, {"Volt/oct", false},

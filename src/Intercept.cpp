@@ -38,6 +38,7 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "Clip.hpp"
 #include "Monitor.hpp"
 #include "Meter.hpp"
+#include "Freq.hpp"
 #include "Palette.hpp"
 
 #include <algorithm>
@@ -1045,6 +1046,11 @@ struct InterceptOverlay : widget::Widget {
 			menu->addChild(createMenuItem("Voltmeter", "", [weakPort]() {
 				if (weakPort)
 					meterCreate(weakPort);
+			}));
+			// And a frequency meter, which reads either end of a cable in the same way.
+			menu->addChild(createMenuItem("Frequency", "", [weakPort]() {
+				if (weakPort)
+					freqCreate(weakPort);
 			}));
 		}
 		if (!widgetsOn || !injectorAcceptsPort(port))

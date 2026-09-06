@@ -28,9 +28,9 @@ Every widget behaves the same way once attached:
 
 Captures at the engine's sample rate rather than the frame rate. About eleven seconds of history is retained, so a paused trace can be scrolled back through.
 
-A scope sets its scales from the signal when it is attached, once it has a full window to measure, which is what pressing **A** does subsequently. Moving it to another port repeats this. A scope restored from a patch does not: the saved scales are the settings.
+A scope sets its scales from the signal when it is attached, once it has a full window to measure, which is what pressing **AUTO** does subsequently. Moving it to another port repeats this. A scope restored from a patch does not: the saved scales are the settings.
 
-**Controls**, along the bottom and displayed on hover: transport (run and pause), **F** follow, **<** home, **A** autoset, **AC** coupling, **G** grid.
+**Controls**, along the bottom and displayed on hover: transport (run and pause), **F** follow, **<** home, **AUTO** autoset, **AC** coupling, **G** grid.
 
 **Scrolling** the face moves the trace: sideways to pan through the history when paused, vertically to move it up and down. One axis at a time, determined by the direction the gesture begins in. Over the readout below the face, scrolling changes the scales instead — volts per division on the left, time base on the right.
 
@@ -69,10 +69,23 @@ Connect **Monitor out** to an audio interface once; every monitor attached after
 
 Reads the voltage on a terminal, on an input or an output alike, and inserts nothing into the signal.
 
-- **One number, and a word above it saying which.** **VOLTS** is the voltage at this moment; **PEAK** is the largest reading of the last quarter of a second, held so it can be read. **Click the face** to change over; the right-click menu offers the same choice by name.
+- **One number, and a word above it saying which.** **METER** is the voltage at this moment; **PEAK** is the largest reading of the last quarter of a second, held so it can be read. **Click the face** to change over; the right-click menu offers the same choice by name.
 - **The peak is found at the engine's rate**, not at the frame rate. A meter that looked once a frame would catch one sample in eight hundred of an audio signal and report whatever it happened to land on. It is the largest reading *by size*, shown with its sign, so a signal swinging to minus eight reads −8.
 - **Always the same width**: a sign, two digits, a point and two decimals. A reading past ninety-nine volts is held there rather than taking a third digit, since a number that changes width as it moves is one the eye cannot rest on.
-- **Polyphonic cables** are read on the first channel, and the word says so — `VOLTS 1/4` on a cable of four.
+- **Polyphonic cables** are read on the first channel, and the word says so — `METER 1/4` on a cable of four.
+
+## Frequency meter
+
+Reads the pitch on a terminal, on an input or an output alike, and inserts nothing into the signal.
+
+- **One reading, and a chip above it saying which unit.** **Click the chip** to change unit; the right-click menu offers the same three by name. Clicking anywhere else only picks the widget up.
+- **Hz** is the measured pitch — `440.00`, or `1.234k` above a thousand.
+- **NOTE** is that same pitch as a note, with its distance from equal temperament in cents: `A4 +07`, `F#2 -13`.
+- **V/OCT** is not a measurement of pitch but of intent: the note a steady control voltage is *asking* for, with nought volts as C4. Clip one on a volt-per-octave cable while tuning and it reads the note being requested rather than the one being made.
+- **The pitch is the time between crossings of the signal's own slow mean**, measured at the engine's rate with a threshold either side of the line so that a wobble is not counted as several cycles. It reads an oscillator or an LFO down to a fraction of a hertz.
+- **Dashes are a reading.** A signal too small to be anything, a signal that has stopped, or one whose cycles disagree with each other — a chord, noise, a heavily folded wave — has no single frequency, so none is shown.
+- **The tuning standard** is set from the right-click menu, from 415 Hz to 444 Hz. It moves the note and the cents; the hertz reading is what it is.
+- **Polyphonic cables** are read on the first channel, and the chip says so — `Hz 1/4` on a cable of four.
 
 ---
 

@@ -96,6 +96,13 @@ void sinkStep() {
 		if (!cw->cable || !cw->outputPort)
 			continue;
 		if (isSinkCable(cw, gear)) {
+			// HIDDEN ON SIGHT, whatever becomes of it below. A patch is saved with every cable
+			// the engine holds, ours included, and comes back as an ordinary visible cable with
+			// new plugs — so a patch reopened with a viewer on an unpatched output showed a
+			// cable running into Test Gear that nobody could account for or take hold of. One
+			// of these is hidden the instant it is recognised, before anything decides whether
+			// it is wanted, so there is no path on which it is drawn even once.
+			hideCable(cw);
 			// One sink per output. A second is a leftover — from an undo, or from a patch
 			// saved while one was in place.
 			if (watched.count(cw->outputPort) && !sinks.count(cw->outputPort)) {

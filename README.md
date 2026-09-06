@@ -8,7 +8,7 @@ Having built them, I have put them in a plugin in case anyone else finds them us
 
 ---
 
-**[Clarity](docs/clarity.md)** changes how the whole rack is drawn and how you interact with it. **[Test Gear](docs/test-gear.md)** attaches instruments to ports, and takes no rack space to do it: oscilloscopes, a frequency analyser, an audio monitor, a voltmeter, a switch, and a set of signal generators.
+**[Clarity](docs/clarity.md)** changes how the whole rack is drawn and how you interact with it. **[Test Gear](docs/test-gear.md)** attaches instruments to ports, and takes no rack space to do it: oscilloscopes, a frequency analyser, an audio monitor, a voltmeter, a frequency meter, a switch, and a set of signal generators.
 
 They are separate modules because they do different things. Clarity applies to the whole rack and is set once. Test Gear is used a widget at a time. Each works without the other.
 
@@ -50,6 +50,7 @@ A viewer attached to an output with nothing connected to it still receives a sig
 - **Analyser** — a spectrum on a logarithmic frequency axis, with the peak reported as a note as well as a frequency, and ticks marking its harmonics. **W** switches to a waterfall: the same spectrum with time as the second axis. Pinch zooms the frequency axis and scrolling sideways pans it.
 - **Audio monitor** — connect Monitor out to an audio interface once, and every monitor attached after that is audible through it, each with its own level and mute. They are summed, so several can be listened to at once.
 - **Voltmeter** — the voltage on a terminal, or the peak of the last quarter second, in one readout that a click turns over. The peak is taken at the engine's rate rather than the frame rate, so it catches what an eye cannot.
+- **Frequency meter** — the pitch on a terminal, in hertz, as a note with its distance from equal temperament in cents, or as the note a steady volt-per-octave cable is asking for. A chip above the reading changes the unit; the tuning standard is set from the menu.
 
 ### Generators
 

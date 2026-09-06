@@ -110,11 +110,18 @@ static const float EDGE = 1.f;
 clicks a good deal further in, since five pixels is not a target anyone should have to aim
 at. */
 static const float TRIG_STRIP_W = 10.f;
+/** THE AUTOSET BUTTON IS AS WIDE AS ITS WORD. Every other control here is a single letter
+because there is no room for more and each is pressed often enough to be learnt — but autoset is
+the one a newcomer needs and the one that is hardest to guess from a letter, so it says AUTO. The
+two buttons to its right move along to make room. */
+static const float AUTO_W = 30.f;
 static const float TRIG_STRIP_REACH = 10.f;
 /** How far in from an edge still counts as grabbing it to resize. */
 static const float RESIZE_EDGE = 6.f;
 static const float LEFT_RESIZE_EDGE = 3.f;
-static const float MIN_W = 70.f, MIN_H = 40.f;
+/** Wide enough for the bottom row: the trigger strip, the transport, AUTO, AC and G, with a
+pad between each. A face narrower than its own controls is a face whose controls overlap. */
+static const float MIN_W = 100.f, MIN_H = 40.f;
 /** A paused scope wears a red frame, so a held trace can never be mistaken for a live one. */
 static const NVGcolor FRAME_RUN = nvgRGB(0x2f, 0xd0, 0x6a);
 static const NVGcolor FRAME_PAUSED = nvgRGB(0xe0, 0x3b, 0x3b);
@@ -875,9 +882,9 @@ struct ScopeWidget : ClipWidget {
 	math::Rect homeBox()     { return math::Rect(math::Vec(faceWidth - BTN * 2 - BTN_PAD - EDGE, EDGE), math::Vec(BTN, BTN)); }
 	/** The bottom row, left to right: pause/run, A for autoset, T for trigger mode, G for
 	grid — the II A T G row on the Wcoast face. */
-	math::Rect autoBox()     { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD * 2 + TRANSPORT_SIZE, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
-	math::Rect acBox()       { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD * 3 + TRANSPORT_SIZE + BTN, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
-	math::Rect gridBox()     { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD * 4 + TRANSPORT_SIZE + BTN * 2, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
+	math::Rect autoBox()     { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD * 2 + TRANSPORT_SIZE, faceHeight - BTN - EDGE), math::Vec(AUTO_W, BTN)); }
+	math::Rect acBox()       { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD * 3 + TRANSPORT_SIZE + AUTO_W, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
+	math::Rect gridBox()     { return math::Rect(math::Vec(TRIG_STRIP_W + BTN_PAD * 4 + TRANSPORT_SIZE + AUTO_W + BTN, faceHeight - BTN - EDGE), math::Vec(BTN, BTN)); }
 	/** The strip itself, and the wider area that answers to it. */
 	math::Rect trigStrip()   { return math::Rect(math::Vec(0.f, 0.f), math::Vec(TRIG_STRIP_W, faceHeight)); }
 	bool inTrigStrip(math::Vec pos) { return pos.x >= 0.f && pos.x <= TRIG_STRIP_REACH && pos.y >= 0.f && pos.y <= faceHeight; }
@@ -1032,8 +1039,15 @@ struct ScopeWidget : ClipWidget {
 			return;
 
 		nvgFontFaceId(vg, font->handle);
-		nvgFontSize(vg, 12);
 		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+		// Twelve points, unless the word does not fit the button at twelve points.
+		float size = 12.f;
+		nvgFontSize(vg, size);
+		const float wide = nvgTextBounds(vg, 0.f, 0.f, glyph, NULL, NULL);
+		if (wide > r.size.x - 4.f && wide > 0.f) {
+			size *= (r.size.x - 4.f) / wide;
+			nvgFontSize(vg, size);
+		}
 		nvgFillColor(vg, dim ? nvgRGBA(0xe0, 0xa0, 0x3b, 0x66) : CONTROL_AMBER);
 		nvgText(vg, r.pos.x + r.size.x / 2, r.pos.y + r.size.y / 2, glyph, NULL);
 	}
@@ -1056,7 +1070,7 @@ struct ScopeWidget : ClipWidget {
 		drawButton(vg, homeBox(), CONTROL_AMBER, "<", atHome());
 		// Never dimmed. Autoset is an action you can always ask for, and dimming it the moment it
 		// finished — which is within a frame or two — made a working button look disabled.
-		drawButton(vg, autoBox(), CONTROL_AMBER, "A", false);
+		drawButton(vg, autoBox(), CONTROL_AMBER, "AUTO", false);
 		// Lit is AC; dimmed is DC, which is the resting state of a scope.
 		drawButton(vg, acBox(), CONTROL_AMBER, "AC", !acCoupled);
 		drawButton(vg, gridBox(), CONTROL_AMBER, "G", !gridShown);

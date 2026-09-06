@@ -111,9 +111,10 @@ static void slotRelease(int i) {
 
 
 static const NVGcolor MET_GREEN = nvgRGB(0x3d, 0xe0, 0x7a);
-/** The injectors' readout size exactly, so a meter sits among them without looking like a
-different kind of object. */
-static const float MET_W = 56.f, MET_H = 32.f;
+/** Wide enough for the digits to be read at a glance, and the same as the frequency meter's so
+that the two sit together as one kind of thing. Six characters in the injectors' 56 pixels left
+the type too small to be worth having. */
+static const float MET_W = 78.f, MET_H = 32.f;
 
 
 struct MeterWidget : ClipWidget {
@@ -221,21 +222,58 @@ struct MeterWidget : ClipWidget {
 
 		// The word says both what this is and which of its two readings is showing, which is
 		// why it is one word rather than a name and a state.
+		// SMALL, AND HIGH UP, because it is read once and the number is read continuously. It
+		// names the widget when the reading is the plain voltage and names the reading when it
+		// is not, which is the only state this widget has.
 		nvgFontSize(args.vg, 11.f);
 		nvgFillColor(args.vg, MET_GREEN);
 		// THE CHANNEL COUNT WHEN THERE IS MORE THAN ONE. The reading is the first channel, and
 		// a number that quietly describes one note of a chord while looking like the whole
 		// thing is worse than no number.
 		const int n = (slot >= 0) ? slots[slot].channels.load(std::memory_order_relaxed) : 1;
-		const std::string word = std::string(showPeak ? "PEAK" : "VOLTS")
+		const std::string word = std::string(showPeak ? "PEAK" : "METER")
 			+ ((n > 1) ? string::f(" 1/%d", n) : "");
-		nvgText(args.vg, MET_W / 2.f, 8.f, word.c_str(), NULL);
+		// Bold by overdrawing, exactly as the injector's name is: there is no bold monospace to
+		// hand, and a single pass of this face at this size is too thin to read at a glance.
+		for (int i = 0; i < 3; i++)
+			nvgText(args.vg, MET_W / 2.f + i * 0.35f, 6.5f, word.c_str(), NULL);
 
+		// THE READOUT IS THE WIDGET, so it takes everything the frame will give it: the full
+		// width, and every pixel from under the label to the bottom frame.
+		//
+		// SET LIKE THE DC LEVEL'S DIGITS, and for the same reason. It is sized by MEASURING the
+		// ink rather than by trusting a font size — a size is the em, and a digit fills about
+		// seven tenths of it — and it is drawn a few times a third of a pixel apart, which
+		// gives the strokes enough weight to hold up at a glance. It is never stretched: type
+		// squeezed tall to fill a box is harder to read than smaller type that is not.
+		//
 		// Held at ninety-nine rather than allowed a third digit: a number that changes width as
 		// it moves is one the eye cannot rest on.
 		const float v = math::clamp(reading(), -99.99f, 99.99f);
-		nvgFontSize(args.vg, 12.f);
-		nvgText(args.vg, MET_W / 2.f, 21.f, string::f("%+06.2f", v).c_str(), NULL);
+		const std::string digits = string::f("%+06.2f", v);
+
+		const float top = 11.5f, bottom = MET_H - 1.5f;
+		const float availW = MET_W - 3.f, availH = bottom - top;
+
+		// Set before measuring: the alignment decides where the bounds are reported from, and a
+		// height measured against one alignment cannot place a baseline drawn with another.
+		nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+		float size = 20.f;
+		nvgFontSize(args.vg, size);
+		float ink[4] = {0.f, 0.f, 0.f, 0.f};
+		const float wide = nvgTextBounds(args.vg, 0.f, 0.f, digits.c_str(), NULL, ink);
+		const float tall = ink[3] - ink[1];
+		// Whichever runs out first. Six characters in this width is usually what does.
+		if (wide > 0.f && tall > 0.f)
+			size *= std::fmin(availW / wide, availH / tall);
+		nvgFontSize(args.vg, size);
+
+		// Placed by the ink's own centre: text is drawn from a baseline, and centring on the
+		// line box leaves the font's guard space above the digits inside the band.
+		nvgTextBounds(args.vg, 0.f, 0.f, digits.c_str(), NULL, ink);
+		const float digitsY = top + availH / 2.f - (ink[1] + ink[3]) / 2.f;
+		for (int i = 0; i < 3; i++)
+			nvgText(args.vg, MET_W / 2.f + i * 0.35f, digitsY, digits.c_str(), NULL);
 	}
 
 	void onButton(const ButtonEvent& e) override {
