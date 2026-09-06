@@ -823,27 +823,28 @@ struct InterceptOverlay : widget::Widget {
 		if (!font || font->handle < 0 || text.empty())
 			return;
 		nvgFontFaceId(args.vg, font->handle);
-		// HALF THE SIZE IT WAS. Twenty-six point was a caption for a video watched across a
-		// room; read at a desk it was larger than anything else on the panel and took more of
-		// the rack than the control it was describing.
-		nvgFontSize(args.vg, 13.f);
+		// TWENTY-SIX POINT, which is a caption rather than a label: this is read at a glance
+		// while the eye is on the control being turned, and on a magnified or recorded screen
+		// a smaller one is the thing you have to stop and look for. It was halved once for
+		// being larger than the panel it sat over; the panel is not what it competes with.
+		nvgFontSize(args.vg, 26.f);
 		nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 		const float w = nvgTextBounds(args.vg, 0, 0, text.c_str(), NULL, NULL);
-		const float plateW = w + 10.f;
-		const float plateH = 18.f;
+		const float plateW = w + 20.f;
+		const float plateH = 36.f;
 
 		const float x = above ? (p.x - plateW / 2.f) : (p.x + 16.f);
-		// Six pixels of air over the control, and never off the top of the window: a readout
-		// that has gone above the edge of the screen is a readout nobody can read.
+		// Air over the control, and never off the top of the window: a readout that has gone
+		// above the edge of the screen is a readout nobody can read.
 		const float y = above ? std::fmax(2.f, p.y - plateH - 6.f) : (p.y + dy);
 
 		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, x, y, plateW, plateH, 3.5f);
+		nvgRoundedRect(args.vg, x, y, plateW, plateH, 6.f);
 		nvgFillColor(args.vg, nvgRGBA(0, 0, 0, (int) (0xc8 * alpha)));
 		nvgFill(args.vg);
 		ink.a = alpha;
 		nvgFillColor(args.vg, ink);
-		nvgText(args.vg, x + 5.f, y + plateH / 2.f, text.c_str(), NULL);
+		nvgText(args.vg, x + 10.f, y + plateH / 2.f, text.c_str(), NULL);
 	}
 
 	void drawPointer(const DrawArgs& args) {

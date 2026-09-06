@@ -138,7 +138,7 @@ Where several cables meet at one port, repeated clicks on the handle select each
 
 **Right-click the handle** to disconnect that cable from its port.
 
-### Add and move cables without dragging
+### Click to add and move cables
 
 The mouse button does not have to be held down. Creating a cable at an unconnected port:
 
@@ -182,10 +182,22 @@ Pinching with the pointer over an analyser zooms that analyser's frequency axis 
 
 ---
 
+## Animate clicks
+
+Draws a pointer into the rack, marking clicks, drags and scrolling. A screen recorder captures the window's contents and not the system's cursor, so without this a recording shows controls moving with nothing touching them.
+
+Off unless it is asked for: it is drawn over somebody's rack, and a module that starts animating the pointer the moment it is placed has decided something that was not its to decide.
+
+## Show pop-up on adjust
+
+While a control is being turned, its name and value are set above it, centred on the control rather than beside the pointer — the tip of the pointer is where the eye already is, and a plate off to the side means looking away from the thing being adjusted to read what it now says.
+
+It is set large, as a caption rather than a label: this is read at a glance while attention is on the control, and on a magnified or recorded screen a small one is something you have to stop and look for.
+
+It has its own switch and does not depend on the pointer being drawn. It answers "what did I just set that to" whether or not anything is being filmed.
+
 ## The right-click menu
 
-- **Draw pointer (for screen recordings)** — draws a pointer into the rack, indicating clicks, drags and scrolling. Screen recorders capture the window contents and not the system cursor.
-- **Draw movement trail** — the trail the drawn pointer leaves behind it while a button is held. Separate from the pointer itself, so one can be had without the other.
 - **Show hints again** — brings back the hints that are shown once and then dismissed.
 - **Port and cable colours…** — the colour chooser, described above.
 - **Colour scheme** — replaces all five colours with a named scheme.

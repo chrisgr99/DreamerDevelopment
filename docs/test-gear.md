@@ -115,6 +115,7 @@ Switching a generator on or off ramps its level over a few milliseconds rather t
 
 Not a generator, though it lives among them: it turns the connection into a port on and off.
 
+- **A click throws it; a drag only moves it.** Which it was is decided when the button is released, by whether the pointer travelled — so nudging the switch to a tidier place on the panel does not break the connection under it. Every widget with a setting behaves this way.
 - **The light is on when the switch is on**, and on means the signal is getting through. A mute is the wrong idea for most of what travels down a cable — nobody mutes a gate, they switch it off — so one word and one polarity mean the same thing whatever the signal is.
 - **It takes the cables out and holds them**, and puts them back when it goes on again. Nothing is altered, so switching it back on leaves the patch exactly as it was.
 - **A cable that is held is drawn as a short stub** leaving the port in its own colour, at the angle the cable left at, so you can see what is waiting on the other side and which of several cables they are.

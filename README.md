@@ -31,8 +31,13 @@ Each feature is a switch on the panel and can be turned off.
 ### Handling cables
 
 - **Cable trace assist** — hovering a cable end displays a handle on it. Clicking the handle leaves that cable at full opacity and hides every other cable in the rack; clicking any module panel restores them. Where several cables meet at one port, repeated clicks select each in turn. Right-clicking the handle disconnects that cable.
-- **Add and move cables without dragging** — click a port to take its cable and click another to connect it, or press, drag and release as before; a release over a port connects it. Both gestures are active at the same time. The rack scrolls when a carried cable reaches the edge of the view.
+- **Click to add and move cables** — click a port to take its cable and click another to connect it, or press, drag and release as before; a release over a port connects it. Both gestures are active at the same time. The rack scrolls when a carried cable reaches the edge of the view.
 - **Pinch to zoom** the rack on a trackpad.
+
+### Recording and reading
+
+- **Animate clicks** — draws a pointer into the rack, marking clicks, drags and scrolling, since a screen recorder captures the window and not the system's cursor.
+- **Show pop-up on adjust** — the name and value of a control set large above it while it is being turned, whether or not anything is being recorded.
 
 ---
 
