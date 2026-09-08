@@ -40,6 +40,7 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "Meter.hpp"
 #include "Freq.hpp"
 #include "Palette.hpp"
+#include "Diag.hpp"
 
 #include <algorithm>
 #include <list>
@@ -1262,8 +1263,9 @@ struct InterceptOverlay : widget::Widget {
 	void onButton(const ButtonEvent& e) override {
 		notePointerButton(e);
 
-		// A note on screen owns its own clicks, like a menu does.
-		if (paletteCovers(e.pos)) {
+		// A note on screen owns its own clicks, like a menu does. The diagnostics window is one
+		// of ours too, and without this its switches would be answered by the rack underneath it.
+		if (paletteCovers(e.pos) || diagCovers(e.pos)) {
 			widget::Widget::onButton(e);
 			return;
 		}

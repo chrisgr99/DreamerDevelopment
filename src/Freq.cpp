@@ -28,6 +28,7 @@ THE TUNING STANDARD affects the note and the cents, never the hertz. A440 unless
 menu says otherwise, which matters to anybody playing with an ensemble tuned somewhere else.
 */
 #include "plugin.hpp"
+#include "Busy.hpp"
 #include "Freq.hpp"
 #include "Clip.hpp"
 #include "SignalTap.hpp"
@@ -162,6 +163,7 @@ static int slotAcquire() {
 		slots[i].quiet = 0.f;
 		slots[i].active.store(true, std::memory_order_release);
 		activeCount.fetch_add(1, std::memory_order_release);
+		busyAdd(1);
 		return i;
 	}
 	return -1;
@@ -172,6 +174,7 @@ static void slotRelease(int i) {
 		return;
 	slots[i].active.store(false, std::memory_order_release);
 	activeCount.fetch_sub(1, std::memory_order_release);
+	busyAdd(-1);
 }
 
 
@@ -221,6 +224,10 @@ struct FreqWidget : ClipWidget {
 
 	int slot = -1;
 	int tapSlot = -1;
+
+	void setSuspended(bool suspended) override {
+		tapSuspend(tapSlot, suspended);
+	}
 
 	enum Mode { MODE_HZ, MODE_NOTE, MODE_VOCT, MODE_COUNT };
 	int mode = MODE_HZ;

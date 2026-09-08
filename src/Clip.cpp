@@ -187,6 +187,10 @@ void clipSetVisible(ClipWidget* clip, bool visible) {
 		clip->handle->visible = visible;
 	if (clip->closeButton)
 		clip->closeButton->visible = visible;
+	// AND IT STOPS WORKING, not merely showing. Hiding used to leave every scope capturing at
+	// audio rate behind the panel, so switching the widgets off looked like removing them and
+	// cost exactly as much as leaving them on.
+	clip->setSuspended(!visible);
 }
 
 
@@ -231,6 +235,38 @@ int clipFollowingCount() {
 }
 
 
+/** How many clips are on the rack at all, for the diagnostics window: the difference between
+"I removed the widgets" and "the widgets are gone" said as a number. */
+int clipCount() {
+	int n = 0;
+	for (widget::Widget* child : APP->scene->rack->children) {
+		if (dynamic_cast<ClipWidget*>(child))
+			n++;
+	}
+	return n;
+}
+
+
+/** Takes one clip and its two loose parts off the rack. The clip's own destructor gives up
+whatever it was holding — its tap, its slot in whichever table it belongs to — so nothing else
+has to be told that it has gone. */
+static void clipDestroy(ClipWidget* clip) {
+	// The handle first, or it would be left pointing at freed memory for the rest of the frame
+	// — and it is stepped every frame.
+	if (clip->handle) {
+		APP->scene->rack->removeChild(clip->handle);
+		delete clip->handle;
+		clip->handle = NULL;
+	}
+	if (clip->closeButton) {
+		APP->scene->rack->removeChild(clip->closeButton);
+		delete clip->closeButton;
+		clip->closeButton = NULL;
+	}
+	APP->scene->rack->removeChild(clip);
+	delete clip;
+}
+
 void clipPurgeDead() {
 	std::vector<ClipWidget*> dead;
 	for (widget::Widget* child : APP->scene->rack->children) {
@@ -238,20 +274,25 @@ void clipPurgeDead() {
 		if (clip && !clip->port && !clip->retargeting)
 			dead.push_back(clip);
 	}
-	for (ClipWidget* clip : dead) {
-		// The handle first, or it would be left pointing at freed memory for the rest of the
-		// frame — and it is stepped every frame.
-		if (clip->handle) {
-			APP->scene->rack->removeChild(clip->handle);
-			delete clip->handle;
-			clip->handle = NULL;
-		}
-		if (clip->closeButton) {
-			APP->scene->rack->removeChild(clip->closeButton);
-			delete clip->closeButton;
-			clip->closeButton = NULL;
-		}
-		APP->scene->rack->removeChild(clip);
-		delete clip;
+	for (ClipWidget* clip : dead)
+		clipDestroy(clip);
+}
+
+/** EVERYTHING GOES, which is what the last Test Gear leaving the rack means.
+
+A clip belongs to Test Gear even though it is not inside it: the module is what captures the
+signal, what mixes the monitors and what saves them all with the patch. With the module gone they
+are attached to nothing, cannot be reopened, and are not saved — so leaving them on the rack
+leaves furniture nobody can move or get rid of.
+
+Nothing is lost by it. The scopes and the rest are written into the module's own JSON, so
+undoing the deletion brings the module back with its data and the clips are made again from it. */
+void clipRemoveAll() {
+	std::vector<ClipWidget*> all;
+	for (widget::Widget* child : APP->scene->rack->children) {
+		if (ClipWidget* clip = dynamic_cast<ClipWidget*>(child))
+			all.push_back(clip);
 	}
+	for (ClipWidget* clip : all)
+		clipDestroy(clip);
 }

@@ -16,6 +16,7 @@ changes width as it moves is a number the eye cannot rest on — and past ninety
 question has stopped being how many.
 */
 #include "plugin.hpp"
+#include "Busy.hpp"
 #include "Meter.hpp"
 #include "Clip.hpp"
 #include "SignalTap.hpp"
@@ -97,6 +98,7 @@ static int slotAcquire() {
 		slots[i].heldFor = 0.f;
 		slots[i].active.store(true, std::memory_order_release);
 		activeCount.fetch_add(1, std::memory_order_release);
+		busyAdd(1);
 		return i;
 	}
 	return -1;
@@ -107,6 +109,7 @@ static void slotRelease(int i) {
 		return;
 	slots[i].active.store(false, std::memory_order_release);
 	activeCount.fetch_sub(1, std::memory_order_release);
+	busyAdd(-1);
 }
 
 
@@ -124,6 +127,10 @@ struct MeterWidget : ClipWidget {
 
 	int slot = -1;
 	int tapSlot = -1;
+
+	void setSuspended(bool suspended) override {
+		tapSuspend(tapSlot, suspended);
+	}
 	/** Which of the two readings is on show. */
 	bool showPeak = false;
 	/** Where a press landed and how far it has travelled, so a drag that moves the widget is

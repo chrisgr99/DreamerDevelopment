@@ -197,6 +197,12 @@ struct ScopeWidget : ClipWidget {
 
 	int tapSlot = -1;
 
+	/** Both taps: the trace's own, and the one watching a separate trigger port. */
+	void setSuspended(bool suspended) override {
+		tapSuspend(tapSlot, suspended);
+		tapSuspend(trigTapSlot, suspended);
+	}
+
 	/** Scroll delta banked but not yet spent, so a scale steps once per three units of scroll
 	rather than once per event. */
 	float scrollAccumX = 0.f, scrollAccumY = 0.f;

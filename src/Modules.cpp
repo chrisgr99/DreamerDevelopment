@@ -39,6 +39,8 @@ optional and can be switched off per user.
 #include "Meter.hpp"
 #include "Freq.hpp"
 #include "Sink.hpp"
+#include "Busy.hpp"
+#include "Diag.hpp"
 
 #include "Palette.hpp"
 
@@ -290,23 +292,80 @@ struct TestGear : Module {
 	settled at construction. Re-run rarely — a few times a second — which costs a walk of a
 	list that almost always holds one thing. */
 	int electIn = 0;
+	/** The sample rate the drawing side has been told about, so it is told again only when it
+	changes rather than on every sample. */
+	float sampleRateSent = 0.f;
 
+	/** TIMED FROM OUTSIDE THE BODY, so that the early returns are inside the measurement. The
+	whole question is what the module costs when it has nothing to do, and an instrument that
+	only times the path where there IS something to do would answer a different one.
+
+	Both calls return immediately unless the diagnostics window is open. */
 	void process(const ProcessArgs& args) override {
+		diagBegin();
+		// NOTHING AT ALL, when the diagnostics ask for it. With no clip on the rack every part
+		// below already returns at once, so switching those off proves nothing; switching this
+		// off leaves the module doing literally nothing per sample. If Rack's own meter still
+		// reads high then, the cost is provably not ours.
+		if (diagGate() & (1u << DIAG_BODY))
+			processBody(args);
+		else {
+			outputs[O_MONITOR].setChannels(1);
+			outputs[O_MONITOR].setVoltage(0.f);
+		}
+		diagEnd(args.sampleTime);
+	}
+
+	void processBody(const ProcessArgs& args) {
 		if (--electIn <= 0) {
 			electIn = 2048;
 			elect();
 		}
 		if (elected != this)
 			return;
-		tapSetSampleRate(args.sampleRate);
-		tapCaptureAll();
-		injectorProcessAll(this, args.sampleTime);
+
+		// NOTHING CLIPPED ON ANYWHERE, which is the state a rack spends most of its life in.
+		//
+		// Each of the five things below already returned at once when it had nothing to do, so on
+		// paper this was already free. On paper. Each of those counts is a static in a different
+		// translation unit, so the question was being asked of five separate lines of memory
+		// forty-four thousand times a second — and memory traffic, unlike arithmetic, costs
+		// different amounts on different machines. That is the shape of a cost that appears on
+		// somebody else's computer and not on the one it was written on.
+		//
+		// One counter now, on a cache line of its own, read once. The output still has to be
+		// written: a jack that stops being driven is not the same as a jack driving silence.
+		if (!busyAny()) {
+			outputs[O_MONITOR].setChannels(1);
+			outputs[O_MONITOR].setVoltage(0.f);
+			return;
+		}
+
+		// ONLY WHEN IT MOVES. This was an atomic store on every sample to tell the drawing thread
+		// something that changes when the audio device is reconfigured and at no other time.
+		if (args.sampleRate != sampleRateSent) {
+			sampleRateSent = args.sampleRate;
+			tapSetSampleRate(args.sampleRate);
+		}
+
+		// ONE LOAD FOR ALL FIVE SWITCHES, read here rather than asked five times. With the
+		// diagnostics window shut every bit is set, so this is a load and five predictable
+		// branches; with it open, each part can be taken out of the sample and what that does to
+		// Rack's own meter can be watched directly.
+		const uint32_t gate = diagGate();
+		if (gate & (1u << DIAG_CAPTURE))
+			tapCaptureAll();
+		if (gate & (1u << DIAG_INJECT))
+			injectorProcessAll(this, args.sampleTime);
 
 		outputs[O_MONITOR].setChannels(1);
-		outputs[O_MONITOR].setVoltage(monitorMix(args.sampleTime));
+		outputs[O_MONITOR].setVoltage((gate & (1u << DIAG_MONITOR))
+			? monitorMix(args.sampleTime) : 0.f);
 		// Read only: a meter takes nothing out of the signal and puts nothing into it.
-		meterProcess(args.sampleTime);
-		freqProcess(args.sampleTime);
+		if (gate & (1u << DIAG_METER))
+			meterProcess(args.sampleTime);
+		if (gate & (1u << DIAG_FREQ))
+			freqProcess(args.sampleTime);
 	}
 
 	/** The one instance that speaks for all of them. */
@@ -994,6 +1053,32 @@ struct DRUIPanel : widget::Widget {
 			nvgStroke(args.vg);
 		};
 		float y = 40.f;
+
+		// WHAT IS WRITTEN HERE HAS TO FIT ABOVE THE JACK, and it stopped fitting.
+		//
+		// The block was laid out by accumulation — start at forty, add a line, add a line — and
+		// the jack's label is placed from the BOTTOM, at seventy-six above the foot. Nothing
+		// compared the two. Every widget added to the list pushed the text down by twelve points,
+		// and somewhere around the sixteenth the hint arrived on top of the label and then on the
+		// jack itself.
+		//
+		// So the leading is worked out from the room there is rather than fixed. With space to
+		// spare nothing changes and the panel looks as it always did; when the list grows past
+		// what the panel holds, the lines close up and the type comes down with them, together,
+		// so it stays readable rather than merely smaller. The floor is the one number that
+		// matters and it is stated once.
+		const float labelY = box.size.y - 76.f;
+		const float floorY = labelY - 12.f;
+		float need = 0.f;
+		if (!legendTitle.empty())
+			need += 17.f;
+		need += legend.size() * 12.f;
+		if (!hint.empty())
+			need += 10.f + hint.size() * 11.f;
+		// Not below three quarters: past that the list is unreadable and the answer is a taller
+		// panel or a shorter list, not smaller type.
+		const float fit = (need > 0.f && need > floorY - y)
+			? math::clamp((floorY - y) / need, 0.75f, 1.f) : 1.f;
 		// Green under the title, tying the head of the panel to its border. The rule further
 		// down stays white: that one separates one kind of text from another rather than
 		// closing off the title.
@@ -1007,7 +1092,7 @@ struct DRUIPanel : widget::Widget {
 			nvgFillColor(args.vg, PANEL_INK);
 			nvgText(args.vg, box.size.x / 2, y + 4.f, legendTitle.c_str(), NULL);
 			nvgFontFaceId(args.vg, font->handle);
-			y += 17.f;
+			y += 17.f * fit;
 		}
 
 		// What is on offer, listed. A panel carrying two switches says nothing about what the
@@ -1015,24 +1100,28 @@ struct DRUIPanel : widget::Widget {
 		// without opening a menu to find out.
 		// One list, no groupings. Naming the two kinds meant two headings competing with the
 		// thirteen names they introduced, on a panel whose whole job is to name them.
-		nvgFontSize(args.vg, 9.f);
+		nvgFontSize(args.vg, 9.f * fit);
 		nvgFillColor(args.vg, PANEL_INK);
 		for (const LegendItem& item : legend) {
 			nvgText(args.vg, box.size.x / 2, y, item.text.c_str(), NULL);
-			y += 12.f;
+			y += 12.f * fit;
 		}
 		if (!hint.empty()) {
 			rule(y - 3.f, nvgRGBA(0xe6, 0xe8, 0xec, 0x7f));
-			y += 10.f;
-			nvgFontSize(args.vg, 8.5f);
+			y += 10.f * fit;
+			nvgFontSize(args.vg, 8.5f * fit);
 			for (const std::string& line : hint) {
 				nvgText(args.vg, box.size.x / 2, y, line.c_str(), NULL);
-				y += 11.f;
+				y += 11.f * fit;
 			}
 		}
 
-		if (!jackLabel.empty())
-			nvgText(args.vg, box.size.x / 2, box.size.y - 76.f, jackLabel.c_str(), NULL);
+		if (!jackLabel.empty()) {
+			// Its own size rather than whatever the block above happened to leave set, so the
+			// jack's name does not shrink along with a list it has nothing to do with.
+			nvgFontSize(args.vg, 8.5f);
+			nvgText(args.vg, box.size.x / 2, labelY, jackLabel.c_str(), NULL);
+		}
 
 		// Clear of the border along the foot, which the lower line used to sit on top of.
 		nvgFontSize(args.vg, 8.f);
@@ -1358,9 +1447,36 @@ struct TestGearWidget : DRUIWidgetBase {
 	~TestGearWidget() {
 		if (counted)
 			gTestGearCount--;
-		if (gTestGearCount <= 0)
+		if (gTestGearCount <= 0) {
 			clearWidgetOptions();
+			// THE LAST ONE OUT TAKES THE CLIPS WITH IT. A scope, a voltmeter or an injector is
+			// worked by this module — it is what captures the signal, what mixes the monitors,
+			// and what writes them all into the patch — so with no Test Gear left they are
+			// attached to nothing, cannot be reopened, and will not be saved. Leaving them was
+			// leaving furniture on the rack that nobody could shift.
+			//
+			// ONLY WHEN THE LAST ONE GOES, never merely when one does: a rack with two of these
+			// still has an owner for every clip, and deleting the spare must not clear the desk.
+			clipRemoveAll();
+		}
 		removeOverlaysIfIdle();
+	}
+
+	/** THE ONE THING THIS MODULE'S MENU HAS TO OFFER, and it is for a fault nobody here can
+	reproduce: a report of high CPU on a machine none of us has. Rather than another guess from
+	the wrong side of the world, a window that measures the module on the machine that is
+	complaining and lets each part of it be switched off while Rack's own meter is watched. */
+	void appendContextMenu(Menu* menu) override {
+		if (!module)
+			return;
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createMenuItem(
+			diagVisible() ? "Hide diagnostics" : "Show diagnostics…", "", []() {
+				if (diagVisible())
+					diagDismiss();
+				else
+					diagShow();
+			}));
 	}
 
 	void step() override {

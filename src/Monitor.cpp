@@ -19,6 +19,7 @@ The mix is built in the audio thread from atomics the UI writes, and every level
 because a level that jumps is a click and a click through headphones is unpleasant.
 */
 #include "plugin.hpp"
+#include "Busy.hpp"
 #include "Clip.hpp"
 #include "SignalTap.hpp"
 #include "Monitor.hpp"
@@ -95,6 +96,7 @@ static int slotAcquire() {
 		slots[i].gain = 0.f;
 		slots[i].active.store(true, std::memory_order_release);
 		activeCount.fetch_add(1, std::memory_order_release);
+		busyAdd(1);
 		return i;
 	}
 	return -1;
@@ -105,6 +107,7 @@ static void slotRelease(int i) {
 		return;
 	slots[i].active.store(false, std::memory_order_release);
 	activeCount.fetch_sub(1, std::memory_order_release);
+	busyAdd(-1);
 }
 
 

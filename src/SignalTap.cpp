@@ -1,5 +1,6 @@
 /** Audio-rate signal taps — see SignalTap.hpp for why this exists and how it stays safe. */
 #include "SignalTap.hpp"
+#include "Busy.hpp"
 
 #include <atomic>
 #include <cstring>
@@ -49,6 +50,14 @@ struct SignalTap {
 	after each sample is written and acquired by the UI thread before reading, which is what
 	makes a torn read impossible. */
 	std::atomic<uint64_t> written{0};
+
+	/** PUT DOWN, BUT NOT GIVEN UP. A clip that has been hidden still owns its tap and its
+	history — switching the widgets back on has to give back what was there — but there is no
+	reason on earth to keep capturing a signal for a face nobody can see.
+
+	Kept beside `active` rather than folded into it, so that suspending twice cannot take the
+	count down twice and showing something that was never hidden cannot put it up. */
+	bool suspended = false;
 };
 
 
@@ -123,10 +132,13 @@ int tapCreate(int64_t moduleId, int portId, bool isOutput, bool needsHistory) {
 		if (!tap.handle->module)
 			return -1;
 
+		// A slot is reused, so it must not inherit the last tenant's suspension.
+		tap.suspended = false;
 		// Last, and with release ordering, so the audio thread cannot see an active slot
 		// whose fields are not yet written.
 		tap.active.store(true, std::memory_order_release);
 		activeCount.fetch_add(1, std::memory_order_release);
+		busyAdd(1);
 		return i;
 	}
 	return -1;
@@ -144,8 +156,46 @@ void tapDestroy(int slot) {
 	// reads a tap that is not active, and leaving it bound is what lets the next tap on this
 	// slot recognise its own handle and reuse it instead of abandoning it. The engine unbinds
 	// it by itself when the module it points at goes away.
-	if (tap.active.exchange(false, std::memory_order_acq_rel))
+	// BRACED. Only the exchange decides whether anything was actually freed, and both counts have
+	// to follow it together; taking the shared one down unconditionally would let it go negative
+	// and report an idle rack while scopes were running.
+	if (tap.active.exchange(false, std::memory_order_acq_rel)) {
 		activeCount.fetch_sub(1, std::memory_order_release);
+		busyAdd(-1);
+	}
+}
+
+
+/** HIDDEN IS NOT THE SAME AS CLOSED, and until now it cost exactly the same.
+
+Switching Scopes or Widgets off hides every clip and leaves everything else untouched, so a scope
+you could no longer see went on capturing its port at audio rate, and a voltmeter went on
+following one. That is the whole of the audio-rate cost of this plugin, being spent on faces that
+are not on the screen — and to anybody watching the CPU meter, "I have removed all the widgets"
+and "the widgets are still running" look identical.
+
+The tap keeps its port, its handle and its history. Only the capturing stops. */
+void tapSuspend(int slot, bool suspended) {
+	if (slot < 0 || slot >= TAP_MAX)
+		return;
+	SignalTap& tap = taps[slot];
+	if (tap.suspended == suspended)
+		return;
+	tap.suspended = suspended;
+	if (suspended) {
+		if (tap.active.exchange(false, std::memory_order_acq_rel)) {
+			activeCount.fetch_sub(1, std::memory_order_release);
+			busyAdd(-1);
+		}
+	}
+	else if (tap.handle) {
+		// Only a tap that still has somewhere to read from comes back. One whose module has gone
+		// is not resumed into capturing nothing.
+		if (!tap.active.exchange(true, std::memory_order_acq_rel)) {
+			activeCount.fetch_add(1, std::memory_order_release);
+			busyAdd(1);
+		}
+	}
 }
 
 

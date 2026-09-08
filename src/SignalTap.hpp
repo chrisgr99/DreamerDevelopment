@@ -47,6 +47,11 @@ int tapCreate(int64_t moduleId, int portId, bool isOutput, bool needsHistory = t
 first, and the audio thread skips inactive slots. */
 void tapDestroy(int slot);
 
+/** Stops a tap capturing without giving it up: for a clip that has been hidden rather than
+closed. It keeps its port, its handle and its history; only the per-sample work stops, and
+resuming gives back what was there. */
+void tapSuspend(int slot, bool suspended);
+
 /** True while the tapped module still exists. Goes false by itself when it is deleted. */
 bool tapAlive(int slot);
 

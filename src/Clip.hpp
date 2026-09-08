@@ -86,6 +86,20 @@ struct ClipWidget : widget::OpaqueWidget {
 		return target != NULL;
 	}
 
+	/** OUT OF SIGHT, AND THEREFORE OUT OF THE AUDIO THREAD.
+
+	Hiding a clip used to change nothing but a flag, so a scope switched off went on capturing its
+	port forty-four thousand times a second for a face that was not on the screen. Everything it
+	owns is kept — the port, the history, the settings — and only the work stops.
+
+	THE ONES THAT MAKE A SOUND DO NOT IMPLEMENT THIS. An audio monitor and an injector are heard
+	rather than seen, and hiding the panel they are configured from is not an instruction to
+	silence a patch. Only the display-only clips — the scope, the analyser, the voltmeter and the
+	frequency counter — have anything to stop. */
+	virtual void setSuspended(bool suspended) {
+		(void) suspended;
+	}
+
 	/** Anchors to the port. Call from step(). */
 	void followPort() {
 		if (following) {
@@ -262,6 +276,12 @@ void clipSetVisible(ClipWidget* clip, bool visible);
 because a widget cannot safely delete itself while the tree is being walked. */
 void clipPurgeDead();
 
+/** Takes every clip off the rack, for the last Test Gear leaving it. They belong to that module
+— it is what captures their signals and what saves them with the patch — so with it gone they
+are furniture nobody can reopen or remove. Undoing the deletion brings them back, since they are
+written into the module's own JSON. */
+void clipRemoveAll();
+
 /** Whether any part of a clip is under this scene position — the face, its grab tab, or its
 close button.
 
@@ -278,6 +298,9 @@ bool clipDepositFollowing();
 
 /** How many clips are riding the pointer. Diagnostic. */
 int clipFollowingCount();
+
+/** How many clips are on the rack, for the diagnostics window. */
+int clipCount();
 
 /** Whether a clip's grab tab is being dragged right now. */
 bool clipRetargeting();

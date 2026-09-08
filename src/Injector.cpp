@@ -1,5 +1,6 @@
 /** Signal injectors — see Injector.hpp for how a signal actually reaches the port. */
 #include "Injector.hpp"
+#include "Busy.hpp"
 #include "Clip.hpp"
 #include "SignalTap.hpp"
 #include "WidgetAt.hpp"
@@ -280,6 +281,7 @@ static bool slotAcquireAt(int i) {
 	slots[i].enabled.store(true, std::memory_order_relaxed);
 	slots[i].active.store(true, std::memory_order_release);
 	activeCount.fetch_add(1, std::memory_order_release);
+	busyAdd(1);
 	return true;
 }
 
@@ -296,6 +298,7 @@ static int slotAcquire() {
 		slots[i].enabled.store(true, std::memory_order_relaxed);
 		slots[i].active.store(true, std::memory_order_release);
 		activeCount.fetch_add(1, std::memory_order_release);
+		busyAdd(1);
 		return i;
 	}
 	return -1;
@@ -304,8 +307,14 @@ static int slotAcquire() {
 static void slotRelease(int i) {
 	if (i < 0 || i >= INJECT_MAX)
 		return;
-	if (slots[i].active.exchange(false, std::memory_order_acq_rel))
+	// BRACED, because there are two statements now and only the exchange decides whether either
+	// of them should happen. An unbraced pair here would take the shared count down on every
+	// call, including the ones that free nothing, and a count that goes negative reads as "no
+	// work to do" while there is plenty.
+	if (slots[i].active.exchange(false, std::memory_order_acq_rel)) {
 		activeCount.fetch_sub(1, std::memory_order_release);
+		busyAdd(-1);
+	}
 }
 
 

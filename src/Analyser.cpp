@@ -95,6 +95,10 @@ struct AnalyserWidget : ClipWidget {
 	}
 
 	int tapSlot = -1;
+
+	void setSuspended(bool suspended) override {
+		tapSuspend(tapSlot, suspended);
+	}
 	bool averaging = true;
 	bool harmonics = true;
 

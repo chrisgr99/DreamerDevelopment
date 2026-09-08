@@ -95,15 +95,53 @@ jobs:
     permissions:
       contents: write
     steps:
+      # The changelog lives in the repository, so the repository has to be here. This job only
+      # downloaded the built packages before, which is why the notes had to be pasted in by hand.
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           path: packages
+
+      # THE NOTES COME FROM CHANGELOG.md, cut out by version.
+      #
+      # One place to write them, and it is the one in the repository — so the file, the release
+      # page and the changelog link in Rack's module menu cannot disagree with each other, and
+      # nothing has to be copied from one to another by a person who might forget.
+      #
+      # The tag is v2.0.6 and the heading is "## 2.0.6 — 8 September 2026", so the version is
+      # taken off the tag and matched against the start of a heading. Everything up to the next
+      # heading is the body.
+      - name: Take this version's notes out of the changelog
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          awk -v want="$version" '
+            /^## / {
+              # A heading: are we entering our section, or leaving it?
+              split($0, part, " ")
+              inside = (part[2] == want)
+              next
+            }
+            inside { print }
+          ' CHANGELOG.md > notes.md
+          # A release with no notes is worse than one with generated ones, and a silent failure
+          # here would produce exactly that. Say so and stop.
+          if [ ! -s notes.md ]; then
+            echo "No section for $version in CHANGELOG.md — add one before tagging." >&2
+            exit 1
+          fi
+          echo "Notes for $version:"
+          cat notes.md
 
       - name: Attach the packages to the release
         uses: softprops/action-gh-release@v2
         with:
           files: packages/*/*.vcvplugin
-          # Drafted rather than published: the notes are worth writing by hand, and a release
-          # is public the moment it appears.
+          # Drafted rather than published. The notes no longer need writing, but a release is
+          # public the moment it appears and that is still worth one deliberate click.
           draft: true
+          body_path: notes.md
+          # Appended under ours: the list of commits and contributors, which is GitHub's to
+          # generate and not worth keeping by hand.
           generate_release_notes: true
