@@ -2,6 +2,11 @@
 
 Newest first.
 
+## 2.0.8 — 8 September 2026
+
+### Fixed
+- Rack could crash on quit. The module browser builds a preview widget for every module it shows, with no module behind it, so such a widget never counts itself into the rack. Test Gear's destructor did rack-wide cleanup whenever the count of them reached zero without asking whether it was itself one of the counted ones — and a preview is destroyed while the scene is being torn down, by which time the rack it walked had already been deleted. Both modules now do nothing at all from a preview, and the functions that walk the rack check it is still there. Anyone who opened the module browser could hit this, whether or not they used Test Gear.
+
 ## 2.0.7 — 8 September 2026
 
 ### Fixed

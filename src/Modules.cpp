@@ -1394,9 +1394,17 @@ struct ClarityWidget : DRUIWidgetBase {
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
 	}
 
+	/** A PREVIEW IS NOT A MODULE IN THE RACK, and must clean up nothing.
+
+	The module browser builds one of these to draw its picture, with no module behind it, so it
+	never counts itself in. Acting on the shared state from such a widget was wrong on its own
+	terms — it is not in anybody's rack — and lethal in practice, because the browser is destroyed
+	while the scene is being torn down, by which time the rack these functions walk has already
+	been deleted. */
 	~ClarityWidget() {
-		if (counted)
-			gClarityCount--;
+		if (!counted)
+			return;
+		gClarityCount--;
 		if (gClarityCount <= 0)
 			clearClarityOptions();
 		removeOverlaysIfIdle();
@@ -1495,9 +1503,12 @@ struct TestGearWidget : DRUIWidgetBase {
 		}
 	}
 
+	/** Nothing from a browser preview. See the note on ClarityWidget's destructor: a preview has
+	no module, never counted itself in, and is destroyed in the middle of the scene going away. */
 	~TestGearWidget() {
-		if (counted)
-			gTestGearCount--;
+		if (!counted)
+			return;
+		gTestGearCount--;
 		if (gTestGearCount <= 0) {
 			clearWidgetOptions();
 			// THE LAST ONE OUT TAKES THE CLIPS WITH IT. A scope, a voltmeter or an injector is

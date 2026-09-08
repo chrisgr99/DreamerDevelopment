@@ -235,9 +235,19 @@ int clipFollowingCount() {
 }
 
 
+/** IS THERE STILL A RACK TO WALK? On the way out of the application the scene is destroyed and
+takes the rack with it, and anything of ours that runs from a destructor after that point is
+walking freed memory. Every function here that reaches for the rack asks this first. */
+static bool rackAlive() {
+	return APP && APP->scene && APP->scene->rack;
+}
+
+
 /** How many clips are on the rack at all, for the diagnostics window: the difference between
 "I removed the widgets" and "the widgets are gone" said as a number. */
 int clipCount() {
+	if (!rackAlive())
+		return 0;
 	int n = 0;
 	for (widget::Widget* child : APP->scene->rack->children) {
 		if (dynamic_cast<ClipWidget*>(child))
@@ -268,6 +278,8 @@ static void clipDestroy(ClipWidget* clip) {
 }
 
 void clipPurgeDead() {
+	if (!rackAlive())
+		return;
 	std::vector<ClipWidget*> dead;
 	for (widget::Widget* child : APP->scene->rack->children) {
 		ClipWidget* clip = dynamic_cast<ClipWidget*>(child);
@@ -288,6 +300,8 @@ leaves furniture nobody can move or get rid of.
 Nothing is lost by it. The scopes and the rest are written into the module's own JSON, so
 undoing the deletion brings the module back with its data and the clips are made again from it. */
 void clipRemoveAll() {
+	if (!rackAlive())
+		return;
 	std::vector<ClipWidget*> all;
 	for (widget::Widget* child : APP->scene->rack->children) {
 		if (ClipWidget* clip = dynamic_cast<ClipWidget*>(child))
