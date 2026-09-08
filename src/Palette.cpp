@@ -130,7 +130,7 @@ Only rules NEWER than the file are considered, which is what makes a deletion st
 user has taken out does not come back, because their file is already at or past the version that
 introduced it. A file with no version at all is treated as version nought, which is right — it
 was written before any of this and predates every rule. */
-static const int PAL_RULES_VERSION = 2;
+static const int PAL_RULES_VERSION = 3;
 
 static const struct { const char* match; int family; int since; } PAL_DEFAULT_RULES[] = {
 	{"MPX", FAM_MPX, 1},
@@ -147,6 +147,15 @@ static const struct { const char* match; int family; int since; } PAL_DEFAULT_RU
 	// read as a clock. Only a BPM port that is not also named as a clock lands here.
 	{"BPM", FAM_PITCH, 2},
 	{"CV", FAM_CV, 1}, {"MOD", FAM_CV, 1}, {"FM", FAM_CV, 1},
+	// A LEVEL IS A CONTROL VOLTAGE, not the audio it controls. An envelope, a velocity and a
+	// breath all arrive at a port called level, and with no rule for the word they fell through
+	// to audio — which is the fallback rather than a decision, and made a control input the same
+	// yellow as the signal it is scaling.
+	//
+	// LAST AMONG THE CV RULES, so a port named "CV level" is still read by the earlier one; it
+	// makes no difference here, since both are the same family, and it keeps the group's order
+	// meaning what it says.
+	{"LEVEL", FAM_CV, 3},
 };
 static const int NUM_DEFAULT_RULES =
 	(int) (sizeof(PAL_DEFAULT_RULES) / sizeof(PAL_DEFAULT_RULES[0]));
@@ -401,7 +410,7 @@ static int paletteGuess(const std::string& name) {
 		if (n.find(PAL_DEFAULT_RULES[i].match) != std::string::npos)
 			return PAL_DEFAULT_RULES[i].family;
 	}
-	return FAM_AUDIO;
+	return FAM_NONE;
 }
 
 int paletteFamilyForName(const std::string& name) {
@@ -417,7 +426,15 @@ int paletteFamilyForName(const std::string& name) {
 		if (n.find(rule.match) != std::string::npos)
 			return rule.family;
 	}
-	return FAM_AUDIO;
+	// NOTHING MATCHED, AND THAT IS AN ANSWER. It used to be audio, which meant a name the table
+	// does not know was confidently given the wrong colour rather than left alone — and a level
+	// input came out the same yellow as the signal it was scaling, which is what sent somebody
+	// looking for the fault in the module rather than in this list.
+	//
+	// Left as Rack drew it instead. An unrecognised port then looks like an ordinary Rack port,
+	// which is both honest and a usable clue: anything still in Rack's own colours is something
+	// the rules have no opinion about, and a word worth adding.
+	return FAM_NONE;
 }
 
 int palettePortOverride(app::PortWidget* port) {
