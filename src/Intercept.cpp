@@ -272,6 +272,20 @@ struct InterceptOverlay : widget::Widget {
 	/** Starts a new cable at this port, with its other end in the hand. */
 	void liftNew(app::PortWidget* port) {
 		app::CableWidget* cw = new app::CableWidget;
+		// RACK'S NEXT COLOUR, exactly as Rack's own drag does. A CableWidget is born with a
+		// default colour, and a default NVGcolor is four zeroes — black at nought opacity, which
+		// draws nothing at all.
+		//
+		// It never showed, because our own colouring pass painted every cable in the rack and no
+		// port ever failed to match: audio was the fallback, so an unrecognised name still came
+		// back with a colour. The moment an unmatched port began returning no family, a cable
+		// started from one was left at that transparent black and the wire vanished — while the
+		// drag itself carried on, loose end and auto-scroll and all, because everything except
+		// the colour was right.
+		//
+		// Set here rather than mended in the colouring pass, so a cable is visible whether or not
+		// that pass is switched on. It should never have depended on us.
+		cw->color = APP->scene->rack->getNextCableColor();
 		cw->getPort(port->type) = port;
 		cw->updateCable();
 		APP->scene->rack->addCable(cw);
