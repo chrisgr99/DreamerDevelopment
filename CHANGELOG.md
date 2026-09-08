@@ -2,6 +2,13 @@
 
 Newest first.
 
+## 2.0.7 — 8 September 2026
+
+### Fixed
+- Adding Test Gear applied Clarity's changes to the rack even with no Clarity present: jacks recoloured, knobs restyled, cables animated, and pinch zoom, slider scrolling, click-to-patch and tracing all switched on. Both modules install the same overlay, but the flags it reads are only written by Clarity and only cleared when the last Clarity leaves — so in a rack that never had one, the defaults stood, and every default was on. They now start off, and they are cleared while no Clarity is present.
+- The same fault turned cable colouring on, which writes to the patch. A rack with only Test Gear in it had its saved cable colours overwritten.
+- Deleting the last Clarity left the drawn recording pointer and its value readout switched on. Clarity sets ten flags and only eight were being cleared.
+
 ## 2.0.6 — 8 September 2026
 
 ### Added

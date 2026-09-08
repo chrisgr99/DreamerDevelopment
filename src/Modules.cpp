@@ -77,17 +77,24 @@ static float flowDashLength(int family) {
 
 // ---- Options, held by the module and persisted with the patch ----
 
+/** EVERYTHING STARTS OFF.
+
+These were true, on the reasoning that a fresh Clarity switches most of them on — but Clarity
+copies its own parameters into them on its first step, so the defaults never described a Clarity
+at all. What they described was a rack with NO Clarity in it, where nothing overwrites them: put
+Test Gear in such a rack and it recoloured every jack, restyled every knob and animated every
+cable on behalf of a module that was not there. */
 struct Options {
-	bool jacks = true;
-	bool knobs = true;
-	bool cableColor = true;
-	bool cableFlow = true;
-	bool pinchZoom = true;
-	bool sliderScroll = true;
+	bool jacks = false;
+	bool knobs = false;
+	bool cableColor = false;
+	bool cableFlow = false;
+	bool pinchZoom = false;
+	bool sliderScroll = false;
 	/** Click a jack to pick up its cable, click another to drop it — no button held between.
 	Off by default: it changes the most basic gesture in Rack. */
 	bool clickCables = false;
-	bool trace = true;
+	bool trace = false;
 	bool scopes = true;
 	bool widgets = true;
 	/** Draws a pointer into the rack, for videos recorded with VCV Recorder — which cannot see
@@ -115,6 +122,10 @@ static int gTestGearCount = 0;
 static void clearClarityOptions() {
 	gOpt.jacks = gOpt.knobs = gOpt.cableColor = gOpt.cableFlow = false;
 	gOpt.pinchZoom = gOpt.sliderScroll = gOpt.clickCables = gOpt.trace = false;
+	// THE DRAWN POINTER TOO. Clarity's syncOptions sets ten flags and this cleared eight, so a
+	// rack that had once had a Clarity in it kept the recording pointer and its value readout
+	// after the module was deleted.
+	gOpt.demoPointer = gOpt.demoValues = false;
 }
 
 static void clearWidgetOptions() {
@@ -680,8 +691,33 @@ struct DRUIOverlay : widget::TransparentWidget {
 
 	/** The shared flags. Not a module's own copy: this overlay outlives any one module, and
 	either module can be the one that put it here. */
+	/** WHAT IS SWITCHED ON, and nothing Clarity owns is on without a Clarity in the rack.
+
+	The overlay is installed by EITHER module — Test Gear needs it for the clips, the intercept
+	and the pointer — but the flags it reads are one set shared by both, and the ones that belong
+	to Clarity start out true because that is what a fresh Clarity should do. They are copied from
+	Clarity's own parameters every frame, and cleared when the last Clarity leaves. Neither of
+	those happens if a Clarity was never there at all: the defaults simply stood, so placing Test
+	Gear alone recoloured every jack in the rack, restyled every knob, and animated every cable —
+	features of a module the user had not added.
+
+	Worse, cable colouring came on with them, and that one WRITES to the patch. It is off by
+	default on Clarity's own panel precisely because a module should not alter somebody's work the
+	moment it is placed, and this route walked round that.
+
+	Asked here rather than fixed by clearing the flags somewhere, because clearing depends on
+	which widget's step runs first and would flicker on the frame a patch loads. This is true
+	whatever the order. */
 	Options options() {
-		return gOpt;
+		Options o = gOpt;
+		if (gClarityCount <= 0) {
+			o.jacks = o.knobs = o.cableColor = o.cableFlow = false;
+			o.pinchZoom = o.sliderScroll = o.clickCables = o.trace = false;
+			o.demoPointer = o.demoValues = false;
+		}
+		if (gTestGearCount <= 0)
+			o.scopes = o.widgets = false;
+		return o;
 	}
 
 	/** A widget's centre in the coordinate system this overlay draws in.
@@ -699,6 +735,21 @@ struct DRUIOverlay : widget::TransparentWidget {
 	}
 
 	void step() override {
+		// THE FLAGS THEMSELVES, not merely the copy options() hands back.
+		//
+		// Two of the overlays are given POINTERS into these — pinch zoom, slider scrolling,
+		// click-to-patch, tracing and the drawn pointer are read straight from here — so a guard
+		// that only cleaned up the returned copy would have left exactly those on. They are
+		// Clarity's to set, and with no Clarity in the rack nobody sets them.
+		//
+		// SAFE IN ANY ORDER. Clarity copies its parameters into these in its own step, so on the
+		// frame a patch loads this may clear them before that runs; drawing happens after every
+		// step, so the values it draws from are the ones Clarity set. The count is not reset per
+		// frame — a widget counts itself in once — so this is only ever true when there really
+		// is no Clarity.
+		if (gClarityCount <= 0)
+			clearClarityOptions();
+
 		const Options o = options();
 
 		// Colour newly connected cables by their destination. There is no "cable connected"
