@@ -148,9 +148,9 @@ static const struct { const char* match; int family; int since; } PAL_DEFAULT_RU
 	{"BPM", FAM_PITCH, 2},
 	{"CV", FAM_CV, 1}, {"MOD", FAM_CV, 1}, {"FM", FAM_CV, 1},
 	// A LEVEL IS A CONTROL VOLTAGE, not the audio it controls. An envelope, a velocity and a
-	// breath all arrive at a port called level, and with no rule for the word they fell through
-	// to audio — which is the fallback rather than a decision, and made a control input the same
-	// yellow as the signal it is scaling.
+	// breath all arrive at a port called level, and with no rule for the word they fall through
+	// to audio — which is the fallback rather than a decision, and makes a control input the same
+	// colour as the signal it is scaling.
 	//
 	// LAST AMONG THE CV RULES, so a port named "CV level" is still read by the earlier one; it
 	// makes no difference here, since both are the same family, and it keeps the group's order
@@ -410,7 +410,7 @@ static int paletteGuess(const std::string& name) {
 		if (n.find(PAL_DEFAULT_RULES[i].match) != std::string::npos)
 			return PAL_DEFAULT_RULES[i].family;
 	}
-	return FAM_NONE;
+	return FAM_AUDIO;
 }
 
 int paletteFamilyForName(const std::string& name) {
@@ -426,15 +426,7 @@ int paletteFamilyForName(const std::string& name) {
 		if (n.find(rule.match) != std::string::npos)
 			return rule.family;
 	}
-	// NOTHING MATCHED, AND THAT IS AN ANSWER. It used to be audio, which meant a name the table
-	// does not know was confidently given the wrong colour rather than left alone — and a level
-	// input came out the same yellow as the signal it was scaling, which is what sent somebody
-	// looking for the fault in the module rather than in this list.
-	//
-	// Left as Rack drew it instead. An unrecognised port then looks like an ordinary Rack port,
-	// which is both honest and a usable clue: anything still in Rack's own colours is something
-	// the rules have no opinion about, and a word worth adding.
-	return FAM_NONE;
+	return FAM_AUDIO;
 }
 
 int palettePortOverride(app::PortWidget* port) {

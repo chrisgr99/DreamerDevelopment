@@ -679,13 +679,9 @@ struct DRUIOverlay : widget::TransparentWidget {
 					&& sameColor(it->second.color, cw->color)) {
 					continue;   // Ours, unchanged, and still going where it was.
 				}
-				// A port the rules do not recognise leaves its cable as Rack coloured it.
-				const int family = paletteFamilyForPort(cw->inputPort);
-				if (family == FAM_NONE)
-					continue;
 				if (originalCableColors.find(cw->cable->id) == originalCableColors.end())
 					originalCableColors[cw->cable->id] = cw->color;
-				const NVGcolor want = paletteColor(family);
+				const NVGcolor want = paletteColor(paletteFamilyForPort(cw->inputPort));
 				cw->color = want;
 				Applied applied;
 				applied.dest = dest;
@@ -717,14 +713,11 @@ struct DRUIOverlay : widget::TransparentWidget {
 				// Recorded HERE rather than on completion: by the time a cable is complete
 				// this loop has already painted it, and what would be kept as "the colour it
 				// had before we touched it" would be a colour we gave it.
-				const int family = paletteFamilyForPort(origin);
-				if (family == FAM_NONE)
-					continue;
 				if (cw->cable
 					&& originalCableColors.find(cw->cable->id) == originalCableColors.end()) {
 					originalCableColors[cw->cable->id] = cw->color;
 				}
-				cw->color = paletteColor(family);
+				cw->color = paletteColor(paletteFamilyForPort(origin));
 			}
 		}
 
@@ -814,15 +807,10 @@ struct DRUIOverlay : widget::TransparentWidget {
 				const float r = std::fmin(p->box.size.x, p->box.size.y) / 2.f;
 				if (r <= 1.f)
 					continue;
-				// NOT DRAWN AT ALL where the rules have no opinion, so the jack stays the one
-				// Rack drew rather than being given a colour that means nothing.
-				const int family = paletteFamilyForPort(p);
-				if (family == FAM_NONE)
-					continue;
 				const math::Vec c = centreOf(p);
 				const bool isOutput = (p->type == engine::Port::OUTPUT);
 
-				drawJack(args.vg, c, r, paletteColor(family), isOutput);
+				drawJack(args.vg, c, r, paletteColor(paletteFamilyForPort(p)), isOutput);
 			}
 		}
 
