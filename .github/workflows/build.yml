@@ -2,8 +2,10 @@
 # release when a version tag is pushed.
 #
 # WHY THIS EXISTS. A plugin built on one machine runs on one architecture. This produces all
-# four without owning the hardware: GitHub's runners cover Apple Silicon, Intel Mac, Windows
-# and Linux, and each one downloads the Rack SDK for its own platform and runs `make dist`.
+# four without owning the hardware. The two Macs and Windows download the Rack SDK for their own
+# platform and run `make dist` on a GitHub runner; Linux is built inside the VCV plugin toolchain
+# container instead, because what a Linux library will run on is decided by the glibc it was
+# built against — see the note above that job.
 #
 # It is also the only test that the source compiles anywhere but macOS.
 #
@@ -35,7 +37,6 @@ jobs:
           - { arch: mac-arm64, runner: macos-14 }
           - { arch: mac-x64, runner: macos-15-intel }
           - { arch: win-x64, runner: windows-latest }
-          - { arch: lin-x64, runner: ubuntu-22.04 }
 
     steps:
       - uses: actions/checkout@v4
@@ -43,10 +44,6 @@ jobs:
       - name: Install build tools (macOS)
         if: startsWith(matrix.arch, 'mac')
         run: brew install jq zstd
-
-      - name: Install build tools (Linux)
-        if: startsWith(matrix.arch, 'lin')
-        run: sudo apt-get update && sudo apt-get install -y build-essential jq zstd
 
       # Windows builds with MinGW, which is what Rack itself is built with. The shell for
       # every later Windows step has to be this one, or make runs under PowerShell and fails.
@@ -72,7 +69,7 @@ jobs:
             "https://vcvrack.com/downloads/Rack-SDK-${RACK_SDK_VERSION}-${{ matrix.arch }}.zip"
           unzip -q rack-sdk.zip
 
-      - name: Build (macOS and Linux)
+      - name: Build (macOS)
         if: "!startsWith(matrix.arch, 'win')"
         run: RACK_DIR=$PWD/Rack-SDK make dist
 
@@ -86,11 +83,69 @@ jobs:
           name: ${{ matrix.arch }}
           path: dist/*.vcvplugin
 
+  # ---------------------------------------------------------------------------------------
+  # LINUX, BUILT INSIDE THE VCV PLUGIN TOOLCHAIN rather than on the runner.
+  #
+  # A shared library records the oldest glibc it can run against, and that is decided by the
+  # glibc it was BUILT against — not by anything we write. Built on GitHub's Ubuntu, the plugin
+  # demanded symbols from glibc 2.35 and would not load on any distribution older than that:
+  # "libc.so.6: version GLIBC_2.32 not found". Pinning an older runner only moves the line, since
+  # GitHub's oldest Ubuntu is still newer than what a great many people run.
+  #
+  # The toolchain container links against a deliberately ancient glibc, which is why it is what
+  # the Rack community builds with. It carries its own SDK, so nothing is downloaded here and our
+  # RACK_SDK_VERSION does not apply to this job — the image decides.
+  #
+  # PINNED BY DIGEST, not by tag. It is somebody else's image and a rebuild upstream would
+  # otherwise change what we ship without changing anything we wrote.
+  build-linux:
+    name: lin-x64
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/qno/rack-plugin-toolchain-win-linux@sha256:fcb1ef432cb646f0c80a1828fbcfa4deb58469e1e188c953740ebdc7c8f93d7d
+      # The image's own user does not own the checkout the runner makes.
+      options: --user root
+    env:
+      TOOLCHAIN_DIR: /home/build/rack-plugin-toolchain
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          set -euo pipefail
+          export PLUGIN_DIR=$GITHUB_WORKSPACE
+          cd "$TOOLCHAIN_DIR"
+          make plugin-build-lin-x64
+
+      # THE POINT OF THE WHOLE CHANGE, AS A NUMBER IN THE LOG. Without this we would be trusting
+      # that the container did what it is supposed to; with it, the highest glibc the library
+      # asks for is printed on every run and a regression is visible rather than reported months
+      # later by somebody whose Rack will not start.
+      - name: What glibc does it need
+        run: |
+          set -euo pipefail
+          so=$(find "$TOOLCHAIN_DIR/plugin-build" -name '*.vcvplugin' | head -1)
+          echo "Package: $so"
+          work=$(mktemp -d)
+          tar --use-compress-program=unzstd -xf "$so" -C "$work"
+          lib=$(find "$work" -name 'plugin.so' | head -1)
+          echo "Library: $lib"
+          echo "--- glibc versions required ---"
+          objdump -T "$lib" | grep -o 'GLIBC_[0-9.]*' | sort -Vu
+          echo "--- highest ---"
+          objdump -T "$lib" | grep -o 'GLIBC_[0-9.]*' | sort -Vu | tail -1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lin-x64
+          # The toolchain writes its packages here rather than into our own dist directory.
+          path: ${{ env.TOOLCHAIN_DIR }}/plugin-build/*.vcvplugin
+
   release:
     # Only for a tag. A run started by hand builds and stops, which is what you want while
     # finding out whether the source compiles at all.
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: [build, build-linux]
     runs-on: ubuntu-latest
     permissions:
       contents: write
