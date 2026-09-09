@@ -6,6 +6,20 @@
 #include "WidgetAt.hpp"
 
 #include <app/CableWidget.hpp>
+// THE PLUGS AT A CABLE'S ENDS, and where their type is declared depends on the SDK.
+//
+// In the SDK this is developed against, PlugWidget is defined inside CableWidget.hpp and the
+// line above is enough. In others it is only FORWARD-declared there and defined in a header of
+// its own — and a forward declaration is enough to hold a pointer and not enough to reach
+// through one, so hiding a plug would not compile. That is not a difference anybody notices on
+// one machine: it cost a Linux build, in a container whose SDK differs from ours.
+//
+// Asked for rather than assumed, so the file is right on both.
+#if defined(__has_include)
+#if __has_include(<app/PlugWidget.hpp>)
+#include <app/PlugWidget.hpp>
+#endif
+#endif
 
 #include <atomic>
 #include <vector>
