@@ -93,8 +93,15 @@ jobs:
   # GitHub's oldest Ubuntu is still newer than what a great many people run.
   #
   # The toolchain container links against a deliberately ancient glibc, which is why it is what
-  # the Rack community builds with. It carries its own SDK, so nothing is downloaded here and our
-  # RACK_SDK_VERSION does not apply to this job — the image decides.
+  # the Rack community builds with.
+  #
+  # WE WANT ITS COMPILER AND NOT ITS SDK. The image carries a Rack SDK of its own, and that SDK
+  # is older than the one we develop against: it forward-declares PlugWidget and never defines
+  # it, so code that hides a cable's plugs compiles here and does not compile there. Contorting
+  # the source to suit it would be fixing the wrong thing — the glibc is what we came for.
+  #
+  # So the image's SDK is replaced with the one we pin before the build, and RACK_SDK_VERSION
+  # means the same thing on every platform again.
   #
   # PINNED BY DIGEST, not by tag. It is somebody else's image and a rebuild upstream would
   # otherwise change what we ship without changing anything we wrote.
@@ -109,6 +116,19 @@ jobs:
       TOOLCHAIN_DIR: /home/build/rack-plugin-toolchain
     steps:
       - uses: actions/checkout@v4
+
+      - name: Use the SDK we pin, not the one in the image
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Image's SDK was:"
+          cat "$TOOLCHAIN_DIR/Rack-SDK-lin-x64/include/rack.hpp" | grep -m1 -i version || true
+          curl -fL -o sdk.zip \
+            "https://vcvrack.com/downloads/Rack-SDK-${RACK_SDK_VERSION}-lin-x64.zip"
+          rm -rf "$TOOLCHAIN_DIR/Rack-SDK-lin-x64"
+          unzip -q sdk.zip -d "$TOOLCHAIN_DIR"
+          mv "$TOOLCHAIN_DIR/Rack-SDK" "$TOOLCHAIN_DIR/Rack-SDK-lin-x64"
+          echo "Now using SDK $RACK_SDK_VERSION"
 
       - name: Build
         # THE CONTAINER'S DEFAULT SHELL IS sh, not bash, and dash has no pipefail. Named on every
