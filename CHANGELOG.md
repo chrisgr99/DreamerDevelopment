@@ -2,6 +2,24 @@
 
 Newest first.
 
+## 2.0.9 — unreleased
+
+### Added
+- **Dark** — a third module. Darkens the panels of makers who ship only light artwork, in memory, from the drawing Rack has already loaded. Nothing is written to disk and removing the module puts every panel back. Near-white areas become the ground, small dark shapes become light so lettering survives, and a panel that is not light all over is left alone. VCV's own panels keep their artwork; only the white patch behind their output jacks is toned down to a middle grey, which still says "these are the outputs" without glaring on a dark rack.
+- Clarity knows what a port is on modules that never named one. NYSTHI has 3,104 ports and names 187 of them, so no rule could ever have coloured it; 2,976 of those ports were read off the panels themselves and now ship in the plugin. A user's own right-click override still wins, and a module whose port count has changed since it was read is ignored rather than half-trusted.
+- Rules can ask about the module a port is on, not only the port's name: its maker, its model, its tags, and which way the port faces. That is what settles the ports whose names are a position rather than a description — "Cell 3", "Channel 2", "Row 5".
+
+### Changed
+- A port no rule recognises is now drawn off-white rather than being coloured as audio. Audio used to be the fallback, which meant the table could never be wrong: a port it had never heard of came back as audio, coloured with a confidence it had not earned. Off-white says what is true — this jack takes whatever you give it, or nobody has worked out what it is. A hundred and ten of VCV's own ports are genuinely of that kind.
+- Where a cable's destination has no opinion, its colour is taken from its source instead. A mult, a merge, a scope and a sequential switch all accept anything, and asking them what a cable carries is asking the one end that does not know.
+- Many more words are recognised, drawn from a census of every module installed rather than from guesswork: 840 ports across VCV's own plugins, then 27,362 across the whole library. Gates gained retrigger, run, start, stop, strobe, mute, hold, and a logic module's operations; control voltages gained aftertouch, tune, sweep, envelope, glide, threshold, tempo and the rest; and where a word means different things at the two ends of a module, the rule now faces one way only.
+
+### Fixed
+- A switch dragged from one port to another went on muting the port it had left. A switch does not mute a signal — it takes the cables arriving at its port out of the rack and remembers them — and moving it never put them back. Lifting a switch off a port now revives that port at once, so being carried counts as being switched on.
+- Clicks on any window floating over the rack fell through to the modules behind it. Clarity asked only whether one of ITS OWN windows was in the way, by name, so anybody else's window was invisible to it — including the chart window of our own MPX plugin.
+- A rule whose shape changed in the table left its old version behind in a user's settings, sitting in front of the replacement. IN, OUT, LEFT, RIGHT, L and R became whole words; a file written before that kept the substring versions, and a substring L matches any name with the letter L in it — so a port called "External trigger" was coloured as audio by the L in "External".
+- Linux builds asked for a glibc newer than many distributions have, and would not load at all. Linux and Windows are both built in the VCV plugin toolchain now, which is what the library itself uses; every build prints the highest glibc it needs.
+
 ## 2.0.8 — 8 September 2026
 
 ### Fixed

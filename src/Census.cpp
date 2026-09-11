@@ -2,6 +2,7 @@
 #include "Census.hpp"
 
 #include <cstdio>
+#include <set>
 #include <string>
 
 
@@ -123,13 +124,55 @@ static json_t* gModulesJ = NULL;
 static double gStarted = 0.0;
 static std::string gStatus;
 
-void censusStart(const std::string& only) {
+/** Where the file lives, and what is already in it. */
+static std::string censusPositionsPath() {
+	return asset::user("DreamerDevelopment/census-positions.json");
+}
+
+static void censusFlush() {
+	if (!gModulesJ)
+		return;
+	json_t* rootJ = json_object();
+	json_object_set_new(rootJ, "modules", json_deep_copy(gModulesJ));
+	system::createDirectories(asset::user("DreamerDevelopment"));
+	FILE* file = std::fopen(censusPositionsPath().c_str(), "w");
+	if (file) {
+		json_dumpf(rootJ, file, JSON_INDENT(1));
+		std::fclose(file);
+	}
+	json_decref(rootJ);
+}
+
+void censusStart(const std::string& only, bool skipDone) {
 	gQueue.clear();
 	gAt = 0;
 	if (gModulesJ)
 		json_decref(gModulesJ);
 	gModulesJ = json_array();
 	gStarted = system::getTime();
+
+	// WHAT IS ALREADY THERE stays there, and is not walked again.
+	std::set<std::string> done;
+	if (skipDone) {
+		json_error_t err;
+		json_t* rootJ = json_load_file(censusPositionsPath().c_str(), 0, &err);
+		if (rootJ) {
+			json_t* modulesJ = json_object_get(rootJ, "modules");
+			size_t i;
+			json_t* j;
+			json_array_foreach(modulesJ, i, j) {
+				json_t* pj = json_object_get(j, "plugin");
+				json_t* mj = json_object_get(j, "model");
+				if (pj && mj) {
+					done.insert(std::string(json_string_value(pj)) + "/"
+						+ json_string_value(mj));
+				}
+				json_array_append(gModulesJ, j);
+			}
+			json_decref(rootJ);
+			INFO("Census: %d models already scanned", (int) done.size());
+		}
+	}
 	for (plugin::Plugin* p : plugin::plugins) {
 		if (!p)
 			continue;
@@ -138,6 +181,8 @@ void censusStart(const std::string& only) {
 				continue;
 			const std::string key = p->slug + "/" + model->slug;
 			if (!only.empty() && key.compare(0, only.size(), only) != 0)
+				continue;
+			if (done.count(key))
 				continue;
 			gQueue.push_back(model);
 		}
@@ -190,6 +235,9 @@ void censusTick(double seconds) {
 		json_object_set_new(j, "params", paramsJ);
 		json_array_append_new(gModulesJ, j);
 		delete mw;
+		// SAVED EVERY TWENTY-FIVE, so a crash costs a handful of models rather than the run.
+		if (gAt % 25 == 0)
+			censusFlush();
 	}
 
 	const double taken = system::getTime() - gStarted;
@@ -202,17 +250,8 @@ void censusTick(double seconds) {
 		return;
 	}
 
-	json_t* rootJ = json_object();
-	json_object_set_new(rootJ, "modules", gModulesJ);
-	gModulesJ = NULL;
-	system::createDirectories(asset::user("DreamerDevelopment"));
-	const std::string path = asset::user("DreamerDevelopment/census-positions.json");
-	FILE* file = std::fopen(path.c_str(), "w");
-	if (file) {
-		json_dumpf(rootJ, file, JSON_INDENT(1));
-		std::fclose(file);
-	}
-	json_decref(rootJ);
+	censusFlush();
+	const std::string path = censusPositionsPath();
 	gStatus = string::f("%d of %d modules\ndone in %.0fs", (int) gQueue.size(),
 		(int) gQueue.size(), taken);
 	INFO("Census: wrote positions for %d models in %.1f s to %s", (int) gQueue.size(), taken,

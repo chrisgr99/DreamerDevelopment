@@ -1672,13 +1672,18 @@ struct DarkenerWidget : DRUIWidgetBase {
 			censusWrite("");
 		}));
 		menu->addChild(createMenuItem("Write port positions: NYSTHI Model277", "", []() {
-			censusStart("NYSTHI/Model277");
+			censusStart("NYSTHI/Model277", false);
 		}));
 		menu->addChild(createMenuItem("Write port positions: NYSTHI", "", []() {
-			censusStart("NYSTHI");
+			censusStart("NYSTHI", false);
 		}));
 		menu->addChild(createMenuItem("Write port positions: everything", "", []() {
-			censusStart("");
+			censusStart("", false);
+		}));
+		// THE OVERNIGHT ONE. Skips what has already been scanned and saves as it goes, so it can
+		// be started again after a crash and will carry on rather than begin again.
+		menu->addChild(createMenuItem("Write port positions: everything not yet done", "", []() {
+			censusStart("", true);
 		}));
 	}
 

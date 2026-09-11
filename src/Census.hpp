@@ -47,8 +47,14 @@ Done in one go it holds the UI thread for as long as it takes — the window sto
 a scan that is working looks exactly like a scan that has hung. So it is started, ticked once a
 frame with a time budget, and finished; the module it was started from shows how far along it is.
 
+RESUMABLE, AND SAVED AS IT GOES. The file it writes is also read at the start: a model already
+in it is not walked again, and the file is rewritten every few models. So a run that takes the
+application down with it — which is the risk of building a widget for every module in a library
+— loses at most a few models, and starting it again carries on from there rather than beginning
+afresh.
+
 Start it, then call tick every frame while busy is true. Status is a line of text to draw. */
-void censusStart(const std::string& only);
+void censusStart(const std::string& only, bool skipDone);
 bool censusBusy();
 void censusTick(double seconds);
 std::string censusStatus();

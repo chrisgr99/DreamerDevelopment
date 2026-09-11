@@ -614,6 +614,17 @@ struct InjectorWidget : ClipWidget {
 	}
 
 	bool reattach(app::PortWidget* target) override {
+		// THE HELD CABLES BELONG TO THE PORT WE ARE LEAVING, and must go back before we go.
+		//
+		// A switch does not mute a signal: it takes the cables arriving at its port out of the
+		// rack and remembers them. Moving the widget without putting them back left the old
+		// port dead — its cables gone, with only this widget remembering them — while the
+		// switch went on to take the new port's cables as well. It looked like a switch
+		// affecting two ports at once, which is what it was.
+		//
+		// detach() has always done this. reattach() is the same departure and was not.
+		if (!held.empty())
+			restoreCables();
 		removeCable();
 		port = target;
 		if (!connectTo(target)) {
@@ -768,7 +779,15 @@ struct InjectorWidget : ClipWidget {
 		// A mute is not a signal: it is the presence or absence of cables, kept in step with
 		// the button every frame.
 		if (type == INJECT_SWITCH) {
-			if (!isOn())
+			// BEING CARRIED IS THE SAME AS BEING ON. The moment the switch is lifted off its
+			// port, that port's cables go back — so picking a switch up never leaves a dead
+			// jack behind, and what you drag is a switch looking for somewhere to be rather
+			// than a switch still holding a port it has left.
+			//
+			// Waiting until the drop was not enough: the cables came back only when the widget
+			// landed, so the old port stayed silent for the whole of the drag, and a switch
+			// dropped somewhere new and then turned on appeared to revive two ports at once.
+			if (!isOn() && !retargeting)
 				takeCables();
 			else if (!held.empty())
 				restoreCables();
