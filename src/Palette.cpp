@@ -203,6 +203,17 @@ static PaletteRule ruleAny(const char* match, int family) {
 	return r;
 }
 
+/** A rule pinned to one module: its plugin slug, model slug or model name, with no word to
+match. For the ports whose names are a position rather than a description — "Cell 3", "Row 5",
+"Channel 2" — where only the module can say what is on them. */
+static PaletteRule ruleModule(const char* module, int dir, int family) {
+	PaletteRule r;
+	r.module = module;
+	r.dir = dir;
+	r.family = family;
+	return r;
+}
+
 static PaletteRule ruleTag(const char* tag, int dir, int family) {
 	PaletteRule r;
 	r.tag = tag;
@@ -334,6 +345,101 @@ static const std::vector<DefaultRule>& defaultRules() {
 	};
 	for (const char* t : AUDIO_TAGS)
 		add(ruleTag(t, PAL_OUT, FAM_AUDIO), 5);
+
+	// ---- WHAT VCV'S OWN MODULES CALL THINGS ------------------------------------------------
+	//
+	// From a census taken inside Rack: every model in Core, Fundamental and the VCV plugins
+	// instantiated, and its ports asked what they are called. 840 ports, and 839 of them are
+	// named — which is why this family was worth doing first, and why so much of what follows
+	// is a word rather than a module.
+	//
+	// These carry well beyond VCV. "Retrigger", "accent", "sweep" and the logic names mean the
+	// same thing in everybody's plugin, which is the test a rule has to pass to be in this
+	// table at all.
+
+	// Gates and triggers, by what the module is being told to do.
+	add(ruleAny("RETRIG", FAM_TRIGGER), 7);
+	add(ruleWord("RUN", FAM_TRIGGER), 7);
+	add(ruleWord("START", FAM_TRIGGER), 7);
+	add(ruleWord("STOP", FAM_TRIGGER), 7);
+	add(ruleWord("CONTINUE", FAM_TRIGGER), 7);
+	add(ruleAny("STROBE", FAM_TRIGGER), 7);
+	add(ruleWord("MUTE", FAM_TRIGGER), 7);
+	add(ruleWord("HOLD", FAM_TRIGGER), 7);
+	add(ruleWord("PUSH", FAM_TRIGGER), 7);
+	add(ruleWord("FLIP", FAM_TRIGGER), 7);
+	add(ruleWord("FLOP", FAM_TRIGGER), 7);
+	add(ruleWord("EOC", FAM_TRIGGER), 7);
+	add(ruleWord("EOF", FAM_TRIGGER), 7);
+	// A LOGIC MODULE'S OUTPUTS ARE ITS OPERATIONS. Whole words throughout: OR lives inside a
+	// great many names and AND inside more.
+	add(ruleWord("AND", FAM_TRIGGER), 7);
+	add(ruleWord("NAND", FAM_TRIGGER), 7);
+	add(ruleWord("OR", FAM_TRIGGER), 7);
+	add(ruleWord("NOR", FAM_TRIGGER), 7);
+	add(ruleWord("XOR", FAM_TRIGGER), 7);
+	add(ruleWord("XNOR", FAM_TRIGGER), 7);
+
+	// Control voltages: the rest of what a front panel asks for by voltage, and what VCV's
+	// drums call the things their knobs set — the port and the knob share a name.
+	add(ruleAny("AFTERTOUCH", FAM_CV), 7);
+	add(ruleAny("TUNE", FAM_CV), 7);
+	add(ruleAny("SWEEP", FAM_CV), 7);
+	add(ruleAny("SNAP", FAM_CV), 7);
+	add(ruleAny("METAL", FAM_CV), 7);
+	add(ruleAny("ACCENT", FAM_CV), 7);
+	add(ruleAny("ENVELOPE", FAM_CV), 7);
+	add(ruleAny("SLEW", FAM_CV), 7);
+	add(ruleAny("GLIDE", FAM_CV), 7);
+	add(ruleAny("MORPH", FAM_CV), 7);
+	add(ruleAny("THRESHOLD", FAM_CV), 7);
+	add(ruleAny("GAIN", FAM_CV), 7);
+	add(ruleAny("TEMPO", FAM_CV), 7);
+	add(ruleAny("CROSSFADE", FAM_CV), 7);
+	add(ruleAny("POSITION", FAM_CV), 7);
+	add(ruleAny("DIFFUSION", FAM_CV), 7);
+	add(ruleAny("REFLECT", FAM_CV), 7);
+	add(ruleAny("SPREAD", FAM_CV), 7);
+	add(ruleAny("SMOOTH", FAM_CV), 7);
+	add(ruleAny("STEPPED", FAM_CV), 7);
+	add(ruleAny("EXPONENTIAL", FAM_CV), 7);
+	add(ruleWord("LINEAR", FAM_CV), 7);
+	add(ruleWord("VOLTAGE", FAM_CV), 7);
+	add(ruleWord("EXTERNAL", FAM_CV), 7);
+	add(ruleWord("ADDRESS", FAM_CV), 7);
+	// A DELAY TIME AND A HIGH-PASS CORNER ARE CONTROLS, on every effect that has them. After
+	// the audio words, so an effect's wet OUTPUT is still audio.
+	add(ruleAny("HIGH-PASS", FAM_CV), 7);
+	add(ruleAny("HIGHPASS", FAM_CV), 7);
+	add(ruleAny("LOW-PASS", FAM_CV), 7);
+	add(ruleAny("LOWPASS", FAM_CV), 7);
+
+	// Audio, and the one word for it VCV use that nothing else does.
+	add(ruleAny("WAVETABLE", FAM_AUDIO), 7);
+	add(ruleAny("DEVICE INPUT", FAM_AUDIO), 7);
+	add(ruleAny("DEVICE OUTPUT", FAM_AUDIO), 7);
+
+	// ---- AND WHERE THE NAME IS A POSITION, THE MODULE ANSWERS --------------------------------
+	//
+	// "Cell 3", "Row 5", "Channel 2" say where a jack is on the panel and nothing about what it
+	// carries. These are the modules from the census whose generic names all mean one thing.
+	// Pinned by model slug, which is what the module rule matches on.
+	add(ruleModule("CV-CC", PAL_EITHER, FAM_CV), 7);
+	add(ruleModule("MIDICCToCVInterface", PAL_EITHER, FAM_CV), 7);
+	add(ruleModule("Host-CC", PAL_EITHER, FAM_CV), 7);
+	add(ruleModule("CV-Gate", PAL_EITHER, FAM_TRIGGER), 7);
+	add(ruleModule("Host-Gate", PAL_EITHER, FAM_TRIGGER), 7);
+	add(ruleModule("RandomValues", PAL_OUT, FAM_CV), 7);
+	add(ruleModule("SHASR", PAL_EITHER, FAM_CV), 7);
+	add(ruleModule("8vert", PAL_EITHER, FAM_CV), 7);
+	add(ruleModule("VCMixer", PAL_EITHER, FAM_AUDIO), 7);
+	add(ruleModule("Unity", PAL_EITHER, FAM_AUDIO), 7);
+	add(ruleModule("MidSide", PAL_EITHER, FAM_AUDIO), 7);
+	add(ruleModule("SoundStage", PAL_EITHER, FAM_AUDIO), 7);
+	add(ruleModule("AudioInterface", PAL_EITHER, FAM_AUDIO), 7);
+	// A drum's inputs are the voltages that shape it; its outputs are the drum.
+	add(ruleModule("DrumMachine", PAL_IN, FAM_CV), 7);
+	add(ruleModule("DrumMachine", PAL_OUT, FAM_AUDIO), 7);
 
 	// THE PLAIN NAMES, WHOLE WORDS ONLY. A port called "In", "Out", "L" or "R" is audio in almost
 	// every module that uses those names, and now that a whole word can be asked for they are
@@ -630,6 +736,18 @@ static void paletteSave() {
 NVGcolor paletteColor(int family) {
 	if (!paletteLoaded)
 		paletteLoad();
+	// A PORT NOTHING RECOGNISES IS DRAWN OFF-WHITE, at ninety per cent, rather than left in
+	// Rack's own colours or given a family it may not belong to.
+	//
+	// It says what is true: this jack takes whatever you patch into it. That is the honest
+	// answer for a mult, a merge, an attenuverter and a scope — a hundred and ten of VCV's own
+	// ports are like that — and it is also what an unrecognised name should look like, since a
+	// colour that means nothing is worse than a colour that means "no opinion".
+	//
+	// NOT PURE WHITE. On a dark rack a white jack is the brightest thing on the screen, and
+	// these are the ports we have least to say about.
+	if (family == FAM_NONE)
+		return nvgRGB(0xe6, 0xe6, 0xe6);
 	if (family < 0 || family >= NUM_FAMILIES)
 		return palette[FAM_AUDIO];
 	return palette[family];

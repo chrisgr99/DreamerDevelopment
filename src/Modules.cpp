@@ -814,11 +814,11 @@ struct DRUIOverlay : widget::TransparentWidget {
 				const float r = std::fmin(p->box.size.x, p->box.size.y) / 2.f;
 				if (r <= 1.f)
 					continue;
-				// NOT DRAWN AT ALL where the rules have no opinion, so the jack stays the one
-				// Rack drew rather than being given a colour that means nothing.
+				// DRAWN EVEN WHERE THE RULES HAVE NO OPINION. An unrecognised port is
+				// off-white, which says "this one takes whatever you give it" — see
+				// paletteColor. It used to be left as Rack drew it, and a jack with no ring at
+				// all read as a jack we had not looked at.
 				const int family = paletteFamilyForPort(p);
-				if (family == FAM_NONE)
-					continue;
 				const math::Vec c = centreOf(p);
 				const bool isOutput = (p->type == engine::Port::OUTPUT);
 
