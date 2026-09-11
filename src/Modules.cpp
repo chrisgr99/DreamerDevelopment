@@ -43,6 +43,8 @@ optional and can be switched off per user.
 #include "Diag.hpp"
 
 #include "Palette.hpp"
+#include "Dark.hpp"
+#include "Census.hpp"
 
 #include <map>
 #include <set>
@@ -1327,9 +1329,11 @@ struct DRUIWidgetBase : ModuleWidget {
 	void buildPanel(const char* titleAbove, const char* title,
 		const std::vector<std::string>& hint,
 		const std::vector<DRUIPanel::LegendItem>& legend, const char* jackLabel = "",
-		const char* legendTitle = "") {
+		const char* legendTitle = "", int hp = 0) {
 
-		box.size = Vec(PANEL_W, RACK_GRID_HEIGHT);
+		// SIX HUP UNLESS ASKED OTHERWISE. The two modules that came first are both six, and
+		// the constant stays the default so neither had to be told what it already was.
+		box.size = Vec(hp > 0 ? hp * RACK_GRID_WIDTH : PANEL_W, RACK_GRID_HEIGHT);
 		DRUIPanel* panel = new DRUIPanel;
 		panel->box.size = box.size;
 		panel->titleAbove = titleAbove;
@@ -1557,3 +1561,75 @@ struct TestGearWidget : DRUIWidgetBase {
 
 Model* modelClarity = createModel<Clarity, ClarityWidget>("Clarity");
 Model* modelTestGear = createModel<TestGear, TestGearWidget>("TestGear");
+
+
+// ---- Dark panels ------------------------------------------------------------------------------
+
+/** A MODULE THAT DOES ONE THING TO EVERYTHING ELSE.
+
+Kept out of Clarity deliberately. Clarity is shipped, and this is a personal preference about
+other people's artwork with no settings worth exposing and no reason for anybody else to carry
+it. A module of its own means the shipped Clarity is the same Clarity everyone has.
+
+Nothing to configure: what counts as background, what counts as lettering and which families
+need their titles written back are decided in Dark.cpp, where they can be argued with in code
+rather than in a menu. The one control is whether it is doing anything at all, which is worth
+having because seeing the difference is most of the work of judging it. */
+struct Darkener : Module {
+	enum ParamId { P_ON, NUM_PARAMS };
+
+	Darkener() {
+		config(NUM_PARAMS, 0, 0, 0);
+		configSwitch(P_ON, 0.f, 1.f, 1.f, "Dark panels", {"Off", "On"});
+	}
+};
+
+static int gDarkenerCount = 0;
+
+struct DarkenerWidget : DRUIWidgetBase {
+	DarkenerWidget(Darkener* module) {
+		setModule(module);
+		buildPanel("", "Dark", {}, {}, "", "", 4);
+		FeatureButton* button = createParam<FeatureButton>(
+			Vec(ROW_X, ROW_TOP), module, Darkener::P_ON);
+		button->box.size.x = box.size.x - ROW_X * 2;
+		button->label = "Dark";
+		button->label2 = "panels";
+		addParam(button);
+	}
+
+	/** A PREVIEW IS NOT A MODULE IN THE RACK. Same rule as the other two: the browser builds
+	one of these with no module behind it, and it must touch nothing shared. */
+	~DarkenerWidget() {
+		if (!counted)
+			return;
+		gDarkenerCount--;
+		if (gDarkenerCount <= 0)
+			darkRestoreAll();
+	}
+
+	void appendContextMenu(Menu* menu) override {
+		menu->addChild(new MenuSeparator);
+		// THE PORT CENSUS. Nothing to do with darkening, but it wants a home on a module that
+		// is only ever in Chris's own rack, and this is that module.
+		menu->addChild(createMenuItem("Write port census: VCV", "", []() {
+			censusWrite("VCV,Core,Fundamental");
+		}));
+		menu->addChild(createMenuItem("Write port census: everything", "", []() {
+			censusWrite("");
+		}));
+	}
+
+	void step() override {
+		Darkener* m = dynamic_cast<Darkener*>(module);
+		if (!m) {
+			ModuleWidget::step();
+			return;
+		}
+		countIn(gDarkenerCount);
+		darkStep(m->params[Darkener::P_ON].getValue() > 0.5f);
+		ModuleWidget::step();
+	}
+};
+
+Model* modelDarkener = createModel<Darkener, DarkenerWidget>("Darkener");

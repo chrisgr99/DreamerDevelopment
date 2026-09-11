@@ -6,6 +6,7 @@ using namespace rack;
 extern Plugin* pluginInstance;
 extern Model* modelClarity;
 extern Model* modelTestGear;
+extern Model* modelDarkener;
 
 /** The pinch-zoom overlay, added to the Scene so it works in screen coordinates. */
 widget::Widget* createPinchZoomOverlay(bool* enabled);
