@@ -1264,12 +1264,54 @@ struct InterceptOverlay : widget::Widget {
 		return false;
 	}
 
+	/** IS ANYTHING FLOATING OVER THE RACK AT THIS POINT?
+
+	This overlay reaches into the rack and acts on whatever is at a scene position — picking up a
+	cable, choosing among the cables on a jack, noting a right-click for the port menu. All of
+	that is wrong if something is sitting on top of the rack there, because the click belongs to
+	that thing and not to the jack it happens to be over.
+
+	It used to ask only about OUR windows, by name — the colour chooser, then the diagnostics —
+	which is a list that is wrong the moment anybody else puts a window on the scene. Another of
+	our own plugins does exactly that: the chart window of the MPX plugin floats over the rack,
+	and clicks on it were also landing on the modules behind it.
+
+	So the question is asked structurally instead. The scene's children are drawn in order, so
+	anything AFTER the rack is over it; anything before it, or the rack itself, is not. Our own
+	two overlays are skipped, being transparent things that cover everything by design. Rack's
+	own menus land in the same net, which is right — a menu owns its clicks too. */
+	bool coveredByAWindow(math::Vec pos) {
+		if (!APP->scene || !APP->scene->rackScroll)
+			return false;
+		bool pastRack = false;
+		for (widget::Widget* child : APP->scene->children) {
+			if (child == APP->scene->rackScroll) {
+				pastRack = true;
+				continue;
+			}
+			if (!pastRack)
+				continue;
+			if (!child->visible)
+				continue;
+			// AN OVERLAY IS NOT A WINDOW. Ours cover the whole scene by design — that is how
+			// they reach every click — and a thing that covers everything cannot be said to own
+			// any particular point. Told apart by shape rather than by name, so this needs no
+			// list of which widgets are ours and cannot go stale.
+			if (child->box.size.x >= APP->scene->box.size.x - 1.f
+				&& child->box.size.y >= APP->scene->box.size.y - 1.f)
+				continue;
+			if (child->box.contains(pos))
+				return true;
+		}
+		return false;
+	}
+
 	void onButton(const ButtonEvent& e) override {
 		notePointerButton(e);
 
-		// A note on screen owns its own clicks, like a menu does. The diagnostics window is one
-		// of ours too, and without this its switches would be answered by the rack underneath it.
-		if (paletteCovers(e.pos) || diagCovers(e.pos)) {
+		// Anything floating over the rack owns its own clicks, like a menu does — our colour
+		// chooser and diagnostics window among them, and anybody else's window as well.
+		if (coveredByAWindow(e.pos)) {
 			widget::Widget::onButton(e);
 			return;
 		}

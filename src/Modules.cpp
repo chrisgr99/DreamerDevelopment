@@ -1614,9 +1614,12 @@ struct DarkenerWidget : DRUIWidgetBase {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		// THE PORT CENSUS. Nothing to do with darkening; it is here because it needs a home and
+		// this module is the one that is always in the rack while the rules are being worked on.
+		// Offered only where the file asks for it — see Census.hpp.
+		if (!censusOffered())
+			return;
 		menu->addChild(new MenuSeparator);
-		// THE PORT CENSUS. Nothing to do with darkening, but it wants a home on a module that
-		// is only ever in Chris's own rack, and this is that module.
 		menu->addChild(createMenuItem("Write port census: VCV", "", []() {
 			censusWrite("VCV,Core,Fundamental");
 		}));

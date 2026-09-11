@@ -5,6 +5,11 @@
 #include <string>
 
 
+bool censusOffered() {
+	return system::isFile(asset::user("DreamerDevelopment/census.enable"));
+}
+
+
 static json_t* portJson(engine::PortInfo* info, int index) {
 	json_t* j = json_object();
 	json_object_set_new(j, "index", json_integer(index));
