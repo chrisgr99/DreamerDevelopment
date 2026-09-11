@@ -1,4 +1,5 @@
 #include "Palette.hpp"
+#include "PortMap.hpp"
 
 #include <osdialog.h>
 #include <tag.hpp>
@@ -139,9 +140,19 @@ struct PaletteRule {
 
 	/** WHAT MAKES THIS RULE THIS RULE, for deciding whether the file already has it. The family
 	is deliberately not part of it: a rule whose family the user has changed is still their
-	version of that rule and must not be handed back a second copy. */
+	version of that rule and must not be handed back a second copy.
+
+	NOR IS THE WORD FLAG, and that is the point of it. A rule is identified by WHAT it matches
+	on, not by HOW — so when the table turns a rule from a substring into a whole word, the copy
+	already in somebody's file is recognised as the same rule and replaced, rather than being
+	kept as a rule of their own and left sitting in front of the new one.
+
+	That is not a hypothetical. IN, OUT, LEFT, RIGHT, L and R became whole words, and a file
+	written before that change kept the substring versions: a substring L matches any name with
+	the letter L in it, so a port called "External trigger" was coloured as audio by the L in
+	"External", ahead of the rule that should have had it. */
 	std::string key() const {
-		return match + "\x1f" + (word ? "w" : "s") + "\x1f" + module + "\x1f"
+		return match + "\x1f" + module + "\x1f"
 			+ string::uppercase(tag) + "\x1f" + std::to_string(dir);
 	}
 };
@@ -230,6 +241,12 @@ static const std::vector<DefaultRule>& defaultRules() {
 
 	add(ruleAny("MPX", FAM_MPX), 1);
 	add(ruleAny("V/OCT", FAM_PITCH), 1);
+	// A PITCH WHEEL IS NOT A PITCH. It is a bend — a voltage that pushes a note off the note it
+	// already has — and a port called "Pitch wheel" was being coloured volt per octave by the
+	// rule below. Before it, so the word "pitch" never gets the chance. Its neighbour "Mod
+	// wheel" was already right, by the MOD rule.
+	add(ruleAny("PITCH WHEEL", FAM_CV), 7);
+	add(ruleAny("BEND", FAM_CV), 7);
 	add(ruleAny("PITCH", FAM_PITCH), 1);
 	add(ruleAny("NOTE", FAM_PITCH), 1);
 	add(ruleAny("GATE", FAM_TRIGGER), 1);
@@ -383,6 +400,8 @@ static const std::vector<DefaultRule>& defaultRules() {
 	// Control voltages: the rest of what a front panel asks for by voltage, and what VCV's
 	// drums call the things their knobs set — the port and the knob share a name.
 	add(ruleAny("AFTERTOUCH", FAM_CV), 7);
+	// The table had LEVEL and PAN and never had this one.
+	add(ruleAny("VOLUME", FAM_CV), 7);
 	add(ruleAny("TUNE", FAM_CV), 7);
 	add(ruleAny("SWEEP", FAM_CV), 7);
 	add(ruleAny("SNAP", FAM_CV), 7);
@@ -419,11 +438,75 @@ static const std::vector<DefaultRule>& defaultRules() {
 	add(ruleAny("DEVICE INPUT", FAM_AUDIO), 7);
 	add(ruleAny("DEVICE OUTPUT", FAM_AUDIO), 7);
 
+	// ---- FROM THE CENSUS OF THE WHOLE LIBRARY ------------------------------------------------
+	//
+	// 2,115 modules, 27,362 ports. Two in three are named by their maker, and the rules above
+	// already settle 62 per cent of those. These are the words that settle the most of what was
+	// left, each one measured: how many ports it would colour, across every plugin installed.
+	//
+	// FACING OUTPUTS, MOST OF THEM, and that is the point of the direction. The same word means
+	// different things at the two ends of a module: a sequencer's "Step" OUTPUT is a gate while
+	// its "Steps" INPUT is a count, a "Random" output is a voltage while a "Random" input is the
+	// trigger that rerolls it, and "Track" out of a sample and hold is a voltage while "Track"
+	// into a mixer is audio. Where a word is safe both ways it is left facing both ways.
+	{
+		struct Cand { const char* word; int family; int dir; };
+		static const Cand CANDIDATES[] = {
+			// Gates, at outputs: what a sequencer, a divider and a counter emit.  189 ports
+			{"STEP",        FAM_TRIGGER, PAL_OUT},
+			{"BIT",         FAM_TRIGGER, PAL_OUT},     //  97
+			{"END",         FAM_TRIGGER, PAL_OUT},     //  71
+			{"DIV",         FAM_TRIGGER, PAL_OUT},     //  40
+			{"STAGE",       FAM_TRIGGER, PAL_OUT},     //  27
+			{"CYCLE",       FAM_TRIGGER, PAL_OUT},     //   3
+			// A tap is a button being struck in time, whichever way it faces.
+			{"TAP",         FAM_TRIGGER, PAL_EITHER},  //  57
+			// Voltages that a module emits.
+			{"PHASOR",      FAM_CV,      PAL_OUT},     //  87
+			{"PHASE",       FAM_CV,      PAL_OUT},     //  61
+			{"RANDOM",      FAM_CV,      PAL_OUT},     //  57
+			{"SHIFT",       FAM_CV,      PAL_OUT},     //  35
+			{"TRACK",       FAM_CV,      PAL_OUT},     //  34
+			{"VALUE",       FAM_CV,      PAL_OUT},     //  33
+			// Voltages that set something, at either end.
+			{"LENGTH",      FAM_CV,      PAL_EITHER},  //  53
+			{"PROBABILITY", FAM_CV,      PAL_EITHER},  //  46
+			{"OCTAVE",      FAM_CV,      PAL_EITHER},  //  46
+			{"FACTOR",      FAM_CV,      PAL_EITHER},  //  40
+			{"PATTERN",     FAM_CV,      PAL_EITHER},  //  39
+			{"SELECT",      FAM_CV,      PAL_EITHER},  //  34
+			{"SCALE",       FAM_CV,      PAL_EITHER},  //  32
+			{"COUNT",       FAM_CV,      PAL_EITHER},  //   4
+			// Sound, at outputs: an equaliser's bands, an amplifier, a waveform.
+			{"BAND",        FAM_AUDIO,   PAL_OUT},     //  57
+			{"VCA",         FAM_AUDIO,   PAL_OUT},     //  54
+			{"WAVE",        FAM_AUDIO,   PAL_OUT},     //  32
+		};
+		for (const Cand& c : CANDIDATES) {
+			PaletteRule r = ruleAny(c.word, c.family);
+			r.dir = c.dir;
+			add(r, 7);
+		}
+	}
+
 	// ---- AND WHERE THE NAME IS A POSITION, THE MODULE ANSWERS --------------------------------
 	//
 	// "Cell 3", "Row 5", "Channel 2" say where a jack is on the panel and nothing about what it
 	// carries. These are the modules from the census whose generic names all mean one thing.
 	// Pinned by model slug, which is what the module rule matches on.
+	// THE HOST MODULES' CELLS ARE PARAMETER AUTOMATION. Host has sixteen of them and then a CV
+	// and a Gate; Host-XL has twenty-four and then its audio inputs, named Left, Right and
+	// Audio 3 upwards. So the cells are voltages that set a hosted plugin's parameters.
+	//
+	// NAME AND MODULE TOGETHER, and inputs only. A rule pinned to the module alone would also
+	// take the audio inputs beside them, and Host-CC and Host-Gate call their OUTPUTS cells as
+	// well — those are a control voltage and a gate respectively, and have their own rules.
+	{
+		PaletteRule cells = ruleAny("CELL", FAM_CV);
+		cells.module = "HOST";
+		cells.dir = PAL_IN;
+		add(cells, 7);
+	}
 	add(ruleModule("CV-CC", PAL_EITHER, FAM_CV), 7);
 	add(ruleModule("MIDICCToCVInterface", PAL_EITHER, FAM_CV), 7);
 	add(ruleModule("Host-CC", PAL_EITHER, FAM_CV), 7);
@@ -847,7 +930,7 @@ static int paletteGuess(const PaletteWhere& w) {
 		if (ruleMatches(d.rule, w))
 			return d.rule.family;
 	}
-	return FAM_AUDIO;
+	return FAM_NONE;
 }
 
 static int paletteFamilyFor(const PaletteWhere& w) {
@@ -862,7 +945,12 @@ static int paletteFamilyFor(const PaletteWhere& w) {
 		if (ruleMatches(rule, w))
 			return rule.family;
 	}
-	return FAM_AUDIO;
+	// NOTHING MATCHED, AND THAT IS AN ANSWER. Audio used to be the fallback, which meant the
+	// table could never be wrong: a port it had never heard of came back as audio and was
+	// coloured with confidence it had not earned. Saying nothing instead is what makes the
+	// off-white jacks possible, and what makes an unrecognised name visible as a word worth
+	// adding rather than hidden among the ones we know.
+	return FAM_NONE;
 }
 
 int paletteFamilyForName(const std::string& name) {
@@ -899,10 +987,33 @@ void paletteSetPortOverride(app::PortWidget* port, int family) {
 	paletteSave();
 }
 
+/** HOW MANY PORTS THIS MODEL HAS, asked of a module in the rack. The port map's guard needs it
+and the map itself cannot see the rack, so it is answered here. */
+int portMapPortCount(const std::string& plugin, const std::string& model) {
+	if (!APP->engine)
+		return -1;
+	for (int64_t id : APP->engine->getModuleIds()) {
+		engine::Module* m = APP->engine->getModule(id);
+		if (!m || !m->model || !m->model->plugin)
+			continue;
+		if (m->model->plugin->slug == plugin && m->model->slug == model)
+			return (int) (m->inputs.size() + m->outputs.size());
+	}
+	return -1;
+}
+
+
 int paletteFamilyForPort(app::PortWidget* port) {
 	const int override_ = palettePortOverride(port);
 	if (override_ >= 0)
 		return override_;
+	// THE PANELS WE HAVE READ, beneath the user's own corrections and above the word rules.
+	if (port && port->module && port->module->model && port->module->model->plugin) {
+		const int mapped = portMapFamily(port->module->model->plugin->slug,
+			port->module->model->slug, port->type == engine::Port::OUTPUT, port->portId);
+		if (mapped >= 0)
+			return mapped;
+	}
 	PaletteWhere w;
 	if (port) {
 		if (engine::PortInfo* info = port->getPortInfo())

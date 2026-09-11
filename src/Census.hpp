@@ -29,6 +29,30 @@ time it is wanted is a tool that gets lost. */
 /** Whether census.enable is there, and the menu should offer this at all. */
 bool censusOffered();
 
+/** WHERE EVERY JACK AND KNOB SITS, which the census above cannot tell you.
+
+A position lives on the WIDGET, so this creates each model's widget as well as its module —
+loading its panel and running its author's constructor against a module that is in no rack. That
+is the path that crashes, which is why it takes a filter and is meant to be pointed at one
+plugin, or one model, at a time. Rack does the same walk itself when it screenshots every module,
+which is fair evidence that it survives.
+
+Written to DreamerDevelopment/census-positions.json. `only` is matched against "plugin/model",
+so "NYSTHI" takes a whole maker and "NYSTHI/Model277" takes one module. */
+int censusPositions(const std::string& only);
+
+/** THE SAME WALK, A SLICE AT A TIME.
+
+Done in one go it holds the UI thread for as long as it takes — the window stops redrawing, and
+a scan that is working looks exactly like a scan that has hung. So it is started, ticked once a
+frame with a time budget, and finished; the module it was started from shows how far along it is.
+
+Start it, then call tick every frame while busy is true. Status is a line of text to draw. */
+void censusStart(const std::string& only);
+bool censusBusy();
+void censusTick(double seconds);
+std::string censusStatus();
+
 /** Writes the census to DreamerDevelopment/census.json, and returns how many models were read.
 `only` narrows it to plugins whose slug begins with one of the comma-separated prefixes given —
 empty for all of them. */

@@ -783,9 +783,15 @@ struct DRUIOverlay : widget::TransparentWidget {
 			for (CableWidget* cw : APP->scene->rack->getCompleteCables()) {
 				if (!cw->cable || !cw->inputPort)
 					continue;
-				const std::string dest = string::f("%lld:%d",
+				// BOTH ENDS, because either can be the one that knows. See below.
+				std::string dest = string::f("%lld:%d",
 					(long long) (cw->inputPort->module ? cw->inputPort->module->id : -1),
 					cw->inputPort->portId);
+				if (cw->outputPort) {
+					dest += string::f(">%lld:%d",
+						(long long) (cw->outputPort->module ? cw->outputPort->module->id : -1),
+						cw->outputPort->portId);
+				}
 				auto it = cableDestination.find(cw->cable->id);
 				if (it != cableDestination.end() && it->second.dest == dest
 					&& sameColor(it->second.color, cw->color)) {
@@ -793,7 +799,23 @@ struct DRUIOverlay : widget::TransparentWidget {
 				}
 				if (originalCableColors.find(cw->cable->id) == originalCableColors.end())
 					originalCableColors[cw->cable->id] = cw->color;
-				const NVGcolor want = paletteColor(paletteFamilyForPort(cw->inputPort));
+				// THE DESTINATION DECIDES, AND THE SOURCE ANSWERS WHEN IT CANNOT.
+				//
+				// A cable is coloured by where it ARRIVES, because that is what tells you what
+				// the far end expects of it. But a great many ports take whatever they are
+				// given — a mult, a merge, a scope, a sequential switch — and those are the
+				// ports the table has nothing to say about. Asking them what the cable carries
+				// is asking the one end that does not know.
+				//
+				// So where the destination has no opinion, the source is asked instead: an
+				// oscillator's output knows it is audio whatever it is patched into. Only if
+				// neither end knows is the cable left in Rack's own colour.
+				int family = paletteFamilyForPort(cw->inputPort);
+				if (family == FAM_NONE && cw->outputPort)
+					family = paletteFamilyForPort(cw->outputPort);
+				if (family == FAM_NONE)
+					continue;
+				const NVGcolor want = paletteColor(family);
 				cw->color = want;
 				Applied applied;
 				applied.dest = dest;
@@ -1591,6 +1613,24 @@ struct Darkener : Module {
 
 static int gDarkenerCount = 0;
 
+/** HOW FAR THROUGH THE CENSUS IS, drawn on the module that started it. */
+struct CensusProgress : widget::Widget {
+	void draw(const DrawArgs& args) override {
+		const std::string text = censusStatus();
+		if (text.empty())
+			return;
+		std::shared_ptr<window::Font> font =
+			APP->window->loadFont(asset::system("res/fonts/DejaVuSans.ttf"));
+		if (!font || !font->handle)
+			return;
+		nvgFontFaceId(args.vg, font->handle);
+		nvgFontSize(args.vg, 11.f);
+		nvgFillColor(args.vg, censusBusy() ? nvgRGB(0xff, 0xd8, 0x6e) : nvgRGB(0x9a, 0xa4, 0xb4));
+		nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+		nvgTextBox(args.vg, 0.f, box.size.y / 2.f, box.size.x, text.c_str(), NULL);
+	}
+};
+
 struct DarkenerWidget : DRUIWidgetBase {
 	DarkenerWidget(Darkener* module) {
 		setModule(module);
@@ -1601,6 +1641,11 @@ struct DarkenerWidget : DRUIWidgetBase {
 		button->label = "Dark";
 		button->label2 = "panels";
 		addParam(button);
+
+		CensusProgress* progress = new CensusProgress;
+		progress->box.pos = math::Vec(2.f, ROW_TOP + ROW_H + 8.f);
+		progress->box.size = math::Vec(box.size.x - 4.f, 40.f);
+		addChild(progress);
 	}
 
 	/** A PREVIEW IS NOT A MODULE IN THE RACK. Same rule as the other two: the browser builds
@@ -1626,6 +1671,15 @@ struct DarkenerWidget : DRUIWidgetBase {
 		menu->addChild(createMenuItem("Write port census: everything", "", []() {
 			censusWrite("");
 		}));
+		menu->addChild(createMenuItem("Write port positions: NYSTHI Model277", "", []() {
+			censusStart("NYSTHI/Model277");
+		}));
+		menu->addChild(createMenuItem("Write port positions: NYSTHI", "", []() {
+			censusStart("NYSTHI");
+		}));
+		menu->addChild(createMenuItem("Write port positions: everything", "", []() {
+			censusStart("");
+		}));
 	}
 
 	void step() override {
@@ -1636,6 +1690,11 @@ struct DarkenerWidget : DRUIWidgetBase {
 		}
 		countIn(gDarkenerCount);
 		darkStep(m->params[Darkener::P_ON].getValue() > 0.5f);
+		// A SLICE OF THE CENSUS EACH FRAME, with a budget small enough that the window keeps
+		// drawing — which is the whole point: a scan that is working must not look like one
+		// that has hung.
+		if (censusBusy())
+			censusTick(0.05);
 		ModuleWidget::step();
 	}
 };

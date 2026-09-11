@@ -22,6 +22,204 @@ static json_t* portJson(engine::PortInfo* info, int index) {
 }
 
 
+/** A widget's box, in the module's own coordinates — which is the space nanosvg's panel bounds
+are in, so a jack and a shape on the panel can be compared directly. */
+static json_t* boxJson(int index, const char* kind, widget::Widget* w) {
+	json_t* j = json_object();
+	json_object_set_new(j, "index", json_integer(index));
+	json_object_set_new(j, "kind", json_string(kind));
+	json_object_set_new(j, "x", json_real(w->box.pos.x));
+	json_object_set_new(j, "y", json_real(w->box.pos.y));
+	json_object_set_new(j, "w", json_real(w->box.size.x));
+	json_object_set_new(j, "h", json_real(w->box.size.y));
+	json_object_set_new(j, "cx", json_real(w->box.getCenter().x));
+	json_object_set_new(j, "cy", json_real(w->box.getCenter().y));
+	return j;
+}
+
+
+int censusPositions(const std::string& only) {
+	json_t* rootJ = json_object();
+	json_t* modulesJ = json_array();
+	int count = 0;
+
+	for (plugin::Plugin* p : plugin::plugins) {
+		if (!p)
+			continue;
+		for (plugin::Model* model : p->models) {
+			if (!model)
+				continue;
+			const std::string key = p->slug + "/" + model->slug;
+			if (!only.empty() && key.compare(0, only.size(), only) != 0)
+				continue;
+			// Said BEFORE the attempt, so if this brings Rack down the log names the culprit.
+			INFO("Census: positions for %s", key.c_str());
+			// NO MODULE BEHIND IT, and that is not a shortcut — it is the only safe way.
+			//
+			// A ModuleWidget's destructor asks the ENGINE to remove its module, and a module
+			// this code made was never added to the engine, so Rack asserted and took the
+			// application with it. Passing NULL makes a preview widget, exactly as the module
+			// browser does for every model it shows, and a preview owns no module to remove.
+			//
+			// The jacks and knobs are added by the widget's constructor either way, so their
+			// positions are all still here. The names come from the other census, which needs
+			// a module and no widget — between them the two halves need neither at once.
+			app::ModuleWidget* mw = NULL;
+			try {
+				mw = model->createModuleWidget(NULL);
+			}
+			catch (std::exception& e) {
+				WARN("Census: %s threw: %s", key.c_str(), e.what());
+				continue;
+			}
+			if (!mw)
+				continue;
+
+			json_t* j = json_object();
+			json_object_set_new(j, "plugin", json_string(p->slug.c_str()));
+			json_object_set_new(j, "model", json_string(model->slug.c_str()));
+			json_object_set_new(j, "name", json_string(model->name.c_str()));
+			json_object_set_new(j, "width", json_real(mw->box.size.x));
+			json_object_set_new(j, "height", json_real(mw->box.size.y));
+
+			json_t* portsJ = json_array();
+			int i = 0;
+			for (app::PortWidget* pw : mw->getInputs())
+				json_array_append_new(portsJ, boxJson(pw->portId, "input", pw)), i++;
+			for (app::PortWidget* pw : mw->getOutputs())
+				json_array_append_new(portsJ, boxJson(pw->portId, "output", pw)), i++;
+			json_object_set_new(j, "ports", portsJ);
+
+			json_t* paramsJ = json_array();
+			for (app::ParamWidget* pw : mw->getParams())
+				json_array_append_new(paramsJ, boxJson(pw->paramId, "param", pw));
+			json_object_set_new(j, "params", paramsJ);
+
+			json_array_append_new(modulesJ, j);
+			count++;
+			delete mw;
+		}
+	}
+
+	json_object_set_new(rootJ, "modules", modulesJ);
+	system::createDirectories(asset::user("DreamerDevelopment"));
+	const std::string path = asset::user("DreamerDevelopment/census-positions.json");
+	FILE* file = std::fopen(path.c_str(), "w");
+	if (file) {
+		json_dumpf(rootJ, file, JSON_INDENT(1));
+		std::fclose(file);
+		INFO("Census: wrote positions for %d models to %s", count, path.c_str());
+	}
+	json_decref(rootJ);
+	return count;
+}
+
+
+// ---- the same thing, a slice at a time --------------------------------------------------------
+
+static std::vector<plugin::Model*> gQueue;
+static size_t gAt = 0;
+static json_t* gModulesJ = NULL;
+static double gStarted = 0.0;
+static std::string gStatus;
+
+void censusStart(const std::string& only) {
+	gQueue.clear();
+	gAt = 0;
+	if (gModulesJ)
+		json_decref(gModulesJ);
+	gModulesJ = json_array();
+	gStarted = system::getTime();
+	for (plugin::Plugin* p : plugin::plugins) {
+		if (!p)
+			continue;
+		for (plugin::Model* model : p->models) {
+			if (!model)
+				continue;
+			const std::string key = p->slug + "/" + model->slug;
+			if (!only.empty() && key.compare(0, only.size(), only) != 0)
+				continue;
+			gQueue.push_back(model);
+		}
+	}
+	gStatus = string::f("0 of %d modules", (int) gQueue.size());
+	INFO("Census: %d models to walk", (int) gQueue.size());
+}
+
+bool censusBusy() {
+	return gAt < gQueue.size();
+}
+
+std::string censusStatus() {
+	return gStatus;
+}
+
+void censusTick(double seconds) {
+	if (!censusBusy())
+		return;
+	const double until = system::getTime() + seconds;
+	while (censusBusy() && system::getTime() < until) {
+		plugin::Model* model = gQueue[gAt++];
+		const std::string key = model->plugin->slug + "/" + model->slug;
+		INFO("Census: positions for %s", key.c_str());
+		app::ModuleWidget* mw = NULL;
+		try {
+			mw = model->createModuleWidget(NULL);
+		}
+		catch (std::exception& e) {
+			WARN("Census: %s threw: %s", key.c_str(), e.what());
+			continue;
+		}
+		if (!mw)
+			continue;
+		json_t* j = json_object();
+		json_object_set_new(j, "plugin", json_string(model->plugin->slug.c_str()));
+		json_object_set_new(j, "model", json_string(model->slug.c_str()));
+		json_object_set_new(j, "name", json_string(model->name.c_str()));
+		json_object_set_new(j, "width", json_real(mw->box.size.x));
+		json_object_set_new(j, "height", json_real(mw->box.size.y));
+		json_t* portsJ = json_array();
+		for (app::PortWidget* pw : mw->getInputs())
+			json_array_append_new(portsJ, boxJson(pw->portId, "input", pw));
+		for (app::PortWidget* pw : mw->getOutputs())
+			json_array_append_new(portsJ, boxJson(pw->portId, "output", pw));
+		json_object_set_new(j, "ports", portsJ);
+		json_t* paramsJ = json_array();
+		for (app::ParamWidget* pw : mw->getParams())
+			json_array_append_new(paramsJ, boxJson(pw->paramId, "param", pw));
+		json_object_set_new(j, "params", paramsJ);
+		json_array_append_new(gModulesJ, j);
+		delete mw;
+	}
+
+	const double taken = system::getTime() - gStarted;
+	if (censusBusy()) {
+		// HOW LONG IS LEFT, from how long the ones already done took. The only number worth
+		// showing while you wait.
+		const double each = taken / (double) gAt;
+		gStatus = string::f("%d of %d modules\n%ds left", (int) gAt, (int) gQueue.size(),
+			(int) ((gQueue.size() - gAt) * each + 0.5));
+		return;
+	}
+
+	json_t* rootJ = json_object();
+	json_object_set_new(rootJ, "modules", gModulesJ);
+	gModulesJ = NULL;
+	system::createDirectories(asset::user("DreamerDevelopment"));
+	const std::string path = asset::user("DreamerDevelopment/census-positions.json");
+	FILE* file = std::fopen(path.c_str(), "w");
+	if (file) {
+		json_dumpf(rootJ, file, JSON_INDENT(1));
+		std::fclose(file);
+	}
+	json_decref(rootJ);
+	gStatus = string::f("%d of %d modules\ndone in %.0fs", (int) gQueue.size(),
+		(int) gQueue.size(), taken);
+	INFO("Census: wrote positions for %d models in %.1f s to %s", (int) gQueue.size(), taken,
+		path.c_str());
+}
+
+
 int censusWrite(const std::string& only) {
 	json_t* rootJ = json_object();
 	json_t* modulesJ = json_array();

@@ -22,14 +22,31 @@ struct DarkRule {
 	float lightAbove = 0.85f;
 	/** Below it, lettering. */
 	float darkBelow = 0.15f;
-	/** No more than this much of the panel, as a percentage, is lettering. Measured on NYSTHI's
-	Serge Programmer, where the lettering is 0.039 per cent of the panel and the four channel
-	jacks are 0.117, so 0.08 divides them cleanly. */
-	float lettering = 0.08f;
-	/** At least this much of the panel has to be near-white for the drawing to be treated as a
-	light panel at all. Stoermelder's are the case this exists for: a mid-toned ground that would
-	otherwise have kept its colour while its lettering went light — worse than doing nothing. */
-	float mustBeLight = 15.f;
+	/** A SHAPE THIS SMALL IS LETTERING, in square pixels of the panel itself.
+
+	ABSOLUTE, NOT A SHARE OF THE PANEL, and that distinction cost an evening. A letter is a
+	fixed physical size: the same glyph is 0.12 per cent of a 10 HP panel and 0.06 per cent of a
+	19 HP one, so a threshold in per cent lightened the title of VCV's Host-XL and left the
+	identical title on Host black on a black ground.
+
+	The numbers it has to separate, all measured: a letter on VCV's panels is about 66 square
+	pixels and one on NYSTHI's Serge Programmer about 133, while that module's channel jacks —
+	which must stay dark — are about 400. 250 sits between them with room on both sides.
+
+	Rack draws at 75 DPI, so this is about 44 square millimetres. */
+	float letteringArea = 250.f;
+	/** A SINGLE near-white shape has to cover this much of the panel for the drawing to count as
+	a light panel at all.
+
+	Stoermelder's panels are the case it exists for: a mid-toned ground that would otherwise have
+	kept its colour while its lettering went light, which is worse than doing nothing.
+
+	SIXTY PER CENT, AND IT HAS TO BE ONE SHAPE. It was fifteen, which any sizeable white patch
+	could reach: VCV's Split marks its two columns of outputs with white strips covering half the
+	panel between them, so its DARK artwork was read as a light panel and fully darkened — and
+	its title, white because it was drawn for a dark panel, was repainted to the ground and
+	vanished. A ground covers its panel; a patch does not. */
+	float mustBeLight = 60.f;
 	NVGcolor ground = nvgRGB(0x14, 0x14, 0x14);
 	NVGcolor ink = nvgRGB(0xd8, 0xd8, 0xd8);
 
@@ -336,7 +353,7 @@ static void darkPaintPatches(app::ModuleWidget* mw, NSVGimage* image, const Dark
 			math::Vec(shape->bounds[2] - shape->bounds[0], shape->bounds[3] - shape->bounds[1]));
 		const float part = 100.f * r.size.x * r.size.y / panelArea;
 		// Big enough to be a patch rather than a glyph, small enough not to be the ground.
-		if (part > rule.patchMax || part < rule.lettering)
+		if (part > rule.patchMax || r.size.x * r.size.y < rule.letteringArea)
 			continue;
 		bool hasOut = false, hasIn = false;
 		for (size_t i = 0; i < outs.size(); i++)
@@ -370,7 +387,6 @@ static void darkPaintPatches(app::ModuleWidget* mw, NSVGimage* image, const Dark
 			continue;
 		const math::Rect r = math::Rect(math::Vec(shape->bounds[0], shape->bounds[1]),
 			math::Vec(shape->bounds[2] - shape->bounds[0], shape->bounds[3] - shape->bounds[1]));
-		const float part = 100.f * r.size.x * r.size.y / panelArea;
 		const float L = lightnessOf(shape->fill.color);
 
 		// THE PATCH COUNTS AS BEING INSIDE ITSELF, which has to be said outright: Rack's
@@ -399,7 +415,7 @@ static void darkPaintPatches(app::ModuleWidget* mw, NSVGimage* image, const Dark
 			shape->fill.color = packed(rule.ground, shape->fill.color);
 			changed = true;
 		}
-		else if (L <= rule.darkBelow && part <= rule.lettering) {
+		else if (L <= rule.darkBelow && r.size.x * r.size.y <= rule.letteringArea) {
 			shape->fill.color = packed(rule.ink, shape->fill.color);
 			changed = true;
 		}
@@ -446,12 +462,10 @@ static void darkPaint(NSVGimage* image, const DarkRule& rule) {
 		was.stroke = shape->stroke.color;
 		original.shapes.push_back(was);
 
-		// THE SHAPE'S OWN SIZE, as a percentage of the panel. nanosvg has already worked out
-		// the bounds in final coordinates, so there is no path to walk and no transform to
-		// compose.
+		// THE SHAPE'S OWN SIZE, in panel pixels. nanosvg has already worked out the bounds in
+		// final coordinates, so there is no path to walk and no transform to compose.
 		const float w = shape->bounds[2] - shape->bounds[0];
 		const float h = shape->bounds[3] - shape->bounds[1];
-		const float part = 100.f * (w * h) / panelArea;
 
 		// A GRADIENT IS LEFT ALONE. It is somebody drawing something deliberate, and repainting
 		// one end of it would be worse than leaving it light.
@@ -465,7 +479,7 @@ static void darkPaint(NSVGimage* image, const DarkRule& rule) {
 				shape->fill.color = packed(rule.ground, shape->fill.color);
 				changed = true;
 			}
-			else if (L <= rule.darkBelow && part <= rule.lettering) {
+			else if (L <= rule.darkBelow && w * h <= rule.letteringArea) {
 				shape->fill.color = packed(rule.ink, shape->fill.color);
 				changed = true;
 			}
