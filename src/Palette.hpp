@@ -29,6 +29,11 @@ enum Family {
 	NUM_FAMILIES
 };
 
+/** NO RULE MATCHED, which is a different thing from being an audio port. Such a port is drawn
+off-white rather than given a family it may not belong to — see paletteColor for why that is the
+honest answer and not a gap. */
+static const int FAM_NONE = -1;
+
 /** The colour for a family. Loads the saved palette the first time it is asked. */
 NVGcolor paletteColor(int family);
 
