@@ -8,7 +8,7 @@ An entry is a list of lines. The first line says what the module is. Every line 
 
 Menu options go last, on a line starting `Menu — `, and only where they matter to using the module.
 
-One line per control. There is no target length: a module with four jacks gets four lines and a module with fifteen controls gets fifteen. Length is not a cost here, because nobody reads the entry straight through — each line is clicked separately, and a line that covers two controls cannot be clicked for one of them. Group only where controls are genuinely identical, such as eight outputs that differ by number alone.
+One line per control, and **never a cap**. If you are running helper agents, do not give them a line limit: a run tonight set one at forty and it cost real content — 66 input jacks on one module ended up sharing a single catch-all line. There is no target length: a module with four jacks gets four lines and a module with fifteen controls gets fifteen. Length is not a cost here, because nobody reads the entry straight through — each line is clicked separately, and a line that covers two controls cannot be clicked for one of them. Group only where controls are genuinely identical, such as eight outputs that differ by number alone.
 
 ## A line is about the one control that was clicked
 
@@ -68,7 +68,47 @@ Panel lettering is outlines, not text, so it cannot be read from the SVG. Render
 
 `census/<Plugin>.json` in this directory has every model's parameter, input and output names as the maker configured them, which is usually enough to know what the controls are; the render settles what they are called.
 
+**AND THE MODULE'S OWN ONE-LINE DESCRIPTION** is in the installed `plugin.json`, beside its name and tags. It is the text the module browser shows, and it is often the only statement of what a module is for: NYSTHI's Bitshifter describes itself there as "256 bits bitshifter with S&H and noise and inner LFO and VCO". Read it before writing a first line.
+
+**THOSE NAMES ARE THE TOOLTIPS.** What Rack shows when you hover a jack is exactly this text, so where a maker has written a real sentence into a name — NYSTHI's Bitshifter has "Pulse in to switch between RND or VCO generators" — the module is documenting itself and the census already has it. Read the names before deciding a module is undocumented.
+
+Some controls also carry a second line, in `paramDesc`/`inputDesc`/`outputDesc`. Only about 800 in the whole library do, and they are worth looking for because of what they usually say: normalling, and what a control does that its name does not convey. Venom, Stoermelder, Befaco, CountModula and Amalgamated Harmonics are the makers who wrote them.
+
+**WHEN THE PANEL RENDERS BLANK, FIND A PICTURE OF THE RUNNING MODULE.** Some makers draw their controls at runtime rather than in the artwork — VCV's Chords, Reverb, Convolver, Compressor and Host, and most of JW-Modules — and rsvg-convert gives a blank rectangle for those.
+
+The VCV library serves screenshots at **400 pixels wide, or 200**. Other widths 404; checked on 2026-09-11, when the 800 this spec used to name stopped working:
+
+    curl -sL "https://library.vcvrack.com/screenshots/400/<plugin slug>/<model slug>.png" -o /tmp/panel.png
+
+Verify you got an image and not an error page — `file /tmp/panel.png` — because a 404 saved to disk reads as a corrupt PNG rather than a failure.
+
+Failing that, most makers keep screenshots in their own repository, usually under `doc/` or `images/`. **Those are often stale**: a JW-Modules run found four modules whose controls postdate the maker's own pictures. Where a repository image disagrees with the installed `plugin.json` and the census, the installed module wins.
+
+**DRAW THE INDEX NUMBERS ONTO THE PANEL.** This is the single most useful thing you can do, and it turns "which jack is input 6" from inference into something you read off a picture. Inline the panel SVG and write each control's census index at its census position — parameters in one colour, inputs in another, outputs in a third — then look at the result.
+
+`research/annotate.py` does this, and it is what made the NYSTHI port map possible; a run tonight wrote its own version at `scratchpad/sheet2.py`. Either is a few minutes of work that removes the whole class of invisible tagging error.
+
 RENDER EVERY PANEL. It is not a check on the manual, it is a source in its own right: manuals go stale, and the panel is what the listener is sitting in front of. On Bogaudio — a careful maker with a good manual — the manual said ATACK and DECAY where the panel says ATTACK and RELEASE, and DECTECT where the panel says DETECT. Where they disagree the panel wins.
+
+## Match the version that is installed
+
+A maker's `main` branch documents the version they are working on, not the one in the rack. Check the installed version in the plugin's `plugin.json` and read the matching tag.
+
+This is not pedantry. Venom's installed build is 2.15.0 while `main` is 2.16.2, and the documentation was restructured in between; Fundamental's installed build is 2.6.4 while the website documents 2.6.5, which changed a filter's range. Both were caught by checking. Cite the manual URL as `source`, and say in your report which version you actually read.
+
+## Read the maker's source where there is any
+
+Most makers publish their code, and it answers what the manual leaves out. Rack's own Core manual says nothing about the Audio module's level knob, nothing about its left-to-both normalling and nothing about the voltage thresholds in the CV-to-MIDI modules; all of that came from the source, and those are now the most useful lines in that entry.
+
+Use it for what a manual cannot say: exact ranges and thresholds, what a control does at its extremes, what an undocumented button is for, what a port outputs when nothing is patched. Cite the manual as the `source` — the code is corroboration, not the record — and say in your report which facts came from it.
+
+NYSTHI is the counter-example and the reason to check rather than assume: its repository holds a README, a screenshot and a changelog, and no code at all.
+
+**AND WHERE THERE IS NO SOURCE, LOOK IN THE INSTALLED PLUGIN FOLDER.** NYSTHI ships a 204KB `CHANGELOG.md` beside its binary, and it is not a changelog in the ordinary sense — for many modules it is a control-by-control description written by the maker, including menu items and lamp colour legends. It describes **71 of the 149 installed NYSTHI modules**, and it is the only documentation those modules have anywhere:
+
+    ~/Library/Application Support/Rack2/plugins-mac-arm64/<Plugin>/CHANGELOG.md
+
+`strings` on the binary is the last resort and it works: it yielded the Programmer's menu wording verbatim, including one option the changelog omits. Check the plugin's own folder for any `.md`, `.txt` or `res/` documentation before concluding a maker has none.
 
 ## Voice
 
@@ -88,6 +128,14 @@ Write units exactly like this, whatever case the panel prints them in: `0-10V`, 
 
 An expander's first line says which module it expands and that it sits immediately to the right of it. If one of its controls is completed by a knob on the base module, say so. That is not leaning on another entry — it is what the module actually is.
 
+## Two rulings on families
+
+**A time or rate input is `cv`, even when it doubles per volt.** This covers tempo and BPM jacks, and equally an envelope's rise and fall CVs that halve or double the stage per volt. Octave scaling on a time control is still a time control. A BPM jack scaled two to the power of volts is arithmetically the same as 1V/octave, but the colour is there to answer "what do I patch here", and nobody patches a keyboard into a tempo input. Reserve `pitch` for a port whose voltage sets an audible pitch or a filter frequency.
+
+**Anything that tracks 1V per octave is `pitch`, filter cutoffs included.** The family answers "what do I patch here", and a cutoff that tracks 1V/octave takes the same cable a note pitch does. Reserve `cv` for inputs with no such scaling.
+
+**A port whose meaning depends on what is plugged into the module gets no family at all.** Host's audio jacks carry whatever the hosted plugin sends; a mult carries whatever you give it. The rule Chris set stands: no colour says nobody knows, a wrong colour lies.
+
 ## When the manual does not say
 
 Leave the control out rather than guess. An entry that covers eight of ten controls is useful; one that invents the other two is not.
@@ -97,6 +145,10 @@ Leave the control out rather than guess. An entry that covers eight of ten contr
 A tag says which line covers which jack or knob, by index. **Index order is not panel order, and assuming it is will reverse an entry without looking wrong.** NYSTHI's Model277 numbers its four output jacks from the bottom up: index 3 is the top jack, index 0 the bottom. An entry tagged from the numbering alone told somebody clicking the top jack about the bottom one.
 
 `census/<Plugin>.json` carries `inputPos`, `outputPos` and `paramPos` beside the names — the centre of each control on the panel, as x and y, with y increasing downwards. Work out the order from those, then check it against the rendered panel. Never from the index.
+
+**A tag points at a line that describes THAT control, or at nothing.** Where no line describes it, leave it untagged: the panel then says "nothing here describes this one yet", which is true and useful. Pointing at the nearest line instead is the same fault as a wrong colour — it reads perfectly and it lies. Bogaudio's NOISE had all five of its noise outputs pointing at a line about the polyphony menu, so clicking the blue noise jack answered a question nobody asked.
+
+When you find a control with no line, the fix is usually to write the line, not to stretch a neighbouring one.
 
 Two habits that catch the rest: after tagging, read the tags back as sentences ("the top output is the full delay time — is it?"), and be suspicious whenever a tag map looks like a tidy run of 0, 1, 2, 3.
 

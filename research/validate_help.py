@@ -24,7 +24,8 @@ LEANING = re.compile(
 # The sideways way of saying a limit. "up to ten seconds" is a range and is fine; "up to the knob"
 # is a relationship dressed as one.
 SIDEWAYS = re.compile(r'up to (the|its|whatever)\b', re.I)
-SELLING = re.compile(r'\b(simply|just|easy|easily|powerful|versatile|perfect)\b', re.I)
+SELLING = re.compile(r'\b(simply|just|easy|easily|powerful|versatile|perfect(?! balance))\b',
+                     re.I)
 # A thing doing what only a person does. It reads as writing rather than as fact, and it is
 # usually covering for not having said what the control does — "where the wave sits in the mix"
 # was standing in for "the phase of that wave".
@@ -43,8 +44,15 @@ GROUPED = re.compile(
     r' (jacks|knobs|inputs|outputs|buttons|ports|rows|columns|sliders)\b', re.I)
 
 
+# Rack's own Core is not a plugin folder: it is built into the application, and its manifest
+# lives inside the app bundle.
+CORE = ('/Applications/VCV Rack 2 Free.app/Contents/Resources/Core.json')
+
+
 def models_of(slug):
     path = os.path.join(PLUGINS, slug, 'plugin.json')
+    if slug == 'Core' and os.path.exists(CORE):
+        path = CORE
     if not os.path.exists(path):
         return None
     with open(path) as f:
@@ -80,6 +88,24 @@ def check(path):
             problems.append('%s: %d entries for models that are not installed: %s'
                             % (name, len(extra), ', '.join(extra[:8])))
 
+    # A tag pointing at a line about the context menu is a tag pointing at the nearest line
+    # rather than the right one — see STYLE.md.
+    for model, entry in sorted(entries.items()):
+        if isinstance(entry, dict):
+            lines_ = entry.get('lines', [])
+            for kind in ('param', 'in', 'out'):
+                for idx, li in (entry.get(kind) or {}).items():
+                    if not isinstance(li, int) or li >= len(lines_):
+                        continue
+                    text = lines_[li]
+                    # ONLY a line that is wholly about the menu. A line that describes the
+                    # control and mentions a menu option in passing — "the output soft-clips at
+                    # 12V; hard clipping or none on the menu" — is a good line for that output.
+                    if text.startswith(('Menu — ', 'Note — ')):
+                        problems.append(
+                            '%s/%s: %s %s is tagged to a line about the menu: "%s"'
+                            % (name, model, kind, idx, text[:60]))
+
     for model, entry in sorted(entries.items()):
         where = '%s/%s' % (name, model)
         # An entry is a list of lines, or an object carrying those lines plus the tags saying
@@ -91,17 +117,32 @@ def check(path):
         if not lines:
             problems.append('%s: empty' % where)
             continue
-        if len(lines) > 40:
-            problems.append('%s: %d lines, which is more controls than a module has'
+        # A GENEROUS CEILING, NOT A TARGET. Probably Note MathNerd has 66 input jacks and
+        # Manic Compression MB has 59 attenuverters; a cap near the size of a large module makes
+        # writers merge unlike controls onto one line, which is the fault this whole file exists
+        # to prevent. This is here only to catch a runaway generator.
+        if len(lines) > 200:
+            problems.append('%s: %d lines, which is more than any module has controls'
                             % (where, len(lines)))
         for i, line in enumerate(lines):
             # The first line is about the module, not a control, and may lead with its name.
             if i > 0 and not line.startswith(('Menu — ', 'Note — ')) and LABELLED.match(line):
                 problems.append('%s line %d names the control it describes: "%s"'
                                 % (where, i, line.split(' — ')[0]))
-            if i > 0 and GROUPED.match(line):
-                problems.append('%s line %d recites a row to somebody who clicked one of it: "%s"'
-                                % (where, i, line[:60]))
+            # ONLY WHEN THE LINE COUNTS THE VERY THING IT IS ATTACHED TO. "The four outputs",
+            # tagged to an output, recites the row. "The two inputs added together", tagged to an
+            # output, describes that output in terms of what feeds it, which is correct and the
+            # natural way to say it.
+            hit = GROUPED.match(line)
+            if i > 0 and hit and isinstance(entry, dict):
+                noun = hit.group(3).lower()
+                kinds = {'inputs': 'in', 'ports': 'in', 'outputs': 'out',
+                         'knobs': 'param', 'buttons': 'param', 'sliders': 'param'}
+                kind = kinds.get(noun)
+                if kind and i in ((entry.get(kind) or {}).values()):
+                    problems.append(
+                        '%s line %d recites a row to somebody who clicked one of it: "%s"'
+                        % (where, i, line[:60]))
             if len(line) > 200:
                 problems.append('%s line %d: %d characters, too long to hear in one piece'
                                 % (where, i, len(line)))

@@ -47,6 +47,15 @@ def main():
             'inputs':  [p.get('name') for p in r.get('inputs', [])],
             'outputs': [p.get('name') for p in r.get('outputs', [])],
         }
+        # THE SECOND LINE OF THE TOOLTIP, where a maker wrote one. Only about 800 controls in the
+        # whole library have it, and it is worth carrying because of what it usually says:
+        # normalling, and what a control does that its name does not convey.
+        for kind, key in (('params', 'paramDesc'), ('inputs', 'inputDesc'), ('outputs', 'outputDesc')):
+            desc = {str(i): (p.get('description') or '').strip()
+                    for i, p in enumerate(r.get(kind, []))
+                    if (p.get('description') or '').strip()}
+            if desc:
+                entry[key] = desc
         # WHERE EACH CONTROL SITS, because index order is not panel order. NYSTHI's Model277
         # numbers its output jacks from the bottom up, and an entry tagged from the numbering
         # alone was exactly reversed. y increases downwards.

@@ -61,8 +61,35 @@ def tags_of(entry):
     return lines, out
 
 
+# What a family word means to Clarity's palette. Kept in step with FAM_* in src/Palette.hpp.
+FAMILIES = {'audio': 0, 'cv': 1, 'trigger': 2, 'pitch': 3}
+
+
+def families_of(entry):
+    """The family per input and per output, as palette numbers, -1 where we did not say.
+
+    These are read off the panels while the help was written, and they are what Clarity colours a
+    jack from — so they are emitted into the same table rather than living only in the JSON."""
+    if not isinstance(entry, dict):
+        return [], []
+    fam = entry.get('family') or {}
+    out = []
+    for kind in ('in', 'out'):
+        m = fam.get(kind) or {}
+        if not m:
+            out.append([])
+            continue
+        highest = max(int(k) for k in m)
+        table = [-1] * (highest + 1)
+        for k, v in m.items():
+            if v in FAMILIES:
+                table[int(k)] = FAMILIES[v]
+        out.append(table)
+    return out
+
+
 def main():
-    entries = []          # (plugin, model, [lines], [in, out, param])
+    entries = []          # (plugin, model, [lines], [in, out, param], [infam, outfam])
     sources = []          # (plugin, url, count)
     for name in sorted(os.listdir(HELP)):
         if not name.endswith('.json'):
@@ -73,7 +100,7 @@ def main():
         mods = doc['modules']
         for model, entry in sorted(mods.items()):
             lines, tables = tags_of(entry)
-            entries.append((plugin, model, lines, tables))
+            entries.append((plugin, model, lines, tables, families_of(entry)))
         sources.append((plugin, doc.get('source', ''), len(mods)))
 
     entries.sort()
@@ -87,7 +114,7 @@ def main():
             f.write('  %-24s %4d modules  %s\n' % (plugin, count, url))
         f.write('*/\n#include "Help.hpp"\n\n#include <cstddef>\n\n')
 
-        for i, (plugin, model, lines, tables) in enumerate(entries):
+        for i, (plugin, model, lines, tables, fams) in enumerate(entries):
             f.write('static const char* const L%d[] = {\n' % i)
             for line in lines:
                 f.write('\t%s,\n' % cstr(line))
@@ -96,11 +123,17 @@ def main():
                 if table:
                     f.write('static const short %s%d[] = {%s};\n'
                             % (kind, i, ','.join(str(x) for x in table)))
+            for kind, table in zip(('FI', 'FO'), fams):
+                if table:
+                    f.write('static const signed char %s%d[] = {%s};\n'
+                            % (kind, i, ','.join(str(x) for x in table)))
         f.write('\n/** Sorted by plugin then model, so it can be searched rather than walked. */\n')
         f.write('const HelpEntry HELP[] = {\n')
-        for i, (plugin, model, lines, tables) in enumerate(entries):
+        for i, (plugin, model, lines, tables, fams) in enumerate(entries):
             cells = []
             for kind, table in zip(('I', 'O', 'P'), tables):
+                cells.append('%s%d, %d' % (kind, i, len(table)) if table else 'NULL, 0')
+            for kind, table in zip(('FI', 'FO'), fams):
                 cells.append('%s%d, %d' % (kind, i, len(table)) if table else 'NULL, 0')
             f.write('\t{%s, %s, L%d, %d, %s},\n'
                     % (cstr(plugin), cstr(model), i, len(lines), ', '.join(cells)))
@@ -108,8 +141,9 @@ def main():
         f.write('const int HELP_COUNT = %d;\n' % len(entries))
 
     tagged = sum(1 for e in entries if any(e[3]))
-    print('%d modules across %d makers, %d with controls tagged -> %s'
-          % (len(entries), len(sources), tagged, OUT))
+    typed = sum(sum(1 for x in t if x >= 0) for e in entries for t in e[4])
+    print('%d modules across %d makers, %d with controls tagged, %d ports typed -> %s'
+          % (len(entries), len(sources), tagged, typed, OUT))
     return 0
 
 

@@ -1,0 +1,1180 @@
+{
+ "plugin": "MSM",
+ "source": "https://github.com/netboy3/MSM-vcvrack-plugin/blob/2.0.3/README.md",
+ "read": "2026-09-12",
+ "modules": {
+  "ADSR": {
+   "lines": [
+    "Envelope generator with a slider for each of the four stages, a bendable curve on the attack, decay and release, and a gate output marking the end of each stage",
+    "Sets the length of the attack stage, from 10ms to 1 second.",
+    "Sets the length of the decay stage, from 10ms to 1 second.",
+    "Sets the level the envelope holds while the gate stays high, 0V at the bottom of the travel and 10V at the top.",
+    "Sets the length of the release stage, from 10ms to 1 second.",
+    "Bends that stage's curve by raising its progress to this power, 0.1 to 4; at 1 the stage is a straight ramp, below 1 it moves quickly at the start, above 1 it moves slowly at the start.",
+    "Raises the decay shape by 0.4 per volt, added to the decay shape knob and clamped to the same 0.1 to 4 range.",
+    "Lengthens that stage by 0.1 second per volt, added to the stage's own slider, reading 0-10V.",
+    "Raises the sustain level by 1V of envelope per volt, added to the S slider, reading 0-10V.",
+    "A high gate runs the envelope through its attack and decay and holds it at the sustain level; when the gate falls the release begins. The jack reads high above 1V and low below 0V.",
+    "While the voltage here is high the envelope is forced into its decay stage. The jack reads high above 1V and low below 0V.",
+    "Holds 10V, dropping to 0V about 10ms into the attack stage and returning to 10V the moment the attack ends.",
+    "Holds 10V, dropping to 0V about 10ms into the decay stage and returning to 10V the moment the decay ends.",
+    "Holds 10V, dropping to 0V about 10ms into the sustain stage and returning to 10V the moment the sustain ends.",
+    "Holds 10V, dropping to 0V about 10ms into the release stage and returning to 10V the moment the release ends.",
+    "The envelope, 0V to 10V.",
+    "The envelope subtracted from 10V, so it reads 10V while the envelope is at 0V and 0V at the envelope's peak.",
+    "Note — a lamp for each stage lights while the envelope is in that stage."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 5,
+    "6": 5
+   },
+   "in": {
+    "0": 7,
+    "1": 7,
+    "2": 8,
+    "3": 7,
+    "4": 9,
+    "5": 10,
+    "6": 6
+   },
+   "out": {
+    "0": 15,
+    "1": 16,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "notes": "The EOA, EOD, EOS and EOR jacks are named for the end of each stage and the maker's tooltips call them the attack, decay, sustain and release period. The code holds each one at 10V and drops it to 0V during its own stage, so the useful edge is the rise at the end of the stage; the lines follow the code."
+  },
+  "Bitcrusher": {
+   "lines": [
+    "Distortion that quantises the signal to a shorter word length and holds each sample for longer",
+    "Sets the word length the signal is quantised to, 8 bits down to 0 bits.",
+    "Adds one bit per volt to the BIT knob.",
+    "Sets how often a new sample is taken, from every sample at the top of the travel down to one sample in a hundred.",
+    "Drives the signal into a soft-clipping stage before it is quantised, from no gain at 0 to heavy saturation at 0.95.",
+    "The signal that is crushed.",
+    "The crushed signal, soft-clipped."
+   ],
+   "param": {
+    "0": 1,
+    "1": 4,
+    "2": 3
+   },
+   "in": {
+    "0": 5,
+    "1": 2
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   }
+  },
+  "BlankPanel": {
+   "lines": [
+    "A blank panel carrying the MSM logo, for filling a gap in the rack"
+   ],
+   "param": {},
+   "in": {},
+   "out": {}
+  },
+  "DualDelay": {
+   "lines": [
+    "Two independent delay lines, each free-running or locked to a clock, with feedback, a high-pass and a low-pass filter on the delayed signal, and crossfeed from the other line",
+    "Chooses whether that delay line runs free, its time taken straight from the TIME knob, or locks to the clock at CLK IN and delays by a note division.",
+    "Sets the delay: 1ms to 10 seconds when the line runs free, or one of twenty-five note divisions from a 1/128 triplet to 8 bars when it is synced. The display above shows the current setting.",
+    "Adds a tenth of the TIME knob's travel per volt for that line, reading 0-10V.",
+    "Sets how much of that line's delayed signal is fed back into it, -100% to 100%; a negative setting feeds it back with its phase flipped.",
+    "Adds 10% of feedback per volt to that line's FEEDBACK knob.",
+    "Sets the cutoff of the low-pass filter on that line's delayed signal, 1kHz to 10kHz. Turning the knob down from the top of its travel switches the filter on, and a lamp shows that it is running.",
+    "Sets the cutoff of the high-pass filter on that line's delayed signal, 1kHz to 10kHz. Turning the knob up from the bottom of its travel switches the filter on, and a lamp shows that it is running.",
+    "Adds a tenth of the low-pass knob's travel per volt for that line, and patching a cable here switches the filter on whatever the knob is set to.",
+    "Adds a tenth of the high-pass knob's travel per volt for that line, and patching a cable here switches the filter on whatever the knob is set to.",
+    "Crossfades that line's main output between the signal coming in and the delayed signal.",
+    "Moves that line's DRY/WET mix 10% towards wet per volt.",
+    "Attenuates that line's input before it reaches both the delay and the dry path, 0% to 100%.",
+    "Feeds IN B into delay line A, from silence to full level, joining whatever IN A is carrying.",
+    "Feeds IN A into delay line B, from silence to full level, joining whatever IN B is carrying.",
+    "Empties that delay line's buffer, and lights red when it fires.",
+    "A 10V trigger empties that delay line's buffer.",
+    "The clock the synced delay lines measure against; the gap between two rising edges is taken as a quarter note.",
+    "The signal fed into that delay line.",
+    "That line's incoming and delayed signals mixed by its DRY/WET knob.",
+    "That line's delayed signal alone, after its filters, with none of the incoming signal."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 4,
+    "5": 4,
+    "6": 6,
+    "7": 7,
+    "8": 6,
+    "9": 7,
+    "10": 10,
+    "11": 10,
+    "12": 12,
+    "13": 12,
+    "14": 13,
+    "15": 14,
+    "16": 15,
+    "17": 15
+   },
+   "in": {
+    "0": 17,
+    "1": 3,
+    "2": 3,
+    "3": 5,
+    "4": 5,
+    "5": 8,
+    "6": 9,
+    "7": 8,
+    "8": 9,
+    "9": 11,
+    "10": 11,
+    "11": 18,
+    "12": 18,
+    "15": 16,
+    "16": 16
+   },
+   "out": {
+    "0": 19,
+    "1": 19,
+    "2": 20,
+    "3": 20
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "audio",
+     "12": "audio",
+     "15": "trigger",
+     "16": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "notes": "Inputs 13 and 14 are declared in the code as level CV jacks but are not placed on the panel and are never read, so they carry no line. The LEVEL knobs therefore have no CV input."
+  },
+  "TreasureVCO": {
+   "lines": [
+    "Oscillator that reads a wavetable through three modulation algorithms, running at audio rate or a hundred times slower as an LFO",
+    "Switches the oscillator between audio rate and a rate one hundredth of it.",
+    "Sets the octave in seven steps, each step moving the pitch by twelve semitones.",
+    "Raises the pitch by up to twelve semitones above the octave setting.",
+    "Detunes the oscillator by up to a semitone either way.",
+    "Picks the base waveform the modulation works on, fourteen of them.",
+    "Adds three base waveform steps per volt to the TYPE knob.",
+    "Sets the number of interpolation points between 512 and 2047; a higher setting gives a more intricate pattern.",
+    "Adds 120 interpolation points per volt to the SIZE knob.",
+    "Sets the depth of that modulation algorithm on the base waveform, 0.01 to 1.",
+    "Attenuates and inverts the voltage at that modulation input before it reaches the MOD setting, -100% to 100%, with a squared response.",
+    "Shifts that MOD setting through its own attenuverter; with this jack empty the MOD knob alone sets the depth.",
+    "Attenuates and inverts the signal at the FM CV input, -100% to 100%, with a squared response.",
+    "Modulates the pitch through the FM CV knob, twelve semitones per volt at full setting.",
+    "Sets the pitch, twelve semitones per volt.",
+    "A rising edge sends the pattern generator back to the start of its cycle, which is most audible in LFO mode.",
+    "The oscillator, soft-clipped, peaking near 7V.",
+    "Menu — four panel themes: Classic, Night Mode, Espen's Treasure | Jedi and Omri's Treasure | Mushroom."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 12,
+    "5": 5,
+    "6": 7,
+    "7": 9,
+    "8": 9,
+    "9": 9,
+    "10": 10,
+    "11": 10,
+    "12": 10
+   },
+   "in": {
+    "0": 14,
+    "1": 15,
+    "2": 6,
+    "3": 8,
+    "4": 11,
+    "5": 11,
+    "6": 11,
+    "7": 13
+   },
+   "out": {
+    "0": 16
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   }
+  },
+  "Fade": {
+   "lines": [
+    "Three crossfaders: one across IN 1 and IN 2, one across IN 3 and IN 4, and a third across the results of the other two",
+    "Crossfades OUT A from IN 1 at the counter-clockwise end to IN 2 at the clockwise end.",
+    "Crossfades OUT B from IN 3 at the counter-clockwise end to IN 4 at the clockwise end.",
+    "Crossfades OUT AB from the A fader's result to the B fader's result.",
+    "Reaches OUT A alone with the A knob fully counter-clockwise.",
+    "Reaches OUT A alone with the A knob fully clockwise.",
+    "Reaches OUT B alone with the B knob fully counter-clockwise.",
+    "Reaches OUT B alone with the B knob fully clockwise.",
+    "Moves the A crossfade a tenth of its travel towards IN 2 per volt.",
+    "Moves the B crossfade a tenth of its travel towards IN 4 per volt.",
+    "Moves the AB crossfade a tenth of its travel towards the B fader's result per volt.",
+    "IN 1 and IN 2 crossfaded by the A knob.",
+    "IN 3 and IN 4 crossfaded by the B knob.",
+    "The A and B fader results crossfaded by the AB knob.",
+    "Note — every jack is DC-coupled, so the faders work on control voltages and on audio alike."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "5": 9,
+    "6": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "2": 13
+   },
+   "family": {
+    "in": {
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   }
+  },
+  "MLFO": {
+   "lines": [
+    "Two low-frequency oscillators sharing one frequency knob, each morphing continuously between five waveforms, with a crossfade of the two on a third output",
+    "Sets the frequency of both oscillators, from about 0.002Hz to 128Hz.",
+    "Morphs that oscillator's main output through sine, triangle, sawtooth, square and random staircase, crossfading between each neighbouring pair.",
+    "Advances that oscillator's morph by one waveform per volt, added to its WAVE knob.",
+    "Attenuates the signal at that oscillator's FM input, 0% to 100%.",
+    "Modulates that oscillator's frequency through its FM knob, doubling the frequency per volt at full setting.",
+    "Sets the pulse width of that oscillator's square wave, 1% to 99%.",
+    "Switches that oscillator's outputs between bipolar, swinging -5V to 5V, and unipolar, 0V to 10V.",
+    "Shifts that oscillator's waveforms by half a cycle.",
+    "Crossfades MIX OUT from OUT A to OUT B.",
+    "Moves the MIX crossfade a tenth of its travel towards OUT B per volt.",
+    "A rising edge sends both oscillators back to the start of their cycle.",
+    "Oscillator A's sine wave.",
+    "Oscillator A's triangle wave.",
+    "A staircase made by sampling an internal noise source on every rising edge of oscillator A's square wave.",
+    "Oscillator B's sawtooth wave.",
+    "Oscillator B's square wave, its width set by PW B.",
+    "Oscillator A's morphed waveform, as set by WAVE A.",
+    "Oscillator B's morphed waveform, as set by WAVE B.",
+    "OUT A and OUT B crossfaded by the MIX knob."
+   ],
+   "param": {
+    "1": 1,
+    "2": 4,
+    "3": 6,
+    "5": 7,
+    "6": 8,
+    "7": 2,
+    "8": 4,
+    "9": 6,
+    "11": 7,
+    "12": 8,
+    "13": 2,
+    "14": 9
+   },
+   "in": {
+    "0": 5,
+    "2": 11,
+    "3": 3,
+    "4": 5,
+    "6": 3,
+    "7": 10
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "6": 15,
+    "7": 16,
+    "8": 17,
+    "9": 18,
+    "10": 19,
+    "11": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    }
+   },
+   "notes": "Parameters 0, 4 and 10 and inputs 1 and 5 are declared in the code but are not placed on the panel, so they carry no line."
+  },
+  "Morph": {
+   "lines": [
+    "Crossfades a chain of two to eight inputs down to one output",
+    "Sets how many inputs take part, from two to eight; a lamp marks each input that is in the chain.",
+    "Sweeps the output along the chain of active inputs, crossfading between each neighbouring pair.",
+    "Moves the morph a tenth of the knob's travel along the chain per volt.",
+    "One of the inputs in the morph chain; it reaches the output as the morph sweeps past it, and an unpatched jack contributes 0V.",
+    "The morphed signal."
+   ],
+   "param": {
+    "0": 2,
+    "1": 1
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 3
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "8": "cv"
+    }
+   }
+  },
+  "Mult": {
+   "lines": [
+    "Three separate sections, each adding or subtracting a pair of inputs and splitting the result to six outputs",
+    "Chooses whether that section adds its two inputs or subtracts the lower one from the upper one.",
+    "The first input of that section; the section's other input is added to it or subtracted from it.",
+    "The second input of that section; it is added to the section's other input or subtracted from it.",
+    "Carries that section's sum or difference, the same signal on every one of the section's outputs."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 2,
+    "3": 3,
+    "4": 2,
+    "5": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "9": 4,
+    "10": 4,
+    "11": 4,
+    "12": 4,
+    "13": 4,
+    "14": 4,
+    "15": 4,
+    "16": 4,
+    "17": 4
+   }
+  },
+  "Noise": {
+   "lines": [
+    "Noise generator with a white, pink or brown output and a second output blending white noise with a filtered version of it",
+    "Picks white, pink or brown noise for the NOISE output.",
+    "Sets the cutoff of the low-pass filter in the coloured noise path, 10kHz to 50kHz.",
+    "Sets the cutoff of the high-pass filter in the coloured noise path, 500Hz to 2.5kHz.",
+    "Crossfades the COLORED NOISE output from plain white noise to the filtered noise.",
+    "Scales the amplitude of both outputs, silent at 0V and full at 10V; with nothing patched here both outputs stay at full level.",
+    "White, pink or brown noise, whichever TYPE selects.",
+    "White noise and the filtered noise blended by the MIX knob."
+   ],
+   "param": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 1
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   }
+  },
+  "Phaser": {
+   "lines": [
+    "Phaser of two to twenty all-pass stages swept by an internal LFO, with feedback around the network",
+    "Sets the bottom of the frequency range the all-pass stages are swept through.",
+    "Sets the top of the frequency range the all-pass stages are swept through.",
+    "Raises the bottom of the sweep range by a tenth of the LOW knob's travel per volt.",
+    "Raises the top of the sweep range by a tenth of the HIGH knob's travel per volt.",
+    "Sets the number of all-pass stages, two to twenty; more stages give more notches.",
+    "Sets the frequency of the LFO that sweeps the stages, from stopped to about 7Hz.",
+    "Sets how much of the all-pass network's output is fed back into its input, 0% to 95%, sharpening the notches.",
+    "Sets how much of the phase-shifted signal is mixed with the incoming signal.",
+    "Picks the LFO shape: sine, triangle, sawtooth or square.",
+    "Sets how far the LFO moves the stages across the range between LOW and HIGH.",
+    "Adds a tenth of the LFO DEPTH knob's travel per volt.",
+    "Sets the pulse width of the LFO's square wave, which has no effect on the other three LFO shapes.",
+    "The signal fed through the all-pass network.",
+    "The phased signal."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "8": 12
+   },
+   "in": {
+    "0": 11,
+    "1": 3,
+    "2": 4,
+    "3": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "notes": "The LOW and HIGH knobs disagree between sources: their tooltips display 10Hz to 8kHz, while the code scales the knob to 0 to 20kHz. The lines give no figure for that reason."
+  },
+  "RandomSource": {
+   "lines": [
+    "Sample and hold building staircase voltages out of whatever is patched into it, with a slew limiter on a second output",
+    "Attenuates the held voltage before it reaches both outputs, silent at 0 and full at 1.",
+    "Attenuates the voltage at the CV S input before it adds to the SAMPLE setting, 0 to 1.",
+    "Adds to the SAMPLE setting through the CV S knob, a fifth of the knob's travel per volt.",
+    "Adds 5V to the sampled voltage in one position and passes it as sampled in the other.",
+    "Sets how fast the SLEW OUT voltage travels, from 10000V per second at 0 to 0.1V per second at 1.",
+    "Slows the slew, adding a tenth of the SLEW knob's travel per volt.",
+    "Crossfades the slew between a constant rate and a rate proportional to the distance left to travel, which rounds the corners of the staircase.",
+    "A rising edge takes a new sample of the IN voltage and holds it until the next one.",
+    "The voltage that is sampled; with nothing patched here the SAMPLE knob's own value is sampled instead, so the randomness comes from what you patch in.",
+    "The voltage held since the last trigger, scaled by SAMPLE.",
+    "The held voltage with the slew limiter applied."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 4,
+    "3": 5,
+    "4": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 6,
+    "3": 3
+   },
+   "out": {
+    "0": 10,
+    "1": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   }
+  },
+  "Ring": {
+   "lines": [
+    "Two independent ring modulators, each crossfading its carrier with the product of carrier and modulator",
+    "Crossfades that section's output from the plain carrier to the ring-modulated signal.",
+    "Moves that section's MIX 10% towards the ring-modulated signal per volt.",
+    "The carrier of that section; it is what the output carries with MIX fully counter-clockwise.",
+    "The modulator of that section, multiplied with the carrier to make the ring-modulated signal.",
+    "That section's carrier and ring-modulated signal blended by its MIX knob."
+   ],
+   "param": {
+    "2": 1,
+    "3": 1
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 2
+   },
+   "out": {
+    "0": 5,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "audio",
+     "4": "audio",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   }
+  },
+  "SimpleSlider": {
+   "lines": [
+    "A slider that either crossfades two inputs or attenuates their sum",
+    "In crossfader mode moves the output from IN 1 at the bottom of the travel to IN 2 at the top; in VCA mode attenuates the two inputs summed, silent at the bottom and full at the top.",
+    "Chooses whether the slider crossfades between the two inputs or attenuates their sum.",
+    "Reaches the output alone with the slider at the bottom in crossfader mode, and is summed with IN 2 in VCA mode.",
+    "Reaches the output alone with the slider at the top in crossfader mode, and is summed with IN 1 in VCA mode.",
+    "Moves the slider position a tenth of its travel per volt.",
+    "The crossfaded or attenuated signal."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "2": "cv"
+    }
+   }
+  },
+  "CrazyMult": {
+   "lines": [
+    "Eight inputs, each switched onto one of two summing buses or off, with each bus repeated across eight output jacks",
+    "Routes that input to the A bus, to the B bus, or to neither.",
+    "Adds to that row's switch: about 3.2V or more selects B, and about -3.2V or less selects A.",
+    "The signal that row sends to whichever bus its switch selects.",
+    "The sum of every input switched to A, carried identically on each of the A jacks.",
+    "The sum of every input switched to B, carried identically on each of the B jacks.",
+    "Menu — Positive sums the routed inputs as they are; Negative sums them inverted."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 5,
+    "9": 5,
+    "10": 5,
+    "11": 5,
+    "12": 5,
+    "13": 5,
+    "14": 5,
+    "15": 5
+   },
+   "family": {
+    "in": {
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv"
+    }
+   }
+  },
+  "PAN-VCA": {
+   "lines": [
+    "Two voltage-controlled amplifiers that either run as separate channels or feed a constant-power panner",
+    "Chooses between two independent amplifiers and a panner fed by both inputs mixed together.",
+    "Attenuates the left channel, 0% to 100%; in pan mode it sets the level of the mixed signal feeding OUT L.",
+    "Attenuates the right channel, 0% to 100%; in pan mode it sets the level of the mixed signal feeding OUT R.",
+    "Chooses whether that channel's CV input acts linearly or exponentially, leaving the knob's own response untouched.",
+    "Places the mixed signal across OUT L and OUT R on a constant-power curve, hard left at -1 and hard right at +1.",
+    "Shifts the pan position of the mixed signal.",
+    "Scales the left channel, silent at 0V and full at 10V; with nothing patched here the channel stays at its knob setting.",
+    "Scales the right channel, silent at 0V and full at 10V; with nothing patched here the channel stays at its knob setting.",
+    "The left input; in pan mode it is mixed with the right input before the panner.",
+    "The right input; in pan mode it is mixed with the left input before the panner.",
+    "The left channel after its attenuator, or the left side of the pan.",
+    "The right channel after its attenuator, or the right side of the pan.",
+    "The two attenuated channels added together.",
+    "The two attenuated channels added together and then subtracted from 1V."
+   ],
+   "param": {
+    "0": 2,
+    "1": 3,
+    "2": 5,
+    "3": 4,
+    "4": 4,
+    "5": 1
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "3": 7,
+    "4": 8,
+    "5": 6
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "4": 13,
+    "5": 14
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "4": "audio",
+     "5": "audio"
+    }
+   },
+   "notes": "The panel prints SUM- and the manual calls it the difference of the two inputs, but the code computes 1V minus the sum of the two attenuated channels. The line follows the code. Input 2 and outputs 2 and 3 are declared in the code, are not placed on the panel and are never read."
+  },
+  "OSCiX": {
+   "lines": [
+    "Two oscillators with linear and exponential FM, cross-modulation between them, hard sync in both directions, and a wave folder",
+    "In analogue both oscillators drift with a slow random pitch slew and carry richer harmonics; in digital the COARSE knobs snap to whole semitones.",
+    "Switches that oscillator between audio rate and a rate one hundredth of it.",
+    "Sets that oscillator's pitch in semitones, fifty-four either side of C4 at 261.63Hz.",
+    "Detunes that oscillator by up to three semitones either way, with a squared response.",
+    "Sets that oscillator's pitch, twelve semitones per volt.",
+    "Attenuates and inverts the linear FM reaching that oscillator, -100% to 100%, with a squared response.",
+    "Frequency-modulates that oscillator linearly through its LIN attenuverter; with this jack empty the other oscillator's sine feeds the attenuverter instead.",
+    "Attenuates and inverts the exponential FM reaching that oscillator, -100% to 100%.",
+    "Frequency-modulates that oscillator exponentially through its EXP attenuverter; with this jack empty the other oscillator's sine feeds the attenuverter instead.",
+    "Scales every FM path in the module at once, from none at 0 to full at 1.",
+    "Adds one unit of FM INDEX per volt, on top of the FM INDEX knob.",
+    "Resets oscillator A at every rising zero crossing of oscillator B's sine.",
+    "Resets oscillator B at every rising zero crossing of oscillator A's sine.",
+    "Any positive voltage here resets oscillator A at every rising zero crossing of oscillator B's sine.",
+    "Any positive voltage here resets oscillator B at every rising zero crossing of oscillator A's sine.",
+    "A rising edge sends that oscillator back to the start of its cycle.",
+    "Sets the width of oscillator B's square wave, 0% to 100%.",
+    "Widens oscillator B's square by 10% per volt, added to the PW knob.",
+    "Oscillator A's sine wave, peaking at 6V.",
+    "Oscillator A's triangle wave, peaking at 6V.",
+    "Oscillator A's sawtooth wave, peaking at 6V.",
+    "Oscillator B's sine wave, peaking at 6V.",
+    "Oscillator B's square wave, peaking at 6V, its width set by PW.",
+    "Drives the signal into the folder, from half level at 0 to full level at 1, so more of it creases over.",
+    "Attenuates and inverts the voltage at the F CV input before it adds to the FOLD setting.",
+    "Shifts the fold amount through the FOLD CV attenuverter.",
+    "Sets the extra folding applied to the part of the signal that rises above the fold window, 0 to 1.",
+    "Sets the extra folding applied to the part of the signal that falls below the fold window, 0 to 1.",
+    "Adds 0.4 to the UP setting per volt.",
+    "Adds 0.4 to the DN setting per volt.",
+    "Sets the level of the FOLD output, silent at 0 and full at 1.",
+    "Raises the FOLD output level by a tenth per volt, added to the FOLD INDEX knob.",
+    "The signal the folder works on; with nothing patched here it folds oscillator B's sine.",
+    "The folded signal, soft-clipped.",
+    "Replaces oscillator A's sine, triangle and sawtooth with a sine of a sine, a half-wave rectified sine and a full-wave rectified sine, and feeds the sine of a sine into the FM normalling."
+   ],
+   "param": {
+    "0": 1,
+    "3": 3,
+    "4": 3,
+    "5": 4,
+    "6": 4,
+    "14": 6,
+    "15": 8,
+    "16": 6,
+    "17": 8,
+    "19": 17,
+    "20": 24,
+    "21": 31,
+    "22": 2,
+    "23": 2,
+    "24": 12,
+    "25": 13,
+    "26": 10,
+    "27": 25,
+    "28": 27,
+    "29": 28,
+    "30": 35
+   },
+   "in": {
+    "0": 5,
+    "1": 5,
+    "3": 18,
+    "4": 7,
+    "5": 9,
+    "6": 7,
+    "7": 9,
+    "10": 16,
+    "11": 16,
+    "12": 33,
+    "13": 32,
+    "14": 14,
+    "15": 15,
+    "16": 11,
+    "17": 26,
+    "18": 29,
+    "19": 30
+   },
+   "out": {
+    "2": 19,
+    "3": 20,
+    "4": 21,
+    "5": 22,
+    "6": 23,
+    "7": 34
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "audio",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "cv"
+    },
+    "out": {
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio"
+    }
+   },
+   "notes": "Parameter 30 is an unmarked button over the OSCiX lettering, the easter egg the manual hints at. Parameters 1, 2, 7 to 13 and 18, inputs 2, 8 and 9, and outputs 0 and 1 are declared in the code but are not placed on the panel, so they carry no line."
+  },
+  "Rogue": {
+   "lines": [
+    "Single oscillator with seven fixed waveform outputs, running at audio rate or a hundred times slower as an LFO",
+    "In analogue the pitch drifts with a slow random slew and the waveforms carry richer harmonics; in digital the COARSE knob snaps to whole semitones and RAMP becomes a reverse sawtooth.",
+    "Switches the oscillator between audio rate and a rate one hundredth of it.",
+    "Sets the pitch in semitones, fifty-four either side of C4 at 261.63Hz.",
+    "Detunes the oscillator by up to three semitones either way, with a squared response.",
+    "Sets the pitch, twelve semitones per volt.",
+    "Attenuates the linear FM reaching the oscillator, 0% to 100%, with a squared response.",
+    "Frequency-modulates the oscillator linearly through the LIN knob.",
+    "Attenuates the exponential FM reaching the oscillator, 0% to 100%.",
+    "Frequency-modulates the oscillator exponentially through the EXP knob.",
+    "Sets the width of the square wave, 0% to 100%.",
+    "Widens the square by 10% per volt, added to the PW knob.",
+    "A rising edge sends the oscillator back to the start of its cycle.",
+    "The sine wave, peaking at 6V.",
+    "The ramp, peaking at 6V; it takes a different curvature in analogue mode and runs as a reverse sawtooth in digital mode.",
+    "The triangle wave, peaking at 6V.",
+    "The sawtooth wave, peaking at 6V.",
+    "The square wave, peaking at 6V, its width set by PW.",
+    "The sine wave with its negative half removed.",
+    "The sine wave with its negative half turned positive."
+   ],
+   "param": {
+    "0": 3,
+    "1": 4,
+    "2": 8,
+    "3": 6,
+    "4": 1,
+    "5": 10,
+    "6": 2
+   },
+   "in": {
+    "0": 12,
+    "1": 5,
+    "2": 7,
+    "3": 9,
+    "4": 11
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18,
+    "6": 19
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio"
+    }
+   }
+  },
+  "Wavefolder": {
+   "lines": [
+    "Wave folder with two folding algorithms, an offset that makes the folding asymmetric, and separate depth for the two sides",
+    "Drives the signal into the folder, from half level at 0 to double level at 1.5, so more of it creases over.",
+    "Attenuates and inverts the voltage at the CV F input before it adds to the FOLD setting.",
+    "Shifts the fold amount through the CV F attenuverter, a fifth of its range per volt.",
+    "Scales the extra folding applied to whatever passes outside the fold window, 0 to 5.",
+    "Sets the depth of the extra folding on one side of the signal, 0 to 1; which side that is depends on the setting of the I/II switch.",
+    "Sets the depth of the extra folding on one side of the signal, 0 to 1; which side that is depends on the setting of the I/II switch.",
+    "Adds 0.4 to the UP setting per volt.",
+    "Adds 0.4 to the DN setting per volt.",
+    "Offsets the signal by -2 to 2 before it is folded, so the upper and lower folds happen at different levels.",
+    "Chooses between the two folding algorithms, which differ in the curve they apply and in which side UP and DN act on.",
+    "Crossfades the output from the unfolded input to the folded signal.",
+    "Attenuates and inverts the voltage at the CV M input before it adds to the MIX setting.",
+    "Shifts the dry and folded balance through the CV M attenuverter, a fifth of its range per volt.",
+    "The signal that is folded.",
+    "The incoming signal and the folded signal blended by MIX."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 5,
+    "3": 6,
+    "4": 11,
+    "5": 9,
+    "6": 10,
+    "7": 4,
+    "8": 12
+   },
+   "in": {
+    "0": 14,
+    "1": 3,
+    "2": 7,
+    "3": 8,
+    "4": 13
+   },
+   "out": {
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "notes": "Algorithm I applies UP to the part of the signal above the fold window and DN to the part below it; algorithm II swaps them. The lines say so rather than naming a side."
+  },
+  "WaveShaper": {
+   "lines": [
+    "Three shaping stages fed from one common input plus an input of their own, mixed together and blended back with the dry signal",
+    "Sets how hard stage A shapes what reaches it, 1 down to -0.4.",
+    "Sets how hard stage B shapes what reaches it, 0 to 1.",
+    "Sets how hard stage C shapes what reaches it, -1 to 1.",
+    "Attenuates and inverts the voltage at that stage's CV input before it adds to the stage's SHAPE setting.",
+    "Shifts the SHAPE A setting through the CV 1 attenuverter.",
+    "Shifts the SHAPE B setting through the CV 2 attenuverter.",
+    "Shifts the SHAPE C setting through the CV 3 attenuverter.",
+    "Attenuates the three shaping stages mixed together, before they reach the dry and wet blend.",
+    "Crossfades the output from the four inputs summed to the shaped signal.",
+    "Added to IN A, IN B and IN C in turn, so it passes through all three shaping stages.",
+    "Summed with IN M and fed to shaping stage A.",
+    "Summed with IN M and fed to shaping stage B.",
+    "Summed with IN M and fed to shaping stage C.",
+    "The shaped signal and the summed inputs blended by MIX, soft-clipped."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 8,
+    "7": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 11,
+    "5": 12,
+    "6": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   }
+  },
+  "XSEQ": {
+   "lines": [
+    "Nine boolean logic gates wired into a fixed network driven by three clock inputs, each gate switchable between two functions",
+    "A clock into the network, feeding the gates behind outputs 1, 2 and 9. Any voltage other than 0V reads as high.",
+    "A clock into the network, feeding the gates behind outputs 1, 5 and 6. Any voltage other than 0V reads as high.",
+    "A clock into the network, read directly by the gates behind outputs 2, 7, 8 and 9 and inverted into the gates behind outputs 3, 4, 5 and 6. Any voltage other than 0V reads as high.",
+    "Switches the gate behind output 1 between NOR of IN1 and IN2, and AND of them.",
+    "Switches the gate behind output 2 between NAND of IN1 and IN3, and OR of them.",
+    "Switches the gate behind output 3 between XNOR of output 1 and the inverse of IN3, and NAND of them.",
+    "Switches the gate behind output 4 between XNOR of output 3 and the inverse of IN3, and NAND of them.",
+    "Switches the gate behind output 5 between AND of IN2 and the inverse of IN3, and NAND of them.",
+    "Switches the gate behind output 6 between AND of IN2 and the inverse of IN3, and XOR of them.",
+    "Switches the gate behind output 7 between XOR of output 6 and IN3, and XNOR of them.",
+    "Switches the gate behind output 8 between a term that goes high when outputs 6 and 3 are both high or when output 6 is low and IN3 is high, and XOR of outputs 6 and 3.",
+    "Switches the gate behind output 9 between a term that goes high when IN1 and output 7 are both high or when IN1 and IN3 are both low, and the inverse of output 7.",
+    "Adds to that gate's toggle: about 3.2V or more selects the gate's second function, and about -3.2V or less selects its first.",
+    "A 10V gate from the logic fed by IN1 and IN2.",
+    "A 10V gate from the logic fed by IN1 and IN3.",
+    "A 10V gate from the logic fed by output 1 and the inverse of IN3.",
+    "A 10V gate from the logic fed by output 3 and the inverse of IN3.",
+    "A 10V gate from the logic fed by IN2 and the inverse of IN3.",
+    "A 10V gate from the logic fed by IN2 and the inverse of IN3.",
+    "A 10V gate from the logic fed by output 6 and IN3.",
+    "A 10V gate from the logic fed by outputs 6 and 3, and by IN3 on one of its two settings.",
+    "A 10V gate from the logic fed by IN1, output 7 and IN3."
+   ],
+   "param": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "5": 9,
+    "6": 10,
+    "7": 11,
+    "8": 12
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 13,
+    "4": 13,
+    "5": 13,
+    "6": 13,
+    "7": 13,
+    "8": 13,
+    "9": 13,
+    "10": 13,
+    "11": 13
+   },
+   "out": {
+    "4": 14,
+    "6": 15,
+    "2": 16,
+    "7": 17,
+    "0": 18,
+    "1": 19,
+    "8": 20,
+    "5": 21,
+    "9": 22
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "4": "trigger",
+     "6": "trigger",
+     "2": "trigger",
+     "7": "trigger",
+     "0": "trigger",
+     "1": "trigger",
+     "8": "trigger",
+     "5": "trigger",
+     "9": "trigger"
+    }
+   },
+   "notes": "The output jacks are numbered 1 to 9 on the panel but the code orders them differently, so the panel number and the port index do not match. Outputs 10, 11 and 12 are internal inverters of IN3 and are not placed on the panel."
+  }
+ }
+}
