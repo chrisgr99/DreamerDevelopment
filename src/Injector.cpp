@@ -774,6 +774,10 @@ struct InjectorWidget : ClipWidget {
 		sourceKeys.clear();
 	}
 
+	/** Whether the readout has measured itself once. Until it has, a width change is the first
+	measurement rather than a value growing a digit — see step(). */
+	bool sized = false;
+
 	void step() override {
 		updateSourceTap();
 		// A mute is not a signal: it is the presence or absence of cables, kept in step with
@@ -800,9 +804,23 @@ struct InjectorWidget : ClipWidget {
 			// Grow and shrink to the LEFT, keeping the right edge where it is. A value going
 			// from 9.99 to 10.00 needs another digit, and moving the right edge would carry the
 			// captions and the decimal point out from under the pointer that is scrolling them.
-			offset.x -= wantWidth - box.size.x;
+			//
+			// NOT THE FIRST TIME, AND THAT IS THE WHOLE OF A BUG THAT LOOKED LIKE DRIFT.
+			//
+			// A widget is built at a default width and measures its real one on its first frame.
+			// Treating that first measurement as a value change moved the offset by the
+			// difference — every launch, in the same direction, for the life of the patch. The
+			// widgets walked to the right a few pixels each time Rack was opened, and after a
+			// dozen sessions they were nowhere near the module they belonged to. The saved
+			// offset was never wrong; it was being rewritten on the way in.
+			//
+			// So the first sizing only sets the width. Every later one compensates, which is
+			// what the rule was written for: a digit appearing while somebody is looking at it.
+			if (sized)
+				offset.x -= wantWidth - box.size.x;
 			box.size.x = wantWidth;
 			faceHeight = box.size.y;
+			sized = true;
 		}
 		followPort();
 		// Rack hides the plugs on creation, but a cable rebuilds them when its ports change,

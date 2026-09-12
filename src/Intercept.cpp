@@ -33,6 +33,8 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include <history.hpp>
 #include <ui/ScrollWidget.hpp>
 #include <app/PortWidget.hpp>
+
+#include "Help.hpp"
 #include "Injector.hpp"
 #include "WidgetAt.hpp"
 #include "Clip.hpp"
@@ -1308,6 +1310,15 @@ struct InterceptOverlay : widget::Widget {
 
 	void onButton(const ButtonEvent& e) override {
 		notePointerButton(e);
+
+		// HELP MODE STANDS EVERYTHING ELSE DOWN. While it is on, a click on a jack is a question
+		// about that jack, and carrying a cable off it — which is this file's whole purpose — is
+		// exactly the wrong answer. The help catcher sits on the rack and cannot get in front of
+		// this handler, which is higher in the scene, so the standing down has to happen here.
+		if (helpModeOn()) {
+			widget::Widget::onButton(e);
+			return;
+		}
 
 		// Anything floating over the rack owns its own clicks, like a menu does — our colour
 		// chooser and diagnostics window among them, and anybody else's window as well.

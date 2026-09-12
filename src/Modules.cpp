@@ -45,6 +45,7 @@ optional and can be switched off per user.
 #include "Palette.hpp"
 #include "Dark.hpp"
 #include "Census.hpp"
+#include "Help.hpp"
 
 #include <map>
 #include <set>
@@ -1603,11 +1604,13 @@ need their titles written back are decided in Dark.cpp, where they can be argued
 rather than in a menu. The one control is whether it is doing anything at all, which is worth
 having because seeing the difference is most of the work of judging it. */
 struct Darkener : Module {
-	enum ParamId { P_ON, NUM_PARAMS };
+	enum ParamId { P_ON, P_HELP, P_SPEAK, NUM_PARAMS };
 
 	Darkener() {
 		config(NUM_PARAMS, 0, 0, 0);
 		configSwitch(P_ON, 0.f, 1.f, 1.f, "Dark panels", {"Off", "On"});
+		configSwitch(P_HELP, 0.f, 1.f, 1.f, "Help badges", {"Off", "On"});
+		configSwitch(P_SPEAK, 0.f, 1.f, 1.f, "Read the help aloud", {"Off", "On"});
 	}
 };
 
@@ -1642,8 +1645,24 @@ struct DarkenerWidget : DRUIWidgetBase {
 		button->label2 = "panels";
 		addParam(button);
 
+		// A BADGE ON EVERY MODULE SAYING WHAT IT IS. Here because Dark is where the tools that
+		// reach into everybody else's widgets already live — see Help.hpp.
+		FeatureButton* help = createParam<FeatureButton>(
+			Vec(ROW_X, ROW_TOP + ROW_H), module, Darkener::P_HELP);
+		help->box.size.x = box.size.x - ROW_X * 2;
+		help->label = "Help";
+		help->label2 = "badges";
+		addParam(help);
+
+		FeatureButton* speak = createParam<FeatureButton>(
+			Vec(ROW_X, ROW_TOP + ROW_H * 2), module, Darkener::P_SPEAK);
+		speak->box.size.x = box.size.x - ROW_X * 2;
+		speak->label = "Speak";
+		speak->label2 = "the help";
+		addParam(speak);
+
 		CensusProgress* progress = new CensusProgress;
-		progress->box.pos = math::Vec(2.f, ROW_TOP + ROW_H + 8.f);
+		progress->box.pos = math::Vec(2.f, ROW_TOP + ROW_H * 3 + 8.f);
 		progress->box.size = math::Vec(box.size.x - 4.f, 40.f);
 		addChild(progress);
 	}
@@ -1654,8 +1673,10 @@ struct DarkenerWidget : DRUIWidgetBase {
 		if (!counted)
 			return;
 		gDarkenerCount--;
-		if (gDarkenerCount <= 0)
+		if (gDarkenerCount <= 0) {
 			darkRestoreAll();
+			helpRemoveAll();
+		}
 	}
 
 	void appendContextMenu(Menu* menu) override {
@@ -1695,6 +1716,8 @@ struct DarkenerWidget : DRUIWidgetBase {
 		}
 		countIn(gDarkenerCount);
 		darkStep(m->params[Darkener::P_ON].getValue() > 0.5f);
+		helpStep(m->params[Darkener::P_HELP].getValue() > 0.5f);
+		helpSetSpeak(m->params[Darkener::P_SPEAK].getValue() > 0.5f);
 		// A SLICE OF THE CENSUS EACH FRAME, with a budget small enough that the window keeps
 		// drawing — which is the whole point: a scan that is working must not look like one
 		// that has hung.
