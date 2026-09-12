@@ -47,6 +47,14 @@ struct HelpEntry {
 	int outputCount;
 	const short* params;
 	int paramCount;
+	/** WHAT EACH JACK CARRIES, as a Palette.hpp FAM_ number, or -1 where we did not say.
+	
+	Read off the panels while the help was written, and consulted by Clarity when it colours a
+	jack — the same reading serving both. */
+	const signed char* inFamilies;
+	int inFamilyCount;
+	const signed char* outFamilies;
+	int outFamilyCount;
 };
 
 /** What kind of thing was clicked. */
@@ -57,22 +65,31 @@ extern const int HELP_COUNT;
 /** The lines for a module, or an empty vector if nobody has written any. */
 std::vector<std::string> helpFor(const std::string& plugin, const std::string& model);
 
+/** What the help entries say this jack carries, as a Palette.hpp FAM_ number, or -1 if they say
+nothing. Clarity's colouring asks this. */
+int helpFamilyFor(const std::string& plugin, const std::string& model, bool isOutput, int port);
+
 /** The one line covering this jack or knob, or empty if nothing does. */
 std::string helpForControl(const std::string& plugin, const std::string& model,
 	HelpKind kind, int index);
 
-/** Puts a help badge on every module in the rack, or takes them all away.
+/** Keeps the click-catcher on the rack, and switches option-click help on or off.
 
-Cheap to call every frame: it does nothing unless the rack has changed or the switch has moved.
+HOW IT IS ASKED. Cmd-shift-click any jack or knob — Ctrl-shift on Windows and Linux — and a note
+appears beside it saying what that one control is. The same on the module's TITLE BAND, the top
+of its panel, says what the module is. Anywhere else on the panel puts the note away, as does an
+ordinary click anywhere at all, or Escape. Nothing is added to anybody's panel.
 
-HOW IT IS ASKED. Clicking a badge puts the rack into help mode — every badge lights, and a click
-on any jack or knob says what that one is rather than doing what it normally would. Clicking a
-badge again, or pressing Escape, leaves. The click that turns it on says nothing: it is the way
-in, not a question.
+Option was tried first and cannot work: Rack's own ScrollWidget consumes alt-click before its
+children, because alt-drag is how the rack is panned. Cmd alone is taken too — Cmd-drag from a
+jack creates a cable, and Cmd on a knob is fine adjust. A Cmd-shift CLICK, pressed and released
+without travel, is the one gesture Rack leaves spare; Cmd-shift-DRAG still clones a cable, which
+is why a press over a jack waits for the release before deciding.
 
-A modified click was tried first and could not be made to work. See the note in Help.cpp: a
-widget inside a module never sees a click while that module is selected, which is the ordinary
-state of a module somebody is working on. */
+Cheap to call every frame. See the note in Help.cpp for why the catcher lives on the rack rather
+than on each module — a widget inside a module never sees a click while that module is selected,
+which is the ordinary state of a module somebody is working on, and that is what defeated the
+first attempt at this. */
 void helpStep(bool enabled);
 
 /** Whether opening the panel also reads it out.
@@ -92,6 +109,16 @@ part of the same plugin picks a cable up off it is not a mode. Anything of ours 
 click asks this first and stands down. */
 bool helpModeOn();
 
-/** Takes every badge away. Called when the last module that asked for them leaves, because a
-widget added to somebody else's module must not outlive the reason for it. */
+/** Whether help claims THIS click, and everything else of ours should stand down for it.
+
+FOR THE ONE CLICK, NOT FOR EVER. Clarity has gestures of its own on the rack — clicking a jack to
+carry a cable, most of all — and they run from a handler high in the scene where the help catcher
+cannot get in front of them, so they have to stand down by asking. When help was a mode the
+question was "is the mode on"; now that it is a single modified click, the question is whether
+this click is that one. Asking the old question meant Clarity's click-to-patch was switched off
+for the whole session. */
+bool helpClaimsClick(int mods);
+
+/** Puts away anything on the screen and stops anything being read. Called when the last module
+that asked for help leaves. */
 void helpRemoveAll();

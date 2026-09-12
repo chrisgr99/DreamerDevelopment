@@ -58,6 +58,18 @@ static const HelpEntry* helpEntryFor(const std::string& plugin, const std::strin
 	return NULL;
 }
 
+int helpFamilyFor(const std::string& plugin, const std::string& model,
+		bool isOutput, int port) {
+	const HelpEntry* e = helpEntryFor(plugin, model);
+	if (!e || port < 0)
+		return -1;
+	const signed char* table = isOutput ? e->outFamilies : e->inFamilies;
+	const int count = isOutput ? e->outFamilyCount : e->inFamilyCount;
+	if (!table || port >= count)
+		return -1;
+	return table[port];
+}
+
 std::string helpForControl(const std::string& plugin, const std::string& model,
 		HelpKind kind, int index) {
 	const HelpEntry* e = helpEntryFor(plugin, model);
@@ -198,6 +210,48 @@ struct HelpPopup : widget::OpaqueWidget {
 	std::string title;
 	std::string line;
 	bool missing = false;
+	/** Enough to find this entry again in research/help: which maker, which model, and which
+	control by kind and number. Carried for the copy button and nothing else. */
+	std::string plugin;
+	std::string model;
+	std::string what;
+	/** Set when the words are the maker's own rather than ours, so the note can say so. */
+	bool fromMaker = false;
+	/** WHERE IT BELONGS, IN THE RACK'S OWN COORDINATES.
+	
+	The note is drawn on the SCENE rather than in the rack — see helpCatcherStep for why — so its
+	own box is in window coordinates and has to be recomputed whenever the rack is scrolled or
+	zoomed. This is the anchor it is placed against: the control's box, in rack space. */
+	math::Rect anchor;
+	/** When the copy was last taken, so the button can show that it worked. */
+	double copiedAt = -1.0;
+
+	static float iconSize() { return 13.f; }
+
+	/** The copy button, in this widget's own coordinates. */
+	math::Rect iconBox() {
+		return math::Rect(math::Vec(box.size.x - iconSize() - 6.f, 6.f),
+			math::Vec(iconSize(), iconSize()));
+	}
+
+	/** WHAT LANDS ON THE CLIPBOARD: the note as read, and where it came from.
+
+	The point of the button is to be able to say "this one is unclear" without typing out which
+	one. So it carries the module, the control, the line itself, and the slugs and index that
+	identify the entry in the source files — which is what makes the answer actionable rather
+	than a search. */
+	std::string forClipboard() {
+		std::string out = title + "\n" + line + "\n";
+		if (!plugin.empty())
+			out += "[" + plugin + " / " + model + (what.empty() ? "" : " — " + what) + "]\n";
+		return out;
+	}
+
+	void copyToClipboard() {
+		const std::string text = forClipboard();
+		glfwSetClipboardString(APP->window->win, text.c_str());
+		copiedAt = system::getTime();
+	}
 
 	float measure(NVGcontext* vg, bool drawing, const DrawArgs* args) {
 		std::shared_ptr<window::Font> font =
@@ -226,6 +280,18 @@ struct HelpPopup : widget::OpaqueWidget {
 			nvgTextBox(args->vg, HELP_PAD, y, w - HELP_PAD * 2.f, line.c_str(), NULL);
 		}
 		y += std::max(bounds[3] - bounds[1], HELP_LEAD);
+
+		// WHOSE WORDS THESE ARE. Only where they are not ours: an entry we wrote needs no
+		// attribution, and a note that says something on every reading says nothing.
+		if (fromMaker) {
+			y += 3.f;
+			nvgFontSize(vg, 10.f);
+			if (drawing) {
+				nvgFillColor(args->vg, nvgRGB(0x7f, 0x86, 0x92));
+				nvgText(args->vg, HELP_PAD, y, "the maker's own description", NULL);
+			}
+			y += 13.f;
+		}
 		return y + HELP_PAD;
 	}
 
@@ -244,6 +310,32 @@ struct HelpPopup : widget::OpaqueWidget {
 		nvgStrokeWidth(args.vg, 1.f);
 		nvgStroke(args.vg);
 		measure(args.vg, true, &args);
+		drawCopy(args);
+	}
+
+	/** TWO OVERLAPPING SHEETS, which is what a copy button looks like everywhere else. Drawn
+	rather than loaded, because it is nine lines of nanovg and no file to ship. */
+	void drawCopy(const DrawArgs& args) {
+		const math::Rect r = iconBox();
+		const bool done = copiedAt > 0.0 && system::getTime() - copiedAt < 1.2;
+		const NVGcolor ink = done ? nvgRGB(0x7d, 0xe0, 0xa0) : nvgRGBA(0x9f, 0xc8, 0xf0, 0xc0);
+		const float w = r.size.x * 0.62f, h = r.size.y * 0.72f;
+
+		// The sheet behind, offset up and to the right.
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, r.pos.x + r.size.x - w, r.pos.y, w, h, 1.5f);
+		nvgStrokeColor(args.vg, ink);
+		nvgStrokeWidth(args.vg, 1.f);
+		nvgStroke(args.vg);
+
+		// The sheet in front, over the bottom-left of it, filled with the panel's own ground so
+		// the line behind it stops where it is covered.
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, r.pos.x, r.pos.y + r.size.y - h, w, h, 1.5f);
+		nvgFillColor(args.vg, nvgRGBA(0x16, 0x1a, 0x20, 0xff));
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, ink);
+		nvgStroke(args.vg);
 	}
 
 	/** A click on the panel itself reads it out, for when the mouse is already there. */
@@ -254,6 +346,12 @@ struct HelpPopup : widget::OpaqueWidget {
 			// instead. Overriding onButton without calling the base means doing this by hand.
 			e.consume(this);
 			e.stopPropagating();
+			// The copy button first: it sits inside the panel, so the panel's own click would
+			// otherwise take it and start talking.
+			if (iconBox().contains(e.pos)) {
+				copyToClipboard();
+				return;
+			}
 			// A CLICK WHILE IT IS TALKING IS A REQUEST TO STOP. Somebody who has heard enough
 			// reaches for the thing that is talking, and the alternative — starting it again from
 			// the top — is the opposite of what they wanted.
@@ -274,14 +372,44 @@ static void helpPopupHide() {
 		gPopup->hide();
 }
 
-/** Puts the panel beside a control, in the rack's coordinates.
+/** PLACES THE NOTE BESIDE ITS CONTROL, converting the rack to the window.
 
-BESIDE, AND INSIDE THE RACK. It is placed to the right of the control where there is room and to
-the left where there is not, so it never covers the thing being asked about. */
+The rack is inside a scrolling, zooming container, so a point on a panel and a point on the
+screen are different things: scene = the rack's own origin on screen, plus the rack-space point
+times the rack's zoom. That is the same arithmetic our carried widgets use in reverse, in
+Clip.hpp.
+
+The note keeps a constant size at any zoom, which is what you want of something being read.
+
+BESIDE, NEVER OVER. To the right of the control where there is room and to the left where there
+is not, so it never covers the thing being asked about. */
+static void helpPopupPlace() {
+	if (!gPopup || !gPopup->isVisible() || !APP->scene || !APP->scene->rack)
+		return;
+	widget::Widget* rack = APP->scene->rack;
+	const float zoom = rack->getAbsoluteZoom();
+	const math::Vec origin = rack->getAbsoluteOffset(math::Vec(0.f, 0.f));
+	const math::Rect a = gPopup->anchor;
+
+	float x = origin.x + (a.pos.x + a.size.x) * zoom + 8.f;
+	const float y = origin.y + a.pos.y * zoom - 4.f;
+	if (x + gPopup->box.size.x > APP->scene->box.size.x)
+		x = origin.x + a.pos.x * zoom - gPopup->box.size.x - 8.f;
+	gPopup->box.pos = math::Vec(std::max(x, 0.f),
+		math::clamp(y, 0.f, std::max(0.f, APP->scene->box.size.y - gPopup->box.size.y)));
+}
+
+/** Shows the note for one control, anchored to the control's box in rack coordinates. */
 static void helpPopupShow(app::ModuleWidget* mw, math::Rect controlBox,
-		const std::string& title, const std::string& line, bool missing) {
+		const std::string& title, const std::string& line, bool missing,
+		const std::string& what = "", bool fromMaker = false) {
 	if (!gPopup)
 		return;
+	gPopup->plugin = mw->model && mw->model->plugin ? mw->model->plugin->slug : "";
+	gPopup->model = mw->model ? mw->model->slug : "";
+	gPopup->what = what;
+	gPopup->fromMaker = fromMaker;
+	gPopup->copiedAt = -1.0;
 	gPopup->title = title;
 	gPopup->line = line.empty()
 		? "Nothing here describes this one yet."
@@ -292,12 +420,9 @@ static void helpPopupShow(app::ModuleWidget* mw, math::Rect controlBox,
 		gPopup->box.size.y = gPopup->measure(APP->window->vg, false, NULL);
 	gPopup->show();
 
-	// The control's box is in the module's coordinates; the popup lives in the rack's.
-	const math::Vec at = mw->box.pos.plus(controlBox.pos);
-	float x = at.x + controlBox.size.x + 8.f;
-	if (x + gPopup->box.size.x > APP->scene->rack->box.size.x)
-		x = at.x - gPopup->box.size.x - 8.f;
-	gPopup->box.pos = math::Vec(x, at.y - 4.f);
+	// The control's box is in the module's coordinates; the anchor is in the rack's.
+	gPopup->anchor = math::Rect(mw->box.pos.plus(controlBox.pos), controlBox.size);
+	helpPopupPlace();
 }
 
 /** WHAT IS UNDER THE POINTER, asked of the module rather than of the widget tree.
@@ -362,102 +487,105 @@ static bool helpControlAt(app::ModuleWidget* mw, math::Vec pos, std::string& wha
 
 // ---- catching the click -----------------------------------------------------------------------
 
-/** THE BADGE, AT THE TOP RIGHT OF SOMEBODY ELSE'S MODULE.
+/** CMD-SHIFT-CLICK A JACK OR A KNOB.
 
-A PLAIN CLICK, NOT A MODIFIED ONE, and that was decided by measurement rather than taste. The
-first build took option-click on the title; on this machine an option-click never reaches Rack at
-all — the log shows not one mouse event carrying any modifier — because something above it takes
-them. Shift was the obvious second choice and is worse: Rack uses shift-click to extend a
-selection, so claiming it would break selecting modules to add help to them.
+NO MODE, NO BADGE, NOTHING ADDED TO ANYBODY'S PANEL. Cmd-shift-click any control and its note
+appears beside it; the same on bare panel gives what the module is. Alt on Windows and Linux is
+Cmd on a Mac — RACK_MOD_CTRL is the platform's own modifier, so one test covers all three.
 
-So the gesture is a target of its own, which nothing else can be holding. It is small, it sits
-where no maker puts a control, and it is the LAST child of the module so it draws over the panel
-and everything on it. */
-struct HelpBadge : widget::OpaqueWidget {
-	/** A millimetre smaller than a screw, so it reads as a mark rather than a fitting. */
-	static float size() { return 15.f - mm2px(1.f); }
-	bool hovered = false;
+WHY NOT OPTION, WHICH WAS TRIED AND SHIPPED BRIEFLY. Rack's own ScrollWidget takes alt-click
+BEFORE its children and consumes it, with the comment "most widgets consume Alt-click without
+needing to" — alt-drag is how the rack is panned. So an alt-click never reaches a module at all,
+whatever is listening. That, and not the selected-module problem, is what defeated it.
 
-	HelpBadge() {
-		box.size = math::Vec(size(), size());
-	}
+WHY CMD-SHIFT AND NOT CMD ALONE. Cmd-drag from a jack CREATES a cable and Cmd-drag on a knob is
+fine adjust at a tenth speed; taking Cmd-click would sit on top of both. Cmd-shift-drag clones a
+cable, but a Cmd-shift CLICK — pressed and released without travel — does nothing in Rack at all.
+So this claims the one gesture that was going spare.
 
-	void onEnter(const EnterEvent& e) override {
-		hovered = true;
-		widget::OpaqueWidget::onEnter(e);
-	}
-	void onLeave(const LeaveEvent& e) override {
-		hovered = false;
-		widget::OpaqueWidget::onLeave(e);
-	}
+AND IT WAITS FOR THE RELEASE, OVER A JACK. Whether a press is a click or the start of a drag is
+not knowable when it arrives, so over a jack the press is let through and the decision made on
+release, once the travel is known. Under a few pixels is a click and the note appears; anything
+more was a drag and Rack's clone has it. Over a knob or bare panel nothing is at stake, so those
+answer on the press and feel immediate. */
+static bool gHelpOn = true;
 
-	/** Set from outside, when this module is the one in help mode. */
-	bool active = false;
-
-	/** NO BUTTON HANDLING HERE, deliberately. A widget inside a module never sees a click while
-	that module is selected — ModuleWidget::onButton returns before it dispatches to its children,
-	so it can drag the selection. The badge is therefore drawn here and clicked on the rack, by
-	the catcher, which nothing can get in front of. */
-
-	void draw(const DrawArgs& args) override {
-		const float r = box.size.x / 2.f;
-		const bool lit = hovered || active;
-		// QUIET UNTIL IT IS POINTED AT. It is on every module in the rack at once, so at rest it
-		// has to read as a mark on the panel rather than as one more control competing with the
-		// maker's own.
-		nvgBeginPath(args.vg);
-		nvgCircle(args.vg, r, r, r - 1.f);
-		nvgFillColor(args.vg, active ? nvgRGBA(0x2f, 0x7d, 0xc4, 0xff)
-			: lit ? nvgRGBA(0x2b, 0x5c, 0x8a, 0xff) : nvgRGBA(0x18, 0x1c, 0x22, 0xa0));
-		nvgFill(args.vg);
-		nvgStrokeColor(args.vg, lit ? nvgRGBA(0x9f, 0xc8, 0xf0, 0xff)
-			: nvgRGBA(0x8a, 0x92, 0x9e, 0xb0));
-		nvgStrokeWidth(args.vg, active ? 2.f : 1.f);
-		nvgStroke(args.vg);
-
-		// A RING AROUND IT WHILE THE MODE IS ON, so it reads as switched on from across the rack
-		// rather than as merely hovered.
-		if (active) {
-			nvgBeginPath(args.vg);
-			nvgCircle(args.vg, r, r, r + 2.f);
-			nvgStrokeColor(args.vg, nvgRGBA(0x9f, 0xc8, 0xf0, 0x90));
-			nvgStrokeWidth(args.vg, 1.f);
-			nvgStroke(args.vg);
-		}
-
-		std::shared_ptr<window::Font> font =
-			APP->window->loadFont(asset::system("res/fonts/DejaVuSans.ttf"));
-		if (!font || font->handle < 0)
-			return;
-		nvgFontFaceId(args.vg, font->handle);
-		nvgFontSize(args.vg, 11.f);
-		nvgFillColor(args.vg, lit ? nvgRGB(0xff, 0xff, 0xff) : nvgRGBA(0xd8, 0xdd, 0xe4, 0xd0));
-		nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-		nvgText(args.vg, r, r + 0.5f, "?", NULL);
-	}
-};
-
-/** HELP MODE, TURNED ON BY THE BADGE AND OFF BY THE BADGE OR ESCAPE.
-
-Click a question mark and the rack goes into help mode: every badge lights, and a click on any
-jack or knob on any module tells you what that one is, instead of doing what it would normally
-do. Click any badge again, or press Escape, and the rack goes back to normal. The click that
-turns the mode on says nothing — it is the way in, not a question.
-
-WHY A MODE RATHER THAN A MODIFIER. Option-click was tried first and works in Rack, which binds
-Alt nowhere. What defeated it is that a modified click still has to reach the control, and a
-widget inside a module never sees a click while that module is SELECTED: ModuleWidget::onButton
-returns before dispatching to its children so it can drag the selection. A module you have been
-clicking on is usually selected, so the case that failed is the ordinary one.
-
-ON THE RACK, ABOVE EVERY MODULE, for the same reason. This one widget works out for itself which
-module, which badge and which control the pointer is over, so nothing in a module's own handling
-can get in front of it. It consumes a click only when the mode is on or a badge was hit;
-otherwise every click — plain, shift, cmd, right — passes straight through untouched. */
-static bool gHelpMode = false;
-
+/** Whether option-click help is switched on, for the rest of the plugin's own gestures. */
 bool helpModeOn() {
-	return gHelpMode;
+	return gHelpOn;
+}
+
+bool helpClaimsClick(int mods) {
+	return gHelpOn && (mods & RACK_MOD_MASK) == (RACK_MOD_CTRL | GLFW_MOD_SHIFT);
+}
+
+/** A press we are waiting to see the end of, because it landed on a jack. */
+static app::ModuleWidget* gPressModule = NULL;
+static math::Vec gPressAt;
+static bool gPressPending = false;
+/** How far the mouse may travel and still count as a click rather than a drag. */
+static const float HELP_CLICK_SLOP = 3.f;
+
+/** WHAT THE MAKER CALLS IT, ASKED OF THE MODULE IN THE RACK.
+
+Rack's tooltip is exactly this text: the name a maker passed to configInput, configParam or
+configOutput, and the second line they may have added after it. Two thirds of the controls in an
+installed library carry one, and for the modules nobody has written an entry for it is the only
+description that exists — NYSTHI's Bitshifter names a jack "Pulse in to switch between RND or VCO
+generators", which is a better line than silence by a distance.
+
+SHOWN AS THEIRS, NOT OURS. It does not follow the rules the written entries follow: it names the
+control, it says where things are, it is written to be read rather than heard. So the note marks
+it as the maker's own words, and nobody is misled about which they are hearing.
+
+The raw `name` field rather than getName(), which returns "#3" for an unnamed port and would give
+the note something meaningless to say. */
+static std::string helpMakerText(app::ModuleWidget* mw, HelpKind kind, int index) {
+	if (!mw || !mw->module || index < 0)
+		return "";
+	engine::Module* m = mw->module;
+	std::string name, desc;
+	if (kind == HELP_INPUT && index < (int) m->inputInfos.size()) {
+		if (engine::PortInfo* i = m->inputInfos[index]) {
+			name = i->name;
+			desc = i->description;
+		}
+	}
+	else if (kind == HELP_OUTPUT && index < (int) m->outputInfos.size()) {
+		if (engine::PortInfo* i = m->outputInfos[index]) {
+			name = i->name;
+			desc = i->description;
+		}
+	}
+	else if (kind == HELP_PARAM && index < (int) m->paramQuantities.size()) {
+		if (engine::ParamQuantity* q = m->paramQuantities[index]) {
+			name = q->name;
+			desc = q->description;
+		}
+	}
+	if (name.empty() && desc.empty())
+		return "";
+	if (name.empty())
+		return desc;
+	if (desc.empty())
+		return name;
+	return name + ". " + desc;
+}
+
+/** Whether this point in a module is one of its jacks.
+
+Only jacks matter: they are the controls Rack might start a cable drag from, so they are the ones
+whose press has to be left alone until the release settles what it was. */
+static bool helpPortAt(app::ModuleWidget* mw, math::Vec pos) {
+	for (app::PortWidget* p : mw->getInputs()) {
+		if (p->box.contains(pos))
+			return true;
+	}
+	for (app::PortWidget* p : mw->getOutputs()) {
+		if (p->box.contains(pos))
+			return true;
+	}
+	return false;
 }
 
 /** TAKING A CLICK, WHICH IS TWO THINGS AND NOT ONE.
@@ -465,140 +593,148 @@ bool helpModeOn() {
 Consuming an event only records which widget is to be treated as its target — it does NOT stop
 the event being offered to everything else. Rack walks the rest of the children afterwards, and
 the LAST widget to consume becomes the target. So a click taken here and then taken again by a
-port underneath belongs to the port, and Rack starts dragging that port's cable: exactly the
-symptom, with the catcher doing its half correctly the whole time.
+jack underneath belongs to the jack, and Rack starts dragging that jack's cable: exactly the
+symptom, with this widget doing its half correctly the whole time.
 
 Propagation has to be stopped as well, which is precisely what OpaqueWidget does and why this is
-not one — an OpaqueWidget here would swallow every click in the rack, not the ones this mode is
+not one — an OpaqueWidget here would swallow every click in the rack, not the ones this is
 about. */
 static void helpTake(const widget::Widget::ButtonEvent& e, widget::Widget* by) {
 	e.consume(by);
 	e.stopPropagating();
-	INFO("help: took the click — consumed=%d propagating=%d",
-		e.isConsumed() ? 1 : 0, e.isPropagating() ? 1 : 0);
 }
 
 struct HelpCatcher : widget::Widget {
-	/** The badge on this module, if it has one, in the module's own coordinates. */
-	static HelpBadge* badgeIn(app::ModuleWidget* mw) {
-		for (widget::Widget* child : mw->children) {
-			if (HelpBadge* b = dynamic_cast<HelpBadge*>(child))
-				return b;
-		}
-		return NULL;
-	}
+	/** THE TITLE BAND ACROSS THE TOP OF A MODULE, where nearly every maker puts its name.
 
-	void onButton(const ButtonEvent& e) override {
-		if (e.action != GLFW_PRESS || e.button != GLFW_MOUSE_BUTTON_LEFT
-				|| (e.mods & RACK_MOD_MASK) != 0) {
-			widget::Widget::onButton(e);
-			return;
-		}
+	Where the title is cannot be asked — a maker draws it wherever they like, and Rack's own SVG
+	renderer has no text at all, so a panel's name is either outlines or drawn in the maker's own
+	code. This is the top of the panel, which is where it nearly always is. */
+	static float titleBand() { return 40.f; }
 
-		INFO("help: press at %g,%g mode=%d", e.pos.x, e.pos.y, gHelpMode ? 1 : 0);
-
-		// THE PANEL ITSELF FIRST. It is a child of this widget, and a click on it is a click on
-		// it, not on whatever module happens to be behind it.
-		widget::Widget::onButton(e);
-		if (e.isConsumed())
-			return;
-
-		app::ModuleWidget* hit = NULL;
-		for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
-			if (mw->box.contains(e.pos)) {
-				hit = mw;
-				break;
-			}
-		}
-
-		// THE BADGE IS THE WAY IN AND THE WAY OUT, and it says nothing either way.
-		if (hit && hit->model) {
-			HelpBadge* badge = badgeIn(hit);
-			if (badge && badge->box.contains(e.pos.minus(hit->box.pos))) {
-				gHelpMode = !gHelpMode;
-				INFO("help: badge clicked, mode now %d", gHelpMode ? 1 : 0);
-				if (!gHelpMode)
-					helpPopupHide();
-				helpTake(e, this);
-				return;
-			}
-		}
-
-		if (!gHelpMode) {
-			widget::Widget::onButton(e);
-			return;
-		}
-
-		// EVERY CLICK IS TAKEN WHILE THE MODE IS ON, whether or not it lands on anything that has
-		// something to say. A mode that answers some clicks and lets others through is a mode
-		// that picks up a cable when you meant to ask about the jack.
-		helpTake(e, this);
-		if (!hit || !hit->model) {
-			helpPopupHide();
-			return;
-		}
-
-		const math::Vec local = e.pos.minus(hit->box.pos);
+	/** Shows the note for whatever is at this point in the module's own coordinates, or puts the
+	note away where there is nothing to say. */
+	void answer(app::ModuleWidget* mw, math::Vec local) {
 		std::string what, line;
 		math::Rect where;
 		HelpKind kind = HELP_PARAM;
 		int index = -1;
-		if (!helpControlAt(hit, local, what, line, where, kind, index)) {
-			// BARE PANEL IS THE MODULE ITSELF, and what is wanted there is what the thing is —
-			// the first line of the entry — not a list of everything on it.
-			const std::string plugin = hit->model->plugin ? hit->model->plugin->slug : "";
-			const std::vector<std::string> lines = helpFor(plugin, hit->model->slug);
-			const std::string idea = lines.empty() ? "" : lines[0];
-			// CLICKING THE PANEL PUTS THE NOTE AWAY, when there is one to put away. With none
-			// showing it says what the module is, which is the other thing bare panel is for.
-			if (gPopup && gPopup->isVisible()) {
-				helpPopupHide();
-				helpSilence();
+		if (helpControlAt(mw, local, what, line, where, kind, index)) {
+			if (!line.empty()) {
+				helpPopupShow(mw, where, what, line, false, what);
 				return;
 			}
-			helpPopupShow(hit, math::Rect(local, math::Vec(0.f, 0.f)),
-				hit->model->name, idea, idea.empty());
+			// NOTHING WRITTEN FOR THIS ONE: ask the module itself. Better the maker's own words,
+			// marked as theirs, than telling somebody nobody has got round to it.
+			const std::string maker = helpMakerText(mw, kind, index);
+			if (!maker.empty()) {
+				helpPopupShow(mw, where, what, maker, false, what, true);
+				return;
+			}
+			helpPopupShow(mw, where, what, "", true, what);
+			return;
+		}
+		// THE TITLE IS THE MODULE ITSELF: what the thing is, which is the first line of its
+		// entry, not a list of everything on it.
+		if (local.y < titleBand()) {
+			const std::string plugin = mw->model->plugin ? mw->model->plugin->slug : "";
+			const std::vector<std::string> lines = helpFor(plugin, mw->model->slug);
+			const std::string idea = lines.empty() ? "" : lines[0];
+			const math::Rect at(math::Vec(local.x, titleBand()), math::Vec(0.f, 0.f));
+			if (!idea.empty()) {
+				helpPopupShow(mw, at, mw->model->name, idea, false);
+				return;
+			}
+			// NOTHING WRITTEN FOR THIS MODULE: the maker's own one-line description, which is the
+			// text the module browser shows. Marked as theirs, like the per-control fallback.
+			// NYSTHI's Bitshifter, which nobody has written an entry for, describes itself as
+			// "256 bits bitshifter with S&H and noise and inner LFO and VCO" — worth hearing.
+			const std::string made = mw->model->description;
+			helpPopupShow(mw, at, mw->model->name, made, made.empty(), "", !made.empty());
+			return;
+		}
+		// ANYWHERE ELSE ON THE PANEL CLOSES IT. Bare panel has nothing of its own to say, and
+		// somewhere harmless to click is worth more than one more thing to read.
+		helpPopupHide();
+		helpSilence();
+	}
+
+	app::ModuleWidget* moduleAt(math::Vec pos) {
+		for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
+			if (mw->box.contains(pos) && mw->model)
+				return mw;
+		}
+		return NULL;
+	}
+
+	bool isOurs(const ButtonEvent& e) {
+		return gHelpOn && e.button == GLFW_MOUSE_BUTTON_LEFT
+			&& (e.mods & RACK_MOD_MASK) == (RACK_MOD_CTRL | GLFW_MOD_SHIFT);
+	}
+
+	void onButton(const ButtonEvent& e) override {
+		// THE NOTE ITSELF FIRST, whatever the modifiers. It is a child of this widget, and a
+		// plain click on it reads it out — see HelpPopup::onButton.
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+			widget::Widget::onButton(e);
+			if (e.isConsumed())
+				return;
+		}
+
+		if (!isOurs(e)) {
+			// AN ORDINARY CLICK PUTS THE NOTE AWAY. It is a transient answer to a question, not
+			// a window, so getting on with anything dismisses it — and a click ON the note has
+			// already been handled above, so that one reads it out instead of closing it.
+			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
+					&& gPopup && gPopup->isVisible()) {
+				helpPopupHide();
+				helpSilence();
+			}
+			if (e.action == GLFW_PRESS)
+				gPressPending = false;
+			widget::Widget::onButton(e);
 			return;
 		}
 
-		// SHOWN, NEVER SPOKEN FROM HERE. Clicking a control puts its line on the screen without a
-		// word; the note itself is what speaks, and clicking it again stops it. Nothing on the
-		// module makes a sound, so moving around a panel looking at things is silent.
-		helpPopupShow(hit, where, what, line, line.empty());
-	}
-};
-
-/** A QUESTION MARK FOLLOWING THE POINTER WHILE THE MODE IS ON.
-
-DRAWN, NOT A SYSTEM CURSOR. Rack draws its own window and hands the operating system no cursor to
-swap, and a plugin that reached around it would be fighting whatever Rack does with the pointer
-while a knob is being turned. Drawing one costs a circle and a glyph, sits exactly where the
-pointer is, and disappears with the mode.
-
-Beside the pointer rather than on it, so the thing being aimed at stays visible. */
-struct HelpPointer : widget::Widget {
-	void draw(const DrawArgs& args) override {
-		if (!gHelpMode || !APP->scene)
+		if (e.action == GLFW_PRESS) {
+			app::ModuleWidget* hit = moduleAt(e.pos);
+			gPressPending = false;
+			if (!hit) {
+				helpPopupHide();
+				return;
+			}
+			const math::Vec local = e.pos.minus(hit->box.pos);
+			// OVER A JACK, WAIT. Rack may be about to clone a cable from it, and only the
+			// release says whether this was a click or the start of that drag.
+			if (helpPortAt(hit, local)) {
+				gPressModule = hit;
+				gPressAt = e.pos;
+				gPressPending = true;
+				widget::Widget::onButton(e);
+				return;
+			}
+			helpTake(e, this);
+			answer(hit, local);
 			return;
-		const math::Vec at = APP->scene->mousePos.plus(math::Vec(11.f, 12.f));
-		const float r = 7.f;
-		nvgBeginPath(args.vg);
-		nvgCircle(args.vg, at.x, at.y, r);
-		nvgFillColor(args.vg, nvgRGBA(0x2f, 0x7d, 0xc4, 0xf0));
-		nvgFill(args.vg);
-		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0xff, 0xff, 0xd0));
-		nvgStrokeWidth(args.vg, 1.f);
-		nvgStroke(args.vg);
+		}
 
-		std::shared_ptr<window::Font> font =
-			APP->window->loadFont(asset::system("res/fonts/DejaVuSans.ttf"));
-		if (!font || font->handle < 0)
-			return;
-		nvgFontFaceId(args.vg, font->handle);
-		nvgFontSize(args.vg, 11.f);
-		nvgFillColor(args.vg, nvgRGB(0xff, 0xff, 0xff));
-		nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-		nvgText(args.vg, at.x, at.y + 0.5f, "?", NULL);
+		if (e.action == GLFW_RELEASE && gPressPending) {
+			gPressPending = false;
+			const bool moved = e.pos.minus(gPressAt).norm() > HELP_CLICK_SLOP;
+			if (!moved && gPressModule) {
+				answer(gPressModule, gPressAt.minus(gPressModule->box.pos));
+				// Rack may have begun cloning a cable on the press. A clone that was never
+				// dragged anywhere is not wanted, and it is always a NEW cable, so removing it
+				// cannot cost the user a connection they had.
+				for (app::CableWidget* cw : APP->scene->rack->getIncompleteCables()) {
+					APP->scene->rack->removeCable(cw);
+					delete cw;
+				}
+				helpTake(e, this);
+				return;
+			}
+		}
+		widget::Widget::onButton(e);
 	}
 };
 
@@ -616,145 +752,62 @@ static void helpCatcherStep() {
 	catcher->box.pos = math::Vec(0.f, 0.f);
 	catcher->box.size = rack->box.size;
 
-	// THE PANEL IS A CHILD OF THE CATCHER, not a sibling of it.
+	// THE NOTE LIVES ON THE SCENE, NOT IN THE RACK, and that is about being seen.
 	//
-	// As siblings they competed for the last place in the rack's children, which is the place
-	// that is offered a click first: showing the panel took that place, and the catcher never got
-	// it back — so the next click fell through to whatever was under it and picked up a cable.
-	// One widget to keep on top, and the panel inside it, cannot get into that argument. The
-	// catcher's box starts at the rack's origin, so the panel's coordinates do not change.
+	// RackWidget::draw paints four layers in order: panels and modules, then lights and halos,
+	// then plugs, then cables. Anything drawn as part of the first is repainted by the other
+	// three, so a note inside the rack was covered by every lamp, plug and cable over it. Rack's
+	// own tooltips are worse still: they are on the scene and drawn after the whole rack.
+	//
+	// So the note is a child of the scene and is moved to the END of the scene's children every
+	// frame while it is showing, which puts it after the rack and after any tooltip that has just
+	// appeared. Its position is then in window coordinates and has to be recomputed as the rack
+	// scrolls and zooms — see helpPopupPlace.
 	if (!gPopup) {
 		gPopup = new HelpPopup;
 		gPopup->box.size = math::Vec(290.f, 40.f);
 		gPopup->hide();
-		catcher->addChild(gPopup);
+		APP->scene->addChild(gPopup);
+	}
+	if (gPopup->isVisible()) {
+		if (APP->scene->children.back() != gPopup) {
+			APP->scene->removeChild(gPopup);
+			APP->scene->addChild(gPopup);
+		}
+		helpPopupPlace();
 	}
 
-	// The pointer mark lives on the scene rather than the rack, so it is not scrolled or zoomed
-	// with the modules: it belongs to the pointer, which is in window coordinates.
-	static HelpPointer* pointer = NULL;
-	if (!pointer) {
-		pointer = new HelpPointer;
-		APP->scene->addChild(pointer);
-	}
-	pointer->box.pos = math::Vec(0.f, 0.f);
-	pointer->box.size = APP->scene->box.size;
-	if (gHelpMode && APP->scene->children.back() != pointer) {
-		APP->scene->removeChild(pointer);
-		APP->scene->addChild(pointer);
-	}
-	// LAST, EVERY FRAME, WITHOUT CONDITION. Anything added to the rack after it would otherwise be
-	// asked about a click first.
+	// LAST, EVERY FRAME, WITHOUT CONDITION. Anything added to the rack afterwards would otherwise
+	// be asked about a click before it.
 	if (rack->children.back() != catcher) {
 		rack->removeChild(catcher);
 		rack->addChild(catcher);
 	}
 
-	// THE BADGES FOLLOW THE MODE THE MOMENT IT CHANGES. Placing them is done only when the rack
-	// changes, which is almost never, so the lighting is done here instead.
-	static bool wasMode = false;
-	if (gHelpMode != wasMode) {
-		wasMode = gHelpMode;
-		for (app::ModuleWidget* mw : rack->getModules()) {
-			if (HelpBadge* b = HelpCatcher::badgeIn(mw))
-				b->active = gHelpMode;
-		}
-	}
-
-	// WATCHING FOR A CABLE IN FLIGHT, while one fault is being tracked down.
-	static bool hadCable = false;
-	if (gHelpMode) {
-		const std::vector<app::CableWidget*> loose = rack->getIncompleteCables();
-		if (!loose.empty() && !hadCable) {
-			app::CableWidget* cw = loose[0];
-			INFO("help: a cable is in flight — in=%p out=%p",
-				(void*) cw->inputPort, (void*) cw->outputPort);
-		}
-		hadCable = !loose.empty();
-	}
-
-	// ESCAPE LEAVES, and is polled rather than handled as an event: a key event goes to whatever
-	// is focused, and in help mode that is nothing in particular.
-	if (gHelpMode && glfwGetKey(APP->window->win, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		gHelpMode = false;
-		INFO("help: escape, mode off");
+	// ESCAPE PUTS THE NOTE AWAY TOO, for a hand already on the keyboard. Polled rather than
+	// handled as a key event, because a key event goes to whatever is focused and nothing here
+	// takes focus.
+	if (gPopup && gPopup->isVisible()
+			&& glfwGetKey(APP->window->win, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		helpPopupHide();
+		helpSilence();
 	}
-}
-
-static bool gWasEnabled = false;
-static bool gDirty = true;
-static size_t gLastCount = 0;
-
-static HelpBadge* badgeOf(app::ModuleWidget* mw, bool make) {
-	for (widget::Widget* child : mw->children) {
-		if (HelpBadge* h = dynamic_cast<HelpBadge*>(child))
-			return h;
-	}
-	if (!make)
-		return NULL;
-	HelpBadge* h = new HelpBadge;
-	mw->addChild(h);
-	return h;
 }
 
 void helpRemoveAll() {
-	if (!APP->scene || !APP->scene->rack)
-		return;
-	for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
-		if (HelpBadge* h = badgeOf(mw, false)) {
-			mw->removeChild(h);
-			delete h;
-		}
-	}
-	gLastCount = 0;
+	helpPopupHide();
+	helpSilence();
 }
 
 void helpStep(bool enabled) {
 	if (!APP->scene || !APP->scene->rack)
 		return;
 	helpCatcherStep();
-	if (enabled != gWasEnabled) {
-		gWasEnabled = enabled;
-		gDirty = true;
-		if (!enabled) {
-			// No badges means no way back out of the mode, so it goes with them.
-			gHelpMode = false;
-			INFO("help: badges switched off, mode off");
-			helpPopupHide();
-			helpRemoveAll();
-			return;
-		}
-	}
+	if (enabled == gHelpOn)
+		return;
+	gHelpOn = enabled;
+	// Switched off, the catcher stays where it is and simply stops acting; anything already on
+	// the screen goes, and anything being read stops.
 	if (!enabled)
-		return;
-	const std::vector<app::ModuleWidget*> modules = APP->scene->rack->getModules();
-	if (!gDirty && modules.size() == gLastCount)
-		return;
-	gDirty = false;
-	gLastCount = modules.size();
-
-	for (app::ModuleWidget* mw : modules) {
-		if (!mw->model)
-			continue;
-		HelpBadge* h = badgeOf(mw, true);
-		// LAST CHILD, AND PLACED EVERY TIME. Last because children are drawn in order and offered
-		// a click in reverse, so this draws over the panel and is asked about the click first.
-		// Placed every time because a module that changes width — an expander being attached, a
-		// themed panel swapping — would otherwise leave the badge off its own corner.
-		h->box.size = math::Vec(HelpBadge::size(), HelpBadge::size());
-		// ON THE LINE THE SCREWS SIT ON, taken from a screw rather than assumed: the standard
-		// position is the top of the panel, but a maker is free to put theirs elsewhere and the
-		// badge should line up with whatever is actually drawn.
-		float cy = 15.f / 2.f;
-		for (widget::Widget* child : mw->children) {
-			app::SvgScrew* screw = dynamic_cast<app::SvgScrew*>(child);
-			if (screw && screw->box.pos.y < mw->box.size.y / 2.f) {
-				cy = screw->box.getCenter().y;
-				break;
-			}
-		}
-		h->box.pos = math::Vec(mw->box.size.x - h->box.size.x - 1.5f, cy - h->box.size.y / 2.f);
-		h->active = gHelpMode;
-	}
+		helpRemoveAll();
 }

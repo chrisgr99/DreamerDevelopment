@@ -1,4 +1,5 @@
 #include "Palette.hpp"
+#include "Help.hpp"
 #include "PortMap.hpp"
 
 #include <osdialog.h>
@@ -1008,9 +1009,21 @@ int paletteFamilyForPort(app::PortWidget* port) {
 	if (override_ >= 0)
 		return override_;
 	// THE PANELS WE HAVE READ, beneath the user's own corrections and above the word rules.
+	//
+	// TWO READINGS, AND THE NEWER ONE FIRST. The port map came from reading 142 NYSTHI panels for
+	// colour alone. The help entries came from reading nearly a thousand panels against each
+	// maker's own text, and where the two disagree it is the help that had the maker's words in
+	// front of it — see research/portmap-corrections.md, which is a list of places the older
+	// reading is wrong. So the help is asked first, and it also covers 21 makers the map never
+	// touched.
 	if (port && port->module && port->module->model && port->module->model->plugin) {
-		const int mapped = portMapFamily(port->module->model->plugin->slug,
-			port->module->model->slug, port->type == engine::Port::OUTPUT, port->portId);
+		const std::string& plug = port->module->model->plugin->slug;
+		const std::string& mod = port->module->model->slug;
+		const bool isOut = port->type == engine::Port::OUTPUT;
+		const int written = helpFamilyFor(plug, mod, isOut, port->portId);
+		if (written >= 0)
+			return written;
+		const int mapped = portMapFamily(plug, mod, isOut, port->portId);
 		if (mapped >= 0)
 			return mapped;
 	}

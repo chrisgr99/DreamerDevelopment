@@ -1609,7 +1609,7 @@ struct Darkener : Module {
 	Darkener() {
 		config(NUM_PARAMS, 0, 0, 0);
 		configSwitch(P_ON, 0.f, 1.f, 1.f, "Dark panels", {"Off", "On"});
-		configSwitch(P_HELP, 0.f, 1.f, 1.f, "Help badges", {"Off", "On"});
+		configSwitch(P_HELP, 0.f, 1.f, 1.f, "Help on cmd-shift-click", {"Off", "On"});
 		configSwitch(P_SPEAK, 0.f, 1.f, 1.f, "Read the help aloud", {"Off", "On"});
 	}
 };
@@ -1645,13 +1645,13 @@ struct DarkenerWidget : DRUIWidgetBase {
 		button->label2 = "panels";
 		addParam(button);
 
-		// A BADGE ON EVERY MODULE SAYING WHAT IT IS. Here because Dark is where the tools that
-		// reach into everybody else's widgets already live — see Help.hpp.
+		// CMD-SHIFT-CLICK ANY CONTROL TO BE TOLD WHAT IT IS. Here because Dark is where the
+		// tools that reach into everybody else's widgets already live — see Help.hpp.
 		FeatureButton* help = createParam<FeatureButton>(
 			Vec(ROW_X, ROW_TOP + ROW_H), module, Darkener::P_HELP);
 		help->box.size.x = box.size.x - ROW_X * 2;
-		help->label = "Help";
-		help->label2 = "badges";
+		help->label = "Help on";
+		help->label2 = "cmd-sh";
 		addParam(help);
 
 		FeatureButton* speak = createParam<FeatureButton>(

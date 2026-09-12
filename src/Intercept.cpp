@@ -1311,11 +1311,14 @@ struct InterceptOverlay : widget::Widget {
 	void onButton(const ButtonEvent& e) override {
 		notePointerButton(e);
 
-		// HELP MODE STANDS EVERYTHING ELSE DOWN. While it is on, a click on a jack is a question
-		// about that jack, and carrying a cable off it — which is this file's whole purpose — is
-		// exactly the wrong answer. The help catcher sits on the rack and cannot get in front of
-		// this handler, which is higher in the scene, so the standing down has to happen here.
-		if (helpModeOn()) {
+		// A HELP CLICK IS NOT A PATCHING CLICK. Cmd-shift-click asks what a jack is, and carrying
+		// a cable off it — which is this file's whole purpose — is exactly the wrong answer. The
+		// help catcher sits on the rack and cannot get in front of this handler, which is higher
+		// in the scene, so the standing down has to happen here.
+		//
+		// THIS CLICK ONLY. An earlier version asked whether help was switched on at all, which
+		// was true for the whole session and quietly disabled click-to-patch entirely.
+		if (helpClaimsClick(e.mods)) {
 			widget::Widget::onButton(e);
 			return;
 		}
