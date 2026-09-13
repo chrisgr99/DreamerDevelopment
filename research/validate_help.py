@@ -35,6 +35,14 @@ PERSON = re.compile(
 # Words that point instead of saying. If a line needs one, it has not been written yet.
 VAGUE = re.compile(r'\b(somehow|sort of|kind of|handles|deals with|takes care of|affects how)\b',
                    re.I)
+# THE ONLY SPELLINGS A RANGE MAY TAKE, so the column can be compared down its length rather than
+# read line by line. Matches what make_help.py already produces from the lines it harvests.
+RANGE_OK = re.compile(
+    r'^(?:\u00b1\d+(?:\.\d+)?V'
+    r'|-?\d+(?:\.\d+)? to [-+]?\d+(?:\.\d+)?V'
+    r'|1V per octave'
+    r'|high above \d+(?:\.\d+)?V)$')
+
 # A line reached by clicking the control does not need to name it. The heading on the note
 # already does, and the reader is pointing at the thing.
 LABELLED = re.compile(r'^[A-Z0-9][^a-z]{0,20} — ')
@@ -106,6 +114,50 @@ def check(path):
                             '%s/%s: %s %s is tagged to a line about the menu: "%s"'
                             % (name, model, kind, idx, text[:60]))
 
+            # WHAT A JACK EXPECTS, WHICH IS A FIELD AND NOT A SENTENCE.
+            #
+            # Forty agents writing free text into the same slot is forty schemas, and the
+            # generator can only read one. So the shape is policed here: which keys exist, what
+            # kind of value each takes, and — for the range — one spelling of one fact, because
+            # a column somebody is scanning for a match is worthless if 0-10V and "0 to 10 volts"
+            # are both in it. Anything an agent cannot put in these terms belongs in `notes` or
+            # in the port's own line, where prose is what is wanted.
+            props = (entry.get('props') or {}) if isinstance(entry, dict) else {}
+            for kind, holder in props.items():
+                if kind not in ('in', 'out'):
+                    problems.append('%s/%s: props has "%s", which is not in or out'
+                                    % (name, model, kind))
+                    continue
+                for idx, one in (holder or {}).items():
+                    at = '%s/%s props %s %s' % (name, model, kind, idx)
+                    if not isinstance(one, dict):
+                        problems.append('%s: not an object' % at)
+                        continue
+                    for key, value in one.items():
+                        if key == 'poly':
+                            if not isinstance(value, bool):
+                                problems.append('%s: poly is %r, not true or false' % (at, value))
+                        elif key == 'step':
+                            if value not in ('continuous', 'stepped'):
+                                problems.append('%s: step is %r, not continuous or stepped'
+                                                % (at, value))
+                        elif key == 'range':
+                            if not isinstance(value, str) or not RANGE_OK.match(value):
+                                problems.append(
+                                    '%s: range is %r; write it as "0 to 10V", "±5V", '
+                                    '"1V per octave" or "high above 1V"' % (at, value))
+                        elif key == 'polarity':
+                            if value not in ('unipolar', 'bipolar'):
+                                problems.append('%s: polarity is %r, not unipolar or bipolar'
+                                                % (at, value))
+                        elif key != 'why':
+                            problems.append('%s: "%s" is not a field here' % (at, key))
+                    if 'why' not in one:
+                        # WHERE IT CAME FROM, OR IT DID NOT HAPPEN. This project has already
+                        # shipped fabricated constants once; a figure with no source beside it is
+                        # exactly what that looked like.
+                        problems.append('%s: no "why" saying where this was established' % at)
+
     for model, entry in sorted(entries.items()):
         where = '%s/%s' % (name, model)
         # An entry is a list of lines, or an object carrying those lines plus the tags saying
@@ -146,12 +198,22 @@ def check(path):
             if len(line) > 200:
                 problems.append('%s line %d: %d characters, too long to hear in one piece'
                                 % (where, i, len(line)))
+            # A MENU ITEM'S NAME IS THE MAKER'S WORDS, NOT OURS. A menu line reads
+            # "Menu — <the item as the panel prints it> — what it does", and the middle part is
+            # quoted: Zilah really does print "MSB waits for LSB". Rewording it would falsify the
+            # one thing the line exists to get right, so the style rules read the line with that
+            # name taken out. Everything we wrote ourselves is still checked.
+            ours = line
+            if line.startswith('Menu — '):
+                parts = line.split(' — ')
+                if len(parts) > 2:
+                    ours = ' — '.join([parts[0]] + parts[2:])
             for rule, why in ((LEANING, 'leans on something the reader cannot see'),
                               (SIDEWAYS, 'says a relationship sideways'),
                               (SELLING, 'sells rather than says'),
                               (PERSON, 'gives a thing a person\'s verb'),
                               (VAGUE, 'points instead of saying')):
-                hit = rule.search(line)
+                hit = rule.search(ours)
                 if hit:
                     problems.append('%s line %d %s: "%s"' % (where, i, why, hit.group(0)))
     return problems

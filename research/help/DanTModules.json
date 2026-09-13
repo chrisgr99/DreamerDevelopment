@@ -1,7 +1,7 @@
 {
  "plugin": "DanTModules",
  "source": "https://miff-real.github.io/DanTModules-Manual/",
- "read": "2026-09-12",
+ "read": "2026-09-13",
  "modules": {
   "Wavulike": {
    "lines": [
@@ -21,11 +21,12 @@
     "A 10V trigger at the end of every waveform cycle, for syncing a scope or another module to the waveform",
     "The generated waveform, -5 to +5V at full amplitude",
     "Note — with only point A active the output is a static voltage set by that point and the amplitude, and pitch, fine tune and the curves do nothing",
-    "Menu — Mode switches between VCO and LFO, where the frequency is divided by 100",
-    "Menu — Value Follow makes the knobs and sliders track their CV inputs; Value Offset adds the CV to the knob or slider position",
-    "Menu — CV Input Slew sets the smoothing on the point and curve inputs, which stops abrupt CV changes clicking: none, 1ms, 5ms, 10ms, 25ms, 50ms or 100ms",
-    "Menu — Filter DC Offset switches the 15Hz high pass filter that removes DC offset from the output",
-    "Menu — Antialias switches 8x oversampling with a 10kHz low pass filter, which reduces aliasing at high frequencies"
+    "Menu — Frequency: chooses VCO, or LFO where the frequency is divided by 100",
+    "Menu — CV Param Mode sets how every CV input acts on its knob or slider: Offset adds the CV to it, Follow sets it from the CV, Attenuate scales the CV by it",
+    "Menu — CV Input Slew smooths every CV input, which stops abrupt CV changes clicking: None, 1ms, 5ms, 10ms, 25ms, 50ms or 100ms",
+    "Menu — Clamp CV Values keeps a value driven by CV inside the range of its knob or slider; switched off, the value can go past that range",
+    "Menu — Antialiasing switches the oversampling that reduces aliasing at high frequencies",
+    "Menu — Auto-Duck dips the output while the waveform is being changed"
    ],
    "param": {
     "0": 1,
@@ -89,7 +90,8 @@
      "0": "trigger",
      "1": "audio"
     }
-   }
+   },
+   "notes": "The menu item that chooses VCO or LFO is printed \"Frequency:\", read from the module's own context menu code in the 2.7.2 binary; the manual documents an older menu with \"Param Behaviour\", \"Filter DC Offset\" and \"Antialias\", none of which this build has. The oversampling factor and filter frequency behind Antialiasing are not stated in any source, so no numbers are quoted."
   },
   "TMNT": {
    "lines": [
@@ -131,7 +133,10 @@
     "A trigger whenever the active step lands on an enabled step, in either direction",
     "1.25V to 10V for the column the active step is in, 1.25V per column",
     "1.25V to 10V for the row the active step is in, 1.25V per row",
-    "0.15625V to 10V for the number of the active step, counted 1 to 64 from the top left"
+    "0.15625V to 10V for the number of the active step, counted 1 to 64 from the top left",
+    "Note — nothing fires until the run switch is off centre, one of the BPM knobs is above 0 and at least one step is enabled; a step is enabled by clicking it",
+    "Menu — CV Param Mode sets how every CV input acts on its knob: Offset adds the CV to it, Follow sets it from the CV, Attenuate scales the CV by it",
+    "Menu — Clamp CV Values keeps a value driven by CV inside the range of its knob; switched off, the value can go past that range"
    ],
    "param": {
     "0": 1,
@@ -379,6 +384,7 @@
     "The signal for that channel, passed to the mix output while the window selects it",
     "The selected channel's signal, with the slew applied across each change of channel",
     "0 to 10V for the selected channel: 0V for A, 2.5V for B, 5V for C, 7.5V for D and 10V for E",
+    "Note — patch the signals into the channel inputs and a trigger into the trigger input; the window moves only on a trigger or a press of the button, and only between inputs that have a cable",
     "Menu — CV Param Mode sets how the mode input acts on its knob: Offset adds to it, Follow sets it directly, Attenuate scales the CV by the knob"
    ],
    "param": {
@@ -421,7 +427,10 @@
     "Attenuates the correlation and the inverted outputs",
     "Offsets the correlation and the inverted outputs",
     "Modulates the attenuation applied to the correlation and inverted outputs",
-    "Modulates the offset applied to the correlation and inverted outputs"
+    "Modulates the offset applied to the correlation and inverted outputs",
+    "Note — patch the two signals to be compared into the A and B inputs",
+    "Menu — CV Param Mode sets how every CV input acts on its knob: Offset adds the CV to it, Follow sets it from the CV, Attenuate scales the CV by it",
+    "Menu — Clamp CV Values keeps a value driven by CV inside the range of its knob; switched off, the value can go past that range"
    ],
    "param": {
     "0": 1,
@@ -469,8 +478,12 @@
     "Modulates the multiplier applied below the canal",
     "The shaped waveform",
     "A trigger each time the input signal crosses 0V",
+    "Note — the module shapes a signal and generates none of its own, so it does nothing until something is patched into the input",
     "Menu — Filter DC Offset switches the high pass filter that removes DC offset from the shaped output",
-    "Menu — Antialias switches the oversampling that reduces aliasing at high frequencies"
+    "Menu — Antialias switches the oversampling that reduces aliasing at high frequencies",
+    "Menu — CV Param Mode sets how every CV input acts on its knob: Offset adds the CV to it, Follow sets it from the CV, Attenuate scales the CV by it",
+    "Menu — CV Input Slew smooths every CV input, which stops abrupt CV changes clicking: None, 1ms, 5ms, 10ms, 25ms, 50ms or 100ms",
+    "Menu — Clamp CV Values keeps a value driven by CV inside the range of its knob; switched off, the value can go past that range"
    ],
    "param": {
     "0": 2,
@@ -527,7 +540,11 @@
     "A gate while every channel has an active gate, with no slopes on its edges",
     "A gate while at least one channel has an active gate, with no slopes on its edges",
     "Note — a gate covers its start slope but not its end slope, so a channel is busy for the gate length plus one slope length",
-    "Note — when a gate ends while its input is above the threshold, the next gate begins immediately"
+    "Note — when a gate ends while its input is above the threshold, the next gate begins immediately",
+    "Note — a channel generates nothing until a signal patched into it rises above the threshold; with only channel A patched, every channel below it takes that same signal",
+    "Menu — CV Param Mode sets how every CV input acts on its knob: Offset adds the CV to it, Follow sets it from the CV, Attenuate scales the CV by it",
+    "Menu — CV Input Slew smooths every CV input, which stops abrupt CV changes clicking: None, 1ms, 5ms, 10ms, 25ms, 50ms or 100ms",
+    "Menu — Clamp CV Values keeps a value driven by CV inside the range of its knob; switched off, the value can go past that range"
    ],
    "param": {
     "0": 3,
@@ -645,10 +662,14 @@
     "Toggles Rack's dark panels setting",
     "A trigger above 0V toggles Rack's dark panels setting",
     "Note — one instance holds the Rack settings, and any further instance is marked as zombified on the light bulb",
+    "Note — Rack's settings follow this module only while it is active; when the module is added its knobs take up Rack's current settings",
     "Menu — Override Rack sets which values win when the module is activated: its own knob positions, or the current Rack settings",
     "Menu — Deactivation Defaults restores Rack's own default settings when the module is deactivated or bypassed",
     "Menu — Module Browser Deactivation releases the Rack settings for as long as the module browser is open",
-    "Menu — Keyboard Shortcuts remaps the keys that lock module positions and toggle smart rearrangement, Shift-L and Shift-S by default"
+    "Menu — Keyboard Shortcuts remaps the keys that lock module positions and toggle smart rearrangement, Shift-L and Shift-S by default",
+    "Menu — Set Defaults stores the current knob positions, the active state and the menu settings as the ones a new instance starts from",
+    "Menu — CV Param Mode sets how every CV input acts on its knob: Offset adds the CV to it, Follow sets it from the CV, Attenuate scales the CV by it",
+    "Menu — CV Input Slew smooths every CV input, which stops abrupt CV changes jumping the setting: None, 1ms, 5ms, 10ms, 25ms, 50ms or 100ms"
    ],
    "param": {
     "0": 1,
@@ -702,9 +723,11 @@
     "A trigger on a channel loads the plugin memory bank of that number, which is shared by every instance of the module",
     "The quantized 1V/octave pitch for each channel",
     "A trigger on a channel each time its quantized note changes",
-    "Menu — Module Memory Bank and Plugin Memory Bank save the selected notes into one of 16 slots, or load them back",
+    "Note — the quantizer has no notes to snap to until some are chosen; click the keys to switch notes on",
+    "Menu — Module Memory Bank holds sixteen slots of selected notes saved in the patch, as Load Module Slot 1 to 16 and Save Module Slot 1 to 16",
     "Menu — Clear All Keys turns off every selected note",
-    "Menu — Quantized Notes Readout shows the note each active channel is quantized to, under the keys"
+    "Menu — Quantized Notes Readout shows the note each active channel is quantized to, under the keys",
+    "Menu — Plugin Memory Bank holds sixteen slots of selected notes shared by every instance of the module, as Load Plugin Slot 1 to 16 and Save Plugin Slot 1 to 16"
    ],
    "param": {
     "0": 1,
@@ -897,7 +920,10 @@
     "Modulates the green in the colour",
     "Sets the blue in the colour, 0% for none and 100% for 255",
     "Modulates the blue in the colour",
-    "Menu — Set as default keeps the current colour for new patches"
+    "Note — the colour reaches only the DanTModules panels set to the Magical CV theme, which is chosen in each of those modules' own right-click menu under Theme",
+    "Menu — Set as default keeps the current colour for new patches",
+    "Menu — CV Param Mode sets how every CV input acts on its knob: Offset adds the CV to it, Follow sets it from the CV, Attenuate scales the CV by it",
+    "Menu — CV Input Slew smooths every CV input, which stops abrupt CV changes flickering the colour: None, 1ms, 5ms, 10ms, 25ms, 50ms or 100ms"
    ],
    "param": {
     "0": 1,
@@ -923,14 +949,19 @@
   "Chromakey": {
    "lines": [
     "A blank panel in a colour of your choosing, resized by dragging either edge, which can also display text for streaming or video work",
-    "Menu — Chroma sets the panel colour with red, green and blue sliders, and Use plugin panel colour returns it to the plugin default",
+    "Note — drag either side edge of the panel to change its width",
+    "Note — the panel carries no text until Draw text: is ticked in the Text Overlay menu, and the words come from Input text or from a .txt file loaded there",
+    "Menu — Chroma: sets the panel colour with red, green and blue sliders, and Use plugin panel colour returns it to the plugin default",
     "Menu — Set as default width keeps the current width for new instances",
     "Menu — Bypass Room Brightness keeps the panel at full brightness when the room is dimmed",
-    "Menu — Draw text switches the text overlay on, and Input text opens a field to type or paste what it shows",
+    "Menu — Draw text: switches the text overlay on, and Input text opens a field to type or paste what it shows",
     "Menu — Load file lists the .txt files in the Chromakey folder of the Rack user directory and puts one on the panel",
     "Menu — Watch file reloads the text when the file on disk changes, and Tail mode shows the end of it",
-    "Menu — Text position, Font, Font size and Colour set how the overlay is drawn, and Autoscroll moves it at a set speed after a delay"
-   ]
+    "Menu — Text position:, Font:, Font size and Colour: set how the overlay is drawn, and Autoscroll moves it at a set speed after a delay",
+    "Menu — Generate Patchlist writes the names of the patches in the Rack user directory to a text file and shows it on the panel",
+    "Menu — Save current text as... writes what the panel is showing to a .txt file in the Chromakey folder of the Rack user directory"
+   ],
+   "notes": "The items inside the Text Overlay menu are printed with a leading dash — \" - Load file\", \" - Generate Patchlist\", \" - Save current text as...\" — which is left out of the lines so they read aloud cleanly."
   },
   "PolySplice": {
    "lines": [
@@ -953,7 +984,9 @@
     "0.5V per channel for the selected channel, so channel 3 gives 1.5V and channel 16 gives 8V",
     "The selected channel's value, scaled by the output attenuvertor",
     "Attenuates and inverts the output",
-    "Sets what the output carries: the selected channel alone, one channel per input starting at the selected one and wrapping round, or the selected value on all 16 channels"
+    "Sets what the output carries: the selected channel alone, one channel per input starting at the selected one and wrapping round, or the selected value on all 16 channels",
+    "Note — patch a polyphonic signal into the signals input and a trigger into the trigger input; the window moves only on a trigger or a press of the button",
+    "Menu — Mode knob horizontal: draws the advance mode control sideways"
    ],
    "param": {
     "0": 7,
@@ -1036,7 +1069,8 @@
     "A trigger resets the module in whichever ways are ticked in the Reset Behaviours menu",
     "Chooses which channel the readouts show",
     "Note — dividing by 0 does nothing to the working value",
-    "Menu — Reset Behaviours picks what a reset does: initialize the parameters, zero or re-sample any of the values, reset the bounds, and end or restart the slew"
+    "Note — the working value changes only when something is sampled or an operation is fired, by the buttons on the panel or the trigger inputs",
+    "Menu — Reset Behaviours ticks what a reset does: Initialize Parameters, Zero Calculation, Reset Slew, and a Zero and a Sample item for the signal, each operation value and each bound"
    ],
    "param": {
     "0": 13,
@@ -1128,7 +1162,7 @@
      "4": "trigger"
     }
    },
-   "notes": "The Rectify switch beside the clip switch is not described in the manual, on the panel or in the binary, so it has no line and no tag."
+   "notes": "The Rectify switch beside the clip switch has no line and no tag: the binary carries its name as the parameter's tooltip, and nothing in the manual, on the panel or in the binary says what it does."
   },
   "Purfenator": {
    "lines": [
@@ -1138,10 +1172,11 @@
     "Opens the colour background options",
     "Opens the image background options",
     "Opens the skiff options",
-    "Menu — Module & Patch Title draws the name of the patch file down the panel, and sets the size, colour and direction of that text",
-    "Menu — Colour Background fills a layer below the modules with a colour, or with a linear, radial or box gradient between two colours",
-    "Menu — Image Background renders a loaded image below or above the colour layer, tiled or scaled, with its own position and offsets",
-    "Menu — Skiff draws boxes around the modules with a bezel, rails and a shadow, and can split them into several boxes by row or by gaps",
+    "Note — no backdrop is drawn until the module is made active with the button on its panel",
+    "Menu — Module & Patch Title, in the Purf Stylee submenu, draws the name of the patch file down the panel, and sets the size, colour and direction of that text",
+    "Menu — Colour Background, in the Purf Stylee submenu, fills a layer below the modules with a colour, or with a linear, radial or box gradient between two colours",
+    "Menu — Image Background, in the Purf Stylee submenu, renders a loaded image below or above the colour layer, tiled or scaled, with its own position and offsets",
+    "Menu — Skiff, in the Purf Stylee submenu, draws boxes around the modules with a bezel, rails and a shadow, and can split them into several boxes by row or by gaps",
     "Menu — Show Icon Menus hides the four menu buttons on the panel"
    ],
    "param": {
@@ -1161,7 +1196,9 @@
     "Polyphonic CV for the skiff, one per channel: draw skiff, bezel, rails and shadow, skiff depth, bezel size, shadow size, softness and intensity, three skiff colours, four inside colours",
     "Polyphonic CV for the multimode settings, one per channel: multimode, split vertically, and the horizontal threshold",
     "Note — an on-off setting expects a trigger, and any signal above 0V flips it; a numeric setting takes 0-10V across its range, and 0V leaves it where it was",
-    "Note — CV changes a setting directly, with no attenuvertor and no offset, and those changes cannot be undone"
+    "Note — CV changes a setting directly, with no attenuvertor and no offset, and those changes cannot be undone",
+    "Note — the module changes nothing by itself: it needs a Purfenator beside it, and that Purfenator has to be active for any of this to show",
+    "Menu — Poly inputs channel map: lists, for each of the five inputs, which polyphonic channel carries which Purfenator setting"
    ],
    "in": {
     "0": 1,
@@ -1192,7 +1229,8 @@
     "Sets the output level",
     "Clears the audio buffer, which stops the feedback that some settings can build up",
     "The cowbell voice",
-    "Note — every CV input is calibrated to -5 to +5V and is added to its knob, with the result clamped to the range of that knob"
+    "Note — every CV input is calibrated to -5 to +5V and is added to its knob, with the result clamped to the range of that knob",
+    "Note — the voice sounds only when it is struck, by the Hit! button or a trigger at the hit input"
    ],
    "param": {
     "8": 1,
@@ -1251,7 +1289,8 @@
     "Clears the internal buffers, which restarts processing after the feedback has blown the output out",
     "Limits the output to 10 volts peak to peak, whether or not the distortion and feedback are switched on, and lights red while it is limiting",
     "The distorted signal and its feedback",
-    "Note — every CV input is calibrated to -5 to +5V and is added to its knob, with the result clamped to the range of that knob"
+    "Note — every CV input is calibrated to -5 to +5V and is added to its knob, with the result clamped to the range of that knob",
+    "Note — the distortion and the feedback are applied only while Pig Power! is switched on"
    ],
    "param": {
     "1": 2,
@@ -1311,6 +1350,7 @@
     "A trigger when that event ends",
     "A gate while that event is running",
     "A gate while that event is not running",
+    "Note — the clock counts only while it is running, and an event fires nothing until that event is enabled",
     "Menu — Reset on Stop fires a reset whenever the clock goes from running to stopped",
     "Menu — Reset at Time Limit fires a reset at the limit and keeps the clock running, and without it the clock stops there",
     "Menu — Set Limit sets the time at which the limit falls, and Set Time moves the elapsed time to a chosen point",
@@ -1470,6 +1510,7 @@
     "Curves the closing of that channel's VCA, logarithmic to the left, linear in the middle and exponential to the right",
     "A 10V signal while that channel is active, following its rise and fall times and shapes",
     "That channel's input after its VCA",
+    "Note — nothing opens until a clock is patched into the clock input and a channel is enabled",
     "Menu — Immediate Slew Reset closes the slews as fast as it can on a reset, rather than letting them follow their fall settings",
     "Menu — Reset to Enabled Snapshot returns every channel to the enabled state it had at the last snapshot, and Save Enabled Snapshot overwrites that snapshot"
    ],
@@ -1630,6 +1671,7 @@
     "Transposes every channel up one semitone",
     "Transposes every channel down one semitone",
     "Transposes the channels by the voltage here, at a volt per octave and apart from the knob; a monophonic signal moves every channel, and a polyphonic one moves each channel by its own",
+    "Note — the module needs nothing patched into it; every channel output carries its note voltage as soon as the module is added",
     "Menu — Label Text sets the name shown in the readout at the top, which is saved with the patch and with presets"
    ],
    "param": {
@@ -1751,8 +1793,12 @@
     "Rhythmic triggers generated for the day, firing on the first beat except when the day's flavour is rANdoM",
     "A second set of rhythmic triggers generated for the day",
     "A trigger on the last step of the sequence",
-    "Note — the colour behind the date gives the day's flavour: magenta for rANdoM with no pattern, yellow for a 3 beat rhythm, green for 4, orange for 5 and red for 8",
-    "Menu — Lock Current Seed keeps today's sequence instead of generating a new one tomorrow, and the locked seed is saved in the patch and in presets"
+    "Note — the colour behind the date gives the day's flavour: magenta for rANdoM with no pattern, yellow for a 3 beat rhythm, green for 4 and orange for 5",
+    "Note — the sequence moves only on a trigger at the step input or a press of the step button; there is no clock inside the module",
+    "Note — a preset for this module is a locked seed, so the presets that ship with the plugin play the sequences of particular dates",
+    "Menu — Lock Current Seed: keeps today's sequence instead of generating a new one tomorrow, and the locked seed is saved in the patch and in presets",
+    "Menu — Seed: shows the number today's sequence was generated from, and Flavour: the rhythm it was given",
+    "Menu — >>> Time Travel Forwards >>> and <<< Time Travel Backwards <<< move the date the sequence is generated from"
    ],
    "param": {
     "0": 1,
@@ -1784,7 +1830,8 @@
      "3": "trigger",
      "4": "trigger"
     }
-   }
+   },
+   "notes": "The flavour legend in the binary lists magenta for rANdoM, yellow for 3x, green for 4x and orange for 5x, and no other colour; an earlier entry here claimed a red 8 beat flavour, which nothing supports."
   },
   "Kapow": {
    "lines": [
@@ -1821,13 +1868,14 @@
     "A trigger on a channel loads the memory bank of that number, and a trigger for a bank with nothing stored does nothing",
     "The resynthesised voice, -5 to +5V and hard-clipped at 10 volts either way",
     "A 1ms 10V trigger when playback reaches the end of the sample, or the start of it when playing backwards",
-    "Note — a sample has to be analysed before it can be played: drop a .wav, .mp3, .flac or .kapow file onto the display, or pick one from the Audio File Processing menu",
+    "Note — the voice plays analysis data rather than an audio file; drop a .wav, .mp3, .flac or .kapow file onto the module, or use Select Audio File... in the Audio File Processing menu",
     "Menu — Polyphony Enabled allows up to 16 voices, counted from the channels on the pitch and trigger inputs",
     "Menu — Retriggers Enabled lets a new trigger cut the sounding voice short, and without it triggers are ignored until playback finishes",
     "Menu — Memory Banks stores the analysis data and the knob positions in one of 16 slots, and loads a slot back with a 10ms crossfade",
     "Menu — Audio File Processing analyses an audio file, loads or saves a .kapow file, and sets whether leading silence is trimmed and at what threshold",
     "Menu — Embed Kapow data in patch saves the analysis data inside the patch rather than pointing at a file on disk",
-    "Menu — Reset Behaviour picks which knobs a reset returns to their defaults"
+    "Menu — Reset Behaviour picks which knobs a reset returns to their defaults",
+    "Menu — Open Presets folder... opens the folder of .kapow analysis files that ship with the plugin"
    ],
    "param": {
     "0": 5,

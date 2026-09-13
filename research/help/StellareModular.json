@@ -1,57 +1,98 @@
 {
-  "plugin": "StellareModular",
-  "source": "https://github.com/stellare-modular/vcv-rack/blob/master/README.md",
-  "read": "2026-09-12",
-  "modules": {
-    "TuringMachine": {
-      "lines": [
-        "A sixteen-bit shift register sequencer after Music Thing Modular's Turing Machine, with the Volts and Pulses expanders built into the same panel",
-        "Sets the voltage this knob adds while its bit of the sequence is high, 0V to 2V from this knob alone and 10V with all five knobs up and all five bits high",
-        "Sets how likely a bit is to come round unchanged: fully clockwise the loop repeats exactly, fully counter-clockwise every bit flips on each pass, and between them a bit changes at most half the time",
-        "Sets the length of the loop in steps: 2, 3, 4, 5, 6, 8, 12 or 16",
-        "Attenuates the stepped voltage taken from the sequence, which reaches 10V with this knob fully clockwise",
-        "Rotates the sequence one place backwards on the next clock, on top of the step that clock makes, and is ignored while a cable is patched to the MOVE input",
-        "Rotates the sequence one place forwards on the next clock, on top of the step that clock makes, and is ignored while a cable is patched to the MOVE input",
-        "Writes a 0 into the sequence on the next clock, in place of the bit that would have come round",
-        "Writes a 1 into the sequence on the next clock, in place of the bit that would have come round; holding the 0 button at the same time writes a 0 instead",
-        "Steps the sequence on each rising edge, reading high above 5V and low below 0V",
-        "Rotates the sequence back to the start of its loop; it is read only at the instant the clock goes high, and that clock does not step the sequence",
-        "Sets the chance of a bit coming round unchanged in place of the big knob while a cable is patched here, -5V to 5V covering the whole of that knob's travel",
-        "Rotates the sequence one place backwards on each clock while this reads below -0.05V and one place forwards while it reads above 0.05V, and stops the two MOVE buttons working",
-        "Carries 10V while the clock is high and the bit numbered on this jack is high, and 0V the rest of the time",
-        "Carries 10V while the clock is high and both bits numbered on this jack are high, or either of them when Pulses mode is set to Or",
-        "Carries 10V while the clock is high and all four bits numbered on this jack are high, or any one of them when Pulses mode is set to Or",
-        "Twice the sum of the knob voltages whose bits of the sequence are high, reaching 10V with all five knobs up and all five bits high",
-        "White noise, roughly -8V to 8V, drawn fresh every sample and unconnected to the sequence",
-        "The top eight bits of the sequence read as a number, 0V to 10V before SCALE attenuates it",
-        "Menu — Pulses mode: And needs every bit numbered on a combination output to be high, Or needs any one of them"
-      ],
-      "param": {
-        "0": 1, "1": 1, "2": 1, "3": 1, "4": 1,
-        "5": 2, "6": 3, "7": 4,
-        "9": 5, "10": 6, "11": 8, "12": 7
-      },
-      "in": {"0": 9, "1": 10, "2": 11, "3": 12},
-      "out": {
-        "0": 13, "1": 13, "2": 13, "3": 13, "4": 13, "5": 13, "6": 13,
-        "7": 14, "8": 14, "9": 14, "10": 15,
-        "12": 16, "13": 17, "14": 18
-      },
-      "family": {
-        "in": {"0": "trigger", "1": "trigger", "2": "cv", "3": "cv"},
-        "out": {
-          "0": "trigger", "1": "trigger", "2": "trigger", "3": "trigger",
-          "4": "trigger", "5": "trigger", "6": "trigger",
-          "7": "trigger", "8": "trigger", "9": "trigger", "10": "trigger",
-          "12": "cv", "13": "audio", "14": "cv"
-        }
-      },
-      "notes": "The plugin is closed source and its panel SVG is a 1x1 placeholder, so everything above was read out of the compiled binary: the configParam ranges in the constructor, the probability(), sendPitchOutput(), sendVoltsOutput(), sendNoiseOutput() and updatePulses() functions, and the two lookup tables for loop length and for the pulse bit masks. Param 8 and output 11 are never configured and have no widget, so neither can be clicked and neither gets a line. The chance of a bit changing never quite reaches one in two: the keep probability runs from 100 percent down to about 52.5 percent and then jumps to always-flip below 0.05, which differs from the hardware's even coin toss at the centre."
+ "plugin": "StellareModular",
+ "source": "https://github.com/stellare-modular/vcv-rack/blob/master/README.md",
+ "read": "2026-09-12",
+ "modules": {
+  "TuringMachine": {
+   "lines": [
+    "A sixteen-bit shift register sequencer after Music Thing Modular's Turing Machine, with the Volts and Pulses expanders built into the same panel",
+    "Sets the voltage this knob adds while its bit of the sequence is high, 0V to 2V from this knob alone and 10V with all five knobs up and all five bits high",
+    "Sets how likely a bit is to come round unchanged: fully clockwise the loop repeats exactly, fully counter-clockwise every bit flips on each pass, and between them a bit changes at most half the time",
+    "Sets the length of the loop in steps: 2, 3, 4, 5, 6, 8, 12 or 16",
+    "Attenuates the stepped voltage taken from the sequence, which reaches 10V with this knob fully clockwise",
+    "Rotates the sequence one place backwards on the next clock, on top of the step that clock makes, and is ignored while a cable is patched to the MOVE input",
+    "Rotates the sequence one place forwards on the next clock, on top of the step that clock makes, and is ignored while a cable is patched to the MOVE input",
+    "Writes a 0 into the sequence on the next clock, in place of the bit that would have come round",
+    "Writes a 1 into the sequence on the next clock, in place of the bit that would have come round; holding the 0 button at the same time writes a 0 instead",
+    "Steps the sequence on each rising edge, reading high above 5V and low below 0V",
+    "Rotates the sequence back to the start of its loop; it is read only at the instant the clock goes high, and that clock does not step the sequence",
+    "Sets the chance of a bit coming round unchanged in place of the big knob while a cable is patched here, -5V to 5V covering the whole of that knob's travel",
+    "Rotates the sequence one place backwards on each clock while this reads below -0.05V and one place forwards while it reads above 0.05V, and stops the two MOVE buttons working",
+    "Carries 10V while the clock is high and the bit numbered on this jack is high, and 0V the rest of the time",
+    "Carries 10V while the clock is high and both bits numbered on this jack are high, or either of them when Pulses mode is set to Or",
+    "Carries 10V while the clock is high and all four bits numbered on this jack are high, or any one of them when Pulses mode is set to Or",
+    "Twice the sum of the knob voltages whose bits of the sequence are high, reaching 10V with all five knobs up and all five bits high",
+    "White noise, roughly -8V to 8V, drawn fresh every sample and unconnected to the sequence",
+    "The top eight bits of the sequence read as a number, 0V to 10V before SCALE attenuates it",
+    "Menu — Pulses mode — a heading over two choices: And makes a combination output need every bit numbered on it, Or makes it need any one of them",
+    "Note — nothing moves until a clock is patched to CLOCK; the sequence steps only on a rising edge there, and the pulse outputs go high only while that clock is high"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 2,
+    "6": 3,
+    "7": 4,
+    "9": 5,
+    "10": 6,
+    "11": 8,
+    "12": 7
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 13,
+    "2": 13,
+    "3": 13,
+    "4": 13,
+    "5": 13,
+    "6": 13,
+    "7": 14,
+    "8": 14,
+    "9": 14,
+    "10": 15,
+    "12": 16,
+    "13": 17,
+    "14": 18
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv"
     },
-    "BlankPanel": {
-      "lines": [
-        "A blank panel carrying the Stellare Modular logo, for filling gaps in the rack"
-      ]
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "12": "cv",
+     "13": "audio",
+     "14": "cv"
     }
+   },
+   "notes": "The plugin is closed source and its panel SVG is a 1x1 placeholder, so everything above was read out of the compiled binary: the configParam ranges in the constructor, the probability(), sendPitchOutput(), sendVoltsOutput(), sendNoiseOutput() and updatePulses() functions, and the two lookup tables for loop length and for the pulse bit masks. Param 8 and output 11 are never configured and have no widget, so neither can be clicked and neither gets a line. The chance of a bit changing never quite reaches one in two: the keep probability runs from 100 percent down to about 52.5 percent and then jumps to always-flip below 0.05, which differs from the hardware's even coin toss at the centre."
+  },
+  "BlankPanel": {
+   "lines": [
+    "A blank panel carrying the Stellare Modular logo, for filling gaps in the rack"
+   ]
   }
+ }
 }

@@ -1,163 +1,335 @@
 {
-  "plugin": "Noise86",
-  "source": "https://github.com/spacejoey86/Noise86/blob/master/README.md",
-  "read": "2026-09-12",
-  "modules": {
-    "MarkovDrummer": {
-      "lines": [
-        "Eight-step trigger sequencer in which every second step takes a random jump to one of the odd steps",
-        "A rising edge moves the sequencer on one step",
-        "A rising edge returns the sequencer to step 1 and fires the step 1 trigger at once, though the maker's notes put that trigger on the next clock",
-        "The weight of that jump; the chance of taking it is this weight divided by the total of the four weights leaving that even step",
-        "A 1ms 10V pulse each time the sequencer arrives at that step",
-        "Note — steps 1, 3, 5 and 7 always move on to the step after them, so only the even steps are weighted",
-        "Note — with all four weights leaving an even step at zero, that step jumps to step 1, not back to itself as the maker's notes describe"
-      ],
-      "param": {
-        "0": 3, "1": 3, "2": 3, "3": 3, "4": 3, "5": 3, "6": 3, "7": 3,
-        "8": 3, "9": 3, "10": 3, "11": 3, "12": 3, "13": 3, "14": 3, "15": 3
-      },
-      "in": { "0": 1, "1": 2 },
-      "out": { "0": 4, "1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4 },
-      "family": {
-        "in": { "0": "trigger", "1": "trigger" },
-        "out": {
-          "0": "trigger", "1": "trigger", "2": "trigger", "3": "trigger",
-          "4": "trigger", "5": "trigger", "6": "trigger", "7": "trigger"
-        }
-      },
-      "notes": "The README says a column of four zero weights repeats the current step. The code takes a random number from 0 to a total of 0, which is 0, and the first weight tested satisfies choice <= chanceSum, so the step always jumps to step 1. The README also says the step 1 trigger waits for the next clock after a reset; the code fires it on the reset edge itself, and the following clock then produces step 2."
+ "plugin": "Noise86",
+ "source": "https://github.com/spacejoey86/Noise86/blob/master/README.md",
+ "read": "2026-09-12",
+ "modules": {
+  "MarkovDrummer": {
+   "lines": [
+    "Eight-step trigger sequencer in which every second step takes a random jump to one of the odd steps",
+    "A rising edge moves the sequencer on one step",
+    "A rising edge returns the sequencer to step 1 and fires the step 1 trigger at once, though the maker's notes put that trigger on the next clock",
+    "The weight of that jump; the chance of taking it is this weight divided by the total of the four weights leaving that even step",
+    "A 1ms 10V pulse each time the sequencer arrives at that step",
+    "Note — steps 1, 3, 5 and 7 always move on to the step after them, so only the even steps are weighted",
+    "Note — with all four weights leaving an even step at zero, that step jumps to step 1, not back to itself as the maker's notes describe",
+    "Note — The sequencer moves only on a rising edge at the clock input, so with nothing patched there no trigger is ever fired"
+   ],
+   "param": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 3,
+    "13": 3,
+    "14": 3,
+    "15": 3
+   },
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
     },
-    "MultiLogic": {
-      "lines": [
-        "Three identical logic gates, each with three inputs and a plain and an inverted output, working per polyphonic channel",
-        "The first of that gate's three inputs, read as high above 2V; with this and the second patched and the third empty, the gate is an XOR of the two",
-        "The second of that gate's three inputs, read as high above 2V; with this and the third patched and the first empty, the gate is an AND of the two",
-        "The third of that gate's three inputs, read as high above 2V; with this and the second patched and the first empty, the gate is an AND of the two",
-        "A 10V gate while that gate's result is true and 0V while it is false, carrying as many polyphonic channels as the widest of its three inputs",
-        "A 10V gate while that gate's result is false and 0V while it is true, carrying as many polyphonic channels as the widest of its three inputs",
-        "Note — any patching other than those two pairs makes a gate an OR of its inputs, so the XOR, OR and AND printed on the panel say which inputs to patch rather than what one gate is fixed to do"
-      ],
-      "param": {},
-      "in": { "0": 1, "1": 2, "2": 3, "3": 1, "4": 2, "5": 3, "6": 1, "7": 2, "8": 3 },
-      "out": { "0": 4, "1": 4, "2": 4, "3": 5, "4": 5, "5": 5 },
-      "family": {
-        "in": {
-          "0": "trigger", "1": "trigger", "2": "trigger", "3": "trigger", "4": "trigger",
-          "5": "trigger", "6": "trigger", "7": "trigger", "8": "trigger"
-        },
-        "out": {
-          "0": "trigger", "1": "trigger", "2": "trigger",
-          "3": "trigger", "4": "trigger", "5": "trigger"
-        }
-      },
-      "notes": "All three sections run the same code; which logic a section performs depends only on which of its three inputs are patched. The panel brackets label the three sections XOR, OR and AND, which is a patching illustration rather than a fixed function. Q' is the upper jack of each pair and Q the lower."
-    },
-    "EyeSeq": {
-      "lines": [
-        "Six clock dividers, each adding a fixed voltage to the output while it is in the first half of its division",
-        "A rising edge above 3V advances the step count by one",
-        "A rising edge returns the step count to zero",
-        "Sets the division for that row, a whole number from 2 to 16; the row is active for the first half of each division and the light beside it shows when",
-        "The voltage that row adds to the output while it is active, -1V to 1V",
-        "The offsets of every active row added together, -6V to 6V"
-      ],
-      "param": {
-        "0": 3, "1": 3, "2": 3, "3": 3, "4": 3, "5": 3,
-        "6": 4, "7": 4, "8": 4, "9": 4, "10": 4, "11": 4
-      },
-      "in": { "0": 1, "1": 2 },
-      "out": { "0": 5 },
-      "family": {
-        "in": { "0": "trigger", "1": "trigger" },
-        "out": { "0": "cv" }
-      },
-      "notes": "The step count wraps at 720720, the lowest common multiple of 1 to 16, so the whole pattern repeats there. The output is a plain sum of offsets; the README calls the module a pitch sequencer, but nothing in it scales to a volt per octave, so the output family is left as cv."
-    },
-    "TransQuant": {
-      "lines": [
-        "Three-channel quantizer with a transposition that triggers step up and down by a set interval",
-        "A rising edge adds the interval to the running transposition",
-        "A rising edge subtracts the interval from the running transposition",
-        "Adds a whole number of semitones, 0 to 11, to the transposition; on its own a setting of 6 or more moves the pitch down by that many semitones rather than up",
-        "Volts added to the transposition, a volt to the octave",
-        "Sets the step the transpose triggers move by, a whole number of semitones from 0 to 20",
-        "Sets the step the transpose triggers move by at 12 semitones to the volt, and the interval knob is ignored while anything is patched here",
-        "Picks the scale notes are quantized to: chromatic, blues, major, Dorian, Phrygian, Lydian, Mixolydian, minor or Locrian",
-        "Picks the scale by whole volts, 0V for chromatic through 8V for Locrian, and the Mode knob is ignored while anything is patched here",
-        "Pitch into that channel, a volt to the octave",
-        "A 1ms 10V pulse each time the quantized note on that channel changes",
-        "The pitch on that channel, transposed and then quantized to the chosen scale",
-        "Note — only the fractional part of the transposition is used, and once it reaches half an octave the pitch moves down by it instead of up, so 7 semitones of transposition sounds 7 semitones lower"
-      ],
-      "param": { "0": 3, "1": 5, "2": 7 },
-      "in": { "0": 1, "1": 2, "2": 4, "3": 6, "4": 8, "5": 9, "6": 9, "7": 9 },
-      "out": { "0": 10, "1": 10, "2": 10, "3": 11, "4": 11, "5": 11 },
-      "family": {
-        "in": {
-          "0": "trigger", "1": "trigger", "2": "pitch", "3": "pitch", "4": "cv",
-          "5": "pitch", "6": "pitch", "7": "pitch"
-        },
-        "out": {
-          "0": "trigger", "1": "trigger", "2": "trigger",
-          "3": "pitch", "4": "pitch", "5": "pitch"
-        }
-      },
-      "notes": "The README says the octave is preserved by transposing up or down depending which is closer. The code takes the fractional part of the total transposition and subtracts it, rather than its complement, whenever it is 0.5 or more, so a transposition of 7 semitones lowers the pitch by 7 semitones instead of raising it by 5. Bypassing the module passes each channel input straight to its channel output."
-    },
-    "SeqOfChanges": {
-      "lines": [
-        "Markov trigger sequencer in which the chance of the next trigger is set by the last three clocks, a state drawn as one of eight trigrams",
-        "A rising edge above 3V draws the next trigger, at the chance set by the knob for the current state",
-        "A rising edge sets the state to that trigram; a clock arriving in the same sample is ignored",
-        "The chance of a trigger on the next clock while the module is in that state, 0 for never and 1 for every clock",
-        "10V when the clock three before the last one fired a trigger, 0V when it did not",
-        "10V when the clock before the last one fired a trigger, 0V when it did not",
-        "10V when the last clock fired a trigger, 0V when it did not",
-        "The chance set for the current state, scaled to 0-10V",
-        "A 1ms 10V pulse each time the sequencer fires",
-        "Note — the arrows on the panel show which states can follow which, a solid arrow for a clock that fired a trigger and a broken arrow for one that did not"
-      ],
-      "param": {
-        "0": 3, "1": 3, "2": 3, "3": 3, "4": 3, "5": 3, "6": 3, "7": 3
-      },
-      "in": {
-        "0": 1, "1": 2, "2": 2, "3": 2, "4": 2, "5": 2, "6": 2, "7": 2, "8": 2
-      },
-      "out": { "0": 4, "1": 5, "2": 6, "3": 7, "4": 8 },
-      "family": {
-        "in": {
-          "0": "trigger", "1": "trigger", "2": "trigger", "3": "trigger", "4": "trigger",
-          "5": "trigger", "6": "trigger", "7": "trigger", "8": "trigger"
-        },
-        "out": {
-          "0": "trigger", "1": "trigger", "2": "trigger", "3": "cv", "4": "trigger"
-        }
-      },
-      "notes": "The state is a three-bit history shifted on every clock: bit 4 is the most recent clock and drives State 3, bit 1 the oldest and drives State 1. The knobs and trigram inputs are named Kun, Gen, Kan, Xun, Zhen, Li, Dui and Qian in the tooltips; the panel prints only the trigram figures."
-    },
-    "RepeatBuddy": {
-      "lines": [
-        "Counter with a comparator and a clock divider, for adding step repeats to a sequencer",
-        "Sets the count the comparator fires at, 1V for 0.8 through 10V for 8; with nothing patched here the threshold is 8",
-        "A rising edge adds one to the counter, which stops climbing at 8",
-        "A rising edge clears the counter to zero and restarts the division",
-        "Scales the Count output, from silence at one end to the full count voltage at the other",
-        "10V while the count is at or above the threshold; with nothing patched to Rst the counter clears itself there, so the gate lasts 1ms",
-        "The count as a voltage, 0V to 10V over counts of 0 to 7 and 11.43V at a count of 8, scaled by the counter attenuator",
-        "Sets the division, 0 to 8 in whole numbers, and attenuates the voltage at the Division input while anything is patched there",
-        "Sets the division, 0V to 10V spanning 0 to 8 in whole numbers once the knob has attenuated it",
-        "A 1ms 10V pulse whenever the count is a multiple of the division; at a division of 0 nothing is sent",
-        "Note — the green lights show the count and the red lights the threshold, brightened at every multiple of the division"
-      ],
-      "param": { "0": 4, "1": 7 },
-      "in": { "0": 1, "1": 2, "2": 3, "3": 8 },
-      "out": { "0": 5, "1": 6, "2": 9 },
-      "family": {
-        "in": { "0": "cv", "1": "trigger", "2": "trigger", "3": "cv" },
-        "out": { "0": "trigger", "1": "cv", "2": "trigger" }
-      },
-      "notes": "The threshold input clamps its voltage to 1V to 10V before scaling, so a count of 0 can never be the threshold. The counter output scales counts 0 to 7 across 0V to 10V but the counter itself reaches 8, which reads 11.43V before attenuation. The two knobs carry no lettering on the panel."
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
     }
+   },
+   "notes": "The README says a column of four zero weights repeats the current step. The code takes a random number from 0 to a total of 0, which is 0, and the first weight tested satisfies choice <= chanceSum, so the step always jumps to step 1. The README also says the step 1 trigger waits for the next clock after a reset; the code fires it on the reset edge itself, and the following clock then produces step 2."
+  },
+  "MultiLogic": {
+   "lines": [
+    "Three identical logic gates, each with three inputs and a plain and an inverted output, working per polyphonic channel",
+    "The first of that gate's three inputs, read as high above 2V; with this and the second patched and the third empty, the gate is an XOR of the two",
+    "The second of that gate's three inputs, read as high above 2V; with this and the third patched and the first empty, the gate is an AND of the two",
+    "The third of that gate's three inputs, read as high above 2V; with this and the second patched and the first empty, the gate is an AND of the two",
+    "A 10V gate while that gate's result is true and 0V while it is false, carrying as many polyphonic channels as the widest of its three inputs",
+    "A 10V gate while that gate's result is false and 0V while it is true, carrying as many polyphonic channels as the widest of its three inputs",
+    "Note — any patching other than those two pairs makes a gate an OR of its inputs, so the XOR, OR and AND printed on the panel say which inputs to patch rather than what one gate is fixed to do"
+   ],
+   "param": {},
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 1,
+    "4": 2,
+    "5": 3,
+    "6": 1,
+    "7": 2,
+    "8": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 5,
+    "4": 5,
+    "5": 5
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "notes": "All three sections run the same code; which logic a section performs depends only on which of its three inputs are patched. The panel brackets label the three sections XOR, OR and AND, which is a patching illustration rather than a fixed function. Q' is the upper jack of each pair and Q the lower."
+  },
+  "EyeSeq": {
+   "lines": [
+    "Six clock dividers, each adding a fixed voltage to the output while it is in the first half of its division",
+    "A rising edge above 3V advances the step count by one",
+    "A rising edge returns the step count to zero",
+    "Sets the division for that row, a whole number from 2 to 16; the row is active for the first half of each division and the light beside it shows when",
+    "The voltage that row adds to the output while it is active, -1V to 1V",
+    "The offsets of every active row added together, -6V to 6V",
+    "Note — The step count rises only on a rising edge at the clock input, so with nothing patched there the output never changes",
+    "Note — Every offset knob comes up at zero, so the output rests at 0V until at least one of them is moved"
+   ],
+   "param": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "9": 4,
+    "10": 4,
+    "11": 4
+   },
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "notes": "The step count wraps at 720720, the lowest common multiple of 1 to 16, so the whole pattern repeats there. The output is a plain sum of offsets; the README calls the module a pitch sequencer, but nothing in it scales to a volt per octave, so the output family is left as cv."
+  },
+  "TransQuant": {
+   "lines": [
+    "Three-channel quantizer with a transposition that triggers step up and down by a set interval",
+    "A rising edge adds the interval to the running transposition",
+    "A rising edge subtracts the interval from the running transposition",
+    "Adds a whole number of semitones, 0 to 11, to the transposition; on its own a setting of 6 or more moves the pitch down by that many semitones rather than up",
+    "Volts added to the transposition, a volt to the octave",
+    "Sets the step the transpose triggers move by, a whole number of semitones from 0 to 20",
+    "Sets the step the transpose triggers move by at 12 semitones to the volt, and the interval knob is ignored while anything is patched here",
+    "Picks the scale notes are quantized to: chromatic, blues, major, Dorian, Phrygian, Lydian, Mixolydian, minor or Locrian",
+    "Picks the scale by whole volts, 0V for chromatic through 8V for Locrian, and the Mode knob is ignored while anything is patched here",
+    "Pitch into that channel, a volt to the octave",
+    "A 1ms 10V pulse each time the quantized note on that channel changes",
+    "The pitch on that channel, transposed and then quantized to the chosen scale",
+    "Note — only the fractional part of the transposition is used, and once it reaches half an octave the pitch moves down by it instead of up, so 7 semitones of transposition sounds 7 semitones lower"
+   ],
+   "param": {
+    "0": 3,
+    "1": 5,
+    "2": 7
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 4,
+    "3": 6,
+    "4": 8,
+    "5": 9,
+    "6": 9,
+    "7": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 10,
+    "2": 10,
+    "3": 11,
+    "4": 11,
+    "5": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "cv",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch"
+    }
+   },
+   "notes": "The README says the octave is preserved by transposing up or down depending which is closer. The code takes the fractional part of the total transposition and subtracts it, rather than its complement, whenever it is 0.5 or more, so a transposition of 7 semitones lowers the pitch by 7 semitones instead of raising it by 5. Bypassing the module passes each channel input straight to its channel output."
+  },
+  "SeqOfChanges": {
+   "lines": [
+    "Markov trigger sequencer in which the chance of the next trigger is set by the last three clocks, a state drawn as one of eight trigrams",
+    "A rising edge above 3V draws the next trigger, at the chance set by the knob for the current state",
+    "A rising edge sets the state to that trigram; a clock arriving in the same sample is ignored",
+    "The chance of a trigger on the next clock while the module is in that state, 0 for never and 1 for every clock",
+    "10V when the clock three before the last one fired a trigger, 0V when it did not",
+    "10V when the clock before the last one fired a trigger, 0V when it did not",
+    "10V when the last clock fired a trigger, 0V when it did not",
+    "The chance set for the current state, scaled to 0-10V",
+    "A 1ms 10V pulse each time the sequencer fires",
+    "Note — the arrows on the panel show which states can follow which, a solid arrow for a clock that fired a trigger and a broken arrow for one that did not",
+    "Note — Every probability knob comes up at zero, so no trigger is ever fired until one of them is raised",
+    "Note — The state moves only on a rising edge at the clock input, so with nothing patched there the module holds the state it is in"
+   ],
+   "param": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2
+   },
+   "out": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "trigger"
+    }
+   },
+   "notes": "The state is a three-bit history shifted on every clock: bit 4 is the most recent clock and drives State 3, bit 1 the oldest and drives State 1. The knobs and trigram inputs are named Kun, Gen, Kan, Xun, Zhen, Li, Dui and Qian in the tooltips; the panel prints only the trigram figures."
+  },
+  "RepeatBuddy": {
+   "lines": [
+    "Counter with a comparator and a clock divider, for adding step repeats to a sequencer",
+    "Sets the count the comparator fires at, 1V for 0.8 through 10V for 8; with nothing patched here the threshold is 8",
+    "A rising edge adds one to the counter, which stops climbing at 8",
+    "A rising edge clears the counter to zero and restarts the division",
+    "Scales the Count output, from silence at one end to the full count voltage at the other",
+    "10V while the count is at or above the threshold; with nothing patched to Rst the counter clears itself there, so the gate lasts 1ms",
+    "The count as a voltage, 0V to 10V over counts of 0 to 7 and 11.43V at a count of 8, scaled by the counter attenuator",
+    "Sets the division, 0 to 8 in whole numbers, and attenuates the voltage at the Division input while anything is patched there",
+    "Sets the division, 0V to 10V spanning 0 to 8 in whole numbers once the knob has attenuated it",
+    "A 1ms 10V pulse whenever the count is a multiple of the division; at a division of 0 nothing is sent",
+    "Note — the green lights show the count and the red lights the threshold, brightened at every multiple of the division",
+    "Note — The counter climbs only on a rising edge at the Count input, so with nothing patched there the count, the comparator and the divider all stand at zero"
+   ],
+   "param": {
+    "0": 4,
+    "1": 7
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 8
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "trigger"
+    }
+   },
+   "notes": "The threshold input clamps its voltage to 1V to 10V before scaling, so a count of 0 can never be the threshold. The counter output scales counts 0 to 7 across 0V to 10V but the counter itself reaches 8, which reads 11.43V before attenuation. The two knobs carry no lettering on the panel."
   }
+ }
 }

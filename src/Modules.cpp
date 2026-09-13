@@ -45,6 +45,7 @@ optional and can be switched off per user.
 #include "Palette.hpp"
 #include "Dark.hpp"
 #include "Census.hpp"
+#include "Probe.hpp"
 #include "Help.hpp"
 
 #include <map>
@@ -1660,10 +1661,14 @@ struct Darkener : Module {
 
 static int gDarkenerCount = 0;
 
-/** HOW FAR THROUGH THE CENSUS IS, drawn on the module that started it. */
+/** HOW FAR THROUGH THE CENSUS OR THE PROBE IS, drawn on the module that started it.
+
+Either walk, whichever is running: they are never both running, and a scan that is working must
+not look like one that has hung. */
 struct CensusProgress : widget::Widget {
 	void draw(const DrawArgs& args) override {
-		const std::string text = censusStatus();
+		const bool probing = probeBusy() || !probeStatus().empty();
+		const std::string text = probing ? probeStatus() : censusStatus();
 		if (text.empty())
 			return;
 		std::shared_ptr<window::Font> font =
@@ -1672,7 +1677,8 @@ struct CensusProgress : widget::Widget {
 			return;
 		nvgFontFaceId(args.vg, font->handle);
 		nvgFontSize(args.vg, 11.f);
-		nvgFillColor(args.vg, censusBusy() ? nvgRGB(0xff, 0xd8, 0x6e) : nvgRGB(0x9a, 0xa4, 0xb4));
+		nvgFillColor(args.vg, (probing ? probeBusy() : censusBusy())
+			? nvgRGB(0xff, 0xd8, 0x6e) : nvgRGB(0x9a, 0xa4, 0xb4));
 		nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 		nvgTextBox(args.vg, 0.f, box.size.y / 2.f, box.size.x, text.c_str(), NULL);
 	}
@@ -1734,6 +1740,19 @@ struct DarkenerWidget : DRUIWidgetBase {
 		menu->addChild(createMenuItem("Write port positions: everything not yet done", "", []() {
 			censusStart("", true);
 		}));
+		// ASKING EVERY MODULE WHETHER ITS JACKS TAKE POLYPHONY — see Probe.hpp. The same shape as
+		// the census: started here, ticked in step(), saved as it goes, resumable after the crash
+		// that running two thousand makers' DSP outside the engine will eventually cause.
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createMenuItem("Probe polyphony: Befaco", "", []() {
+			probeStart("Befaco", false);
+		}));
+		menu->addChild(createMenuItem("Probe polyphony: everything", "", []() {
+			probeStart("", false);
+		}));
+		menu->addChild(createMenuItem("Probe polyphony: everything not yet done", "", []() {
+			probeStart("", true);
+		}));
 	}
 
 	void step() override {
@@ -1749,6 +1768,8 @@ struct DarkenerWidget : DRUIWidgetBase {
 		// that has hung.
 		if (censusBusy())
 			censusTick(0.05);
+		if (probeBusy())
+			probeTick(0.05);
 		ModuleWidget::step();
 	}
 };

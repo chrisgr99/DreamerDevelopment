@@ -56,7 +56,24 @@ struct HelpEntry {
 	int inFamilyCount;
 	const signed char* outFamilies;
 	int outFamilyCount;
+	/** WHAT EACH INPUT EXPECTS, as an index into HELP_PROP_TEXT, or -1 where nothing is known.
+
+	A sensible voltage range, whether the signal is continuous or stepped, whether the port takes
+	polyphony: the questions the Rack forum keeps answering with a scope and a test rig. Two of the
+	three fall out of the family already recorded beside this, so they are worked out by
+	make_help.py and pooled — there are thousands of ports and only a handful of things to say. */
+	const signed char* inProps;
+	int inPropCount;
+	/** THE SAME FOR OUTPUTS, where the question is what comes OUT rather than what to send in.
+	Unipolar or bipolar is the one a patch usually turns on: a 0-10V envelope into something
+	expecting ±5V is the commonest silent mistake in a rack. */
+	const signed char* outProps;
+	int outPropCount;
 };
+
+/** The pooled phrases the indices above point into. */
+extern const char* const HELP_PROP_TEXT[];
+extern const int HELP_PROP_TEXT_COUNT;
 
 /** THE GESTURE'S NAME, AS SHORT AS THE PANEL NEEDS IT.
 
@@ -97,6 +114,14 @@ std::vector<std::string> helpFor(const std::string& plugin, const std::string& m
 /** What the help entries say this jack carries, as a Palette.hpp FAM_ number, or -1 if they say
 nothing. Clarity's colouring asks this. */
 int helpFamilyFor(const std::string& plugin, const std::string& model, bool isOutput, int port);
+
+/** What this input expects — range, shape, polyphony — or empty where nothing is established.
+
+SHOWN UNDER THE LINE, NOT INSTEAD OF IT. The line says what the jack is for, which is what
+somebody asks first; this says what to send it, which is what they ask next and what Rack itself
+has never told anybody. */
+std::string helpPropsFor(const std::string& plugin, const std::string& model,
+	bool isOutput, int port);
 
 /** The one line covering this jack or knob, or empty if nothing does. */
 std::string helpForControl(const std::string& plugin, const std::string& model,

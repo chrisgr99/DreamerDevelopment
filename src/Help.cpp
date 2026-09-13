@@ -1,6 +1,7 @@
 /** In-rack help — see Help.hpp for what this is and why the text is written rather than derived. */
 #include "Help.hpp"
 
+#include <tag.hpp>
 #include <ui/Menu.hpp>
 #include <ui/MenuOverlay.hpp>
 #include <ui/TextField.hpp>
@@ -70,6 +71,21 @@ int helpFamilyFor(const std::string& plugin, const std::string& model,
 	return table[port];
 }
 
+std::string helpPropsFor(const std::string& plugin, const std::string& model,
+		bool isOutput, int port) {
+	const HelpEntry* e = helpEntryFor(plugin, model);
+	if (!e || port < 0)
+		return "";
+	const signed char* table = isOutput ? e->outProps : e->inProps;
+	const int count = isOutput ? e->outPropCount : e->inPropCount;
+	if (!table || port >= count)
+		return "";
+	const signed char at = table[port];
+	if (at < 0 || at >= HELP_PROP_TEXT_COUNT)
+		return "";
+	return HELP_PROP_TEXT[at];
+}
+
 std::string helpForControl(const std::string& plugin, const std::string& model,
 		HelpKind kind, int index) {
 	const HelpEntry* e = helpEntryFor(plugin, model);
@@ -122,6 +138,30 @@ static std::string helpSpeech(std::string t) {
 	t = std::regex_replace(t, std::regex("\u2325"), "option ");
 	t = std::regex_replace(t, std::regex("\u2318"), "command ");
 	t = std::regex_replace(t, std::regex("\u21E7"), "shift");
+	// SYMBOLS A PANEL USES AND A VOICE CANNOT. Each was found by counting the non-ASCII
+	// characters actually in the entries and reading them in context, rather than guessing at a
+	// list: a degree sign in "a full 360 degree turn", cents in "100 cents", and the two arrows,
+	// which mean different things — Befaco's menu prints "1 input ▸ 8 outputs", where the mark
+	// is the word "to", while CountModula names a menu CHOICE with a bare arrow, where the
+	// reader is looking for an arrow on screen and wants to hear that word.
+	t = std::regex_replace(t, std::regex("\u00B1"), "plus or minus ");
+	t = std::regex_replace(t, std::regex("\u00B0"), " degrees");
+	t = std::regex_replace(t, std::regex("\u00A2"), " cents");
+	t = std::regex_replace(t, std::regex("\u25B8"), " to ");
+	t = std::regex_replace(t, std::regex("\u2192"), " arrow ");
+	// A DIVISION SIGN, so a menu item can be quoted as it is printed. MindMeld's PatchMaster
+	// prints "SR \u00f7 4 (default)", and the alternative was to write a slash and falsify the one
+	// thing a menu line exists to get right.
+	t = std::regex_replace(t, std::regex("\u00f7"), " divided by ");
+	// A MIDDLE DOT SEPARATES THE FACTS A JACK EXPECTS — range, shape, polyphony. The eye reads
+	// the gap; the voice needs a comma, or it runs the three together as one phrase.
+	t = std::regex_replace(t, std::regex(" *· *"), ", ");
+	// A PIPE IS A SEPARATOR, NOT A WORD. Menu items are quoted exactly as the menu prints them,
+	// and some makers separate two names with a bar — MSM's "Espen's Treasure | Jedi". The eye
+	// reads that as a break; the voice needs a comma.
+	t = std::regex_replace(t, std::regex(" *\\| *"), ", ");
+	// A bullet leads each menu item in a module's note; the voice does not need to say it.
+	t = std::regex_replace(t, std::regex("\u2022 "), "");
 	// An em dash is a pause, not a word. A leading bullet dash is not a word either.
 	t = std::regex_replace(t, std::regex("\n- "), "\n");
 	t = std::regex_replace(t, std::regex("—"), ",");
@@ -223,6 +263,15 @@ struct HelpPopup : widget::OpaqueWidget {
 	std::string what;
 	/** Set when the words are the maker's own rather than ours, so the note can say so. */
 	bool fromMaker = false;
+	/** WHETHER THE MAKER CALLS THE MODULE POLYPHONIC: 1 yes, 0 no, -1 they never say.
+
+	A FLAG, BECAUSE IT IS THE ONE FACT THAT DECIDES WHETHER A PATCH IS POSSIBLE. The note says it
+	in words as well, and the words are the ones that carry the attribution — but a person opening
+	a note about a module is usually asking a different question, and having to read for this one
+	is a poor way to answer "can I put sixteen voices through it". Colour answers that before the
+	sentence is read, and the sentence is still there to be read, so nothing rests on colour
+	alone. -1 draws nothing at all: a maker who never uses the tag has not said no. */
+	int poly = -1;
 	/** WHERE IT BELONGS, IN THE RACK'S OWN COORDINATES.
 	
 	The note is drawn on the SCENE rather than in the rack — see helpCatcherStep for why — so its
@@ -238,6 +287,43 @@ struct HelpPopup : widget::OpaqueWidget {
 	math::Vec pointer;
 	/** When the copy was last taken, so the button can show that it worked. */
 	double copiedAt = -1.0;
+	/** WHERE EACH PARAGRAPH ENDED UP, so a click can be answered with the one it landed on.
+
+	A module's note is several paragraphs now — what it is, then anything true of the whole
+	module rather than of a control. Read as one block it is a long listen with no way to skip,
+	and the reader has no way to ask for the part they wanted. So the vertical span of each is
+	recorded as it is drawn, and a click picks the paragraph it fell in. Filled by measure(),
+	which is the only thing that knows where the text wrapped. */
+	std::vector<float> paraTop;
+	std::vector<float> paraBottom;
+
+	/** The note broken at its blank lines. One paragraph for an ordinary control note; for a
+	module, its first line and then each Note or Menu line. */
+	std::vector<std::string> paragraphs() const {
+		std::vector<std::string> out;
+		size_t at = 0;
+		while (at <= line.size()) {
+			const size_t br = line.find("\n\n", at);
+			out.push_back(line.substr(at, br == std::string::npos ? std::string::npos : br - at));
+			if (br == std::string::npos)
+				break;
+			at = br + 2;
+		}
+		return out;
+	}
+
+	/** Where the pointer is, in this widget's coordinates, or below everything when it is away. */
+	float hoverY = -1.f;
+
+	void onHover(const HoverEvent& e) override {
+		hoverY = e.pos.y;
+		widget::OpaqueWidget::onHover(e);
+	}
+
+	void onLeave(const LeaveEvent& e) override {
+		hoverY = -1.f;
+		widget::OpaqueWidget::onLeave(e);
+	}
 
 	static float iconSize() { return 13.f; }
 
@@ -266,6 +352,23 @@ struct HelpPopup : widget::OpaqueWidget {
 		copiedAt = system::getTime();
 	}
 
+	/** Capitals, for the title row only.
+
+	ASCII LETTERS AND NOTHING ELSE, deliberately. A byte-wise toupper across UTF-8 would corrupt
+	the continuation bytes of any accented letter and put rubbish on the panel; module names such
+	as Vult's Ferox and NYSTHI's Sussudio are plain ASCII, but a name from any maker may not be,
+	and a title is not the place to find out. A letter this leaves alone is simply not capitalised,
+	which is a good outcome rather than a broken one. */
+	static std::string helpUpper(const std::string& s) {
+		std::string out = s;
+		for (size_t i = 0; i < out.size(); i++) {
+			const unsigned char c = (unsigned char) out[i];
+			if (c >= 'a' && c <= 'z')
+				out[i] = (char) (c - 'a' + 'A');
+		}
+		return out;
+	}
+
 	float measure(NVGcontext* vg, bool drawing, const DrawArgs* args) {
 		std::shared_ptr<window::Font> font =
 			APP->window->loadFont(asset::system("res/fonts/DejaVuSans.ttf"));
@@ -277,22 +380,83 @@ struct HelpPopup : widget::OpaqueWidget {
 		nvgFontFaceId(vg, font->handle);
 		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 
-		nvgFontSize(vg, 11.f);
+		// THE NAME OF THE THING, AND ONLY IT. Larger, bold and in capitals: the note's one
+		// heading, above a list whose own headings stay the size of the text they head. Caps get
+		// a little tracking, because letters set in caps at their natural spacing crowd.
+		nvgFontSize(vg, 15.f);
 		if (drawing) {
+			const std::string caps = helpUpper(title);
 			nvgFillColor(args->vg, nvgRGB(0x7f, 0xb0, 0xe4));
-			nvgText(args->vg, HELP_PAD, y, title.c_str(), NULL);
+			nvgTextLetterSpacing(args->vg, 0.6f);
+			// Struck twice, a third of a pixel apart: no bold cut of this face ships with Rack,
+			// and the one bold face in the bundle is a different typeface.
+			nvgText(args->vg, HELP_PAD, y, caps.c_str(), NULL);
+			const float after = nvgText(args->vg, HELP_PAD + 0.35f, y, caps.c_str(), NULL);
+			// POLY OR MONO AS PART OF THE NAME, which is where somebody reading the title is
+			// already looking. It was a pill on the right for a while; a bracket after the name
+			// is read in the same glance as the name, and needs no shape to be learned. The
+			// colour stays, so it is still answerable without reading, and the word stays, so
+			// nothing rests on the colour.
+			if (poly >= 0) {
+				const char* word = poly ? "(POLY)" : "(MONO)";
+				nvgFillColor(args->vg, poly ? nvgRGB(0x5f, 0xc8, 0x8b)
+					: nvgRGB(0x87, 0x90, 0x9d));
+				nvgText(args->vg, after + 5.f, y, word, NULL);
+				nvgText(args->vg, after + 5.35f, y, word, NULL);
+			}
+			nvgTextLetterSpacing(args->vg, 0.f);
 		}
-		y += 15.f;
+		y += 20.f;
 
 		nvgFontSize(vg, 12.f);
 		nvgTextLineHeight(vg, HELP_LEAD / 12.f);
-		float bounds[4];
-		nvgTextBoxBounds(vg, HELP_PAD, y, w - HELP_PAD * 2.f, line.c_str(), NULL, bounds);
-		if (drawing) {
-			nvgFillColor(args->vg, missing ? nvgRGB(0x8a, 0x92, 0x9e) : nvgRGB(0xe4, 0xe8, 0xee));
-			nvgTextBox(args->vg, HELP_PAD, y, w - HELP_PAD * 2.f, line.c_str(), NULL);
+		paraTop.clear();
+		paraBottom.clear();
+		const std::vector<std::string> paras = paragraphs();
+		for (size_t i = 0; i < paras.size(); i++) {
+			// A POINT LOOKS LIKE A POINT. A module's note is a dozen separate facts, and run
+			// together as plain paragraphs there is nothing for the eye to catch on: finding the
+			// one you want means reading all of them. A bullet and a hanging indent give each
+			// point an edge to scan down, which is the whole difference between a list and a
+			// wall. The mark is put on by whoever assembles the note, so a one-fact note about a
+			// single knob does not get a bullet it has no list to belong to.
+			const bool bullet = paras[i].rfind("• ", 0) == 0;
+			// A HEADING, which is any point that ends in a colon: "Right-click the panel for:".
+			// It announces the points under it and is not one of them, so it is not bulleted and
+			// it is set in bold.
+			const bool heading = !bullet && !paras[i].empty()
+				&& paras[i][paras[i].size() - 1] == ':';
+			const std::string body = bullet ? paras[i].substr(std::strlen("• ")) : paras[i];
+			const float x = bullet ? HELP_PAD + 9.f : HELP_PAD;
+			const float tw = w - x - HELP_PAD;
+			float bounds[4];
+			nvgTextBoxBounds(vg, x, y, tw, body.c_str(), NULL, bounds);
+			const float h = std::max(bounds[3] - bounds[1], HELP_LEAD);
+			paraTop.push_back(y);
+			paraBottom.push_back(y + h);
+			if (drawing) {
+				// The one under the pointer is lit, so it is plain that a paragraph is a thing
+				// you can click rather than a wall of text.
+				const bool hot = paras.size() > 1 && APP->event
+					&& APP->event->hoveredWidget == this
+					&& hoverY >= y && hoverY < y + h;
+				nvgFillColor(args->vg, missing ? nvgRGB(0x8a, 0x92, 0x9e)
+					: heading ? nvgRGB(0x9d, 0xc4, 0xf0)
+					: hot ? nvgRGB(0xff, 0xff, 0xff) : nvgRGB(0xe4, 0xe8, 0xee));
+				if (bullet)
+					nvgText(args->vg, HELP_PAD, y, "•", NULL);
+				nvgTextBox(args->vg, x, y, tw, body.c_str(), NULL);
+				// BOLD WITHOUT A BOLD FONT. Rack ships DejaVuSans and no bold cut of it, and the
+				// one bold face it does carry is Nunito — a different typeface, which at eleven
+				// points reads as a mistake rather than as emphasis. Striking the same letters
+				// twice a third of a pixel apart thickens the stems and keeps the face.
+				if (heading)
+					nvgTextBox(args->vg, x + 0.35f, y, tw, body.c_str(), NULL);
+			}
+			y += h;
+			if (i + 1 < paras.size())
+				y += heading ? 3.f : 6.f;
 		}
-		y += std::max(bounds[3] - bounds[1], HELP_LEAD);
 
 		// WHOSE WORDS THESE ARE. Only where they are not ours: an entry we wrote needs no
 		// attribution, and a note that says something on every reading says nothing.
@@ -368,10 +532,22 @@ struct HelpPopup : widget::OpaqueWidget {
 			// A CLICK WHILE IT IS TALKING IS A REQUEST TO STOP. Somebody who has heard enough
 			// reaches for the thing that is talking, and the alternative — starting it again from
 			// the top — is the opposite of what they wanted.
-			if (helpIsSpeaking())
+			if (helpIsSpeaking()) {
 				helpSilence();
-			else if (!missing)
-				helpSay(line);
+				return;
+			}
+			if (missing)
+				return;
+			// THE PARAGRAPH THAT WAS CLICKED, not the whole note. A module with eighteen menu
+			// options read from the top is not an answer to anything.
+			const std::vector<std::string> paras = paragraphs();
+			for (size_t i = 0; i < paras.size() && i < paraTop.size(); i++) {
+				if (e.pos.y >= paraTop[i] && e.pos.y < paraBottom[i]) {
+					helpSay(paras[i]);
+					return;
+				}
+			}
+			helpSay(line);
 			return;
 		}
 		widget::OpaqueWidget::onButton(e);
@@ -437,6 +613,10 @@ static std::string helpPlatformText(std::string t) {
 }
 
 /** Shows the note for one control, anchored to the control's box in rack coordinates. */
+/** What the next note should flag, set just before it is shown. A parameter would have to be
+threaded through six call sites that have nothing to do with polyphony. */
+static int gPolyFlag = -1;
+
 static void helpPopupShow(app::ModuleWidget* mw, math::Rect controlBox,
 		const std::string& title, const std::string& line, bool missing,
 		const std::string& what = "", bool fromMaker = false) {
@@ -449,6 +629,10 @@ static void helpPopupShow(app::ModuleWidget* mw, math::Rect controlBox,
 	gPopup->copiedAt = -1.0;
 	gPopup->pointer = APP->scene && APP->scene->rack
 		? APP->scene->rack->getMousePos() : math::Vec();
+	// The flag belongs to the module note, so every other note clears it rather than inheriting
+	// whatever the last one showed.
+	gPopup->poly = gPolyFlag;
+	gPolyFlag = -1;
 	gPopup->title = title;
 	gPopup->line = line.empty()
 		? "Nothing here describes this one yet."
@@ -620,6 +804,100 @@ static std::string helpMakerText(app::ModuleWidget* mw, HelpKind kind, int index
 	return name + ". " + desc;
 }
 
+/** WHETHER THE MAKER CALLS THIS MODULE POLYPHONIC, WHICH ONLY THE MAKER CAN SAY.
+
+The question the Rack forum keeps asking about a jack — will it take sixteen channels — has no
+answer anywhere in Rack's interface, and for most modules no answer in the manual either. But
+every maker fills in a list of tags for the module browser, and one of the tags is Polyphonic.
+That is a declaration, in their own words, and Rack has already loaded it: it is on the Model,
+so nothing has to be scanned, stored or kept in step, and it is true of the build installed rather
+than of whatever is on somebody's main branch.
+
+IT IS ABOUT THE MODULE, NOT THE JACK, so it goes on the title band with the other things that are
+true of the whole module. It does not say which inputs take polyphony — that stays a blank on the
+ports until somebody establishes it — but "this module handles polyphony at all" is most of what
+somebody wants to know before they patch a sixteen-channel cable into it.
+
+AND SILENCE ONLY MEANS SOMETHING WHERE THE MAKER USES TAGS. Thirty-eight of the plugins here never
+apply Polyphonic to anything, so an untagged module in one of those is not a monophonic module —
+it is a maker who does not use the tag. Saying "the maker does not list this as polyphonic" there
+would be inventing a statement nobody made. So the plugin is asked first whether it uses the tag
+at all, and where it does not, this says nothing. */
+/** WHAT WE ESTABLISHED OURSELVES, WHICH OUTRANKS A TAG.
+
+A tag is one word about a whole module, written by a maker who may have meant it about the outputs
+— Bogaudio's UNISON is tagged polyphonic and every one of its inputs reads channel one only,
+because it is a mono-to-poly voicer. The port fields say which jacks actually take a polyphonic
+cable, each cited to a file and a line, so where they exist they are the better answer.
+
+They also reach where a tag cannot. Thirty-eight plugins never use the tag at all — Instruo,
+Bidoo, JW-Modules and dBiz among them, 423 modules — and for those the tag can say nothing,
+whereas a port that was read in the maker's source says as much as any other.
+
+Returns 1 if any input was found to take polyphony, 0 if every input we settled does not, and -1
+if nothing about this module's inputs has been established. */
+static int helpPolyphonyFound(plugin::Model* model) {
+	if (!model || !model->plugin)
+		return -1;
+	const HelpEntry* e = helpEntryFor(model->plugin->slug, model->slug);
+	if (!e || !e->inProps)
+		return -1;
+	bool anyKnown = false;
+	for (int i = 0; i < e->inPropCount; i++) {
+		const signed char at = e->inProps[i];
+		if (at < 0 || at >= HELP_PROP_TEXT_COUNT)
+			continue;
+		const std::string phrase = HELP_PROP_TEXT[at];
+		if (phrase.find("polyphonic") != std::string::npos)
+			return 1;
+		if (phrase.find("one channel only") != std::string::npos)
+			anyKnown = true;
+	}
+	return anyKnown ? 0 : -1;
+}
+
+static int helpPolyphonyFlag(plugin::Model* model) {
+	const int found = helpPolyphonyFound(model);
+	if (found >= 0)
+		return found;
+	if (!model || !model->plugin)
+		return -1;
+	const int want = tag::findId("Polyphonic");
+	if (want < 0)
+		return -1;
+	for (int id : model->tagIds) {
+		if (id == want)
+			return 1;
+	}
+	for (plugin::Model* other : model->plugin->models) {
+		if (!other)
+			continue;
+		for (int id : other->tagIds) {
+			if (id == want)
+				return 0;
+		}
+	}
+	return -1;
+}
+
+static std::string helpPolyphony(plugin::Model* model) {
+	// WHOSE STATEMENT IT IS, SAID IN THE SENTENCE. A fact read out of the maker's source is ours
+	// and is about the jacks; a tag is theirs and is about the module. They are not the same claim
+	// and the note does not pretend they are.
+	switch (helpPolyphonyFound(model)) {
+		case 1:  return "Inputs on this module take a polyphonic cable — "
+			"option-click a jack to see which.";
+		case 0:  return "Every input on this module reads one channel only.";
+		default: break;
+	}
+	switch (helpPolyphonyFlag(model)) {
+		case 1:  return "The maker lists this module as polyphonic.";
+		case 0:  return "The maker lists other modules in this plugin as polyphonic "
+			"and not this one.";
+		default: return "";
+	}
+}
+
 /** Whether this point in a module is one of its jacks.
 
 Only jacks matter: they are the controls Rack might start a cable drag from, so they are the ones
@@ -667,6 +945,17 @@ static void helpAnswer(app::ModuleWidget* mw, math::Vec local) {
 	HelpKind kind = HELP_PARAM;
 	int index = -1;
 	if (helpControlAt(mw, local, what, line, where, kind, index)) {
+		// WHAT TO SEND IT, UNDER WHAT IT IS FOR. Rack tells nobody what voltage a jack wants,
+		// whether the signal is continuous or stepped, or whether it takes polyphony, and the
+		// forum answers those with a scope and a test rig. Where we know, it goes on its own
+		// paragraph so it can be clicked and heard on its own.
+		if (kind == HELP_INPUT || kind == HELP_OUTPUT) {
+			const std::string plugin = mw->model->plugin ? mw->model->plugin->slug : "";
+			const std::string props = helpPropsFor(plugin, mw->model->slug,
+				kind == HELP_OUTPUT, index);
+			if (!props.empty())
+				line += (line.empty() ? "" : "\n\n") + props;
+		}
 		if (!line.empty()) {
 			helpPopupShow(mw, where, what, line, false, what);
 			return;
@@ -686,7 +975,34 @@ static void helpAnswer(app::ModuleWidget* mw, math::Vec local) {
 	if (local.y < titleBand()) {
 		const std::string plugin = mw->model->plugin ? mw->model->plugin->slug : "";
 		const std::vector<std::string> lines = helpFor(plugin, mw->model->slug);
-		const std::string idea = lines.empty() ? "" : lines[0];
+		// THE MODULE'S OWN LINES, ALL OF THEM, and until now only the first was reachable.
+		//
+		// An entry's first line says what the module is. Everything after it describes one control
+		// and is reached by clicking that control — except the lines belonging to no control:
+		// `Note —` for something that changes how the module is used, and `Menu —` for a setting
+		// with no knob. There are thousands of those and no click arrived at any of them.
+		//
+		// THE PREFIXES ARE FOR THE AUTHOR, NOT THE READER. `Note —` says nothing to somebody
+		// seeing it for the first time, and `Menu —` is worse: it names a menu without saying
+		// which, and Rack has four — the module's, a knob's, a port's, and whatever a display
+		// carries. So the prefixes come off, and the menu settings are gathered under one heading
+		// that says where to find them, as points beneath it.
+		std::string idea = lines.empty() ? "" : lines[0];
+		std::string menu;
+		for (size_t i = 1; i < lines.size(); i++) {
+			// rfind at 0 is a prefix test that needs no length: the em dash is three bytes in
+			// UTF-8, so counting characters here would be counting the wrong thing.
+			if (lines[i].rfind("Note \u2014 ", 0) == 0)
+				idea += "\n\n\u2022 " + lines[i].substr(std::strlen("Note \u2014 "));
+			else if (lines[i].rfind("Menu \u2014 ", 0) == 0)
+				menu += "\n\n\u2022 " + lines[i].substr(std::strlen("Menu \u2014 "));
+		}
+		gPolyFlag = helpPolyphonyFlag(mw->model);
+		const std::string poly = helpPolyphony(mw->model);
+		if (!poly.empty())
+			idea += "\n\n• " + poly;
+		if (!menu.empty())
+			idea += "\n\nRight-click the panel for:" + menu;
 		const math::Rect at(math::Vec(local.x, titleBand()), math::Vec(0.f, 0.f));
 		if (!idea.empty()) {
 			helpPopupShow(mw, at, mw->model->name, idea, false);

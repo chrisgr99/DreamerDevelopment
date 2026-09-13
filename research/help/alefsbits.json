@@ -1,348 +1,750 @@
 {
-  "plugin": "alefsbits",
-  "source": "https://github.com/alefnull/alefsbits/blob/master/README.md",
-  "read": "2026-09-12",
-  "modules": {
-    "simplexandhold": {
-      "lines": [
-        "Sample and hold that draws its samples from an internal simplex noise source rather than from a patched signal",
-        "A rising edge takes a new sample, and the number of channels here sets the number of channels at the output",
-        "Sets how fast the module travels through the noise, 1% to 100%, so how far apart in the noise two consecutive samples fall",
-        "0-10V scales the travel speed set by the speed knob, 0V freezing the travel and 10V giving the full knob speed",
-        "The value held since the last trigger, mapped into the voltage range picked on the menu",
-        "Menu — range sets the voltage span of the output, twelve presets from +/-10V to 0V-1V plus sliders for an arbitrary min and max; it starts at -1V to 1V"
-      ],
-      "param": {"0": 2},
-      "in": {"0": 1, "1": 3},
-      "out": {"0": 4},
-      "family": {"in": {"0": "trigger", "1": "cv"}, "out": {"0": "cv"}}
+ "plugin": "alefsbits",
+ "source": "https://github.com/alefnull/alefsbits/blob/v2.5.63/README.md",
+ "read": "2026-09-13",
+ "modules": {
+  "simplexandhold": {
+   "lines": [
+    "Sample and hold that draws its samples from an internal simplex noise source rather than from a patched signal",
+    "A rising edge takes a new sample, and the number of channels here sets the number of channels at the output",
+    "Sets how fast the module travels through the noise, 1% to 100%, so how far apart in the noise two consecutive samples fall",
+    "0-10V scales the travel speed set by the speed knob, 0V freezing the travel and 10V giving the full knob speed",
+    "The value held since the last trigger, mapped into the voltage range picked on the menu",
+    "Menu — range — sets the voltage span of the output: twelve presets from +/-10V to 0V-1V, or custom for a minimum and maximum of your own; it starts at -1V to 1V",
+    "Note — the output carries the last sample taken and nothing else, so it is 0V until a rising edge reaches the trigger jack."
+   ],
+   "param": {
+    "0": 2
+   },
+   "in": {
+    "0": 1,
+    "1": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv"
     },
-    "blank6hp": {
-      "lines": [
-        "A 6HP blank panel carrying the alef's bits logo",
-        "Rotates the logo, 36 degrees per volt"
-      ],
-      "in": {"0": 1},
-      "family": {"in": {"0": "cv"}}
-    },
-    "polyrand": {
-      "lines": [
-        "Passes one randomly chosen channel of a polyphonic input, choosing again on each trigger",
-        "A rising edge chooses a new channel at random, which happens only while the poly input and the output are both patched",
-        "The polyphonic signal one channel of which reaches the output, 16 channels at most",
-        "The voltage of the chosen channel, on its own"
-      ],
-      "in": {"0": 1, "1": 2},
-      "out": {"0": 3},
-      "family": {"in": {"0": "trigger"}}
-    },
-    "noize": {
-      "lines": [
-        "Random noise generator whose values are held for an adjustable time, giving white noise at one end and stepped noise at the other",
-        "Sets how long each random value is held, 0 to 1ms, a new value being drawn every sample at zero",
-        "0-10V adds to the duration knob, 10V adding the full 1ms",
-        "The noise, -5V to 5V",
-        "Menu — random mode draws values evenly across the range (uniform) or clustered around the middle (gaussian), with a slider setting the gaussian deviation from 0.1 to 0.9"
-      ],
-      "param": {"0": 1},
-      "in": {"0": 2},
-      "out": {"0": 3},
-      "family": {"in": {"0": "cv"}, "out": {"0": "audio"}}
-    },
-    "steps": {
-      "lines": [
-        "Eight step sequencer with a knob per step, a gate output per step, a randomize trigger and an end-of-cycle trigger",
-        "A rising edge advances to the next step",
-        "Sets how many steps play before the sequence returns to the first, 1 to 8",
-        "A rising edge sets all eight step knobs to new random values",
-        "Sets all eight step knobs to new random values",
-        "A rising edge returns the sequence to step 1, taking effect on the next clock pulse while the clock input is patched",
-        "A 1ms 10V trigger each time the sequence returns to its first step",
-        "The voltage of the knob for the current step, over the range picked on the menu, and 0V while the clock input is unpatched",
-        "Sets the voltage this step sends to the cv output, over the range picked on the menu",
-        "Carries 10V while the sequence is on this step and 0V otherwise, and holds whatever it last carried while this step is above the number set by the steps knob",
-        "Menu — range sets the voltage span of the step knobs and the cv output, twelve presets from +/-10V to 0V-1V plus sliders for an arbitrary min and max"
-      ],
-      "param": {"0": 2, "1": 8, "2": 8, "3": 8, "4": 8, "5": 8, "6": 8, "7": 8, "8": 8, "9": 4},
-      "in": {"0": 1, "1": 5, "2": 3},
-      "out": {"0": 6, "1": 7, "2": 9, "3": 9, "4": 9, "5": 9, "6": 9, "7": 9, "8": 9, "9": 9},
-      "family": {
-        "in": {"0": "trigger", "1": "trigger", "2": "trigger"},
-        "out": {"0": "trigger", "1": "cv", "2": "trigger", "3": "trigger", "4": "trigger", "5": "trigger", "6": "trigger", "7": "trigger", "8": "trigger", "9": "trigger"}
-      },
-      "notes": "A step gate output above the number set by the steps knob is left at whatever it last held, since only the steps in play are refreshed."
-    },
-    "fibb": {
-      "lines": [
-        "Clock divider with five outputs, each firing at a Fibonacci number of clock pulses",
-        "The clock being divided, each rising edge counting once",
-        "A rising edge restarts every division from zero",
-        "A 10V gate on every second clock pulse, lasting as long as that pulse stays high",
-        "A 10V gate on every third clock pulse, lasting as long as that pulse stays high",
-        "A 10V gate on every fifth clock pulse, lasting as long as that pulse stays high",
-        "A 10V gate on every eighth clock pulse, lasting as long as that pulse stays high",
-        "A 10V gate on every thirteenth clock pulse, lasting as long as that pulse stays high"
-      ],
-      "in": {"0": 1, "1": 2},
-      "out": {"0": 3, "1": 4, "2": 5, "3": 6, "4": 7},
-      "family": {
-        "in": {"0": "trigger", "1": "trigger"},
-        "out": {"0": "trigger", "1": "trigger", "2": "trigger", "3": "trigger", "4": "trigger"}
-      }
-    },
-    "lucc": {
-      "lines": [
-        "Clock divider with five outputs, each firing at a Lucas number of clock pulses",
-        "The clock being divided, each rising edge counting once",
-        "A rising edge restarts every division from zero",
-        "A 10V gate on every third clock pulse, lasting as long as that pulse stays high",
-        "A 10V gate on every fourth clock pulse, lasting as long as that pulse stays high",
-        "A 10V gate on every seventh clock pulse, lasting as long as that pulse stays high",
-        "A 10V gate on every eleventh clock pulse, lasting as long as that pulse stays high",
-        "A 10V gate on every eighteenth clock pulse, lasting as long as that pulse stays high"
-      ],
-      "in": {"0": 1, "1": 2},
-      "out": {"0": 3, "1": 4, "2": 5, "3": 6, "4": 7},
-      "family": {
-        "in": {"0": "trigger", "1": "trigger"},
-        "out": {"0": "trigger", "1": "trigger", "2": "trigger", "3": "trigger", "4": "trigger"}
-      }
-    },
-    "octsclr": {
-      "lines": [
-        "Multiplies a voltage and adds a whole number of volts to it, for fitting a signal into a chosen span of octaves",
-        "Multiplies the input by 0 to 2, in steps of 0.1",
-        "Adds a whole number of volts to the scaled signal, -3V to 3V, which moves a pitch signal by that many octaves",
-        "The voltage being scaled, 16 channels at most",
-        "The input multiplied by the scale knob with the offset knob added, clamped to -10V to 10V"
-      ],
-      "param": {"0": 1, "1": 2},
-      "in": {"0": 3},
-      "out": {"0": 4},
-      "notes": "The source and scaled jacks carry whatever you patch: a pitch voltage only tracks a volt per octave with the scale knob at 1.0, so neither jack is given a family."
-    },
-    "shift": {
-      "lines": [
-        "An eight stage shift register, each stage moving its value to the next on a trigger, with a probability control on every stage",
-        "The voltage shifted into the first stage, a fresh random voltage in the menu range being used at each trigger while this is unpatched",
-        "A rising edge shifts every stage along by one",
-        "Sets the chance that this stage stores the value shifted into it, 0 to 100%; below that chance the stage keeps its previous value and passes that one along",
-        "0-10V scales the storing chance set by the knob on that stage, 0V stopping the stage from storing anything",
-        "The voltage shifted into that stage at the last trigger",
-        "Menu — range sets the voltage span of the random voltages used while the in jack is unpatched, twelve presets from +/-10V to 0V-1V plus sliders for an arbitrary min and max",
-        "Menu — scrambled eggs! feeds every stage from a randomly chosen other stage instead of the stage before it"
-      ],
-      "param": {"0": 3, "1": 3, "2": 3, "3": 3, "4": 3, "5": 3, "6": 3, "7": 3},
-      "in": {"0": 1, "1": 2, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4},
-      "out": {"0": 5, "1": 5, "2": 5, "3": 5, "4": 5, "5": 5, "6": 5, "7": 5},
-      "family": {
-        "in": {"1": "trigger", "2": "cv", "3": "cv", "4": "cv", "5": "cv", "6": "cv", "7": "cv", "8": "cv", "9": "cv"}
-      }
-    },
-    "mlt": {
-      "lines": [
-        "Two separate 1-to-5 multiples, each copying one polyphonic input to five outputs",
-        "The signal copied to the five outputs of that half",
-        "A copy of the input feeding that half, at that input's channel count"
-      ],
-      "in": {"0": 1, "1": 1},
-      "out": {"0": 2, "1": 2, "2": 2, "3": 2, "4": 2, "5": 2, "6": 2, "7": 2, "8": 2, "9": 2}
-    },
-    "math": {
-      "lines": [
-        "Six arithmetic combinations of two inputs, each result clamped to -10V to 10V",
-        "One of the two voltages being combined, taken as A in every operation",
-        "One of the two voltages being combined, taken as B in every operation",
-        "A plus B, clamped to -10V to 10V",
-        "A minus B, clamped to -10V to 10V",
-        "A multiplied by B, clamped to -10V to 10V",
-        "A divided by B, clamped to -10V to 10V",
-        "The remainder left after dividing A by B, clamped to -10V to 10V",
-        "The average of A and B, clamped to -10V to 10V"
-      ],
-      "in": {"0": 1, "1": 2},
-      "out": {"0": 3, "1": 4, "2": 5, "3": 6, "4": 7, "5": 8}
-    },
-    "logic": {
-      "lines": [
-        "Six logic outputs comparing two inputs, each input counting as high above 0V",
-        "One of the two signals compared, taken as A, and counting as high above 0V",
-        "One of the two signals compared, taken as B, and counting as high above 0V",
-        "10V while both A and B are high, 0V otherwise",
-        "10V while either A or B is high, 0V otherwise",
-        "10V while exactly one of A and B is high, 0V otherwise",
-        "0V while both A and B are high, 10V otherwise",
-        "0V while either A or B is high, 10V otherwise",
-        "0V while exactly one of A and B is high, 10V otherwise"
-      ],
-      "in": {"0": 1, "1": 2},
-      "out": {"0": 3, "1": 4, "2": 5, "3": 6, "4": 7, "5": 8},
-      "family": {
-        "in": {"0": "trigger", "1": "trigger"},
-        "out": {"0": "trigger", "1": "trigger", "2": "trigger", "3": "trigger", "4": "trigger", "5": "trigger"}
-      }
-    },
-    "probablynot": {
-      "lines": [
-        "Mutes and unmutes a signal on each trigger, the chance of muting set by a knob",
-        "The signal that is passed or silenced, 16 channels at most",
-        "A rising edge draws again on the probability, either muting the signal or letting it through",
-        "Sets the chance of muting at each trigger, 0 to 100%",
-        "Adds to the prob knob, 10V adding the full 100%",
-        "The input signal, either passed through or silenced",
-        "Menu — fade in/out replaces the instant mute with a fade, a slider setting the fade length from 5ms to 10 seconds"
-      ],
-      "param": {"0": 3},
-      "in": {"0": 1, "1": 2, "2": 4},
-      "out": {"0": 5},
-      "family": {"in": {"1": "trigger", "2": "cv"}}
-    },
-    "polyplay": {
-      "lines": [
-        "Sample player that starts the sample again on a new polyphonic channel at each trigger, so repeats overlap",
-        "Sets how many channels are cycled through, 1 to 16",
-        "Starts the sample on the next channel",
-        "A rising edge starts the sample on the next channel",
-        "How far that channel has played through the sample, over the range picked on the menu",
-        "The left channel of the sample, or a mix of all its channels while the right output is unpatched",
-        "The right channel of the sample, or a copy of the left one for a mono sample",
-        "Menu — load sample opens a file dialog, and the loaded file is named below it; clicking that name unloads it",
-        "Menu — gain multiplies the sample playback by 1 to 2",
-        "Menu — phase range sets the voltage span of the phase output, twelve presets from +/-10V to 0V-1V plus sliders for an arbitrary min and max"
-      ],
-      "param": {"0": 1, "1": 2},
-      "in": {"0": 3},
-      "out": {"0": 5, "1": 6, "2": 4},
-      "family": {"in": {"0": "trigger"}, "out": {"0": "audio", "1": "audio", "2": "cv"}}
-    },
-    "lights": {
-      "lines": [
-        "Eight inputs with a lamp each, for showing which gates in a patch are high",
-        "The lamp beside this jack brightens with the voltage here and is full at 10V, or toggles on each rising edge in latch mode, despite the README saying a lamp is on above 5V",
-        "Menu — latch makes a rising edge toggle a lamp on or off, in place of a lamp following the voltage"
-      ],
-      "in": {"0": 1, "1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 1, "7": 1},
-      "family": {
-        "in": {"0": "trigger", "1": "trigger", "2": "trigger", "3": "trigger", "4": "trigger", "5": "trigger", "6": "trigger", "7": "trigger"}
-      },
-      "notes": "The README says a lamp stays on while its input is above 5V; the installed code instead sets lamp brightness to the input voltage divided by 10, which is what the line describes."
-    },
-    "slips": {
-      "lines": [
-        "A 64 step sequencer of randomly generated voltages, quantized to a root and scale, with random per-cycle offsets called slips and a second modulation sequence",
-        "A rising edge advances one step",
-        "Sets the root note the sequence is quantized to, C through B",
-        "0-10V sweeps the root across the twelve notes, or reads a pitch voltage with root input v/oct switched on in the menu",
-        "Sets how many steps play before the sequence returns to its starting step, 1 to 64",
-        "0-10V sets the number of steps over the whole 1 to 64 span, in place of the steps knob",
-        "A rising edge returns the sequence to its starting step",
-        "Picks the scale the sequence is quantized to: chromatic, major, minor, major pentatonic, minor pentatonic, dorian, lydian, mixolydian, phrygian, locrian or blues",
-        "0-10V steps through the eleven scales, in place of the scale knob",
-        "Sets the step the sequence starts and restarts from, 1 to 64",
-        "0-10V sets the starting step over the whole 1 to 64 span, in place of the start knob",
-        "Draws a new random sequence of 64 values",
-        "A rising edge draws a new random sequence of 64 values",
-        "A 100ms 10V trigger each time the sequence returns to its starting step",
-        "Sets the chance that a step reaches the outputs, 0 to 100%; a skipped step repeats the last voltage and puts out no gate",
-        "0-10V sets the step chance over the whole 0 to 100% span, in place of the prob knob",
-        "A rising edge draws a new random modulation sequence",
-        "Draws a new random modulation sequence",
-        "Sets what share of the 64 steps are given a random offset, 0 to 100%, a fresh set of steps being chosen at the start of each cycle",
-        "0-10V sets the share of offset steps over the whole 0 to 100% span, in place of the slips knob",
-        "The quantized voltage of the current step, with that step's random offset added where it has one",
-        "Carries the clock voltage while a step plays, and 0V while a step is skipped",
-        "Carries the clock voltage while a step that has a random offset plays, and 0V otherwise",
-        "The voltage of the current step of the modulation sequence, over the range picked on the menu",
-        "Menu — root input v/oct makes the root cv jack read a pitch voltage, the twelve semitones of each volt picking the root, in place of a 0-10V sweep",
-        "Menu — poly channels sets how many channels the sequence and gate outputs carry, each clock pulse moving to the next channel",
-        "Menu — poly mod output carries the modulation sequence on the same channels as the main sequence; switched off it is monophonic",
-        "Menu — remap on generate fits the random values to their ranges when a sequence is generated; switched off, the fitting happens at playback, so a range change reshapes the existing sequence",
-        "Menu — sequence range, slip sequence range and mod sequence range each set a voltage span, twelve presets from +/-10V to 0V-1V plus sliders for an arbitrary min and max",
-        "Menu — mod sequence options quantize the modulation sequence to the same root and scale, add the slip offsets to it, and apply the step chance to it",
-        "Menu — add slipspander places a slipspander expander to the right, whose lit note buttons then replace the scale knob"
-      ],
-      "param": {"0": 2, "1": 4, "2": 7, "3": 9, "4": 11, "5": 14, "6": 18, "7": 17},
-      "in": {"0": 1, "1": 3, "2": 5, "3": 6, "4": 8, "5": 10, "6": 12, "7": 15, "9": 19, "10": 16},
-      "out": {"1": 20, "2": 21, "3": 22, "4": 13, "5": 23},
-      "family": {
-        "in": {"0": "trigger", "1": "cv", "2": "cv", "3": "trigger", "4": "cv", "5": "cv", "6": "trigger", "7": "cv", "9": "cv", "10": "trigger"},
-        "out": {"1": "pitch", "2": "trigger", "3": "trigger", "4": "trigger", "5": "cv"}
-      },
-      "notes": "Input 8 (quantize) and output 0 (quantize) are configured in the code but placed on no panel position, so they have no line and no family."
-    },
-    "slipspander": {
-      "lines": [
-        "Expander for slips, placed immediately to its right, whose twelve note buttons set a custom scale for slips to quantize to",
-        "Puts that note into the custom scale while it is lit",
-        "Note — with no note lit, slips quantizes to the scale picked by its own scale knob"
-      ],
-      "param": {"0": 1, "1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1, "10": 1, "11": 1}
-    },
-    "turnt": {
-      "lines": [
-        "Generates a trigger when an input signal turns around, crosses a threshold, or both, with a scope drawing the signal and its triggers",
-        "The signal the triggers are taken from, 16 channels at most, each channel having its own scope tab",
-        "Sets the threshold crossed in through zero mode, -10V to 10V",
-        "Scales the threshold set by the zero knob, 10V giving the full knob value and negative voltages flipping its sign",
-        "Picks what makes a trigger: direction, where the signal turns from rising to falling or back; through zero, where it crosses the threshold; or both of those",
-        "Sets the chance that a trigger is generated when the condition is met, 0 to 100%",
-        "0-10V scales the chance set by the prob knob, 10V giving the full knob value",
-        "A 1ms 10V trigger at each crossing, or in latch mode a gate that flips between 0V and 10V at each crossing",
-        "Menu — trigger mode picks a 1ms trigger at each crossing, or a latch that flips the output between 0V and 10V",
-        "Menu — freeze when idle holds the scope drawing in place while the source jack is unpatched, in place of clearing it",
-        "Menu — scope mode draws the active channel's tab centred on 0V (bipolar) or from 0V upwards (unipolar)",
-        "Menu — time scale sets how much signal the active channel's tab holds, 64, 256 or 2048 samples"
-      ],
-      "param": {"0": 4, "1": 2, "2": 5},
-      "in": {"0": 1, "1": 3, "2": 6},
-      "out": {"0": 7},
-      "family": {"in": {"1": "cv", "2": "cv"}, "out": {"0": "trigger"}}
-    },
-    "nos": {
-      "lines": [
-        "Oscillator that reads its waveform from a table of random noise, refilled on demand from one of three noise sources",
-        "Sets the frequency, 32.7Hz to 1046.5Hz",
-        "Shifts the frequency set by the freq knob a volt per octave, the voltage clamped to -4V to 4V",
-        "A rising edge refills the wavetable with fresh noise",
-        "Refills the wavetable with fresh noise",
-        "The oscillator, -5V to 5V",
-        "Menu — table size sets the length of the wavetable, 64 to 1024 samples, which takes effect at the next refill",
-        "Menu — mode picks the noise the table is filled from: rand for independent random values, simplex for a smooth noise curve, worley for a cellular one",
-        "Menu — noise increment sets how far apart the table's samples are taken in the simplex and worley noise, 0.01 to 0.1, so how jagged the wave is"
-      ],
-      "param": {"0": 1, "1": 4},
-      "in": {"0": 2, "1": 3},
-      "out": {"0": 5},
-      "family": {"in": {"0": "pitch", "1": "trigger"}, "out": {"0": "audio"}}
-    },
-    "polyshuffle": {
-      "lines": [
-        "Re-orders the channels of a polyphonic signal on a trigger, by shuffling them or rotating them one place",
-        "The polyphonic signal whose channels are re-ordered, and whose channel count the output takes",
-        "A rising edge re-orders the channels by the mode picked on the menu",
-        "A rising edge puts the channels back into the order they arrive in",
-        "The input's channels in their current order",
-        "Menu — mode picks what a trigger does: shuffle the channels at random, rotate them up one place, or rotate them down one place"
-      ],
-      "in": {"0": 1, "1": 2, "2": 3},
-      "out": {"0": 4},
-      "family": {"in": {"1": "trigger", "2": "trigger"}}
-    },
-    "polycounter": {
-      "lines": [
-        "Counts in volts between two limits on each trigger, with a separate count for every channel of the trigger input",
-        "A rising edge adds the inc value to the count for that channel",
-        "A rising edge returns the count to the start value; a monophonic signal here resets every channel, a polyphonic one resets only the matching channel",
-        "Sets the voltage the count begins from and wraps back to, -10V to 10V",
-        "Sets the voltage the count wraps at, -10V to 10V",
-        "Sets how much is added at each trigger, -10V to 10V, a negative value counting downwards",
-        "The current count for that channel, wrapping round between the start and end values"
-      ],
-      "param": {"0": 3, "1": 4, "2": 5},
-      "in": {"0": 1, "1": 2},
-      "out": {"0": 6},
-      "family": {"in": {"0": "trigger", "1": "trigger"}, "out": {"0": "cv"}},
-      "notes": "Start and end are swapped internally when start is the higher of the two, so the count always runs between them."
+    "out": {
+     "0": "cv"
     }
+   }
+  },
+  "blank6hp": {
+   "lines": [
+    "A 6HP blank panel carrying the alef's bits logo",
+    "Rotates the logo, 36 degrees per volt",
+    "Menu — contrast — a slider setting the brightness of the panel, 0.1 to 0.9, the panel and its lettering inverting below 0.4",
+    "Menu — use global contrast — makes this panel follow the brightness shared by every alef's bits module, in place of its own",
+    "Menu — set global contrast — copies this panel's brightness into the brightness shared by every alef's bits module"
+   ],
+   "in": {
+    "0": 1
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    }
+   }
+  },
+  "polyrand": {
+   "lines": [
+    "Passes one randomly chosen channel of a polyphonic input, choosing again on each trigger",
+    "A rising edge chooses a new channel at random, which happens only while the poly input and the output are both patched",
+    "The polyphonic signal one channel of which reaches the output, 16 channels at most",
+    "The voltage of the chosen channel, on its own",
+    "Note — a channel is picked afresh only while trig, poly and out are all patched; with any of the three unpatched the output keeps the channel picked last."
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    }
+   }
+  },
+  "noize": {
+   "lines": [
+    "Random noise generator whose values are held for an adjustable time, giving white noise at one end and stepped noise at the other",
+    "Sets how long each random value is held, 0 to 1ms, a new value being drawn every sample at zero",
+    "0-10V adds to the duration knob, 10V adding the full 1ms",
+    "The noise, -5V to 5V",
+    "Menu — uniform — draws each random value evenly across the range",
+    "Menu — gaussian — draws each random value clustered around the middle of the range, with a slider under it setting the deviation, 0.1 to 0.9"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   }
+  },
+  "steps": {
+   "lines": [
+    "Eight step sequencer with a knob per step, a gate output per step, a randomize trigger and an end-of-cycle trigger",
+    "A rising edge advances to the next step",
+    "Sets how many steps play before the sequence returns to the first, 1 to 8",
+    "A rising edge sets all eight step knobs to new random values",
+    "Sets all eight step knobs to new random values",
+    "A rising edge returns the sequence to step 1, taking effect on the next clock pulse while the clock input is patched",
+    "A 1ms 10V trigger each time the sequence returns to its first step",
+    "The voltage of the knob for the current step, over the range picked on the menu, and 0V while the clock input is unpatched",
+    "Sets the voltage this step sends to the cv output, over the range picked on the menu",
+    "Carries 10V while the sequence is on this step and 0V otherwise, and holds whatever it last carried while this step is above the number set by the steps knob",
+    "Menu — range — sets the voltage span of the step knobs and the cv output: twelve presets from +/-10V to 0V-1V, or custom for a minimum and maximum of your own",
+    "Note — the cv and eoc outputs hold 0V until a clock is patched; the eight step gate outputs follow the current step whether or not a clock is patched."
+   ],
+   "param": {
+    "0": 2,
+    "1": 8,
+    "2": 8,
+    "3": 8,
+    "4": 8,
+    "5": 8,
+    "6": 8,
+    "7": 8,
+    "8": 8,
+    "9": 4
+   },
+   "in": {
+    "0": 1,
+    "1": 5,
+    "2": 3
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 9,
+    "3": 9,
+    "4": 9,
+    "5": 9,
+    "6": 9,
+    "7": 9,
+    "8": 9,
+    "9": 9
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger"
+    }
+   },
+   "notes": "A step gate output above the number set by the steps knob is left at whatever it last held, since only the steps in play are refreshed."
+  },
+  "fibb": {
+   "lines": [
+    "Clock divider with five outputs, each firing at a Fibonacci number of clock pulses",
+    "The clock being divided, each rising edge counting once",
+    "A rising edge restarts every division from zero",
+    "A 10V gate on every second clock pulse, lasting as long as that pulse stays high",
+    "A 10V gate on every third clock pulse, lasting as long as that pulse stays high",
+    "A 10V gate on every fifth clock pulse, lasting as long as that pulse stays high",
+    "A 10V gate on every eighth clock pulse, lasting as long as that pulse stays high",
+    "A 10V gate on every thirteenth clock pulse, lasting as long as that pulse stays high"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger"
+    }
+   }
+  },
+  "lucc": {
+   "lines": [
+    "Clock divider with five outputs, each firing at a Lucas number of clock pulses",
+    "The clock being divided, each rising edge counting once",
+    "A rising edge restarts every division from zero",
+    "A 10V gate on every third clock pulse, lasting as long as that pulse stays high",
+    "A 10V gate on every fourth clock pulse, lasting as long as that pulse stays high",
+    "A 10V gate on every seventh clock pulse, lasting as long as that pulse stays high",
+    "A 10V gate on every eleventh clock pulse, lasting as long as that pulse stays high",
+    "A 10V gate on every eighteenth clock pulse, lasting as long as that pulse stays high"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger"
+    }
+   }
+  },
+  "octsclr": {
+   "lines": [
+    "Multiplies a voltage and adds a whole number of volts to it, for fitting a signal into a chosen span of octaves",
+    "Multiplies the input by 0 to 2, in steps of 0.1",
+    "Adds a whole number of volts to the scaled signal, -3V to 3V, which moves a pitch signal by that many octaves",
+    "The voltage being scaled, 16 channels at most",
+    "The input multiplied by the scale knob with the offset knob added, clamped to -10V to 10V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "notes": "The source and scaled jacks carry whatever you patch: a pitch voltage only tracks a volt per octave with the scale knob at 1.0, so neither jack is given a family."
+  },
+  "shift": {
+   "lines": [
+    "An eight stage shift register, each stage moving its value to the next on a trigger, with a probability control on every stage",
+    "The voltage shifted into the first stage, a fresh random voltage in the menu range being used at each trigger while this is unpatched",
+    "A rising edge shifts every stage along by one",
+    "Sets the chance that this stage stores the value shifted into it, 0 to 100%; below that chance the stage keeps its previous value and passes that one along",
+    "0-10V scales the storing chance set by the knob on that stage, 0V stopping the stage from storing anything",
+    "The voltage shifted into that stage at the last trigger",
+    "Menu — range — sets the voltage span of the random voltages used while in is unpatched: twelve presets from +/-10V to 0V-1V, or custom for a minimum and maximum of your own",
+    "Menu — scrambled eggs! — feeds every stage from a randomly chosen other stage in place of the stage before it"
+   ],
+   "param": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "9": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5
+   },
+   "family": {
+    "in": {
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv"
+    }
+   }
+  },
+  "mlt": {
+   "lines": [
+    "Two separate 1-to-5 multiples, each copying one polyphonic input to five outputs",
+    "The signal copied to the five outputs of that half",
+    "A copy of the input feeding that half, at that input's channel count"
+   ],
+   "in": {
+    "0": 1,
+    "1": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2
+   }
+  },
+  "math": {
+   "lines": [
+    "Six arithmetic combinations of two inputs, each result clamped to -10V to 10V",
+    "One of the two voltages being combined, taken as A in every operation",
+    "One of the two voltages being combined, taken as B in every operation",
+    "A plus B, clamped to -10V to 10V",
+    "A minus B, clamped to -10V to 10V",
+    "A multiplied by B, clamped to -10V to 10V",
+    "A divided by B, clamped to -10V to 10V",
+    "The remainder left after dividing A by B, clamped to -10V to 10V",
+    "The average of A and B, clamped to -10V to 10V"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8
+   },
+   "notes": "What the div and mod outputs carry when b is 0V was not established: the code clamps the result of a plain division and fmod, so no line says."
+  },
+  "logic": {
+   "lines": [
+    "Six logic outputs comparing two inputs, each input counting as high above 0V",
+    "One of the two signals compared, taken as A, and counting as high above 0V",
+    "One of the two signals compared, taken as B, and counting as high above 0V",
+    "10V while both A and B are high, 0V otherwise",
+    "10V while either A or B is high, 0V otherwise",
+    "10V while exactly one of A and B is high, 0V otherwise",
+    "0V while both A and B are high, 10V otherwise",
+    "0V while either A or B is high, 10V otherwise",
+    "0V while exactly one of A and B is high, 10V otherwise"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   }
+  },
+  "probablynot": {
+   "lines": [
+    "Mutes and unmutes a signal on each trigger, the chance of muting set by a knob",
+    "The signal that is passed or silenced, 16 channels at most",
+    "A rising edge draws again on the probability, either muting the signal or letting it through",
+    "Sets the chance of muting at each trigger, 0 to 100%",
+    "Adds to the prob knob, 10V adding the full 100%",
+    "The input signal, either passed through or silenced",
+    "Menu — fade in/out — replaces the instant mute with a fade, the slider under it setting the fade length from 5ms to 10 seconds"
+   ],
+   "param": {
+    "0": 3
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "1": "trigger",
+     "2": "cv"
+    }
+   }
+  },
+  "polyplay": {
+   "lines": [
+    "Sample player that starts the sample again on a new polyphonic channel at each trigger, so repeats overlap",
+    "Sets how many channels are cycled through, 1 to 16",
+    "Starts the sample on the next channel",
+    "A rising edge starts the sample on the next channel",
+    "How far that channel has played through the sample, over the range picked on the menu",
+    "The left channel of the sample, or a mix of all its channels while the right output is unpatched",
+    "The right channel of the sample, or a copy of the left one for a mono sample",
+    "Menu — load sample — opens a file dialog to choose the audio file the module plays",
+    "Menu — gain — a slider multiplying the played sample by 1 to 2",
+    "Menu — phase range — sets the voltage span of the phase output: twelve presets from +/-10V to 0V-1V, or custom for a minimum and maximum of your own",
+    "Menu — the loaded file's name — an item printed below load sample once a file is loaded; clicking it unloads the sample",
+    "Note — the module makes no sound until a sample is loaded from its right-click menu; until then the trigger button and the trigger input do nothing.",
+    "Note — the loaded file is named in the patch, and opening the patch loads it again from the same path; changing the engine sample rate resamples it."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv"
+    }
+   },
+   "notes": "The module's own menu holds load sample and, once a file is loaded, an item bearing the file's name that unloads it; nothing plays until a file is loaded."
+  },
+  "lights": {
+   "lines": [
+    "Eight inputs with a lamp each, for showing which gates in a patch are high",
+    "The lamp beside this jack brightens with the voltage here and is full at 10V, or toggles on each rising edge in latch mode, despite the README saying a lamp is on above 5V",
+    "Menu — latch — makes a rising edge toggle a lamp on or off, in place of a lamp brightening with the voltage"
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    }
+   },
+   "notes": "The README says a lamp stays on while its input is above 5V; the installed code instead sets lamp brightness to the input voltage divided by 10, which is what the line describes."
+  },
+  "slips": {
+   "lines": [
+    "A 64 step sequencer of randomly generated voltages, quantized to a root and scale, with random per-cycle offsets called slips and a second modulation sequence",
+    "A rising edge advances one step",
+    "Sets the root note the sequence is quantized to, C through B",
+    "0-10V sweeps the root across the twelve notes, or reads a pitch voltage with root input v/oct switched on in the menu",
+    "Sets how many steps play before the sequence returns to its starting step, 1 to 64",
+    "0-10V sets the number of steps over the whole 1 to 64 span, in place of the steps knob",
+    "A rising edge returns the sequence to its starting step",
+    "Picks the scale the sequence is quantized to: chromatic, major, minor, major pentatonic, minor pentatonic, dorian, lydian, mixolydian, phrygian, locrian or blues",
+    "0-10V steps through the eleven scales, in place of the scale knob",
+    "Sets the step the sequence starts and restarts from, 1 to 64",
+    "0-10V sets the starting step over the whole 1 to 64 span, in place of the start knob",
+    "Draws a new random sequence of 64 values",
+    "A rising edge draws a new random sequence of 64 values",
+    "A 100ms 10V trigger each time the sequence returns to its starting step",
+    "Sets the chance that a step reaches the outputs, 0 to 100%; a skipped step repeats the last voltage and puts out no gate",
+    "0-10V sets the step chance over the whole 0 to 100% span, in place of the prob knob",
+    "A rising edge draws a new random modulation sequence",
+    "Draws a new random modulation sequence",
+    "Sets what share of the 64 steps are given a random offset, 0 to 100%, a fresh set of steps being chosen at the start of each cycle",
+    "0-10V sets the share of offset steps over the whole 0 to 100% span, in place of the slips knob",
+    "The quantized voltage of the current step, with that step's random offset added where it has one",
+    "Carries the clock voltage while a step plays, and 0V while a step is skipped",
+    "Carries the clock voltage while a step that has a random offset plays, and 0V otherwise",
+    "The voltage of the current step of the modulation sequence, over the range picked on the menu",
+    "Menu — root input v/oct — makes the root cv jack read a pitch voltage, the twelve semitones of each volt picking the root, in place of a 0-10V sweep",
+    "Menu — poly channels — sets how many channels the sequence and gate outputs carry, 1 to 16, each clock pulse moving to the next channel",
+    "Menu — poly mod output — carries the mod sequence output on the same channels as the sequence output; switched off it is monophonic",
+    "Menu — remap on generate — fits the random values to their ranges as a sequence is generated; switched off the fitting happens at playback, so a range change reshapes the sequence already generated",
+    "Menu — sequence range — sets the voltage span of the sequence output: twelve presets from +/-10V to 0V-1V, or custom for a minimum and maximum of your own",
+    "Menu — slip sequence range — sets the voltage span of the random offsets the slips add: twelve presets from +/-10V to 0V-1V, or custom for a minimum and maximum of your own",
+    "Menu — mod sequence range — sets the voltage span of the mod sequence output: twelve presets from +/-10V to 0V-1V, or custom for a minimum and maximum of your own",
+    "Menu — quantize mod sequence — an item in the mod sequence options submenu, quantizing the mod sequence to the same root and scale as the main sequence",
+    "Menu — apply slips to mod sequence — an item in the mod sequence options submenu, adding each cycle's random offsets to the mod sequence too",
+    "Menu — apply step probability to mod sequence — an item in the mod sequence options submenu, applying the step chance to the mod sequence too",
+    "Menu — add slipspander — places a slipspander expander against the right-hand edge of the module; with one already there the menu prints slipspander connected in place of this item"
+   ],
+   "param": {
+    "0": 2,
+    "1": 4,
+    "2": 7,
+    "3": 9,
+    "4": 11,
+    "5": 14,
+    "6": 18,
+    "7": 17
+   },
+   "in": {
+    "0": 1,
+    "1": 3,
+    "2": 5,
+    "3": 6,
+    "4": 8,
+    "5": 10,
+    "6": 12,
+    "7": 15,
+    "9": 19,
+    "10": 16
+   },
+   "out": {
+    "1": 20,
+    "2": 21,
+    "3": 22,
+    "4": 13,
+    "5": 23
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "cv",
+     "9": "cv",
+     "10": "trigger"
+    },
+    "out": {
+     "1": "pitch",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv"
+    }
+   },
+   "notes": "Input 8 (quantize) and output 0 (quantize) are configured in the code but placed on no panel position, so they have no line and no family."
+  },
+  "slipspander": {
+   "lines": [
+    "Expander for slips, placed immediately to its right, whose twelve note buttons set a custom scale for slips to quantize to",
+    "Puts that note into the custom scale while it is lit",
+    "Note — with no note lit, slips quantizes to the scale picked by its own scale knob.",
+    "Note — the lamp at the bottom of the panel lights while the module is next to a slips on its left, which is the only position in which the note buttons reach anything."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1
+   }
+  },
+  "turnt": {
+   "lines": [
+    "Generates a trigger when an input signal turns around, crosses a threshold, or both, with a scope drawing the signal and its triggers",
+    "The signal the triggers are taken from, 16 channels at most, each channel having its own scope tab",
+    "Sets the threshold crossed in through zero mode, -10V to 10V",
+    "Scales the threshold set by the zero knob, 10V giving the full knob value and negative voltages flipping its sign",
+    "Picks what makes a trigger: direction, where the signal turns from rising to falling or back; through zero, where it crosses the threshold; or both of those",
+    "Sets the chance that a trigger is generated when the condition is met, 0 to 100%",
+    "0-10V scales the chance set by the prob knob, 10V giving the full knob value",
+    "A 1ms 10V trigger at each crossing, or in latch mode a gate that flips between 0V and 10V at each crossing",
+    "Menu — freeze when idle — holds the scope drawing in place while signal is unpatched, in place of clearing it",
+    "Menu — trigger mode — trigger gives a 1ms pulse at each crossing, latch flips the output between 0V and 10V at each crossing",
+    "Menu — scope mode — bipolar draws the channel being shown centred on 0V, unipolar draws it from 0V upwards",
+    "Menu — time scale — sets how many samples the drawing of the channel being shown is built from: low 64, medium 256, high 2048",
+    "Note — the numbered tabs above and below the scope pick which channel of signal is drawn, and the menu's scope mode and time scale apply to the channel picked there.",
+    "Note — a channel tab is picked by clicking it, by scrolling sideways over the tabs, or with the left and right arrow keys while the pointer is over them.",
+    "Note — clicking the scope switches the channel being shown between bipolar and unipolar.",
+    "Note — scrolling on the scope sets how long a span of signal the whole trace covers, 0.1 to 10 seconds, for every channel at once."
+   ],
+   "param": {
+    "0": 4,
+    "1": 2,
+    "2": 5
+   },
+   "in": {
+    "0": 1,
+    "1": 3,
+    "2": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   }
+  },
+  "nos": {
+   "lines": [
+    "Oscillator that reads its waveform from a table of random noise, refilled on demand from one of three noise sources",
+    "Sets the frequency, 32.7Hz to 1046.5Hz",
+    "Shifts the frequency set by the freq knob a volt per octave, the voltage clamped to -4V to 4V",
+    "A rising edge refills the wavetable with fresh noise",
+    "Refills the wavetable with fresh noise",
+    "The oscillator, -5V to 5V",
+    "Menu — table size — a slider setting the length of the wavetable, 64 to 1024 samples, which takes effect at the next refill",
+    "Menu — rand — fills the wavetable with independent random values at the next refill",
+    "Menu — simplex — fills the wavetable from a smooth simplex noise curve at the next refill",
+    "Menu — worley — fills the wavetable from a cellular worley noise pattern at the next refill",
+    "Menu — noise increment — a slider setting how far apart the wavetable's samples are taken in the simplex and worley noise, 0.01 to 0.1, so how jagged the wave is"
+   ],
+   "param": {
+    "0": 1,
+    "1": 4
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   }
+  },
+  "polyshuffle": {
+   "lines": [
+    "Re-orders the channels of a polyphonic signal on a trigger, by shuffling them or rotating them one place",
+    "The polyphonic signal whose channels are re-ordered, and whose channel count the output takes",
+    "A rising edge re-orders the channels by the mode picked on the menu",
+    "A rising edge puts the channels back into the order they arrive in",
+    "The input's channels in their current order",
+    "Menu — shuffle — makes a trigger re-order the channels at random",
+    "Menu — rotate up — makes a trigger move every channel up one place",
+    "Menu — rotate down — makes a trigger move every channel down one place"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "1": "trigger",
+     "2": "trigger"
+    }
+   }
+  },
+  "polycounter": {
+   "lines": [
+    "Counts in volts between two limits on each trigger, with a separate count for every channel of the trigger input",
+    "A rising edge adds the inc value to the count for that channel",
+    "A rising edge returns the count to the start value; a monophonic signal here resets every channel, a polyphonic one resets only the matching channel",
+    "Sets the voltage the count begins from and wraps back to, -10V to 10V",
+    "Sets the voltage the count wraps at, -10V to 10V",
+    "Sets how much is added at each trigger, -10V to 10V, a negative value counting downwards",
+    "The current count for that channel, wrapping round between the start and end values"
+   ],
+   "param": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "notes": "Start and end are swapped internally when start is the higher of the two, so the count always runs between them."
   }
+ }
 }

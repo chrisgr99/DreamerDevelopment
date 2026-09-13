@@ -8,6 +8,28 @@ An entry is a list of lines. The first line says what the module is. Every line 
 
 Menu options go last, on a line starting `Menu — `, and only where they matter to using the module.
 
+**Name the item first, exactly as the menu prints it, then an em dash, then what it does.**
+
+    Menu — Delay specification — chooses whether the Delay knob is read as a pitch, one cycle long, or as a time
+
+The name comes first because that is what a person scans the menu for, and the em dash separates it from the description — both to the eye and to the voice, which reads an em dash as a pause. Half the menu lines written before this rule described an effect without ever naming the item, which leaves the reader hunting. Where an item has named choices, list them as they are printed, so they can be matched against what is on screen.
+
+The names are literal strings in the maker's source and in the compiled binary — `createMenuItem("Digital Voltage Range", ...)` — so they can be checked rather than guessed.
+
+**AND THE NAME IS QUOTED, SO THE VOICE RULES DO NOT APPLY TO IT.** Zilah's menu really does print *MSB waits for LSB*, which is personification we would never write; rewording it would falsify the one thing the line exists to get right. Print the name as the maker prints it. `validate_help.py` reads a menu line with that middle part taken out, so the style rules still judge everything we wrote ourselves and nothing we only copied.
+
+Where a choice's own name is the problem — Grayscale's Startup state offers *Remember* — put the choices in that same exempt part, after a colon, rather than in the description:
+
+    Menu — Startup state: Start, Stop, Remember — sets the playback state the module takes when a patch is loaded
+
+**A COSMETIC MENU THAT EVERY MODULE IN A PLUGIN CARRIES GETS NO LINE.** Themes, skins, panel art, light and dark: these never answer the question somebody opens help with. Written per module they are pure repetition — dBiz would carry three identical theme lines on all 32 of its modules, 96 lines in which nothing is said, and they would be the ONLY thing under the menu heading for twenty of them. Leave them out.
+
+Two exceptions. Where the theme IS the module — a blank panel whose whole function is to be looked at — it is the module's purpose and belongs. And where a plugin-wide menu item changes BEHAVIOUR rather than appearance, write it on every module that has it: Venom's *Lock all parameters* is exactly the thing that makes a module seem broken, because every knob refuses to move and the panel says nothing about why.
+
+The absence of such a menu can still be worth a line where a reader would expect one — Bogaudio's ANALYZER-XL is the single module in that plugin without the panel submenu, and that is a fact about it.
+
+**Where the menu is NOT the module's own, say so in the line.** These lines are gathered under a heading that reads "Right-click the panel for:", which is right for the large majority. Rack has four kinds of right-click menu — the module's, a knob's, a port's, and whatever a display carries — and a setting that lives on one of the others must say which, or the heading makes it confidently wrong.
+
 One line per control, and **never a cap**. If you are running helper agents, do not give them a line limit: a run tonight set one at forty and it cost real content — 66 input jacks on one module ended up sharing a single catch-all line. There is no target length: a module with four jacks gets four lines and a module with fifteen controls gets fifteen. Length is not a cost here, because nobody reads the entry straight through — each line is clicked separately, and a line that covers two controls cannot be clicked for one of them. Group only where controls are genuinely identical, such as eight outputs that differ by number alone.
 
 ## A line is about the one control that was clicked
@@ -46,7 +68,13 @@ Some panels print the same word on two or three different things — GATE as a k
 
 ## A line for something that is not a control
 
-A fact worth knowing that is not attached to any control goes on a line starting `Note — `. Use it rarely, and only for something that changes how the module is used — for example, that right-clicking a knob lets an exact value be typed, which is how a sample-accurate delay is set.
+A fact worth knowing that is not attached to any control goes on a line starting `Note — `.
+
+**Write one wherever a module cannot be used without knowing something, and that is not a rare case.** This instruction used to read "use it rarely", which was wrong and cost the entries their most useful sentences. NYSTHI's Sussudio is a six-headed sample player that does nothing at all until you right-click a region and load a sample, and its entry never said so — because that fact belongs to no control, and the rule discouraged writing it. The reader who most needs help is the one looking at a module that appears to be broken.
+
+So: **if a module does nothing until you do something, say what.** A file to load, a device to choose, an expander to place, a mode to leave. Then anything else that changes how the module is used and that clicking a control would never reveal — a gesture on a display, what an expander attaches to and on which side, a limit such as being mono only.
+
+These lines are shown, with the `Note — ` stripped, when the module's title band is clicked. The prefix is an authoring mark that tells the generator the line belongs to the module rather than to a control; the reader never sees it.
 
 ## Never name the control either
 

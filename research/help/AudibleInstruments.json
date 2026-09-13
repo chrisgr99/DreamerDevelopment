@@ -1,29 +1,31 @@
 {
  "plugin": "AudibleInstruments",
  "source": "https://pichenettes.github.io/mutable-instruments-documentation/ (the Mutable Instruments manuals, which vcvrack.com/AudibleInstruments links to) with https://github.com/VCVRack/AudibleInstruments v2.0.0 as the authority where they differ",
- "read": "2026-09-12",
+ "read": "2026-09-13",
  "modules": {
   "Braids": {
    "lines": [
-    "Digital oscillator carrying 48 synthesis models, from analogue waveforms and wavetables to physical models, speech and drum circuits, each shaped by two parameters",
-    "Steps through the 48 models; the four-letter code of the one in use shows on the display",
+    "Digital oscillator carrying 47 synthesis models, from analogue waveforms and wavetables to physical models, speech and drum circuits, each shaped by two parameters",
+    "Steps through the 47 models; the four-letter code of the one in use shows on the display",
     "Detunes by up to a semitone either way",
     "Sets the pitch in octaves, from five octaves below the middle C of the oscillator to three above it",
     "Attenuverts the FM input, which shifts the pitch by one octave per volt at full clockwise; with META switched on it scales that input's control of the model instead",
     "Sets the first shaping parameter of the model in use, which is the waveform sweep, the wavefolder amount, the sync interval or the filter cutoff depending on which model that is",
     "Attenuverts the TIMBRE input, which adds to the TIMBRE knob",
     "Sets the second shaping parameter of the model in use, which is the detuning, the feedback amount, the formant shift or the brightness depending on which model that is",
-    "A rising edge past 1V strikes the physical models, resets the phase of the other models and fires the internal envelope",
+    "A rising edge past 1V strikes the physical models and resets the phase of the other models",
     "Sets the pitch, one volt per octave, added to the two frequency knobs",
     "Shifts the pitch, scaled and inverted by the FM knob, one octave per volt at full clockwise",
     "Adds to the TIMBRE knob through the MODULATION attenuverter, 5V covering the whole knob range",
     "Adds to the COLOR knob, 5V covering the whole knob range",
     "The oscillator, peaking at 5V, though loudness differs from model to model",
-    "Menu — Model picks the synthesis model from a list that names what each one does",
-    "Menu — META: FM CV selects model hands the FM input over to choosing the model, and pitch is then set by V/OCT and the frequency knobs alone",
-    "Menu — DRFT: Pitch drift adds the slow random detuning of an analogue oscillator",
-    "Menu — SIGN: Waveform imperfections mixes in a waveshaped copy of the output for a dirtier tone",
-    "Menu — Low CPU (disable resampling) runs the oscillator at the engine sample rate instead of resampling from 96kHz, which costs less processing and adds aliasing"
+    "Note — the display shows the four-letter code of the model in use, and the Model menu lists all 47 codes with a description beside each one.",
+    "Note — the module is monophonic: on a polyphonic cable only the first channel is read, and the output carries one channel.",
+    "Menu — Model — picks the synthesis model from a list giving each one's four-letter display code and a short description of it",
+    "Menu — META: FM CV selects model — hands the FM input over to choosing the model, and pitch is then set by V/OCT and the frequency knobs alone",
+    "Menu — DRFT: Pitch drift — adds the slow random detuning of an analogue oscillator",
+    "Menu — SIGN: Waveform imperfections — mixes in a waveshaped copy of the output for a dirtier tone",
+    "Menu — Low CPU (disable resampling) — runs the oscillator at the engine sample rate instead of resampling from 96kHz, which costs less processing and adds aliasing"
    ],
    "param": {
     "6": 1,
@@ -55,7 +57,8 @@
     "out": {
      "0": "audio"
     }
-   }
+   },
+   "notes": "The trigger input calls Strike() on the oscillator, which re-excites the physical and percussive models and resets the phase of the others. The hardware's internal AD envelope is not implemented here: the port zeroes the settings block and exposes only meta_modulation, vco_drift and signature, so no envelope is applied to level, timbre or colour. The model count is 47, not the 48 often quoted: the shape parameter is scaled to MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, which is index 46 of the 47-entry table in Braids.cpp."
   },
   "Plaits": {
    "lines": [
@@ -81,9 +84,12 @@
     "Sets the pitch, one volt per octave; the number of channels on this cable sets how many voices the module runs, up to sixteen",
     "The main signal of the model in use, peaking at 5V",
     "A second signal from the same model, which is a sub-oscillator, a second formant or a different part of the drum, depending on which model is in use",
-    "Menu — the two model lists pick the model by name, with the pitched models and the noise and percussive models in separate groups",
-    "Menu — Edit LPG response/decay swaps the TIMBRE and MORPH knobs for the low-pass gate's response and decay knobs",
-    "Menu — Low CPU (disable resampling) runs the oscillator at the engine sample rate instead of resampling from 48kHz, which costs less processing and adds aliasing"
+    "Note — with nothing patched into TRIG and nothing into LEVEL the low-pass gate is bypassed, and the model sounds continuously.",
+    "Note — patch TRIG to strike the model through the internal envelope and low-pass gate, or LEVEL to open that gate from the voltage there.",
+    "Note — while TRIG is patched, the internal decay envelope drives the FM, TIMBRE and MORPH attenuverters for whichever of those three inputs has no cable in it, so each strike moves those parameters.",
+    "Menu — Pitched models and Noise/percussive models — two lists of eight that pick the model by name",
+    "Menu — Edit LPG response/decay — hides the TIMBRE and MORPH knobs and puts the low-pass gate's response and decay knobs in their place on the panel",
+    "Menu — Low CPU (disable resampling) — runs the oscillator at the engine sample rate instead of resampling from 48kHz, which costs less processing and adds aliasing"
    ],
    "param": {
     "0": 1,
@@ -178,7 +184,9 @@
     "Modulates the reverb space through its attenuverter; a large voltage with the SPACE knob at maximum freezes the reverb tail",
     "The resonator signal; as SPACE is raised this becomes the left half of a stereo pair",
     "The exciter signal; as SPACE is raised this becomes the right half of a stereo pair",
-    "Menu — Models chooses the resonator: the original, a non-linear string, chords, or the Ominous voice"
+    "Note — the exciters make no sound until they are gated: hold the play button on the panel, or send 1V or more to GATE.",
+    "Note — a new Elements has BOW and BLOW at zero and STRIKE half way up, so the first gate gives a struck sound until those two knobs are raised.",
+    "Menu — Models — chooses the resonator: Original, Non-linear string, Chords or Ominous voice"
    ],
    "param": {
     "0": 1,
@@ -281,7 +289,8 @@
     "Carries 5V until the fall has finished, then 0V until the next cycle or trigger, where the manual has it going high at the end of the fall and staying high",
     "The wave as a unipolar signal, 0-8V",
     "The wave as a bipolar signal, -5V to 5V, with a positive and a negative bump in each cycle rather than a shifted copy of the unipolar wave",
-    "Menu — Wavetable firmware (Sheep) swaps the generator for the Sheep firmware, which scans wavetables, and changes the panel with it"
+    "Note — the Sheep firmware changes what the panel says as well as what the module does, and the CLOCK input is ignored while it runs.",
+    "Menu — Wavetable firmware (Sheep) — replaces the generator with the Sheep firmware, which scans wavetables, and swaps the panel artwork for the Sheep panel"
    ],
    "param": {
     "0": 1,
@@ -328,7 +337,7 @@
      "3": "cv"
     }
    },
-   "notes": "Both gate outputs run inverted against the Mutable manual, which has HIGH TIDE going high at the end of the rise and LOW TIDE going high at the end of the fall, each staying high until the cycle restarts or the envelope is retriggered. The plugin holds each one high through its segment and drops it at the end, so the lines describe the plugin. Clock sync differs too: the manual engages the phase-locked mode by holding the range switch for a second, while the plugin locks to the CLOCK input whenever a cable is patched there."
+   "notes": "Both gate outputs run inverted against the Mutable manual, which has HIGH TIDE going high at the end of the rise and LOW TIDE going high at the end of the fall, each staying high until the cycle restarts or the envelope is retriggered. The plugin holds each one high through its segment and drops it at the end, so the lines describe the plugin. Clock sync differs too: the manual engages the phase-locked mode by holding the range switch for a second, while the plugin locks to the CLOCK input whenever a cable is patched there. The Sheep firmware also disables clock sync: set_sync is called with the CLOCK input's connected state ANDed with the firmware being off."
   },
   "Tides2": {
    "lines": [
@@ -355,7 +364,8 @@
     "A rising edge past 1.7V starts an AD envelope or resets the cycle; in AR mode the envelope rises while the gate is high and falls when it goes low",
     "Locks the rate to an external clock whenever a cable is patched here, the FREQUENCY knob then setting the ratio; it reads high at 1.7V",
     "The first of the four related signals; in the amplitude output mode the SHIFT/LEVEL knob attenuverts this one",
-    "One of the signals following the first, differing from it in waveshape, level, timing or frequency according to the output mode"
+    "One of the signals following the first, differing from it in waveshape, level, timing or frequency according to the output mode",
+    "Note — this module has no right-click menu of its own; the range, output mode and ramp mode are set by the three panel buttons alone."
    ],
    "param": {
     "0": 1,
@@ -435,9 +445,11 @@
     "Adds to the TEXTURE knob, 5V covering the whole knob range",
     "The left channel of the grain cloud mixed with the dry signal",
     "The right channel of the grain cloud mixed with the dry signal",
-    "Menu — Blend knob picks which of the four parameters the BLEND knob and its input control, the same choice the mode button steps through",
-    "Menu — Alternate mode swaps granular playback for a pitch-shifter and time-stretcher, a looping delay, or spectral processing",
-    "Menu — Quality sets the buffer's length and format, trading fidelity for recording time, from 1 second of 32kHz 16-bit stereo to 8 seconds of 16kHz 8-bit mono"
+    "Note — a new Clouds sows no grains, because DENSITY comes up at its centre where the grain overlap is zero. Move DENSITY off centre, or send a trigger to TRIG, to hear anything but the dry signal.",
+    "Note — the module is monophonic: on a polyphonic cable only the first channel is recorded into the buffer.",
+    "Menu — Blend knob — picks which of four the BLEND knob and its input control: Wet/dry, Spread, Feedback or Reverb, the same choice the mode button steps through",
+    "Menu — Alternate mode — picks the processor: Granular, Pitch-shifter/time-stretcher, Looping delay or Spectral madness",
+    "Menu — Quality — sets the buffer's length and format: 1s 32kHz 16-bit stereo, 2s 32kHz 16-bit mono, 4s 16kHz 8-bit µ-law stereo or 8s 16kHz 8-bit µ-law mono"
    ],
    "param": {
     "0": 1,
@@ -488,7 +500,7 @@
      "1": "audio"
     }
    },
-   "notes": "The load and save button beside the mode button is drawn on the panel and configured as a parameter, but the plugin never reads it, so its line says that nothing reads it and the tag points there."
+   "notes": "The load and save button beside the mode button is drawn on the panel and configured as a parameter, but the plugin never reads it, so its line says that nothing reads it and the tag points there. DENSITY at its centre gives a grain overlap of exactly zero: the granular processor leaves overlap at 0 for values between 0.47 and 0.53, and the sample player scales the grain count by the cube of overlap, so no grains are sown until the knob leaves that band. A trigger at TRIG still sows one."
   },
   "Warps": {
    "lines": [
@@ -505,7 +517,11 @@
     "The carrier audio; with the internal oscillator running, this signal phase-modulates it instead",
     "The modulator audio",
     "The two signals combined by the chosen algorithm",
-    "The sum of the carrier and modulator after their gain stages, or the bare internal oscillator when that is running"
+    "The sum of the carrier and modulator after their gain stages, or the bare internal oscillator when that is running",
+    "Note — with the internal oscillator switched off, nothing comes out until audio is patched into both the carrier and the modulator inputs.",
+    "Note — pressing the oscillator button puts the internal oscillator in place of the carrier input.",
+    "Note — this module has no right-click menu of its own; the algorithm and the internal oscillator are set on the panel.",
+    "Note — the module is monophonic: on a polyphonic cable only the first channel is processed."
    ],
    "param": {
     "0": 1,
@@ -561,13 +577,16 @@
     "Modulates the damping through its attenuverter",
     "Modulates the structure through its attenuverter",
     "Modulates the excitation position through its attenuverter",
-    "A voltage of 1V or more lets the sounding voice decay and starts the next one; with nothing patched here a note change on V/OCT or a transient in the audio input does that instead",
+    "A voltage of 1V or more lets the sounding voice decay and starts the next one; with nothing patched here a note change on V/OCT does that, or a transient in the audio input if V/OCT is empty",
     "Sets the pitch of the resonator, one volt per octave",
     "The audio that excites the resonator; with nothing patched here a pulse or burst of noise is generated at each strum",
     "The odd-numbered partials or strings, or one of two complementary components of a single voice; with only one of the two outputs patched, it carries the whole signal",
     "The even-numbered partials or strings, or one of two complementary components of a single voice; with only one of the two outputs patched, it carries the whole signal",
-    "Menu — Resonator picks from six models, the three on the panel plus an FM voice, quantized sympathetic strings and a reverb string",
-    "Menu — Disastrous Peace swaps the resonator for the four-voice string synthesizer hidden in the hardware, with chorus, reverb and formant effects"
+    "Note — the resonator makes no sound until something strums it, and with none of STRUM, V/OCT or the audio input patched nothing ever does.",
+    "Note — with STRUM unpatched, a strum is taken from a note change on V/OCT, or from a transient in the audio input when V/OCT is unpatched as well.",
+    "Note — the module is monophonic: on a polyphonic cable only the first channel is read.",
+    "Menu — Resonator — picks the model: Modal resonator, Sympathetic strings, Modulated/inharmonic string, FM voice, Quantized sympathetic strings or Reverb string",
+    "Menu — Disastrous Peace — swaps the resonator for the four-voice string synthesizer hidden in the hardware, with chorus, reverb and formant effects"
    ],
    "param": {
     "0": 1,
@@ -612,7 +631,8 @@
      "0": "audio",
      "1": "audio"
     }
-   }
+   },
+   "notes": "Strummer::Process decides the internal strum: a V/OCT cable makes a note change of more than 0.4 semitones the strum; failing that, an audio cable makes an onset in that signal the strum; with neither patched the firmware sets strum to false and comments that nothing is connected."
   },
   "Links": {
    "lines": [
@@ -622,7 +642,9 @@
     "One of the two signals the middle section adds together",
     "The sum of the two signals patched into the middle section",
     "One of the three signals the bottom section adds together",
-    "The sum of the three signals patched into the bottom section"
+    "The sum of the three signals patched into the bottom section",
+    "Note — each of the three sections works on polyphonic cables on its own, the number of channels on that section's busiest input setting how many its outputs carry.",
+    "Note — this module has no right-click menu of its own."
    ],
    "param": {},
    "in": {
@@ -645,7 +667,7 @@
     "in": {},
     "out": {}
    },
-   "notes": "No families: every jack carries whatever is patched into the section, audio or CV alike."
+   "notes": "No families: every jack carries whatever is patched into the section, audio or CV alike. The middle section's two outputs both carry the same sum; nothing in the code inverts either of them."
   },
   "Kinks": {
    "lines": [
@@ -660,7 +682,9 @@
     "The signal the sample and hold reads; with nothing patched here it samples the internal noise source, giving a random voltage at each trigger",
     "A rising edge past 0.7V makes the sample and hold take a fresh reading",
     "White noise with a bell-shaped distribution, mostly within -2V to 2V",
-    "The voltage read at the last trigger, held until the next one"
+    "The voltage read at the last trigger, held until the next one",
+    "Note — the module is monophonic: on a polyphonic cable only the first channel is read, and every output carries one channel.",
+    "Note — this module has no right-click menu of its own."
    ],
    "param": {},
    "in": {
@@ -695,7 +719,8 @@
     "Sets the gain of that channel: from 0 to 1 in attenuator mode, or from -1 to 1 in attenuverter mode, where the centre mutes it",
     "Switches that channel between an attenuator, whose gain runs from 0 to 1, and an attenuverter, whose gain runs from -1 to 1",
     "The signal for that channel; with nothing patched it reads a constant 5V, so the knob puts out an adjustable offset instead",
-    "That channel, summed with any channel above it whose own output is unpatched"
+    "That channel, summed with any channel above it whose own output is unpatched",
+    "Note — the module is monophonic: on a polyphonic cable only the first channel is read."
    ],
    "param": {
     "0": 1,
@@ -729,7 +754,9 @@
     "The gate or trigger the second channel routes, read high at 2V; with nothing patched here it takes the first channel's input",
     "Adds to that channel's probability knob, 10V covering the whole range",
     "Carries a 10V gate when the coin sends the incoming gate to A",
-    "Carries a 10V gate when the coin sends the incoming gate to B"
+    "Carries a 10V gate when the coin sends the incoming gate to B",
+    "Menu — Channel 1 mode — sets the first channel to Latch, where the coin sends the incoming gate to one output or the other, or Toggle, where the picked output stays high",
+    "Menu — Channel 2 mode — sets the second channel to Latch, where the coin sends the incoming gate to one output or the other, or Toggle, where the picked output stays high"
    ],
    "param": {
     "0": 1,
@@ -771,7 +798,8 @@
     "Attenuverts that channel's CV input, which adds to the gain knob and can push the gain as far as -2 or 2",
     "The signal for that channel; with nothing patched it reads a constant 5V, so the knob puts out an adjustable offset instead",
     "Modulates that channel's gain through its attenuverter, 5V at full attenuverter changing the gain by one; with audio here and audio on the signal input the channel is a ring modulator",
-    "That channel, summed with any channel above it whose own output is unpatched"
+    "That channel, summed with any channel above it whose own output is unpatched",
+    "Note — the module is monophonic: on a polyphonic cable only the first channel is read."
    ],
    "param": {
     "0": 1,
@@ -816,7 +844,8 @@
     "Sets the response of that channel's CV, exponential counter-clockwise and linear clockwise",
     "The audio or CV for that channel",
     "Controls the gain of that channel, 5V giving unity on the linear curve and negative voltages closing it; while it is patched the gain knob scales what it does",
-    "That channel, summed with any channel above it whose own output is unpatched"
+    "That channel, summed with any channel above it whose own output is unpatched",
+    "Note — the module is monophonic: on a polyphonic cable only the first channel is read."
    ],
    "param": {
     "0": 1,
@@ -872,9 +901,15 @@
     "The sum of the channels whose own outputs are unpatched, halved and clipped at 10V",
     "That channel after its VCA, and patching it takes that channel out of the MIX output",
     "Nothing in the module writes to this output; it stays at 0V however the animation moves",
-    "Menu — Channel settings sets each channel's interpolation curve between keyframes, from step and linear to bouncing, and its response curve, linear or exponential",
-    "Menu — Clear keyframes empties the animation and leaves the four knobs in direct control of the gains",
-    "Menu — Alternate modes swaps the keyframer for a Poly LFO, four linked LFOs whose levels drive the four VCAs"
+    "Note — a new Frames holds no keyframes, and until one is stored the four gain knobs set their channel gains directly and the FRAME knob does not move them.",
+    "Note — the add button stores a keyframe at the FRAME knob's position, holding the four gains as they stand.",
+    "Note — the four gain knobs come up at zero, so nothing reaches the outputs until one of them is raised.",
+    "Note — the module is monophonic: on a polyphonic cable only the first channel is read.",
+    "Menu — Channel 1, Channel 2, Channel 3 and Channel 4 — each carries the Interpolation curve and Response curve settings for that channel",
+    "Menu — Interpolation curve, inside a channel's submenu — how that channel's gain travels between keyframes: Step, Linear, Accelerating, Decelerating, Departure/arrival or Bouncing",
+    "Menu — Response curve, inside a channel's submenu — sets that channel's VCA to Linear or Exponential",
+    "Menu — Clear keyframes — empties the animation and leaves the four knobs in direct control of the gains",
+    "Menu — Keyframer and Poly LFO — the two entries under Alternate modes, Poly LFO replacing the keyframer with four linked LFOs whose levels drive the four VCAs"
    ],
    "param": {
     "0": 1,
@@ -909,7 +944,7 @@
     },
     "out": {}
    },
-   "notes": "The FR. STEP output is drawn on the panel and configured, but the plugin never writes to it, so its line says that nothing writes to it and the tag points there."
+   "notes": "The FR. STEP output is drawn on the panel and configured, but the plugin never writes to it, so its line says that nothing writes to it and the tag points there. With no keyframes stored the module calls set_immediate for a knob that has moved, so the knobs set the gains directly and the FRAME knob does not move them. The four gain knobs default to zero."
   },
   "Stages": {
    "lines": [
@@ -919,7 +954,11 @@
     "Sets the time that segment takes when it ramps, and the level it goes to, 0-8V, when it steps or holds",
     "Adds to that segment's slider, 8V covering the whole range",
     "A gate past 1.7V runs the group of segments that begins here, and patching a cable here starts a new group",
-    "The envelope of the group that begins at this segment, or, for a segment further into a group, a ramp from 8V down to 0V while that segment is running"
+    "The envelope of the group that begins at this segment, or, for a segment further into a group, a ramp from 8V down to 0V while that segment is running",
+    "Note — a segment with nothing patched into its gate input and no loop set holds its output at 0V.",
+    "Note — hold a segment's button for a second to make it loop, which runs it as a free-running LFO; patch a gate into its gate input to run it as an envelope instead.",
+    "Note — one looping segment in a group loops on its own, and two mark the start and the end of a looping section; setting a third clears the loop from the other two.",
+    "Note — this module has no right-click menu of its own; the segment types and looping are set by the six buttons."
    ],
    "param": {
     "0": 1,
@@ -986,7 +1025,8 @@
      "4": "cv",
      "5": "cv"
     }
-   }
+   },
+   "notes": "A single segment with no gate patched and no loop set is routed to ProcessZero in the firmware's process function table, so its output sits at 0V; the same segment with loop set is routed to ProcessFreeRunningLFO. The module allows two looping segments in a group, which mark a loop's start and end; toggling a third clears the loop from the other two."
   },
   "Marbles": {
    "lines": [
@@ -1019,12 +1059,14 @@
     "The master clock itself, a 10V gate with an even duty cycle",
     "A random voltage stepped at a division of the clock chosen in the menu, anywhere from a sixty-fourth of that clock to the clock itself",
     "A random voltage drawn at each clock pulse from the distribution set by SPREAD and BIAS and shaped by STEPS",
-    "Menu — T mode reaches seven ways of splitting the clock: the three on the panel, plus independent Bernoulli, divider, three states and Markov",
-    "Menu — T range and X range set the clock division and the output voltage range, the same choices the two range buttons step through",
-    "Menu — X mode sets how the three voltage outputs answer the knobs, the same choice the X mode button steps through",
-    "Menu — Scales picks the scale the STEPS knob quantises to: major, minor, pentatonic, pelog, raag bhairav that or raag shri",
-    "Menu — Internal X clock source picks which gate outputs clock the three voltage outputs when nothing is patched into the X clock input",
-    "Menu — Y divider ratio sets how far the Y output is divided down, from the clock itself to a sixty-fourth of it"
+    "Note — the module is monophonic: every output carries one channel.",
+    "Menu — T mode — sets how the clock is split between the gate outputs: Complementary Bernoulli, Clusters, Drums, Independent Bernoulli, Divider, Three states or Markov",
+    "Menu — T range — sets the clock range to 1/4x, 1x or 4x, the same choice the clock range button steps through",
+    "Menu — X mode — sets how the three voltage outputs answer the knobs: Identical, Bump or Tilt, the same choice the X mode button steps through",
+    "Menu — X range — sets the range of the random voltage outputs to Narrow, Positive or Full, the same choice the output voltage range button steps through",
+    "Menu — Scales — picks the scale the STEPS knob quantises to: Major, Minor, Pentatonic, Pelog, Raag Bhairav That or Raag Shri",
+    "Menu — Internal X clock source — picks which of the three t streams clocks the three X outputs when nothing is patched into the X clock input, either one stream each or one stream driving all three",
+    "Menu — Y divider ratio — sets how far the Y output is divided down, from 1/64 through 1/48, 1/32, 1/24, 1/16, 1/12, 1/8, 1/6, 1/4, 1/3 and 1/2 to 1"
    ],
    "param": {
     "0": 1,
@@ -1100,7 +1142,8 @@
     "The two-pole band-pass tap, falling away at 12dB per octave on both sides",
     "The two-pole low-pass tap, 12dB per octave",
     "The four-pole low-pass output, 24dB per octave",
-    "The four-pole low-pass output through the VCA, whose gain the GAIN input sets"
+    "The four-pole low-pass output through the VCA, whose gain the GAIN input sets",
+    "Note — this module has no right-click menu of its own."
    ],
    "param": {
     "0": 1,
@@ -1169,7 +1212,8 @@
     "The band-pass tap of the second parametric filter",
     "The low-pass tap of the second parametric filter",
     "The audio with all four bands applied; the red lamp beside it lights when the signal clips",
-    "Menu — Pad input by -6dB halves the level going into the equaliser, which leaves room for large boosts"
+    "Note — the number of channels on the audio input sets how many the module filters, up to sixteen, and every output carries that many.",
+    "Menu — Pad input by -6dB — halves the level going into the equaliser, which leaves room for large boosts"
    ],
    "param": {
     "0": 1,
@@ -1244,12 +1288,14 @@
     "One press shows that channel's function on the display, and each further press steps through envelope, vactrol, follower and compressor; holding the button switches to the second set of functions",
     "One press brings the bargraph back to the display, and each further press steps the meter between excite, level, input and output",
     "The control signal for that channel: the trigger for the envelope, the signal a vactrol or follower responds to, or the side-chain for the compressor",
-    "The audio for that channel; with nothing patched it reads a constant 3.3V, so the output carries the control signal itself",
+    "The audio for that channel; with nothing patched it reads a constant 5V, so the output carries the control signal itself",
     "Drives that channel's amplifier directly through the LEVEL MOD attenuator; with nothing patched it reads 8V",
     "That channel after the filter and amplifier",
-    "Menu — Link channels makes the second channel follow the first channel's settings",
-    "Menu — Channel mode reaches ten functions for a channel, the four on the button plus AR envelope, plucked vactrol, cutoff controller, slow compressor, direct filter controller and a Lorenz generator",
-    "Menu — Meter picks what the bargraph shows: excite, level, input or output"
+    "Note — the number of channels on whichever of the two audio inputs carries more sets how many voices the module runs, up to sixteen, and both outputs carry that many.",
+    "Menu — Link channels — makes the second channel follow the first channel's settings",
+    "Menu — Channel 1 mode — Envelope, Vactrol, Follower, Compressor, AR envelope, Plucked vactrol, Cutoff controller, Slow compressor, Direct VCF controller or Lorenz generator for the first channel",
+    "Menu — Channel 2 mode — Envelope, Vactrol, Follower, Compressor, AR envelope, Plucked vactrol, Cutoff controller, Slow compressor, Direct VCF controller or Lorenz generator for the second channel",
+    "Menu — Meter — picks what the bargraph shows: Excite, Level, In or Out"
    ],
    "param": {
     "0": 1,
@@ -1287,7 +1333,8 @@
      "0": "audio",
      "1": "audio"
     }
-   }
+   },
+   "notes": "No prerequisite note was written: with EXCITE unpatched the LEVEL input still reads its 8V normal through the LEVEL MOD attenuator, and it was not established from the code whether that alone opens the amplifier in every channel function, so no claim is made about the module being silent at startup. The unpatched signal input reads 5V, not the 3.4V of the hardware's internal normal: kSignalInNormalV is 5.f in Streams/streams.hpp. The unpatched level input reads 8V, kLevelNormalV."
   }
  }
 }

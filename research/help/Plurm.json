@@ -1,100 +1,193 @@
 {
-  "plugin": "Plurm",
-  "source": "https://github.com/terrytheplatypus/Plurm/blob/master/README.md",
-  "read": "2026-09-12",
-  "modules": {
-    "Stacktrace": {
-      "lines": [
-        "Sample and hold built on a stack: each push samples the input and puts it on top of the pile, each pop throws the top one away, and the output carries whatever is on top",
-        "A rising edge samples In and pushes that voltage onto the stack; it is ignored once seven values are held, although the maker's README describes eight frames",
-        "A rising edge throws away the value on top of the stack, and it changes nothing while the stack is empty",
-        "The voltage that is sampled at the moment Push fires; at every other moment it is ignored",
-        "The value on top of the stack, or 0V while the stack is empty"
-      ],
-      "param": {},
-      "in": {"0": 2, "1": 1, "2": 3},
-      "out": {"0": 4},
-      "family": {
-        "in": {"0": "trigger", "1": "trigger"},
-        "out": {}
-      },
-      "notes": "In and Out carry whatever voltage is fed in, so neither is given a family. The maker's README describes eight stack frames; the code refuses a push once seven values are held, and the eighth indicator light is drawn at the same position as the seventh and is never lit."
+ "plugin": "Plurm",
+ "source": "https://github.com/terrytheplatypus/Plurm/blob/master/README.md",
+ "read": "2026-09-13",
+ "modules": {
+  "Stacktrace": {
+   "lines": [
+    "Sample and hold built on a stack: each push samples the input and puts it on top of the pile, each pop throws the top one away, and the output carries whatever is on top",
+    "A rising edge samples In and pushes that voltage onto the stack; it is ignored once seven values are held, although the maker's README describes eight frames",
+    "A rising edge throws away the value on top of the stack, and it changes nothing while the stack is empty",
+    "The voltage that is sampled at the moment Push fires; at every other moment it is ignored",
+    "The value on top of the stack, or 0V while the stack is empty"
+   ],
+   "param": {},
+   "in": {
+    "0": 2,
+    "1": 1,
+    "2": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
     },
-    "randomchordrecorder": {
-      "lines": [
-        "Polyphonic chord sequencer: chords are played into it and kept in twelve slots, and a trigger picks one of the recorded slots at random by weight",
-        "Sets how often its slot is picked when TRIG fires, as a share of the total weight of the recorded slots inside the length; with every weight at zero the draw is even",
-        "Sets the weight of the eighth slot of the sequence rather than the seventh, because the seventh and eighth weight knobs are crossed in the code",
-        "Sets the weight of the seventh slot of the sequence rather than the eighth, because the seventh and eighth weight knobs are crossed in the code",
-        "Jumps to that slot, playing what is recorded there and making it the slot the next recording is written into; pressing it during a recording abandons that recording",
-        "Sets how many of the twelve slots make up the sequence, 1 to 12; a slot past the end is never played and never drawn",
-        "The notes of the chord being recorded, one per channel, taken while the matching channel of gate in is above 5V",
-        "A channel going above 5V starts a recording, and the chord is written into the current slot once every channel is back below 5V, after which the current slot moves on to the next empty one",
-        "A rising edge picks a new slot at random from the recorded slots inside the length, weighted by the weight knobs, and drops the gates briefly so the new chord retriggers",
-        "While this is above 5V a rising edge at TRIG replays the current slot instead of drawing a new one",
-        "The notes of the current slot, one per channel; during a recording it carries the notes coming into v/oct in",
-        "10V on each channel of the current slot that holds a note, dropping to 0V for about ten samples whenever the slot changes so that the next chord retriggers",
-        "Note — a slot light is dark past the end of the sequence, white with nothing recorded, green with a chord recorded, steady red on the current slot and blinking red while it records",
-        "Menu — Polyphony Channels sets how many channels v/oct out and gate out carry, 1 to 16, and 5 unless it is changed"
-      ],
-      "param": {"0": 1, "1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 3, "7": 2,
-                "8": 1, "9": 1, "10": 1, "11": 1,
-                "12": 4, "13": 4, "14": 4, "15": 4, "16": 4, "17": 4, "18": 4, "19": 4,
-                "20": 4, "21": 4, "22": 4, "23": 4, "24": 5},
-      "in": {"0": 6, "1": 7, "2": 8, "3": 9},
-      "out": {"0": 10, "1": 11},
-      "family": {
-        "in": {"0": "pitch", "1": "trigger", "2": "trigger", "3": "trigger"},
-        "out": {"0": "pitch", "1": "trigger"}
-      },
-      "notes": "The weight knobs of the seventh and eighth slots are swapped: the parameter enum lists WEIGHT8 before WEIGHT7, while the weight used for slot n is params[n] and the lights and edit buttons are in panel order. So the knob drawn above the seventh light weights the eighth slot and the other way round. The guard that is meant to stop an edit button from aborting a recording of the slot already selected compares a parameter index with a slot number, so it never matches and the press always abandons the recording."
+    "out": {}
+   },
+   "notes": "In and Out carry whatever voltage is fed in, so neither is given a family. The maker's README describes eight stack frames; the code refuses a push once seven values are held, and the eighth indicator light is drawn at the same position as the seventh and is never lit."
+  },
+  "randomchordrecorder": {
+   "lines": [
+    "Polyphonic chord sequencer: chords are played into it and kept in twelve slots, and a trigger picks one of the recorded slots at random by weight",
+    "Sets how often its slot is picked when TRIG fires, as a share of the total weight of the recorded slots inside the length; with every weight at zero the draw is even",
+    "Sets the weight of the eighth slot of the sequence rather than the seventh, because the seventh and eighth weight knobs are crossed in the code",
+    "Sets the weight of the seventh slot of the sequence rather than the eighth, because the seventh and eighth weight knobs are crossed in the code",
+    "Jumps to that slot, playing what is recorded there and making it the slot the next recording is written into; pressing it during a recording abandons that recording",
+    "Sets how many of the twelve slots make up the sequence, 1 to 12; a slot past the end is never played and never drawn",
+    "The notes of the chord being recorded, one per channel, taken while the matching channel of gate in is above 5V",
+    "A channel going above 5V starts a recording, and the chord is written into the current slot once every channel is back below 5V, after which the current slot moves on to the next empty one",
+    "A rising edge picks a new slot at random from the recorded slots inside the length, weighted by the weight knobs, and drops the gates briefly so the new chord retriggers",
+    "While this is above 5V a rising edge at TRIG replays the current slot instead of drawing a new one",
+    "The notes of the current slot, one per channel; during a recording it carries the notes coming into v/oct in",
+    "10V on each channel of the current slot that holds a note, dropping to 0V for about ten samples whenever the slot changes so that the next chord retriggers",
+    "Note — a slot light is dark past the end of the sequence, white with nothing recorded, green with a chord recorded, steady red on the current slot and blinking red while it records",
+    "Note — there is nothing to play until a chord has been recorded. Hold a channel of gate in above 5V with its note at v/oct in, and the chord is written into the current slot once every gate is down",
+    "Note — a trigger draws a new slot only when two or more slots inside the length hold a chord; with one or none it leaves the current slot where it is",
+    "Menu — Polyphony Channels — how many channels v/oct out and gate out carry, 1 to 16, and 5 unless it is changed"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 3,
+    "7": 2,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 4,
+    "13": 4,
+    "14": 4,
+    "15": 4,
+    "16": 4,
+    "17": 4,
+    "18": 4,
+    "19": 4,
+    "20": 4,
+    "21": 4,
+    "22": 4,
+    "23": 4,
+    "24": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
     },
-    "randomchordexpndr": {
-      "lines": [
-        "Expander for randomchordrecorder, placed immediately to its right, reporting which slot is playing",
-        "The number of the slot randomchordrecorder is playing, a volt per slot, 0V for the first and 11V for the twelfth"
-      ],
-      "param": {},
-      "in": {},
-      "out": {"0": 1},
-      "family": {"in": {}, "out": {"0": "cv"}}
-    },
-    "chordscalequantizer": {
-      "lines": [
-        "Picks the major scale that best matches a chord played into it and rounds a separate melody to that scale; the maker describes the module as unfinished",
-        "The notes of the chord that chooses the scale, one per channel, read while the matching channel of chord gate is above 2V; the major scale holding most of those notes is the one used",
-        "A channel above 2V puts the note on that channel of chord v/oct into the chord, and dropping below 2V takes it out again",
-        "The pitches to be rounded to the chosen scale, and the number of channels here sets the number of channels at quantized melody",
-        "Each channel of melody v/oct rounded to the nearest note of the chosen scale, kept in the octave it arrived in",
-        "The seven notes of the chosen scale as a polyphonic signal, one per channel, from 0V for C up to 0.917V for B",
-        "10V in any sample in which a note of the chord changed, and 0V in every other sample",
-        "The first note of the chosen scale as a pitch inside one octave, 0V for C up to 0.917V for B"
-      ],
-      "param": {},
-      "in": {"0": 1, "1": 2, "2": 3},
-      "out": {"0": 4, "1": 7, "2": 6, "3": 5},
-      "family": {
-        "in": {"0": "pitch", "1": "trigger", "2": "pitch"},
-        "out": {"0": "pitch", "1": "pitch", "2": "trigger", "3": "pitch"}
-      },
-      "notes": "Three of the four output jacks are drawn on blank panel with no lettering and no jack artwork: the scale, the chord-change pulse and the scale root. The quantiser splits the input with modf, so a negative fractional part is compared against scale notes that are all positive and the first note of the scale always wins; melody voltages below 0V are therefore rounded to one note per octave. The maker's README says the module does not work fully as intended."
-    },
-    "simplerouter": {
-      "lines": [
-        "Two effects loops wired in series, with a switch that swaps which of them comes first",
-        "Off runs effect A first: in goes to send1, ret1 goes to send2, ret2 goes to out. On runs effect B first: in goes to send2, ret2 goes to send1, ret1 goes to out",
-        "The signal fed into the chain, and the number of channels here sets the number of channels at every output",
-        "The return from effect A, passed to send2 with the switch off and to out with the switch on",
-        "The return from effect B, passed to out with the switch off and to send1 with the switch on",
-        "Feeds effect A, carrying in with the switch off and ret2 with the switch on",
-        "Feeds effect B, carrying ret1 with the switch off and in with the switch on",
-        "The end of the chain, carrying ret2 with the switch off and ret1 with the switch on",
-        "Note — every output stays silent while in is unpatched, because the routing runs once per channel of in and an unpatched input has no channels"
-      ],
-      "param": {"0": 1},
-      "in": {"0": 2, "1": 3, "2": 4},
-      "out": {"0": 5, "1": 6, "2": 7},
-      "family": {"in": {}, "out": {}}
+    "out": {
+     "0": "pitch",
+     "1": "trigger"
     }
+   },
+   "notes": "The weight knobs of the seventh and eighth slots are swapped: the parameter enum lists WEIGHT8 before WEIGHT7, while the weight used for slot n is params[n] and the lights and edit buttons are in panel order. So the knob drawn above the seventh light weights the eighth slot and the other way round. The guard that is meant to stop an edit button from aborting a recording of the slot already selected compares a parameter index with a slot number, so it never matches and the press always abandons the recording."
+  },
+  "randomchordexpndr": {
+   "lines": [
+    "Expander for randomchordrecorder, placed immediately to its right, reporting which slot is playing",
+    "The number of the slot randomchordrecorder is playing, a volt per slot, 0V for the first and 11V for the twelfth",
+    "Note — with no randomchordrecorder touching its left-hand side the output stays at 0V"
+   ],
+   "param": {},
+   "in": {},
+   "out": {
+    "0": 1
+   },
+   "family": {
+    "in": {},
+    "out": {
+     "0": "cv"
+    }
+   },
+   "notes": "Once a randomchordrecorder has been found at the left the expander keeps the pointer to it and never clears it, so what happens after that module is moved or deleted is not defined. No line claims anything about it."
+  },
+  "chordscalequantizer": {
+   "lines": [
+    "Picks the major scale that best matches a chord played into it and rounds a separate melody to that scale; the maker describes the module as unfinished",
+    "The notes of the chord that chooses the scale, one per channel, read while the matching channel of chord gate is above 2V; the major scale holding most of those notes is the one used",
+    "A channel above 2V puts the note on that channel of chord v/oct into the chord, and dropping below 2V takes it out again",
+    "The pitches to be rounded to the chosen scale, and the number of channels here sets the number of channels at quantized melody",
+    "Each channel of melody v/oct rounded to the nearest note of the chosen scale, kept in the octave it arrived in",
+    "The seven notes of the chosen scale as a polyphonic signal, one per channel, from 0V for C up to 0.917V for B",
+    "10V in any sample in which a note of the chord changed, and 0V in every other sample",
+    "The first note of the chosen scale as a pitch inside one octave, 0V for C up to 0.917V for B",
+    "Note — the scale is C major until a chord is played in, so a melody is rounded to the white notes before the chord inputs have been used",
+    "Note — a note joins the chord while its channel of chord gate is above 2V, so the chord inputs do nothing without gates; the notes alone are not read"
+   ],
+   "param": {},
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 7,
+    "2": 6,
+    "3": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "trigger",
+     "3": "pitch"
+    }
+   },
+   "notes": "Three of the four output jacks are drawn on blank panel with no lettering and no jack artwork: the scale, the chord-change pulse and the scale root. The quantiser splits the input with modf, so a negative fractional part is compared against scale notes that are all positive and the first note of the scale always wins; melody voltages below 0V are therefore rounded to one note per octave. The maker's README says the module does not work fully as intended."
+  },
+  "simplerouter": {
+   "lines": [
+    "Two effects loops wired in series, with a switch that swaps which of them comes first",
+    "Off runs effect A first: in goes to send1, ret1 goes to send2, ret2 goes to out. On runs effect B first: in goes to send2, ret2 goes to send1, ret1 goes to out",
+    "The signal fed into the chain, and the number of channels here sets the number of channels at every output",
+    "The return from effect A, passed to send2 with the switch off and to out with the switch on",
+    "The return from effect B, passed to out with the switch off and to send1 with the switch on",
+    "Feeds effect A, carrying in with the switch off and ret2 with the switch on",
+    "Feeds effect B, carrying ret1 with the switch off and in with the switch on",
+    "The end of the chain, carrying ret2 with the switch off and ret1 with the switch on",
+    "Note — every output stays silent while in is unpatched, because the routing runs once per channel of in and an unpatched input has no channels"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "family": {
+    "in": {},
+    "out": {}
+   }
   }
+ },
+ "notes": "Polyphony Channels is the only menu item in the plugin, on randomchordrecorder, and its name is read from src/randomchordrecorder.cpp; its choices are the channel counts. Stacktrace, randomchordexpndr, chordscalequantizer and simplerouter add nothing to the right-click menu."
 }

@@ -28,7 +28,10 @@
     "One chunk per channel, as many channels as SPLT sets, counting up from the chunk picked by SCN, each channel mixed with the incoming signal by WET",
     "Rises to 10V when a recording reaches the end of the buffer and holds there until the next recording starts",
     "Note — the readout gives the number of chunks the buffer is split into and the length of one chunk in samples",
-    "Menu — Scale speed divides the playback speed by the number of chunks set by SPLT"
+    "Menu — Scale speed — divides the playback speed by the number of chunks set by SPLT",
+    "Note — the playback buffer starts empty and WET starts at 100%, so the outputs are silent until a recording has been made",
+    "Note — press REC, or raise the REC input above 0V, and leave it until all 65536 samples have been written; the button releases itself at that point",
+    "Note — the recording is copied into the playback buffer at the start of the next play cycle after the buffer fills, so the loop changes a moment after the recording ends"
    ],
    "param": {
     "0": 1,
@@ -137,7 +140,9 @@
     "Scales the whole CV output, 10V leaving it at full and 0V collapsing it to nothing",
     "One channel per register bit in use, carrying 10V while that bit is set and the clock is high",
     "One voltage summed from the set register bits, each bit weighted by its own V/OCT knob",
-    "Note — a register holding all zeros stays at zero; pressing NOT feeds a 1 into it and starts the sequence again"
+    "Note — a register holding all zeros stays at zero; pressing NOT feeds a 1 into it and starts the sequence again",
+    "Note — the register is shifted only by a rising edge at CLK; with nothing patched there the outputs never change",
+    "Note — every feedback coefficient starts switched off, so the register shifts in zeros and falls silent within a few clocks; switch at least one coefficient on for a repeating sequence"
    ],
    "param": {
     "0": 1,
@@ -206,7 +211,9 @@
     "The bits of the first register read as a binary number and scaled to 0-10V",
     "The bits of the second register read as a binary number and scaled to 0-10V",
     "Eight channels from the sixteen bits read as a four by four grid: the first four read a row as a four-bit number scaled to 0-10V, the last four come from a column but not as plain binary",
-    "Note — each square light shows one register bit: in the first register a set bit is bright and a clear bit dim, and in the second register a set bit is dark and a clear bit dim"
+    "Note — each square light shows one register bit: in the first register a set bit is bright and a clear bit dim, and in the second register a set bit is dark and a clear bit dim",
+    "Note — the first register is shifted only by a rising edge at CLK1 and the second only by one at CLK2; with nothing patched there the outputs never change",
+    "Note — every feedback coefficient starts switched off, so a register shifts in zeros and falls silent within a few clocks; switch at least one coefficient on for a repeating sequence"
    ],
    "param": {
     "0": 3,
@@ -278,7 +285,9 @@
     "A rising edge runs one cycle of the flow, reading high above 2V and low below 0.1V",
     "Eight channels, one per cell, carrying 10V on the ticks when that cell empties",
     "Eight channels, one per cell, carrying the volume of liquid in that cell as 0-10V",
-    "Note — the square lights give the amount of liquid in each cell, brighter for a fuller cell"
+    "Note — the square lights give the amount of liquid in each cell, brighter for a fuller cell",
+    "Note — nothing moves until a clock is patched to CLK; the module has no clock of its own",
+    "Note — FLOW starts at zero, so no liquid enters the first cell and no gate fires until FLOW is raised"
    ],
    "param": {
     "0": 1,
@@ -319,7 +328,8 @@
     "A voltage above 0.1V returns the map to its starting value of 0.61834",
     "A rising edge runs one iteration of the map, reading high above 2V and low below 0.1V",
     "Carries 10V on the steps where the new value of the map is lower than the step before, and 0V otherwise",
-    "The current value of the map, 0-10V"
+    "The current value of the map, 0-10V",
+    "Note — the map is stepped only by a rising edge at CLK; with nothing patched there the outputs never change"
    ],
    "param": {
     "0": 2,
@@ -372,7 +382,8 @@
     "Attenuates and inverts the voltage at the LVL input before it is added to the pluck level",
     "A voltage added to the pluck level, scaled by the slider for LVL, with 10V covering the whole range at the slider's full setting",
     "The signal used to excite the string, halved on the way in and summed to one channel if it is polyphonic; white noise excites the string when nothing is patched here",
-    "The string, with one channel per channel patched into FRQ"
+    "The string, with one channel per channel patched into FRQ",
+    "Note — the number of channels at the output is taken from the V/OCT input, so with nothing patched there the output carries no channels and the module is silent"
    ],
    "param": {
     "0": 1,
@@ -432,7 +443,10 @@
     "Crossfades the output between the incoming signal and the loop, 0% for the incoming signal alone and 100% for the loop alone",
     "Sets the dry and wet mix from a voltage of 0-1V, and overrides the WET knob",
     "The signal written into the buffer, and the dry side of the WET mix",
-    "The loop, mixed with the incoming signal by WET"
+    "The loop, mixed with the incoming signal by WET",
+    "Note — the playback buffer starts empty and WET starts at 100%, so the output is silent until a recording has been made",
+    "Note — hold RECORD, or keep the record input above 0V, until the writing position reaches the end of the 32768-sample buffer; that is when the recording is copied over for playback",
+    "Note — the maker marks this module deprecated and points to muLooper instead, so it is left out of the module browser unless the browser is set to show deprecated modules"
    ],
    "param": {
     "0": 1,
@@ -479,7 +493,10 @@
     "Carries 10V while that register bit is set and the clock is high, and 0V otherwise",
     "Sets one of the four weights the CV outputs are summed from, 0 to 1; every set register bit adds one of the four weights, and each CV output starts the rotation of weights at a different knob",
     "A voltage summed from the set register bits, each weighted by one of the four V/OCT knobs, reaching 8V with every bit set and every weight at maximum",
-    "Note — the round lights give the register bits, bright for a set bit and dim for a clear one"
+    "Note — the round lights give the register bits, bright for a set bit and dim for a clear one",
+    "Note — the register is shifted only by a rising edge at CLK; with nothing patched there the outputs never change",
+    "Note — every feedback coefficient starts switched off, so the register shifts in zeros and falls silent within a few clocks; switch at least one coefficient on for a repeating sequence",
+    "Note — the maker marks this module deprecated and points to LFSR8 Poly instead, so it is left out of the module browser unless the browser is set to show deprecated modules"
    ],
    "param": {
     "0": 2,
@@ -568,7 +585,10 @@
     "Carries 10V when the four bits of one row of the grid hold an odd number of set bits, and 0V otherwise",
     "Carries 10V while the lowest bit of the first register is set, despite the tooltip naming it sequence 2",
     "Carries 10V while the lowest bit of the second register is set",
-    "Note — each square light gives one register bit, red in the first register and green in the second, and brighter where the bit is set"
+    "Note — each square light gives one register bit, red in the first register and green in the second, and brighter where the bit is set",
+    "Note — the first register is shifted only by a rising edge at CLK1 and the second only by one at CLK2; with nothing patched there the outputs never change",
+    "Note — every feedback coefficient starts switched off, so a register shifts in zeros and falls silent within a few clocks; switch at least one coefficient on for a repeating sequence",
+    "Note — the maker marks this module deprecated and points to LFSR16 Poly instead, so it is left out of the module browser unless the browser is set to show deprecated modules"
    ],
    "param": {
     "0": 1,

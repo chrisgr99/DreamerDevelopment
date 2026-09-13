@@ -1,14 +1,16 @@
 {
  "plugin": "CharredDesert",
  "source": "https://svmodular.com/plugin/vcv/charred-desert.html",
- "read": "2026-09-12",
+ "read": "2026-09-13",
  "modules": {
   "DTMF": {
    "lines": [
     "Generator for the dual tone multi-frequency pairs a telephone keypad sends, one of sixteen keys picked by pitch voltage and sounded while a gate is high",
     "Sounds the tone while the voltage here is 1.7V or above, and silences the output below that; each fresh rising edge restarts the tone from its beginning",
     "Picks which of the sixteen keys is sounded, a semitone per key and within 0.02V of each step: 0V gives 1, and then 2, 3, A, 4, 5, 6, B, 7, 8, 9, C, star, 0, hash and D at 1.25V",
-    "The two summed sine tones of the chosen key, and 0V whenever the gate is below 1.7V"
+    "The two summed sine tones of the chosen key, and 0V whenever the gate is below 1.7V",
+    "Note — No tone sounds until a gate of 1.7V or more reaches GATE; with nothing patched there the output holds 0V.",
+    "Note — Both tones are computed for a sample rate of 44100Hz whatever rate the engine is set to, so at any other rate the pair comes out shifted by the ratio between the two rates."
    ],
    "in": {
     "0": 2,
@@ -33,7 +35,8 @@
     "Noise generator producing white or pink noise for as long as a gate is high",
     "Lets the noise through while the voltage here is 1.7V or above, and holds the output at 0V below that",
     "Chooses white noise in the upper position and pink noise in the lower",
-    "The noise, white or pink as the switch is set, and 0V while the gate is below 1.7V"
+    "The noise, white or pink as the switch is set, and 0V while the gate is below 1.7V",
+    "Note — No noise comes out until a gate of 1.7V or more reaches GATE; with nothing patched there the output holds 0V."
    ],
    "param": {
     "0": 2
@@ -59,7 +62,8 @@
     "Advances to the next of the four steps on each rising edge through 1.7V",
     "The voltage of the step the sequencer has reached, held until the next clock edge",
     "Sets the voltage of that step in whole volts, 0 to 10V",
-    "Added to the knob of that step, the sum clamped to 0-10V"
+    "Added to the knob of that step, the sum clamped to 0-10V",
+    "Note — Nothing leaves the module until a clock reaches CLK: the output holds 0V until the first rising edge through 1.7V, and each edge reads that step once and holds the result until the next edge."
    ],
    "param": {
     "0": 3,
@@ -95,7 +99,8 @@
     "Inverter, either flipping the sign of a voltage or turning a gate into its opposite",
     "The voltage to be inverted",
     "In the CV position 1.7V or more gives 0V out and anything lower gives 1.7V out, the reverse of the maker's manual; in the V/OCT position the sign of the input is flipped, so 3.4V in gives -3.4V out",
-    "The inverted voltage"
+    "The inverted voltage",
+    "Note — With nothing patched into IN the missing input is read as 0V, so in the CV position OUT is held at a steady 1.7V."
    ],
    "param": {
     "0": 2
@@ -150,7 +155,8 @@
     "In the CLIP position the result is clamped to -5V and 5V, and in the NATURAL position it is passed at whatever voltage it reaches",
     "Sets the voltage added to the input, -5V to +5V",
     "Added to the SHIFT knob, and the total is what the input is offset by",
-    "The input plus the shift amount, clamped to -5V and 5V when the switch is set to CLIP"
+    "The input plus the shift amount, clamped to -5V and 5V when the switch is set to CLIP",
+    "Note — With nothing patched into IN, OUT carries the shift amount alone, which makes the module a source of any fixed voltage between -5V and 5V."
    ],
    "param": {
     "0": 2,
@@ -289,7 +295,8 @@
     "Each volt here moves the cutoff by 1000Hz, added to the FREQ knob and clamped to 20Hz and 6000Hz",
     "Sets the resonance, 0 to 4, with the filter ringing hard towards the top of its travel",
     "Each volt here adds 0.1 to the resonance, and the total is clamped to 0.1 and 4",
-    "The low pass output of the filter"
+    "The low pass output of the filter",
+    "Note — The filter runs only while both IN and OUT are patched; with either one unpatched OUT is held at 0V, while the green display keeps following the FREQ knob and its CV."
    ],
    "param": {
     "0": 2,
@@ -328,7 +335,9 @@
     "One press mutes the left side of the stereo mix and the next restores it, and the lamp is lit while it is muted",
     "One press mutes the right side of the stereo mix and the next restores it, and the lamp is lit while it is muted",
     "The left side of the stereo mix, after its own level and mute",
-    "The right side of the stereo mix, after its own level and mute"
+    "The right side of the stereo mix, after its own level and mute",
+    "Note — The pair of bar meters beside a channel shows its left and right level after that channel's VOLUME and PAN; the pair beside MASTER shows the stereo mix after the master volumes and mutes.",
+    "Note — A meter segment lights green in half-volt steps to 3V, yellow at 3.5V and 4V, and red at 4.5V, following the size of the voltage whichever way it swings."
    ],
    "param": {
     "0": 2,
@@ -430,7 +439,10 @@
     "Each volt here covers the whole wet and dry range of the left side of the mix, added to the LEFT MIX knob and clamped to 0 and 1",
     "Each volt here covers the whole wet and dry range of the right side of the mix, added to the RIGHT MIX knob and clamped to 0 and 1",
     "Each rising edge through 1.7V toggles the mute of the left side of the stereo mix",
-    "Each rising edge through 1.7V toggles the mute of the right side of the stereo mix"
+    "Each rising edge through 1.7V toggles the mute of the right side of the stereo mix",
+    "Note — Patching a RECV jack changes nothing on its own: every MIX knob starts at 0, which passes the dry signal alone, and the return is heard only as that MIX is raised.",
+    "Note — The pair of bar meters beside a channel shows its left and right level after that channel's VOL and PAN; the pair beside MASTER shows the stereo mix after the master volumes and mutes.",
+    "Note — A meter segment lights green in half-volt steps to 3V, yellow at 3.5V and 4V, and red at 4.5V, following the size of the voltage whichever way it swings."
    ],
    "param": {
     "0": 2,
@@ -645,7 +657,8 @@
     "Two independent constant voltage sources, each switched on and off by hand",
     "One press turns that half on and the next turns it off; the lamp is lit while it is on, and the output is held at 0V while it is off",
     "Sets the voltage that half puts out while it is on, 0V to 10V",
-    "The voltage set for that half while it is switched on, and 0V while it is off"
+    "The voltage set for that half while it is switched on, and 0V while it is off",
+    "Note — Each half holds its output at 0V until its ON button has been pressed; the button is a latch, one press on and the next press off."
    ],
    "param": {
     "0": 2,
@@ -713,7 +726,8 @@
     "Adds a fixed offset of -10V to 10V to whatever leaves the HIGH output, despite the panel and the maker's manual calling it an attenuator",
     "Shifts the HIGH offset, 10V adding the whole -10V to 10V span to the HIGH ATT knob and -10V taking it away",
     "Carries the signal while the modulator voltage is below the split point, with the LOW ATT offset added, and 0V at every other moment",
-    "Carries the signal while the modulator voltage is at or above the split point, with the HIGH ATT offset added, and 0V at every other moment"
+    "Carries the signal while the modulator voltage is at or above the split point, with the HIGH ATT offset added, and 0V at every other moment",
+    "Note — Both outputs hold 0V until a voltage reaches MOD; without it nothing is routed, whatever is patched into AUD."
    ],
    "param": {
     "0": 3,

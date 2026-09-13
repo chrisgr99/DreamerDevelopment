@@ -20,7 +20,11 @@
     "Sends timbre for a note that is already sounding, 0 to 10V, and with nothing patched here no timbre is sent at all rather than a stream of zeros",
     "Carries the note stream to an MPX input; it is not a voltage, so a scope or a mixer reads nothing from it",
     "Note — a bare gate makes a complete note, because every value not patched is taken from its knob",
-    "Note — the pitch read at the note's start is held for the life of the note, so a source that keeps moving afterwards bends the note instead of dragging it"
+    "Note — the pitch read at the note's start is held for the life of the note, so a source that keeps moving afterwards bends the note instead of dragging it",
+    "Note — mpx OUT carries a note stream, not a voltage; patch it to the mpx IN of another DreamerMPX module, and use fromMPX where ordinary voltages are wanted again",
+    "Note — a cable between two MPX jacks turns pink once it has taken; a cable from an MPX jack to anything else keeps its ordinary colour and carries nothing",
+    "Note — no note is sent until a rising edge arrives at the gate input",
+    "Note — an MPX cable carries a note stream rather than a voltage and goes to an MPX input; fromMPX turns a stream back into gates and pitch for the wider rack"
    ],
    "param": {
     "0": 1,
@@ -56,7 +60,7 @@
   "fromMPX": {
    "lines": [
     "Breaks an MPX note stream back out into seven ordinary signals, allocating the notes across a set number of voices",
-    "Sets how many voices the notes are shared between, 1 to 16, which is also the channel count of every output",
+    "Sets how many voices the notes are shared between, 1 to 16, which is also the channel count of every output; left-click the readout for a list of its values, or roll the scroll wheel over it",
     "Chooses what happens to a note that arrives with every voice busy: take the oldest, take the quietest, ignore it, glide within one voice, or play legato across two",
     "Sets how long a glide takes, 0 to 2 seconds, and applies only in the two modes that reuse a sounding voice",
     "Takes the note stream from an MPX output; it carries no voltage, so nothing else can be patched here usefully",
@@ -68,7 +72,14 @@
     "Carries pressure per voice, and stays where it was for a note whose source sent none",
     "Carries timbre per voice, and stays where it was for a note whose source sent none",
     "Carries the stereo placing of each voice",
-    "Note — every output is polyphonic with one channel per voice, so the voice count sets the channel count on all seven at once"
+    "Note — every output is polyphonic with one channel per voice, so the voice count sets the channel count on all seven at once",
+    "Note — mpx IN takes a note stream from the mpx OUT of another DreamerMPX module and from nothing else; with nothing patched there every output stays where it was",
+    "Note — this is the module that turns a note stream back into ordinary voltages, and toMPX is the one at the other end that turns voltages into a stream",
+    "Note — only one MPX cable is read here; the first one that carries a stream is the one used",
+    "Note — a cable between two MPX jacks turns pink once it has taken; a cable from an MPX jack to anything else keeps its ordinary colour and carries nothing",
+    "Note — the input takes a cable from an MPX output; an ordinary voltage patched there is not a note stream and nothing comes out",
+    "Note — the voice-count plate opens a list of 1 to 16 when it is clicked, and the scroll wheel steps it",
+    "Note — an MPX cable carries a note stream rather than a voltage and goes to an MPX input; fromMPX turns a stream back into gates and pitch for the wider rack"
    ],
    "param": {
     "0": 1,
@@ -101,7 +112,8 @@
      "5": "cv",
      "6": "cv"
     }
-   }
+   },
+   "notes": "The panel-layout menu every module in this plugin carries (Edit panel, Save layout, Restore the built-in wording, Forget my layout) changes only how the panel looks and is left out of the lines."
   },
   "mpxMonitor": {
    "lines": [
@@ -109,7 +121,13 @@
     "Freezes the display so a note that has gone past can be read",
     "Takes the note stream from an MPX output",
     "Carries the same stream on unchanged, so this can be placed anywhere in a chain without altering it",
-    "Note — an MPX cable carries no voltage, so a scope says nothing about it; this is the only way to read what is on one"
+    "Note — an MPX cable carries no voltage, so a scope says nothing about it; this is the only way to read what is on one",
+    "Note — mpx IN takes a note stream from the mpx OUT of another DreamerMPX module, and the module does nothing until one is patched there",
+    "Note — mpx OUT carries a note stream, not a voltage; patch it to another DreamerMPX module's mpx IN, or to fromMPX where ordinary voltages are wanted",
+    "Note — up to four MPX cables can be patched into the one MPX input, and the notes arriving on them are merged",
+    "Note — a cable between two MPX jacks turns pink once it has taken; a cable from an MPX jack to anything else keeps its ordinary colour and carries nothing",
+    "Note — nothing is shown until an MPX output is patched to the input",
+    "Note — an MPX cable carries a note stream rather than a voltage and goes to an MPX input; fromMPX turns a stream back into gates and pitch for the wider rack"
    ],
    "param": {
     "0": 1
@@ -133,7 +151,14 @@
     "Chooses how loud each note is relative to the others: all the same, rising, falling, random, or first loudest",
     "Bends each note after it has started, -2 to +2 semitones, and nought is off",
     "Takes the note stream carrying the chord to play over",
-    "Carries the arpeggiated notes on as an MPX stream"
+    "Carries the arpeggiated notes on as an MPX stream",
+    "Note — mpx IN takes a note stream from the mpx OUT of another DreamerMPX module, and the module does nothing until one is patched there",
+    "Note — mpx OUT carries a note stream, not a voltage; patch it to another DreamerMPX module's mpx IN, or to fromMPX where ordinary voltages are wanted",
+    "Note — up to four MPX cables can be patched into the one MPX input, and the notes arriving on them are merged",
+    "Note — a cable between two MPX jacks turns pink once it has taken; a cable from an MPX jack to anything else keeps its ordinary colour and carries nothing",
+    "Note — there is no clock input here; the beat is read from the MPX stream, so the chart or progression upstream sets the tempo",
+    "Note — the chord and the beat both come from the MPX stream patched in, and only mpxChart and mpxProgression put harmony on a stream, so nothing sounds until one of those reaches this input",
+    "Note — an MPX cable carries a note stream rather than a voltage and goes to an MPX input; fromMPX turns a stream back into gates and pitch for the wider rack"
    ],
    "param": {
     "0": 1,
@@ -172,32 +197,40 @@
     "Spreads the notes of a chord over a few milliseconds instead of striking them together",
     "Sets how the level is shared between the chord and the root beneath it, 0 to 100%",
     "Takes the note stream carrying the harmony to play over",
-    "Carries the accompaniment on as an MPX stream"
+    "Carries the accompaniment on as an MPX stream",
+    "Note — mpx IN takes a note stream from the mpx OUT of another DreamerMPX module, and the module does nothing until one is patched there",
+    "Note — mpx OUT carries a note stream, not a voltage; patch it to another DreamerMPX module's mpx IN, or to fromMPX where ordinary voltages are wanted",
+    "Note — up to four MPX cables can be patched into the one MPX input, and the notes arriving on them are merged",
+    "Note — a cable between two MPX jacks turns pink once it has taken; a cable from an MPX jack to anything else keeps its ordinary colour and carries nothing",
+    "Note — there is no clock input here; the beat is read from the MPX stream, so the chart or progression upstream sets the tempo",
+    "Note — the chord and the beat both come from the MPX stream patched in, and only mpxChart and mpxProgression put harmony on a stream, so nothing sounds until one of those reaches this input",
+    "Note — an MPX cable carries a note stream rather than a voltage and goes to an MPX input; fromMPX turns a stream back into gates and pitch for the wider rack"
    ],
    "param": {
     "0": 1,
-    "1": 2,
-    "2": 3,
-    "3": 4,
+    "2": 2,
+    "3": 3,
+    "1": 4,
     "4": 5,
     "5": 6,
     "6": 7,
-    "7": 8,
-    "8": 9,
-    "9": 10,
-    "10": 11,
-    "11": 12,
-    "12": 13,
-    "13": 14,
-    "14": 15,
-    "15": 16
+    "14": 8,
+    "15": 9,
+    "7": 10,
+    "8": 11,
+    "9": 12,
+    "10": 13,
+    "11": 14,
+    "12": 15,
+    "13": 16
    },
    "in": {
     "0": 17
    },
    "out": {
     "0": 18
-   }
+   },
+   "notes": "The param tags follow the index order in the module's ParamId enum, where Rhythm and Rate were appended after Strum and Balance rather than inserted beside Pattern; the lines are in panel order, so the map is deliberately not a run."
   },
   "mpxEuclid": {
    "lines": [
@@ -215,7 +248,10 @@
     "Sets the tempo when no clock is patched, 30 to 300 beats per minute",
     "Advances the patterns; patching anything here overrides the tempo knob",
     "Returns every voice to the start of its pattern",
-    "Carries all four voices on as one MPX stream"
+    "Carries all four voices on as one MPX stream",
+    "Note — mpx OUT carries a note stream, not a voltage; patch it to another DreamerMPX module's mpx IN, or to fromMPX where ordinary voltages are wanted",
+    "Note — a cable between two MPX jacks turns pink once it has taken; a cable from an MPX jack to anything else keeps its ordinary colour and carries nothing",
+    "Note — an MPX cable carries a note stream rather than a voltage and goes to an MPX input; fromMPX turns a stream back into gates and pitch for the wider rack"
    ],
    "param": {
     "0": 1,
@@ -264,7 +300,10 @@
     "Sets the tempo when no clock is patched, 30 to 300 beats per minute",
     "Advances the progression; patching anything here overrides the tempo knob",
     "Returns the progression to its first chord",
-    "Carries the progression on as an MPX stream"
+    "Carries the progression on as an MPX stream",
+    "Note — mpx OUT carries a note stream, not a voltage; patch it to another DreamerMPX module's mpx IN, or to fromMPX where ordinary voltages are wanted",
+    "Note — a cable between two MPX jacks turns pink once it has taken; a cable from an MPX jack to anything else keeps its ordinary colour and carries nothing",
+    "Note — an MPX cable carries a note stream rather than a voltage and goes to an MPX input; fromMPX turns a stream back into gates and pitch for the wider rack"
    ],
    "param": {
     "0": 1,
@@ -294,7 +333,13 @@
     "Sets how fast the variation moves, 0.05 to 8 cycles per beat, and it means nothing for white",
     "Chooses whether the variation repeats the same way each time round or is different on every pass",
     "Takes the note stream to vary",
-    "Carries the varied notes on as an MPX stream"
+    "Carries the varied notes on as an MPX stream",
+    "Note — mpx IN takes a note stream from the mpx OUT of another DreamerMPX module, and the module does nothing until one is patched there",
+    "Note — mpx OUT carries a note stream, not a voltage; patch it to another DreamerMPX module's mpx IN, or to fromMPX where ordinary voltages are wanted",
+    "Note — up to four MPX cables can be patched into the one MPX input, and the notes arriving on them are merged",
+    "Note — a cable between two MPX jacks turns pink once it has taken; a cable from an MPX jack to anything else keeps its ordinary colour and carries nothing",
+    "Note — nothing comes out until an MPX output is patched to the input",
+    "Note — an MPX cable carries a note stream rather than a voltage and goes to an MPX input; fromMPX turns a stream back into gates and pitch for the wider rack"
    ],
    "param": {
     "0": 1,
@@ -313,39 +358,44 @@
   "mpxChart": {
    "lines": [
     "Plays a chord chart as an MPX stream and also as ordinary pitch voltages, so the harmony can drive modules that have no MPX input",
-    "Transposes the whole chart, -11 to +11 semitones",
     "Sets the seed the chart's random choices are made from, 0 to 999, so a performance can be repeated exactly",
     "Sets the tempo when no clock is patched, 30 to 300 beats per minute",
     "Starts and stops playback",
     "Returns the chart to its first bar",
-    "Chooses how the chord symbols are written",
-    "Opens the window where the chart itself is edited",
+    "Chooses how the chord symbols are written, letter names or Roman numerals",
     "Advances the chart; patching anything here overrides the tempo knob",
     "Returns the chart to its first bar",
     "Carries the chart's chords on as an MPX stream",
     "Carries the tones of the chord in force as polyphonic pitch, one channel per tone",
     "Carries the root of the chord in force as a pitch voltage",
     "Carries a bass line beneath the chord as a pitch voltage",
-    "Note — the three pitch outputs are ordinary voltages, so a quantiser, an oscillator or anything else in the rack can be patched to the harmony without an MPX module in between"
+    "Note — a new module has no chart in it and plays nothing; a song has to be chosen, and songs come from an iReal Pro playlist imported as HTML",
+    "Note — clicking the title line of the readout opens the chart picker: the import item, then each imported playlist, then its songs behind their initials",
+    "Note — clicking the key line of the readout opens a list of the twelve keys, and choosing one transposes the whole chart; there is no transpose knob on the panel",
+    "Note — clicking the plate below the key opens the chart window, and clicking it again closes it; the window shows the chart and follows the music",
+    "Note — clicking a measure in the chart window moves the play head to the next time that bar comes round",
+    "Note — the BPM and SEED plates are stepped with the scroll wheel rather than dragged, and neither opens a list, because each covers more values than a menu holds",
+    "Note — the three pitch outputs are ordinary voltages, so a quantiser, an oscillator or anything else in the rack can be patched to the harmony without an MPX module in between",
+    "Note — an MPX cable carries a note stream rather than a voltage and goes to an MPX input; fromMPX turns a stream back into gates and pitch for the wider rack",
+    "Menu — Import an iReal Pro playlist… — opens a file chooser for an iReal Pro playlist exported as HTML and adds its songs to the charts on offer",
+    "Menu — Charts — a heading over the import item and one entry per imported playlist, each opening onto its songs behind their initials"
    ],
    "param": {
-    "0": 1,
+    "6": 1,
     "1": 2,
     "2": 3,
     "3": 4,
-    "4": 5,
-    "5": 6,
-    "6": 7
+    "4": 5
    },
    "in": {
-    "0": 8,
-    "1": 9
+    "0": 6,
+    "1": 7
    },
    "out": {
-    "0": 10,
-    "1": 11,
-    "2": 12,
-    "3": 13
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11
    },
    "family": {
     "in": {
@@ -357,20 +407,23 @@
      "2": "pitch",
      "3": "pitch"
     }
-   }
+   },
+   "notes": "Transpose and Open chart window are declared as params but neither has a widget on the panel: the key line of the readout opens the transpose menu, and the plate below it opens the window. Neither can be clicked for help, so neither gets a line. The earlier entry tagged all seven params in a run, which handed every control from Tempo onwards its neighbour's line."
   },
   "polyToStereo": {
    "lines": [
     "Mixes a polyphonic audio cable down to a stereo pair, with a level and a placing per channel",
-    "Sets the level applied to the first of the two level inputs, 0 to 100%",
-    "Sets the level applied to the second of the two level inputs, 0 to 100%",
+    "Attenuates the first level stage, 0 to 100%; with nothing patched to its input the knob alone sets that stage, and at 100% the audio passes through at full level",
+    "Attenuates the second level stage, 0 to 100%, and multiplies with the first; with nothing patched to its input the knob alone sets that stage",
     "Sets the placing across the stereo field when nothing is patched to the pan input, hard left to hard right",
     "Takes the polyphonic audio to be mixed down",
-    "Sets a level per channel, taken from one polyphonic cable",
-    "Sets a second level per channel, multiplied with the first",
-    "Sets the placing of each channel across the stereo field, one channel per voice",
+    "Sets a level per channel, one channel per voice, where 10V is unity and the knob for it attenuates what arrives",
+    "Sets a second level per channel, where 10V is unity, multiplied with the first stage",
+    "Moves each channel across the stereo field, -5V to 5V added to the pan knob, one channel per voice",
     "Carries the left side of the mix",
-    "Carries the right side of the mix"
+    "Carries the right side of the mix",
+    "Note — with nothing patched to the right output the left output carries the whole mix rather than half of it",
+    "Note — the pan is equal power, so the pair is louder at the centre than the sum of the two sides and nothing is scaled to hide it"
    ],
    "param": {
     "0": 1,
