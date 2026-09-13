@@ -55,26 +55,42 @@ int censusPositions(const std::string& only) {
 				continue;
 			// Said BEFORE the attempt, so if this brings Rack down the log names the culprit.
 			INFO("Census: positions for %s", key.c_str());
-			// NO MODULE BEHIND IT, and that is not a shortcut — it is the only safe way.
+			// WITH A MODULE BEHIND IT, because some controls only exist when there is one.
 			//
-			// A ModuleWidget's destructor asks the ENGINE to remove its module, and a module
-			// this code made was never added to the engine, so Rack asserted and took the
-			// application with it. Passing NULL makes a preview widget, exactly as the module
-			// browser does for every model it shows, and a preview owns no module to remove.
+			// This used to pass NULL, making a preview widget exactly as the module browser does.
+			// That is safe, and it is wrong: a maker is free to add a widget only when a module
+			// is there — SurgeXTRack builds its mixer's mute and solo buttons inside
+			// `if (module)`, and Surge's older plugin adds a tempo-sync switch only where that
+			// parameter can be synced. A preview has none of them, so this census recorded none
+			// of them, and the help could say nothing about twelve working controls a reader can
+			// click. What is not in this file gets no line, so a gap here is silence there.
 			//
-			// The jacks and knobs are added by the widget's constructor either way, so their
-			// positions are all still here. The names come from the other census, which needs
-			// a module and no widget — between them the two halves need neither at once.
+			// AND THE MODULE MUST BE TAKEN BACK BEFORE THE WIDGET DIES. ~ModuleWidget calls
+			// setModule(NULL), which calls Engine::removeModule, which asserts the module is one
+			// the engine knows. A module made here was never added to the engine, so letting the
+			// widget keep it asserts and takes Rack with it — which is what the NULL was avoiding.
+			// Clearing mw->module by hand is what makes a real module safe here.
+			engine::Module* m = NULL;
+			try {
+				m = model->createModule();
+			}
+			catch (std::exception& e) {
+				WARN("Census: %s module threw: %s", key.c_str(), e.what());
+				m = NULL;
+			}
 			app::ModuleWidget* mw = NULL;
 			try {
-				mw = model->createModuleWidget(NULL);
+				mw = model->createModuleWidget(m);
 			}
 			catch (std::exception& e) {
 				WARN("Census: %s threw: %s", key.c_str(), e.what());
+				delete m;
 				continue;
 			}
-			if (!mw)
+			if (!mw) {
+				delete m;
 				continue;
+			}
 
 			json_t* j = json_object();
 			json_object_set_new(j, "plugin", json_string(p->slug.c_str()));
@@ -98,7 +114,10 @@ int censusPositions(const std::string& only) {
 
 			json_array_append_new(modulesJ, j);
 			count++;
+			// Take the module back before the destructor can hand it to the engine. See above.
+			mw->module = NULL;
 			delete mw;
+			delete m;
 		}
 	}
 
@@ -207,16 +226,29 @@ void censusTick(double seconds) {
 		plugin::Model* model = gQueue[gAt++];
 		const std::string key = model->plugin->slug + "/" + model->slug;
 		INFO("Census: positions for %s", key.c_str());
+		// WITH A MODULE BEHIND IT — see censusPositions above for why, and for why the module has
+		// to be taken back off the widget before the widget is deleted.
+		engine::Module* m = NULL;
+		try {
+			m = model->createModule();
+		}
+		catch (std::exception& e) {
+			WARN("Census: %s module threw: %s", key.c_str(), e.what());
+			m = NULL;
+		}
 		app::ModuleWidget* mw = NULL;
 		try {
-			mw = model->createModuleWidget(NULL);
+			mw = model->createModuleWidget(m);
 		}
 		catch (std::exception& e) {
 			WARN("Census: %s threw: %s", key.c_str(), e.what());
+			delete m;
 			continue;
 		}
-		if (!mw)
+		if (!mw) {
+			delete m;
 			continue;
+		}
 		json_t* j = json_object();
 		json_object_set_new(j, "plugin", json_string(model->plugin->slug.c_str()));
 		json_object_set_new(j, "model", json_string(model->slug.c_str()));
@@ -234,7 +266,9 @@ void censusTick(double seconds) {
 			json_array_append_new(paramsJ, boxJson(pw->paramId, "param", pw));
 		json_object_set_new(j, "params", paramsJ);
 		json_array_append_new(gModulesJ, j);
+		mw->module = NULL;
 		delete mw;
+		delete m;
 		// SAVED EVERY TWENTY-FIVE, so a crash costs a handful of models rather than the run.
 		if (gAt % 25 == 0)
 			censusFlush();
@@ -303,6 +337,37 @@ int censusWrite(const std::string& only) {
 			if (!m)
 				continue;
 
+			// AND THE WIDGET, BECAUSE SOME MAKERS NAME THEIR PORTS THERE. configInput and
+			// configOutput are usually called in the module's constructor, which the line above
+			// has already run — but a maker is free to call them from the WIDGET's constructor
+			// instead, guarded by `if (module)`. StudioSixPlusOne does, and this census recorded
+			// 205 empty names for that one plugin: ports Rack itself labels perfectly well in a
+			// rack, because there the widget is built against a real module.
+			//
+			// So build the widget against the module before reading the names off. The widget is
+			// wanted for its constructor's side effects on the module and nothing else.
+			//
+			// AND IT MUST BE DETACHED AGAIN BEFORE THE WIDGET DIES. ~ModuleWidget calls
+			// setModule(NULL), which calls Engine::removeModule, which asserts that the module
+			// is one the engine knows. A module made here was never added to the engine, so
+			// letting the widget take it to the grave asserts and takes Rack with it — which is
+			// exactly why the OTHER pass above builds its widgets with no module at all.
+			//
+			// Clearing mw->module by hand is what avoids that: the widget then owns nothing, and
+			// the module is deleted here as it always was.
+			app::ModuleWidget* mw = NULL;
+			try {
+				mw = model->createModuleWidget(m);
+			}
+			catch (std::exception& e) {
+				// The names from the constructor are still good, so keep what we have rather than
+				// dropping the model. A widget that threw may or may not have taken the module;
+				// assume it did not, which leaks at worst and cannot double free.
+				WARN("Census: %s %s widget threw: %s",
+					p->slug.c_str(), model->slug.c_str(), e.what());
+				mw = NULL;
+			}
+
 			json_t* j = json_object();
 			json_object_set_new(j, "plugin", json_string(p->slug.c_str()));
 			json_object_set_new(j, "model", json_string(model->slug.c_str()));
@@ -335,6 +400,12 @@ int censusWrite(const std::string& only) {
 
 			json_array_append_new(modulesJ, j);
 			count++;
+			// Detach BEFORE the destructor runs, then free the module ourselves. See above for
+			// what happens if the widget is allowed to take it.
+			if (mw) {
+				mw->module = NULL;
+				delete mw;
+			}
 			delete m;
 		}
 	}

@@ -438,8 +438,32 @@ static bool helpControlAt(app::ModuleWidget* mw, math::Vec pos, std::string& wha
 	const std::string plugin = mw->model->plugin ? mw->model->plugin->slug : "";
 	const std::string model = mw->model->slug;
 
+	// THE SMALLEST CONTROL UNDER THE POINTER WINS, not the first one found.
+	//
+	// TWO REASONS, both from real panels. A HIDDEN widget must never answer: a maker may build
+	// two knobs at one spot and show whichever the mode calls for — StochasticTelegraph's
+	// Fixation does exactly that with its LENGTH and note-length knobs — and the hidden one
+	// would otherwise answer for the visible one every time.
+	//
+	// And CONCENTRIC controls must resolve to the one actually pointed at. PinkTrombone puts a
+	// small attenuverter at the centre of a large knob, and Blamsoft does the same; both are
+	// visible, both contain the click, and returning the first in the widget list answers about
+	// whichever the maker happened to add first. Area is what tells them apart: the small knob
+	// is wholly inside the large one, so the smaller box is the more specific answer, and on a
+	// panel where nothing overlaps it changes nothing.
+	float bestArea = 0.f;
+	bool found = false;
+	auto take = [&](math::Rect box) {
+		const float area = box.size.x * box.size.y;
+		if (found && area >= bestArea)
+			return false;
+		bestArea = area;
+		found = true;
+		return true;
+	};
+
 	for (app::PortWidget* p : mw->getInputs()) {
-		if (!p->box.contains(pos))
+		if (!p->isVisible() || !p->box.contains(pos) || !take(p->box))
 			continue;
 		what = "input " + std::to_string(p->portId + 1);
 		if (p->module) {
@@ -452,10 +476,9 @@ static bool helpControlAt(app::ModuleWidget* mw, math::Vec pos, std::string& wha
 		where = p->box;
 		kind = HELP_INPUT;
 		index = p->portId;
-		return true;
 	}
 	for (app::PortWidget* p : mw->getOutputs()) {
-		if (!p->box.contains(pos))
+		if (!p->isVisible() || !p->box.contains(pos) || !take(p->box))
 			continue;
 		what = "output " + std::to_string(p->portId + 1);
 		if (p->module) {
@@ -468,10 +491,9 @@ static bool helpControlAt(app::ModuleWidget* mw, math::Vec pos, std::string& wha
 		where = p->box;
 		kind = HELP_OUTPUT;
 		index = p->portId;
-		return true;
 	}
 	for (app::ParamWidget* p : mw->getParams()) {
-		if (!p->box.contains(pos))
+		if (!p->isVisible() || !p->box.contains(pos) || !take(p->box))
 			continue;
 		what = "control " + std::to_string(p->paramId + 1);
 		if (p->getParamQuantity() && !p->getParamQuantity()->name.empty())
@@ -480,9 +502,8 @@ static bool helpControlAt(app::ModuleWidget* mw, math::Vec pos, std::string& wha
 		where = p->box;
 		kind = HELP_PARAM;
 		index = p->paramId;
-		return true;
 	}
-	return false;
+	return found;
 }
 
 // ---- catching the click -----------------------------------------------------------------------
