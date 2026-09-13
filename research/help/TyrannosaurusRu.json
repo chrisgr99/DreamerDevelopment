@@ -1,0 +1,646 @@
+{
+ "plugin": "TyrannosaurusRu",
+ "source": "https://github.com/fairplay/vcv-rack-plugins/blob/v2.1.0/README.md",
+ "read": "2026-09-12",
+ "modules": {
+  "muLooper": {
+   "notes": "The EOC jack is named End-Of-The-Record-Cycle, but the code writes it only while a recording is running: it goes to 10V when the buffer fills and holds there until the next recording starts. The Dry/Wet input's port name is spelled \"Dry/Wet modulatiob\" in the source.",
+   "lines": [
+    "Records up to 65536 samples of a signal, splits the recording into chunks and plays one chunk back with feedback overdubbing and a dry and wet mix",
+    "Starts filling the buffer with the incoming signal, and releases itself once 65536 samples have been written",
+    "A voltage above 0V starts filling the buffer with the incoming signal",
+    "Divides the 65536-sample buffer into 1 to 16 chunks, each of them 65536 divided by that number of samples long",
+    "Sets the number of chunks the buffer is divided into, 0-10V covering 1 to 16, and overrides the SPLT knob",
+    "Picks which chunk plays, 0 at the first and 1 at the last, fading from one chunk to the next in between",
+    "Attenuates and inverts the voltage at the SCN input before it is added to the chunk selection",
+    "A voltage moving the chunk selection, scaled by the slider for SCN, with 10V covering the whole set of chunks at the slider's full setting",
+    "Sets the playback speed in samples per sample, -4 to 4, with negative values playing the recording backwards",
+    "Attenuates and inverts the voltage at the SPD input before it is added to the playback speed",
+    "A voltage added to the playback speed, scaled by the slider for SPD, with 5V adding one sample per sample at the slider's full setting",
+    "Sets how much of what is playing is mixed into the signal being recorded, 0 to 100%",
+    "Attenuates and inverts the voltage at the FBK input before it is added to the feedback amount",
+    "A voltage added to the feedback amount, scaled by the slider for FBK, with 10V covering the whole range at the slider's full setting",
+    "Crossfades the outputs between the incoming signal and the recording, 0% for the incoming signal alone and 100% for the recording alone",
+    "Attenuates and inverts the voltage at the WET input before it is added to the dry and wet mix",
+    "A voltage added to the dry and wet mix, scaled by the slider for WET, with 10V covering the whole range at the slider's full setting",
+    "The signal written into the buffer, summed to one channel if it is polyphonic, and the dry side of the WET mix",
+    "The chunk picked by SCN, mixed with the incoming signal by WET",
+    "One chunk per channel, as many channels as SPLT sets, counting up from the chunk picked by SCN, each channel mixed with the incoming signal by WET",
+    "Rises to 10V when a recording reaches the end of the buffer and holds there until the next recording starts",
+    "Note — the readout gives the number of chunks the buffer is split into and the length of one chunk in samples",
+    "Menu — Scale speed divides the playback speed by the number of chunks set by SPLT"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 5,
+    "3": 6,
+    "4": 8,
+    "5": 9,
+    "6": 11,
+    "7": 12,
+    "8": 14,
+    "9": 15
+   },
+   "in": {
+    "0": 17,
+    "1": 2,
+    "2": 4,
+    "3": 7,
+    "4": 13,
+    "5": 10,
+    "6": 16
+   },
+   "out": {
+    "0": 18,
+    "1": 19,
+    "2": 20
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "trigger"
+    }
+   }
+  },
+  "LogisticScratch": {
+   "lines": [
+    "Chaotic oscillator built on the logistic map, sweeping the map's coefficient between two settings at an audio rate to make scratching and glitching tones",
+    "Sets the frequency at which the map's coefficient is swept between the lambda 1 and lambda 2 settings, 54 semitones either side of 261.63Hz",
+    "Attenuates and inverts the voltage at the FRQ input before it is added to the frequency, and at its full setting the oscillator tracks a volt per octave",
+    "A voltage raising the sweep frequency, scaled by the slider for FRQ, with one volt doubling the frequency at the slider's full setting",
+    "Sets one limit of the coefficient sweep, the knob's 0 to 1 covering coefficient values 0.75 to 1",
+    "Attenuates and inverts the voltage at the lambda 1 input before it is added to the lambda 1 setting",
+    "A voltage added to the lambda 1 setting, scaled by the slider for lambda 1, with 10V covering the knob's whole range at the slider's full setting",
+    "Sets the other limit of the coefficient sweep, the knob's 0 to 1 covering coefficient values 0.75 to 1",
+    "Attenuates and inverts the voltage at the lambda 2 input before it is added to the lambda 2 setting",
+    "A voltage added to the lambda 2 setting, scaled by the slider for lambda 2, with 10V covering the knob's whole range at the slider's full setting",
+    "Sets how far the state falls on each sample between iterations of the map, 0.001 to 1, larger values giving a more mellow tone",
+    "Attenuates and inverts the voltage at the delta x input before it is added to the delta x setting",
+    "A voltage added to the delta x setting, scaled by the slider for delta x, with 10V covering the knob's whole range at the slider's full setting",
+    "The oscillator, -5V to 5V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 4,
+    "3": 5,
+    "4": 7,
+    "5": 8,
+    "6": 10,
+    "7": 11
+   },
+   "in": {
+    "0": 3,
+    "1": 6,
+    "2": 9,
+    "3": 12
+   },
+   "out": {
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   }
+  },
+  "LFSR8Poly": {
+   "notes": "The eight CV knobs have no names in the source; the panel labels the group V/OCT.",
+   "lines": [
+    "Sequencer running an eight-bit linear feedback shift register, sending the register bits out as polyphonic gates and as one weighted CV",
+    "Sets all eight feedback coefficients at once, as a whole number from 0 to 255 read as eight bits",
+    "Sets all eight feedback coefficients from a voltage, 0-10V covering 0 to 255, and overrides the COEF knob",
+    "Switches one feedback coefficient on or off; the register bits whose coefficient is on are combined to make the bit shifted in",
+    "Sets how many of the eight register bits are used, 1 to 8",
+    "Sets how many register bits are used from a voltage, 0-10V covering 1 to 8, and overrides the LEN knob",
+    "Feeds the inverse of the combined bit back into the register, making it an XNOR register rather than an XOR one",
+    "A voltage above 0V makes the register feed back the inverted bit, and moves the NOT button with it",
+    "A rising edge shifts the register one place, reading high above 2V and low below 0.1V",
+    "Scales what one register bit contributes to the CV output, 0 to 1; the first bit can add 10V and each bit after it half as much",
+    "Scales the whole CV output, 10V leaving it at full and 0V collapsing it to nothing",
+    "One channel per register bit in use, carrying 10V while that bit is set and the clock is high",
+    "One voltage summed from the set register bits, each bit weighted by its own V/OCT knob",
+    "Note — a register holding all zeros stays at zero; pressing NOT feeds a 1 into it and starts the sequence again"
+   ],
+   "param": {
+    "0": 1,
+    "17": 4,
+    "18": 6,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 9,
+    "10": 9,
+    "11": 9,
+    "12": 9,
+    "13": 9,
+    "14": 9,
+    "15": 9,
+    "16": 9
+   },
+   "in": {
+    "0": 2,
+    "1": 5,
+    "2": 7,
+    "3": 8,
+    "4": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   }
+  },
+  "LFSR16Poly": {
+   "notes": "The last four channels of the matrix CV output come from an expression that compares bits rather than shifting them, so those channels are not a binary reading of the column; the line says so rather than claiming a range it does not hold.",
+   "lines": [
+    "Sequencer running a sixteen-bit linear feedback shift register that can be split into two independently clocked registers, with gate and CV outputs for each",
+    "Sets all sixteen feedback coefficients at once, as a whole number from 0 to 65535 read as sixteen bits",
+    "Sets all sixteen feedback coefficients from a voltage, 0-10V covering 0 to 65535, and overrides the COEF knob",
+    "Switches one feedback coefficient on or off; the register bits whose coefficient is on are combined to make the bit shifted in",
+    "Sets how many of the sixteen bits belong to the first register, 0 to 16, the rest forming the second register",
+    "Sets how many bits belong to the first register from a voltage, 0-10V covering 0 to 16, and overrides the SPLT knob",
+    "Makes the first register feed back the inverted bit, an XNOR rather than an XOR",
+    "Makes the second register feed back the inverted bit, an XNOR rather than an XOR",
+    "A voltage above 0V makes the first register feed back the inverted bit, and moves the NOT1 button with it",
+    "A voltage above 0V makes the second register feed back the inverted bit, and moves the NOT2 button with it",
+    "A rising edge shifts the first register one place, reading high above 2V and low below 0.1V",
+    "A rising edge shifts the second register one place, reading high above 2V and low below 0.1V",
+    "One channel per bit of the first register, carrying 10V while that bit is set",
+    "One channel per bit of the second register, carrying 10V while that bit is set",
+    "Eight channels taken from the sixteen bits read as a four by four grid: the first four carry 10V when a row holds an odd number of set bits, the last four when a column does",
+    "The bits of the first register read as a binary number and scaled to 0-10V",
+    "The bits of the second register read as a binary number and scaled to 0-10V",
+    "Eight channels from the sixteen bits read as a four by four grid: the first four read a row as a four-bit number scaled to 0-10V, the last four come from a column but not as plain binary",
+    "Note — each square light shows one register bit: in the first register a set bit is bright and a clear bit dim, and in the second register a set bit is dark and a clear bit dim"
+   ],
+   "param": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 3,
+    "13": 3,
+    "14": 3,
+    "15": 3,
+    "16": 1,
+    "17": 4,
+    "18": 6,
+    "19": 7
+   },
+   "in": {
+    "0": 2,
+    "1": 5,
+    "2": 10,
+    "3": 11,
+    "4": 8,
+    "5": 9
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16,
+    "5": 17
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    }
+   }
+  },
+  "Droplets": {
+   "notes": "Liquid moves between cells only on the ticks when a cell reaches the viscosity threshold: in leakCell the leakage worked out for a cell below the threshold is assigned to a shadowed local and never used, so the smooth seepage the model implies does not happen.",
+   "lines": [
+    "Sequencer modelling liquid running down a leaky pipe of eight cells, moving liquid from cell to cell on each clock tick and firing a gate wherever a cell empties",
+    "Sets how much liquid is added to the first cell on each tick, 0 to 1",
+    "Attenuates and inverts the voltage at the FLOW input before it is added to the flow amount",
+    "A voltage added to the flow amount, scaled by the slider for FLOW, with 10V covering the whole range at the slider's full setting",
+    "Sets the volume a cell has to reach before it empties into the cell below and fires its gate, 0.001 to 10",
+    "Attenuates and inverts the voltage at the VISC input before it is added to the viscosity",
+    "A voltage added to the viscosity, scaled by the slider for VISC, with 10V covering the whole range at the slider's full setting",
+    "A rising edge runs one cycle of the flow, reading high above 2V and low below 0.1V",
+    "Eight channels, one per cell, carrying 10V on the ticks when that cell empties",
+    "Eight channels, one per cell, carrying the volume of liquid in that cell as 0-10V",
+    "Note — the square lights give the amount of liquid in each cell, brighter for a fuller cell"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 4,
+    "3": 5
+   },
+   "in": {
+    "0": 3,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   }
+  },
+  "ChaosMaps": {
+   "notes": "The MAP switch is configured as \"Map: tent or logistic\", but 0 selects the logistic map and 1 the tent map; the readout on the panel names the one in use.",
+   "lines": [
+    "Sequencer stepping one iteration of a chaotic map on each clock, with the logistic and tent maps to choose between",
+    "Chooses which map is iterated, logistic or tent, and the readout names the one that is set",
+    "Sets the map's coefficient, the knob's 0 to 1 covering 2 to 4 for the logistic map and 1 to 2 for the tent map",
+    "Attenuates and inverts the voltage at the R input before it is added to the coefficient",
+    "A voltage added to the coefficient, scaled by the slider for R, with 10V covering the knob's whole range at the slider's full setting",
+    "Returns the map to its starting value of 0.61834",
+    "A voltage above 0.1V returns the map to its starting value of 0.61834",
+    "A rising edge runs one iteration of the map, reading high above 2V and low below 0.1V",
+    "Carries 10V on the steps where the new value of the map is lower than the step before, and 0V otherwise",
+    "The current value of the map, 0-10V"
+   ],
+   "param": {
+    "0": 2,
+    "1": 3,
+    "2": 1,
+    "3": 5
+   },
+   "in": {
+    "0": 4,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 9,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger"
+    }
+   }
+  },
+  "Pluck": {
+   "notes": "The pluck angle is clamped to 0.9 on every sample, so the top of the DIR knob's range is unreachable. The output takes its channel count from the V/OCT input, while the voice loop runs one voice beyond that count.",
+   "lines": [
+    "Polyphonic plucked string built on the Karplus-Strong algorithm, with control over damping, decay time, pluck angle, pluck position and pluck level",
+    "Plucks the string once on each press",
+    "A rising edge plucks the string, reading high above 2V and low below 0.1V",
+    "Sets the frequency of the string, 30 semitones either side of 261.63Hz",
+    "Sets the pitch of the string at a volt per octave, added to the FRQ knob, and the number of channels patched here is the number of strings that sound",
+    "Sets the damping of the string, 0 to 1, higher settings giving a duller tone and lower ones a brighter one",
+    "Attenuates and inverts the voltage at the DMP input before it is added to the damping",
+    "A voltage added to the damping, scaled by the slider for DMP, with 10V covering the whole range at the slider's full setting",
+    "Sets the angle of the pluck, smoothing the excitation more as it rises, and the value in use is held at 0.9 even where the knob reads 1",
+    "Attenuates and inverts the voltage at the DIR input before it is added to the pluck angle",
+    "A voltage added to the pluck angle, scaled by the slider for DIR, with 10V covering the whole range at the slider's full setting",
+    "Sets the time the string takes to fall by 60dB, 0.1 to 10 seconds",
+    "Attenuates and inverts the voltage at the DCY input before it is added to the decay time",
+    "A voltage added to the decay time at one second per volt, scaled by the slider for DCY",
+    "Sets where along the string the pluck happens, 0 at the bridge and 1 at the middle of the string",
+    "Attenuates and inverts the voltage at the POS input before it is added to the pluck position",
+    "A voltage added to the pluck position, scaled by the slider for POS, with 10V covering the whole range at the slider's full setting",
+    "Sets the strength of the pluck, 0 to 1, lower settings giving a softer and darker excitation",
+    "Attenuates and inverts the voltage at the LVL input before it is added to the pluck level",
+    "A voltage added to the pluck level, scaled by the slider for LVL, with 10V covering the whole range at the slider's full setting",
+    "The signal used to excite the string, halved on the way in and summed to one channel if it is polyphonic; white noise excites the string when nothing is patched here",
+    "The string, with one channel per channel patched into FRQ"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 5,
+    "3": 6,
+    "4": 8,
+    "5": 9,
+    "6": 11,
+    "7": 12,
+    "8": 14,
+    "9": 15,
+    "10": 17,
+    "11": 18
+   },
+   "in": {
+    "0": 2,
+    "1": 4,
+    "2": 7,
+    "3": 10,
+    "4": 13,
+    "5": 16,
+    "6": 19,
+    "7": 20
+   },
+   "out": {
+    "0": 21
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   }
+  },
+  "MicroLooper": {
+   "notes": "The LENGTH knob's tooltip displays two to the power of the knob value, while the code plays a loop of half that many samples; the line describes the samples played.",
+   "lines": [
+    "Recording sampler that plays one short loop out of a 32768-sample buffer, superseded by muLooper",
+    "While it is held, the signal being written is copied into the playback buffer each time the recording reaches the end of the buffer",
+    "A voltage above 0V copies the signal being written into the playback buffer each time the recording reaches the end of the buffer, and moves the RECORD button with it",
+    "Sets the length of the loop that plays, 128 to 16384 samples in powers of two, and the readout gives twice the number of samples actually played",
+    "Sets the loop length from a voltage, 0-1V covering 128 to 16384 samples, and overrides the LENGTH knob",
+    "Picks which part of the buffer plays, 0 at the start and 1 at the last loop-length piece of it, fading from one piece to the next in between",
+    "Picks which part of the buffer plays from a voltage of 0-1V, and overrides the SCAN knob",
+    "Sets the playback speed in samples per sample, -5 to 5, with negative values playing the loop backwards",
+    "Sets the playback speed from a voltage of -5V to 5V, one sample per sample per volt, and overrides the SPEED knob",
+    "Crossfades the output between the incoming signal and the loop, 0% for the incoming signal alone and 100% for the loop alone",
+    "Sets the dry and wet mix from a voltage of 0-1V, and overrides the WET knob",
+    "The signal written into the buffer, and the dry side of the WET mix",
+    "The loop, mixed with the incoming signal by WET"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 5,
+    "3": 7,
+    "4": 9
+   },
+   "in": {
+    "0": 2,
+    "1": 4,
+    "2": 6,
+    "3": 8,
+    "4": 10,
+    "5": 11
+   },
+   "out": {
+    "0": 12
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   }
+  },
+  "LFSR8": {
+   "notes": "The four CV weighting knobs have no names in the source; the panel labels the group V/OCT.",
+   "lines": [
+    "Sequencer running an eight-bit linear feedback shift register, with a gate output for every register bit and four CV outputs summed from weighted bits, superseded by LFSR8 Poly",
+    "A rising edge shifts the register one place, reading high above 2V and low below 0.1V",
+    "Switches one feedback coefficient on or off; the register bits whose coefficient is on are combined to make the bit shifted in",
+    "A voltage above 0V switches that feedback coefficient on and a lower one switches it off, and the button for it moves with the voltage",
+    "Feeds the inverse of the combined bit back into the register, making it an XNOR register rather than an XOR one",
+    "A voltage above 0V makes the register feed back the inverted bit, and moves the not button with it",
+    "Sets how many of the eight register bits are used, 1 to 8",
+    "Carries 10V while that register bit is set and the clock is high, and 0V otherwise",
+    "Sets one of the four weights the CV outputs are summed from, 0 to 1; every set register bit adds one of the four weights, and each CV output starts the rotation of weights at a different knob",
+    "A voltage summed from the set register bits, each weighted by one of the four V/OCT knobs, reaching 8V with every bit set and every weight at maximum",
+    "Note — the round lights give the register bits, bright for a set bit and dim for a clear one"
+   ],
+   "param": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 4,
+    "9": 6,
+    "10": 8,
+    "11": 8,
+    "12": 8,
+    "13": 8
+   },
+   "in": {
+    "0": 1,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 5
+   },
+   "out": {
+    "0": 7,
+    "1": 7,
+    "2": 7,
+    "3": 7,
+    "4": 7,
+    "5": 7,
+    "6": 7,
+    "7": 7,
+    "8": 9,
+    "9": 9,
+    "10": 9,
+    "11": 9
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    }
+   }
+  },
+  "LFSR16": {
+   "notes": "configOutput is called twice for GATE1_OUT_OUTPUT, so the sequence 1 jack carries the tooltip \"Gate Sequence 2\" and the sequence 2 jack has no tooltip at all. The column CV outputs come from an expression that compares bits rather than shifting them, so they are not a binary reading of the column.",
+   "lines": [
+    "Sequencer running a sixteen-bit linear feedback shift register that can be split into two independently clocked registers, with the bits also read across a four by four grid, superseded by LFSR16 Poly",
+    "Switches one feedback coefficient on or off; the register bits whose coefficient is on are combined to make the bit shifted in",
+    "Makes the first register feed back the inverted bit, an XNOR rather than an XOR",
+    "Makes the second register feed back the inverted bit, an XNOR rather than an XOR",
+    "Sets how many of the sixteen bits belong to the first register, 0 to 16, the rest forming the second register",
+    "A rising edge shifts the first register one place, reading high above 2V and low below 0.1V",
+    "A rising edge shifts the second register one place, reading high above 2V and low below 0.1V",
+    "A voltage built from the four bits of one column of the grid, 0V to 1V, the four bits not being weighted as a plain binary number",
+    "The four bits of one row of the grid read as a binary number, 0V to 1V",
+    "Carries 10V when the four bits of one column of the grid hold an odd number of set bits, and 0V otherwise",
+    "Carries 10V when the four bits of one row of the grid hold an odd number of set bits, and 0V otherwise",
+    "Carries 10V while the lowest bit of the first register is set, despite the tooltip naming it sequence 2",
+    "Carries 10V while the lowest bit of the second register is set",
+    "Note — each square light gives one register bit, red in the first register and green in the second, and brighter where the bit is set"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 2,
+    "17": 3,
+    "18": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 7,
+    "2": 7,
+    "3": 7,
+    "4": 8,
+    "5": 8,
+    "6": 8,
+    "7": 8,
+    "8": 9,
+    "9": 9,
+    "10": 9,
+    "11": 9,
+    "12": 10,
+    "13": 10,
+    "14": 10,
+    "15": 10,
+    "16": 11,
+    "17": 12
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger"
+    }
+   }
+  }
+ }
+}

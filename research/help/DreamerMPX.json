@@ -1,0 +1,404 @@
+{
+ "plugin": "DreamerMPX",
+ "source": "the plugin's own source at ~/ProgrammingProjects/MPX",
+ "read": "2026-09-12",
+ "modules": {
+  "toMPX": {
+   "lines": [
+    "Bundles seven ordinary control signals into one MPX note stream, reading them all on the gate's rising edge and holding them for the life of the note",
+    "Sets the level of a note when nothing is patched to the level input, 0 to 100%",
+    "Sets the length of a note when nothing is patched to the duration input, 0.01 to 30 seconds, exponential so the short end has most of the travel",
+    "Sets the placing of a note across the stereo field when nothing is patched to the pan input, hard left to hard right",
+    "Declares how many semitones count as full bend deflection, 0 to 12, and travels with every note so the receiving end needs no matching setting; fractions are allowed",
+    "Chooses whether a note ends at its own duration whatever the gate does, or at whichever of the gate's fall and the duration comes first",
+    "A rising edge starts a note and the whole note is read at that instant; it reads high above 2V and low below 0.1V, and it is polyphonic, one note per channel",
+    "Sets the pitch of a note at its start, and afterwards any movement here is sent as bend measured from where the note began",
+    "Sets the level of a note, 0 to 10V mapping to none to full, read once at the note's start; the knob is used instead when nothing is patched",
+    "Sets the length of a note in seconds, one volt to the second, read once at the note's start; the knob is used instead when nothing is patched",
+    "Sets the placing of a note across the stereo field, -5V to 5V for hard left to hard right, read once at the note's start; the knob is used instead when nothing is patched",
+    "Sends pressure for a note that is already sounding, 0 to 10V, and with nothing patched here no pressure is sent at all rather than a stream of zeros",
+    "Sends timbre for a note that is already sounding, 0 to 10V, and with nothing patched here no timbre is sent at all rather than a stream of zeros",
+    "Carries the note stream to an MPX input; it is not a voltage, so a scope or a mixer reads nothing from it",
+    "Note — a bare gate makes a complete note, because every value not patched is taken from its knob",
+    "Note — the pitch read at the note's start is held for the life of the note, so a source that keeps moving afterwards bends the note instead of dragging it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10,
+    "5": 11,
+    "6": 12
+   },
+   "out": {
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   }
+  },
+  "fromMPX": {
+   "lines": [
+    "Breaks an MPX note stream back out into seven ordinary signals, allocating the notes across a set number of voices",
+    "Sets how many voices the notes are shared between, 1 to 16, which is also the channel count of every output",
+    "Chooses what happens to a note that arrives with every voice busy: take the oldest, take the quietest, ignore it, glide within one voice, or play legato across two",
+    "Sets how long a glide takes, 0 to 2 seconds, and applies only in the two modes that reuse a sounding voice",
+    "Takes the note stream from an MPX output; it carries no voltage, so nothing else can be patched here usefully",
+    "Tells this module which voices are sounding, so a voice whose envelope has not finished is not taken for a new note",
+    "Carries a gate per voice for as long as that note lasts",
+    "Carries the pitch of each voice with any bend already added, so it can be patched straight to an oscillator",
+    "Carries the level each note was given, per voice",
+    "Carries the bend of each voice on its own, scaled by the bend range that travelled with the note",
+    "Carries pressure per voice, and stays where it was for a note whose source sent none",
+    "Carries timbre per voice, and stays where it was for a note whose source sent none",
+    "Carries the stereo placing of each voice",
+    "Note — every output is polyphonic with one channel per voice, so the voice count sets the channel count on all seven at once"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10,
+    "5": 11,
+    "6": 12
+   },
+   "family": {
+    "in": {
+     "1": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   }
+  },
+  "mpxMonitor": {
+   "lines": [
+    "Shows the notes going past on an MPX stream and the harmony they are played against, and passes the stream on unchanged",
+    "Freezes the display so a note that has gone past can be read",
+    "Takes the note stream from an MPX output",
+    "Carries the same stream on unchanged, so this can be placed anywhere in a chain without altering it",
+    "Note — an MPX cable carries no voltage, so a scope says nothing about it; this is the only way to read what is on one"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3
+   }
+  },
+  "mpxArp": {
+   "lines": [
+    "Turns the chord arriving on an MPX stream into an arpeggio, playing its tones one at a time in time with the chart",
+    "Sets how often a note falls: once a bar, once in two beats, once a beat, or two, three or four a beat",
+    "Sets the order the tones are played in: up, down, up and down, random, or all at once as a chord",
+    "Sets how many octaves the figure climbs through before it starts again, one, two or three",
+    "Chooses how much of the chord is played: the triad, the sevenths, or every extension the chord has",
+    "Sets the register of the part, -24 to +24 semitones from middle C, which is how a musician states register whatever key the chart is in",
+    "Sets how long each note lasts as a percentage of its step; below 100% the notes are separated, at it they meet, above it they overlap",
+    "Chooses how loud each note is relative to the others: all the same, rising, falling, random, or first loudest",
+    "Bends each note after it has started, -2 to +2 semitones, and nought is off",
+    "Takes the note stream carrying the chord to play over",
+    "Carries the arpeggiated notes on as an MPX stream"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9
+   },
+   "out": {
+    "0": 10
+   }
+  },
+  "mpxComp": {
+   "lines": [
+    "Plays a chord accompaniment from the harmony on an MPX stream, with a choice of voicing, rhythmic figure and accent",
+    "Sets how many notes are sounded in each chord",
+    "Sets the register of the part, -24 to +24 semitones from middle C",
+    "Sets how wide the chord is spread, one, two or three octaves",
+    "Chooses whether the chord's root is sounded beneath it",
+    "Chooses the voicing: close, drop two, or open",
+    "Chooses how much of the chord is used: the triad, the sevenths, or the extensions",
+    "Sets how strongly each chord is voiced to move as little as possible from the one before it, 0 to 100%",
+    "Chooses between one held chord and a repeating rhythmic figure",
+    "Sets how often a step falls: once a bar, once in two beats, once a beat, or two, three or four a beat",
+    "Chooses the figure the notes are played in: block, broken upwards, broken downwards, Alberti, or waltz",
+    "Sets how much of each step a note fills, 5 to 100%",
+    "Chooses which steps are accented: evenly, by the metre, on the downbeat, on the backbeat, offbeat, or pushed",
+    "Sets how much louder an accented step is than the rest, 0 to 100%",
+    "Moves each note slightly off its exact time, 0 to 100%, so a figure does not sound mechanical",
+    "Spreads the notes of a chord over a few milliseconds instead of striking them together",
+    "Sets how the level is shared between the chord and the root beneath it, 0 to 100%",
+    "Takes the note stream carrying the harmony to play over",
+    "Carries the accompaniment on as an MPX stream"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15,
+    "15": 16
+   },
+   "in": {
+    "0": 17
+   },
+   "out": {
+    "0": 18
+   }
+  },
+  "mpxEuclid": {
+   "lines": [
+    "Generates four voices of euclidean rhythm as one MPX note stream, each voice with its own pattern, clock division and wandering level",
+    "Sets how many steps that voice's pattern is long, 1 to 32",
+    "Sets how many of that voice's steps sound, 0 to 32, spread as evenly through the pattern as they can be",
+    "Rotates that voice's pattern by a number of steps, 0 to 31, without changing which steps sound relative to each other",
+    "Sets how fast that voice is clocked relative to the incoming beat: every beat, half speed, a third or a quarter",
+    "Sets the level the voices wander around, 0 to 100%",
+    "Sets how far the level is allowed to wander from that setting, 0 to 100%",
+    "Sets the length of a note, 0.01 to 4 seconds, exponential so the short end has most of the travel",
+    "Sets how strongly a note's length follows its level, 0 to 100%, so louder notes can also be longer",
+    "Sets how fast the wandering moves, a quarter to sixteen beats per cycle",
+    "Sets how many beats pass before the wandering repeats itself, 1 to 64",
+    "Sets the tempo when no clock is patched, 30 to 300 beats per minute",
+    "Advances the patterns; patching anything here overrides the tempo knob",
+    "Returns every voice to the start of its pattern",
+    "Carries all four voices on as one MPX stream"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 4,
+    "13": 4,
+    "14": 4,
+    "15": 4,
+    "16": 5,
+    "17": 6,
+    "18": 7,
+    "19": 8,
+    "20": 9,
+    "21": 10,
+    "22": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   }
+  },
+  "mpxProgression": {
+   "lines": [
+    "Plays a chord progression as an MPX stream, so the modules downstream have a harmony to work against",
+    "Chooses which progression is played",
+    "Sets the key it is played in, the twelve semitones",
+    "Sets the tempo when no clock is patched, 30 to 300 beats per minute",
+    "Advances the progression; patching anything here overrides the tempo knob",
+    "Returns the progression to its first chord",
+    "Carries the progression on as an MPX stream"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   }
+  },
+  "mpxRand": {
+   "lines": [
+    "Varies one attribute of the notes passing through an MPX stream, leaving everything else as it arrived",
+    "Chooses which attribute is varied: duration, level, pan, timing or detune",
+    "Chooses the character of the variation: white, a random walk, or Perlin noise",
+    "Sets how far the attribute is moved, 0 to 100%, and at nought the notes come out exactly as they went in",
+    "Sets how fast the variation moves, 0.05 to 8 cycles per beat, and it means nothing for white",
+    "Chooses whether the variation repeats the same way each time round or is different on every pass",
+    "Takes the note stream to vary",
+    "Carries the varied notes on as an MPX stream"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6
+   },
+   "out": {
+    "0": 7
+   }
+  },
+  "mpxChart": {
+   "lines": [
+    "Plays a chord chart as an MPX stream and also as ordinary pitch voltages, so the harmony can drive modules that have no MPX input",
+    "Transposes the whole chart, -11 to +11 semitones",
+    "Sets the seed the chart's random choices are made from, 0 to 999, so a performance can be repeated exactly",
+    "Sets the tempo when no clock is patched, 30 to 300 beats per minute",
+    "Starts and stops playback",
+    "Returns the chart to its first bar",
+    "Chooses how the chord symbols are written",
+    "Opens the window where the chart itself is edited",
+    "Advances the chart; patching anything here overrides the tempo knob",
+    "Returns the chart to its first bar",
+    "Carries the chart's chords on as an MPX stream",
+    "Carries the tones of the chord in force as polyphonic pitch, one channel per tone",
+    "Carries the root of the chord in force as a pitch voltage",
+    "Carries a bass line beneath the chord as a pitch voltage",
+    "Note — the three pitch outputs are ordinary voltages, so a quantiser, an oscillator or anything else in the rack can be patched to the harmony without an MPX module in between"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch"
+    }
+   }
+  },
+  "polyToStereo": {
+   "lines": [
+    "Mixes a polyphonic audio cable down to a stereo pair, with a level and a placing per channel",
+    "Sets the level applied to the first of the two level inputs, 0 to 100%",
+    "Sets the level applied to the second of the two level inputs, 0 to 100%",
+    "Sets the placing across the stereo field when nothing is patched to the pan input, hard left to hard right",
+    "Takes the polyphonic audio to be mixed down",
+    "Sets a level per channel, taken from one polyphonic cable",
+    "Sets a second level per channel, multiplied with the first",
+    "Sets the placing of each channel across the stereo field, one channel per voice",
+    "Carries the left side of the mix",
+    "Carries the right side of the mix"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   }
+  }
+ }
+}

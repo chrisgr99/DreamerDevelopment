@@ -150,6 +150,26 @@ A tag says which line covers which jack or knob, by index. **Index order is not 
 
 When you find a control with no line, the fix is usually to write the line, not to stretch a neighbouring one.
 
+## A control that does nothing gets a line saying so
+
+**An untagged control does not fall silent — it falls back to the maker's own tooltip**, shown marked as theirs. So leaving a dead control untagged hands the reader the one piece of text that has been proved false. LadyNina's small knob under Boost is never read by the module; untagged, clicking it answers "Drive CV".
+
+So: a control that is on the panel, can be clicked, and has been PROVED to do nothing gets a line and a tag, saying that. `Nothing in the module reads this control; the boost CV is applied at a fixed 20dB per volt.` That is not a failure to describe it — on a panel with a dead knob it is the most useful line in the entry.
+
+The distinction is proof, not suspicion. A control you could not work out still gets no line: silence beats invention. A control whose code you have read and which reads nothing is knowledge.
+
+A control that can never be clicked — declared with no widget, or covered by another control at the same position — still gets nothing, because no click will ever reach it.
+
+**How to tell: no position in the census means no line.** The positions come from the module widget's own `ParamWidget` and `PortWidget` children, and `Help.cpp` resolves a click by walking those same three lists. So a control missing from `paramPos`, `inputPos` or `outputPos` cannot be reached by this feature at all.
+
+That holds even where a maker DOES draw the control. Several plugins put working controls inside one custom display widget — a step grid, a slider bank, a pattern strip — which is a single widget with no `ParamWidget` per control. A reader can turn those in the rack and can never click one for help. They get no line here; where such a control matters to using the module, a `Note — ` line is the place for it.
+
+## Where we contradict the maker, the control's own line says so
+
+The reader clicked that knob and is looking at that label. A line that quietly describes something other than what the panel says reads as our mistake. So the line describes what the code does and ends with a short clause naming the conflict: `Sets the decay of the snare body, despite the panel printing NOISE.`
+
+One clause, not a paragraph — the full account belongs in the module's `notes`. And this is for a real conflict with something the reader can see or be shown: the panel lettering, the maker's tooltip, the published manual. Not for every place our wording differs from theirs.
+
 Two habits that catch the rest: after tagging, read the tags back as sentences ("the top output is the full delay time — is it?"), and be suspicious whenever a tag map looks like a tidy run of 0, 1, 2, 3.
 
 ## Format

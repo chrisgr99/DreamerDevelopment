@@ -17,13 +17,21 @@ Use **all** of these, not the first one that answers. Each has been the only sou
   1. Render the SVG from the installed plugin folder: `rsvg-convert -w 400 panel.svg -o /tmp/x.png`. **Then draw the census param/input/output indices on top of the image** — that settles the index-to-jack map beyond doubt, and has already caught controls numbered bottom-up on two plugins in this batch.
   2. **Some makers draw their panels in code, not SVG.** Then `rsvg-convert` has nothing to work on, and the panel lettering is inside each widget's `render()`/`draw()` as text calls. Read it there.
   3. The VCV library screenshots, which are at width 400 and 200, not 800.
+
+  **A plugin's `res/` may hold more than one panel per module, and only one of them is the running one.** OrangeLine ships `*Bright.svg` and `*Work.svg`, and the Work files are an OLDER layout whose control positions do not match the module in the rack. Where there is a choice, check the positions against the census before trusting a panel, and read the widget source to see which file it actually loads.
 - **The maker's own tooltips**, which are already in your census slice: the `name` for every control, and the `description` second line where one exists. Only about 800 controls in the whole library have a description, and where one exists it usually says the thing no other source does — normalling, ranges, and what a control does that its name does not convey. **Where we write our own line, it must agree with the maker's tooltip, or improve on it. Never contradict it without a reason you can point to.**
 - **Files shipped inside the installed plugin folder.** Look at everything there, not just the binary: `README`, `CHANGELOG`, `docs/`, `manual/`, `res/` text. NYSTHI ships a 204KB `CHANGELOG.md` with control-by-control legends for 17 modules that exist nowhere else — under the maker's OLD module names, so match them up by panel, not by slug.
 - `strings` on the plugin binary, for text that is in the code and nowhere else — menu item labels, mode names, error text.
 - **The maker's manual or wiki**, which is the weakest source: usually written for a different version, and it omits the numbers. Useful for what a module is FOR; not to be trusted for what a control does.
 - Release notes, forum threads and issue trackers, where a control's behaviour is disputed or changed.
 
+**A port or copy of commercial hardware is the hardest case.** The maker's own page is usually marketing, and the hardware manual describes a revision the plugin does not implement. Trust the code, then the panel; quote a range only where the code gives it. Where the plugin plainly differs from the hardware it is named after, that is a fact about this module, not an error to correct.
+
 Where two sources disagree, say so in the module's `notes` field rather than picking silently.
+
+**QUOTE A NUMBER ONLY WHERE YOU HAVE SEEN IT.** On a plugin with published source that means in the source; on a closed one it means in the binary, as a constant you found. A figure from a hardware manual, a product page or a review is not a figure about this module and must never be promoted into a line. Say what the control does without the number, and record in `notes` what you left out and why — a thin line that is true beats a full one that is invented. This is not hypothetical: one entry in this project was written with a list of DSP constants that appear nowhere in the plugin, and it had to be thrown away and rewritten. `research/check_numbers.py` now tests every quoted number against the binary; `research/help/NUMBER-CHECK.md` records what it found.
+
+**One maker's bug is common enough to check for by name.** `configOutput` (or `configInput`, or `configParam`) called twice on the same id, or called inside a loop with the index left out, leaves one control wearing its neighbour's tooltip and another with no name at all. Five plugins in this project have it. When a tooltip looks like it belongs to the control next door, go and read the config calls before believing it.
 
 ## The one error no validator can catch
 
@@ -44,7 +52,12 @@ Where two sources disagree, say so in the module's `notes` field rather than pic
 - Every line stands alone — no "also", "still", "as above", "the same as".
 - Nothing does what only a person does. No personification.
 - Never say a relationship sideways. If the knob attenuates the CV, write that.
-- **Leave it out rather than guess.** Where a control is dead, a jack unread, or you cannot tell what it does, write no line and no tag for it. Record what you could not settle in a `notes` field on the module.
+- **Leave it out rather than guess** — but only where you are guessing. Two different cases:
+  - **You cannot tell what it does.** No line, no tag. Silence beats invention. Record it in `notes`.
+  - **You have PROVED it does nothing.** That is knowledge, and the reader needs it more than anything else on that panel. Write the line and tag it: `Nothing in the module reads this control; the boost CV is applied at a fixed 20dB per volt`. This applies to any control that is ON THE PANEL and can be clicked. A control declared in code with no widget, or hidden under another control at the same position, can never be clicked and still gets no line.
+- **Say it in the control's own line when we contradict the maker.** Where the panel, the tooltip or the manual disagrees with the code, the line describes the code AND ends with a short clause saying so: `Sets the decay of the snare body, despite the panel printing NOISE`. The reader clicked that control and is looking at that label; they have to learn it there, not in a note they will never reach. Keep it to one clause — the full account of the disagreement still goes in `notes`.
+
+Both of these matter because of what happens when a control has NO line: the help falls back to the maker's own tooltip, marked as theirs. So an untagged dead control tells the reader exactly the wrong thing — the very text you proved was false.
 
 ## Before you finish
 

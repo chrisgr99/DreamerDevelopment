@@ -1,0 +1,376 @@
+{
+  "plugin": "OrangeLine",
+  "source": "https://github.com/Stubs42/OrangeLine/blob/2.0/README.md",
+  "read": "2026-09-12",
+  "modules": {
+    "Fence": {
+      "lines": [
+        "Brings a CV into a chosen range by adding or subtracting a step until it fits, with a raw mode, a semitone quantized mode and an audio shaper mode",
+        "Sets the lower bound of the range, -10V to 10V in raw mode and -5V to 5V in shaper mode; with the link button blue it sets the spread either side of the centre instead",
+        "Sets the upper bound of the range; with the link button blue it sets the centre of the range instead",
+        "Unlit leaves the two range knobs free, green moves one range knob with the other so the span between them holds, blue turns them into a spread and a centre",
+        "Unlit passes voltages between -10V and 10V untouched, green quantizes input, step and output to semitones, red treats the input as audio between -5V and 5V and rescales the output to that range",
+        "Switches TRG OUT between a trigger at each change of CV OUT and a gate that stays high between changes, dropping low for a moment each time",
+        "Sets the voltage added or subtracted until the input falls inside the range; in quantized mode a whole octave is tried first and this note used only where the octave overshoots the upper bound",
+        "Added to the lower bound of the range",
+        "Added to the upper bound of the range",
+        "Added to the STEP knob",
+        "While a cable is here the module reads CV IN only when a trigger arrives, rather than following it continuously",
+        "The voltage to be brought into the range",
+        "Fires whenever CV OUT changes, as a trigger or as a gate according to TR/GT",
+        "The input brought into the range, quantized to semitones in quantized mode, centred and scaled to -5V to 5V in shaper mode, and clamped to -10V to 10V in every mode"
+      ],
+      "param": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 6},
+      "in": {"0": 7, "1": 8, "2": 9, "3": 10, "4": 11},
+      "out": {"0": 12, "1": 13},
+      "family": {
+        "in": {"0": "cv", "1": "cv", "2": "cv", "3": "trigger"},
+        "out": {"0": "trigger"}
+      },
+      "notes": "CV IN and CV OUT carry a pitch in quantized mode and an audio signal in shaper mode, so they are left without a family. Knob ranges and the quantized-mode step rule come from Fence.hpp and Fence.cpp; the gate behaviour of TRG OUT comes from the output stage in OrangeLineCommon.hpp."
+    },
+    "Swing": {
+      "lines": [
+        "Micro timing sequencer that takes a clock and a BPM voltage and puts out a clock whose beats are pushed early or late by a setting per beat",
+        "Restarts the timing pattern at its first step",
+        "Sets how many timed beats are produced for each incoming clock trigger, 1 to 16",
+        "Sets how many of the sixteen timing knobs are used before the pattern returns to the first, 1 to 16",
+        "Scales every timing knob, from 0% where the timing knobs change nothing to 100% where they act in full",
+        "Shifts that beat of the pattern, -100% for half a beat early through 0% on the beat to 100% for half a beat late",
+        "A trigger restarts the timing pattern at its first step",
+        "Takes the tempo as a volt per octave BPM voltage, and no timed clock is produced without it",
+        "The clock that is divided into timed beats, and no timed clock is produced without it",
+        "A ramp of one timed beat, -10V half a beat early, 0V on the beat and 10V half a beat late",
+        "The threshold on the phase at which the current beat fires, which is the timing knob for that beat scaled by AMT",
+        "A trigger at the earliest moment the timed clock for that beat could fire, for clocking sequencers whose values are then sampled when tCLK arrives",
+        "The micro timed clock"
+      ],
+      "param": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 5, "6": 5, "7": 5, "8": 5, "9": 5, "10": 5, "11": 5, "12": 5, "13": 5, "14": 5, "15": 5, "16": 5, "17": 5, "18": 5, "19": 5},
+      "in": {"0": 7, "1": 8, "2": 6},
+      "out": {"0": 9, "1": 11, "2": 10, "3": 12},
+      "family": {
+        "in": {"0": "cv", "1": "trigger", "2": "trigger"},
+        "out": {"0": "cv", "1": "trigger", "2": "cv", "3": "trigger"}
+      },
+      "notes": "The half-beat span of a timing knob is from Swing.cpp, where the CMP output is the knob percentage times AMT divided by ten, against a phase running -10V to 10V over one beat."
+    },
+    "Mother": {
+      "lines": [
+        "Probabilistic quantizer holding twelve scales, each with a weight per note, choosing a neighbouring note by weight rather than always the nearest one",
+        "Shifts the root note of the mother scale, -11 to 11 semitones",
+        "Picks which of the twelve stored mother scales is in use",
+        "Rotates the scale by that many positions, -11 to 11, so the notes and weights start at another degree of it; 0 uses the mother scale itself",
+        "Sets how far either side of the incoming note the choice may reach, 0 to 6 semitones; at 0 the module quantizes to the nearest note of the scale with no choice",
+        "Shapes how the chance of a note falls away with distance from the incoming note: turned down only the closest notes come up, turned up notes out at the edge of SPAN come up nearly as often",
+        "Sets the probability weight of that note, 0% to 100%; 50% takes the weight from the same position of the mother scale, and 100% takes that note outright with no further choice",
+        "Switches that note in or out of the scale; the buttons are locked while CHILD is not 0",
+        "Nothing changes when this button is clicked: the first note of a mother scale is always in the scale",
+        "The pitch to quantize",
+        "While a cable is here the module quantizes only when a trigger arrives, rather than on every change of the input pitch",
+        "Adds semitones to the root of the mother scale, quantized, so a C adds nothing and a D raises the root two semitones",
+        "Adds semitones to the scale number, quantized, so a C selects the scale the knob points at and a D the one two on from it",
+        "Adds semitones to the rotation, quantized, so a C leaves the rotation at the knob setting",
+        "A seed for the internal random generator, which is reset to this value every process cycle, so a fresh seed per trigger is wanted for fresh choices",
+        "The chosen note as a pitch",
+        "A gate each time the output pitch changes",
+        "The weight of the note that was chosen; the POW Output Config menu switches it to put out the notes of the scale instead",
+        "Menu — Disable Grab stops a weight of 100% from taking a note outright, and Disable DNA stops a child weight of 50% from taking the weight of the mother scale",
+        "Menu — Copy Scale and Paste Scale move a whole scale between the twelve slots and between instances of the module",
+        "Menu — Polyphony sets the number of output channels, or follows the input channel count when Auto Channels is set"
+      ],
+      "param": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 6, "6": 6, "7": 6, "8": 6, "9": 6, "10": 6, "11": 6, "12": 6, "13": 6, "14": 6, "15": 6, "16": 6, "17": 8, "18": 7, "19": 7, "20": 7, "21": 7, "22": 7, "23": 7, "24": 7, "25": 7, "26": 7, "27": 7, "28": 7},
+      "in": {"0": 9, "1": 10, "2": 11, "3": 12, "4": 13, "5": 14},
+      "out": {"0": 15, "1": 16, "2": 17},
+      "family": {
+        "in": {"0": "pitch", "1": "trigger", "2": "pitch", "3": "cv", "4": "cv", "5": "cv"},
+        "out": {"0": "pitch", "1": "trigger", "2": "cv"}
+      },
+      "notes": "The note button at the bottom of the column is param 17 and is the root of the scale; Mother.cpp skips it when toggling, which is why it gets a line saying so. SCALE and CHILD read semitone-quantized voltages but pick a slot and a rotation rather than a pitch, so they are marked cv while ROOT is marked pitch. The panel prints RISE where the maker's tooltip says Shape."
+    },
+    "Phrase": {
+      "lines": [
+        "Phrase sequencer with no sequence of its own: it clocks a master sequencer for the pattern, length and duration of each phrase, and drives a slave sequencer to play them",
+        "Sets the clock division the module runs at, 1 to 256 incoming triggers per step",
+        "Sets how many samples pass between the master clock trigger and the reading of the master's pattern, length and duration voltages, 0 to 32",
+        "Offsets the pattern voltage arriving from the master sequencer, -10V to 10V",
+        "Sets how many steps one pattern of the slave sequencer has, 1 to 64; a phrase longer than this moves the slave on to the next pattern",
+        "Sets the voltage added to the slave pattern output to move on to the next slave pattern, -10V to 10V",
+        "Delays the slave clock and reset outputs by that many samples, 0 to 32",
+        "A trigger restarts the phrase sequence and resets both sequencers",
+        "The clock the module runs on",
+        "A pattern voltage passed on to the master sequencer, so that a phrase list can itself be sequenced by another Phrase",
+        "Sets the default pattern length used where the master length is unpatched or at 0V",
+        "Takes the pattern voltage the master sequencer puts out, which becomes the slave's starting pattern",
+        "Takes the pattern length from the master sequencer at 0.01V per clock tick; at 0V the default length is used",
+        "Takes the phrase duration from the master sequencer at 0.01V per clock tick; at 0V the duration matches the pattern length",
+        "A reset trigger for the master sequencer",
+        "A trigger clocking the master sequencer when the values for the next phrase are wanted",
+        "Copies the PTN input to the master sequencer at the moment the master clock trigger is sent",
+        "The effective default pattern length at 0.01V per clock tick, copied from the DLEN input where that is patched and otherwise the slave LEN knob multiplied by DIV",
+        "A trigger at the start of each phrase, moved to the end of the phrase by the SPH is EOC menu option",
+        "A trigger at the start of each pattern",
+        "A reset trigger for the slave sequencer",
+        "The clock trigger for the slave sequencer",
+        "The pattern voltage selecting the slave sequencer's pattern",
+        "Menu — Trowa pattern offset adds a small offset to the pattern voltage, for trowaSoft sequencers whose pattern input does not read back the voltage they put out"
+      ],
+      "param": {"0": 2, "1": 4, "2": 5, "3": 1, "4": 3, "5": 6},
+      "in": {"0": 7, "1": 8, "2": 9, "3": 11, "4": 12, "5": 13, "6": 10},
+      "out": {"0": 14, "1": 15, "2": 16, "3": 20, "4": 21, "5": 22, "6": 18, "7": 19, "8": 17},
+      "family": {
+        "in": {"0": "trigger", "1": "trigger", "2": "cv", "3": "cv", "4": "cv", "5": "cv", "6": "cv"},
+        "out": {"0": "trigger", "1": "trigger", "2": "cv", "3": "trigger", "4": "trigger", "5": "cv", "6": "trigger", "7": "trigger", "8": "cv"}
+      },
+      "notes": "The left column PTN knob is the offset applied to the master pattern voltage coming in, which the README states obliquely; Phrase.cpp names the parameter Master Input Pattern Offset."
+    },
+    "Dejavu": {
+      "lines": [
+        "Polyphonic source of random triggers, gates and CV whose sequences repeat in up to four nested levels, so that passages heard before come back",
+        "Sets the clock division the module runs at, 1 to 64, and is passed over while the DIV input is patched",
+        "Sets the seed the random generators start from on reset",
+        "Sets the number of steps in the sequence that row repeats, counted in clock ticks for the top row and in whole durations of the active row above it for the others",
+        "Switches that repeat row on or off; the lamp is dim where the row is on but its length and duration are both 1",
+        "Sets how long that row runs before it takes a fresh seed and starts a new sequence, usually a multiple of that row's length",
+        "Sets the probability that a trigger fires on each clock tick, 0% to 100%, the same for every channel while the probability input is unpatched",
+        "Unlit lets the CV output change on every clock tick, yellow only where a trigger or gate is produced, red only on a trigger or a newly opened gate",
+        "Unlit produces triggers, yellow a gate that reopens on every clock tick, red a gate that is held across consecutive gates",
+        "Sets the offset added to the generated CV, -10V to 10V",
+        "Attenuates the CV offset input before it is added to the OFS knob, -100% to 100%",
+        "Sets the scale of the generated CV, -100 to 100; positive gives unipolar values from the offset upward and negative bipolar values centred on the offset",
+        "Attenuates the CV scale input before it is added to the SCL knob, -100% to 100%",
+        "A trigger resets the module and reseeds it from the SEED setting",
+        "The clock the module runs on, divided by DIV",
+        "Sets the clock division in place of the DIV knob, 0.1V per division, so 6.4V gives the largest division of 64",
+        "Sets the seed in place of the SEED knob, scaled by a thousand",
+        "Polyphonic control of the four repeat rows, read as length 1, duration 1, length 2, duration 2 and so on at 0.01V per clock tick",
+        "A trigger sets all counters back to zero without applying the reset offsets",
+        "Polyphonic trigger probability per output channel, with the HEAT knob added to each channel",
+        "Polyphonic scaling of how much the HEAT knob adds to each channel's probability; a negative channel makes raising HEAT lower that channel's probability",
+        "Sets the CV offset for each output channel, through its own attenuator and added to the OFS knob",
+        "Sets the CV scale for each output channel, through its own attenuator and added to the SCL knob",
+        "Sets trigger or gate behaviour per channel: below 1V triggers, from 1V to 2V a gate reopening on every clock tick, and from 2V a gate held across consecutive gates",
+        "Sets sample and hold behaviour per channel: below 1V the CV changes on every clock tick, from 1V to 2V only where a trigger or gate is produced, and from 2V only on a trigger or newly opened gate",
+        "Polyphonic effective length and duration of the repeat rows, read as duration 1, length 1, duration 2 and so on, scaled so that 10V stands for 100000 clock ticks",
+        "Polyphonic triggers from the repeat rows, the even channels at the end of a row's length and the odd channels at the end of its duration",
+        "The polyphonic random CV",
+        "The polyphonic random triggers or gates",
+        "Menu — Poly Channels sets how many channels of trigger and CV are produced",
+        "Menu — Edit Ranges turns the length and duration knobs into the maximum each of them may reach, and Edit Offsets turns the duration knobs into the counter offsets applied on reset",
+        "Menu — Visual Direction runs the repeat display clockwise or backward"
+      ],
+      "param": {"0": 1, "1": 2, "2": 3, "3": 3, "4": 3, "5": 3, "6": 4, "7": 4, "8": 4, "9": 4, "10": 5, "11": 5, "12": 5, "13": 5, "14": 6, "15": 7, "16": 8, "17": 9, "18": 10, "19": 11, "20": 12},
+      "in": {"0": 13, "1": 14, "2": 15, "3": 16, "4": 17, "5": 18, "6": 19, "7": 20, "8": 21, "9": 22, "10": 23, "11": 24},
+      "out": {"0": 25, "1": 26, "2": 28, "3": 27},
+      "family": {
+        "in": {"0": "trigger", "1": "trigger", "2": "cv", "3": "cv", "4": "cv", "5": "trigger", "6": "cv", "7": "cv", "8": "cv", "9": "cv", "10": "cv", "11": "cv"},
+        "out": {"0": "cv", "1": "trigger", "2": "trigger", "3": "cv"}
+      },
+      "notes": "Param 21 has no widget position in the census and gets no line. The README says REP input channels below 1V are ignored while also scaling that input at 0.01V per tick, which cannot both hold; the scaling is in the code, so only that is stated. In the Edit Ranges and Edit Offsets states the HEAT knob sets display brightness rather than probability."
+    },
+    "Gator": {
+      "lines": [
+        "Polyphonic gate generator timed against a phase ramp, with gate length, jitter, ratcheting and strumming set per channel",
+        "Sets the gate length in phase lengths, from the shortest trigger at 0 to 100 phases, and is replaced by the LEN input while that is patched",
+        "Sets how much random offset is added to the moment each gate fires, 0% for exact timing and 100% for very loose timing; the JTR input is added to it",
+        "Sets how many extra gates are added to each gate, 0 to 10; a negative setting runs the extra gates ahead of the beat so the last of them lands on it",
+        "Sets the time between ratcheted gates in phase lengths; at 0 no extra gates are produced whatever the count is",
+        "Spreads the gates of the polyphonic channels in time, positive firing the lowest channel first and negative the highest, -100% to 100%",
+        "The phase ramp all timing is measured against, -10V half a beat early, 0V on the beat and 10V half a beat late",
+        "Sets the threshold on the phase at which gates fire, shifting every channel in time together",
+        "A channel held above 5V produces a gate at the next threshold crossing, and the number of channels here sets the number of output channels",
+        "Added to the firing threshold per channel, moving that channel's gates up to nearly half a beat earlier or later",
+        "Sets the gate length per channel in place of the knob, 0.1V for one phase and 10V for 100 phases",
+        "Added to the jitter knob per channel, 10V for fully loose timing",
+        "Sets the number of extra gates per channel in place of the knob, 1V for each gate",
+        "Sets the time between ratcheted gates per channel in place of the knob, 1V for one phase length",
+        "Sets the strum spread in place of the knob, and acts on all channels together rather than per channel",
+        "A trigger clears every gate, ratchet and strum in progress",
+        "The polyphonic gate output"
+      ],
+      "param": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5},
+      "in": {"0": 6, "1": 7, "2": 8, "3": 9, "4": 10, "5": 11, "6": 12, "7": 13, "8": 14, "9": 15},
+      "out": {"0": 16},
+      "family": {
+        "in": {"0": "cv", "1": "cv", "2": "trigger", "3": "cv", "4": "cv", "5": "cv", "6": "cv", "7": "cv", "8": "cv", "9": "trigger"},
+        "out": {"0": "trigger"}
+      },
+      "notes": "The README says the JTR and TIME inputs are used in place of their knobs; Gator.cpp adds them to the knob value instead, while the LEN, RAT, DLY and STR inputs do replace their knobs. The negative half of the RAT knob range is undocumented in the README and is read from Gator.cpp."
+    },
+    "Resc": {
+      "lines": [
+        "Polyphonic pitch rescaler: it finds the degree of the incoming note in a source scale and puts out the note at that degree of a target scale",
+        "The pitch to rescale, one channel per voice",
+        "The source scale the incoming pitch is read against, one channel per note of it; with nothing patched the scale is C major",
+        "The scale the pitch is rescaled into, one channel per note of it; with nothing patched the scale is C major",
+        "A note voltage picks which degree of the target scale becomes the root of the scale actually used",
+        "The rescaled pitch taken from the target scale as it stands, with the CHILD input left out of the reckoning",
+        "The rescaled pitch taken from the target scale rotated to the degree chosen by the CHILD input",
+        "The notes of the target scale rotated to the degree chosen by the CHILD input, one channel per note",
+        "Menu — Child CV Mode reads the CHILD voltage either as an absolute note or relative to the root of the target scale"
+      ],
+      "in": {"0": 1, "1": 2, "2": 3, "3": 4},
+      "out": {"0": 5, "1": 6, "2": 7},
+      "family": {
+        "in": {"0": "pitch", "1": "pitch", "2": "pitch", "3": "pitch"},
+        "out": {"0": "pitch", "1": "pitch", "2": "pitch"}
+      }
+    },
+    "Morph": {
+      "lines": [
+        "Polyphonic gate and CV looper with turing machine behaviour, replacing steps of its loop from source inputs or from an internal random generator; the maker marks it deprecated in favour of Morpheus",
+        "Sets the chance that the gate at the current step is left alone, 0% replacing the gate at every step and 100% replacing none",
+        "Added to both lock settings, -100% to 100%",
+        "Sets the chance that the CV at the current step is left alone, 0% replacing the CV at every step and 100% replacing none",
+        "Sets where a replacement comes from, 0% always the SRC inputs and 100% always the internal random generator",
+        "Shifts the loop one step to the left",
+        "Shifts the loop one step to the right",
+        "Clears the loop, taking every gate off and every CV to 0V",
+        "Sets the number of steps in the loop, 1 to 64",
+        "Sets the chance of a gate where a step is replaced from the random generator, 0% to 100%",
+        "Scales the random CV, -1 to 1, positive giving unipolar values and negative bipolar ones",
+        "Sets the offset added to the scaled random CV, -10V to 10V",
+        "The clock that advances the playhead one step, monophonic where every other jack is polyphonic",
+        "The gate written into the loop where a step is replaced from the source",
+        "The CV written into the loop where a step is replaced from the source",
+        "A high channel writes the source gate and CV into that channel's loop whatever the lock settings are",
+        "Added to the gate lock for each channel, 0-10V covering the full range",
+        "Added to both locks for each channel, -10V to 10V",
+        "Added to the CV lock for each channel, 0-10V covering the full range",
+        "Sets the balance between source and random per channel, 0V always source and 10V always random",
+        "A high channel shifts that channel's loop one step to the left",
+        "A high channel shifts that channel's loop one step to the right",
+        "A high channel clears that channel's loop",
+        "Sets the loop length per channel, 0.1V per step, so 6.4V gives the longest loop of 64",
+        "Sets the chance of a random gate per channel, 0-10V",
+        "Sets the random CV scale per channel, -10V to 10V",
+        "Sets the random CV offset per channel, -10V to 10V",
+        "The gate at the playhead of each channel's loop",
+        "The CV at the playhead of each channel's loop",
+        "Menu — Gates from CV takes the gate output from the step's CV value rather than from the stored gate",
+        "Menu — Channels sets the number of polyphonic output channels, or follows the input channel count when Auto is set"
+      ],
+      "param": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 6, "6": 7, "7": 8, "8": 9, "9": 10, "10": 11},
+      "in": {"0": 12, "1": 13, "2": 14, "3": 15, "4": 16, "5": 17, "6": 18, "7": 19, "8": 20, "9": 21, "10": 22, "11": 23, "12": 24, "13": 25, "14": 26},
+      "out": {"0": 27, "1": 28},
+      "family": {
+        "in": {"0": "trigger", "1": "trigger", "2": "cv", "3": "trigger", "4": "cv", "5": "cv", "6": "cv", "7": "cv", "8": "trigger", "9": "trigger", "10": "trigger", "11": "cv", "12": "cv", "13": "cv", "14": "cv"},
+        "out": {"0": "trigger", "1": "cv"}
+      }
+    },
+    "Morpheus": {
+      "lines": [
+        "Polyphonic CV looper with turing machine behaviour and sixteen memory slots, mutating a loop step by step or morphing it toward a stored one",
+        "Sets the chance that the current step is left as it is, 0% replacing every step and 100% replacing none",
+        "Sets where a replacement comes from, 0% always the source and 100% always randomized",
+        "Sets the number of steps in the loop, 1 to 128",
+        "Steps the selected memory slot up; the slot number shows red while the selection is not the slot in use",
+        "Steps the selected memory slot down; the slot number shows red while the selection is not the slot in use",
+        "Stores the current loop in the selected memory slot and makes that slot the one in use",
+        "Makes the selected slot the one in use while the slot number shows red, and otherwise loads that slot's loop into the step loop at once",
+        "Freezes the steps of every channel, so nothing is replaced and a recall passes them over",
+        "Randomizes the current step of every channel for as long as the button is held",
+        "Shifts the step loop of every channel one step to the left",
+        "Shifts the step loop of every channel one step to the right",
+        "Sets the current step of every channel to that channel's OFS value for as long as the button is held",
+        "Takes the source for replacement from the SRC input rather than from the memory slot in use",
+        "Writes the external CV into the current step for as long as the button is held",
+        "Sets the threshold the step's CV has to cross for a gate; a higher setting lowers the threshold and so produces more gates",
+        "Scales the randomly generated CV, -10V to 10V, positive giving unipolar values from OFS upward and negative bipolar values centred on OFS",
+        "Sets the offset of the randomly generated CV, -10V to 10V",
+        "Added to the lock setting per channel, 0-10V covering the full range",
+        "Added to the source and random balance per channel, 0-10V covering the full range",
+        "Sets the loop length per channel, 0.01V per step; a channel at 0V takes the length from the knob",
+        "A channel above 0V freezes that channel's steps",
+        "A channel above 0V randomizes that channel's current step",
+        "A channel above 0V shifts that channel's loop one step to the left",
+        "A channel above 0V shifts that channel's loop one step to the right",
+        "A channel above 0V sets that channel's current step to its OFS value",
+        "The external CV used as the source for replacement and for recording",
+        "A channel above 5V writes the external CV into that channel's current step",
+        "Sets the gate threshold per channel in place of the knob",
+        "Sets the random CV scale per channel in place of the knob",
+        "Sets the random CV offset per channel in place of the knob",
+        "Selects the memory slot by voltage, 0.1V per slot, and is monophonic",
+        "A voltage above 0V stores the loop in the selected slot",
+        "A voltage above 0V recalls the selected slot",
+        "A trigger sets the playhead of every loop back to the first step",
+        "The clock that advances the loop one step",
+        "The current external CV while EXT is on, and the value from the memory slot in use otherwise",
+        "A gate for each channel whose step CV crosses the GTP threshold, switchable to a trigger in the menu",
+        "The CV of the current step of each channel's loop",
+        "Menu — MEM is Note reads the MEM voltage as a volt per octave note, and Recall or Load on Mem CV Change acts on the slot as soon as that voltage changes",
+        "Menu — Smart HLD turns the HLD input around, so a low channel is frozen and the edit buttons reach only the channels held high",
+        "Menu — Channels sets the number of polyphonic output channels, or follows the input channel count when Auto is set"
+      ],
+      "param": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 6, "6": 7, "7": 8, "8": 9, "9": 10, "10": 11, "11": 12, "12": 13, "13": 14, "14": 15, "15": 16, "16": 17},
+      "in": {"0": 18, "1": 19, "2": 20, "3": 21, "4": 22, "5": 23, "6": 24, "7": 25, "8": 26, "9": 27, "10": 28, "11": 29, "12": 30, "13": 31, "14": 32, "15": 33, "16": 34, "17": 35},
+      "out": {"0": 36, "1": 37, "2": 38},
+      "family": {
+        "in": {"0": "cv", "1": "cv", "2": "cv", "3": "trigger", "4": "trigger", "5": "trigger", "6": "trigger", "7": "trigger", "8": "cv", "9": "trigger", "10": "cv", "11": "cv", "12": "cv", "13": "cv", "14": "trigger", "15": "trigger", "16": "trigger", "17": "trigger"},
+        "out": {"0": "cv", "1": "trigger", "2": "cv"}
+      }
+    },
+    "Buckets": {
+      "lines": [
+        "Splits a polyphonic pitch and gate pair into thirteen pitch and gate pairs, sending each input channel to the first row whose split point its pitch does not exceed",
+        "Sets the split point for that row, shown as a note; an input channel goes to the first row counting downward whose split point is not lower than the channel's pitch",
+        "The polyphonic pitch to split",
+        "The polyphonic gates, taken channel by channel alongside the pitch",
+        "The pitches of the input channels that fell into that row",
+        "The gates of the input channels that fell into that row",
+        "The pitches of the input channels higher than every split point, for chaining into another instance of the module",
+        "The gates of the input channels higher than every split point, for chaining into another instance of the module"
+      ],
+      "param": {"0": 1, "1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1, "10": 1, "11": 1},
+      "in": {"0": 2, "1": 3},
+      "out": {"0": 4, "1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4, "10": 4, "11": 4, "12": 6, "13": 5, "14": 5, "15": 5, "16": 5, "17": 5, "18": 5, "19": 5, "20": 5, "21": 5, "22": 5, "23": 5, "24": 5, "25": 7},
+      "family": {
+        "in": {"0": "pitch", "1": "trigger"},
+        "out": {"0": "pitch", "1": "pitch", "2": "pitch", "3": "pitch", "4": "pitch", "5": "pitch", "6": "pitch", "7": "pitch", "8": "pitch", "9": "pitch", "10": "pitch", "11": "pitch", "12": "pitch", "13": "trigger", "14": "trigger", "15": "trigger", "16": "trigger", "17": "trigger", "18": "trigger", "19": "trigger", "20": "trigger", "21": "trigger", "22": "trigger", "23": "trigger", "24": "trigger", "25": "trigger"}
+      },
+      "notes": "The installed 2.4.14 build has pitch and gate outputs only; the maker's 2.4.15 source adds a third aux column, which is not in this build."
+    },
+    "Cron": {
+      "lines": [
+        "Interface between a MIDI to CV module and the rack: it taps the MIDI clock for a BPM voltage, follows the transport, and works out latency corrected timing for sixteen destinations",
+        "Selects which of the sixteen channels the latency knob edits, 1 to 16",
+        "Sets the latency correction for the selected channel, -100ms to 100ms",
+        "The divided MIDI clock, used to line the local clock up with the MIDI clock",
+        "The MIDI clock at 24 pulses per beat, tapped to work out the tempo",
+        "A MIDI start message here sets the module running from the beginning",
+        "A MIDI stop message here takes the module out of the running state",
+        "A MIDI continue message here sets the module running without restarting",
+        "The reference timing threshold to be corrected, taken from the CMP output of Swing",
+        "Copies the CLK/N input",
+        "The tempo worked out from the MIDI clock, as a volt per octave BPM voltage",
+        "A reset trigger sent when a start message arrives",
+        "Held high for as long as the transport is running",
+        "Polyphonic timing thresholds, one channel per latency setting, for Gator instances to produce latency corrected gates"
+      ],
+      "param": {"0": 1, "1": 2},
+      "in": {"0": 3, "1": 4, "2": 5, "3": 6, "4": 7, "5": 8},
+      "out": {"0": 9, "1": 10, "2": 11, "3": 12, "4": 13},
+      "family": {
+        "in": {"0": "trigger", "1": "trigger", "2": "trigger", "3": "trigger", "4": "trigger", "5": "cv"},
+        "out": {"0": "trigger", "1": "cv", "2": "trigger", "3": "trigger", "4": "cv"}
+      },
+      "notes": "Outputs 5 to 19 are declared in Cron.hpp for the polyphonic CMP output but have no widget of their own; the single CMP jack is output 4, and the rest are left untagged."
+    },
+    "Hold": {
+      "lines": [
+        "Ten rows of polyphonic sample and hold, keeping the held voltages in the patch so they come back with it",
+        "Off samples each row on the rising edge of its gate, on follows the input for as long as the gate is high",
+        "The polyphonic gate that samples the rows, the first channel for the first row and so on, high above 5V; rows past the last channel follow that last channel",
+        "The voltage sampled into that row, polyphonic; a row with nothing patched takes its input from the nearest patched row above it",
+        "The voltage held for that row, one channel for each channel of the input feeding it"
+      ],
+      "param": {"0": 1},
+      "in": {"0": 2, "1": 3, "2": 3, "3": 3, "4": 3, "5": 3, "6": 3, "7": 3, "8": 3, "9": 3, "10": 3},
+      "out": {"0": 4, "1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4},
+      "family": {
+        "in": {"0": "trigger"}
+      },
+      "notes": "Hold has no section in the README; everything here is read from Hold.cpp, including the downward normalling of the CV inputs, the reuse of the last gate channel by the rows below it, and the storage of held values in the patch. The CV jacks carry whatever is patched, so they are left without a family."
+    }
+  }
+}

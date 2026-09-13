@@ -1,0 +1,194 @@
+{
+ "plugin": "Sckitam",
+ "source": "https://github.com/philippesalembier/SckitamVCV",
+ "read": "2026-09-12",
+ "modules": {
+  "2DRotation": {
+   "lines": [
+    "Reads two signals as the horizontal and vertical parts of a point and rotates that point about the origin, by a fixed angle, by a continuous spin, or by both, with offsets applied before and after",
+    "Sets the rotation angle, -180 to 180 degrees",
+    "Attenuates and inverts the rotation CV, and at the full setting 5V there turns the pair by a further 180 degrees",
+    "Sets the speed of a continuous rotation added to the angle, -3 to 3: in L mode up to 90 turns per second either way, and in H mode 261.63 turns per second at the centre, doubling per unit",
+    "Attenuates and inverts the velocity CV, which is added to the velocity knob before the total is clamped to -3 to 3",
+    "Switches the velocity between L, a flat scale reaching 90 turns per second, and H, a volt per octave scale giving 261.63 turns per second at the centre of the velocity knob",
+    "Adds -10V to 10V to the first input before the rotation",
+    "Adds -10V to 10V to the second input before the rotation",
+    "Adds -10V to 10V to the first output after the rotation",
+    "Adds -10V to 10V to the second output after the rotation",
+    "Turns the pair away from the angle knob, 180 degrees for 5V at the full CV amount",
+    "Adds to the rotation velocity, scaled by the velocity CV amount",
+    "The horizontal part of the pair, and the number of channels here sets the polyphony of both outputs",
+    "The vertical part of the pair, read at the channel count of the other input",
+    "The horizontal part of the rotated pair, the cosine of the angle times the first input plus its sine times the second",
+    "The vertical part of the rotated pair, the cosine of the angle times the second input minus its sine times the first",
+    "Note — bypassing the module passes the first input straight to the first output and the second to the second"
+   ],
+   "param": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 6, "6": 7, "7": 8, "8": 9},
+   "in": {"0": 10, "1": 11, "2": 12, "3": 13},
+   "out": {"0": 14, "1": 15},
+   "family": {"in": {"0": "cv", "1": "cv"}, "out": {}}
+  },
+  "2DAffine": {
+   "lines": [
+    "Reads two signals as the horizontal and vertical parts of a point, shears that point in both axes and rotates it about the origin, with offsets before and after and a soft limit on each output",
+    "Sets the rotation angle, -180 to 180 degrees",
+    "Attenuates and inverts the rotation CV, and at the full setting 5V there turns the pair by a further 180 degrees",
+    "Mixes -3 to 3 times the vertical input into the horizontal one before the rotation, which shears the curve sideways, despite the hover text naming it Scale",
+    "Attenuates and inverts the horizontal shearing CV, which is added to the Shearx knob",
+    "Mixes -3 to 3 times the horizontal input into the vertical one before the rotation, which shears the curve up and down",
+    "Attenuates and inverts the vertical shearing CV, which is added to the Sheary knob",
+    "Adds -10V to 10V to the first input before the shearing and the rotation",
+    "Adds -10V to 10V to the second input before the shearing and the rotation",
+    "Adds -10V to 10V to the first output after the rotation, before the saturator",
+    "Adds -10V to 10V to the second output after the rotation, before the saturator",
+    "Turns the pair away from the angle knob, 180 degrees for 5V at the full CV amount",
+    "Adds to the horizontal shearing, scaled by the trimpot under the Shearx knob",
+    "Adds to the vertical shearing, scaled by the trimpot under the Sheary knob",
+    "The horizontal part of the pair, and the number of channels here sets the polyphony of both outputs",
+    "The vertical part of the pair, read at the channel count of the other input",
+    "The horizontal part of the sheared and rotated pair, held to -10V to 10V by a parabolic saturator that softens the peaks shearing adds",
+    "The vertical part of the sheared and rotated pair, held to -10V to 10V by a parabolic saturator that softens the peaks shearing adds",
+    "Note — bypassing the module passes the first input straight to the first output and the second to the second"
+   ],
+   "param": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 6, "6": 7, "7": 8, "8": 9, "9": 10},
+   "in": {"0": 11, "1": 12, "2": 13, "3": 14, "4": 15},
+   "out": {"0": 16, "1": 17},
+   "family": {"in": {"0": "cv", "1": "cv", "2": "cv"}, "out": {}}
+  },
+  "FIFOQueue": {
+   "lines": [
+    "Three first-in first-out queues written and read by triggers, each holding up to 128 values, so a run of voltages can be stored and played back in the order it arrived",
+    "A trigger above 1V stores the voltage at each of the three In jacks as one more entry, and is ignored once 128 entries are held",
+    "A trigger above 1V takes the oldest entry out of each queue and holds it at the Out jacks; on an empty queue nothing is read and no trigger is sent",
+    "Above 0V, every entry read out is written back onto the end of the queue, so the stored run repeats",
+    "A trigger above 1V empties all three queues",
+    "The voltage stored in its own queue each time a write trigger arrives, and returned at the matching Out jack",
+    "A 10V trigger 1ms long each time an entry is actually read out",
+    "Carries 10V while the queues are empty and 0V while they hold anything",
+    "The entry read out of its own queue, held until the next read trigger",
+    "Note — the figure printed on the panel counts the entries now held, out of a maximum of 128, and the lamp column shows the same count as a bar"
+   ],
+   "param": {},
+   "in": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 5, "6": 5},
+   "out": {"0": 6, "1": 7, "2": 8, "3": 8, "4": 8},
+   "family": {
+    "in": {"0": "trigger", "1": "trigger", "2": "trigger", "3": "trigger", "4": "cv", "5": "cv", "6": "cv"},
+    "out": {"0": "trigger", "1": "trigger", "2": "cv", "3": "cv", "4": "cv"}
+   }
+  },
+  "MarkovSeq": {
+   "lines": [
+    "An eight-state sequencer driven by a Markov chain: every clock draws the next state at random from the probabilities set for the current one, and the output carries that state's value and input",
+    "Steps the chain on by hand, drawing the next state exactly like a clock pulse",
+    "Scales the output, 0 to 1, after the state value and the state input have been summed",
+    "Smooths the move from one state's knob value to the next, 0 for an instant change and 0.999 for the slowest glide; the signals at the State inputs are not slewed",
+    "Sets the value carried by the output while that state is current, -10V to 10V, added to the signal at that state's input",
+    "Makes that state the next one, in place of the state drawn at random, until the next clock arrives",
+    "Sets the relative probability of the chain moving from one state to another; the eight probabilities for a state are divided by their sum, so equal settings make every destination equally likely",
+    "Sets every probability of moving into that state to 0.5, from all eight states at once",
+    "Sets every probability of moving into that state to zero, from all eight states at once, so nothing leads there",
+    "Sets every probability of leaving that state to 0.5, towards all eight states at once",
+    "Sets every probability of leaving that state to zero, towards all eight states at once",
+    "A rise to 1V or more moves the chain on: the state drawn last becomes current and the one after it is drawn",
+    "The signal carried by the output while that state is current, added to that state's knob value and faded in and out over about 2.5ms to stop a click",
+    "A rise to 1V or more makes that state the next one, in place of the state drawn at random",
+    "The current state's knob value plus the signal at its input, scaled by the gain and limited to -10V to 10V",
+    "Carries the number of the current state, 0V for the first up to 7V for the eighth",
+    "A 10V trigger 1ms long when that state becomes the current one",
+    "Note — the red lamp beside a state marks the current state and the blue lamp marks the state the next clock will move to",
+    "Note — the number of channels at the first State input sets the polyphony of the Out jack",
+    "Menu — when every probability out of the current state is zero, the chain either stays on that state or treats all eight states as equally likely"
+   ],
+   "param": {
+    "0": 1, "1": 2, "2": 3,
+    "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4, "10": 4,
+    "11": 5, "12": 5, "13": 5, "14": 5, "15": 5, "16": 5, "17": 5, "18": 5,
+    "19": 6, "20": 6, "21": 6, "22": 6, "23": 6, "24": 6, "25": 6, "26": 6,
+    "27": 6, "28": 6, "29": 6, "30": 6, "31": 6, "32": 6, "33": 6, "34": 6,
+    "35": 6, "36": 6, "37": 6, "38": 6, "39": 6, "40": 6, "41": 6, "42": 6,
+    "43": 6, "44": 6, "45": 6, "46": 6, "47": 6, "48": 6, "49": 6, "50": 6,
+    "51": 6, "52": 6, "53": 6, "54": 6, "55": 6, "56": 6, "57": 6, "58": 6,
+    "59": 6, "60": 6, "61": 6, "62": 6, "63": 6, "64": 6, "65": 6, "66": 6,
+    "67": 6, "68": 6, "69": 6, "70": 6, "71": 6, "72": 6, "73": 6, "74": 6,
+    "75": 6, "76": 6, "77": 6, "78": 6, "79": 6, "80": 6, "81": 6, "82": 6,
+    "83": 7, "84": 7, "85": 7, "86": 7, "87": 7, "88": 7, "89": 7, "90": 7,
+    "91": 8, "92": 8, "93": 8, "94": 8, "95": 8, "96": 8, "97": 8, "98": 8,
+    "99": 9, "100": 9, "101": 9, "102": 9, "103": 9, "104": 9, "105": 9, "106": 9,
+    "107": 10, "108": 10, "109": 10, "110": 10, "111": 10, "112": 10, "113": 10, "114": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12, "2": 12, "3": 12, "4": 12, "5": 12, "6": 12, "7": 12, "8": 12,
+    "9": 13, "10": 13, "11": 13, "12": 13, "13": 13, "14": 13, "15": 13, "16": 13
+   },
+   "out": {
+    "0": 14, "1": 15,
+    "2": 16, "3": 16, "4": 16, "5": 16, "6": 16, "7": 16, "8": 16, "9": 16
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "9": "trigger", "10": "trigger", "11": "trigger", "12": "trigger",
+     "13": "trigger", "14": "trigger", "15": "trigger", "16": "trigger"
+    },
+    "out": {
+     "0": "cv", "1": "cv",
+     "2": "trigger", "3": "trigger", "4": "trigger", "5": "trigger",
+     "6": "trigger", "7": "trigger", "8": "trigger", "9": "trigger"
+    }
+   }
+  },
+  "PolygonalVCO": {
+   "lines": [
+    "An oscillator that runs a phasor around a polygon and gives its horizontal and vertical coordinates as two waveforms, the harmonic content set by the number of sides and by teeth added to the corners",
+    "Sets the pitch in octaves, -3 to 3, with 0 giving C4 at 261.63Hz",
+    "Attenuates the FM input, which at the full setting shifts the frequency by 700Hz per volt, through zero",
+    "Sets the number of sides of the polygon, 2.1 to 20; low values give a rich harmonic spectrum and high ones converge on a cosine at X and a sine at Y",
+    "Grows teeth on the corners of the polygon, 0 to 1, adding harmonics and trimming the output level by up to half as it rises",
+    "Attenuates and inverts the N CV, which at the full setting moves the number of sides by one per volt",
+    "Attenuates and inverts the T CV, which at the full setting moves the teeth value across its whole range for 10V",
+    "Sets the pitch a volt per octave, added to the pitch knob and clamped to -4 to 4 volts, and its channel count sets the polyphony of both outputs",
+    "Shifts the frequency through zero by 700Hz per volt at the full FM amount",
+    "Moves the number of polygon sides, scaled by the trimpot under the N knob; one channel here is applied to every voice, and a polyphonic cable gives each voice its own value",
+    "Moves the teeth value, scaled by the trimpot under the T knob; one channel here is applied to every voice, and a polyphonic cable gives each voice its own value",
+    "The horizontal coordinate of the point running around the polygon, -10V to 10V, a cosine at high side counts",
+    "The vertical coordinate of the point running around the polygon, -10V to 10V, a sine at high side counts",
+    "Menu — N: Quantization step rounds the number of sides to the nearest 0.25, 0.33, 0.50 or 1.00, or leaves it free"
+   ],
+   "param": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 6},
+   "in": {"0": 7, "1": 8, "2": 9, "3": 10},
+   "out": {"0": 11, "1": 12},
+   "family": {
+    "in": {"0": "pitch", "1": "cv", "2": "cv", "3": "cv"},
+    "out": {"0": "audio", "1": "audio"}
+   }
+  },
+  "WDelay": {
+   "lines": [
+    "A delay line read with third-order Lagrange interpolation, built for waveguide and Karplus-Strong voices, flanging and chorus, with a second output tapped part way along the line",
+    "Shortens the delay by 0 to 16 sample periods, which compensates for the one sample every patch cable in the feedback loop adds",
+    "Sets the delay to one cycle of a pitch, -4 to 4 volts around C4 at 261.63Hz, and appears while the menu is set to Pitch",
+    "Sets the delay directly, 0.1ms to 1 second, and appears while the menu is set to Time",
+    "Taps the delay line for the Pickup output, 0 at the point the signal enters the line and 1 at the point it leaves",
+    "Attenuates and inverts the pickup position CV, which at the full setting moves the tap across the whole line for 10V",
+    "Scales the signal at the FBack input, 0 to 0.999, before it is added to the delay input",
+    "Switches the feedback between being added to the input and being subtracted from it, and lights the lamp for the sign in force",
+    "Sets the delay: read a volt per octave around C4 in Pitch mode, and in Time mode every volt lengthens the delay by a fifth of the knob setting",
+    "Moves the pickup tap along the delay line, scaled by the trimpot under the Pk Pos knob",
+    "The signal fed into the delay line",
+    "The signal returned into the delay line, scaled by the feedback trimpot and given the sign of the plus-minus button; nothing is routed back inside the module, so a cable is needed",
+    "The signal tapped part way along the delay line, at the point set by Pk Pos",
+    "The delayed signal, interpolated between samples so the delay can be a fraction of one, and limited to -20V to 20V",
+    "Menu — Delay specification chooses whether the Delay knob is read as a pitch, one cycle long, or as a time in milliseconds"
+   ],
+   "param": {"0": 1, "1": 2, "2": 3, "3": 4, "4": 5, "5": 6, "6": 7},
+   "in": {"0": 8, "1": 9, "2": 10, "3": 11},
+   "out": {"0": 12, "1": 13},
+   "family": {
+    "in": {"0": "pitch", "1": "cv", "2": "audio", "3": "audio"},
+    "out": {"0": "audio", "1": "audio"}
+   },
+   "notes": "The Pitch and Time knobs are built at the same place on the panel and only one is visible at a time, chosen by the Delay specification menu item; both are described. The delay input is coloured as a pitch port because Pitch is the default mode and the jack is read a volt per octave there; in Time mode the same jack is a time CV."
+  }
+ }
+}

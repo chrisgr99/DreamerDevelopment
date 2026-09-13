@@ -1,0 +1,424 @@
+{
+  "plugin": "SynthKit",
+  "source": "https://github.com/JerrySievert/SynthKit/blob/master/docs/README.md",
+  "read": "2026-09-12",
+  "modules": {
+    "1x8Splitter": {
+      "lines": [
+        "Splitter taking one input and copying it, unchanged, to eight outputs",
+        "The voltage copied to every output, read once per sample",
+        "A copy of the IN voltage, driven separately from the other outputs, with no attenuation or offset"
+      ],
+      "in": {
+        "0": 1
+      },
+      "out": {
+        "0": 2,
+        "1": 2,
+        "2": 2,
+        "3": 2,
+        "4": 2,
+        "5": 2,
+        "6": 2,
+        "7": 2
+      }
+    },
+    "1x8SplitterCV": {
+      "lines": [
+        "Splitter with one input copied to eight outputs, each output gated open or shut by its own CV input",
+        "The voltage copied to every output whose CV input is high",
+        "Holds its output open while the voltage here is 1.7V or above, and shuts it to 0V below that",
+        "Carries the IN voltage while its CV input is 1.7V or above, and 0V below that"
+      ],
+      "in": {
+        "0": 1,
+        "1": 2,
+        "2": 2,
+        "3": 2,
+        "4": 2,
+        "5": 2,
+        "6": 2,
+        "7": 2,
+        "8": 2
+      },
+      "out": {
+        "0": 3,
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3,
+        "6": 3,
+        "7": 3
+      },
+      "family": {
+        "in": {
+          "1": "trigger",
+          "2": "trigger",
+          "3": "trigger",
+          "4": "trigger",
+          "5": "trigger",
+          "6": "trigger",
+          "7": "trigger",
+          "8": "trigger"
+        }
+      },
+      "notes": "The lamp beside each output follows its gate, and is a light rather than a clickable control."
+    },
+    "And": {
+      "lines": [
+        "Bitwise AND of two voltages, in two independent sections; each voltage is multiplied by 10,000 and truncated to a whole number, the bits are combined, and the result is divided by 10,000 again",
+        "One of the two voltages combined by the AND in its own section",
+        "The bitwise AND of the two inputs of its section, at 1/10,000 resolution"
+      ],
+      "in": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "out": {
+        "0": 2,
+        "1": 2
+      },
+      "notes": "Negative voltages are combined as two's-complement integers, which the maker's documentation does not cover."
+    },
+    "Or": {
+      "lines": [
+        "Bitwise OR of two voltages, in two independent sections; each voltage is multiplied by 10,000 and truncated to a whole number, the bits are combined, and the result is divided by 10,000 again",
+        "One of the two voltages combined by the OR in its own section",
+        "The bitwise OR of the two inputs of its section, at 1/10,000 resolution"
+      ],
+      "in": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "out": {
+        "0": 2,
+        "1": 2
+      },
+      "notes": "Negative voltages are combined as two's-complement integers, which the maker's documentation does not cover."
+    },
+    "Addition": {
+      "lines": [
+        "Adds two voltages together, in two independent sections, with no clipping",
+        "One of the two voltages added together in its own section",
+        "The sum of the two inputs of its section; nothing limits the result, so it can run well beyond -5V to 5V"
+      ],
+      "in": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "out": {
+        "0": 2,
+        "1": 2
+      }
+    },
+    "Subtraction": {
+      "lines": [
+        "Subtracts one voltage from another, in two independent sections, with no clipping",
+        "The voltage that the other input of its section is subtracted from",
+        "The voltage subtracted from the upper input of its section",
+        "The upper input of its section minus the lower one; nothing limits the result, so it can run well beyond -5V to 5V"
+      ],
+      "in": {
+        "0": 1,
+        "1": 2,
+        "2": 1,
+        "3": 2
+      },
+      "out": {
+        "0": 3,
+        "1": 3
+      }
+    },
+    "ClockDivider": {
+      "lines": [
+        "Clock divider counting incoming pulses 1 to 8 over and over, with eight outputs firing on the counts that divide by their own number",
+        "Each rise past 1.7V advances the count; the first pulse after a reset only measures the interval, and counting starts on the one after it",
+        "A rise past 1.7V sets the count back to the start; the next pulse after it measures the interval and counting resumes on the one after that",
+        "Goes high on each count that divides by its own number and falls after half the last clock interval, carrying the CLOCK input's own voltage rather than the fixed 1.7V the manual states"
+      ],
+      "in": {
+        "0": 1,
+        "1": 2
+      },
+      "out": {
+        "0": 3,
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3,
+        "6": 3,
+        "7": 3
+      },
+      "family": {
+        "in": {
+          "0": "trigger",
+          "1": "trigger"
+        },
+        "out": {
+          "0": "trigger",
+          "1": "trigger",
+          "2": "trigger",
+          "3": "trigger",
+          "4": "trigger",
+          "5": "trigger",
+          "6": "trigger",
+          "7": "trigger"
+        }
+      },
+      "notes": "The code passes the clock input's own voltage to an active output, while docs/clock_divider.md says a value of 1.7 is output. The eight-count cycle means /5, /6 and /7 fire once per cycle rather than at an even spacing."
+    },
+    "FibonacciClockDivider": {
+      "lines": [
+        "Counts incoming clock pulses 1 to 34 over and over, with eight outputs numbered 1, 2, 3, 5, 8, 13, 21 and 34, each firing on the single count that matches its number",
+        "Each rise past 1.7V advances the count; the first pulse after a reset only measures the interval, and counting starts on the one after it",
+        "A rise past 1.7V sets the count back to the start; the next pulse after it measures the interval and counting resumes on the one after that",
+        "Fires at the count matching its own number, once per 34-count cycle, so every output fires at the same rate despite the panel's DIV numbering; it carries the CLOCK voltage, not the manual's 1.7V",
+        "Note — an output that has gone high falls again after half the last measured clock interval, so the pulse width follows the incoming clock"
+      ],
+      "in": {
+        "0": 1,
+        "1": 2
+      },
+      "out": {
+        "0": 3,
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3,
+        "6": 3,
+        "7": 3
+      },
+      "family": {
+        "in": {
+          "0": "trigger",
+          "1": "trigger"
+        },
+        "out": {
+          "0": "trigger",
+          "1": "trigger",
+          "2": "trigger",
+          "3": "trigger",
+          "4": "trigger",
+          "5": "trigger",
+          "6": "trigger",
+          "7": "trigger"
+        }
+      },
+      "notes": "The panel heading reads DIV, but no output divides the clock: each one fires at its own position in a 34-count cycle, so every output fires at the same rate and only the placement differs. The code passes the clock input's own voltage while an output is high, where docs/fibonacci.md says 1.7."
+    },
+    "PrimeClockDivider": {
+      "lines": [
+        "Counts incoming clock pulses 1 to 19 over and over, with eight outputs numbered 2, 3, 5, 7, 11, 13, 17 and 19, each firing on the single count that matches its number",
+        "Each rise past 1.7V advances the count; the first pulse after a reset only measures the interval, and counting starts on the one after it",
+        "A rise past 1.7V sets the count back to the start; the next pulse after it measures the interval and counting resumes on the one after that",
+        "Fires at the count matching its own number, once per 19-count cycle, so every output fires at the same rate despite the panel's DIV numbering; it carries the CLOCK voltage, not the manual's 1.7V",
+        "Note — an output that has gone high falls again after half the last measured clock interval, so the pulse width follows the incoming clock"
+      ],
+      "in": {
+        "0": 1,
+        "1": 2
+      },
+      "out": {
+        "0": 3,
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3,
+        "6": 3,
+        "7": 3
+      },
+      "family": {
+        "in": {
+          "0": "trigger",
+          "1": "trigger"
+        },
+        "out": {
+          "0": "trigger",
+          "1": "trigger",
+          "2": "trigger",
+          "3": "trigger",
+          "4": "trigger",
+          "5": "trigger",
+          "6": "trigger",
+          "7": "trigger"
+        }
+      },
+      "notes": "The panel heading reads DIV, but no output divides the clock: each one fires at its own position in a 19-count cycle, so every output fires at the same rate and only the placement differs. The code passes the clock input's own voltage while an output is high, where docs/prime.md says 1.7."
+    },
+    "RotatingClockDivider": {
+      "lines": [
+        "Clock divider counting incoming pulses 1 to 8 over and over, with a trigger input that steps the eight divisions round the eight output jacks",
+        "Each rise past 1.7V advances the count; the first pulse after a reset only measures the interval, and counting starts on the one after it",
+        "Each rise past 1.7V moves every division on one jack, the eighth wrapping round to the first, and eight triggers return them where they started",
+        "A rise past 1.7V sets the count back to the start; the next pulse after it measures the interval and counting resumes on the one after that; it leaves the rotation where it is",
+        "Unrotated, goes high on each count that divides by its own number, carrying the CLOCK input's own voltage rather than the 1.7V the manual states; ROT moves which division arrives here",
+        "Note — an output that has gone high falls again after half the last measured clock interval, so the pulse width follows the incoming clock"
+      ],
+      "in": {
+        "0": 1,
+        "1": 2,
+        "2": 3
+      },
+      "out": {
+        "0": 4,
+        "1": 4,
+        "2": 4,
+        "3": 4,
+        "4": 4,
+        "5": 4,
+        "6": 4,
+        "7": 4
+      },
+      "family": {
+        "in": {
+          "0": "trigger",
+          "1": "trigger",
+          "2": "trigger"
+        },
+        "out": {
+          "0": "trigger",
+          "1": "trigger",
+          "2": "trigger",
+          "3": "trigger",
+          "4": "trigger",
+          "5": "trigger",
+          "6": "trigger",
+          "7": "trigger"
+        }
+      },
+      "notes": "RST resets the clock count only; the rotation count is untouched by it and by the module's own initialisation."
+    },
+    "ShiftingClockDividerCV": {
+      "lines": [
+        "Clock divider counting incoming pulses 1 to 8 over and over, with a CV input that sets how far the eight divisions are shifted round the eight output jacks",
+        "Each rise past 1.7V advances the count; the first pulse after a reset only measures the interval, and counting starts on the one after it",
+        "The voltage here, rounded to the nearest volt and reduced by one, shifts the divisions 0 to 7 jacks down; 0V and 1V leave them unshifted, 1.5V moves them one jack, and 8V or more moves them seven",
+        "A rise past 1.7V sets the count back to the start; the next pulse after it measures the interval and counting resumes on the one after that; it leaves the shift where it is",
+        "Unshifted, goes high on each count that divides by its own number, carrying the CLOCK input's own voltage rather than the 1.7V the manual states; SHFT moves which division arrives here",
+        "Note — an output that has gone high falls again after half the last measured clock interval, so the pulse width follows the incoming clock"
+      ],
+      "in": {
+        "0": 1,
+        "1": 2,
+        "2": 3
+      },
+      "out": {
+        "0": 4,
+        "1": 4,
+        "2": 4,
+        "3": 4,
+        "4": 4,
+        "5": 4,
+        "6": 4,
+        "7": 4
+      },
+      "family": {
+        "in": {
+          "0": "trigger",
+          "1": "cv",
+          "2": "trigger"
+        },
+        "out": {
+          "0": "trigger",
+          "1": "trigger",
+          "2": "trigger",
+          "3": "trigger",
+          "4": "trigger",
+          "5": "trigger",
+          "6": "trigger",
+          "7": "trigger"
+        }
+      },
+      "notes": "The CV column printed down the right of the panel gives the shift voltage that puts the /1 division on each row: 0v, 1.5, 2.5 and so on to 7.5."
+    },
+    "4-StepSequencer": {
+      "lines": [
+        "Four-step pitch sequencer clocked from outside, with one octave knob for all four steps and a semitone knob per step",
+        "Each rise past 1.7V moves on to the next step and sets NOTE OUT to that step's pitch",
+        "A rise past 1.7V makes the next clock play step 1",
+        "Sets the octave of all four steps, snapping to whole numbers 1 to 8; 4 gives 0V and each number above it adds a volt, so the range is -3V to 4V",
+        "Sets the semitone for that step, snapping to whole numbers 0 to 11, and adds that many twelfths of a volt to the octave voltage",
+        "The pitch of the step now playing, held until the next clock; nothing is output before the first clock arrives",
+        "Note — the twelve semitones are stored rounded to two decimal places, so a step can be up to 4 cents away from equal temperament"
+      ],
+      "param": {
+        "0": 3,
+        "1": 4,
+        "2": 4,
+        "3": 4,
+        "4": 4
+      },
+      "in": {
+        "0": 1,
+        "1": 2
+      },
+      "out": {
+        "0": 5
+      },
+      "family": {
+        "in": {
+          "0": "trigger",
+          "1": "trigger"
+        },
+        "out": {
+          "0": "pitch"
+        }
+      }
+    },
+    "8-StepSequencer": {
+      "lines": [
+        "Eight-step pitch sequencer clocked from outside, with an octave knob and a semitone knob for each step",
+        "Each rise past 1.7V moves on to the next step and sets NOTE OUT to that step's pitch",
+        "A rise past 1.7V makes the next clock play step 1",
+        "Sets the octave of that step, snapping to whole numbers 1 to 8; 4 gives 0V and each number above it adds a volt, so the range is -3V to 4V",
+        "Sets the semitone for that step, snapping to whole numbers 0 to 11, and adds that many twelfths of a volt to that step's octave voltage",
+        "The pitch of the step now playing, held until the next clock; nothing is output before the first clock arrives",
+        "Note — the twelve semitones are stored rounded to two decimal places, so a step can be up to 4 cents away from equal temperament"
+      ],
+      "param": {
+        "0": 3,
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3,
+        "6": 3,
+        "7": 3,
+        "8": 4,
+        "9": 4,
+        "10": 4,
+        "11": 4,
+        "12": 4,
+        "13": 4,
+        "14": 4,
+        "15": 4
+      },
+      "in": {
+        "0": 1,
+        "1": 2
+      },
+      "out": {
+        "0": 5
+      },
+      "family": {
+        "in": {
+          "0": "trigger",
+          "1": "trigger"
+        },
+        "out": {
+          "0": "pitch"
+        }
+      }
+    }
+  }
+}
