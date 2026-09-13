@@ -148,6 +148,9 @@ struct Clarity : Module {
 		P_JACKS, P_CABLE_COLOR, P_KNOBS, P_CABLE_FLOW,
 		P_PINCH, P_TRACE, P_CLICK_CABLES, P_SLIDER_SCROLL,
 		P_ANIMATE_CLICKS, P_SHOW_VALUES,
+		// APPENDED, NEVER INSERTED. Rack saves a param by its number, so a new one in the
+		// middle would move everything after it and load somebody's saved patch wrong.
+		P_HELP,
 		NUM_PARAMS
 	};
 
@@ -187,6 +190,13 @@ struct Clarity : Module {
 		// filmed — it is the one part of this that answers "what did I just set that to"
 		// without leaning towards the panel. So it does not depend on the pointer being drawn.
 		configSwitch(P_SHOW_VALUES, 0.f, 1.f, 0.f, "Show pop-up on adjust", {"Off", "On"});
+		// OFF BY DEFAULT, because it claims a gesture on everybody else's panel. Cmd-shift-click
+		// is unbound in Rack today, but it is not ours, and a plugin that silently takes a
+		// modifier over somebody's whole rack the moment it is placed is the kind of thing that
+		// gets reported as a bug in a third plugin. Off also makes the gesture discoverable
+		// through this switch rather than by accident.
+		configSwitch(P_HELP, 0.f, 1.f, 0.f,
+			"Help on " HELP_MOD_NAME "-click", {"Off", "On"});
 	}
 
 	/** Copies the params into the flags the overlays read. Called from the widget's step, on
@@ -960,8 +970,22 @@ struct DRUIOverlay : widget::TransparentWidget {
 				Knob* knob = dynamic_cast<Knob*>(pw);
 				if (!knob || !reallyVisible(knob, mw))
 					continue;
+				// A SLIDER IS NOT A KNOB, though Rack makes it one: SliderKnob derives from Knob,
+				// so it arrives here and was given a little round knob in the middle of its
+				// track. Nothing about that reads as the control it is drawn on, and the value
+				// it showed was the fader's, pointing in a direction a fader has no meaning for.
+				// Consistent knobs means every KNOB drawn alike, not every parameter turned into
+				// one.
+				if (dynamic_cast<app::SliderKnob*>(pw))
+					continue;
 				const float r = std::fmin(knob->box.size.x, knob->box.size.y) / 2.f;
 				if (r <= 1.f)
+					continue;
+				// AND NEITHER IS ANYTHING ELSE SHAPED LIKE A TRACK. A maker may build a fader
+				// from a plain Knob, and a control half as wide as it is tall — or the reverse —
+				// is not something a round face belongs on.
+				const float w = knob->box.size.x, h = knob->box.size.y;
+				if (w > 0.f && h > 0.f && (w / h > 1.8f || h / w > 1.8f))
 					continue;
 				const math::Vec c = centreOf(knob);
 				float frac = 0.5f;
@@ -1421,6 +1445,11 @@ struct ClarityWidget : DRUIWidgetBase {
 			// anything will never touch, and a panel should read in the order it matters.
 			{Clarity::P_ANIMATE_CLICKS, "Animate",      "clicks"},
 			{Clarity::P_SHOW_VALUES,    "Show pop-up",  "on adjust"},
+			// LAST, AND OFF: the only switch here that changes what a click does rather than
+			// what the rack looks like. Two lines is all a row has, so the panel says the short
+			// form and the param's own name — what a hover and the right-click menu show —
+			// says the whole of it.
+			{Clarity::P_HELP,           "Help on",      HELP_MOD_NAME "-click"},
 		};
 		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
@@ -1453,6 +1482,19 @@ struct ClarityWidget : DRUIWidgetBase {
 		// here every frame. Without this the buttons moved and nothing else did.
 		m->syncOptions();
 		installOverlays();
+		helpStep(m->params[Clarity::P_HELP].getValue() > 0.5f);
+		// SPEECH IS NOT A SWITCH, because it is not a feature of this plugin — it is `say` on a
+		// Mac, and a button for it would be dead weight on every panel that is not this one.
+		// A file says who wants it: put an empty file called `speak-help` in the plugin's own
+		// folder under Rack's user directory and the note reads itself out when clicked.
+		// Looked for once, not every frame.
+		static bool asked = false;
+		static bool speak = false;
+		if (!asked) {
+			asked = true;
+			speak = system::isFile(asset::user("DreamerDevelopment/speak-help"));
+		}
+		helpSetSpeak(speak);
 		ModuleWidget::step();
 	}
 
@@ -1604,13 +1646,15 @@ need their titles written back are decided in Dark.cpp, where they can be argued
 rather than in a menu. The one control is whether it is doing anything at all, which is worth
 having because seeing the difference is most of the work of judging it. */
 struct Darkener : Module {
-	enum ParamId { P_ON, P_HELP, P_SPEAK, NUM_PARAMS };
+	// HELP MOVED TO CLARITY. It is a thing a rack has once and it acts on every module, which
+	// is what Clarity is; Dark only ever held it because Dark was where the tools that reach
+	// into everybody else's widgets already lived. The numbers are left as they were rather
+	// than closed up, so a patch saved with the old three-switch Dark still loads.
+	enum ParamId { P_ON, P_UNUSED_HELP, P_UNUSED_SPEAK, NUM_PARAMS };
 
 	Darkener() {
 		config(NUM_PARAMS, 0, 0, 0);
 		configSwitch(P_ON, 0.f, 1.f, 1.f, "Dark panels", {"Off", "On"});
-		configSwitch(P_HELP, 0.f, 1.f, 1.f, "Help on cmd-shift-click", {"Off", "On"});
-		configSwitch(P_SPEAK, 0.f, 1.f, 1.f, "Read the help aloud", {"Off", "On"});
 	}
 };
 
@@ -1645,24 +1689,8 @@ struct DarkenerWidget : DRUIWidgetBase {
 		button->label2 = "panels";
 		addParam(button);
 
-		// CMD-SHIFT-CLICK ANY CONTROL TO BE TOLD WHAT IT IS. Here because Dark is where the
-		// tools that reach into everybody else's widgets already live — see Help.hpp.
-		FeatureButton* help = createParam<FeatureButton>(
-			Vec(ROW_X, ROW_TOP + ROW_H), module, Darkener::P_HELP);
-		help->box.size.x = box.size.x - ROW_X * 2;
-		help->label = "Help on";
-		help->label2 = "cmd-sh";
-		addParam(help);
-
-		FeatureButton* speak = createParam<FeatureButton>(
-			Vec(ROW_X, ROW_TOP + ROW_H * 2), module, Darkener::P_SPEAK);
-		speak->box.size.x = box.size.x - ROW_X * 2;
-		speak->label = "Speak";
-		speak->label2 = "the help";
-		addParam(speak);
-
 		CensusProgress* progress = new CensusProgress;
-		progress->box.pos = math::Vec(2.f, ROW_TOP + ROW_H * 3 + 8.f);
+		progress->box.pos = math::Vec(2.f, ROW_TOP + ROW_H + 8.f);
 		progress->box.size = math::Vec(box.size.x - 4.f, 40.f);
 		addChild(progress);
 	}
@@ -1716,8 +1744,6 @@ struct DarkenerWidget : DRUIWidgetBase {
 		}
 		countIn(gDarkenerCount);
 		darkStep(m->params[Darkener::P_ON].getValue() > 0.5f);
-		helpStep(m->params[Darkener::P_HELP].getValue() > 0.5f);
-		helpSetSpeak(m->params[Darkener::P_SPEAK].getValue() > 0.5f);
 		// A SLICE OF THE CENSUS EACH FRAME, with a budget small enough that the window keeps
 		// drawing — which is the whole point: a scan that is working must not look like one
 		// that has hung.

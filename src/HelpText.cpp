@@ -10906,17 +10906,18 @@ static const char* const L590[] = {
 	"Picks a cable up from a jack on a click that does not move, where Rack alone would do nothing; a click that moves lands the cable exactly as a drag does",
 	"Draws a ring at each click, for a screen recording where the pointer alone does not show what was pressed",
 	"Shows a knob's name and value in large type while it is being turned",
+	"Turns on the in-rack help: ⌥ click any jack, knob or title band and a note above the pointer says what that one control is",
+	"Note — help takes over the option-click menu of clip-on instruments; the same menu opens from the top of any port's right-click menu",
 	"Menu — Scroll wheel adjusts sliders, which lets the wheel move a slider the pointer is over",
 	"Note — the port colours come from a reading of each maker's own text and panels, so a jack whose meaning nobody has established is left in Rack's colour rather than guessed at",
 };
-static const short P590[] = {1,2,3,4,5,6,7,-1,8,9};
+static const short P590[] = {1,2,3,4,5,6,7,-1,8,9,10};
 static const char* const L591[] = {
-	"Darkens the panels of modules whose makers ship only light artwork, and carries the in-rack help; the darkening is in memory only, so removing this module puts every panel back",
+	"Darkens the panels of modules whose makers ship only light artwork; the darkening is in memory only, so removing this module puts every panel back",
 	"Darkens every light panel in the rack",
-	"Turns on the in-rack help: cmd-shift-click any jack, knob or title band and a note says what that one control is; a click elsewhere on a panel puts it away, as does Escape",
-	"Reads the help note aloud when it is clicked, and clicking it again stops it; a second click on a note that is talking silences it",
+	"Note — the in-rack help is a switch on Clarity, not here: it acts on every module in the rack, which is what Clarity is for",
 };
-static const short P591[] = {1,2,3};
+static const short P591[] = {1};
 static const char* const L592[] = {
 	"Test gear for the rack: right-click any port on any module and clip on an instrument — an oscilloscope, a frequency analyser, a meter or a voltage injector — which then appears beside that port",
 	"One of the hidden jacks this module patches for itself, so a measured port carries a signal or a driven port receives one; the cable and its plugs are drawn nowhere",
@@ -43134,8 +43135,8 @@ const HelpEntry HELP[] = {
 	{"DanTModules", "TimeLord", L587, 25, I587, 8, O587, 27, P587, 50, FI587, 8, FO587, 27},
 	{"DanTModules", "Wavulike", L588, 21, I588, 15, O588, 2, P588, 17, FI588, 15, FO588, 2},
 	{"DreamerDemo", "Demo", L589, 1, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
-	{"DreamerDevelopment", "Clarity", L590, 12, NULL, 0, NULL, 0, P590, 10, NULL, 0, NULL, 0},
-	{"DreamerDevelopment", "Darkener", L591, 4, NULL, 0, NULL, 0, P591, 3, NULL, 0, NULL, 0},
+	{"DreamerDevelopment", "Clarity", L590, 14, NULL, 0, NULL, 0, P590, 11, NULL, 0, NULL, 0},
+	{"DreamerDevelopment", "Darkener", L591, 3, NULL, 0, NULL, 0, P591, 1, NULL, 0, NULL, 0},
 	{"DreamerDevelopment", "TestGear", L592, 3, I592, 12, O592, 9, NULL, 0, NULL, 0, NULL, 0},
 	{"DreamerMPX", "fromMPX", L593, 14, I593, 2, O593, 7, P593, 3, FI593, 2, FO593, 7},
 	{"DreamerMPX", "mpxArp", L594, 11, I594, 1, O594, 1, P594, 8, NULL, 0, NULL, 0},

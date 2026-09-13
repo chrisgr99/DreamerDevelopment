@@ -18,9 +18,10 @@ research/make_help.py. Edit the JSON, never the generated table.
 NOT ON EVERY MODULE, AND THAT IS VISIBLE. A maker with no entry yet gets a panel saying so rather
 than a guess. Nothing here is inferred: an entry exists because their manual was read.
 
-ON THE DARK MODULE FOR NOW. It belongs in Clarity eventually — it is a thing a rack has once, not
-a thing a module does — but Dark is where the tools that walk everybody else's widgets already
-live, and moving it later is moving a call. */
+ON CLARITY, AND OFF UNTIL ASKED FOR. It is a thing a rack has once and it acts on every module,
+which is what Clarity is; Dark only held it while it was being built, because Dark was where the
+tools that walk everybody else's widgets already lived. Off by default because it claims a
+gesture on somebody else's panel, and that is not a thing to take without being asked. */
 #include "plugin.hpp"
 
 #include <string>
@@ -57,6 +58,34 @@ struct HelpEntry {
 	int outFamilyCount;
 };
 
+/** THE GESTURE'S NAME, AS SHORT AS THE PANEL NEEDS IT.
+
+Symbols on a Mac, because a two-line row has about twelve characters to spend. DejaVuSans, which
+is the panel font, carries U+2325 and U+21E7 — checked, not assumed. Windows and Linux have no
+symbol anybody reads at a glance, so they get the words they are used to.
+
+OPTION, AND WHERE IT IS HANDLED IS THE WHOLE POINT. Cmd+Shift is Rack's clone-the-top-cable on
+a port, so a question there began a cable and took it back. Control cannot be used on a Mac at
+all: Rack's mouse callback turns Control-click into a RIGHT click and Control-Shift-click into a
+MIDDLE click, stripping the modifier, before any widget sees it.
+
+Option looked impossible too, because ScrollWidget consumes option-click BEFORE its children so
+that option-drag can pan the rack. It is not: that only defeats a handler parented to the rack.
+Clarity's own overlay is a child of the SCENE, added after the rack's scroll view, which is why
+option-click has always opened the clip-on menu on a port. The help is answered from that same
+overlay, so option reaches it untouched — and nothing of Rack's is claimed, since the only thing
+Rack does with option is pan, which still works everywhere except over a control.
+
+SPEECH IS HANDLED SEPARATELY, and has to be: `say` reads a symbol as nothing at all. helpSpeech
+turns these back into words on the way to the voice, which is the same split every other piece of
+panel shorthand gets — what is on screen matches what is printed, and the spoken copy is
+computed from it. */
+#if defined ARCH_MAC
+	#define HELP_MOD_NAME "⌥"
+#else
+	#define HELP_MOD_NAME "Alt"
+#endif
+
 /** What kind of thing was clicked. */
 enum HelpKind { HELP_INPUT, HELP_OUTPUT, HELP_PARAM };
 extern const HelpEntry HELP[];
@@ -75,21 +104,13 @@ std::string helpForControl(const std::string& plugin, const std::string& model,
 
 /** Keeps the click-catcher on the rack, and switches option-click help on or off.
 
-HOW IT IS ASKED. Cmd-shift-click any jack or knob — Ctrl-shift on Windows and Linux — and a note
-appears beside it saying what that one control is. The same on the module's TITLE BAND, the top
-of its panel, says what the module is. Anywhere else on the panel puts the note away, as does an
+HOW IT IS ASKED. Option-click any jack or knob — Alt elsewhere — and a note appears above the
+pointer saying what that one control is. The same on the module's TITLE BAND, the top of its
+panel, says what the module is. Anywhere else on the panel puts the note away, as does an
 ordinary click anywhere at all, or Escape. Nothing is added to anybody's panel.
 
-Option was tried first and cannot work: Rack's own ScrollWidget consumes alt-click before its
-children, because alt-drag is how the rack is panned. Cmd alone is taken too — Cmd-drag from a
-jack creates a cable, and Cmd on a knob is fine adjust. A Cmd-shift CLICK, pressed and released
-without travel, is the one gesture Rack leaves spare; Cmd-shift-DRAG still clones a cable, which
-is why a press over a jack waits for the release before deciding.
-
-Cheap to call every frame. See the note in Help.cpp for why the catcher lives on the rack rather
-than on each module — a widget inside a module never sees a click while that module is selected,
-which is the ordinary state of a module somebody is working on, and that is what defeated the
-first attempt at this. */
+Cheap to call every frame. This now only keeps the note on the scene and watches for Escape: the
+click itself arrives through Clarity's overlay, for the reason set out above. */
 void helpStep(bool enabled);
 
 /** Whether opening the panel also reads it out.
@@ -109,15 +130,19 @@ part of the same plugin picks a cable up off it is not a mode. Anything of ours 
 click asks this first and stands down. */
 bool helpModeOn();
 
-/** Whether help claims THIS click, and everything else of ours should stand down for it.
+/** Answers a help click at this point, given in the RACK's coordinates.
 
-FOR THE ONE CLICK, NOT FOR EVER. Clarity has gestures of its own on the rack — clicking a jack to
-carry a cable, most of all — and they run from a handler high in the scene where the help catcher
-cannot get in front of them, so they have to stand down by asking. When help was a mode the
-question was "is the mode on"; now that it is a single modified click, the question is whether
-this click is that one. Asking the old question meant Clarity's click-to-patch was switched off
-for the whole session. */
-bool helpClaimsClick(int mods);
+CALLED FROM CLARITY'S SCENE OVERLAY, because that is the only place an option-click arrives.
+ScrollWidget consumes option-click before its children so that option-drag can pan the rack, so
+anything parented to the rack never sees one — which is why the first attempt at this gesture
+failed. The overlay that already answers option-click on a port is a child of the SCENE, above
+that scroll view, and this is the same click asked of the same overlay.
+
+Returns whether the click was taken. */
+bool helpClickAt(math::Vec rackPos);
+
+/** Puts the note away, for any ordinary click that is not a question. */
+void helpDismissNote();
 
 /** Puts away anything on the screen and stops anything being read. Called when the last module
 that asked for help leaves. */

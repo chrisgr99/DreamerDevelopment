@@ -1311,17 +1311,11 @@ struct InterceptOverlay : widget::Widget {
 	void onButton(const ButtonEvent& e) override {
 		notePointerButton(e);
 
-		// A HELP CLICK IS NOT A PATCHING CLICK. Cmd-shift-click asks what a jack is, and carrying
-		// a cable off it — which is this file's whole purpose — is exactly the wrong answer. The
-		// help catcher sits on the rack and cannot get in front of this handler, which is higher
-		// in the scene, so the standing down has to happen here.
-		//
-		// THIS CLICK ONLY. An earlier version asked whether help was switched on at all, which
-		// was true for the whole session and quietly disabled click-to-patch entirely.
-		if (helpClaimsClick(e.mods)) {
-			widget::Widget::onButton(e);
-			return;
-		}
+		// NO STANDING DOWN FOR HELP ANY MORE. There used to be a guard here that handed a help
+		// click straight to the children, from when help was answered by a catcher inside the
+		// rack that this handler sat in front of. Help is answered in THIS function now, further
+		// down, so the guard was returning before the code that does the work — and it only
+		// misfired while help was switched on, which is the one state in which it mattered.
 
 		// Anything floating over the rack owns its own clicks, like a menu does — our colour
 		// chooser and diagnostics window among them, and anybody else's window as well.
@@ -1490,10 +1484,34 @@ struct InterceptOverlay : widget::Widget {
 			cableFocusClear();
 		}
 
+		// AN ORDINARY CLICK PUTS THE HELP NOTE AWAY. It is a transient answer to a question
+		// rather than a window, so getting on with anything dismisses it. A click ON the note is
+		// never seen here: the note is a child of the scene added after this overlay, so it is
+		// offered the click first and consumes it to read itself out.
+		if (e.action == GLFW_PRESS && (e.mods & RACK_MOD_MASK) != GLFW_MOD_ALT)
+			helpDismissNote();
+
 		if (e.action != GLFW_PRESS || e.button != GLFW_MOUSE_BUTTON_LEFT
 			|| (e.mods & RACK_MOD_MASK) != GLFW_MOD_ALT) {
 			widget::Widget::onButton(e);
 			return;
+		}
+
+		// HELP FIRST, WHERE IT IS SWITCHED ON, and it answers for the whole rack rather than
+		// only for a port — a knob, a switch and a module's title band all have something to
+		// say. This is the only place in the plugin that an option-click arrives: ScrollWidget
+		// consumes one before its children so that option-drag can pan, so a handler inside the
+		// rack never sees one. See Help.hpp.
+		//
+		// IT TAKES THE CLIP-ON MENU'S GESTURE, deliberately. The instruments are still one
+		// right-click away, at the top of any port's menu, which is how they are documented.
+		if (helpModeOn()) {
+			const math::Vec rackPos = APP->scene->rack->getMousePos();
+			if (helpClickAt(rackPos)) {
+				e.consume(this);
+				e.stopPropagating();
+				return;
+			}
 		}
 		app::PortWidget* port = clipFamilyAt(e.pos)
 			? NULL : widgetAt<app::PortWidget>(APP->scene, e.pos);

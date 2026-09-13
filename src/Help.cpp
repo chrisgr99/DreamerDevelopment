@@ -116,6 +116,12 @@ Every one of these is a thing `say` gets wrong when read straight: it says the d
 a word, spells nothing out of "3HP", and reads "dB" as a syllable. The panel keeps the short
 forms because they are what is printed on the module; this is a second copy for the voice. */
 static std::string helpSpeech(std::string t) {
+	// A MODIFIER SYMBOL IS SILENT. The panel says ⌘⇧ because a row has no room for the words;
+	// `say` reads both as nothing, so the voice gets them back. Before everything else, so the
+	// words that come out are then treated like any other words.
+	t = std::regex_replace(t, std::regex("\u2325"), "option ");
+	t = std::regex_replace(t, std::regex("\u2318"), "command ");
+	t = std::regex_replace(t, std::regex("\u21E7"), "shift");
 	// An em dash is a pause, not a word. A leading bullet dash is not a word either.
 	t = std::regex_replace(t, std::regex("\n- "), "\n");
 	t = std::regex_replace(t, std::regex("—"), ",");
@@ -223,6 +229,13 @@ struct HelpPopup : widget::OpaqueWidget {
 	own box is in window coordinates and has to be recomputed whenever the rack is scrolled or
 	zoomed. This is the anchor it is placed against: the control's box, in rack space. */
 	math::Rect anchor;
+	/** WHERE THE POINTER WAS WHEN IT WAS ASKED, in the rack's own coordinates.
+
+	The note is centred above this rather than beside the control, so that it never lands where
+	Rack draws its own tooltip — which appears below and to the right of the cursor. Kept in rack
+	coordinates, not window ones, so the note stays with the control when the rack is scrolled or
+	zoomed under it. */
+	math::Vec pointer;
 	/** When the copy was last taken, so the button can show that it worked. */
 	double copiedAt = -1.0;
 
@@ -389,14 +402,38 @@ static void helpPopupPlace() {
 	widget::Widget* rack = APP->scene->rack;
 	const float zoom = rack->getAbsoluteZoom();
 	const math::Vec origin = rack->getAbsoluteOffset(math::Vec(0.f, 0.f));
-	const math::Rect a = gPopup->anchor;
+	// CENTRED ABOVE THE POINTER. Rack puts its own tooltip below and to the right of the cursor,
+	// so anything drawn there fights it; above is the one side that is always free. Far enough
+	// up to clear the cursor itself.
+	static const float GAP = 18.f;
+	const math::Vec p = origin.plus(gPopup->pointer.mult(zoom));
 
-	float x = origin.x + (a.pos.x + a.size.x) * zoom + 8.f;
-	const float y = origin.y + a.pos.y * zoom - 4.f;
-	if (x + gPopup->box.size.x > APP->scene->box.size.x)
-		x = origin.x + a.pos.x * zoom - gPopup->box.size.x - 8.f;
-	gPopup->box.pos = math::Vec(std::max(x, 0.f),
-		math::clamp(y, 0.f, std::max(0.f, APP->scene->box.size.y - gPopup->box.size.y)));
+	float x = p.x - gPopup->box.size.x / 2.f;
+	float y = p.y - gPopup->box.size.y - GAP;
+	// Near the top of the window there is no room above, so it goes below — which is where the
+	// tooltip is, but a note the reader cannot see at all is worse than one they have to move off.
+	if (y < 0.f)
+		y = p.y + GAP;
+	const float maxX = std::max(0.f, APP->scene->box.size.x - gPopup->box.size.x);
+	const float maxY = std::max(0.f, APP->scene->box.size.y - gPopup->box.size.y);
+	gPopup->box.pos = math::Vec(math::clamp(x, 0.f, maxX), math::clamp(y, 0.f, maxY));
+}
+
+/** The text as this machine should read it.
+
+ONE PHRASE, AND IT IS OURS. Only our own entries name the gesture, and they name it the Mac way
+because that is where they were written, in the symbols the Mac panel uses. Rather than keep two copies of a line, the one phrase is
+swapped on the way to the screen — which is also the way to the voice, since the spoken copy is
+computed from this. Narrow on purpose: a maker who writes "cmd" about something else of their own
+is left alone, because only the exact gesture is matched. */
+static std::string helpPlatformText(std::string t) {
+#if !defined ARCH_MAC
+	const std::string from = "\u2325\u21E7";
+	const std::string to = "Alt+Shift";
+	for (size_t at = t.find(from); at != std::string::npos; at = t.find(from, at + to.size()))
+		t.replace(at, from.size(), to);
+#endif
+	return t;
 }
 
 /** Shows the note for one control, anchored to the control's box in rack coordinates. */
@@ -410,10 +447,12 @@ static void helpPopupShow(app::ModuleWidget* mw, math::Rect controlBox,
 	gPopup->what = what;
 	gPopup->fromMaker = fromMaker;
 	gPopup->copiedAt = -1.0;
+	gPopup->pointer = APP->scene && APP->scene->rack
+		? APP->scene->rack->getMousePos() : math::Vec();
 	gPopup->title = title;
 	gPopup->line = line.empty()
 		? "Nothing here describes this one yet."
-		: line;
+		: helpPlatformText(line);
 	gPopup->missing = line.empty();
 	gPopup->box.size.x = 290.f;
 	if (APP->window && APP->window->vg)
@@ -531,21 +570,9 @@ more was a drag and Rack's clone has it. Over a knob or bare panel nothing is at
 answer on the press and feel immediate. */
 static bool gHelpOn = true;
 
-/** Whether option-click help is switched on, for the rest of the plugin's own gestures. */
 bool helpModeOn() {
 	return gHelpOn;
 }
-
-bool helpClaimsClick(int mods) {
-	return gHelpOn && (mods & RACK_MOD_MASK) == (RACK_MOD_CTRL | GLFW_MOD_SHIFT);
-}
-
-/** A press we are waiting to see the end of, because it landed on a jack. */
-static app::ModuleWidget* gPressModule = NULL;
-static math::Vec gPressAt;
-static bool gPressPending = false;
-/** How far the mouse may travel and still count as a click rather than a drag. */
-static const float HELP_CLICK_SLOP = 3.f;
 
 /** WHAT THE MAKER CALLS IT, ASKED OF THE MODULE IN THE RACK.
 
@@ -625,165 +652,117 @@ static void helpTake(const widget::Widget::ButtonEvent& e, widget::Widget* by) {
 	e.stopPropagating();
 }
 
-struct HelpCatcher : widget::Widget {
-	/** THE TITLE BAND ACROSS THE TOP OF A MODULE, where nearly every maker puts its name.
+/** THE TITLE BAND ACROSS THE TOP OF A MODULE, where nearly every maker puts its name.
 
-	Where the title is cannot be asked — a maker draws it wherever they like, and Rack's own SVG
-	renderer has no text at all, so a panel's name is either outlines or drawn in the maker's own
-	code. This is the top of the panel, which is where it nearly always is. */
-	static float titleBand() { return 40.f; }
+Where the title is cannot be asked — a maker draws it wherever they like, and Rack's own SVG
+renderer has no text at all, so a panel's name is either outlines or drawn in the maker's own
+code. This is the top of the panel, which is where it nearly always is. */
+static float titleBand() { return 40.f; }
 
-	/** Shows the note for whatever is at this point in the module's own coordinates, or puts the
-	note away where there is nothing to say. */
-	void answer(app::ModuleWidget* mw, math::Vec local) {
-		std::string what, line;
-		math::Rect where;
-		HelpKind kind = HELP_PARAM;
-		int index = -1;
-		if (helpControlAt(mw, local, what, line, where, kind, index)) {
-			if (!line.empty()) {
-				helpPopupShow(mw, where, what, line, false, what);
-				return;
-			}
-			// NOTHING WRITTEN FOR THIS ONE: ask the module itself. Better the maker's own words,
-			// marked as theirs, than telling somebody nobody has got round to it.
-			const std::string maker = helpMakerText(mw, kind, index);
-			if (!maker.empty()) {
-				helpPopupShow(mw, where, what, maker, false, what, true);
-				return;
-			}
-			helpPopupShow(mw, where, what, "", true, what);
+/** Shows the note for whatever is at this point in the module's own coordinates, or puts the
+note away where there is nothing to say. */
+static void helpAnswer(app::ModuleWidget* mw, math::Vec local) {
+	std::string what, line;
+	math::Rect where;
+	HelpKind kind = HELP_PARAM;
+	int index = -1;
+	if (helpControlAt(mw, local, what, line, where, kind, index)) {
+		if (!line.empty()) {
+			helpPopupShow(mw, where, what, line, false, what);
 			return;
 		}
-		// THE TITLE IS THE MODULE ITSELF: what the thing is, which is the first line of its
-		// entry, not a list of everything on it.
-		if (local.y < titleBand()) {
-			const std::string plugin = mw->model->plugin ? mw->model->plugin->slug : "";
-			const std::vector<std::string> lines = helpFor(plugin, mw->model->slug);
-			const std::string idea = lines.empty() ? "" : lines[0];
-			const math::Rect at(math::Vec(local.x, titleBand()), math::Vec(0.f, 0.f));
-			if (!idea.empty()) {
-				helpPopupShow(mw, at, mw->model->name, idea, false);
-				return;
-			}
-			// NOTHING WRITTEN FOR THIS MODULE: the maker's own one-line description, which is the
-			// text the module browser shows. Marked as theirs, like the per-control fallback.
-			// NYSTHI's Bitshifter, which nobody has written an entry for, describes itself as
-			// "256 bits bitshifter with S&H and noise and inner LFO and VCO" — worth hearing.
-			const std::string made = mw->model->description;
-			helpPopupShow(mw, at, mw->model->name, made, made.empty(), "", !made.empty());
+		// NOTHING WRITTEN FOR THIS ONE: ask the module itself. Better the maker's own words,
+		// marked as theirs, than telling somebody nobody has got round to it.
+		const std::string maker = helpMakerText(mw, kind, index);
+		if (!maker.empty()) {
+			helpPopupShow(mw, where, what, maker, false, what, true);
 			return;
 		}
-		// ANYWHERE ELSE ON THE PANEL CLOSES IT. Bare panel has nothing of its own to say, and
-		// somewhere harmless to click is worth more than one more thing to read.
+		helpPopupShow(mw, where, what, "", true, what);
+		return;
+	}
+	// THE TITLE IS THE MODULE ITSELF: what the thing is, which is the first line of its
+	// entry, not a list of everything on it.
+	if (local.y < titleBand()) {
+		const std::string plugin = mw->model->plugin ? mw->model->plugin->slug : "";
+		const std::vector<std::string> lines = helpFor(plugin, mw->model->slug);
+		const std::string idea = lines.empty() ? "" : lines[0];
+		const math::Rect at(math::Vec(local.x, titleBand()), math::Vec(0.f, 0.f));
+		if (!idea.empty()) {
+			helpPopupShow(mw, at, mw->model->name, idea, false);
+			return;
+		}
+		// NOTHING WRITTEN FOR THIS MODULE: the maker's own one-line description, which is the
+		// text the module browser shows. Marked as theirs, like the per-control fallback.
+		// NYSTHI's Bitshifter, which nobody has written an entry for, describes itself as
+		// "256 bits bitshifter with S&H and noise and inner LFO and VCO" — worth hearing.
+		const std::string made = mw->model->description;
+		helpPopupShow(mw, at, mw->model->name, made, made.empty(), "", !made.empty());
+		return;
+	}
+	// ANYWHERE ELSE ON THE PANEL CLOSES IT. Bare panel has nothing of its own to say, and
+	// somewhere harmless to click is worth more than one more thing to read.
+	helpPopupHide();
+	helpSilence();
+}
+
+static app::ModuleWidget* helpModuleAt(math::Vec pos) {
+	for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
+		if (mw->box.contains(pos) && mw->model)
+			return mw;
+	}
+	return NULL;
+}
+
+
+/** A HELP CLICK, WHEREVER IT IS DELIVERED FROM.
+
+THE GESTURE IS HANDLED ABOVE THE RACK, NOT INSIDE IT, and that is not a preference — it is the
+only place it can be. ScrollWidget consumes option-click BEFORE its children, because option-drag
+pans the rack, so a catcher parented to the rack never saw one. Clarity's own overlay is a child
+of the SCENE, added after the rack's scroll view, which is why the option-click menu on a port
+has always worked. This is the same click, asked of the same overlay.
+
+`rackPos` is the pointer in the RACK's coordinates, which is what the module boxes are in;
+APP->scene->rack->getMousePos() hands it over with no conversion to do. Returns whether the click
+was taken. */
+bool helpClickAt(math::Vec rackPos) {
+	if (!gHelpOn)
+		return false;
+	app::ModuleWidget* hit = helpModuleAt(rackPos);
+	if (!hit) {
+		// Bare rack: nothing to say, and the note goes away rather than hanging over nothing.
+		helpPopupHide();
+		helpSilence();
+		return true;
+	}
+	helpAnswer(hit, rackPos.minus(hit->box.pos));
+	return true;
+}
+
+/** Puts the note away, for any ordinary click elsewhere. */
+void helpDismissNote() {
+	if (gPopup && gPopup->isVisible()) {
 		helpPopupHide();
 		helpSilence();
 	}
+}
 
-	app::ModuleWidget* moduleAt(math::Vec pos) {
-		for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
-			if (mw->box.contains(pos) && mw->model)
-				return mw;
-		}
-		return NULL;
-	}
+/** Keeps the note on the scene and watches for Escape.
 
-	bool isOurs(const ButtonEvent& e) {
-		return gHelpOn && e.button == GLFW_MOUSE_BUTTON_LEFT
-			&& (e.mods & RACK_MOD_MASK) == (RACK_MOD_CTRL | GLFW_MOD_SHIFT);
-	}
+THE NOTE LIVES ON THE SCENE, NOT IN THE RACK, and that is about being seen. RackWidget::draw
+paints four layers in order: panels and modules, then lights and halos, then plugs, then cables.
+Anything drawn as part of the first is repainted by the other three, so a note inside the rack was
+covered by every lamp, plug and cable over it. Rack's own tooltips are worse still: they are on
+the scene and drawn after the whole rack.
 
-	void onButton(const ButtonEvent& e) override {
-		// THE NOTE ITSELF FIRST, whatever the modifiers. It is a child of this widget, and a
-		// plain click on it reads it out — see HelpPopup::onButton.
-		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
-			widget::Widget::onButton(e);
-			if (e.isConsumed())
-				return;
-		}
-
-		if (!isOurs(e)) {
-			// AN ORDINARY CLICK PUTS THE NOTE AWAY. It is a transient answer to a question, not
-			// a window, so getting on with anything dismisses it — and a click ON the note has
-			// already been handled above, so that one reads it out instead of closing it.
-			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
-					&& gPopup && gPopup->isVisible()) {
-				helpPopupHide();
-				helpSilence();
-			}
-			if (e.action == GLFW_PRESS)
-				gPressPending = false;
-			widget::Widget::onButton(e);
-			return;
-		}
-
-		if (e.action == GLFW_PRESS) {
-			app::ModuleWidget* hit = moduleAt(e.pos);
-			gPressPending = false;
-			if (!hit) {
-				helpPopupHide();
-				return;
-			}
-			const math::Vec local = e.pos.minus(hit->box.pos);
-			// OVER A JACK, WAIT. Rack may be about to clone a cable from it, and only the
-			// release says whether this was a click or the start of that drag.
-			if (helpPortAt(hit, local)) {
-				gPressModule = hit;
-				gPressAt = e.pos;
-				gPressPending = true;
-				widget::Widget::onButton(e);
-				return;
-			}
-			helpTake(e, this);
-			answer(hit, local);
-			return;
-		}
-
-		if (e.action == GLFW_RELEASE && gPressPending) {
-			gPressPending = false;
-			const bool moved = e.pos.minus(gPressAt).norm() > HELP_CLICK_SLOP;
-			if (!moved && gPressModule) {
-				answer(gPressModule, gPressAt.minus(gPressModule->box.pos));
-				// Rack may have begun cloning a cable on the press. A clone that was never
-				// dragged anywhere is not wanted, and it is always a NEW cable, so removing it
-				// cannot cost the user a connection they had.
-				for (app::CableWidget* cw : APP->scene->rack->getIncompleteCables()) {
-					APP->scene->rack->removeCable(cw);
-					delete cw;
-				}
-				helpTake(e, this);
-				return;
-			}
-		}
-		widget::Widget::onButton(e);
-	}
-};
-
-/** Puts the catcher on the rack and keeps it last, so it is offered a click before the modules
-under it. Also watches for Escape, which leaves help mode. */
+So the note is a child of the scene and is moved to the END of the scene's children every frame
+while it is showing, which puts it after the rack and after any tooltip that has just appeared.
+Its position is then in window coordinates and has to be recomputed as the rack scrolls and
+zooms — see helpPopupPlace. */
 static void helpCatcherStep() {
-	if (!APP->scene || !APP->scene->rack || !APP->window)
+	if (!APP->scene || !APP->window)
 		return;
-	app::RackWidget* rack = APP->scene->rack;
-	static HelpCatcher* catcher = NULL;
-	if (!catcher) {
-		catcher = new HelpCatcher;
-		rack->addChild(catcher);
-	}
-	catcher->box.pos = math::Vec(0.f, 0.f);
-	catcher->box.size = rack->box.size;
-
-	// THE NOTE LIVES ON THE SCENE, NOT IN THE RACK, and that is about being seen.
-	//
-	// RackWidget::draw paints four layers in order: panels and modules, then lights and halos,
-	// then plugs, then cables. Anything drawn as part of the first is repainted by the other
-	// three, so a note inside the rack was covered by every lamp, plug and cable over it. Rack's
-	// own tooltips are worse still: they are on the scene and drawn after the whole rack.
-	//
-	// So the note is a child of the scene and is moved to the END of the scene's children every
-	// frame while it is showing, which puts it after the rack and after any tooltip that has just
-	// appeared. Its position is then in window coordinates and has to be recomputed as the rack
-	// scrolls and zooms — see helpPopupPlace.
 	if (!gPopup) {
 		gPopup = new HelpPopup;
 		gPopup->box.size = math::Vec(290.f, 40.f);
@@ -798,17 +777,10 @@ static void helpCatcherStep() {
 		helpPopupPlace();
 	}
 
-	// LAST, EVERY FRAME, WITHOUT CONDITION. Anything added to the rack afterwards would otherwise
-	// be asked about a click before it.
-	if (rack->children.back() != catcher) {
-		rack->removeChild(catcher);
-		rack->addChild(catcher);
-	}
-
 	// ESCAPE PUTS THE NOTE AWAY TOO, for a hand already on the keyboard. Polled rather than
 	// handled as a key event, because a key event goes to whatever is focused and nothing here
 	// takes focus.
-	if (gPopup && gPopup->isVisible()
+	if (gPopup->isVisible()
 			&& glfwGetKey(APP->window->win, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		helpPopupHide();
 		helpSilence();
