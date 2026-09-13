@@ -1,6 +1,6 @@
 {
  "plugin": "Geodesics",
- "source": "https://marcboule.github.io/Geodesics/",
+ "source": "https://www.pyer.be/geodesics.html",
  "read": "2026-09-13",
  "modules": {
   "BlackHoles": {
@@ -13,7 +13,8 @@
     "The signal into that channel, which is multiplied by the channel's level and sent both to its own output and to the black hole mix",
     "Adds to the level knob of that channel, a full sweep taking 5V or 10V according to the gravity setting of that black hole",
     "That channel's input at the level set for it, or a fixed voltage from the level knob alone when the channel input is empty",
-    "The four channels of that black hole added together, clamped to plus or minus 10V"
+    "The four channels of that black hole added together, clamped to plus or minus 10V",
+    "Note — the plus or minus 10V gravity setting suits envelopes and gates, and the plus or minus 5V setting suits oscillators and LFOs"
    ],
    "param": {
     "0": 1,
@@ -108,7 +109,13 @@
     "A trigger here reverses the direction of that pulsar's rotation",
     "Makes that pulsar pick its next jack at random instead of the next one round the circle, and shuffles the order of the jacks in the all-jacks reading of the rotation input",
     "Steps that pulsar's rotation input through three readings: minus 5V to 5V, 0V to 10V, and a third where one 0V to 10V sweep runs across all of that pulsar's connected jacks",
-    "Note — neither pulsar rotates by itself; each needs a moving voltage at its rotation input, and with nothing patched there it rests on one jack"
+    "Note — neither pulsar rotates by itself; each needs a moving voltage at its rotation input, and with nothing patched there it rests on one jack",
+    "Note — the shape of the rotation voltage sets the character of the crossfade: a triangle gives a linear fade, a sine an exponential one, a sawtooth a jump with no fade at all",
+    "Note — a square wave at a rotation input makes that pulsar a plain sequential switch, since it never rests between two jacks",
+    "Note — the first jack patched on a pulsar is where its rotation cycle starts",
+    "Note — the white lamp of a pulsar flashes at the start of each fade cycle, which shows whether the rotation voltage is reaching the amplitude that pulsar needs",
+    "Note — the blue lamps show how much of each jack is reaching the output, dark at none and full at all of it",
+    "Note — a pulsar moves on to the next jack only when its rotation voltage arrives at an end of its range, so changing the amplitude of that voltage changes the rhythm of the steps"
    ],
    "param": {
     "0": 7,
@@ -205,6 +212,12 @@
     "Switches the bottom brane's noise away from minus 5V to 5V: its white hold and three right hand holds run 0V to 1V, and its three left hand holds run minus 1V to 1V",
     "A trigger here switches that brane's noise range",
     "Note — no value is held until a trigger arrives at one of the two trigger inputs",
+    "Note — with a brane's trigger switched off, each of its outputs passes its input through, or its own noise where no input is patched, without sampling",
+    "Note — the lamp in a brane's trigger button flashes white at each trigger and holds red while that brane's trigger is switched off",
+    "Note — in the yellow Young slits state one patched output of that brane takes each trigger, picked at random from the patched ones, and the others keep the value they were holding",
+    "Note — in the blue Young slits state each patched output of that brane has an even chance of taking each trigger, and the ones that miss it keep the value they were holding",
+    "Note — the yellow Young slits state changes nothing while only one output of that brane is patched",
+    "Note — while a brane is in a Young slits state, its trigger button and its trigger toggle input switch it between the yellow state and the blue one",
     "Menu — High brane Young mode (long push) — puts the top brane into the random trigger modes, the state a two second hold of its trigger button reaches",
     "Menu — Low brane Young mode (long push) — puts the bottom brane into the random trigger modes, the state a two second hold of its trigger button reaches"
    ],
@@ -292,7 +305,7 @@
      "13": "cv"
     }
    },
-   "notes": "The two 'Young mode' menu items are the same states the panel reaches by holding a brane's trigger button for two seconds; the panel prints no name for them. Each brane generates one value per noise colour and hands the second jack of that colour the inverted copy, so the inversion only appears while both jacks of a pair are patched."
+   "notes": "The two 'Young mode' menu items are the same states the panel reaches by holding a brane's trigger button for two seconds; the panel prints no name for them. Each brane generates one value per noise colour and hands the second jack of that colour the inverted copy, so the inversion only appears while both jacks of a pair are patched. The yellow and blue Young slits states were checked against the installed 2.4.0 source: the yellow state picks one connected output at random for each trigger, and the blue state gives each connected output an even chance. The trigger button and the trigger toggle input are summed, so either switches between the two states while the brane is in Young slits mode."
   },
   "Ions": {
    "lines": [
@@ -322,7 +335,9 @@
     "The voltage of the knob the blue voice has reached, in whichever ring it is travelling",
     "The voltage of the knob the yellow voice has reached, in whichever ring it is travelling",
     "A 1ms 10V pulse each time that voice jumps from one ring to the other",
-    "Note — the sequence does not advance until a clock arrives; the module comes up running, and the run button stops and starts it"
+    "Note — the sequence does not advance until a clock arrives; the module comes up running, and the run button stops and starts it",
+    "Note — with the jump probability at zero the module is two independent eight-step sequences, and with it fully clockwise the two voices share one sixteen-step sequence",
+    "Note — the step button advances the sequence whether or not the module is running, which is how the step voltages are set and heard one at a time while it is stopped"
    ],
    "param": {
     "0": 4,
@@ -395,7 +410,8 @@
      "2": "trigger",
      "3": "trigger"
     }
-   }
+   },
+   "notes": "The maker's per-module PDF says that with uncertainty on a press of the reset button places the voices at a random step. The installed 2.4.0 source does not do that: reset calls initRun(true), which sets both step indexes to zero whatever the uncertainty state. Uncertainty is applied only to the local clock inputs. The entry follows the code."
   },
   "Entropia": {
    "lines": [
@@ -429,7 +445,11 @@
     "Advances the sequence by one step for each press, whether or not it is running",
     "Returns the sequence to its first step whenever run is switched on",
     "The value of the step now playing, blue or yellow according to that step's chance, or the two added together in the adding macrostate mode",
-    "Note — the sequence does not advance until a clock arrives; the module comes up running, and the run button stops and starts it"
+    "Note — the sequence does not advance until a clock arrives; the module comes up running, and the run button stops and starts it",
+    "Note — with a colour's source set to its external input and that input read as audio, the module crossfades briefly between steps to stop clicks",
+    "Note — to pass an external signal at the level it arrives, turn that colour's step knobs fully clockwise",
+    "Note — the step button advances the sequence whether or not it is running, which is how the two values of each step are set and heard one at a time while it is stopped",
+    "Note — a way in: set both colours to fixed CV, edit the values while stopped with the step and invert buttons, turn the global probability fully to blue, start it, then sweep that knob to yellow"
    ],
    "param": {
     "0": 23,
@@ -527,7 +547,10 @@
     "Sends a negative voltage at either momentum input to the other oscillator's feedback instead of its own, and doubles what both momentum inputs add",
     "Scales the output from silence at 0V to full at 10V, slewed to avoid clicks; with nothing patched here the output stays at full",
     "Sets the pitch of both oscillators at one volt per octave, and the number of channels here sets the polyphony",
-    "The M sine multiplied by the square of the C sine, scaled by the multiply input"
+    "The M sine multiplied by the square of the C sine, scaled by the multiply input",
+    "Note — the Planck lamp of an oscillator shows its quantisation: dark for a smooth sweep, white for semitones, blue for fifths and octaves, and yellow for LFO range",
+    "Note — one oscillator can be set to LFO range on its own while the other stays at audio rate",
+    "Note — the multiply input is slewed with a 2.5ms rise and a 20ms fall, so a plain gate patched there works as an envelope"
    ],
    "param": {
     "0": 2,
@@ -564,7 +587,8 @@
     "out": {
      "0": "audio"
     }
-   }
+   },
+   "notes": "The 2.5ms rise and 20ms fall on the multiply input are the arguments to setParams2 in the installed 2.4.0 source, and the maker's PDF gives the same figures."
   },
   "DarkEnergy": {
    "lines": [
@@ -590,7 +614,10 @@
     "A rising edge here restarts the phase of that oscillator",
     "The M sine multiplied by the square of the C sine and inverted, scaled by the extra modulation envelope while the amp button is on",
     "The M oscillator's sine on its own",
-    "The square of the C oscillator's sine, scaled by the extra modulation envelope while the amp button is on"
+    "The square of the C oscillator's sine, scaled by the extra modulation envelope while the amp button is on",
+    "Note — the C output is a sine multiplied by itself, so it never goes below 0V",
+    "Note — a trigger at a phase reset input starts that oscillator's cycle again, which makes an LFO shape repeatable and works like oscillator sync at audio rate",
+    "Note — the amp button and a modulation destination together make the extra modulation envelope move timbre and level at once, in the manner of a lowpass gate"
    ],
    "param": {
     "0": 2,
@@ -653,6 +680,9 @@
     "Scales every output from silence to twice the level, applied after the mix and clamped to plus or minus 10V",
     "A signal fed into the mix, reaching each output at a level set by its distance from this jack; the channels of a polyphonic cable here are summed",
     "The blend of the patched inputs weighted by their distance from this jack, scaled by the gain knob",
+    "Note — in filter mode an output one jack from the input passes a 16kHz lowpass or a 60Hz highpass, and one seven jacks away passes a 100Hz lowpass or an 8kHz highpass",
+    "Note — the filter cutoffs come from a fixed table of frequencies chosen by ear, not from ratios worked out from the distance",
+    "Note — patching an output back into an input makes a sub-mix, which is how more than eight channels are mixed in one module",
     "Menu — Filters — the slope used in filter mode: 6dB per octave, or 12dB per octave, which is the default"
    ],
    "param": {
@@ -714,7 +744,8 @@
      "5": "audio",
      "6": "audio"
     }
-   }
+   },
+   "notes": "The filter cutoffs are a lookup table in calcCutoffFreq in the installed 2.4.0 source, keyed on how far apart the input and output jacks are: one apart gives a 16kHz lowpass or a 60Hz highpass, seven apart gives a 100Hz lowpass or an 8kHz highpass. The maker's PDF says these were chosen by ear rather than worked out as ratios."
   },
   "Fate": {
    "lines": [
@@ -729,6 +760,9 @@
     "Widens the random offsets added when fate is altered by a tenth of their span per volt, added to the choice depth knob",
     "Note — nothing is drawn until a trigger arrives at the clock input",
     "Note — with nothing patched to the event inputs the outputs carry the random offsets alone, which makes the module a pair of probabilistic random sources",
+    "Note — the number of output channels is the largest channel count among the two event inputs and the clock input",
+    "Note — with the choice depth knob at its centre no random voltage is added, which leaves a probabilistic switch between the two event inputs",
+    "Note — clock this module from the same source as the sequencer feeding it, so that a draw lands on the same step as the note",
     "Menu — Hold trigger out during step — holds the trigger output high until the next draw, rather than only for the length of the incoming trigger"
    ],
    "param": {
@@ -792,6 +826,10 @@
     "A rising edge here returns the clocks to the start of a reference group",
     "A 1ms 10V pulse whenever the module is reset, and on starting or stopping with the matching menu option set",
     "Note — the clocks come up running as soon as the module is added, and the run button stops and starts them",
+    "Note — the two group sizes are a ratio: while the reference group counts out its beats, the travelling twin fits its own count into the same span",
+    "Note — a reference of 1 against a traveler of 2 doubles the travelling clock, and a reference of 2 against a traveler of 1 halves it",
+    "Note — a reference of 4 against a traveler of 5 gives quintuplets, and a reference of 5 against a traveler of 7 gives nested tuplets",
+    "Note — the run and reset outputs are the intended way to start and reset the rest of a patch along with these clocks",
     "Menu — On Start — what starting the clocks also does, either, both or neither of Do internal reset and Send reset pulse",
     "Menu — On Stop — what stopping the clocks also does, either, both or neither of Do internal reset and Send reset pulse",
     "Menu — Outputs high on reset when not running — holds the clock outputs at 10V while the module is reset and stopped, in place of 0V",
@@ -849,7 +887,8 @@
      "4": "trigger",
      "5": "trigger"
     }
-   }
+   },
+   "notes": "The right-click options covering what starting and stopping the clocks also does are the same settings Impromptu Modular's Clocked carries, which is what the maker's PDF says to read for them. Two menu items in TwinParadox.cpp are commented out and are not in the running module; they are deliberately left out of this entry."
   },
   "Blank-PanelInfo": {
    "lines": [

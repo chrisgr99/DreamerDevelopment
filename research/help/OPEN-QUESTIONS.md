@@ -27,7 +27,34 @@ The port pass turned up a class of thing no amount of manual-reading would have 
 - **mscHack Osc_3Ch inputs 9-11** — our line describes them attenuating filter resonance. `IN_REZ` is named and added and never read; that description is true of the maker's *other* oscillator, OSC_WaveMorph_3.
 - **NYSTHI PolyDelayAttackHoldDecay input 7** — our line: "a trigger switches the looping on and off". Never read; input 8, the hold toggle, is.
 
-**And then it turned out not to be a handful but a hundred.** FrozenWasteland alone has 46 inputs no line of the module ever reads, dbRackSequencer 4. Most are not drawn on the panel and so can never be clicked, which is why nobody has ever noticed — but **31 of them ARE drawn and clickable**: ManicCompression's two curve CVs, ManicCompressionMB's ten band curve CVs, all sixteen of PortlandWeather's TAP LEVEL jacks, SliceOfLife's MIX, SeriouslySlowEG's RELEASE TIME, and P16B's OFFSET. Option-click any of those today and the help falls back to the maker's own tooltip, which describes a thing that does not happen.
+**NYSTHI GateTrigMerger's first line is wrong.** It says "each section is an OR: its output is on while any of its four inputs is on". The code adds a section's four inputs together and compares the one sum against 10V — so two inputs at 5V turn the output on and one input at 5V does not. That is not an OR; it is a threshold on a sum.
+
+**NYSTHI JIRAJIRAECHO input 18 is a second audio input**, not "a CV changing the input level" as our line has it. The code reads input 0 and input 18 side by side, multiplies both by the same input-level knob, and normals either one to both sides when only one is patched.
+
+### Makers whose own manifest disagrees with their own source
+
+The `Polyphonic` tag in `plugin.json` is the maker's declaration, and it is the fallback the module note uses where we have established nothing. Three cases where it is wrong, all found by reading the code:
+
+- **SubmarineFree tags nothing at all**, in a plugin where ten modules are genuinely polyphonic — AG-202, OG-202, XG-202, NG-206, the four DO delays, MZ-909, LT-116, LA-216 and the arithmetic modules.
+- **SurgeXTRack omits the tag from RotarySpeaker, FrequencyShifter and Exciter**, although `FXConfig::allowsPolyphony()` returns true and is never specialised, so all twenty effects offer the polyphony menu.
+- **Bogaudio tags UNISON polyphonic** while every one of its inputs reads channel one only — that one is defensible, since the tag is about its outputs.
+
+None of this costs us anything any more: the note prefers what we established from the source over the tag, so those modules now read correctly. It is recorded because the makers would want to know, and because it is the evidence for preferring our own reading.
+
+**squinkylabs LFNB is half-wired, and our lines describe both halves as working.** `LFNB.h:255-267` reads the Fc and Q knob, trim and CV of channel one only; channel two's filter is never configured, so its two jacks, its two knobs and its two trims do nothing and its output runs at the default filter. Recorded in `notes`; the lines were left alone because the port pass does not edit prose. This is a lines fix, not a fields fix.
+
+**AS WaveShaper's range input flips the switch on every sample** whose voltage is not zero, so a steady gate toggles it at the sample rate. Our line calls it a trigger.
+
+**And then it turned out not to be a handful but a hundred.**
+
+Four more came out of the closed plugins, found by disassembly:
+
+- **DanTModules TMNT** — the thirty-two Column, Row, Mutate and Shift gate inputs are never read. `process` touches only five inputs and the last six; nothing else in the plugin reads that module's input vector. The matching panel buttons do work.
+- **DanTModules BillyG8s** — Channel D and Channel E are never read, while A, B and C are read and normalled to each other. D and E's End Trigger, Length, Slope Length and Slope Shape inputs *are* all read, so this looks like an omission rather than a design.
+- **VultModulesFree Trummor2 and TrummorFM** — the four Mod inputs are never read anywhere in the binary. Worth cross-checking against the paid VultModules build: this may be a free-version limitation rather than a bug.
+- **VCV Drums' DrumMachine** — *Open hat decay* is never read, and the open hat's decay is offset by the *Open hat attack* input's voltage instead. Every other voice's five inputs are read.
+
+ FrozenWasteland alone has 46 inputs no line of the module ever reads, dbRackSequencer 4. Most are not drawn on the panel and so can never be clicked, which is why nobody has ever noticed — but **31 of them ARE drawn and clickable**: ManicCompression's two curve CVs, ManicCompressionMB's ten band curve CVs, all sixteen of PortlandWeather's TAP LEVEL jacks, SliceOfLife's MIX, SeriouslySlowEG's RELEASE TIME, and P16B's OFFSET. Option-click any of those today and the help falls back to the maker's own tooltip, which describes a thing that does not happen.
 
 STYLE.md already says a control proved to do nothing gets a line saying so. Writing those lines is a `lines` edit, which the port pass deliberately does not make — so it wants a small pass of its own, and it is the single most useful thing left on this page.
 
@@ -48,6 +75,11 @@ STYLE.md already says a control proved to do nothing gets a line saying so. Writ
 **Venom's Slew gives its two shape CV jacks the same names as its two time CV jacks**, so Rack shows "Rise time CV" twice.
 
 ## Worth a minute each, because a wrong reading misleads
+
+**Geodesics Ions — the maker's PDF and the maker's code disagree.** The manual says a reset places the voices at a random step while uncertainty is on. The installed 2.4.0 source does not: `initRun(true)` zeroes both step indexes whatever the setting. The entry follows the code and records the disagreement in `notes`, which is the rule STYLE.md already sets — but this one is the maker contradicting himself rather than a manual gone stale, so he may want to know.
+
+**NANOModules ARC's "0.5ms to seven minutes"** appears in our first line and in none of the maker's PDFs; it most likely came from the product page. Everything else in that plugin was verified against the manuals line by line and holds.
+
 
 **Alikins ColorPanel — a reversal of what the first pass said.** The first pass said the ColorMode menu was dead. It is not: `ColorModeItem::onAction` sets it and `ColorPanelFrame::step()` reads it. The entry has been rewritten on that basis. To check: put a 0-10V ramp into the first input and switch ColorMode. RGB should go red-ish, HSL should sweep hues.
 
@@ -108,6 +140,18 @@ STYLE.md already says a control proved to do nothing gets a line saying so. Writ
 **VCV Drums' hi-hat choke input** is printed MUTE on the panel. Our lines describe it without naming it, which is allowed, but the name is unusual enough to note.
 
 **computerscare, ten figures not literal in the binary.** All ten were verified as correct derivations in source, not inventions — `0.625V` is `ch / 1.6f`, `221222` is a string, and so on. `check_numbers.py` flags derived figures by design; see NUMBER-CHECK.md.
+
+## Repositories that have moved, or are gone
+
+Matching the installed build is the first rule of every pass, and five source URLs in this project turned out to be wrong. These are now known-good:
+
+- **squinkylabs' own repository no longer exists** — `squinkylabs/SquinkyVCV` is a 404. What ships as 2.1.9 is the maintained fork **`kockie69/SquinkyVCV-main`**; the matching commit is the parent of `3701a8c`.
+- **dBiz** is at `github.com/dBiz/dBiz`, not `dizzasterhaze/dBiz`, which is a 404.
+- **mscHack**'s installed 2.0.0 is **baconpaul's port**, `github.com/baconpaul/mschack-VCV-Rack-Plugins` at `v2.0.0`. The original maker's repository stops at 1.0.2.
+- **Bidoo** has no tag for 2.1.1; the matching commit is `85c00f2`.
+- **ImpromptuModular** has no tag for 2.5.0; the matching commit is `9d26bfb`.
+
+And one claim of mine that was wrong in the briefs, though right in STYLE.md: **ImpromptuModular writes no `inputDesc` second lines at all.** Counted from the census, 817 descriptions exist library-wide and they belong to Stoermelder (356), CountModula (150), Befaco (120), Venom (83) and Amalgamated Harmonics (76), with a dozen in Fundamental and a scattering elsewhere. STYLE.md names exactly those five; I added Impromptu to an agent brief from memory.
 
 ## One source that was wrongly written off
 

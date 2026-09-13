@@ -76,11 +76,11 @@ std::string helpPropsFor(const std::string& plugin, const std::string& model,
 	const HelpEntry* e = helpEntryFor(plugin, model);
 	if (!e || port < 0)
 		return "";
-	const signed char* table = isOutput ? e->outProps : e->inProps;
+	const short* table = isOutput ? e->outProps : e->inProps;
 	const int count = isOutput ? e->outPropCount : e->inPropCount;
 	if (!table || port >= count)
 		return "";
-	const signed char at = table[port];
+	const short at = table[port];
 	if (at < 0 || at >= HELP_PROP_TEXT_COUNT)
 		return "";
 	return HELP_PROP_TEXT[at];
@@ -165,6 +165,11 @@ static std::string helpSpeech(std::string t) {
 	// An em dash is a pause, not a word. A leading bullet dash is not a word either.
 	t = std::regex_replace(t, std::regex("\n- "), "\n");
 	t = std::regex_replace(t, std::regex("—"), ",");
+	// THE RANGE FIELD'S OWN SPELLING, which is not the one the lines use. A jack's properties are
+	// generated as "1V per octave" — no slash — and the rule below only caught "1V/octave", so
+	// this went to the voice as "one V per octave" and came out sounding like October. Both
+	// spellings, because both are in the text.
+	t = std::regex_replace(t, std::regex("1V per octave"), "one volt per octave");
 	t = std::regex_replace(t, std::regex("1V/octave"), "one volt per octave");
 	// "V/OCT" READ ALOUD IS "V OCTOBER", which is what the abbreviation deserves. The jacks that
 	// name a pitch input in the same shorthand get the same treatment.
@@ -350,6 +355,23 @@ struct HelpPopup : widget::OpaqueWidget {
 		const std::string text = forClipboard();
 		glfwSetClipboardString(APP->window->win, text.c_str());
 		copiedAt = system::getTime();
+	}
+
+	/** WHAT IS BEING TALKED ABOUT, BEFORE WHAT IS SAID ABOUT IT.
+
+	On screen the title sits above the text and the eye takes both in at once. A voice has no
+	above: it starts in the middle of a sentence about a thing it never named, and somebody
+	listening to a jack's description has no way to tell which jack answered. So the name goes
+	first, with a full stop after it, which is the pause `say` gives a sentence end.
+
+	ONLY ON THE FIRST PARAGRAPH. A module's note is a dozen points and each is clicked on its own;
+	repeating the module's name before every one of them would be the padding this whole project
+	strips out of the lines themselves. The first paragraph — what the module is — is the one that
+	needs the name, and the rest are plainly still about it. */
+	std::string withTitle(bool first, const std::string& text) const {
+		if (!first || title.empty())
+			return text;
+		return title + ". " + text;
 	}
 
 	/** Capitals, for the title row only.
@@ -543,11 +565,11 @@ struct HelpPopup : widget::OpaqueWidget {
 			const std::vector<std::string> paras = paragraphs();
 			for (size_t i = 0; i < paras.size() && i < paraTop.size(); i++) {
 				if (e.pos.y >= paraTop[i] && e.pos.y < paraBottom[i]) {
-					helpSay(paras[i]);
+					helpSay(withTitle(i == 0, paras[i]));
 					return;
 				}
 			}
-			helpSay(line);
+			helpSay(withTitle(true, line));
 			return;
 		}
 		widget::OpaqueWidget::onButton(e);
@@ -844,7 +866,7 @@ static int helpPolyphonyFound(plugin::Model* model) {
 		return -1;
 	bool anyKnown = false;
 	for (int i = 0; i < e->inPropCount; i++) {
-		const signed char at = e->inProps[i];
+		const short at = e->inProps[i];
 		if (at < 0 || at >= HELP_PROP_TEXT_COUNT)
 			continue;
 		const std::string phrase = HELP_PROP_TEXT[at];

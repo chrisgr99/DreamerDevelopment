@@ -61,13 +61,15 @@ struct HelpEntry {
 	A sensible voltage range, whether the signal is continuous or stepped, whether the port takes
 	polyphony: the questions the Rack forum keeps answering with a scope and a test rig. Two of the
 	three fall out of the family already recorded beside this, so they are worked out by
-	make_help.py and pooled — there are thousands of ports and only a handful of things to say. */
-	const signed char* inProps;
+	make_help.py and pooled. SHORT, NOT A BYTE: there were a handful of distinct phrases while the
+	shapes were derived from families, and once agents began reading real ranges out of real source
+	the pool went past 127 in an afternoon and the table stopped compiling. */
+	const short* inProps;
 	int inPropCount;
 	/** THE SAME FOR OUTPUTS, where the question is what comes OUT rather than what to send in.
 	Unipolar or bipolar is the one a patch usually turns on: a 0-10V envelope into something
 	expecting ±5V is the commonest silent mistake in a rack. */
-	const signed char* outProps;
+	const short* outProps;
 	int outPropCount;
 };
 

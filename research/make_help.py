@@ -341,7 +341,7 @@ def main():
                             % (kind, i, ','.join(str(x) for x in table)))
             for mark, table in (('PR', props), ('PO', oprops)):
                 if table:
-                    f.write('static const signed char %s%d[] = {%s};\n'
+                    f.write('static const short %s%d[] = {%s};\n'
                             % (mark, i, ','.join(str(seen[p]) if p else '-1' for p in table)))
         f.write('\n/** Sorted by plugin then model, so it can be searched rather than walked. */\n')
         f.write('const HelpEntry HELP[] = {\n')
