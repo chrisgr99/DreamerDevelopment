@@ -1,78 +1,1414 @@
 {
  "plugin": "Cella",
- "source": "https://github.com/victorkashirin/CellaVCV",
+ "source": "https://github.com/victorkashirin/CellaVCV/blob/master/docs/Cella_Manual.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Resonators": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four Karplus-Strong resonators fed from one input, each tuned to its own pitch, with a shared decay, tone and mix and the four voices out separately as well as summed",
+    "Tunes its resonator, -54 to 54 semitones from C4 at 261.63Hz",
+    "Sets the level of its resonator's contribution, 0 to 1, the hover text reading it in decibels",
+    "Sets how long the resonators ring, 0 to 1; the setting is raised to the power of 0.2 and mapped onto a feedback of 0.7 to 0.995, so most of the useful travel is near the bottom",
+    "Sets the tone of all four resonators at once: counter-clockwise of the centre brings a lowpass down from 20kHz to 200Hz, clockwise takes a highpass up from 20Hz to 2000Hz",
+    "Scales the sum of the four resonators before it reaches the OUT jack, 0 to 1; the WET jack is not touched by it",
+    "Crossfades the OUT jack between the untouched input at fully counter-clockwise and the resonated sum at fully clockwise",
+    "Attenuates and inverts the DECAY jack, -1 to 1, before that voltage is added to the DECAY knob",
+    "Attenuates and inverts the COLOR jack, -1 to 1, before that voltage is added to the COLOR knob",
+    "Attenuates and inverts the GAIN jack, -1 to 1, before that voltage is added to each GAIN knob",
+    "Attenuates and inverts the MIX jack, -1 to 1, before that voltage is added to the MIX knob",
+    "Divided by 10, scaled by its attenuverter and added to the DECAY knob; each channel of a polyphonic cable reaches the resonator of the same number, and the last channel covers any left over",
+    "Divided by 10, scaled by its attenuverter and added to the COLOR knob; each channel of a polyphonic cable reaches the resonator of the same number, and the last channel covers any left over",
+    "Divided by 10, scaled by its attenuverter and added to the GAIN knobs; each channel of a polyphonic cable reaches the resonator of the same number, and the last channel covers any left over",
+    "Divided by 10, scaled by its attenuverter and added to the MIX knob; only the first channel is read",
+    "One volt per octave added to the first resonator's FREQ knob; with more than one channel patched here, channels two to four tune the other three resonators unless they have cables of their own",
+    "One volt per octave added to its own resonator's FREQ knob, taking that resonator off any polyphonic cable in the first pitch jack",
+    "The audio the four resonators are excited with",
+    "The four resonators on four channels, each at its own GAIN setting, with no AMP scaling and no dry signal mixed in",
+    "The input and the summed resonators crossfaded by MIX, the resonators first scaled by AMP",
+    "Note — the pitch of each resonator, knob and jack together, is clamped to four and a half octaves either side of C4",
+    "Note — with the module bypassed the audio input is passed straight to the OUT jack"
+   ],
+   "param": {
+    "0": 1,
+    "2": 1,
+    "4": 1,
+    "6": 1,
+    "1": 2,
+    "3": 2,
+    "5": 2,
+    "7": 2,
+    "8": 3,
+    "9": 4,
+    "10": 5,
+    "11": 6,
+    "12": 7,
+    "13": 8,
+    "14": 9,
+    "15": 10
+   },
+   "in": {
+    "0": 17,
+    "1": 15,
+    "2": 16,
+    "3": 16,
+    "4": 16,
+    "5": 11,
+    "6": 12,
+    "7": 13,
+    "8": 14
+   },
+   "out": {
+    "0": 19,
+    "1": 18
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "why": "Resonators.cpp:141 reads this input with getVoltage(), which is channel 1 alone"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Resonators.cpp:156 asks this input for its channel count and Resonators.cpp:172 reads channels by index to tune the other three resonators"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the first pitch jack's second channel",
+      "why": "Resonators.cpp:169 reads this input with getVoltage(), which is channel 1 alone; Resonators.cpp:170 falls back to the polyphonic first pitch jack"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the first pitch jack's third channel",
+      "why": "Resonators.cpp:169 reads this input with getVoltage(), which is channel 1 alone; Resonators.cpp:170 falls back to the polyphonic first pitch jack"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the first pitch jack's fourth channel",
+      "why": "Resonators.cpp:169 reads this input with getVoltage(), which is channel 1 alone; Resonators.cpp:170 falls back to the polyphonic first pitch jack"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Resonators.cpp:151 asks this input for its channel count; Resonators.cpp:180 reads each channel, divides by 10, scales by the attenuverter and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Resonators.cpp:152 asks this input for its channel count; Resonators.cpp:192 reads each channel, divides by 10, scales by the attenuverter and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Resonators.cpp:153 asks this input for its channel count; Resonators.cpp:202 reads each channel, divides by 10, scales by the attenuverter and clamps the knob-plus-jack total to 0.0001 and 1"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Resonators.cpp:146 reads this input with getVoltage(), which is channel 1 alone, divides by 10 and scales by the attenuverter; Resonators.cpp:148 clamps the total to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Resonators.cpp:254 writes channel 1 alone and the output is never given more channels"
+     },
+     "1": {
+      "poly": true,
+      "why": "Resonators.cpp:158 sets this output to four channels and Resonators.cpp:246 writes one resonator per channel"
+     }
+    }
+   },
+   "notes": "Read from src/Resonators.cpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1. The manual is written for 2.11.0 and says nothing about this module that the code contradicts. Two things it leaves out. The AMP knob scales only what reaches the OUT jack; the WET jack carries the four resonators at their GAIN settings alone (Resonators.cpp:246 against 250). And the polyphonic CV jacks fall back to their last channel rather than to zero when they carry fewer than four channels (Resonators.cpp:183, 195 and 205), so a monophonic cable into DECAY, COLOR or GAIN moves all four resonators. The COLOR figures come from Resonators.cpp:197 to 234: the knob is turned into a factor of 100 to the power of twice the knob minus one, which multiplies a 20000Hz lowpass and a 20Hz highpass, both clamped to 20Hz and 20000Hz."
   },
   "TwinPeaks": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two resonant lowpass filters fed the same signal, with the second subtracted from the first to give a two-peaked bandpass; built to be pinged with stepped voltages at high resonance",
+    "Sets the cutoff of filter A, 20Hz to 20kHz, and comes up at the bottom of that range",
+    "Sets the cutoff of filter B, 20Hz to 20kHz, and comes up at the top of that range",
+    "Scales everything modulating filter A's cutoff together, -1 to 1, so it can attenuate or invert the whole sum",
+    "Sets the resonance of both filters at once, 0 to 1; the band marked on the panel is the part of the travel that pings well",
+    "Crossfades the output from filter A's lowpass alone at 0 to the full two-peaked response at 1",
+    "Scales everything modulating filter B's cutoff together, -1 to 1, so it can attenuate or invert the whole sum",
+    "Sends some of the input signal to filter A's own cutoff, -1 to 1",
+    "Sends some of filter B's output to filter A's cutoff, -1 to 1",
+    "Chooses how steep both filters are: two poles for 12dB per octave, three for 18dB, four for 24dB",
+    "Sends some of the input signal to filter B's own cutoff, -1 to 1",
+    "Attenuates and inverts the FM A jack, -1 to 1, before the FM A knob scales it",
+    "Attenuates and inverts the RES jack, -1 to 1, before that voltage reaches the resonance of both filters",
+    "Attenuates and inverts the LP-TWP jack, -1 to 1, before that voltage is added to the LP-TWP knob",
+    "Attenuates and inverts the FM B jack, -1 to 1, before the FM B knob scales it",
+    "Modulates filter A's cutoff, scaled by its own attenuverter and then by the FM A knob; it also feeds filter B while the FM B jack has no cable",
+    "Moves the resonance of both filters, scaled by its attenuverter and added to the RES knob",
+    "Divided by 10, scaled by its attenuverter and added to the LP-TWP knob, the total clamped to 0 and 1",
+    "Modulates filter B's cutoff, scaled by its own attenuverter and then by the FM B knob",
+    "The signal both filters are fed; its channel count sets the polyphony of the whole module",
+    "One volt per octave on filter A's cutoff, added with no attenuverter in the way",
+    "One volt per octave on filter B's cutoff, added with no attenuverter in the way",
+    "Filter A's output minus filter B's, the subtraction scaled by the LP-TWP setting, clamped to -12V and 12V",
+    "Note — every route to a cutoff is summed and then capped, so neither filter can be pushed above the 20kHz its knob already reaches at the top",
+    "Note — a tiny amount of noise is added to the input inside each filter, which is what lets a high resonance setting break into self-oscillation with nothing patched",
+    "Note — the filter core is the one from Audible Instruments' Liquid Filter, with a three-pole output added for the 18dB setting"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "6": 3,
+    "2": 4,
+    "12": 5,
+    "7": 6,
+    "4": 7,
+    "10": 8,
+    "11": 9,
+    "5": 10,
+    "8": 11,
+    "3": 12,
+    "13": 13,
+    "9": 14
+   },
+   "in": {
+    "3": 15,
+    "0": 16,
+    "6": 17,
+    "4": 18,
+    "5": 19,
+    "1": 20,
+    "2": 21
+   },
+   "out": {
+    "0": 22
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "cv",
+     "4": "cv",
+     "5": "audio",
+     "6": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "TwinPeaks.cpp:134 reads this input with getPolyVoltage per channel and multiplies it by the attenuverter"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "TwinPeaks.cpp:147 reads this input with getPolyVoltage per channel; ripples.hpp:153 adds it straight to the cutoff in volts per octave"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "TwinPeaks.cpp:138 reads this input with getPolyVoltage per channel; ripples.hpp:153 adds it straight to the cutoff in volts per octave"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "TwinPeaks.cpp:148 reads this input with getPolyVoltage per channel; TwinPeaks.cpp:139 also reads it in place of the FM B jack when that one is unconnected"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "FM A",
+      "why": "TwinPeaks.cpp:139 reads this input with getPolyVoltage per channel and falls back to the FM A jack when it is unconnected"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "why": "TwinPeaks.cpp:103 takes the module's channel count from this input and TwinPeaks.cpp:136 reads each channel"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "TwinPeaks.cpp:130 reads this input with getVoltage(), which is channel 1 alone, multiplies it by 0.1 and the attenuverter, adds the knob and clamps the total to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "TwinPeaks.cpp:164 sets this output to the input's channel count and TwinPeaks.cpp:161 clamps each channel to -12V and 12V"
+     }
+    }
+   },
+   "notes": "Read from src/TwinPeaks.cpp and src/filter/ripples.hpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1. The manual describes FM A and FM B as controlling the total amount of modulation, which is right: ripples.hpp:154 multiplies the whole sum of FM jack, TRACK and XFM-B by that knob before it reaches the cutoff. ripples.hpp:156 then takes the minimum of that sum and zero, so upward modulation past the knob's own 20kHz maximum does nothing; the manual does not mention the cap. The LP-TWP jack is the one input on the module that is read outside the polyphony loop (TwinPeaks.cpp:130), so it is monophonic while everything else follows the audio input's channel count. ripples.hpp:163 adds a microvolt of noise to the input, which is what starts self-oscillation."
   },
   "Euler": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Measures how fast its input is changing and puts out the angle of that slope, -90 to 90 degrees scaled onto -10V to 10V, with the absolute value and the two halves out separately",
+    "Sets the frequency the slope is measured against, a fraction of a hertz up to 16Hz; it is also the sensitivity, since a higher setting makes the same change read as a steeper angle",
+    "Averages the input over up to 1 second before the slope is worked out, which takes the jitter out of a hand-moved controller",
+    "The signal whose rate of change is measured",
+    "The angle of the slope, 10V for a vertical rise, -10V for a vertical fall and 0V where the input is flat",
+    "The angle of the slope with the sign taken off, 0V where the input is flat and 10V for a vertical move either way",
+    "The angle of the slope while the input is rising, and 0V while it is falling or flat",
+    "The angle of the slope while the input is falling, put out as a positive voltage, and 0V while it is rising or flat",
+    "Note — the slope is measured once every two cycles of the FREQ setting rather than every sample, up to a limit of 1024 samples between measurements, so a low setting gives a coarser reading",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "why": "Euler.cpp:73 reads this input with getVoltage(), which is channel 1 alone"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Euler.cpp:95 writes channel 1 alone; Euler.cpp:89 scales an angle of at most 90 degrees onto 10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Euler.cpp:96 writes channel 1 alone, and the absolute value of a figure Euler.cpp:89 caps at 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Euler.cpp:97 writes channel 1 alone, and the positive part of a figure Euler.cpp:89 caps at 10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Euler.cpp:98 writes channel 1 alone, and the negated negative part of a figure Euler.cpp:89 caps at 10V"
+     }
+    }
+   },
+   "notes": "Read from src/Euler.cpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1. The FREQ knob runs from -8 to 4 and is shown as two to that power in hertz (Euler.cpp:52), so the range is about 0.004Hz to 16Hz with 2Hz at the default. The measurement interval is two divided by that frequency in samples, clamped to between 1 and 1024 (Euler.cpp:85), which the manual does not mention; at the slow end the module measures rarely and the output steps. The 31.5 in the angle formula at Euler.cpp:88 is the scaling that makes a one hertz sine measured at a FREQ of one hertz come out as its cosine, as the manual describes. The module has no context menu of its own."
   },
   "Rich": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Attack-decay envelope whose peak can be raised or lowered by an accent, with the accent stepping through a set number of levels each time it fires or following the voltage that fires it",
+    "Sets the rise time, 1ms at fully counter-clockwise to 10 seconds at fully clockwise",
+    "Sets the fall time, 1ms at fully counter-clockwise to 10 seconds at fully clockwise",
+    "Bends both stages from a straight line at fully counter-clockwise to a curve at fully clockwise, the exponent chosen on the menu",
+    "Sets how many levels the accent steps through, -8 to 8; at 0 no accent is added, at 1 every accent is full, at 2 they alternate half and full, and a negative setting subtracts the accent instead",
+    "Sets the peak the envelope reaches with no accent, 0 to 10V",
+    "Sets how much of the headroom above the base level an accent may use, 0 to 1; with the base at 6V, a full setting adds up to 4V",
+    "Attenuates and inverts the ATT jack, -1 to 1, before that voltage is added to the ATTACK knob",
+    "Flips the accent steps between climbing from the lowest level to the highest and falling the other way",
+    "Attenuates and inverts the DEC jack, -1 to 1, before that voltage is added to the DECAY knob",
+    "Divided by 10, scaled by its attenuverter and added to the ATTACK knob",
+    "Each rise past 1V flips the accent steps between climbing and falling, which the panel button does too",
+    "Divided by 10, scaled by its attenuverter and added to the DECAY knob",
+    "Each rise past 1V starts the envelope",
+    "A voltage here at the moment of a trigger makes that envelope an accented one, and its size, 0V to 10V, scales how much accent is applied",
+    "The accent level of the envelope being played, 0V to 10V, before the ACCENT knob scales it, so an external signal can shape the accent with that knob at zero",
+    "The envelope, 0V to 10V",
+    "Menu — Attack Curve: Logarithmic, Exponential — chooses which way the SHAPE knob bends the rising stage",
+    "Menu — Exponent Function: Quadratic, Cubic, Quartic — sets how sharp the curve the SHAPE knob reaches at its clockwise end is",
+    "Menu — Retrigger: Off, On — sets whether a trigger arriving during the fall restarts the envelope",
+    "Menu — Retrigger Strategy: I, II — I jumps straight to the fall of the new envelope and crossfades to avoid a click; II holds off until the new envelope's peak would be above the current level",
+    "Menu — Trigger Sync Delay: Off, 5 samples, 10 samples — sets how far apart the trigger and the accent may arrive and be taken as one hit",
+    "Note — the module holds off for the Trigger Sync Delay before starting an envelope, so every envelope is late by that many samples; at the default that is five",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "4": 4,
+    "3": 5,
+    "5": 6,
+    "6": 7,
+    "8": 8,
+    "7": 9
+   },
+   "in": {
+    "2": 10,
+    "4": 11,
+    "3": 12,
+    "0": 13,
+    "1": 14
+   },
+   "out": {
+    "1": 15,
+    "0": 16
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Rich.cpp:131 reads this input with getVoltage(), which is channel 1 alone, and passes it to a Schmitt trigger at Rack's default 1V threshold"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "Rich.cpp:134 passes this input to a Schmitt trigger at Rack's default 1V threshold; Rich.cpp:136 and 153 read it with getVoltage() and clamp it to 0 and 10V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Rich.cpp:246 reads this input with getVoltage(), divides it by 10, scales it by the attenuverter and adds it to the knob"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Rich.cpp:229 reads this input with getVoltage(), divides it by 10, scales it by the attenuverter and adds it to the knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Rich.cpp:128 reads this input with getVoltage() and passes it to a Schmitt trigger rising at 1V and falling at 0.1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Rich.cpp:297 writes channel 1 alone; the envelope is built from a base level of at most 10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Rich.cpp:298 writes channel 1 alone, ten times an accent figure that is clamped to 1"
+     }
+    }
+   },
+   "notes": "Read from src/Rich.cpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1, alongside docs/Cella_Manual.md, which is written for 2.11.0. The manual's account matches the code. One thing it does not say: the trigger sync window is a delay, not a look-ahead, so Rich.cpp:143 starts the envelope only once the chosen number of samples has passed since the trigger, and the whole envelope is late by that much unless the window is switched off. The ACCENT jack is read twice, once as a Schmitt trigger and once as a level (Rich.cpp:134 and 153), which is how one jack both fires an accent and sets its size."
   },
   "Bytebeat": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Bytebeat player: a short C-style expression in a counter variable is evaluated once per step and the result, masked to a chosen number of bits, becomes the output voltage",
+    "Sets how fast the counter steps, 16Hz at fully counter-clockwise to about 22kHz at fully clockwise, coming up at 8000Hz; with a cable in the CLOCK jack it becomes a multiplier of that clock",
+    "Sets the value the letter a stands for in the expression, a whole number from 0 to 128",
+    "Sets the value the letter b stands for in the expression, a whole number from 0 to 128",
+    "Sets the value the letter c stands for in the expression, a whole number from 0 to 128",
+    "Sets how many bits of the result are kept, 1 to 12, which is what makes the steps in the output coarse or fine",
+    "Starts and stops the counter; while it is stopped the output holds at 0V",
+    "Attenuates the CV a jack, 0 to 1; at 0 that jack does nothing",
+    "Attenuates the CV b jack, 0 to 1; at 0 that jack does nothing",
+    "Attenuates the CV c jack, 0 to 1; at 0 that jack does nothing",
+    "Sets the counter back to zero without stopping it",
+    "Each rise past 2V starts or stops the counter, the same flip the RUN button makes",
+    "Scaled so that 10V is the full 128, multiplied by its attenuator and added to the a knob, the total clamped to 128",
+    "Scaled so that 10V is the full 128, multiplied by its attenuator and added to the b knob, the total clamped to 128",
+    "Scaled so that 10V is the full 128, multiplied by its attenuator and added to the c knob, the total clamped to 128",
+    "Each rise past 2V sets the counter back to zero",
+    "Sets the base rate from the time between its own rises, and the FREQ knob then multiplies that; with no cable the base rate is 2Hz",
+    "The value of the expression, scaled onto whichever range the menu is set to and 0V while the counter is stopped",
+    "Menu — Output Range: -2.5V..2.5V, -5V..5V, 0..5V, 0..10V — sets the span the expression's result is scaled onto",
+    "Menu — Submit/New Line: Enter/Shift+Enter, Shift+Enter/Enter — swaps which key submits the expression and which starts a new line in the editor",
+    "Note — the module puts out 0V until an expression is typed into the display and submitted with the Enter key; nothing on the panel does anything before that",
+    "Note — the two lamps report on the expression: one lights while the text has been changed but not submitted, the other while the submitted text could not be parsed",
+    "Note — the editor is a plain text field rather than a control, so clicking it cannot reach a help line",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5,
+    "1": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "2": 10
+   },
+   "in": {
+    "3": 11,
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "4": 15,
+    "5": 16
+   },
+   "out": {
+    "0": 17
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Bytebeat.cpp:139 reads this input with getVoltage(), which is channel 1 alone, divides it by 10, multiplies by 128 and the attenuator, and clamps the knob-plus-jack total to 0 and 128"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Bytebeat.cpp:139 reads this input with getVoltage(), divides it by 10, multiplies by 128 and the attenuator, and clamps the knob-plus-jack total to 0 and 128"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Bytebeat.cpp:139 reads this input with getVoltage(), divides it by 10, multiplies by 128 and the attenuator, and clamps the knob-plus-jack total to 0 and 128"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "Bytebeat.cpp:146 reads this input with getVoltage() and passes it to a Schmitt trigger rising at 2V and falling at 0.1V"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "Bytebeat.cpp:152 reads this input with getVoltage() and passes it to a Schmitt trigger rising at 2V and falling at 0.1V"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "normal": "2Hz",
+      "why": "Bytebeat.cpp:159 reads this input with getVoltage() and passes it to a Schmitt trigger rising at 2V and falling at 0.1V; Bytebeat.cpp:168 uses 2Hz when the jack is empty"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Bytebeat.cpp:211 writes channel 1 alone; Bytebeat.cpp:195 scales the result onto one of four ranges, the widest of which is -5V to 5V"
+     }
+    }
+   },
+   "notes": "Read from src/Bytebeat.cpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1, alongside docs/Cella_Manual.md written for 2.11.0. The manual calls the second menu item Multiline with an on and off state; the code's item is Submit/New Line with the choices Enter/Shift+Enter and Shift+Enter/Enter (Bytebeat.cpp:437). The three CV knobs are attenuators from 0 to 1 rather than attenuverters (Bytebeat.cpp:127 to 129), so a jack cannot be inverted. The clock rate is measured between rises and clamped to between 0.001Hz and 1000Hz (Bytebeat.cpp:163); the FREQ knob then multiplies half that figure by two to the power of the knob, which is why the hover text changes from hertz to a multiplier when a clock is patched. The expression editor is a LedDisplayTextField, not a parameter, so it has no census position and no click on it can reach a help line."
   },
   "Bezier": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Smooth random voltage generator: a new random value every so often, joined to the last one by a Bezier curve whose shape runs from spiked through straight to rounded",
+    "Sets how often a new value is drawn, a fraction of a hertz up to 50Hz",
+    "Attenuates the curve, 0 to 1, before the offset is added",
+    "Shapes the join between one value and the next: spiked at fully counter-clockwise, a straight line at the centre, rounded at fully clockwise",
+    "Adds a fixed voltage to the curve, -5V to 5V, which is also the point the inverted output is mirrored around",
+    "Replaces the random draw with whatever is patched here, sampled at the moment each new value is due, so the module becomes a sample and hold with a curved slew",
+    "Chooses what happens when the offset pushes the curve past 5V: CLIP holds it at the limit, FOLD turns it back from there, WRAP jumps it to the opposite limit",
+    "Attenuates and inverts the FM jack, -1 to 1, and multiplies it by 1.5 before it is added to the FREQ knob in octaves",
+    "Attenuates and inverts the LEVEL jack, -1 to 1, before that voltage is added to the LEVEL knob",
+    "Divided into octaves by the attenuverter and added to the FREQ knob; by default it is sampled only when a new value is drawn",
+    "Divided by 5, clamped to -2 and 2, scaled by its attenuverter and added to the LEVEL knob; by default it is sampled only when a new value is drawn",
+    "The curve, 0V to 5V either side of the offset, limited in the way the switch sets",
+    "The curve subtracted from the offset rather than added to it, limited in the way the switch sets",
+    "A 10V pulse 1 millisecond long each time a new random value is drawn",
+    "10V while the curve is above the offset and 0V while it is below it",
+    "Menu — Continuous Frequency Modulation — reads the FM jack every sample instead of only when a new value is drawn",
+    "Menu — Continuous Level Modulation — reads the LEVEL jack every sample instead of only when a new value is drawn, and applies it after the curve rather than before",
+    "Menu — Assymetric Curve — makes the join start smooth and end spiked, or the other way about, instead of being the same at both ends",
+    "Menu — Distribution: Uniform, Normal — chooses between any value being equally likely and values near the middle being more likely",
+    "Menu — Post-Modulation Level Clip: 0..100%, 0..200%, -100..100%, -200..200% — sets how far the LEVEL jack may take the level past the knob's own range",
+    "Note — the rate cannot be synchronised to an outside clock; the FREQ knob and its jack are the only way to set it",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "6": 6,
+    "4": 7,
+    "5": 8
+   },
+   "in": {
+    "0": 5,
+    "1": 9,
+    "2": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14
+   },
+   "family": {
+    "in": {
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "a new random value",
+      "why": "Bezier.cpp:152 tests this input for a cable and Bezier.cpp:153 reads it with getVoltage(), which is channel 1 alone, in place of the random draw"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Bezier.cpp:162 reads this input with getVoltage() when a new value is drawn, or Bezier.cpp:141 every sample with the continuous option on; Bezier.cpp:144 adds it to the knob in octaves"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Bezier.cpp:134 reads this input with getVoltage(), divides it by 5 and clamps to -2 and 2; Bezier.cpp:136 scales it by the attenuverter and Bezier.cpp:138 clamps the total to the range the menu sets"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Bezier.cpp:196 writes channel 1 alone and holds the result to -5V and 5V by clipping, folding or wrapping"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Bezier.cpp:197 writes channel 1 alone and holds the result to -5V and 5V by clipping, folding or wrapping"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Bezier.cpp:211 writes channel 1 alone, 10V while a 1 millisecond pulse is high"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Bezier.cpp:214 writes channel 1 alone, 10V while the curve is above zero"
+     }
+    }
+   },
+   "notes": "Read from src/Bezier.cpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1, alongside docs/Cella_Manual.md written for 2.11.0. The manual says the GATE output carries the maximum of zero and the curve; the code puts out a flat 10V or 0V depending on whether the curve is above zero (Bezier.cpp:214), and it tests the curve before the offset is added, so an offset does not move the point at which the gate opens. The manual spells the menu item Asymmetric Curve; the item itself prints Assymetric Curve. The SIGNAL input has no panel label of its own beyond IN and is not described in the manual at all: with a cable in it, the random draw is replaced by whatever voltage is present at that instant. The CLIP, FOLD and WRAP switch positions run top to bottom and the module comes up on CLIP. The Level jack is given no family because it and the FM jack both take plain modulation; the IN jack is given none because it carries whatever is patched."
   },
   "CognitiveShift": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight-bit shift register: each clock works out a new bit from the DATA, LOGIC and XOR jacks and pushes it in, with every bit on its own jack and four converters reading groups of them",
+    "Sets all eight bits to zero at once",
+    "Forces the bit going in to 1 on the next clock; in EDIT mode it pushes a 1 in straight away",
+    "Forces the bit going in to 0 on the next clock; in EDIT mode it pushes a 0 in straight away",
+    "Hands the register over to the WRITE and ERASE buttons and stops the clock being read at all, so a pattern can be typed in by hand",
+    "A rise past 1V sets all eight bits to zero at once",
+    "Scaled by its attenuverter and added to the THRES knob, the total clamped to 1V and 9V",
+    "Attenuates and inverts the THRES CV jack, -1 to 1, before that voltage is added to the THRES knob",
+    "Sets the voltage at which the DATA, LOGIC and XOR jacks count as high, 1V to 9V",
+    "Each rise past 1V works out the next bit and shifts the whole register along by one",
+    "The voltage read against the threshold to set the bit going in, unless a WRITE or ERASE button overrides it",
+    "A second voltage read against the threshold and combined with the DATA result by the logic operation the menu chooses; hovering the jack names the operation in use",
+    "A third voltage read against the threshold and exclusive-ORed with everything else to give the bit going in",
+    "Attenuates and inverts the four-bit converter reading bits 1 to 4, -1 to 1",
+    "Attenuates and inverts the four-bit converter reading bits 3 to 6, -1 to 1",
+    "Attenuates and inverts the four-bit converter reading bits 5 to 8, -1 to 1",
+    "Attenuates and inverts the eight-bit converter reading the whole register, -1 to 1",
+    "Bits 1 to 4 read as a four-bit number, 0V to 10V before its attenuverter",
+    "Bits 3 to 6 read as a four-bit number, 0V to 10V before its attenuverter",
+    "Bits 5 to 8 read as a four-bit number, 0V to 10V before its attenuverter",
+    "All eight bits read as one number, -5V to 5V before its attenuverter, or 0V to 10V with the menu set to unipolar",
+    "Its own bit of the register, put out as a gate, a copy of the clock or a short trigger depending on the menu",
+    "Menu — Bit output mode: Clocks, Gates, Triggers — Clocks passes the CLOCK voltage through while the bit is high, Gates holds a flat 10V, Triggers sends a 1 millisecond pulse per clock",
+    "Menu — Logic type: XOR, NAND, XNOR, OR, AND, NOR — chooses how the LOGIC jack combines with the DATA result",
+    "Menu — Input overrides: Data, Everything — Data lets LOGIC and XOR act on a WRITE or ERASE press as well, Everything makes the button the whole answer",
+    "Menu — 8 Bit DAC output: Bipolar, Unipolar — sets whether the eight-bit converter runs -5V to 5V or 0V to 10V",
+    "Menu — Show DAC lights — turns the converter lamps on and off",
+    "Menu — Show bit lights — turns the per-bit lamps on and off",
+    "Note — with EDIT on the clock input is not read at all; the register only moves when WRITE or ERASE is pressed",
+    "Note — a bit output patched back into DATA, LOGIC or XOR is handled specially: if that bit changed on the very clock being processed, its previous state is read, which keeps a feedback loop stable",
+    "Note — that same handling means stacked cables into DATA, LOGIC or XOR are not read correctly; to merge sources, patch one into LOGIC and set the logic type to OR",
+    "Note — a jack with no cable counts as low and takes no part in working out the next bit",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "2": 1,
+    "0": 2,
+    "1": 3,
+    "9": 4,
+    "4": 7,
+    "3": 8,
+    "5": 13,
+    "6": 14,
+    "7": 15,
+    "8": 16
+   },
+   "in": {
+    "4": 5,
+    "5": 6,
+    "3": 9,
+    "0": 10,
+    "1": 11,
+    "2": 12
+   },
+   "out": {
+    "0": 17,
+    "1": 18,
+    "2": 19,
+    "11": 20,
+    "3": 21,
+    "4": 21,
+    "5": 21,
+    "6": 21,
+    "7": 21,
+    "8": 21,
+    "9": 21,
+    "10": 21
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "11": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "normal": "0V",
+      "why": "CognitiveShift.cpp:215 reads this input with getVoltage(), which is channel 1 alone, and compares it against the threshold; CognitiveShift.cpp:202 treats an unconnected jack as low"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "normal": "0V",
+      "why": "CognitiveShift.cpp:215 reads this input with getVoltage() and compares it against the threshold; CognitiveShift.cpp:304 only applies the logic operation while a cable is in it"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "normal": "0V",
+      "why": "CognitiveShift.cpp:215 reads this input with getVoltage() and compares it against the threshold; CognitiveShift.cpp:202 treats an unconnected jack as low"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "CognitiveShift.cpp:272 reads this input with getVoltage() and passes it to a Schmitt trigger at Rack's default 1V threshold"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "CognitiveShift.cpp:247 reads this input with getVoltage() and passes it to a Schmitt trigger at Rack's default 1V threshold"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "sumRange": "1 to 9V",
+      "normal": "0V",
+      "why": "CognitiveShift.cpp:279 reads this input with getVoltage(), multiplies it by the attenuverter and adds the knob; CognitiveShift.cpp:280 clamps the total to 1 and 9"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:367 writes channel 1 alone; CognitiveShift.cpp:360 scales a four-bit value onto 0V to 10V before the attenuverter"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:368 writes channel 1 alone; CognitiveShift.cpp:360 scales a four-bit value onto 0V to 10V before the attenuverter"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:369 writes channel 1 alone; CognitiveShift.cpp:360 scales a four-bit value onto 0V to 10V before the attenuverter"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:354 writes channel 1 alone, at the 10V held in CognitiveShift.cpp:11"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:354 writes channel 1 alone, at the 10V held in CognitiveShift.cpp:11"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:354 writes channel 1 alone, at the 10V held in CognitiveShift.cpp:11"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:354 writes channel 1 alone, at the 10V held in CognitiveShift.cpp:11"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:354 writes channel 1 alone, at the 10V held in CognitiveShift.cpp:11"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:354 writes channel 1 alone, at the 10V held in CognitiveShift.cpp:11"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:354 writes channel 1 alone, at the 10V held in CognitiveShift.cpp:11"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CognitiveShift.cpp:354 writes channel 1 alone, at the 10V held in CognitiveShift.cpp:11"
+     },
+     "11": {
+      "poly": false,
+      "range": "±5V",
+      "why": "CognitiveShift.cpp:391 writes channel 1 alone; CognitiveShift.cpp:383 scales an eight-bit value onto -5V to 5V, or onto 0V to 10V on the unipolar setting"
+     }
+    }
+   },
+   "notes": "Read from src/CognitiveShift.cpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1, alongside docs/Cella_Manual.md written for 2.11.0. The manual's account matches the code. Two things it does not spell out. The EDIT button does not merely enable manual entry: CognitiveShift.cpp:269 skips the clock test entirely while it is on, so a running clock is ignored until it is switched off again. And the DAC attenuverters run -1 to 1 rather than 0 to 1 (CognitiveShift.cpp:110 to 113), so a converter output can be inverted. The self-patch handling at CognitiveShift.cpp:203 to 211 reads the source module's previous bit state when that source was clocked on the same frame, which is the timing compensation the manual describes."
   },
   "LoudnessMeter": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Loudness meter to the EBU R128 standard, reading momentary, short-term and integrated loudness, loudness range, the two dynamics ratios and the maximum true peak",
+    "The left channel, or the whole signal when it is the only cable; voltages are scaled by a tenth before the measurement, so 10V is taken as full scale",
+    "The right channel of a stereo pair",
+    "A rise past 1V clears every integrated, maximum and historical reading and starts the measurement again",
+    "Clears every integrated, maximum and historical reading and starts the measurement again",
+    "Sets the loudness the momentary bar is measured against, -36 to 0 LUFS; the bar is white below it and red above",
+    "Menu — Processing mode: Auto, Mono, Stereo — Auto follows the cables, Mono mixes both inputs down first, Stereo copies a single input to both channels",
+    "Menu — Short-Term loudness: Disabled, Enabled — switching it off stops the short-term and dynamics readings being worked out at all, which costs less processor time",
+    "Menu — Add Loudness CV — creates the expander module immediately to the right of this one",
+    "Note — the same audio measured in stereo reads about 3 LUFS higher than in mono, because the standard sums the energy of both channels, so the processing mode changes the number",
+    "Note — the integrated reading is saved with the patch and comes back when it is loaded; everything else starts again from nothing",
+    "Note — the true peak figure turns red above -0.5dB, which is the point at which converting back to analogue may clip"
+   ],
+   "param": {
+    "0": 4,
+    "1": 5
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "LoudnessMeterEngine.hpp:432 reads this input with getVoltage(), which is channel 1 alone, and scales it by a tenth"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "LoudnessMeterEngine.hpp:433 reads this input with getVoltage(), which is channel 1 alone, and scales it by a tenth"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "LoudnessMeterEngine.hpp:392 reads this input with getVoltage() and passes it to a Schmitt trigger at Rack's default 1V threshold"
+     }
+    }
+   },
+   "notes": "Read from src/LoudnessMeter.cpp and src/LoudnessMeterEngine.hpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1, alongside docs/Cella_Manual.md written for 2.11.0. The measurement itself comes from the libebur128 library in deps. The manual's account matches the code. The module has no outputs of its own; the Loudness CV expander is the only way to get a voltage out of it. The nine readings on the display are drawn by a display widget rather than by parameters, so none of them can be clicked for help; they are covered by the first line and the notes."
   },
   "Loud": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Loudness meter to the EBU R128 standard in a narrow panel, reading momentary, short-term and integrated loudness, loudness range, the two dynamics ratios and the maximum true peak",
+    "A rise past 1V clears every integrated, maximum and historical reading and starts the measurement again",
+    "Clears every integrated, maximum and historical reading and starts the measurement again",
+    "The left channel, or the whole signal when it is the only cable; voltages are scaled by a tenth before the measurement, so 10V is taken as full scale",
+    "The right channel of a stereo pair",
+    "Menu — Processing mode: Auto, Mono, Stereo — Auto follows the cables, Mono mixes both inputs down first, Stereo copies a single input to both channels",
+    "Menu — Short-Term loudness: Disabled, Enabled — switching it off stops the short-term and dynamics readings being worked out at all, which costs less processor time",
+    "Menu — Target loudness — a slider setting the loudness the momentary bar is measured against, -36 to 0 LUFS; this panel has no knob for it",
+    "Menu — Add Loudness CV — creates the expander module immediately to the right of this one",
+    "Note — the same audio measured in stereo reads about 3 LUFS higher than in mono, because the standard sums the energy of both channels, so the processing mode changes the number",
+    "Note — the integrated reading is saved with the patch and comes back when it is loaded; everything else starts again from nothing",
+    "Note — this is the wide meter's engine in a narrower panel, so the target is set from the menu rather than from a knob"
+   ],
+   "param": {
+    "0": 2
+   },
+   "in": {
+    "2": 1,
+    "0": 3,
+    "1": 4
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "LoudnessMeterEngine.hpp:432 reads this input with getVoltage(), which is channel 1 alone, and scales it by a tenth"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "LoudnessMeterEngine.hpp:433 reads this input with getVoltage(), which is channel 1 alone, and scales it by a tenth"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "LoudnessMeterEngine.hpp:392 reads this input with getVoltage() and passes it to a Schmitt trigger at Rack's default 1V threshold"
+     }
+    }
+   },
+   "notes": "Read from src/Loud.cpp and src/LoudnessMeterEngine.hpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1. Loud and Loudness Meter are the same module class with different widgets (Loud.cpp:268 creates it from the LoudnessMeter class). The target loudness parameter exists here but is given no widget, so it has no census position and no click can reach it; Loud.cpp:256 puts it on the context menu as a slider instead."
   },
   "LoudnessCV": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Expander for Loud and Loudness Meter that turns the meter's reading into a voltage; it goes immediately to the right of the meter it reads",
+    "Chooses which reading is used: M for the momentary loudness over 400ms, S for the short-term loudness over 3 seconds",
+    "Sets how many volts each loudness unit away from the target is worth, 0.125V to 2V, doubling across the travel",
+    "Chooses what is put out: the plus sign gives only the amount above the target, the plus-or-minus sign gives the signed distance on both sides of it",
+    "The reading's distance from the meter's target, scaled and limited to -10V and 10V",
+    "Note — the module has to be immediately to the right of a Loud or a Loudness Meter; anywhere else its output is 0V",
+    "Note — with the short-term reading chosen and short-term loudness switched off on the meter, the output is 0V",
+    "Note — at the default half a volt per loudness unit, the full 10V is reached 20 loudness units from the target"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "LoudnessCV.cpp:68 writes channel 1 alone; LoudnessCV.cpp:63 clamps the scaled difference to -10V and 10V"
+     }
+    }
+   },
+   "notes": "Read from src/LoudnessCV.cpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1, alongside docs/Cella_Manual.md written for 2.11.0. The manual's account matches the code. The scale parameter is two to the power of a value from -3 to 1 (LoudnessCV.cpp:25), so the travel runs 0.125V to 2V per loudness unit with 0.5V at the default. The expander reads its meter over Rack's expander message channel and puts out 0V whenever there is no compatible module immediately to its left (LoudnessCV.cpp:37 and 42). The panel prints M, S, SCL and the two output-mode signs, with no fuller wording anywhere on it."
   },
   "Integral": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Integrator: it adds its input into a running total at a set rate, holds that total when the input is at zero, and can be made to leak back towards zero over a set time",
+    "Sets how fast the input is added into the total, -5 to 5 in octaves around whichever range the switch chooses, the hover text reading the result in hertz",
+    "Sets how long the total takes to fall to about a third of itself with no input, from no leak at all at fully counter-clockwise to a short time constant at fully clockwise",
+    "While it is held down, the voltage set by the INIT knob is added to the input, which is how a total is started from nothing",
+    "Sets the voltage the INIT button adds to the input, -10V to 10V",
+    "Sets which decade the RATE knob works in: L runs 6.25mHz to 6.4Hz, M runs 0.125Hz to 128Hz, H runs 25Hz to 25.6kHz",
+    "Chooses what happens at the voltage limit: CLIP holds the total there, FOLD turns the output back from it, RESET drops the total to 0V",
+    "Attenuates and inverts the RATE jack, -1 to 1, before that voltage is added to the RATE knob",
+    "Switches between integrating only while the GATE jack is above 0V and integrating only while it is at exactly 0V",
+    "Attenuates and inverts the LEAK jack, -1 to 1, before that voltage is added to the LEAK knob",
+    "Divided by 2, scaled by its attenuverter and added to the RATE knob, so 2V at a full attenuverter moves the rate by one octave",
+    "Stops and starts the integration; which way round it works is set by the gate-mode button, and with no cable here integration always runs",
+    "Divided by 10, scaled by its attenuverter and added to the LEAK knob, the total clamped to the knob's own range",
+    "A rise past 1V sets the total straight back to 0V",
+    "Sets the total straight back to 0V",
+    "The voltage added into the total; every channel of a polyphonic cable is summed first",
+    "The running total, held to the voltage limit the menu sets in the way the switch chooses",
+    "Menu — Range: -5V..5V, -10V..10V — sets the voltage limit the CLIP, FOLD and RESET switch acts at",
+    "Note — on the FOLD setting only the output is folded; the total inside the module keeps growing past the limit, so it can take a while to come back once the input is removed",
+    "Note — the gate test for the low setting is against exactly 0V, so a gate that idles at a few millivolts stops the integration on that setting"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "5": 3,
+    "6": 4,
+    "2": 5,
+    "3": 6,
+    "7": 7,
+    "9": 8,
+    "8": 9,
+    "4": 14
+   },
+   "in": {
+    "2": 10,
+    "1": 11,
+    "3": 12,
+    "4": 13,
+    "0": 15
+   },
+   "out": {
+    "0": 16
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "why": "Integral.cpp:201 reads this input with getVoltageSum, which adds every channel of a polyphonic cable together"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "normal": "always integrating",
+      "why": "Integral.cpp:243 reads this input with getVoltage(), which is channel 1 alone, and Integral.cpp:244 to 248 compare it against 0V; Integral.cpp:242 only applies the test while a cable is present"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Integral.cpp:221 reads this input with getVoltage(), multiplies it by the attenuverter and divides by 2 before adding it to the knob"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Integral.cpp:227 reads this input with getVoltage(), multiplies it by the attenuverter and divides by 10; Integral.cpp:228 clamps the total to 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Integral.cpp:212 reads this input with getVoltage() and passes it to a Schmitt trigger at Rack's default 1V threshold"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Integral.cpp:268 writes channel 1 alone; Integral.cpp:256 sets the limit at 5V or 10V from the menu"
+     }
+    }
+   },
+   "notes": "Read from src/Integral.cpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1, alongside docs/Cella_Manual.md written for 2.11.0. Two places where the manual and the code differ. The manual says the INIT knob sets a voltage from 0V to 10V; Integral.cpp:154 configures it from -10V to 10V, so it can subtract as well. And the manual gives the gate modes as low meaning 0V and high meaning above 0V, which is right, but the low test is an exact comparison with zero (Integral.cpp:246), so any small offset on the gate counts as high. On the FOLD setting the fold is applied to the output only and the internal total is left alone (Integral.cpp:265 against 260), unlike CLIP and RESET which act on the total itself. The rate figures come from the base time constants of 5s, 0.25s and 0.00125s at Integral.cpp:87 with the knob as a power of two."
   },
   "2State": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three sections that each put out one of two voltages you set by hand, switched between by a gate, a button, or a trigger that toggles them",
+    "Forces its section's gate on for as long as it is held, and in latch mode each press flips the section over",
+    "Switches its section between following the gate directly and toggling on each rise of it",
+    "Sets the voltage its section puts out while its gate is off, across whichever range the menu chooses",
+    "Sets the voltage its section puts out while its gate is on, across whichever range the menu chooses",
+    "2V or more turns the first section's gate on",
+    "2V or more turns its own section's gate on; with no cable and cascading left on, the section follows the nearest section above it that has a gate or a pressed button",
+    "The LOW or the HIGH voltage of its section, whichever its gate state calls for, with no slew or crossfade between them",
+    "Menu — Range: +/-10V, +/-5V, +/-3V, +/-2V, +/-1V, 0V-10V, 0V-5V, 0V-3V, 0V-2V, 0V-1V — sets the span all six LOW and HIGH knobs work across",
+    "Menu — Default mode: Gate, Latch — sets which way the latch switches come up after an initialise",
+    "Menu — Cascading: Disabled, Enabled — sets whether a section with no gate of its own follows the sections above it",
+    "Note — the three sections share only the voltage range and the cascading rule; each has its own gate, latch and pair of knobs",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 4,
+    "10": 4,
+    "11": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 7,
+    "2": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "2State.cpp:118 reads this input with getVoltage(), which is channel 1 alone, and compares it against 2V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "normal": "Gate 1",
+      "why": "2State.cpp:118 reads this input with getVoltage() and compares it against 2V; 2State.cpp:133 falls back to the sections above when it is unconnected"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "normal": "Gate 2 or Gate 1",
+      "why": "2State.cpp:118 reads this input with getVoltage() and compares it against 2V; 2State.cpp:133 falls back to the sections above when it is unconnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "2State.cpp:152 writes channel 1 alone, at a voltage the menu range caps at 10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "2State.cpp:152 writes channel 1 alone, at a voltage the menu range caps at 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "why": "2State.cpp:152 writes channel 1 alone, at a voltage the menu range caps at 10V"
+     }
+    }
+   },
+   "notes": "Read from src/2State.cpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1, alongside docs/Cella_Manual.md written for 2.11.0. The manual's account matches the code. The cascade at 2State.cpp:130 walks upward through every earlier section rather than only the one immediately above, and it takes either a patched gate or a pressed button, which is what makes one gate in the top section reach all three. The Default mode menu only takes effect on an initialise (2State.cpp:88); moving the menu does not move the latch switches that are already set."
   },
   "FrequencyAnalyzer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Twelve-band spectrum analyser with a vintage meter display, showing the energy in bands centred at 25Hz, 40Hz, 63Hz, 100Hz, 160Hz, 250Hz, 500Hz, 1kHz, 2kHz, 4kHz, 8kHz and 16kHz",
+    "The left channel, or the whole signal when it is the only cable",
+    "The right channel, which gets its own meter in each band on the L/R Split setting",
+    "Menu — Stereo View: Mono Energy, L/R Split — one meter per band from both inputs together, or a separate meter for each input",
+    "Menu — Display: Dots, Segmented Bars, Solid Bars — chooses what each meter is drawn as",
+    "Menu — Light Response: Solid, Dynamic, Persistence — Solid holds one brightness, Dynamic brightens with the signal, Persistence leaves an afterglow",
+    "Menu — Effects: Bloom, Glass, Shimmer, CRT — four display treatments that can be switched on in any combination",
+    "Menu — Effects Strength: Off, Subtle, Full — sets how strong those treatments are",
+    "Menu — Theme: Red, Orange, Amber, Green, Light Blue, Vintage Blue, Ivory — chooses the meter colours",
+    "Menu — Show Labels — turns the frequency labels under the bands on and off",
+    "Menu — Show Unlit Segments — turns the dark part of each meter on and off",
+    "Menu — Top — a slider setting the top of the visible level range, -40dB to 0dB, at -12dB to begin with",
+    "Menu — Bottom — a slider setting the bottom of the visible level range, -120dB to -60dB, at -100dB to begin with",
+    "Menu — Fall Delay — a slider setting how quickly the band levels fall, 0.01 to 2 seconds",
+    "Menu — Peak Fall Delay — a slider setting how quickly the peak marks fall, 0.01 to 3 seconds, at 1 second to begin with",
+    "Note — the module has no outputs and no panel controls at all; the four levels it can be set to are sliders on the right-click menu",
+    "Note — the whole display is drawn with OpenGL, so nothing on it can be clicked for help"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "FrequencyAnalyzer.cpp:118 declares this input and the analyser reads channel 1 of it alone"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "FrequencyAnalyzer.cpp:119 declares this input and the analyser reads channel 1 of it alone"
+     }
+    }
+   },
+   "notes": "Read from src/FrequencyAnalyzer.cpp at commit fb01326, the commit whose plugin.json carries the installed 2.11.1, alongside docs/Cella_Manual.md written for 2.11.0. All four parameters are declared with no widget of their own (FrequencyAnalyzer.cpp:112 to 117 against the widget's addParam calls, of which there are none), so none has a census position and no click can reach them; they appear as sliders on the context menu at FrequencyAnalyzer.cpp:895 to 898. The band centres and the four slider ranges are the constants at FrequencyAnalyzer.cpp:20 to 31, and they match the manual exactly."
   },
   "Spectrum": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Scrolling spectrogram: the frequency content of the input drawn against time, with a classic analysis and a time-frequency reassigned one, several colour palettes and a full-window view",
+    "The left channel, or the whole signal when it is the only cable",
+    "The right channel; with no cable it takes the left input",
+    "A rise past 1V drops a marker at the current point in the history",
+    "Sets the quietest level the display shows, -140 to -40 dBFS; the top of the range is always 0 dBFS",
+    "Sets how fast the history moves across the display: slower settings fit more time on screen, faster settings less",
+    "A rise past 1V stops and starts the display, the same pause the FREEZE button gives",
+    "Stops and starts the display without clearing what is on it",
+    "Erases the history and every marker on it",
+    "Menu — Open expanded view — fills the Rack window with the running display, keeping its history; Space freezes and resumes it, Escape or a click outside closes it",
+    "Menu — Analysis mode: Classic, T-F Reassigned — Classic is the ordinary spectrogram; the reassigned one moves each piece of energy to its estimated true frequency and time",
+    "Menu — Channel mode: Left, Right, Mono, Mid, Side — chooses what is analysed; Mono averages the two inputs, or uses whichever one is connected on its own",
+    "Menu — FFT size: 1024, 2048, 4096, 8192, 16384 — a larger size resolves frequency more finely and time more coarsely",
+    "Menu — FFT overlap: None, 25%, 50%, 75%, 87.5%, 93.75% — sets how far each analysis window overlaps the one before it",
+    "Menu — Window: Hann, Blackman-Harris, Flat-top — chooses the window function the analysis uses",
+    "Menu — Time detail: Economy · 15 rows/s, Normal · 30 rows/s, High · 60 rows/s — sets how many rows a second the display draws",
+    "Menu — Polyphonic voice: Channel 1 to Channel 16 — picks which channel of a polyphonic cable is analysed",
+    "Menu — Flow: Up, Down, Left, Right — sets the direction the history moves across the display",
+    "Menu — Palette — chooses the colours the levels are drawn in",
+    "Menu — Rendering: Precise, Smooth — chooses between drawing each bin exactly and smoothing between them",
+    "Menu — Trace: Live, Peak — sets the two optional traces drawn over the spectrogram",
+    "Menu — Ticks — turns the frequency and time guides on and off and sets how strong they are",
+    "Menu — Frequency — sets the axis labels, the smoothing, whether bins are spaced by Log, Linear or Mel, and resets the zoom",
+    "Menu — Markers — turns the markers on and off and sets how strong they are",
+    "Note — hovering the display reads the frequency, the nearest note and the level under the pointer; shift and the wheel zoom the frequency range, dragging pans it, a double click resets it",
+    "Note — changing the analysis mode clears the history, because rows from the two modes hold different measurements",
+    "Note — the reassigned mode costs a good deal more processor time and holds each new row back by about one analysis window, though the timestamps it records refer to when the sound happened",
+    "Note — the panel can be dragged wider or narrower, and the display grows with it"
+   ],
+   "param": {
+    "1": 4,
+    "4": 5,
+    "2": 7,
+    "3": 8
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "3": 3,
+    "2": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "Spectrum.cpp:244 reads this input with getVoltage on the channel the Polyphonic voice menu selects"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "Left",
+      "why": "Spectrum.cpp:245 reads this input with getVoltage on the channel the Polyphonic voice menu selects; Spectrum.cpp:243 falls back to the left input when it is unconnected"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Spectrum.cpp:210 reads this input with getVoltage() and passes it to a Schmitt trigger at Rack's default 1V threshold"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Spectrum.cpp:227 reads this input with getVoltage() and passes it to a Schmitt trigger at Rack's default 1V threshold"
+     }
+    }
+   },
+   "notes": "Read from src/Spectrum.cpp and src/spectrum at commit fb01326, the commit whose plugin.json carries the installed 2.11.1. This is the module the installed 2.11.1 differs from the 2.11.0 manual over: that release made the panel resizable, which the manual does not mention. The Channel mode parameter has no widget of its own (Spectrum.cpp:136 against the widget's addParam calls), so no click can reach it; it is set from the menu instead. The floor runs -140 to -40 dBFS and the speed is a power of two between the shortest and longest history the module holds (Spectrum.cpp:27 to 29 and SpectrumTypes.hpp:98). The display's hover readout, zoom and pan are handled by the display widget, which is not a parameter, so none of them can be clicked for help."
   }
  }
 }

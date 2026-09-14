@@ -1,18 +1,147 @@
 {
  "plugin": "ArhythmeticUnits-Fourier",
- "source": "https://github.com/Kautenja/ArhythmeticUnits-Fourier",
+ "source": "https://github.com/Kautenja/ArhythmeticUnits-Fourier/blob/main/manual/Fourier/manual.tex",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "SpectrumAnalyzer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-channel spectrum analyzer with the short-time Fourier transform laid out as controls: window, buffer length, hop rate, both axis scales, smoothing in time and frequency, and a display tilt.",
+    "Sets the gain on that input before analysis, from silence up to 12dB; the colour beside it is the colour of the curve it draws.",
+    "Stops and starts the buffering of fresh audio; switched off, the display holds the analysis it last made.",
+    "Chooses one of fifteen window functions applied to the buffer before the transform, which trades frequency resolution against spectral leakage.",
+    "Sets the size of the analysis buffer as a power of two, 128 samples up to 16384; a longer buffer resolves closer frequencies and costs more processing.",
+    "Sets how much time passes between one analysis and the next, 5ms to 300ms, which is also how often the display is redrawn.",
+    "Chooses whether the frequency axis is spaced linearly or logarithmically.",
+    "Chooses whether the level axis runs linearly from 0% to 400% of headroom, or in decibels from -60dB or -120dB up to 12dB.",
+    "Sets the time constant of the averaging applied across successive analyses, 0 to 2500ms; about 250ms suits music.",
+    "Sets how wide a band of neighbouring frequency bins is averaged together, from none up to 2.5 octaves; 1/6 octave suits a buffer of 1024 samples or more.",
+    "Sets the lowest frequency drawn, 0Hz up to half the sample rate.",
+    "Sets the highest frequency drawn, 0Hz up to half the sample rate.",
+    "Tilts the drawn spectrum about 1kHz, -9 to +9dB per octave, to offset the fall of high frequency energy in music; 4.5 or 3 is the usual choice.",
+    "One of four audio inputs; every channel of a polyphonic cable is summed into it, and 5V counts as full scale.",
+    "Note — The module has no outputs. Audio patched in is analysed and drawn, and nothing comes back out.",
+    "Note — The ten green words along the bottom of the display are the controls themselves: drag one up or down to change it.",
+    "Note — Randomize leaves every control alone, so it cannot scramble an analysis setting you are working with.",
+    "Note — The low and high frequency limits and their defaults are rebuilt from the sample rate, so changing the engine rate resets the high limit to the new Nyquist frequency.",
+    "Menu — Filled Display — fills the area under each curve rather than drawing it as a line",
+    "Menu — Bezier Curve — draws each curve as a smooth spline rather than straight segments between bins",
+    "Menu — AC-coupled — passes each input through a DC blocker before the analysis"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 3,
+    "6": 4,
+    "7": 5,
+    "8": 6,
+    "9": 7,
+    "10": 8,
+    "11": 9,
+    "12": 10,
+    "13": 11,
+    "14": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 13,
+    "2": 13,
+    "3": 13
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/SpectrumAnalyzer.cpp:477 fromAC(inputs[INPUT_SIGNAL+i].getVoltageSum()), and src/dsp/math/eurorack.hpp:59 divides by 5"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/SpectrumAnalyzer.cpp:477 fromAC(inputs[INPUT_SIGNAL+i].getVoltageSum()), and src/dsp/math/eurorack.hpp:59 divides by 5"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/SpectrumAnalyzer.cpp:477 fromAC(inputs[INPUT_SIGNAL+i].getVoltageSum()), and src/dsp/math/eurorack.hpp:59 divides by 5"
+     },
+     "3": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/SpectrumAnalyzer.cpp:477 fromAC(inputs[INPUT_SIGNAL+i].getVoltageSum()), and src/dsp/math/eurorack.hpp:59 divides by 5"
+     }
+    }
+   },
+   "notes": "getVoltageSum() sums every channel of a polyphonic cable into one analysis lane, so the module reads polyphony but does not display it channel by channel. There are no outputs at all. The gain parameters run 0 to 3.981 with a display base of -10 and a multiplier of 20, which is how the tooltip reads -inf dB to 12dB. The ten parameters along the bottom of the display and the four input gains all have positions, so all fifteen controls can be clicked for help; index order matches panel order left to right. Every parameter has randomizeEnabled set false (src/SpectrumAnalyzer.cpp:183-184). The maker's manual is written against version 2.0.1 and matches this build's controls."
   },
   "Spectrogram": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A spectrogram: the same Fourier analysis drawn as a scrolling image, frequency up the screen and time across it, with level shown as colour.",
+    "Sets the gain on the input before analysis, from silence up to 12dB; it comes up at 6dB.",
+    "Stops and starts the buffering of fresh audio; switched off, the image stops scrolling.",
+    "Chooses one of fifteen window functions applied to the buffer before the transform, which trades frequency resolution against spectral leakage.",
+    "Chooses whether the frequency axis up the image is spaced linearly or logarithmically.",
+    "Sets the time constant of the averaging applied across successive analyses, 0 to 2500ms.",
+    "Sets how wide a band of neighbouring frequency bins is averaged together, from none up to 2.5 octaves.",
+    "Sets the lowest frequency drawn, 0Hz up to half the sample rate.",
+    "Sets the highest frequency drawn, 0Hz up to half the sample rate.",
+    "Tilts the drawn spectrum about 1kHz, -9 to +9dB per octave, to offset the fall of high frequency energy in music.",
+    "The audio to analyse; every channel of a polyphonic cable is summed into it, and 5V counts as full scale. The maker left this jack named TODO, which is what its tooltip reads.",
+    "Note — The module has no outputs. Audio patched in is analysed and drawn, and nothing comes back out.",
+    "Note — The transform is fixed at 2048 samples and the image holds 512 columns of history; neither is adjustable, unlike the analyzer in this plugin.",
+    "Note — The seven green words along the bottom of the display are the controls themselves: drag one up or down to change it.",
+    "Menu — AC-coupled — passes the input through a DC blocker before the analysis",
+    "Menu — Color Map: Viridis, Cividis, Magma, Plasma, Inferno, Bone, Gray — chooses the colours level is drawn in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Spectrogram.cpp:399 fromAC(inputs[INPUT_SIGNAL].getVoltageSum()), and src/dsp/math/eurorack.hpp:59 divides by 5"
+     }
+    }
+   },
+   "notes": "The one input is configured as configInput(INPUT_SIGNAL, \"TODO\") at src/Spectrogram.cpp:110, so Rack's own tooltip for that jack reads TODO. The parameter the panel prints as Y SCALE is the frequency scale, FrequencyScale Linear or Logarithmic, named \"Y Scale\" because the spectrogram draws frequency up the image rather than across it; the analyzer in the same plugin uses the same enumeration for its X SCALE. The shipped manual for Spectre is the Fourier manual with the module name left as Fourier in its header, and it documents Length, Hop, X-Scale and a magnitude Y-Scale, none of which exist on this panel: the FFT length is fixed at 2048 and the history at 512 columns (src/Spectrogram.cpp:27-28), and the only Y Scale is the frequency one. There are no outputs. Index order matches panel order."
   }
  }
 }

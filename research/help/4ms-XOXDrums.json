@@ -1,68 +1,1161 @@
 {
  "plugin": "4ms-XOXDrums",
- "source": "https://github.com/4ms/XOXDrums/",
+ "source": "https://github.com/4ms/XOXDrums/blob/main/doc/XOX%20Drums%20User%20Manual.md",
  "read": "2026-09-14",
- "partial": true,
+ "notes": "Read against the maker's source at tag v2.1.2, commit 5b82327, which is the installed version; the branch has since gained bypass handling that the installed binary does not contain. The manual is doc/XOX Drums User Manual.md in that tag. Every jack in the plugin is one channel: the VCV shim at src/vcv/comm_module.cc:31 reads each input with getVoltage and :60 writes each output with setVoltage. Every CV input works the same way, through combineKnobBipolarCV at src/helpers/param_cv.hh:6-11: the voltage is divided by 10, added to its knob, and the total clamped to 0 to 1, so 10V is worth the knob's whole travel and a negative voltage takes the setting down. Every trigger input is a rising edge above 0.5V and the gate length is discarded. THE ONE FINDING A PERSON SHOULD CHECK BY EAR: every sine and square oscillator in the plugin except the hi-hat's advances its phase by twice the frequency it is nominally set to, because the phase increment carries a factor of two (or, in Kick, Snare and Tom, adds the base frequency to itself) while the waveform completes one cycle per unit of phase. M_PIF is pi, confirmed in the 4ms cpputil header util/math.hh:17. So the pitch of Clave, Cowbell, Congabongo, Kick, Snare and Tom is an octave above what the manual and the knob tooltips say. Each of those modules carries the arithmetic in its own notes. Every module also shows an Alt Parameters submenu on right-click; none of these twelve modules declares an alt parameter, so the submenu is empty on all of them and no module gets a menu line for it.",
  "modules": {
   "Clave": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sine burst with a fast decay, in the manner of the 808 clave",
+    "Sets the pitch of the sine, 2000Hz to 3500Hz; the tooltip and the manual both quote half those figures",
+    "Sets how fast the sine fades, 5ms fully anticlockwise to 25ms fully clockwise",
+    "Fires the sound, restarting the sine from zero phase; a rising edge at the trigger jack does it too",
+    "Adds to the PITCH knob",
+    "Adds to the DECAY knob",
+    "A rising edge above 0.5V fires the sound; the length of the gate makes no difference",
+    "The sine burst, up to 5V peak",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — the manual calls the pitch control a bandpass filter cutoff; there is no filter in this module, only a sine oscillator"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Clave.hh:37 adds it to the PITCH knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Clave.hh:76 adds it to the DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Clave.hh:40 takes a rising edge from that voltage being greater than 0.5"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Clave.hh:60 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "The sine runs at twice the frequency the code's own variable names: src/modules/Clave.hh:52 advances the phase by frequency * rSampleRate * 2 while :54 takes sin(2 * M_PIF * phase), and M_PIF is pi (4ms cpputil util/math.hh:17), so one cycle takes sampleRate/(2*frequency) samples. With frequency set to 1000 + control * 750 at :52 the sounding range is 2000Hz to 3500Hz, not the 1kHz to 2kHz the knob's tooltip and the manual give. The decay range 5ms to 25ms at :76-77 matches the manual."
   },
   "Cowbell": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two detuned square waves through a lowpass and a highpass, shaped by one decay, in the manner of the 808 cowbell",
+    "Sets the pitch of both squares together: the upper one 1000Hz to 1600Hz and the lower one 520Hz beneath it; the tooltip and the manual quote half those figures",
+    "Sets how fast the pair fades, 20ms fully anticlockwise to 120ms fully clockwise",
+    "Fires the sound; a rising edge at the trigger jack does it too",
+    "Adds to the PITCH knob",
+    "Adds to the DECAY knob",
+    "A rising edge above 0.5V fires the sound; the length of the gate makes no difference",
+    "The cowbell, up to 5V peak",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — a trigger restarts the phase of the upper square only, so the two oscillators meet differently on every hit and no two hits sound quite alike"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Cowbell.hh:105 adds it to the PITCH knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Cowbell.hh:99 adds it to the DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Cowbell.hh:46 takes a rising edge from that voltage being greater than 0.5"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Cowbell.hh:82 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "Both oscillators sound an octave above the figures in the code's comments and in the manual, because src/modules/Cowbell.hh:107 and :111 set the phase increment to frequency * rSampleRate * 2 while the square flips once per unit of phase at :61 and :66. The upper oscillator's frequency variable is 500 + control * 300 (:106) so it sounds 1000Hz to 1600Hz; the lower is that variable minus 260 (:110) so it sounds 520Hz below the upper, 480Hz to 1080Hz. The manual's 240-540Hz and 500-800Hz are the two variables, not what is heard. Only `phase` is reset on a trigger at :47; `phase_1` runs on undisturbed."
   },
   "Accent": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Holds a signal down and lets it back to full level for a moment on each trigger, so accented hits stand out",
+    "Sets how far the signal drops between accents: fully anticlockwise it drops to four fifths, and past about nine tenths of the travel it passes through silence and comes back inverted",
+    "Fires an accent; a rising edge at the trigger jack does it too",
+    "Adds to the AMOUNT knob",
+    "A rising edge above 0.5V fires an accent; the length of the gate makes no difference",
+    "The signal accented here; with nothing patched the module puts out silence",
+    "The input at the level the accent envelope allows, clipped at 5V",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — the accent envelope is fixed at 70ms and no control changes it",
+    "Note — an accent never makes the signal louder than the input; the knob only lowers everything between accents, despite the manual saying it boosts the accented signal"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Accent.hh:62 adds it to the AMOUNT knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Accent.hh:37 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Accent.hh:49 reads it as a value"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Accent.hh:51 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "src/modules/Accent.hh:63 turns the knob into an amount of 0.2 to 1.1, and :47 makes the gain envelope * amount + (1 - amount). At the peak of the envelope that is always 1, whatever the knob, so the accented level is the input level; between accents it is 1 - amount, which is 0.8 at the bottom of the knob and -0.1 at the top. The knob therefore only attenuates, and past the point where amount passes 1 (about 89 per cent of the travel) the resting signal is inverted rather than merely quiet. The manual's claim that the control boosts the accented signal is not in the code. The 70ms envelope is at :55."
   },
   "Clap": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Bandpassed noise gated by four staggered envelopes, so one hit sounds like several hands, in the manner of the 808 clap",
+    "Sets the decay of the first three envelopes together, 10ms fully anticlockwise to 20ms fully clockwise; the manual says 5ms to 15ms",
+    "Sets when the second, third and fourth envelopes fire after the trigger: the second from 20ms to 40ms, the third from 35ms to 50ms and the fourth from 45ms to 60ms",
+    "Sets the centre of the bandpass filter on the noise, 800Hz to 1600Hz; the tooltip and the manual say the top is 16000Hz",
+    "Sets the decay of the fourth envelope, 20ms to 100ms, which is the tail heard as a room",
+    "Sets how much of the fourth envelope's noise reaches the mix; fully anticlockwise removes the tail",
+    "Multiplies the mix by 1 up to 10 before the output clips at 5V, so turning it up squares the noise off",
+    "Fires the clap; a rising edge at the trigger jack does it too",
+    "A rising edge above 0.5V fires the sound; the length of the gate makes no difference",
+    "Adds to the ENERGY knob",
+    "Adds to the SPREAD knob",
+    "Adds to the COLOR knob",
+    "Adds to the VERB DECAY knob",
+    "Adds to the VERB VOLUME knob",
+    "Adds to the SATURATION knob",
+    "The clap, up to 5V peak",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — only the first envelope fires with the trigger; the other three are started by a sample count, so a second trigger before the spread has run cancels whichever have not fired yet",
+    "Note — all four envelopes gate the same piece of filtered noise, so the four hands are the same hand at four moments"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13,
+    "6": 14
+   },
+   "out": {
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Clap.hh:54 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Clap.hh:47 adds it to the ENERGY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Clap.hh:48 adds it to the SPREAD knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Clap.hh:132 adds it to the COLOR knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Clap.hh:49 adds it to the VERB DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Clap.hh:50 adds it to the VERB VOLUME knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Clap.hh:51 adds it to the SATURATION knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Clap.hh:122 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "Two figures in the manual do not match the code. Energy maps to 10ms to 20ms at src/modules/Clap.hh:66, not the 5ms to 15ms the manual gives; Color maps to 800Hz to 1600Hz at :133-134, not 800Hz to 16kHz, and the knob's own tooltip repeats the manual's 16kHz. The three spread times at :74-76 and the verb decay at :70 do match. The bandpass Q is fixed at 2 (:17). Saturation is a gain of 1 to 10 applied after the mix has already been multiplied by 5 (:113-115), so the output reaches the -5V to 5V clamp at :117 on most settings. Envelopes 2, 3 and 4 are armed by delayCounter equalling a sample count at :81-93, and the counter is reset by every trigger at :56."
   },
   "Congabongo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two sine drums tuned a fourth apart, each with a ringing tone hit and a muted slap hit, in the manner of the 808 congas and bongos",
+    "Sets the pitch of both drums: at Conga the high one runs 196Hz to 396Hz and at Bongo 400Hz to 900Hz, with the low one three quarters of that; the manual quotes half these figures",
+    "Sets how fast both tone hits fade: 40ms to 120ms at Conga and 15ms to 40ms at Bongo; the manual gives 80ms and 25ms as the two tops",
+    "Conga gives the lower pitch range and the longer decay, Bongo the higher range and the shorter one; a new module comes up at Conga",
+    "Strikes the high drum with a ringing tone, restarting its sine from zero phase",
+    "Strikes the high drum with a slap: it cuts off any tone ringing on that drum and plays a hit twice as loud that fades in 10ms",
+    "Strikes the low drum with a ringing tone, restarting its sine from zero phase",
+    "Strikes the low drum with a slap: it cuts off any tone ringing on that drum and plays a hit twice as loud that fades in 10ms",
+    "A rising edge above 0.5V slaps the low drum; the length of the gate makes no difference",
+    "Adds to the PITCH knob",
+    "A rising edge above 0.5V slaps the high drum; the length of the gate makes no difference",
+    "A rising edge above 0.5V plays the low drum's tone hit; the length of the gate makes no difference",
+    "Adds to the DECAY knob",
+    "A rising edge above 0.5V plays the high drum's tone hit; the length of the gate makes no difference",
+    "The low drum, tone and slap together, up to 5V peak",
+    "The high drum, tone and slap together, up to 5V peak",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — the slap decay is fixed at 10ms and the DECAY knob does not reach it",
+    "Note — the two drums share one pitch setting; the low one always runs three quarters of the high one's frequency, a fourth below it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Congabongo.hh:39 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Congabongo.hh:110 adds it to the PITCH knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Congabongo.hh:39 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Congabongo.hh:39 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Congabongo.hh:109 adds it to the DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Congabongo.hh:39 takes a rising edge from that voltage being greater than 0.5"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Congabongo.hh:91 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Congabongo.hh:92 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "Both sines sound an octave above the code's frequency variable: src/modules/Congabongo.hh:120-121 set the phase increments to freq_hz * rSampleRate * 2 and freq_hz * 0.75 * rSampleRate * 2, and :73 and :78 take sin(2 * M_PIF * phase) with M_PIF equal to pi. freq_hz is 98 + control * 100 at Conga and 200 + control * 250 at Bongo (:115-118), so the high drum sounds 196Hz to 396Hz and 400Hz to 900Hz. The manual's 98-198Hz and 200-400Hz are the variable, and its 400Hz top does not match the code's 450Hz either. Decay is 40 + control * 80 at Conga and 15 + control * 25 at Bongo, so the tops are 120ms and 40ms, where the manual says 80ms and 25ms. The switch is a Toggle2pos whose second position, printed Bongo on the panel, is compared against Toggle2posHoriz::RIGHT at :114 - the two enums both give 1, so it works. The slap alpha is fixed at 10ms at :96, the slap is doubled in the mix at :86 and :89, and a slap sets the matching tone envelope to zero at :57 and :64, which is the muting the manual describes."
   },
   "HiHat": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Six square waves through a bandpass and a highpass, played as a short closed hat and a long open hat, in the manner of the 808 hi-hat",
+    "Sets the base frequency of the six squares, 1000Hz to 2000Hz; each one runs at that plus a fixed offset of 100Hz, 250Hz, 400Hz, 550Hz, 600Hz or 1000Hz",
+    "Sets how fast the open hat fades, 50ms to 250ms; the closed hat is fixed at 10ms, and the tooltip and the manual say the top here is 300ms",
+    "With it on, a closed-hat trigger silences the open hat at once; with it off the two ring past each other, and a new module comes up off",
+    "Sets the centre of the bandpass filter the six squares pass through, 1000Hz to 5000Hz",
+    "Sets the corner of the highpass filter after the bandpass, 10000Hz fully anticlockwise down to 1000Hz fully clockwise, and drops the makeup gain from 10 to 2 as it turns",
+    "Plays the closed hat, and chokes the open hat when the choke switch is on; a rising edge at the closed-hat jack does it too",
+    "Plays the open hat; a rising edge at the open-hat jack does it too",
+    "A rising edge above 0.5V plays the closed hat; the length of the gate makes no difference",
+    "Adds to the PITCH knob",
+    "A rising edge above 0.5V plays the open hat; the length of the gate makes no difference",
+    "Adds to the DECAY knob",
+    "Adds to the BRIGHTNESS knob",
+    "Adds to the THICKNESS knob",
+    "The closed hat, up to 5V peak",
+    "The open hat, up to 5V peak",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — both hats are cut from the same six oscillators through the same bandpass, so PITCH and BRIGHTNESS settings reach each of them",
+    "Note — the manual says four square oscillators; there are six"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/HiHat.hh:60 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/HiHat.hh:155 adds it to the PITCH knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/HiHat.hh:69 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/HiHat.hh:147 adds it to the DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/HiHat.hh:141 adds it to the BRIGHTNESS knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/HiHat.hh:129 adds it to the THICKNESS knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/HiHat.hh:107 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/HiHat.hh:108 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "This is the one voice in the plugin whose oscillators are not doubled: src/modules/HiHat.hh:159 sets each phase increment to (frequency + offset) * rSampleRate with no factor of two, so the printed 1kHz to 2kHz is what is heard. The six offsets are at :168-169; the manual says four oscillators. Open decay is 50ms to 250ms at :145-149 where the tooltip and the manual say 300ms. Closed decay is a fixed 10ms at :112. Thickness does two jobs at :129-136: the makeup gain falls from 10 to 2 as the knob rises, and the highpass corner is mapped backwards, 10000Hz at the bottom of the knob to 1000Hz at the top. Choke is read at :62 and works by zeroing the open hat's decay coefficient for that sample, which empties the envelope."
   },
   "Maraca": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A short burst of highpassed white noise, in the manner of the 808 maraca",
+    "Sets how fast the burst fades, 2.5ms fully anticlockwise to 12.5ms fully clockwise; the tooltip and the manual say 2ms to 20ms",
+    "Fires the burst; a rising edge at the trigger jack does it too",
+    "Adds to the DECAY knob",
+    "A rising edge above 0.5V fires the sound; the length of the gate makes no difference",
+    "The noise burst, up to 5V peak",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — the highpass filter is fixed at 6000Hz with a Q of 1, and there is no control for it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Maraca.hh:41 adds it to the DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Maraca.hh:49 takes a rising edge from that voltage being greater than 0.5"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Maraca.hh:68 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "src/modules/Maraca.hh:42 makes the decay 2.5 + control * 10 milliseconds, so the range is 2.5ms to 12.5ms; the knob's tooltip and the manual both say 2ms to 20ms. The highpass cutoff 6000Hz and Q of 1 are at :18-19. A makeup gain of 0.75 is applied after the filter at :64."
   },
   "Rimshot": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A very short pulse rung through a resonant highpass filter, in the manner of the 808 rimshot",
+    "Sets the corner of the filter the pulse rings, 200Hz to 2000Hz, which is the pitch you hear",
+    "Sets the resonance of that filter, from 1 fully anticlockwise to 10 fully clockwise, so the ring grows longer and more tonal as it rises",
+    "Fires the pulse; a rising edge at the trigger jack does it too",
+    "Adds to the PITCH knob",
+    "Adds to the RING knob",
+    "A rising edge above 0.5V fires the sound; the length of the gate makes no difference",
+    "The rimshot, up to 5V peak",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — the exciting pulse is 0.084ms of 5V and nothing on the panel changes it; everything you hear is the filter ringing",
+    "Note — the filter is a highpass, despite the manual calling it a bandpass"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Rimshot.hh:41 adds it to the PITCH knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Rimshot.hh:42 adds it to the RING knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Rimshot.hh:49 takes a rising edge from that voltage being greater than 0.5"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Rimshot.hh:65 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "src/modules/Rimshot.hh:39 declares a BiquadHPF and :45 sets it, so the resonator is a highpass; the manual calls it a bandpass. Cutoff 200Hz to 2000Hz is at :44 and resonance 1 to 10 at :43, both matching the manual. The impulse length, impulseMs, is 0.084 at :80 and its level is 5V at :51; the filter output is tripled at :63 before the -5V to 5V clamp. The manual's remark about the trigger modulating the cutoff is not in this code: nothing changes the filter on a hit."
   },
   "Kick": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sine with separate pitch and amplitude envelopes and a saturated output, built from the 808 and 909 bass drums",
+    "Sets the resting frequency of the sine, 20Hz to 100Hz; the tooltip and the manual say 10Hz to 40Hz",
+    "Sets how far the pitch envelope lifts the sine at the start of a hit, up to 500Hz above the resting frequency",
+    "Sets how fast that lift falls away, 5ms to 35ms; the tooltip and the manual say the top is 30ms",
+    "Sets how fast the hit fades, 5ms to 305ms",
+    "Multiplies the output before it clips at 5V, from 1 fully anticlockwise up to 3, 11 or 101 depending on the L | M | H switch",
+    "Sets how far SATURATION can go: L multiplies by up to 3, M by up to 11, H by up to 101; the switch's own tooltip reads 2x, 10x and 100x, which is the part added to 1",
+    "Fires the kick; a rising edge at the trigger jack does it too",
+    "A rising edge above 0.5V fires the sound; the length of the gate makes no difference",
+    "Adds to the PITCH knob",
+    "Adds to the P. DEPTH knob",
+    "Adds to the P. DECAY knob",
+    "Adds to the AMP DECAY knob",
+    "Adds to the SATURATION knob",
+    "The kick, up to 5V peak",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — a trigger restarts the sine phase along with both envelopes, so every hit begins with the same rise and there is no click from a part-finished cycle"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Kick.hh:46 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Kick.hh:41 adds it to the PITCH knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Kick.hh:42 adds it to the P. DEPTH knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Kick.hh:109 adds it to the P. DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Kick.hh:103 adds it to the AMP DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Kick.hh:43 adds it to the SATURATION knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Kick.hh:85 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "The sine sounds at twice the code's frequency variable. src/modules/Kick.hh:58 sets frequency to 10 + control * 40, :59 sets modulatedFrequency to frequency plus the envelope term, and :60 advances the phase by (frequency + modulatedFrequency) * rSampleRate, which is (2 * frequency + envelope term) per second, with :62 taking sin(2 * M_PIF * phase) and M_PIF equal to pi. The resting pitch is therefore 20Hz to 100Hz where the tooltip and the manual say 10Hz to 40Hz, while the envelope's 500Hz lift is not doubled. Pitch decay is 5 + control * 30 at :110, so 5ms to 35ms against the manual's 30ms top; amp decay is 5 + control * 300 at :104. The saturation multiplier is 1 + control times 2, 10 or 100 at :68-77, so the switch positions cap it at 3, 11 and 101 rather than at the 2x, 10x and 100x their names give."
   },
   "Snare": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sine body and a bandpassed noise, each with its own envelope, crossfaded and saturated, built from the 808 and 909 snares",
+    "Sets the resting frequency of the sine body, 160Hz to 360Hz",
+    "Sets how fast the pitch envelope falls, 5ms to 35ms; the tooltip and the manual say the top is 25ms",
+    "Sets how far the pitch envelope lifts the body at the start of a hit, up to 500Hz, and how far it lifts the noise filter, up to 5000Hz",
+    "Sets the centre of the bandpass filter on the noise, 1000Hz to 6000Hz; the tooltip and the manual say the top is 5000Hz",
+    "Sets how fast the noise fades, 5ms to 80ms",
+    "Sets how fast the sine body fades, 5ms to 55ms; the tooltip and the manual say the top is 50ms",
+    "Crossfades the two sources: fully anticlockwise gives the sine body alone and fully clockwise the noise alone",
+    "Sets how far SATURATION can go: L multiplies by up to 3, M by up to 11, H by up to 101; the switch's own tooltip reads 2x, 10x and 100x, which is the part added to 1",
+    "Multiplies the mix before the output clips at 5V, from 1 fully anticlockwise to the ceiling the L | M | H switch sets",
+    "Fires the snare; a rising edge at the trigger jack does it too",
+    "A rising edge above 0.5V fires the sound; the length of the gate makes no difference",
+    "Adds to the PITCH knob",
+    "Adds to the PITCH DECAY knob",
+    "Adds to the PITCH ENV AMT knob",
+    "Adds to the NOISE COLOR knob",
+    "Adds to the NOISE DECAY knob",
+    "Adds to the BODY DECAY knob",
+    "Adds to the BODY/NOISE knob",
+    "Adds to the SATURATION knob",
+    "The snare, up to 5V peak",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — the mix is doubled after the saturation multiplier, so even at the lowest setting a loud hit reaches the 5V clip",
+    "Note — the pitch envelope drives the noise filter as well as the body, which is why turning PITCH ENV AMT up brightens the snap and not only the thump"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17,
+    "7": 18,
+    "8": 19
+   },
+   "out": {
+    "0": 20
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Snare.hh:60 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Snare.hh:54 adds it to the PITCH knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Snare.hh:126 adds it to the PITCH DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Snare.hh:55 adds it to the PITCH ENV AMT knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Snare.hh:57 adds it to the NOISE COLOR knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Snare.hh:132 adds it to the NOISE DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Snare.hh:120 adds it to the BODY DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "7": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Snare.hh:56 adds it to the BODY/NOISE knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "8": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Snare.hh:138 adds it to the SATURATION knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Snare.hh:96 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "The body sine sounds at twice its frequency variable: src/modules/Snare.hh:72 sets frequency to 80 + control * 100 and :74 advances the phase by (frequency + modulatedFrequency) * rSampleRate, which comes to 2 * frequency plus the envelope term, with :75 taking sin(2 * M_PIF * phase). The heard range is 160Hz to 360Hz, which is close to the 150-380Hz the tooltip and manual give, so the doubling happens to land near the documented figure here. Three other figures do not: pitch decay is 5 + control * 30 at :127 against a documented 25ms top, body decay is 5 + control * 50 at :121 against 50ms, and the noise filter centre is 1000 + control * 5000 at :81 against a documented 5kHz top. The crossfade at :76 and :85 halves the body while leaving the noise at full, and :95 doubles the whole mix after the saturation gain, so the -5V to 5V clamp at :96 is reached easily. The pitch envelope is applied to the noise filter as well, at :82."
   },
   "Tom": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sine with separate pitch and amplitude envelopes, in the manner of the 808 toms",
+    "Sets the resting frequency of the sine within the range the L | M | H switch selects",
+    "Sets how fast the hit fades, 25ms to 100ms",
+    "Sets the range PITCH works over: L gives 80Hz to 280Hz, M gives 160Hz to 560Hz and H gives 320Hz to 1120Hz; the tooltip and the manual quote half these figures",
+    "Sets how fast the pitch envelope falls, 5ms to 50ms",
+    "Sets how far the pitch envelope lifts the sine at the start of a hit, up to 500Hz above the resting frequency",
+    "Fires the tom; a rising edge at the trigger jack does it too",
+    "A rising edge above 0.5V fires the sound; the length of the gate makes no difference",
+    "Adds to the PITCH knob",
+    "Adds to the AMP DECAY knob",
+    "Adds to the PITCH DECAY knob",
+    "Adds to the ENV DEPTH knob",
+    "The tom, up to 5V peak",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — a new module comes up with PITCH DECAY fully anticlockwise, at its shortest, so the initial bend is very quick"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11
+   },
+   "out": {
+    "0": 12
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Tom.hh:46 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Tom.hh:42 adds it to the PITCH knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Tom.hh:113 adds it to the AMP DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Tom.hh:107 adds it to the PITCH DECAY knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Tom.hh:43 adds it to the ENV DEPTH knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Tom.hh:85 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "The sine sounds at twice the code's frequency variable, as in Kick and Snare: src/modules/Tom.hh:78 advances the phase by (frequency + modulatedFrequency) * rSampleRate where modulatedFrequency is frequency plus the envelope term, and :80 takes sin(2 * M_PIF * phase) with M_PIF equal to pi. The switch sets frequency to 40 + control * 100, 80 + control * 200 or 160 + control * 400 at :62-70, so the heard ranges are 80-280Hz, 160-560Hz and 320-1120Hz; the manual's Low, Medium and High figures are the variable, which means the manual's Medium and High ranges are what Low and Medium actually sound. Amp decay 25-100ms at :114 and pitch decay 5-50ms at :108 both match. The switch reads Toggle3pos DOWN, CENTER and UP while the element is a Toggle3posHoriz; both enums number left to right as 0, 1, 2, so the panel's L, M and H line up. The Amp Decay CV jack is declared GateJackInput4ms in Tom_info.hh rather than AnalogJackInput4ms, which changes nothing beyond which picture the MetaModule hardware would draw."
   },
   "Duck": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Drops the level of a signal passing through on each trigger and lets it climb back, the sidechain pump without a compressor",
+    "Sets how deep the drop goes: fully anticlockwise the signal passes unchanged, fully clockwise each trigger takes it to silence",
+    "Sets how long the level takes to climb back, 50ms fully anticlockwise to 2 seconds fully clockwise",
+    "Fires a duck; a rising edge at the trigger jack does it too",
+    "Adds to the AMOUNT knob",
+    "Adds to the TIME knob",
+    "A rising edge above 0.5V fires a duck; the length of the gate makes no difference",
+    "The signal ducked here; with nothing patched the module puts out silence",
+    "The ducked signal, clipped at 5V",
+    "Note — a CV input is bipolar and is added to its knob: 10V there is worth the knob's whole travel, -10V cancels a knob that is fully up, and the total is clamped to the knob's own range",
+    "Note — the module makes up some of the level it takes away, so at the middle of AMOUNT the un-ducked signal comes out about an eighth louder than it went in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Duck.hh:39 adds it to the AMOUNT knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Duck.hh:74 adds it to the TIME knob through combineKnobBipolarCV, which divides the voltage by 10 and clamps the knob-plus-CV total to 0 to 1 (src/helpers/param_cv.hh:8-10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Duck.hh:42 takes a rising edge from that voltage being greater than 0.5"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/vcv/comm_module.cc:31-32 passes this jack's single-channel voltage straight to the core; src/modules/Duck.hh:54 reads it as a value"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/modules/Duck.hh:58 writes this output, and src/vcv/comm_module.cc:60 sets it with setVoltage on one channel; the value is clamped to -5V to 5V before it leaves the core"
+     }
+    }
+   },
+   "notes": "src/modules/Duck.hh:40 sets a makeup gain that runs from 0.5 at the bottom of AMOUNT to 1 at the top, and :52 sets the ducking gain to (1 - amount) + (1 - envelope * amount). With the knob down the two cancel to unity; with it up the resting gain is 1 and the gain at the peak of the envelope is 0. In between the resting gain rises above unity: at the middle of the knob it is 1.125. The recovery time is 50 + control * 1950 milliseconds at :75, matching the manual's 50ms to 2s."
   }
  }
 }

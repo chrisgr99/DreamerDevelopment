@@ -2,27 +2,540 @@
  "plugin": "BGal256",
  "source": "https://github.com/Shtrompel/BGal256",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "BufferSludger": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A rolling audio buffer one beat long, recorded continuously from the input and played back from wherever an automation voltage points, in mono or stereo",
+    "Sets the tempo of the internal clock, 1 to 400 BPM, and with it the buffer length, which is one beat",
+    "Chooses what the automation voltage means: direct sets the playback position outright, wrap adds an offset onto a loop already running at the tempo",
+    "Switches the clock from the BPM knob to the STEP or PHASE input",
+    "Crossfades the output from the buffer read at the recording position fully left to the buffer read at the automation position fully right",
+    "A rising edge past 1V sets the tempo from the time since the previous edge and restarts the buffer, and is read only while EXTERNAL is on",
+    "A rising edge past 1V restarts the clock and the buffer from the beginning",
+    "A clock given as a rising ramp: a jump of more than 0.5V sets the tempo from the time since the last jump; it is read only while EXTERNAL is on and STEP is unpatched",
+    "A rising edge past 1V fills the buffer with silence",
+    "The audio recorded into the buffer, mono or the left channel",
+    "Sets the playback position, 0 to 10V covering the whole buffer and wrapping round outside that",
+    "Shifts the dry-wet mix, 1V covering the whole of the DRY/WET knob's travel, although the manual describes this jack as 0-10V",
+    "The right channel recorded into the buffer; patching it puts the module into stereo",
+    "The mixed buffer playback, mono or the left channel",
+    "The right channel of the buffer playback",
+    "Note — with EXTERNAL on and neither STEP nor PHASE patched the clock is reset every sample, so nothing plays back",
+    "Note — the buffer holds exactly one beat, so changing the tempo changes its length; an item on the panel menu sets whether what is recorded is resampled to fit or trimmed and padded",
+    "Note — the display draws the buffer with a red line at the recording position and a yellow line at the playback position, and the number at the top is the tempo",
+    "Note — a BufferSludgerTransposer placed on either side of this module adds its own automation to the automation input",
+    "Menu — Load WAV File — opens a file dialog and reads a WAV file into the buffer",
+    "Menu — Interpolation Mode: None, Linear, Cubic, Optimal 2x, Optimal 8x, Optimal 32x — chooses how a sample between two buffer positions is worked out",
+    "Menu — Disable Output Filter — turns off the 20kHz lowpass on the outputs",
+    "Menu — Disable Anti Clicking Filter — turns off the short crossfade applied when the playback position jumps a long way",
+    "Menu — Enable speed change on bpm change — resamples what is already in the buffer when the tempo changes, instead of trimming it or padding it with silence",
+    "Menu — Visual Mode: Disable, Samples, Disk — chooses how the buffer is drawn",
+    "Menu — Ui Downsampling — sets how many samples are skipped when the buffer is drawn, 1 to 64; higher values draw faster and more coarsely"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "trigger",
+     "4": "audio",
+     "5": "cv",
+     "6": "cv",
+     "7": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "BufferSludger.cpp:190 runs a dsp::SchmittTrigger on this jack, which fires above 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "BufferSludger.cpp:172 runs a dsp::SchmittTrigger on this jack, which fires above 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "BufferSludger.cpp:202-204 compares this jack with its value on the previous sample and treats a change of more than 0.5V as a beat"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "BufferSludger.cpp:166 runs a dsp::SchmittTrigger on this jack, which fires above 1V"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "BufferSludger.cpp:279 writes this voltage into the buffer unchanged"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "BufferSludger.cpp:218-220 wraps this voltage into 0 to 10V with a modulo, then divides by 10 to give a position in the buffer"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "BufferSludger.cpp:339-342 adds this voltage straight to the Dry/Wet knob, which runs 0 to 1, and clamps the total"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "BufferSludger.cpp:279 writes this voltage into the buffer unchanged; line 163 puts the module into stereo when it is patched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "BufferSludger.cpp:357 and 366 write a single voltage with setVoltage and no channel count is set"
+     },
+     "1": {
+      "poly": false,
+      "why": "BufferSludger.cpp:359 and 368 write a single voltage with setVoltage and no channel count is set"
+     }
+    }
+   },
+   "notes": "The manual gives the Dry/Wet jack as 0-10V, but BufferSludger.cpp:341 adds the voltage straight to a parameter that runs 0 to 1 and clamps the sum, so 1V already reaches full wet. The output filter is applied with the left channel's filter object for both outputs (BufferSludger.cpp:357-360 both call outFilter[0]), so the right output is run through the left channel's filter state; with Disable Output Filter set neither output is filtered and the two are independent."
   },
   "BufferSludgerTransposer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for BufferSludger that plays its buffer at a pitch, adding its own automation to whatever is at that module's automation input; it goes on either side of it",
+    "Plays the buffer backwards when set to enable, unless the REVERSE CTRL jack is patched, which takes the setting over",
+    "Chooses what a change of pitch does: add carries on from the position already reached, reset starts the buffer again from the beginning",
+    "Holding 5V or more here plays the buffer backwards and overrides the REVERSE switch, despite the maker's tooltip naming this jack Reset",
+    "Sets the playback speed at two to the power of the voltage in direct mode, and at two to the power of one volt less, less a half, in wrap mode, where 0V then adds nothing",
+    "Note — with no BufferSludger on either side of it this module does nothing and the CONNECTED lamp stays dark",
+    "Note — a second lamp lights whenever the playback is reversed",
+    "Note — there is no output jack: the automation worked out here is handed to the BufferSludger beside it and added to that module's automation input"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {},
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 5V",
+      "negative": "ignored",
+      "normal": "the REVERSE switch",
+      "why": "BufferSludgerTransposer.cpp:56-64 treats 5V and above as reverse when the jack is patched, and falls back to the Reverse mode switch when it is not"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "BufferSludgerTransposer.cpp:68 and 75 raise two to the power of this voltage to set the playback speed"
+     }
+    }
+   },
+   "notes": "The panel letters the first jack REVERSE CTRL and the manual calls it Reverse Control, but BufferSludgerTransposer.cpp:11 configures its tooltip as Reset; the code at lines 56-64 uses it for reverse. The expander is looked for on the left first and then on the right (lines 32-40), so it works on either side."
   },
   "DressMeUp": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-step sequencer played as a dressing game: each step holds a piece of clothing dragged onto the model in the display, and the output voltage follows whatever that step is wearing",
+    "Sets how many steps the sequence runs through, 1 to 4",
+    "Sets the voltage range the STEP/CV jack is read over: +10V, ±5V or ±10V",
+    "Sets the voltage range the value jacks are read over: +10V, ±5V or ±10V",
+    "Multiplies both voltage outputs, 0 to 10",
+    "Crossfades from one step's value to the next as the STEP/CV voltage moves between them, instead of snapping to the nearer step",
+    "Chooses what the output value is: enabled, the number of the clothing worn at that step; disabled, the voltage last sent to that step's value jack",
+    "A rising edge past 1V sets the sequence back to the first step",
+    "A rising edge past 1V moves back one step, wrapping round at the first, and is ignored while STEP/CV is patched",
+    "Sets the current step from a voltage spread across the range chosen on the STEP/CV switch, and stops the STEP and PREV jacks from moving the sequence",
+    "Sets the value of step A from a voltage across the chosen value range, changing the clothing shown for that step",
+    "Sets the value of step B from a voltage across the chosen value range, changing the clothing shown for that step",
+    "Sets the value of step C from a voltage across the chosen value range, changing the clothing shown for that step",
+    "Sets the value of step D from a voltage across the chosen value range, changing the clothing shown for that step",
+    "Sets the value of whichever step is current, across the chosen value range, changing the clothing shown for it",
+    "A rising edge past 1V moves on one step, wrapping round after the last, and is ignored while STEP/CV is patched",
+    "The current step's value multiplied by RANGE",
+    "A 10V pulse 1ms long when the step changes or the current step's value changes, and only while that value is not zero",
+    "The values of every step in use added together, multiplied by RANGE and then divided by four, although the manual calls this the raw sum",
+    "Note — with QUAN enabled the output follows the clothing worn by the model, so a fresh module puts out 0V until a garment is dragged onto it",
+    "Note — garments are dragged onto the model in the display, and the one belonging to the current step is highlighted as the sequence runs",
+    "Note — the garments in the display are drawn inside a single widget, so clicking one of them cannot reach a help entry of its own",
+    "Menu — Shader parameters — opens sliders for the look of the screen, among them Spot Width, Spot Height, Color Boost, Input Gamma and Output Gamma",
+    "Menu — Disable Shader — draws the screen without its shader",
+    "Menu — Enable Output Filter — puts a 100Hz highpass on the main output, which lets it swing below 0V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "3": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14,
+    "15": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 17,
+    "2": 18
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "3": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "DressMeUp.cpp:70 runs a dsp::SchmittTrigger on this jack, which fires above 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "DressMeUp.cpp:191 runs a dsp::SchmittTrigger on this jack, which fires above 1V"
+     },
+     "15": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "DressMeUp.cpp:186 runs a dsp::SchmittTrigger on this jack, which fires above 1V"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "DressMeUp.cpp:176-183 maps this voltage across the range the Step input range switch sets at lines 141-155, clamps it to 0..1 and multiplies by the step count"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "DressMeUp.cpp:229-239 maps this voltage across the range the Value range switch sets at lines 157-170 and stores it as step A"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "DressMeUp.cpp:229-239 maps this voltage across the range the Value range switch sets at lines 157-170 and stores it as step B"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "DressMeUp.cpp:229-239 maps this voltage across the range the Value range switch sets at lines 157-170 and stores it as step C"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "DressMeUp.cpp:229-239 maps this voltage across the range the Value range switch sets at lines 157-170 and stores it as step D"
+     },
+     "14": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "DressMeUp.cpp:219-225 maps this voltage across the range the Value range switch sets at lines 157-170 and stores it as the current step"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "DressMeUp.cpp:288 writes one voltage with setVoltage and no channel count is set"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "DressMeUp.cpp:274 triggers a PulseGenerator for 1e-3 seconds and lines 293-294 write 10V while it runs"
+     },
+     "2": {
+      "poly": false,
+      "why": "DressMeUp.cpp:280-286 adds the step values, multiplies by the Output Range knob and divides by 4"
+     }
+    }
+   },
+   "notes": "Seven of the sixteen declared inputs have no jack on the panel and no name, so nothing describes them here. The Sum output is divided by four whatever the step count is (DressMeUp.cpp:286) and is scaled by the Output Range knob, where the manual calls it the raw sum of all four steps. The Step input range switch reads bottom to top as ±10V, ±5V and +10V, and its default is ±10V. The Smooth Step switch only has an effect while the STEP/CV jack is patched, because the fractional step position is zero otherwise (DressMeUp.cpp:249-262)."
   },
   "SortStep": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sequencer driven by sorting algorithms: an array is shuffled, sorted and then read through, and every operation puts the index it touched and the value there out as CV",
+    "Sets the top of the range the index and value outputs are scaled to, 0.1 to 10V, while the screen's key output is off",
+    "Pressing it puts the array back to its starting order and returns to the shuffle stage",
+    "Pressing it scrambles the array outright and returns to the shuffle stage",
+    "Pressing it works the whole sorting out again from the beginning",
+    "A rising edge past 1V performs one operation, moving on from shuffle to sort to traverse as each finishes, and doing nothing once the traverse is over",
+    "A rising edge past 1V puts the array back to its starting order and returns to the shuffle stage",
+    "A rising edge past 1V performs one step of the Fisher-Yates shuffle, beginning again once the array has been through it",
+    "A rising edge past 1V performs one operation of the chosen sorting algorithm, and does nothing once the array is sorted",
+    "A rising edge past 1V moves to the next element of the sorted array, beginning again from the left at the end",
+    "A rising edge past 1V scrambles the array outright and returns to the shuffle stage",
+    "A rising edge past 1V works the whole sorting out again from the beginning",
+    "Chooses the sorting algorithm, but reaches only the first nine of the twenty-seven, because 10V is scaled to eight rather than to the number of algorithms",
+    "Sets how many elements the array holds, 10V giving the full thousand",
+    "The index of the element an operation touched, scaled across the array into the range OUT SCALE sets, on two channels when the operation touched two elements",
+    "The value held at the element an operation touched, scaled across the array into the range OUT SCALE sets, on two channels when the operation touched two elements",
+    "A 10V pulse 1ms long once all three stages have finished",
+    "A 10V pulse 1ms long once the shuffle has been through the whole array",
+    "A 10V pulse 1ms long once the array is sorted",
+    "A 10V pulse 1ms long once the traverse has reached the end of the array",
+    "Note — nothing happens on its own: every operation is driven by a rising edge at one of the step jacks, and the three buttons only reset, scramble or recalculate",
+    "Note — three buttons drawn on the screen open panels for the array size and algorithm, for filtering out kinds of operation, and for mapping the output onto a musical scale",
+    "Note — the screen's own buttons and panels are drawn inside one widget, so none of them can be clicked for a help entry of its own",
+    "Note — a PdArray Array, a dbRackModules module or a MindMeld ShapeMaster placed immediately to either side has its stored data read in and sorted instead of the module's own array",
+    "Note — both CV outputs always carry two channels, and an operation that touched one element writes only the first of them"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12,
+    "8": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15,
+    "2": 16,
+    "3": 17,
+    "4": 18,
+    "5": 19
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "cv",
+     "8": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "SortStep.cpp:47-52 runs a dsp::SchmittTrigger on this jack from triggersMap, which fires above 1V; it is read at line 552"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "SortStep.cpp:47-52 runs a dsp::SchmittTrigger on this jack from triggersMap, which fires above 1V; it is read at line 528"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "SortStep.cpp:47-52 runs a dsp::SchmittTrigger on this jack from triggersMap, which fires above 1V; it is read at line 558"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "SortStep.cpp:47-52 runs a dsp::SchmittTrigger on this jack from triggersMap, which fires above 1V; it is read at line 564"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "SortStep.cpp:47-52 runs a dsp::SchmittTrigger on this jack from triggersMap, which fires above 1V; it is read at line 570"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "SortStep.cpp:47-52 runs a dsp::SchmittTrigger on this jack from triggersMap, which fires above 1V; it is read at line 536"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "SortStep.cpp:47-52 runs a dsp::SchmittTrigger on this jack from triggersMap, which fires above 1V; it is read at line 544"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "SortStep.cpp:466-470 divides this voltage by 10, multiplies by 8 and clamps to 0 up to one less than the algorithm count"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "SortStep.cpp:486-490 divides this voltage by 10, multiplies by MAX_ARRAY_SIZE of 1000 and clamps to 1..1000"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "SortStep.cpp:553 sets this jack to two channels and lines 101-103 write one voltage per element of the operation, clamped to ±10V"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "SortStep.cpp:554 sets this jack to two channels and lines 107-109 write one voltage per element of the operation, clamped to ±10V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "SortStep.cpp:583 triggers a PulseGenerator for 1e-3 seconds and writes 10V while it runs"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "SortStep.cpp:590 triggers a PulseGenerator for 1e-3 seconds and writes 10V while it runs"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "SortStep.cpp:597 triggers a PulseGenerator for 1e-3 seconds and writes 10V while it runs"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "SortStep.cpp:604 triggers a PulseGenerator for 1e-3 seconds and writes 10V while it runs"
+     }
+    }
+   },
+   "notes": "The Algorithm Select jack scales its voltage by SORTER_ARRAY_EVENTS_COUNT, which is 8, rather than by the number of algorithms, which is 27 (SortStep.cpp:468 against SorterAlgorithm.hpp:20 and 32-60). 10V therefore lands on the ninth algorithm and the clamp to 26 is never reached, so the jack cannot select the other eighteen; the on-screen menu can. The scale mapping on the key output can also carry the outputs above the Scale knob's setting, up to the ±10V clamp at SortStep.cpp:97."
   }
  }
 }

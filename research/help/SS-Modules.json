@@ -2,12 +2,77 @@
  "plugin": "SS-Modules",
  "source": "https://github.com/strongs20/SS-modules",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "melodygen": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Generates a melody in a chosen scale, taking one note from each gate it is given and choosing that note by weighted rules for leap size, rest, repeat, root gravity and trill",
+    "Sets how many octaves of the scale the melody may use, 1 to 5",
+    "Chooses the scale: Major, Lydian, Mixolydian, Minor, Melodic Minor, Harmonic Minor, Dorian, Phrygian, Aeolian, Chromatic, Raga Kafi, Maqam Hijaz or Japanese Kumoi, with the name printed under the knob",
+    "Transposes the scale a semitone per step, C up to B, with the note name printed under the knob",
+    "Sets how far the next note may fall from the one before it: at the bottom of its travel the melody moves by one step, and at the top the next note is drawn from the whole range",
+    "Sets the chance that a gate produces no note at all, 0 to 100%; the gate output stays at 0V for that beat",
+    "Sets the chance that a note trills with the next note of the scale, 0 to 100%",
+    "Sets the chance that a note drawn a second time in a row is allowed to stand; the rest of the time it is moved one step up or down",
+    "Sets the chance that the note is replaced by the nearest root note of the key, 0 to 100%, which is applied after the repeat rule and overrides it",
+    "Sets how fast a trill alternates: the two notes swap every 10000 samples at the bottom of its travel and every sample at the top",
+    "Starts a new note on each rising edge; the module counts the gate high only at 10V and above",
+    "Carries 10V while a note plays and 0V between notes, and stays at 0V for a beat the rest chance has skipped",
+    "The pitch of the note being played, one volt per octave, with 0V the root of the key in the lowest octave",
+    "Note — The gate input is counted high only at 10V and above, so a 5V gate from another module never starts a note.",
+    "Note — While a note is trilling the module reads nothing from the gate input; a trill runs eight alternations and then ends.",
+    "Note — If the pitch ever leaves the range 0V to 12V the module clears itself back to 0V and skips that gate.",
+    "Note — None of these settings has a CV input; the module is played from the gate input alone."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 10V",
+      "why": "melodygen.cpp:81 reads the jack with getVoltage() alone, melodygen.cpp:139 counts it high at 10V and above and melodygen.cpp:241 counts it low below 10V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "melodygen.cpp:227 and 243 write 10V and melodygen.cpp:160 and 248 write 0V, one value each with setVoltage()"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "melodygen.cpp:225 divides the note number in semitones by 12 and melodygen.cpp:253 writes that one value with setVoltage()"
+     }
+    }
+   },
+   "notes": "Source read at SS-modules commit 1894a74, the head of main. Three commits carry version 2.0.0; the installed binary was matched to this one by the window check added in ddfa91d, whose compare against 12.0 is present in Melodygen::process in the installed plugin.dylib. The gate threshold really is 10V and not the usual 1V or 2V: melodygen.cpp:139 tests gateIn >= 10.f, so gates below 10V do nothing at all, which makes the module look broken beside makers who send 5V. The trill rate is (10 - knob) * 1000 samples between alternations, so the knob's bottom gives 10000 samples and its top gives zero, alternating every sample. Root gravity is rolled after the repeat rule and replaces the note outright, which is what the maker's tooltip means by overriding the repeat percentage. One quirk of the gate output: on the sample where the input gate falls, melodygen.cpp:243 writes 10V again before the next sample writes 0V, so the output gate is one sample longer than the input. The module configures a BLINK light that no widget ever places and that process never writes."
   }
  }
 }

@@ -72,6 +72,12 @@ def check(path):
     with open(path) as f:
         doc = json.load(f)
     problems = []
+    # NOT EVERY JSON FILE HERE IS AN ENTRY. A worklist was put in this directory and the validator
+    # died on it — `doc.get` on a list. A checking tool that crashes on an unexpected file checks
+    # nothing at all until somebody notices, so a stranger is reported and stepped over.
+    if not isinstance(doc, dict):
+        return ['%s: not a help entry (a %s at the top level); it does not belong here'
+                % (name, type(doc).__name__)]
     plugin = doc.get('plugin')
     if not plugin:
         return ['%s: no plugin slug' % name]
@@ -246,6 +252,11 @@ def main():
     files = 0
     for name in sorted(os.listdir(HELP)):
         if not name.endswith('.json'):
+            continue
+        # NOT EVERY JSON FILE HERE IS A PLUGIN. UNINSTALLED.json holds entries written for models
+        # their plugin no longer registers — kept so the work survives a maker's removal, but
+        # loaded by nothing and shipped nowhere, so there is nothing here to validate.
+        if name == 'UNINSTALLED.json':
             continue
         if only and not name.lower().startswith(only.lower()):
             continue

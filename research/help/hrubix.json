@@ -1,13 +1,70 @@
 {
  "plugin": "hrubix",
- "source": "https://github.com/hrubix/Invaders",
+ "source": "https://github.com/hrubix/Invaders/wiki",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Invaders": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A ten by sixteen grid of coloured pixels running an arcade invader animation; four gate inputs drive it, and it has no audio of any kind",
+    "Sets how bright the pixels are and how slowly a pixel fades once it is drawn: turned down the trail is short, turned up it is long and the brightest pixels are pushed past full",
+    "Sets the hue the invaders are drawn in, once round the colour wheel across the travel; the four invader shapes are offset from one another so they never share a colour",
+    "A rising edge past 1V moves the whole fleet one pixel sideways and flips the invaders to their other animation frame; every 64 edges the fleet turns round and steps one pixel vertically",
+    "A rising edge past 1V fires a laser upward from a column picked at random along the bottom; the invader it strikes turns pale for about a fifth of a second",
+    "A rising edge past 1V inverts the bright pixels and washes the whole screen towards white for eight frames",
+    "Held above 1V, doubles the size of the picture and follows the fleet sideways; the laser and the flash are switched off for as long as it is held",
+    "Note — the module has no outputs and makes no sound. It is a picture, driven by the four gate inputs.",
+    "Note — the screen is redrawn a hundred times a second, but the invaders only move when an edge arrives at jack 1. With nothing patched the same frozen fleet is drawn over and over.",
+    "Note — the four jacks are numbered 1 to 4 on the panel. The maker's wiki calls them Walk, Fire, Crash and Zoom in that order.",
+    "Note — all four jacks are read only once every hundredth of a second, so a trigger that rises and falls inside 10ms can be missed altogether.",
+    "Note — the 160 pixels are lights rather than controls, so no click on the screen reaches help for anything."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "Invaders.cpp:198 reads inputs[IN1_INPUT].getVoltage() with no channel argument into a dsp::SchmittTrigger, whose default thresholds are 0V and 1V, inside the block entered once every 0.01 seconds at line 155"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "Invaders.cpp:160 reads inputs[IN2_INPUT].getVoltage() with no channel argument into a dsp::SchmittTrigger, default thresholds 0V and 1V, inside the 0.01 second block at line 155; line 177 also tests the same voltage against 1.0f for the decay override"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "Invaders.cpp:161 reads inputs[IN3_INPUT].getVoltage() with no channel argument into a dsp::SchmittTrigger, default thresholds 0V and 1V, inside the 0.01 second block at line 155"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "Invaders.cpp:152 reads inputs[IN4_INPUT].getVoltage() with no channel argument and tests it against 1.0f as a level, not an edge; no SchmittTrigger is involved"
+     }
+    }
+   },
+   "notes": "Source read at commit 1da72f2. src/ and res/ have changed only once, at the initial release c9af887, so every 2.0.0 commit carries the same code; 1da72f2 and a176950 are the two whose plugin.json is byte-identical to the installed one, and all four installed res/ SVGs hash to the blobs there. THE BRIGHTNESS KNOB SETS TWO THINGS. Invaders.cpp:149 remaps the knob's 0 to 1 into 0.5 to 1, line 172 uses that to set the phosphor decay from 0.88 to 0.96 per frame, and line 341 squares it for the master brightness, with line 346 adding up to 1.5 more once the remapped value passes 0.75 — which is the knob's own default position, so the overdrive starts at the centre of the travel. gates[3] is declared at line 102 and never used: the fourth jack is read as a level at line 152 rather than as an edge. The random generator is seeded to 1 at line 106 and never reseeded, so a freshly placed module always draws the same sequence of invader shapes and fires its lasers down the same columns. THE WIKI AND THE CODE DISAGREE ON JACK 3: the wiki says it 'overlays a white noise flash', but lines 289 to 298 invert the bright pixels and then pull every pixel a third of the way towards a flat 0.85 grey each frame for eight frames. There is no noise in it. The maker named none of the four inputs, so Rack shows an empty tooltip on each; the two parameters are named Brightness & Overdrive and Color/Hue, and the panel prints a sun symbol over the first and COLOR over the second. The wiki at https://github.com/hrubix/Invaders/wiki is the only documentation; the README is a placeholder pointing at it."
   }
  }
 }

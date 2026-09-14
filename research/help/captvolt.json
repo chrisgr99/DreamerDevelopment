@@ -1,13 +1,676 @@
 {
  "plugin": "captvolt",
- "source": "https://github.com/cnvogelg/captvolt-vcv",
+ "source": "https://github.com/cnvogelg/captvolt-vcv/blob/master/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "captvolt-sidofon": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Raw access to the registers of a Commodore 64 SID chip, emulated with ReSID, with three voices, a shared filter and a CV jack beside every register field",
+    "Sets the pitch of that voice, 54 semitones either side of C4, written into the chip's 16-bit frequency register",
+    "Sets the duty cycle of that voice's pulse waveform, 50% at the centre and reaching 0% and 100% at the ends, written as a 12-bit value",
+    "Switches the triangle waveform into that voice; picking more than one waveform at once does not mix them, the chip combines them into a single new shape",
+    "Switches the sawtooth waveform into that voice, and while it is on the chip ignores that voice's ring modulation",
+    "Switches the pulse waveform into that voice, its width taken from the PW knob and the PW input",
+    "Switches the noise waveform into that voice; the noise is clocked from that voice's own frequency, so the pitch controls set how bright it is",
+    "Runs the attack, decay and sustain of that voice's envelope while it is on, and the release when it goes off",
+    "Resets voice 1's oscillator every time voice 3's oscillator wraps round, which is hard sync",
+    "Resets voice 2's oscillator every time voice 1's oscillator wraps round, which is hard sync",
+    "Resets voice 3's oscillator every time voice 2's oscillator wraps round, which is hard sync",
+    "Ring modulates voice 1's triangle waveform against voice 3's oscillator; it changes nothing unless the triangle is on, and the sawtooth being on cancels it",
+    "Ring modulates voice 2's triangle waveform against voice 1's oscillator; it changes nothing unless the triangle is on, and the sawtooth being on cancels it",
+    "Ring modulates voice 3's triangle waveform against voice 2's oscillator; it changes nothing unless the triangle is on, and the sawtooth being on cancels it",
+    "Clears that voice's oscillator and holds it at zero, which silences the voice and forces its pulse output high until this goes off again",
+    "Sets the attack time of that voice's envelope, which the chip stores as one of 16 steps",
+    "Sets the decay time of that voice's envelope, which the chip stores as one of 16 steps",
+    "Sets the sustain level of that voice's envelope, which the chip stores as one of 16 steps",
+    "Sets the release time of that voice's envelope, which the chip stores as one of 16 steps",
+    "Routes that voice through the filter; a voice with this off goes straight to the output unfiltered",
+    "Routes the Aux input through the filter instead of straight to the output",
+    "Cuts voice 3 out of the audio output, which frees it as a modulation source at the Osc and Env jacks",
+    "Switches the filter's lowpass output on; the chip sums whichever of the three modes are on, so lowpass and highpass together make a notch",
+    "Switches the filter's bandpass output on; the chip sums whichever of the three modes are on",
+    "Switches the filter's highpass output on; the chip sums whichever of the three modes are on, so highpass and lowpass together make a notch",
+    "Sets the filter cutoff, written as an 11-bit value from 0 to 2047",
+    "Sets the filter resonance, which the chip stores as one of 16 steps",
+    "Sets the chip's master volume as one of 16 steps, applied to everything it puts out",
+    "Transposes that voice at one volt per octave, added to the Pitch knob, with no clamp of its own",
+    "Shifts the duty cycle of that voice's pulse waveform, ±5V covering the whole sweep, added to the PW knob and clamped at the ends",
+    "1V or more switches the triangle waveform into that voice; the voltage is added to the switch, so with the switch already on -1V or less switches it off again",
+    "1V or more switches the sawtooth waveform into that voice; the voltage is added to the switch, so with the switch already on -1V or less switches it off again",
+    "1V or more switches the pulse waveform into that voice; the voltage is added to the switch, so with the switch already on -1V or less switches it off again",
+    "1V or more switches the noise waveform into that voice; the voltage is added to the switch, so with the switch already on -1V or less switches it off again",
+    "1V or more opens that voice's envelope and anything below closes it; the voltage is added to the Gate switch, so with that switch on the voice stays open",
+    "1V or more resets voice 1's oscillator from voice 3's; the voltage is added to the Sync switch, so with that switch on -1V or less turns the sync off",
+    "1V or more resets voice 2's oscillator from voice 1's; the voltage is added to the Sync switch, so with that switch on -1V or less turns the sync off",
+    "1V or more resets voice 3's oscillator from voice 2's; the voltage is added to the Sync switch, so with that switch on -1V or less turns the sync off",
+    "1V or more ring modulates voice 1's triangle against voice 3's oscillator; the voltage is added to the RingMod switch, so -1V or less turns it off again",
+    "1V or more ring modulates voice 2's triangle against voice 1's oscillator; the voltage is added to the RingMod switch, so -1V or less turns it off again",
+    "1V or more ring modulates voice 3's triangle against voice 2's oscillator; the voltage is added to the RingMod switch, so -1V or less turns it off again",
+    "1V or more clears and holds that voice's oscillator; the voltage is added to the Test switch, so with that switch on -1V or less releases the oscillator",
+    "Lengthens that voice's attack, 0-10V covering the 16 steps, added to the Attack trimmer and clamped at the ends",
+    "Lengthens that voice's decay, 0-10V covering the 16 steps, added to the Decay trimmer and clamped at the ends",
+    "Raises that voice's sustain level, 0-10V covering the 16 steps, added to the Sustain trimmer and clamped at the ends",
+    "Lengthens that voice's release, 0-10V covering the 16 steps, added to the Release trimmer and clamped at the ends",
+    "1V or more routes that voice through the filter; the voltage is added to the switch, so with the switch on -1V or less takes the voice back out",
+    "1V or more routes the Aux input through the filter; the voltage is added to the Aux switch, so with that switch on -1V or less takes it back out",
+    "1V or more cuts voice 3 out of the audio output; the voltage is added to the 3Off switch, so with that switch on -1V or less puts voice 3 back",
+    "1V or more switches the filter's lowpass output on; the voltage is added to the LP switch, so with that switch on -1V or less switches it off",
+    "1V or more switches the filter's bandpass output on; the voltage is added to the BP switch, so with that switch on -1V or less switches it off",
+    "1V or more switches the filter's highpass output on; the voltage is added to the HP switch, so with that switch on -1V or less switches it off",
+    "Moves the filter cutoff, 0-10V covering the whole 0 to 2047 range, added to the CutOff knob and clamped at the ends",
+    "Raises the filter resonance, 0-10V covering the 16 steps, added to the Res knob and clamped at the ends",
+    "Changes the chip's master volume, 0-10V covering the 16 steps, added to the Volume knob and clamped at the ends",
+    "An external signal fed into the chip's audio path, ±5V taken as full scale, mixed in with the three voices and filtered only if the Aux switch is on",
+    "A rising edge here writes the current control and CV values into the chip's registers; with a cable patched the module's internal update clock is ignored",
+    "The chip's audio, all three voices and the Aux input together, each of them filtered or dry according to the filter switches",
+    "A 10V pulse 0.1ms long every time the chip's registers are written, whether the update came from the Clk input or from the internal clock",
+    "Voice 3's envelope, read back from the chip as an 8-bit register value and scaled to 0-10V, so it moves in 256 steps",
+    "Voice 3's oscillator, read back from the chip as an 8-bit register value and scaled to ±5V, so it moves in 256 steps",
+    "Note — every voice starts with its Gate switch off, so the module makes no sound until you turn a Gate switch on or send 1V or more to a Gate input",
+    "Note — each control's value is added to the voltage at the jack beside it, so to drive a register from CV alone you have to turn that knob or switch fully off first",
+    "Note — the registers are written only at the update rate, either the internal vertical-refresh clock or a rising edge at the Clk input, so a control you move does nothing until the next write",
+    "Note — the small lamp beside each waveform, control, envelope and filter CV input shows the value that parameter has in the chip's registers, and it changes only when the registers are written",
+    "Menu — Reset SID Chip — clears the emulated chip and the module's copy of its registers and starts it again",
+    "Menu — SID Model: MOS 6581, MOS 8580, MOS 8580 (Digi Boost) — picks which chip is emulated; the Digi Boost option holds the chip's audio input at full negative while the Aux jack is empty",
+    "Menu — CPU Clock: PAL (50Hz vsync), NTSC (60Hz vsync) — sets the emulated machine's clock and the register update rate with it, 985248Hz and 50Hz, or 1022727Hz and 60Hz",
+    "Menu — VSync Oversample: x1, x2, x4, x8, x16, No VSync — multiplies the internal register update rate; No VSync writes the registers on every audio sample instead",
+    "Menu — Sample Mode: Direct, Interpolate, Resample, Resample Fastmem — picks how the chip's output reaches the engine; Direct clocks the chip once per audio sample and reads it straight out"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 4,
+    "10": 4,
+    "11": 4,
+    "12": 5,
+    "13": 5,
+    "14": 5,
+    "15": 6,
+    "16": 6,
+    "17": 6,
+    "18": 7,
+    "19": 7,
+    "20": 7,
+    "21": 8,
+    "22": 9,
+    "23": 10,
+    "24": 11,
+    "25": 12,
+    "26": 13,
+    "27": 14,
+    "28": 14,
+    "29": 14,
+    "30": 15,
+    "31": 15,
+    "32": 15,
+    "33": 16,
+    "34": 16,
+    "35": 16,
+    "36": 17,
+    "37": 17,
+    "38": 17,
+    "39": 18,
+    "40": 18,
+    "41": 18,
+    "42": 19,
+    "43": 19,
+    "44": 19,
+    "45": 20,
+    "46": 22,
+    "47": 23,
+    "48": 24,
+    "49": 21,
+    "50": 25,
+    "51": 26,
+    "52": 27
+   },
+   "in": {
+    "0": 28,
+    "1": 28,
+    "2": 28,
+    "3": 29,
+    "4": 29,
+    "5": 29,
+    "6": 30,
+    "7": 30,
+    "8": 30,
+    "9": 31,
+    "10": 31,
+    "11": 31,
+    "12": 32,
+    "13": 32,
+    "14": 32,
+    "15": 33,
+    "16": 33,
+    "17": 33,
+    "18": 34,
+    "19": 34,
+    "20": 34,
+    "21": 35,
+    "22": 36,
+    "23": 37,
+    "24": 38,
+    "25": 39,
+    "26": 40,
+    "27": 41,
+    "28": 41,
+    "29": 41,
+    "30": 42,
+    "31": 42,
+    "32": 42,
+    "33": 43,
+    "34": 43,
+    "35": 43,
+    "36": 44,
+    "37": 44,
+    "38": 44,
+    "39": 45,
+    "40": 45,
+    "41": 45,
+    "42": 46,
+    "43": 46,
+    "44": 46,
+    "45": 47,
+    "46": 49,
+    "47": 50,
+    "48": 51,
+    "49": 48,
+    "50": 52,
+    "51": 53,
+    "52": 54,
+    "53": 55,
+    "54": 56
+   },
+   "out": {
+    "0": 57,
+    "1": 58,
+    "2": 59,
+    "3": 60
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger",
+     "18": "trigger",
+     "19": "trigger",
+     "20": "trigger",
+     "21": "trigger",
+     "22": "trigger",
+     "23": "trigger",
+     "24": "trigger",
+     "25": "trigger",
+     "26": "trigger",
+     "27": "trigger",
+     "28": "trigger",
+     "29": "trigger",
+     "30": "cv",
+     "31": "cv",
+     "32": "cv",
+     "33": "cv",
+     "34": "cv",
+     "35": "cv",
+     "36": "cv",
+     "37": "cv",
+     "38": "cv",
+     "39": "cv",
+     "40": "cv",
+     "41": "cv",
+     "42": "trigger",
+     "43": "trigger",
+     "44": "trigger",
+     "45": "trigger",
+     "46": "trigger",
+     "47": "trigger",
+     "48": "trigger",
+     "49": "trigger",
+     "50": "cv",
+     "51": "cv",
+     "52": "cv",
+     "53": "audio",
+     "54": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "sidofon.cpp:367 reads getVoltage() with no channel and multiplies it by 12 into the semitone sum at line 368, which has no clamp"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "sidofon.cpp:367 reads getVoltage() with no channel and multiplies it by 12 into the semitone sum at line 368, which has no clamp"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "sidofon.cpp:367 reads getVoltage() with no channel and multiplies it by 12 into the semitone sum at line 368, which has no clamp"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "sidofon.cpp:384-385 reads getVoltage() with no channel, divides it by 5 and adds it to the knob before a clamp to -1 and 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "sidofon.cpp:384-385 reads getVoltage() with no channel, divides it by 5 and adds it to the knob before a clamp to -1 and 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "sidofon.cpp:384-385 reads getVoltage() with no channel, divides it by 5 and adds it to the knob before a clamp to -1 and 1"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "12": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "13": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "14": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "15": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "16": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "17": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "18": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "19": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "20": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "21": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "22": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "23": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "24": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "25": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "26": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "27": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "28": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "29": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "30": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "31": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "32": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "33": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "34": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "35": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "36": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "37": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "38": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "39": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "40": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "41": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "42": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "43": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "44": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "45": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "46": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "47": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "48": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "49": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:334-338 getSwitchValue adds getVoltage() with no channel to the switch value and takes the total as on at 1.0 or more"
+     },
+     "50": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:351-358 getLoHiValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 2047 and clamps to 0 and 2047"
+     },
+     "51": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "52": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "sidofon.cpp:341-348 getByteValue adds getVoltage() with no channel divided by 10 to the knob, multiplies by 15 and clamps to 0 and 15"
+     },
+     "53": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V, or full negative with Digi Boost picked",
+      "why": "sidofon.cpp:526-527 divides getVoltage() with no channel by 5 and clamps to -1 and 1; line 530 substitutes -32768 when the jack is empty and the model is MOS 8580 (Digi Boost)"
+     },
+     "54": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "sidofon.cpp:542-543 passes getVoltage() with no channel to a dsp::SchmittTrigger, which fires on the rise past 1V and rearms below 0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "sidofon.cpp:598-599 scales one 16-bit sample by 20/32768 and writes it with setVoltage; the module never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "sidofon.cpp:602-603 multiplies a PulseGenerator's output by 10, the pulse triggered for 1e-4 seconds at line 571"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "sidofon.cpp:593-595 scales the 8-bit read of register 0x1c by 10/255"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "sidofon.cpp:589-591 scales the 8-bit read of register 0x1b by 10/255 and subtracts 5"
+     }
+    }
+   },
+   "notes": "Read at commit f50cb1b, the repository head. Two commits carry the installed 2.1.0: 2bb0b7c added the voice 3 Osc and Env outputs and f50cb1b added configInput and configOutput names for every jack. The installed binary holds those names - Oscillator Pitch, Ring Mod Control Bit, Ext. SID Register Update Clock and the rest, which the census also lists - so f50cb1b is the build that shipped. The README says the pulse width CV reaches 0% at -1V and 100% at 1V; the code divides that voltage by 5, so the full sweep takes ±5V, and the lines say ±5V. Every jack is read with getVoltage() and no channel, and the binary exports no setChannels or getPolyVoltage, so nothing here is polyphonic. The waveform, gate, sync, ring mod, test and filter switch inputs are added to the switch rather than overriding it, which means a negative voltage can switch off a control that is turned on; the README says only that 1V or more enables them. Ring modulation is masked off when the sawtooth is selected, from ring_msb_mask in resid/wave.cc:203; the sync and ring modulation sources are wired voice 1 from voice 3, voice 2 from voice 1 and voice 3 from voice 2 at resid/sid.cc:64-66. The SID register update rate, the lamps beside the CV jacks and the Clk output all move together: the lamps are written in the same block as the registers. The audio output scales a full-scale 16-bit sample to 20V, so no range is claimed for it. The ReSID sources under src/resid are Dag Lem's and were read only for the sync, ring modulation and test bit behaviour."
   }
  }
 }

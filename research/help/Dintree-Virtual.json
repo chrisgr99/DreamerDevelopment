@@ -1,53 +1,906 @@
 {
  "plugin": "Dintree-Virtual",
- "source": "https://github.com/hires/Dintree-Virtual",
+ "source": "https://github.com/hires/Dintree-Virtual/blob/ca9cc0f/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "V100-Scanner": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight-input switch: the input it has selected goes to one output and the one selected before it to the other, stepped by a clock or chosen by a control voltage",
+    "Sets how many of the eight inputs are in the scan, one at fully counter-clockwise and all eight at fully clockwise",
+    "Switched up to ON, each step picks a random input from within the range instead of the next one in order",
+    "Switched up to CV, CTRL IN is read as a voltage that picks the input directly; switched down, CTRL IN is read as a clock and each rising edge steps on by one",
+    "One of the eight signal inputs; whichever one is selected appears at OUT A, and whichever was selected before it at OUT A-1",
+    "Picks the input: read as 0V to 10V spread across the RANGE setting when the CTRL switch is up, or as a clock crossing 1.01V when it is down",
+    "Carries the voltage on the input selected now",
+    "Carries the voltage on the input that was selected before the current one",
+    "Note — the input selection and the knob and switches are read at 1kHz rather than at the audio sample rate, so a clock pulse shorter than 1ms can be missed."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "8": "cv"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "V100-Scanner.cpp:115 reads the selected input with getVoltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "V100-Scanner.cpp:115 reads the selected input with getVoltage"
+     },
+     "2": {
+      "poly": false,
+      "why": "V100-Scanner.cpp:115 reads the selected input with getVoltage"
+     },
+     "3": {
+      "poly": false,
+      "why": "V100-Scanner.cpp:115 reads the selected input with getVoltage"
+     },
+     "4": {
+      "poly": false,
+      "why": "V100-Scanner.cpp:115 reads the selected input with getVoltage"
+     },
+     "5": {
+      "poly": false,
+      "why": "V100-Scanner.cpp:115 reads the selected input with getVoltage"
+     },
+     "6": {
+      "poly": false,
+      "why": "V100-Scanner.cpp:115 reads the selected input with getVoltage"
+     },
+     "7": {
+      "poly": false,
+      "why": "V100-Scanner.cpp:115 reads the selected input with getVoltage"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "V100-Scanner.cpp:164 reads CTRL IN with getVoltage and clamps the result to 0-7; V100-Scanner.cpp:173-177 compares it against CLOCK_THRESH_LO 0.99 and CLOCK_THRESH_HI 1.01"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "V100-Scanner.cpp:116 writes this output with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "V100-Scanner.cpp:119 writes this output with setVoltage"
+     }
+    }
+   },
+   "notes": "The panel and the maker's own tooltip both call the second output OUT A-1; the README calls it OUT B. The lines follow the panel. The eight signal inputs and the two outputs carry whatever you patch into them, so they are given no family. CTRL IN is a control voltage when the CTRL switch is up and a clock when it is down, and the cv family is the closer of the two. RANGE is configured 0 to 8 and clamped to 7.999 before use (V100-Scanner.cpp:160); onReset leaves it at 1.0, which puts two inputs in the scan."
   },
   "V101-Dual_Envelope": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two independent envelope generators, each switchable between ADSR, AR and a free-running LFO",
+    "Sets the attack time, the climb from 0V to 10V; fully counter-clockwise is the fastest and fully clockwise the slowest",
+    "Sets the fall from the peak down to the S level, and only when the mode switch is at ADSR; fully counter-clockwise is the fastest",
+    "Sets the level the envelope holds while the gate is high in ADSR mode, 0V at fully counter-clockwise and a shade under 10V at fully clockwise; moving it during the hold moves the output at once",
+    "Sets the fall back to 0V: after the gate goes low in ADSR mode, and straight down from the peak in AR and LFO modes; fully counter-clockwise is the fastest",
+    "Switched up to ADSR the envelope attacks, decays to the S level, holds while the gate is high and releases; at AR a gate starts an attack and release that runs to its own end; at LFO the two repeat",
+    "A gate above 1V starts the envelope; in ADSR mode it releases when the gate goes low, in AR mode the cycle finishes regardless, and in LFO mode the gate starts the LFO and going low stops it",
+    "The envelope, 0V to 10V, generated at 1kHz and smoothed by a one-pole filter on the way out",
+    "Note — in LFO mode the LFO free-runs as soon as the mode switch reaches LFO, but a gate at GATE IN takes that over and starts and stops it. Switching the mode away and back restores free running.",
+    "Note — the envelopes are generated at 1kHz, so a very fast attack or decay steps rather than glides. That is a deliberate part of the clone of the microcontroller hardware."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 3,
+    "5": 3,
+    "6": 4,
+    "7": 4,
+    "8": 5,
+    "9": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "V101-Dual_Envelope.cpp:239-240 reads the input with getVoltage and compares it against 1.0"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "V101-Dual_Envelope.cpp:239-240 reads the input with getVoltage and compares it against 1.0"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V101-Dual_Envelope.cpp:247 writes this output with setVoltage, from a level capped at MAX_LEVEL 65535 scaled by 0.000152588"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V101-Dual_Envelope.cpp:247 writes this output with setVoltage, from a level capped at MAX_LEVEL 65535 scaled by 0.000152588"
+     }
+    }
+   },
+   "notes": "The README says the clone runs at 12-bit resolution; the code carries the envelope as a 16-bit level, 0 to 65535, scaled to 0V-10V (V101-Dual_Envelope.cpp:243-244). The 1kHz rate the README gives is in the code as RT_TASK_RATE. The D knob is read only in ADSR mode: in AR and LFO the attack phase goes straight to release (V101-Dual_Envelope.cpp:438-444), and the S level is likewise never reached. Attack, decay and release times come from a 128-entry step table indexed by the knob, fastest at the counter-clockwise end. The two channels share nothing but the panel, so the A, D, S, R and MODE lines are each tagged to both of that control's knobs."
   },
   "V102-Output_Mixer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-input stereo mixer with a level and a pan control on each channel, a master level, a pair of sub inputs into the mix bus and a stereo meter",
+    "Sets the level of that channel before the pan control; the knob is squared, so the travel is finer at the quiet end, and fully clockwise passes the input at unity",
+    "Places that channel between the left and right mix busses; centred sends half the level to each side, and either extreme sends all of it to one side and none to the other",
+    "Sets the level of OUT L and OUT R; the knob is squared and multiplied by four, so the centre passes the mix at unity and fully clockwise gives four times that",
+    "One of the four channel inputs; a DC blocker and a clamp at ±10V come before its LEVEL control",
+    "Added straight into the left mix bus, after the four channels and before MASTER, for an effects return or for chaining another mixer in",
+    "Added straight into the right mix bus, after the four channels and before MASTER, for an effects return or for chaining another mixer in",
+    "The left mix: the four channels plus SUB IN L, scaled by MASTER",
+    "The right mix: the four channels plus SUB IN R, scaled by MASTER",
+    "The left mix of the four channels alone, taken before SUB IN L is added and before MASTER",
+    "The right mix of the four channels alone, taken before SUB IN R is added and before MASTER",
+    "Note — the meter steps in 6dB and its 0dB lamp lights at 5V peak, which is the nominal level for audio in Eurorack.",
+    "Note — every LEVEL knob comes up at zero, so nothing reaches the outputs until you raise one."
+   ],
+   "param": {
+    "0": 1,
+    "2": 1,
+    "4": 1,
+    "6": 1,
+    "1": 2,
+    "3": 2,
+    "5": 2,
+    "7": 2,
+    "8": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V102-Output_Mixer.cpp:126-134 reads this input with getVoltage, DC blocks it and clamps it to ±10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V102-Output_Mixer.cpp:126-134 reads this input with getVoltage, DC blocks it and clamps it to ±10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V102-Output_Mixer.cpp:126-134 reads this input with getVoltage, DC blocks it and clamps it to ±10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V102-Output_Mixer.cpp:126-134 reads this input with getVoltage, DC blocks it and clamps it to ±10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V102-Output_Mixer.cpp:153-158 reads this input with getVoltage, DC blocks it and clamps it to ±10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V102-Output_Mixer.cpp:153-158 reads this input with getVoltage, DC blocks it and clamps it to ±10V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "V102-Output_Mixer.cpp:139-165 writes these outputs with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "V102-Output_Mixer.cpp:139-165 writes these outputs with setVoltage"
+     },
+     "2": {
+      "poly": false,
+      "why": "V102-Output_Mixer.cpp:139-165 writes these outputs with setVoltage"
+     },
+     "3": {
+      "poly": false,
+      "why": "V102-Output_Mixer.cpp:139-165 writes these outputs with setVoltage"
+     }
+    }
+   },
+   "notes": "The MASTER knob's tooltip reads POT_MASTER: the maker passed the enum name rather than a label to configParam (V102-Output_Mixer.cpp:101). The panel prints MASTER and the lines follow the panel. The pan law is a linear crossfade, not constant power, so a centred channel is 6dB down on either extreme; this matches the README. The README says the LEVEL controls offer gain, but a LEVEL knob is squared into a 0 to 1 multiplier and cannot exceed unity (V102-Output_Mixer.cpp:196-197) — the gain in the module is in MASTER, which reaches four times. The meter lamps have no ParamWidget or PortWidget, so no click can reach them."
   },
   "V103-Reverb_Delay": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo reverb and delay processor built for an effects loop, which passes no dry signal of its own",
+    "Sets how much reverb reaches the outputs, from silence to eight tenths of the reverb signal at fully clockwise",
+    "Sets how much of the delayed signal reaches the outputs",
+    "Sets the length of the delay line from 0 to 500ms; the setting is smoothed, so turning the knob sweeps the pitch of whatever is already in the line",
+    "At DEL 1 only the plain delay tap is heard; at DEL 2 extra taps come in at two thirds of the delay time on the left and one third on the right; at DEL 3 those move to three quarters and one quarter",
+    "Switched up to REV BIG the reverb runs its longer set of delay lines, for a larger space; down at REV SML it runs a shorter set",
+    "Scaled to three quarters and summed with the other input into the mono signal that feeds both the reverb and the delay line",
+    "The left output: the reverb scaled by REVERB MIX plus the delay taps scaled by DELAY MIX, with no dry signal in it",
+    "The right output: the reverb scaled by REVERB MIX plus the delay taps scaled by DELAY MIX, with no dry signal in it",
+    "Note — no dry signal passes through this module. Patch it into an effects loop, or mix the dry signal back in yourself, or you will hear only reverb and echo.",
+    "Note — the CLIP lamp lights when either output passes 5V peak."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V103-Reverb_Delay.cpp:147-148 reads both inputs with getVoltage and scales each by 0.75"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V103-Reverb_Delay.cpp:147-148 reads both inputs with getVoltage and scales each by 0.75"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "V103-Reverb_Delay.cpp:203 writes this output with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "V103-Reverb_Delay.cpp:204 writes this output with setVoltage"
+     }
+    }
+   },
+   "notes": "The delay line has a fixed internal feedback: the second syncopated tap is scaled by 0.4, low-passed and written back in (V103-Reverb_Delay.cpp:197-198). There is no control for it. The reverb's size and tone are hard-coded at 0.7 (V103-Reverb_Delay.cpp:311-312), so only the BIG/SML switch changes the space. The maximum delay is half a second, set as AUDIO_FS * 0.5. DEL_SW and REV_SW are added with addChild rather than addParam, but the census still finds their positions, so both can be clicked."
   },
   "V104-Four_Vs": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four manual voltage sources, each a knob running from -5V to +5V, with an on/off switch on the first two",
+    "Sets the voltage on that output: -5V at fully counter-clockwise, 0V at the centre, +5V at fully clockwise",
+    "Switched up, the VOLTAGE 1 knob reaches OUT 1; switched down, OUT 1 is held at 0V",
+    "Switched up, the VOLTAGE 2 knob reaches OUT 2; switched down, OUT 2 is held at 0V",
+    "Carries the VOLTAGE 1 setting while ON 1 is up, and 0V while it is down",
+    "Carries the VOLTAGE 2 setting while ON 2 is up, and 0V while it is down",
+    "Carries the VOLTAGE 3 setting, -5V to +5V",
+    "Carries the VOLTAGE 4 setting, -5V to +5V",
+    "Note — this module has no inputs at all; every output is set by hand from the panel.",
+    "Note — both ON switches come up in the up position, so all four outputs carry their knob settings when the module is first placed."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 3
+   },
+   "in": {},
+   "out": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "family": {
+    "in": {},
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "V104-Four_Vs.cpp:76-85 writes these outputs with setVoltage from parameters configured -5.0 to 5.0 at V104-Four_Vs.cpp:61-64"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "V104-Four_Vs.cpp:76-85 writes these outputs with setVoltage from parameters configured -5.0 to 5.0 at V104-Four_Vs.cpp:61-64"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "V104-Four_Vs.cpp:76-85 writes these outputs with setVoltage from parameters configured -5.0 to 5.0 at V104-Four_Vs.cpp:61-64"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "V104-Four_Vs.cpp:76-85 writes these outputs with setVoltage from parameters configured -5.0 to 5.0 at V104-Four_Vs.cpp:61-64"
+     }
+    }
+   },
+   "notes": "The README describes the hardware original as unipolar and this clone as bipolar; the code confirms the clone: each knob is configured -5.0 to 5.0. The knobs and switches are read at 1kHz, not at the audio sample rate."
   },
   "V105-Quad_CV_Proc": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four channels that each sum two inputs, scale the result from nothing to twice its size, and offer it both upright and inverted",
+    "Scales the sum of that channel's two inputs: silence at fully counter-clockwise, unchanged at the centre, twice the amplitude at fully clockwise",
+    "Added to the other input on the same channel, and the sum passed to that channel's GAIN control",
+    "That channel's two inputs added together and scaled by its GAIN control",
+    "That channel's two inputs added together, scaled by its GAIN control and inverted",
+    "Note — every GAIN knob comes up centred at 1x, so a channel passes its input unchanged until you move one.",
+    "Note — nothing here is DC blocked or clamped, so the module passes audio and control voltages alike and will pass a signal larger than ±10V straight through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2
+   },
+   "out": {
+    "0": 3,
+    "2": 3,
+    "4": 3,
+    "6": 3,
+    "1": 4,
+    "3": 4,
+    "5": 4,
+    "7": 4
+   },
+   "family": {
+    "in": {},
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V105-Quad_CV_Proc.cpp:100-110 reads each input with getVoltage and adds the pair"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V105-Quad_CV_Proc.cpp:100-110 reads each input with getVoltage and adds the pair"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V105-Quad_CV_Proc.cpp:100-110 reads each input with getVoltage and adds the pair"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V105-Quad_CV_Proc.cpp:100-110 reads each input with getVoltage and adds the pair"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V105-Quad_CV_Proc.cpp:100-110 reads each input with getVoltage and adds the pair"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V105-Quad_CV_Proc.cpp:100-110 reads each input with getVoltage and adds the pair"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V105-Quad_CV_Proc.cpp:100-110 reads each input with getVoltage and adds the pair"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V105-Quad_CV_Proc.cpp:100-110 reads each input with getVoltage and adds the pair"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "V105-Quad_CV_Proc.cpp:101-111 writes these outputs with setVoltage, the minus output negated"
+     },
+     "1": {
+      "poly": false,
+      "why": "V105-Quad_CV_Proc.cpp:101-111 writes these outputs with setVoltage, the minus output negated"
+     },
+     "2": {
+      "poly": false,
+      "why": "V105-Quad_CV_Proc.cpp:101-111 writes these outputs with setVoltage, the minus output negated"
+     },
+     "3": {
+      "poly": false,
+      "why": "V105-Quad_CV_Proc.cpp:101-111 writes these outputs with setVoltage, the minus output negated"
+     },
+     "4": {
+      "poly": false,
+      "why": "V105-Quad_CV_Proc.cpp:101-111 writes these outputs with setVoltage, the minus output negated"
+     },
+     "5": {
+      "poly": false,
+      "why": "V105-Quad_CV_Proc.cpp:101-111 writes these outputs with setVoltage, the minus output negated"
+     },
+     "6": {
+      "poly": false,
+      "why": "V105-Quad_CV_Proc.cpp:101-111 writes these outputs with setVoltage, the minus output negated"
+     },
+     "7": {
+      "poly": false,
+      "why": "V105-Quad_CV_Proc.cpp:101-111 writes these outputs with setVoltage, the minus output negated"
+     }
+    }
+   },
+   "notes": "The GAIN knobs are configured with an empty name (V105-Quad_CV_Proc.cpp:71-74), so Rack's tooltip for them is blank; the panel prints GAIN 1 to GAIN 4 with markings 0x, 1x and 2x. The inputs and outputs carry whatever you patch in, audio or control voltage, so they are given no family. Gain is the knob times two, with no clamping anywhere."
   },
   "V107-Dual_Slew": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two independent slew limiters, each a one-pole lag whose corner is set by a knob",
+    "Sets how far the output lags the input: fully counter-clockwise puts the filter corner at 10Hz, and turning clockwise drops the corner towards a standstill",
+    "The signal that channel slews",
+    "The slewed version of that channel's input",
+    "Note — the lag is a resistor-and-capacitor curve rather than a constant slope, so a pitch voltage sent through it will not move evenly per octave on its way between notes.",
+    "Note — the knobs are read at 100Hz rather than at the audio sample rate, so turning one changes the corner in steps."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3
+   },
+   "family": {
+    "in": {},
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V107-Dual_Slew.cpp:78 reads this input with getVoltage into a one-pole filter"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V107-Dual_Slew.cpp:80 reads this input with getVoltage into a one-pole filter"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "V107-Dual_Slew.cpp:79 writes this output with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "V107-Dual_Slew.cpp:81 writes this output with setVoltage"
+     }
+    }
+   },
+   "notes": "The knob is turned into a corner frequency as (1 - knob + 0.00001) squared times 10, fed to a one-pole coefficient (V107-Dual_Slew.cpp:96-101), so the corner runs from 10Hz at the counter-clockwise end down to a few billionths of a hertz at the clockwise end. The jacks carry whatever you patch in, so they are given no family."
   },
   "V201-Tri_Comparator": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sixteen gate outputs, each one high while the three inputs stand in one particular combination of equal, less than, greater than and not equal",
+    "Switched up to 10V a true comparison puts 10V on its output; switched down to 5V it puts 5V there",
+    "The first of the three voltages compared; it is measured against IN B and never directly against IN C",
+    "The middle of the three voltages; it is measured against IN A for the left half of each output's name and against IN C for the right half",
+    "The third of the three voltages compared; it is measured against IN B and never directly against IN A",
+    "High while IN A is within 0.01V of IN B and IN B is within 0.01V of IN C",
+    "High while IN A is within 0.01V of IN B and IN B is below IN C",
+    "High while IN A is within 0.01V of IN B and IN B is above IN C",
+    "High while IN A is within 0.01V of IN B and IN B is further than 0.01V from IN C",
+    "High while IN A is below IN B and IN B is within 0.01V of IN C",
+    "High while IN A is below IN B and IN B is below IN C",
+    "High while IN A is below IN B and IN B is above IN C",
+    "High while IN A is below IN B and IN B is further than 0.01V from IN C",
+    "High while IN A is above IN B and IN B is within 0.01V of IN C",
+    "High while IN A is above IN B and IN B is below IN C",
+    "High while IN A is above IN B and IN B is above IN C",
+    "High while IN A is above IN B and IN B is further than 0.01V from IN C",
+    "High while IN A is further than 0.01V from IN B and IN B is within 0.01V of IN C",
+    "High while IN A is further than 0.01V from IN B and IN B is below IN C",
+    "High while IN A is further than 0.01V from IN B and IN B is above IN C",
+    "High while IN A is further than 0.01V from IN B and IN B is further than 0.01V from IN C",
+    "Note — equal means within 0.01V of each other, and not equal means further apart than that.",
+    "Note — the comparisons are made at the audio sample rate, so fast inputs give very short pulses. Slew or filter the inputs for longer ones.",
+    "Note — every output rests at 0V while its comparison is false; none of them goes negative."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12,
+    "8": 13,
+    "9": 14,
+    "10": 15,
+    "11": 16,
+    "12": 17,
+    "13": 18,
+    "14": 19,
+    "15": 20
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V201-Tri_Comparator.cpp:128-132 reads the three inputs with getVoltage and compares them with isNear at EQUAL_NEARNESS 0.01"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V201-Tri_Comparator.cpp:128-132 reads the three inputs with getVoltage and compares them with isNear at EQUAL_NEARNESS 0.01"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V201-Tri_Comparator.cpp:128-132 reads the three inputs with getVoltage and compares them with isNear at EQUAL_NEARNESS 0.01"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "1": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "2": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "3": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "4": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "5": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "6": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "7": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "8": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "9": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "10": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "11": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "12": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "13": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "14": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     },
+     "15": {
+      "poly": false,
+      "why": "V201-Tri_Comparator.cpp:135-287 writes each output with setVoltage, at output_level or 0.0f; output_level is set to 10.0 or 5.0 at V201-Tri_Comparator.cpp:319-324"
+     }
+    }
+   },
+   "notes": "The output voltage is 5V or 10V depending on the OUT RANGE switch, so no single range is written into the port fields; the switch's own line carries it. A<B>C means A below B and B above C: the module never compares A directly with C. The lamp above each output follows that output. The three bicolour lamps below the inputs show the input voltages, green positive and red negative; they have no ParamWidget or PortWidget, so no click can reach them."
   },
   "V218-SH-Clock-Noise": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three sections on one panel: a sample and hold, a clock generator with saw, square and trigger outputs, and a noise source giving white, pink and slow random voltages",
+    "Attenuates the held voltage on its way to SH OUT, from silence at fully counter-clockwise to the full sampled value at fully clockwise; it comes after the hold, so it does not change what is sampled",
+    "Sets the clock rate from 0.3Hz to 30Hz, on a cubed curve that puts most of the travel at the slow end",
+    "While this is above 1V the sample and hold passes SH IN straight through; when it falls below 1V the last value is held",
+    "A rising edge here resets the clock's sawtooth core to zero wherever it had got to, which is how to syncopate the clock against another one",
+    "A rising edge here samples SH IN once and holds it, with no tracking in between edges",
+    "Adds to the CLOCK FREQ setting, a tenth of the full 30Hz span per volt in either direction, with the result held inside the 0.3Hz to 30Hz range",
+    "The voltage the sample and hold section captures",
+    "A 10V pulse 5ms long at each rising edge of SQ OUT",
+    "White noise from a random number generator, 20V peak to peak",
+    "The clock's sawtooth core, rising from 0V to 10V once per cycle",
+    "Pink noise, the white noise source put through three filter stages; its level is a little below the white output",
+    "The held voltage, scaled by S&H LEVEL",
+    "0V for the first half of each clock cycle and 10V for the second half",
+    "A slowly wandering voltage, made by peak-detecting the pink noise and low-passing the result twice",
+    "Note — SH OUT is only written while GATE IN is above 1V or at the moment of a TRIG IN edge. With neither jack patched the sample and hold never samples, and SH OUT stays where it was.",
+    "Note — TRIG IN and SYNC IN fire when the whole-volt part of the input goes from zero to anything else, so a swing past -1V triggers them as surely as one past +1V."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13,
+    "6": 14
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "audio",
+     "2": "cv",
+     "3": "audio",
+     "4": "cv",
+     "5": "trigger",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "V218-SH_Clock_Noise.cpp:133 reads this input with getVoltage and compares it against 1.0f"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "V218-SH_Clock_Noise.cpp:152 reads this input with getVoltage and truncates it to an int for edge detection"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "V218-SH_Clock_Noise.cpp:120 reads this input with getVoltage and truncates it to an int for edge detection"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V218-SH_Clock_Noise.cpp:167-169 reads this input with getVoltage, scales it by 0.1 times CLOCK_FREQ_MAX 30.0f and clamps the sum to CLOCK_FREQ_MIN 0.3f and CLOCK_FREQ_MAX"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "V218-SH_Clock_Noise.cpp:141 reads this input with getVoltage"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V218-SH_Clock_Noise.cpp:186-191 writes 10.0f or 0.0f with setVoltage, the pulse CLOCK_TRIG_PULSELEN 0.005f long"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "V218-SH_Clock_Noise.cpp:197-198 writes (random::uniform() - 0.5f) * 20.0f with setVoltage"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V218-SH_Clock_Noise.cpp:170 writes the phase accumulator times 10.0f with setVoltage"
+     },
+     "3": {
+      "poly": false,
+      "why": "V218-SH_Clock_Noise.cpp:204 writes the pink noise sum times 3.0f with setVoltage"
+     },
+     "4": {
+      "poly": false,
+      "why": "V218-SH_Clock_Noise.cpp:143 writes SH IN times the S&H LEVEL knob with setVoltage"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V218-SH_Clock_Noise.cpp:177-178 writes (int)(phase * 2.0f) * 10.0f with setVoltage"
+     },
+     "6": {
+      "poly": false,
+      "why": "V218-SH_Clock_Noise.cpp:206-210 writes the twice-filtered peak detector output, offset by 1.0f and scaled by 8.0f, with setVoltage"
+     }
+    }
+   },
+   "notes": "TRIG IN and SYNC IN are edge-detected on (int)getVoltage(), not on a Schmitt trigger, so the threshold is one whole volt in either direction and a negative swing past -1V is an edge as much as a positive one past +1V. The negative field is left off those two ports because none of ignored, subtracts or swings describes it. SH OUT is written only inside the if(samp) branch, so it holds its last value indefinitely when nothing is patched to GATE IN or TRIG IN. The README's 0.3Hz to 30Hz clock range, the 5ms trigger length and the 20V peak-to-peak white noise are all literals in the code. The README calls the pink filter a -3dB per octave approximation; that figure is not a constant anywhere in the source, so it is not quoted in the lines."
   }
  }
 }

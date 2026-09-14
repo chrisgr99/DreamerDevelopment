@@ -2,242 +2,4722 @@
  "plugin": "Nozoid",
  "source": "https://github.com/ch-nry/VCV_nozori",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Nozori_68_ADSR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two ADSR envelopes sharing one set of stage knobs, each able to loop and each with a VCA on its output.",
+    "Decay time, shared by both envelopes.",
+    "Attack time, shared by both envelopes.",
+    "Sustain level, shared by both envelopes.",
+    "Release time, shared by both envelopes.",
+    "How much the TIME 1 jack stretches or shortens the first envelope's stages.",
+    "How much the TIME 2 jack stretches or shortens the second envelope's stages.",
+    "Sets what happens after a stage finishes: up, each envelope runs once per gate; middle, the attack and decay repeat; down, the envelope restarts once it has settled on the sustain level.",
+    "A gate for the first envelope: it attacks on the rise and releases on the fall.",
+    "A gate for the second envelope: it attacks on the rise and releases on the fall.",
+    "Stretches or shortens the first envelope's stages, by as much as the MOD 1 knob allows.",
+    "Stretches or shortens the second envelope's stages, by as much as the MOD 2 knob allows.",
+    "Audio for the first VCA. Patch something here and OUT 1 carries that audio shaped by the first envelope rather than the envelope voltage.",
+    "Audio for the second VCA. Patch something here and OUT 2 carries that audio shaped by the second envelope rather than the envelope voltage.",
+    "The first envelope as a voltage, or the audio at IN 1 with that envelope applied when IN 1 is patched.",
+    "The second envelope as a voltage, or the audio at IN 2 with that envelope applied when IN 2 is patched.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — With both TIME jacks empty the two envelopes differ: TIME 1 reads as its lowest value and TIME 2 as its highest, so the second envelope runs slower than the first."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "trigger",
+     "3": "trigger",
+     "1": "cv",
+     "0": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.32V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.32V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "the shortest stage times",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "the longest stage times",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_ADSR.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_ADSR.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_ADSR.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_ADSR.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   },
+   "notes": "m68_ADSR.ino:65-66 gives the unpatched TIME 1 jack a value of -0x7FFF and the unpatched TIME 2 jack +0x7FFF, which is why the two envelopes behave differently with both jacks empty. m68_ADSR.ino:232-254 switches each output between the envelope voltage and the VCA result on whether the matching IN jack is patched."
   },
   "Nozori_68_AR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two attack-release envelopes, each with its own gate input and its own modulation of the two stage times.",
+    "Attack time of the second envelope.",
+    "Attack time of the first envelope.",
+    "Release time of the first envelope.",
+    "Release time of the second envelope.",
+    "How much the first A and R jacks move the first envelope's two stage times.",
+    "How much the second A and R jacks move the second envelope's two stage times.",
+    "Combines the two gate inputs: up each envelope takes its own gate; middle the first fires while both are high and the second while either is; down the first fires while GATE1 is the higher.",
+    "Moves the first envelope's attack time, by as much as the first MOD knob allows.",
+    "Moves the first envelope's release time, by as much as the first MOD knob allows.",
+    "Moves the second envelope's attack time, by as much as the second MOD knob allows.",
+    "Moves the second envelope's release time, by as much as the second MOD knob allows.",
+    "The gate that fires the first envelope: it attacks while this is above 1.67V and releases below it.",
+    "The gate that fires the second envelope. With the switch up and nothing patched here, the second envelope follows GATE1 instead.",
+    "The first envelope as a voltage, rising while its gate is high and falling after it drops.",
+    "The second envelope as a voltage, rising while its gate is high and falling after it drops.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — The gate inputs are on the lower jack row, not the CV row; the four CV jacks only shift the stage times."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "cv",
+     "3": "cv",
+     "1": "cv",
+     "0": "cv",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.67V",
+      "negative": "ignored",
+      "why": "Nozori_68_AR.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.67V",
+      "negative": "ignored",
+      "why": "Nozori_68_AR.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_AR.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_AR.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   },
+   "notes": "m68_AR.ino:70-112 shows the three switch modes. In the down position the two gates are compared as voltages rather than thresholded, so the two envelopes alternate as one input overtakes the other."
   },
   "Nozori_68_CRUSH": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo bit crusher and downsampler, with a wet and dry balance and modulation on all three amounts.",
+    "How much the WET jack moves that balance.",
+    "Balance between the untreated signal and the crushed one.",
+    "How far the sample rate is reduced before the signal is played back.",
+    "How much the FQ jack moves the sample rate reduction.",
+    "How far the sample word is shortened, which is the bit crushing proper.",
+    "How much the CRSH jack moves the bit crushing.",
+    "Sets how the two channels are used: up crushes left and right separately, middle drives their modulation in opposite directions, down crushes IN 1 alone and places it across the stereo pair.",
+    "Takes the crusher out of circuit while it is high, passing the inputs through untouched.",
+    "Moves the wet and dry balance, by as much as the MOD knob beside DRY/WET allows.",
+    "Moves the sample rate reduction, by as much as the MOD knob beside FQ allows.",
+    "Moves the bit crushing, by as much as the MOD knob beside BITCRUSH allows.",
+    "Audio into the left side of the crusher.",
+    "Audio into the right side of the crusher. Left unpatched, the left input is crushed on both sides.",
+    "The crushed signal, left side.",
+    "The crushed signal, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "trigger",
+     "3": "cv",
+     "1": "cv",
+     "0": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.32V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_CRUSH.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "the left input",
+      "why": "Nozori_68_CRUSH.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_CRUSH.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_CRUSH.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   },
+   "notes": "m68_CRUSH.ino:148 and 167 use different bypass thresholds for the two channels, 0xA000 on the left and 0xA800 on the right, which works out as about 1.32V and 1.66V."
   },
   "Nozori_68_CV_REC": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two CV recorders on a common clock: each captures a voltage into a loop and plays it back at whatever speed the clock is running.",
+    "How much the CLK jack moves that speed.",
+    "The speed the loop plays back and records at.",
+    "The voltage written into the first loop while it is recording.",
+    "How much the MOD1 jack moves the voltage written into the first loop.",
+    "The voltage written into the second loop while it is recording.",
+    "How much the MOD2 jack moves the voltage written into the second loop.",
+    "Chooses what the module does: up records into the first loop, middle plays both loops back, down records into the second loop.",
+    "A clock to run the loops from; a rising edge here restarts the loop, and the CLOCK knob is then read as a division of it.",
+    "Moves the loop speed, by as much as the MOD knob beside CLOCK allows.",
+    "Records into the first loop while it is high, whatever the switch is set to.",
+    "Records into the second loop while it is high, whatever the switch is set to.",
+    "Moves the voltage written into the first loop, by as much as the MOD knob beside CV1 allows.",
+    "Moves the voltage written into the second loop, by as much as the MOD knob beside CV2 allows.",
+    "The first recorded loop played back.",
+    "The second recorded loop played back.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — Nothing is stored until you record: put the switch up or take REC1 high to write the first loop, down or REC2 high for the second, then return the switch to the middle to hear them back."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "trigger",
+     "3": "cv",
+     "1": "trigger",
+     "0": "trigger",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.32V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.32V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.32V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Nozori_68_CV_REC.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Nozori_68_CV_REC.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_CV_REC.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_CV_REC.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_DELAY": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A delay line with feedback, a choice of what happens when the feedback overloads, and modulation on the delay time, the input gain and the feedback.",
+    "How much the TIME jack moves the delay time.",
+    "The delay time.",
+    "How much of the input goes into the delay line.",
+    "How much the GAIN jack moves that input level.",
+    "How much of the delayed signal is fed back into the line.",
+    "How much the FB jack moves the feedback.",
+    "Sets what happens when the feedback drives the delay line past full scale: up it clips, middle it folds back, down it goes through a wave shaper.",
+    "A clock to lock the delay time to; a rising edge restarts the delay and the TIME knob is then read as a division of that clock.",
+    "Moves the delay time, by as much as the MOD knob beside TIME allows.",
+    "Moves the input level into the delay line, by as much as the MOD knob beside GAIN allows.",
+    "Moves the feedback, by as much as the MOD knob beside FB allows.",
+    "Audio into the delay line.",
+    "Sets where the delayed signal is placed across the stereo outputs.",
+    "The delayed signal, left side.",
+    "The delayed signal, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "trigger",
+     "3": "cv",
+     "1": "cv",
+     "0": "cv",
+     "4": "audio",
+     "5": "cv"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.99V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_DELAY.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_DELAY.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_DELAY.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_DELAY.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_EQ": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A three-band mixer: it splits the input into low, medium and high and gives each band its own level with its own modulation.",
+    "How much the HIGH jack moves the high band's level.",
+    "Level of the high band, from silence to a small boost.",
+    "Level of the medium band, from silence to a small boost.",
+    "How much the MED jack moves the medium band's level.",
+    "Level of the low band, from silence to a small boost.",
+    "How much the LOW jack moves the low band's level.",
+    "This switch is not read by the module; nothing on the panel changes with it.",
+    "Takes the equaliser out of circuit while it is high, passing the inputs straight to the outputs.",
+    "Moves the low band's level, by as much as the MOD knob beside LOW allows.",
+    "Moves the medium band's level, by as much as the MOD knob beside MEDIUM allows.",
+    "Moves the high band's level, by as much as the MOD knob beside HIGH allows.",
+    "Audio into the left side.",
+    "Audio into the right side. Left unpatched, the left input is used on both sides.",
+    "The three bands mixed back together, left side.",
+    "The three bands mixed back together, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "trigger",
+     "3": "cv",
+     "1": "cv",
+     "0": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.66V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_EQ.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "the left input",
+      "why": "Nozori_68_EQ.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_EQ.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_EQ.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   },
+   "notes": "The switch has no legend printed on the panel and m68_EQ.ino never calls get_toggle(), so it is a control that can be moved and does nothing. The maker's own header comment leaves the Selecteur3 line blank."
   },
   "Nozori_68_GRAN": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A granulator: it takes short pieces out of a recording of the input and replays them, with control over their length, their pitch and where in the recording they come from.",
+    "How much random variation is added to the grain length.",
+    "The length of each grain.",
+    "How far each grain is pitched away from the recording.",
+    "How much random variation is added to that pitch.",
+    "Where in the recorded buffer the grains are taken from.",
+    "How much random variation is added to that position.",
+    "Sets how the buffer is read: up runs forwards, middle freezes the recording so the grains keep coming from the same material, down runs backwards.",
+    "A trigger that starts a grain. With nothing patched here grains follow one another continuously.",
+    "Moves the grain length, by as much as the MOD knob beside SIZE allows.",
+    "Moves the grain pitch, by as much as the MOD knob beside DETUNE allows.",
+    "Moves the read position, by as much as the MOD knob beside POS allows.",
+    "Audio recorded into the buffer the grains are taken from.",
+    "Sets where the grains are placed across the stereo outputs.",
+    "The grains, left side.",
+    "The grains, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through.",
+    "Note — The TRIG jack starts a grain on a rising edge, but its threshold is so low that a patched signal must fall below about -4.9V to read as low again, so an ordinary gate fires once."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "cv",
+     "3": "cv",
+     "1": "cv",
+     "0": "cv",
+     "4": "audio",
+     "5": "cv"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "grains started continuously",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_GRAN.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_GRAN.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_GRAN.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_GRAN.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   },
+   "notes": "m68_Gran.ino:138-142 compares the trigger jack against 0xA00 and 0x900 rather than the 0xA000 and 0x9000 used elsewhere in the firmware. Those work out as about -4.88V and -4.93V, so the jack reads high for anything a normal module puts out and never returns low."
   },
   "Nozori_68_KS": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A Karplus-Strong string: a short delay line fed with noise or with audio and damped a little on each pass, which rings at a pitch set by the delay length.",
+    "How much the FQ jack moves that pitch.",
+    "The pitch the string rings at.",
+    "How much of the audio input goes into the string.",
+    "How much the GAIN jack moves that input level.",
+    "How quickly the string dies away.",
+    "How much high frequency is lost on each pass round the string.",
+    "Sets what is fed into the string: up takes the input as it stands, middle takes the difference between one sample and the next, down takes the sine of that difference.",
+    "Sets the pitch of the string at one volt per octave.",
+    "Moves the string's pitch, by as much as the MOD knob beside FQ allows.",
+    "Moves the input level into the string, by as much as the MOD knob beside GAIN allows.",
+    "Plucks the string with a burst of noise on each rising edge.",
+    "Audio fed into the string instead of, or as well as, the noise burst.",
+    "Sets the level of what goes into the string.",
+    "The ringing string.",
+    "The ringing string.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through.",
+    "Note — The string is silent until something excites it: send a gate to PLK for a plucked note, or patch audio into IN."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "3": "cv",
+     "1": "cv",
+     "0": "trigger",
+     "4": "audio",
+     "5": "cv"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.99V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_KS.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_KS.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_KS.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_KS.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_LFO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two low frequency oscillators, each with a shape that morphs continuously, its own symmetry control and its own sync and hold inputs.",
+    "The rate of the second oscillator.",
+    "The rate of the first oscillator.",
+    "Morphs the first oscillator's shape through triangle, sine, rounded square and square.",
+    "Morphs the second oscillator's shape through triangle, sine, rounded square and square.",
+    "Skews the first oscillator's shape, moving the peak towards one end of the cycle or the other.",
+    "Skews the second oscillator's shape, moving the peak towards one end of the cycle or the other.",
+    "Sets the rate range both oscillators cover: up is the fastest, middle is the range meant for one-volt-per-octave control, down is the slowest.",
+    "Holds the first oscillator's output at its present value while this is low, and lets it run while it is high.",
+    "A clock for the first oscillator: a rising edge restarts its cycle, and the FQ knob is then read as a division of that clock.",
+    "Holds the second oscillator's output at its present value while this is low, and lets it run while it is high.",
+    "A clock for the second oscillator: a rising edge restarts its cycle, and the FQ knob is then read as a division of that clock.",
+    "Returns the first oscillator to the start of its cycle on each rising edge.",
+    "Returns the second oscillator to the start of its cycle on each rising edge.",
+    "The first oscillator.",
+    "The second oscillator.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "trigger",
+     "3": "trigger",
+     "1": "trigger",
+     "0": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.99V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.99V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.99V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.99V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_68_LFO.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_68_LFO.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_LFO.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_LFO.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_LFO_MOD": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "One low frequency oscillator with a shape that morphs continuously, and a modulation input for each of its three controls.",
+    "How much the FQ jack moves the rate. With nothing patched into FQ this knob is a fine tune on the rate instead.",
+    "The rate of the oscillator.",
+    "Morphs the shape through triangle, sine, rounded square and square.",
+    "How much the WF jack moves the shape.",
+    "Skews the shape, moving the peak towards one end of the cycle or the other.",
+    "How much the SYM jack moves that skew.",
+    "Sets the rate range: up is the fastest, middle is the range meant for one-volt-per-octave control, down is the slowest.",
+    "A clock for the oscillator: a rising edge restarts its cycle, and the FQ knob is then read as a division of that clock.",
+    "Moves the rate, by as much as the MOD knob beside FQ allows.",
+    "Moves the shape, by as much as the MOD knob beside WF allows.",
+    "Moves the skew, by as much as the MOD knob beside SYM allows.",
+    "Holds the output at its present value while this is low, and lets the oscillator run while it is high.",
+    "Returns the oscillator to the start of its cycle on each rising edge.",
+    "The oscillator.",
+    "The oscillator with its phase turned round half a cycle.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "trigger",
+     "3": "pitch",
+     "1": "cv",
+     "0": "cv",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.99V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_68_LFO_MOD.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_68_LFO_MOD.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_LFO_MOD.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_LFO_MOD.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_NOISE": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo noise source with a high pass and a low pass filter across it, and a rate control that sets how coarse the noise is.",
+    "How much the FQ jack moves that rate.",
+    "How fast new random values are produced, which sets how coarse or how smooth the noise sounds.",
+    "Cutoff of the high pass filter.",
+    "How much the HIGH jack moves the high pass cutoff.",
+    "Cutoff of the low pass filter.",
+    "How much the LOW jack moves the low pass cutoff.",
+    "Sets the colour of the noise: up is white, middle is pink, down is red.",
+    "A trigger that produces one new random value on each rising edge.",
+    "Moves the rate new values are produced at, by as much as the MOD knob beside FQ allows.",
+    "Moves the high pass cutoff, by as much as the MOD knob beside HIGH allows.",
+    "Moves the low pass cutoff, by as much as the MOD knob beside LOW allows.",
+    "Sets the output level of the noise.",
+    "Sets where the noise is placed across the stereo outputs.",
+    "Filtered noise, left side.",
+    "Filtered noise, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "cv",
+     "3": "cv",
+     "1": "cv",
+     "0": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_NOISE.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_NOISE.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_NOISE.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_NOISE.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_PITCH": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two pitch shifters built from a short delay line read at a changing speed, which gives the shift a tape-like character.",
+    "How far the second shifter moves the pitch.",
+    "How far the first shifter moves the pitch.",
+    "How much the MOD1 jack moves the first shifter's pitch.",
+    "How much the MOD2 jack moves the second shifter's pitch.",
+    "The length of the window the shifters read from, which trades smoothness against delay.",
+    "How much the MOD3 jack moves both shifters' pitch.",
+    "Sets how the two shifters are used: up shifts the left and right inputs separately, middle drives the two shifts in opposite directions, down shifts IN 1 alone and places it across the stereo pair.",
+    "Moves the pitch of both shifters together at one volt per octave.",
+    "Moves the first shifter's pitch, by as much as the MOD knob beside SHIFT allows.",
+    "Moves the second shifter's pitch, by as much as the MOD knob beside the second SHIFT allows.",
+    "Moves both shifters' pitch, by as much as the third MOD knob allows.",
+    "Audio into the first shifter.",
+    "Audio into the second shifter.",
+    "The shifted signal, left side.",
+    "The shifted signal, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "3": "cv",
+     "1": "cv",
+     "0": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_PITCH.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_PITCH.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_PITCH.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_PITCH.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_RND_LOOP": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A loop of random values played back as a stepped or smoothed voltage, with control over how many steps the loop has and how fast the values change.",
+    "How much the CLK jack moves that rate.",
+    "The rate the loop steps at.",
+    "How many steps the loop has, from one to thirty-two.",
+    "How much the STEP jack moves the number of steps.",
+    "How fast the stored values drift to new random ones.",
+    "How much the MUT. jack moves that drift rate.",
+    "Sets how the steps are joined: up leaves them stepped, middle draws a straight line between them, down draws a curve.",
+    "A clock for the loop: a rising edge advances it, and the CLOCK knob is then read as a division of that clock.",
+    "Moves the loop's rate, by as much as the MOD knob beside CLOCK allows.",
+    "Moves the number of steps, by as much as the MOD knob beside NB STEP allows.",
+    "Moves the drift rate, by as much as the MOD knob beside MUTATE allows.",
+    "Replaces every value in the loop with a fresh random one on each rising edge.",
+    "Replaces the value of the next step with a fresh random one on each rising edge.",
+    "The loop played back.",
+    "A second voltage from the same loop, offset from the first.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "trigger",
+     "3": "cv",
+     "1": "cv",
+     "0": "cv",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.99V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_68_RND_LOOP.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_68_RND_LOOP.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_RND_LOOP.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_RND_LOOP.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_SIN_MOD": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sine oscillator whose frequency, phase or amplitude is modulated by the two audio inputs.",
+    "How much the FQ jack moves the pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "The pitch of the oscillator.",
+    "How much the first audio input modulates the oscillator.",
+    "How much the G1 jack moves that first modulation depth.",
+    "How much the second audio input modulates the oscillator.",
+    "How much the G2 jack moves that second modulation depth.",
+    "Chooses how the two inputs modulate the oscillator: up is frequency modulation, middle is phase modulation, down is amplitude modulation.",
+    "Sets the pitch of the oscillator at one volt per octave.",
+    "Moves the pitch, by as much as the MOD knob beside FQ allows.",
+    "Moves the first modulation depth, by as much as the MOD knob beside GAIN 1 allows.",
+    "Moves the second modulation depth, by as much as the MOD knob beside GAIN 2 allows.",
+    "The first modulating signal. With nothing patched here the first modulation is silent.",
+    "The second modulating signal. With nothing patched here the second modulation is silent.",
+    "The modulated oscillator.",
+    "The modulated oscillator.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "3": "pitch",
+     "1": "cv",
+     "0": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Nozori_68_SIN_MOD.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Nozori_68_SIN_MOD.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_SIN_MOD.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_SIN_MOD.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_VCA_PAN": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two voltage-controlled amplifiers, each with a voltage-controlled position across the stereo output pair.",
+    "Level of the second channel.",
+    "Level of the first channel.",
+    "Where the first channel is placed across the stereo pair.",
+    "Where the second channel is placed across the stereo pair.",
+    "How much the first PAN jack moves the first channel's position.",
+    "How much the second PAN jack moves the second channel's position.",
+    "Sets how the level jacks are read: up the level follows the voltage directly, middle it follows an exponential curve over 0V to 5V, down the same curve spread over -5V to +5V.",
+    "Moves the first channel's level.",
+    "Moves the first channel's position across the stereo pair, by as much as the first MOD knob allows.",
+    "Moves the second channel's level.",
+    "Moves the second channel's position across the stereo pair, by as much as the second MOD knob allows.",
+    "Audio into the first channel.",
+    "Audio into the second channel.",
+    "The two channels mixed, left side.",
+    "The two channels mixed, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "cv",
+     "3": "cv",
+     "1": "cv",
+     "0": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCA_PAN.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCA_PAN.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCA_PAN.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCA_PAN.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_VCF_MOD": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A filter whose frequency response morphs continuously between low pass, band pass and high pass, with three separate pitch modulation inputs.",
+    "How much the FQ1 jack moves the cutoff. With nothing patched into FQ1 this knob is a fine tune on the cutoff instead.",
+    "The cutoff frequency.",
+    "How much the FQ2 jack moves the cutoff.",
+    "How much the third modulation input moves the cutoff.",
+    "The resonance.",
+    "How much the Q jack moves the resonance.",
+    "Chooses the shape of the response: up is low pass, middle is band pass, down is high pass.",
+    "Moves the cutoff, at one volt per octave with the MOD knob beside FQ fully up.",
+    "Moves the cutoff, at one volt per octave with the first MOD 1 knob fully up.",
+    "Moves the cutoff, at one volt per octave with the MOD 2 knob fully up.",
+    "Moves the resonance, by as much as the MOD knob beside Q allows.",
+    "Audio into the filter, left side.",
+    "Audio into the filter, right side.",
+    "The filtered signal, left side.",
+    "The filtered signal, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "3": "pitch",
+     "1": "pitch",
+     "0": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCF_MOD.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCF_MOD.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCF_MOD.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCF_MOD.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_VCF_MORPH": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo filter whose frequency response morphs continuously from a steep low pass through a gentler one and a band pass to a high pass.",
+    "How much the FQ jack moves the cutoff. With nothing patched into FQ this knob is a fine tune on the cutoff instead.",
+    "The cutoff frequency.",
+    "The resonance.",
+    "How much the Q jack moves the resonance.",
+    "Morphs the response from a twenty-four decibel low pass through a twelve decibel low pass and a band pass to a high pass.",
+    "How much the MORPH jack moves that response.",
+    "Sets how the two sides are used: up filters left and right separately, middle drives the two filters' modulation in opposite directions, down filters IN 1 alone and places it across the stereo pair.",
+    "Sets the cutoff at one volt per octave.",
+    "Moves the cutoff, at one volt per octave with the MOD knob beside FQ fully up.",
+    "Moves the resonance, by as much as the MOD knob beside Q allows.",
+    "Moves the response shape, by as much as the MOD knob beside MORPH allows.",
+    "Audio into the filter, left side.",
+    "Audio into the filter, right side.",
+    "The filtered signal, left side.",
+    "The filtered signal, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "3": "pitch",
+     "1": "cv",
+     "0": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCF_MORPH.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCF_MORPH.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCF_MORPH.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCF_MORPH.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_VCO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator with three waveforms, pulse width control, and a level and stereo position on its output.",
+    "How much the FQ jack moves the pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "The pitch of the oscillator.",
+    "How much the FQ1 jack moves the pitch.",
+    "How much the FQ2 jack moves the pitch.",
+    "The pulse width of the square wave.",
+    "How much the PWM jack moves the pulse width.",
+    "Chooses the waveform: up is square, middle is a double saw, down is a sine.",
+    "Sets the pitch at one volt per octave.",
+    "Moves the pitch, at one volt per octave with the MOD knob beside FQ fully up.",
+    "Moves the pitch, at one volt per octave with the MOD 1 knob fully up.",
+    "Moves the pulse width, by as much as the MOD 2 knob allows.",
+    "Sets the output level, following an exponential curve.",
+    "Sets where the oscillator is placed across the stereo outputs.",
+    "The oscillator, left side.",
+    "The oscillator, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "3": "pitch",
+     "1": "pitch",
+     "0": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCO.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCO.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCO.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCO.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_VCO_LOOP": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A loop of random values read out at audio rate, which makes a repeating waveform that drifts as the stored values are replaced.",
+    "How much the FQ jack moves that pitch.",
+    "The pitch the loop is read out at.",
+    "How many steps the loop has, from one to thirty-two.",
+    "How much the STEP jack moves the number of steps.",
+    "How fast the stored values drift to new random ones.",
+    "How much the MUT. jack moves that drift rate.",
+    "Sets how the steps are joined: up leaves them stepped, middle draws a straight line between them, down draws a curve.",
+    "Sets the pitch at one volt per octave.",
+    "Moves the pitch, by as much as the MOD knob beside FQ allows.",
+    "Moves the number of steps, by as much as the MOD knob beside NB STEP allows.",
+    "Moves the drift rate, by as much as the MOD knob beside MUTATE allows.",
+    "Sets the output level.",
+    "Sets where the output is placed across the stereo pair.",
+    "The loop read out as a waveform.",
+    "A second waveform from the same loop, offset from the first.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "3": "pitch",
+     "1": "cv",
+     "0": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCO_LOOP.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCO_LOOP.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCO_LOOP.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCO_LOOP.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_VCO_MORPH": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator whose waveform morphs continuously from square through saw to double saw, with pulse width control on top of it.",
+    "How much the FQ jack moves the pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "The pitch of the oscillator.",
+    "Morphs the waveform from square through saw to double saw.",
+    "How much the WF jack moves the waveform.",
+    "The pulse width.",
+    "How much the PWM jack moves the pulse width.",
+    "Sets the pitch range the FQ knob covers: up is the widest audio range, middle is the range meant for one-volt-per-octave control, down is the lowest.",
+    "Sets the pitch at one volt per octave.",
+    "Moves the pitch, at one volt per octave with the MOD knob beside FQ fully up.",
+    "Moves the waveform, by as much as the MOD knob beside WF allows.",
+    "Moves the pulse width, by as much as the MOD knob beside PWM allows.",
+    "Sets the output level, following an exponential curve.",
+    "Sets where the oscillator is placed across the stereo outputs.",
+    "The oscillator, left side.",
+    "The oscillator, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "3": "pitch",
+     "1": "cv",
+     "0": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCO_MORPH.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCO_MORPH.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCO_MORPH.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCO_MORPH.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_VCO_QTZ": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator that rounds its pitch input to whole semitones, with three waveforms and pulse width control.",
+    "How much the FQ jack moves the pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "The pitch of the oscillator, set freely rather than in semitones.",
+    "How much the FQ1 jack moves the pitch.",
+    "How much the FQ2 jack moves the pitch.",
+    "The pulse width of the square wave.",
+    "How much the PWM jack moves the pulse width.",
+    "Chooses the waveform: up is square, middle is a double saw, down is a sine.",
+    "Sets the pitch at one volt per octave, rounded to the nearest semitone.",
+    "Moves the pitch, at one volt per octave with the MOD knob beside FQ fully up. This modulation is not rounded to semitones.",
+    "Moves the pitch, at one volt per octave with the MOD 1 knob fully up. This modulation is not rounded to semitones.",
+    "Moves the pulse width, by as much as the MOD 2 knob allows.",
+    "Sets the output level, following an exponential curve.",
+    "Samples the pitch jack on each rising edge and holds it until the next one. With a gate here and nothing patched into V/O, each edge picks a random semitone within one octave.",
+    "The oscillator, left side.",
+    "The oscillator, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "3": "pitch",
+     "1": "pitch",
+     "0": "cv",
+     "4": "cv",
+     "5": "trigger"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCO_QTZ.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_68_VCO_QTZ.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCO_QTZ.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCO_QTZ.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   },
+   "notes": "The maker's own header comment in m68_VCO_Q.ino is a copy of the plain VCO's and says IN 2 is a pan control. m68_VCO_Q.ino:65-92 uses it as a track-and-hold trigger instead, which is what the panel's T&H legend says, and there is no pan control on this module."
   },
   "Nozori_68_VCO_WS": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sine oscillator through a wave shaper, with a phase control and a level and stereo position on its output.",
+    "How much the FQ jack moves the pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "The pitch of the oscillator.",
+    "How hard the sine is pushed through the wave shaper.",
+    "How much the WS jack moves the wave shaping.",
+    "Where in its cycle the shaped wave is read from.",
+    "How much the PHASE jack moves that reading point.",
+    "Sets the pitch range the FQ knob covers: up is the widest audio range, middle is the range meant for one-volt-per-octave control, down is the lowest.",
+    "Sets the pitch at one volt per octave.",
+    "Moves the pitch, by as much as the MOD knob beside FQ allows.",
+    "Moves the wave shaping, by as much as the MOD knob beside WS allows.",
+    "Moves the reading point, by as much as the MOD knob beside PHASE allows.",
+    "Sets the output level, following an exponential curve.",
+    "Sets where the oscillator is placed across the stereo outputs.",
+    "The shaped oscillator, left side.",
+    "The shaped oscillator, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "3": "pitch",
+     "1": "cv",
+     "0": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCO_WS.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_VCO_WS.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCO_WS.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_VCO_WS.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_68_WS": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A wave shaper and distortion with a wet and dry balance, working on one or two channels.",
+    "How much the WET jack moves that balance.",
+    "Balance between the untreated signal and the shaped one.",
+    "How hard the signal is pushed into the wave shaper.",
+    "How much the SHAPE jack moves the wave shaping.",
+    "How much distortion is added after the shaping.",
+    "How much the DISTO jack moves the distortion.",
+    "Sets how the two channels are used: up shapes left and right separately, middle drives the two channels' modulation in opposite directions, down shapes IN 1 alone and places it across the stereo pair.",
+    "Takes the shaper out of circuit while it is high, passing the inputs through untouched.",
+    "Moves the wet and dry balance, by as much as the MOD knob beside DRY/WET allows.",
+    "Moves the wave shaping, by as much as the MOD knob beside SHAPE allows.",
+    "Moves the distortion, by as much as the MOD knob beside DISTO allows.",
+    "Audio into the shaper, left side.",
+    "Audio into the shaper, right side, or the stereo position when the switch is down.",
+    "The shaped signal, left side.",
+    "The shaped signal, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — An unpatched modulation CV jack does not read 0V: the firmware drives it from an internal chaotic generator, so a MOD knob turned up with nothing patched lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "2": 8,
+    "3": 9,
+    "1": 10,
+    "0": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "1": 14,
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "2": "trigger",
+     "3": "cv",
+     "1": "cv",
+     "0": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.32V",
+      "negative": "ignored",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre; the firmware compares this jack's scaled value against a fixed threshold, which works out at the voltage given here"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5.3V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "vcv2nozori.hpp:42-45 scales a CV jack as clamp(V/10.6, -0.5, 0.5) + 0.5, so it covers ±5.3V with 0V at the centre"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_WS.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_68_WS.cpp:93-94 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_WS.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_68_WS.cpp:109-110 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_8_BITS": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four square-wave oscillators combined by a digital operation, which gives the harsh stepped tones of early game hardware.",
+    "How much the MOD jack moves the first oscillator's pitch. With nothing patched into MOD this knob is a fine tune instead.",
+    "Pitch of the first oscillator.",
+    "Pitch of the second oscillator.",
+    "How much the MOD jack moves the second oscillator's pitch. With nothing patched into MOD this knob is a fine tune instead.",
+    "Pitch of the third oscillator.",
+    "How much the MOD jack moves the third oscillator's pitch. With nothing patched into MOD this knob is a fine tune instead.",
+    "Pitch of the fourth oscillator.",
+    "How much the MOD jack moves the fourth oscillator's pitch. With nothing patched into MOD this knob is a fine tune instead.",
+    "Chooses which of three digital operations combines the four oscillators, numbered 1, 2 and 3 on the panel from the top down.",
+    "Sets the pitch of all four oscillators at one volt per octave.",
+    "Moves the pitch of all four oscillators, each by as much as its own MOD knob allows.",
+    "The four oscillators combined.",
+    "The four oscillators combined.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Nozori_84_8_BITS.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_8_BITS.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_8_BITS.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_8_BITS.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_ADD": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sine oscillator with three further sines added to it, each tuned as a harmonic interval above the first and given its own level.",
+    "How much the FQ jack moves the pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "Pitch of the fundamental.",
+    "The interval the first added sine is tuned to above the fundamental.",
+    "Level of the first added sine.",
+    "The interval the second added sine is tuned to.",
+    "Level of the second added sine.",
+    "The interval the third added sine is tuned to.",
+    "Level of the third added sine.",
+    "Constrains the intervals the added sines may take: up snaps them to octaves, middle to a major scale, down to a minor one.",
+    "Sets the pitch of the fundamental at one volt per octave; the added sines follow it.",
+    "Moves the pitch, by as much as the MOD knob allows.",
+    "The fundamental and the three added sines mixed together.",
+    "The three added sines alone, with the fundamental left out.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Nozori_84_ADD.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_ADD.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_ADD.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_ADD.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_ADSR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two ADSR envelopes, each with its own four stage knobs and its own gate, and each able to loop.",
+    "Attack time of the second envelope.",
+    "Attack time of the first envelope.",
+    "Decay time of the first envelope.",
+    "Decay time of the second envelope.",
+    "Sustain level of the first envelope.",
+    "Sustain level of the second envelope.",
+    "Release time of the first envelope.",
+    "Release time of the second envelope.",
+    "Sets what happens after a stage finishes: up, each envelope runs once per gate; middle, the attack and decay repeat; down, the envelope restarts once it has settled on the sustain level.",
+    "The gate for the first envelope: it attacks on the rise and releases on the fall.",
+    "The gate for the second envelope: it attacks on the rise and releases on the fall.",
+    "The first envelope as a voltage.",
+    "The second envelope as a voltage.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — With no gate patched an envelope stays at rest unless the switch is set to loop, in which case it runs on its own."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.67V",
+      "negative": "ignored",
+      "why": "Nozori_84_ADSR.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.67V",
+      "negative": "ignored",
+      "why": "Nozori_84_ADSR.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_ADSR.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_ADSR.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_CLOCK": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock that can drop or displace beats at random, driving an ADSR envelope which in turn drives a VCA.",
+    "Attack time of the envelope.",
+    "The clock rate.",
+    "How long the envelope's gate stays high, as a share of the clock interval.",
+    "Decay time of the envelope.",
+    "How often a beat is displaced off the grid.",
+    "Sustain level of the envelope.",
+    "How much the MOD jack moves whichever the switch has selected.",
+    "Release time of the envelope.",
+    "Chooses what the MOD jack and knob act on: up they move the clock rate, middle they move how often beats are displaced, down the jack is taken as an external clock instead.",
+    "Moves the clock rate or the displacement amount, by as much as the MOD knob allows, or takes over as the clock when the switch is down.",
+    "Audio for the VCA. Patch something here and OUT 2 carries that audio shaped by the envelope rather than the envelope voltage.",
+    "A gate on every beat the clock produces.",
+    "The envelope as a voltage, or the audio at IN 2 with that envelope applied when IN 2 is patched.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "audio"
+    },
+    "out": {
+     "1": "trigger",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_84_CLOCK.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_84_CLOCK.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_CLOCK.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_CLOCK.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_DOPPLER": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two moving sound sources heard from two listening points: the distance to each source sets a delay and a level, and changing the distance shifts the pitch the way a passing siren does.",
+    "Distance to the second source.",
+    "Distance to the first source.",
+    "How much the first source is heard at the second listening point.",
+    "How much the second source is heard at the first listening point.",
+    "How much the first source is heard at its own listening point.",
+    "How much the second source is heard at its own listening point.",
+    "Cutoff of the low pass filter on the first path.",
+    "Cutoff of the low pass filter on the second path.",
+    "Chooses where the low pass filters are placed: up they act on the doppler paths, middle on the outputs, down on both.",
+    "Audio for the first source. With nothing patched here an internal sine is used instead.",
+    "Audio for the second source. With nothing patched here an internal sine is used instead.",
+    "What reaches the first listening point.",
+    "What reaches the second listening point.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — The module makes a sound with nothing patched in, because each empty audio input is replaced by an internal sine."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "an internal sine",
+      "why": "Nozori_84_DOPPLER.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "an internal sine",
+      "why": "Nozori_84_DOPPLER.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_DOPPLER.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_DOPPLER.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_FM": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four oscillators arranged so that each modulates the frequency of the next, with the modulation applied as an interval rather than a fixed amount.",
+    "How much the FQ jack moves the first oscillator's pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "Pitch of the first oscillator.",
+    "Pitch of the second oscillator.",
+    "How much the second oscillator modulates the one it feeds.",
+    "Pitch of the third oscillator.",
+    "How much the third oscillator modulates the one it feeds.",
+    "Pitch of the fourth oscillator.",
+    "How much the fourth oscillator modulates the one it feeds.",
+    "Chooses the waveform the oscillators use: up a rising saw, middle a falling saw, down a square.",
+    "Sets the pitch of the oscillators at one volt per octave.",
+    "Moves the pitch, by as much as the MOD knob beside FQ 1 allows.",
+    "The result of the modulation chain, left side.",
+    "The result of the modulation chain, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Nozori_84_FM.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_FM.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_FM.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_FM.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_FM_LIN": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four sine oscillators arranged so that each modulates the frequency of the next, with the modulation added as a fixed number of hertz rather than as an interval.",
+    "How much the FQ jack moves the first oscillator's pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "Pitch of the first oscillator.",
+    "Pitch of the second oscillator.",
+    "How much the second oscillator modulates the one it feeds.",
+    "Pitch of the third oscillator.",
+    "How much the third oscillator modulates the one it feeds.",
+    "Pitch of the fourth oscillator.",
+    "How much the fourth oscillator modulates the one it feeds.",
+    "Chooses how the four oscillators are wired to one another, the three arrangements drawn beside the switch.",
+    "Sets the pitch of the oscillators at one volt per octave.",
+    "Moves the first oscillator's pitch, by as much as the MOD knob beside FQ 1 allows.",
+    "The result of the modulation chain, left side.",
+    "The result of the modulation chain, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Nozori_84_FM_LIN.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_FM_LIN.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_FM_LIN.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_FM_LIN.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_HARMONICS": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sine oscillator with three further sines added to it, each tuned freely up to an octave or two above the first and given its own level.",
+    "How much the FQ jack moves the pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "Pitch of the fundamental.",
+    "How far the first added sine is tuned above the fundamental, up to one octave.",
+    "Level of the first added sine.",
+    "How far the second added sine is tuned above the fundamental, up to two octaves.",
+    "Level of the second added sine.",
+    "How far the third added sine is tuned above the fundamental, up to two octaves.",
+    "Level of the third added sine.",
+    "Sets the pitch range the FQ knob covers: up is the highest, middle is the range meant for one-volt-per-octave control, down is the lowest.",
+    "Sets the pitch of the fundamental at one volt per octave; the added sines follow it.",
+    "Moves the pitch, by as much as the MOD knob allows.",
+    "The fundamental and the three added sines mixed together.",
+    "The three added sines alone, with the fundamental left out.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Nozori_84_HARMONICS.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_HARMONICS.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_HARMONICS.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_HARMONICS.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_JONG_LFO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A Peter de Jong strange attractor stepped slowly, giving two related voltages that wander without repeating.",
+    "How much the FQ jack moves that rate.",
+    "The rate the attractor is stepped at.",
+    "Bends the curve the attractor draws, from stepped through straight lines to a smooth curve.",
+    "How much the CURV. jack moves that bend.",
+    "The first of the four constants in the de Jong equations.",
+    "The second of the four constants in the de Jong equations.",
+    "The third of the four constants in the de Jong equations.",
+    "The fourth of the four constants in the de Jong equations.",
+    "Sets how the steps are joined: up leaves them stepped, middle draws a straight line between them, down draws a curve.",
+    "Moves the step rate, by as much as the MOD knob beside FQ allows.",
+    "Moves the curve bend, by as much as the MOD knob beside CURVE allows.",
+    "The attractor's first coordinate.",
+    "The attractor's second coordinate.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — With the two modulation jacks empty the firmware feeds them from an internal chaotic generator, so turning either MOD knob up lets a wandering voltage through."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "Nozori_84_JONG_LFO.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "Nozori_84_JONG_LFO.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_JONG_LFO.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_JONG_LFO.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_JONG_VCO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A Peter de Jong strange attractor stepped at audio rate, giving two related waveforms that never quite repeat.",
+    "How much the FQ jack moves that pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "The rate the attractor is stepped at, which sets the pitch.",
+    "Bends the curve the attractor draws, from stepped through straight lines to a smooth curve.",
+    "How much the CURV. jack moves that bend.",
+    "The first of the four constants in the de Jong equations.",
+    "The second of the four constants in the de Jong equations.",
+    "The third of the four constants in the de Jong equations.",
+    "The fourth of the four constants in the de Jong equations.",
+    "Sets how the steps are joined: up leaves them stepped, middle draws a straight line between them, down draws a curve.",
+    "Moves the pitch, by as much as the MOD knob beside FQ allows.",
+    "Moves the curve bend, by as much as the MOD knob beside CURVE allows.",
+    "The attractor's first coordinate.",
+    "The attractor's second coordinate.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_JONG_VCO.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "an internal chaotic generator",
+      "why": "Nozori_84_JONG_VCO.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_JONG_VCO.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_JONG_VCO.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_LFO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two low frequency oscillators with morphing shapes, the first able to modulate the second.",
+    "Rate of the second oscillator.",
+    "Rate of the first oscillator.",
+    "Morphs the first oscillator's shape through triangle, sine, rounded square and square.",
+    "Morphs the second oscillator's shape through triangle, sine, rounded square and square.",
+    "Skews the first oscillator's shape, moving the peak towards one end of the cycle.",
+    "Skews the second oscillator's shape, moving the peak towards one end of the cycle.",
+    "Folds the first oscillator's output back on itself when it is driven past full scale.",
+    "How much the first oscillator modulates the second.",
+    "Chooses how the first oscillator reaches the second: up they are mixed, middle the first moves the second's rate, down the first moves the second's level.",
+    "A clock for the first oscillator: a rising edge restarts its cycle, and the FQ knob is then read as a division of that clock.",
+    "Holds the second oscillator's output at its present value while this is low, and lets it run while it is high.",
+    "The first oscillator.",
+    "The second oscillator, with whatever modulation the switch has selected applied.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_84_LFO.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_84_LFO.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_LFO.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_LFO.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_LFO_SEQ": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A six-step sequence read out as a repeating voltage, either as steps or smoothed into a shape.",
+    "How much the FQ jack moves that rate. With nothing patched into FQ this knob is a fine tune instead.",
+    "The rate the sequence steps at.",
+    "The voltage of the first step.",
+    "The voltage of the second step.",
+    "The voltage of the third step.",
+    "The voltage of the fourth step.",
+    "The voltage of the fifth step.",
+    "The voltage of the sixth step.",
+    "Sets how the steps are joined: up leaves them stepped, middle draws a straight line between them, down draws a curve.",
+    "A clock for the sequence: a rising edge restarts it, and the FQ knob is then read as a division of that clock.",
+    "Moves the step rate, by as much as the MOD knob allows.",
+    "A ramp following the position through the sequence, which doubles as a clock output.",
+    "The six step voltages read out in turn.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_84_LFO_SEQ.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_LFO_SEQ.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_LFO_SEQ.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_LFO_SEQ.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_MODULATE": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two audio signals combined by eight different operations at once, each with its own level in the mix.",
+    "How much of the two inputs bitwise ANDed together goes into the mix.",
+    "How much of the two inputs bitwise exclusive-ORed together goes into the mix.",
+    "How much of the two inputs bitwise ORed together goes into the mix.",
+    "How much of the smaller of the two inputs goes into the mix.",
+    "How much of the larger of the two inputs goes into the mix.",
+    "How much of the two inputs ring modulated together goes into the mix.",
+    "How much of the two inputs amplitude modulated together goes into the mix.",
+    "How much of the absolute difference between the two inputs goes into the mix.",
+    "Sets how the results are sent to the two outputs: up puts the whole mix on both, middle splits the operations between them, down sends a different pairing to each.",
+    "The first audio signal. With nothing patched here an internal sine is used instead.",
+    "The second audio signal. With nothing patched here an internal sine is used instead.",
+    "The mix of the selected operations, first output.",
+    "The mix of the selected operations, second output.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — The module makes a sound with nothing patched in, because each empty audio input is replaced by an internal sine."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "an internal sine",
+      "why": "Nozori_84_MODULATE.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "an internal sine",
+      "why": "Nozori_84_MODULATE.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_MODULATE.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_MODULATE.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_PARAM": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator whose single cycle is drawn by six knobs: each sets the height of one point, and the waveform runs through them.",
+    "How much the FQ jack moves the pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "The pitch of the oscillator.",
+    "Height of the first point in the cycle.",
+    "Height of the second point in the cycle.",
+    "Height of the third point in the cycle.",
+    "Height of the fourth point in the cycle.",
+    "Height of the fifth point in the cycle.",
+    "Height of the sixth point in the cycle.",
+    "Sets the pitch range the FQ knob covers: up is the highest, middle is the range meant for one-volt-per-octave control, down is the lowest.",
+    "Sets the pitch at one volt per octave.",
+    "Moves the pitch, by as much as the MOD knob allows.",
+    "The drawn waveform.",
+    "The drawn waveform.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Nozori_84_PARAM.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_PARAM.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_PARAM.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_PARAM.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_SEQ_4": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-step sequencer in which each step has both a voltage and a length, so the pattern can be uneven.",
+    "How many clock pulses the first step lasts.",
+    "The voltage of the first step.",
+    "The voltage of the second step.",
+    "How many clock pulses the second step lasts.",
+    "The voltage of the third step.",
+    "How many clock pulses the third step lasts.",
+    "The voltage of the fourth step.",
+    "How many clock pulses the fourth step lasts.",
+    "Chooses what a high level at the EFFECT jack does: up skips the next step, middle holds the gate high through the whole step, down glides from one step's voltage to the next.",
+    "The clock that advances the sequencer, one step on each rising edge.",
+    "Applies whichever effect the switch has selected while this is high.",
+    "A gate on each step, as long as that step's own length setting.",
+    "The voltage of the step the sequencer is on.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — Nothing moves until a clock is patched into CLK; with the jack empty the sequencer holds on its first step."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "1": "trigger",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_84_SEQ_4.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_84_SEQ_4.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SEQ_4.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SEQ_4.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_SEQ_8": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight-step sequencer, one knob per step, advanced by an external clock.",
+    "The voltage of step two.",
+    "The voltage of step one.",
+    "The voltage of step three.",
+    "The voltage of step four.",
+    "The voltage of step five.",
+    "The voltage of step six.",
+    "The voltage of step seven.",
+    "The voltage of step eight.",
+    "Chooses what a high level at the EFFECT jack does: up runs the sequence backwards, middle holds it on its present step, down glides from one step's voltage to the next.",
+    "The clock that advances the sequencer, one step on each rising edge.",
+    "Applies whichever effect the switch has selected while this is high.",
+    "A ramp following the position through the eight steps.",
+    "The voltage of the step the sequencer is on.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — Nothing moves until a clock is patched into CLK; with the jack empty the sequencer holds on its first step."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "1": "cv",
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_84_SEQ_8.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "why": "Nozori_84_SEQ_8.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; the firmware compares the converted word against a fixed threshold, which works out at the voltage given here"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SEQ_8.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SEQ_8.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_SIN_AM": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four sine oscillators arranged so that each changes the amplitude of the next.",
+    "How much the FQ jack moves the first oscillator's pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "Pitch of the first oscillator.",
+    "Pitch of the second oscillator.",
+    "How much the second oscillator modulates the one it feeds.",
+    "Pitch of the third oscillator.",
+    "How much the third oscillator modulates the one it feeds.",
+    "Pitch of the fourth oscillator.",
+    "How much the fourth oscillator modulates the one it feeds.",
+    "Chooses how the four oscillators are wired to one another, the three arrangements drawn beside the switch.",
+    "Sets the pitch of the oscillators at one volt per octave.",
+    "Moves the first oscillator's pitch, by as much as the MOD knob beside FQ 1 allows.",
+    "The result of the modulation chain, left side.",
+    "The result of the modulation chain, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Nozori_84_SIN_AM.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_SIN_AM.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SIN_AM.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SIN_AM.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_SIN_FM": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four sine oscillators arranged so that each modulates the frequency of the next, the modulation applied as an interval.",
+    "How much the FQ jack moves the first oscillator's pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "Pitch of the first oscillator.",
+    "Pitch of the second oscillator.",
+    "How much the second oscillator modulates the one it feeds.",
+    "Pitch of the third oscillator.",
+    "How much the third oscillator modulates the one it feeds.",
+    "Pitch of the fourth oscillator.",
+    "How much the fourth oscillator modulates the one it feeds.",
+    "Chooses how the four oscillators are wired to one another, the three arrangements drawn beside the switch.",
+    "Sets the pitch of the oscillators at one volt per octave.",
+    "Moves the first oscillator's pitch, by as much as the MOD knob beside FQ 1 allows.",
+    "The result of the modulation chain, left side.",
+    "The result of the modulation chain, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Nozori_84_SIN_FM.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_SIN_FM.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SIN_FM.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SIN_FM.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_SIN_PM": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four sine oscillators arranged so that each shifts the phase of the next, which is the modulation used in most FM synthesisers.",
+    "How much the FQ jack moves the first oscillator's pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "Pitch of the first oscillator.",
+    "Pitch of the second oscillator.",
+    "How much the second oscillator modulates the one it feeds.",
+    "Pitch of the third oscillator.",
+    "How much the third oscillator modulates the one it feeds.",
+    "Pitch of the fourth oscillator.",
+    "How much the fourth oscillator modulates the one it feeds.",
+    "Chooses how the four oscillators are wired to one another, the three arrangements drawn beside the switch.",
+    "Sets the pitch of the oscillators at one volt per octave.",
+    "Moves the first oscillator's pitch, by as much as the MOD knob beside FQ 1 allows.",
+    "The result of the modulation chain, left side.",
+    "The result of the modulation chain, right side.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Nozori_84_SIN_PM.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_SIN_PM.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SIN_PM.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SIN_PM.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_SIN_WS": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two sine oscillators passed through a Peter de Jong equation used as a wave shaper, which folds them into two related waveforms.",
+    "How much the FQ1 jack moves the first sine's pitch. With nothing patched into FQ1 this knob is a fine tune instead.",
+    "Pitch of the first sine.",
+    "Pitch of the second sine.",
+    "How much the FQ2 jack moves the second sine's pitch. With nothing patched into FQ2 this knob is a fine tune instead.",
+    "The first of the four constants in the de Jong equations.",
+    "The second of the four constants in the de Jong equations.",
+    "The third of the four constants in the de Jong equations.",
+    "The fourth of the four constants in the de Jong equations.",
+    "Sets the frequency range both sines cover: up is the audio range, middle is a clock range, down is a slow modulation range.",
+    "Moves the first sine's pitch, by as much as the MOD knob beside the first FQ allows.",
+    "Moves the second sine's pitch, by as much as the MOD knob beside the second FQ allows.",
+    "The shaper's first coordinate.",
+    "The shaper's second coordinate.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_SIN_WS.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_SIN_WS.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SIN_WS.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_SIN_WS.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_THOMAS": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two Thomas strange attractors, each giving a pair of related voltages that wander without repeating; slow enough they are modulation, fast enough they are a noisy tone.",
+    "The rate the second attractor is stepped at.",
+    "The rate the first attractor is stepped at.",
+    "How much the first SPEED jack moves the first attractor's rate. With nothing patched there this knob is a fine tune instead.",
+    "How much the second SPEED jack moves the second attractor's rate. With nothing patched there this knob is a fine tune instead.",
+    "The damping constant of the first attractor, which sets how tightly it spirals.",
+    "The damping constant of the second attractor, which sets how tightly it spirals.",
+    "Output level of the first attractor.",
+    "Output level of the second attractor.",
+    "Sets the rate range both attractors cover: up is the audio range, middle is a clock range, down is a slow modulation range.",
+    "Moves the first attractor's rate, by as much as the MOD knob beside the first SPEED allows.",
+    "Moves the second attractor's rate, by as much as the MOD knob beside the second SPEED allows.",
+    "The first attractor's output.",
+    "The second attractor's output.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_THOMAS.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_THOMAS.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_THOMAS.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_THOMAS.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_TROPICAL": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A fundamental with three further oscillators added to it, each tuned as an interval above the first and given its own level, with a choice of waveform.",
+    "How much the FQ jack moves the pitch. With nothing patched into FQ this knob is a fine tune instead.",
+    "Pitch of the fundamental.",
+    "How far the first added oscillator is tuned above the fundamental.",
+    "Level of the first added oscillator.",
+    "How far the second added oscillator is tuned above the fundamental.",
+    "Level of the second added oscillator.",
+    "How far the third added oscillator is tuned above the fundamental.",
+    "Level of the third added oscillator.",
+    "Chooses the waveform all four oscillators use: up a sine, middle a saw, down a square.",
+    "Sets the pitch of the fundamental at one volt per octave; the added oscillators follow it.",
+    "Moves the pitch, by as much as the MOD knob allows.",
+    "The fundamental and the three added oscillators mixed together.",
+    "The three added oscillators alone, with the fundamental left out.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Nozori_84_TROPICAL.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "the MOD knob acts as a fine tune",
+      "why": "Nozori_84_TROPICAL.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word; c_macro.h:95-101 adds this jack to the frequency scaled by IN1_1V, which is one octave per volt"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_TROPICAL.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_TROPICAL.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_VCF": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two filters whose frequency response morphs continuously from a steep low pass to a high pass, each with its own cutoff, resonance and shape.",
+    "Cutoff of the second filter.",
+    "Cutoff of the first filter.",
+    "How much the MOD jack moves the first filter's cutoff. With nothing patched into MOD this knob is a fine tune instead.",
+    "How much the MOD jack moves the second filter's cutoff. With nothing patched into MOD this knob is a fine tune instead.",
+    "Resonance of the first filter.",
+    "Resonance of the second filter.",
+    "Morphs the first filter's response from a twenty-four decibel low pass through a twelve decibel low pass and a band pass to a high pass.",
+    "Morphs the second filter's response from a twenty-four decibel low pass through a twelve decibel low pass and a band pass to a high pass.",
+    "Sets how the two filters are used: up filters the two inputs separately, middle drives their modulation in opposite directions, down filters IN 1 alone and uses IN 2 to place it across the outputs.",
+    "Audio into the first filter.",
+    "Audio into the second filter, or the stereo position when the switch is down.",
+    "The first filter's output.",
+    "The second filter's output.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "why": "Nozori_84_VCF.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Nozori_84_VCF.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_VCF.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_VCF.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   }
   },
   "Nozori_84_WS": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A wave shaper built from two passes of a Peter de Jong equation, folding two inputs into two related outputs.",
+    "Amount of the second sine term in the shaping.",
+    "Amount of the first sine term in the shaping.",
+    "Amount of the third sine term in the shaping.",
+    "Amount of the fourth sine term in the shaping.",
+    "Rate of the first internal modulation of the shaping.",
+    "Rate of the second internal modulation of the shaping.",
+    "Bends the shaping curve on the left side.",
+    "Bends the shaping curve on the right side.",
+    "Sets the rate range the two internal modulations cover: up is the highest, middle is between, down is the slowest.",
+    "Audio into the left side of the shaper. With nothing patched here an internal modulation is shaped instead.",
+    "Audio into the right side of the shaper. With nothing patched here an internal modulation is shaped instead.",
+    "The shaper's first coordinate.",
+    "The shaper's second coordinate.",
+    "Note — Set Rack's sample rate to 96kHz before using this module. At any other rate it runs at the wrong speed, and a red bar appears across the bottom of the panel saying so.",
+    "Note — The module makes a sound with nothing patched in, because an empty audio input is replaced by an internal modulation source."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "1": 12,
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "1": "audio",
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "an internal modulation",
+      "why": "Nozori_84_WS.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.24V",
+      "negative": "swings",
+      "normal": "an internal modulation",
+      "why": "Nozori_84_WS.cpp:91-92 clamps this jack to ±6.24V before converting it to the firmware's 32-bit audio word"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_WS.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±6.67V",
+      "why": "Nozori_84_WS.cpp:107-108 divides the firmware's 32-bit audio word by 322122547.2 to get volts, which puts full scale at ±6.67V"
+     }
+    }
+   },
+   "notes": "The maker's header comment in m84_Stereo_WS.ino names the first four knobs cos 1 to cos 4 and the last four lfo 1 to lfo 4. The panel prints SIN 1 to SIN 4, LFO 1, LFO 2, CURVE L and CURVE R, which is the naming used here."
   }
  }
 }

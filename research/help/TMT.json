@@ -1,68 +1,868 @@
 {
  "plugin": "TMT",
- "source": "https://github.com/Jadael/TMT",
+ "source": "https://github.com/Jadael/TMT/blob/edca974232c716b5d9e49f15976a8176b39ec02d/readme.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Shuffle": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Reorders the channels of a polyphonic cable and can cut the result to fewer channels than came in",
+    "Alt mode: each output channel is drawn at random from the input, so a channel can appear twice or not at all; with it off every input channel appears exactly once",
+    "A rising edge above 1V draws a new ordering",
+    "The channels to be reordered; with nothing patched the module uses twelve channels of a chromatic scale rising from 0V in twelfth-of-a-volt steps",
+    "Sets the random seed used at the next trigger, so the same voltage always gives the same ordering; with nothing patched every trigger takes an unpredictable seed",
+    "Sets how many channels come out, one channel at 0V and as many as came in at 10V",
+    "The input channels in the current order, cut to the channel count set by the Channels input",
+    "Note — the drawing between the jacks shows the current ordering: a dot per input channel on the left, a dot per output channel on the right, and a line for each channel that reaches the output.",
+    "Note — the ordering is also redrawn whenever the number of input channels changes or the alt mode switch is flipped, reusing the seed of the last trigger rather than drawing a new one."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "shuffle.cpp:99 trigger.process(getVoltage()) with Rack's default SchmittTrigger thresholds of 0V and 1V; channel 0 only"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "a 12-channel chromatic scale",
+      "why": "shuffle.cpp:83-91 getChannels() bounds the read loop; the else branch loads defaultVoltages"
+     },
+     "2": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "an unpredictable seed each trigger",
+      "why": "shuffle.cpp:103 germ = (getVoltage() + 10) / 20, scaled to an int seed; shuffle.cpp:106 rd() when unpatched"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "all the input channels",
+      "why": "shuffle.cpp:93-97 clamp(getVoltage(), 0, 10) then rescale to 1..inputChannels; else branch uses inputChannels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "shuffle.cpp:162 setChannels(FinalSize), the lesser of the input count and the requested count"
+     }
+    }
+   },
+   "notes": "The re-shuffle that follows a change in channel count or in the alt mode switch calls rng.seed(seed) with the member `seed`, which is left uninitialised until the first trigger arrives with a cable in the Seed jack (shuffle.cpp:74, :130). The Seed voltage is not clamped before being scaled, so voltages outside ±10V are still accepted and give distinct seeds."
   },
   "Calendar": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Very slow ramps, triggers and gates following the computer's clock, from the current second through to the current year",
+    "Alt mode: reads the clock in UTC rather than in local time",
+    "A ramp rising from 0V to 10V across the current second",
+    "The second's ramp rounded down to 4 steps of 2.5V",
+    "10V through the first hundredth of each second and 0V for the rest of it, which is 10ms rather than the 1ms the manual gives",
+    "10V through the first half of each second and 0V through the second half",
+    "0V through the first half of each second and 10V through the second half",
+    "A ramp rising from 0V to 10V across the current minute",
+    "The minute's ramp rounded down to 60 steps, one per second",
+    "10V through the first hundredth of each minute and 0V for the rest of it, which is 600ms rather than the 1ms the manual gives",
+    "10V through the first half of each minute and 0V through the second half",
+    "0V through the first half of each minute and 10V through the second half",
+    "A ramp rising from 0V to 10V across the current hour",
+    "The hour's ramp rounded down to 24 steps of 2.5 minutes each, not the 60 one-minute steps the manual gives",
+    "10V through the first hundredth of each hour and 0V for the rest of it, which is 36 seconds rather than the 1ms the manual gives",
+    "10V through the first half of each hour and 0V through the second half",
+    "0V through the first half of each hour and 10V through the second half",
+    "A ramp rising from 0V to 10V across the current day, starting at local midnight",
+    "The day's ramp rounded down to 7 steps of 3 hours 26 minutes each, not the 24 hourly steps the manual gives",
+    "10V through the first hundredth of each day and 0V for the rest of it, which is about 14 minutes rather than the 1ms the manual gives",
+    "10V through the first half of each day and 0V through the second half",
+    "0V through the first half of each day and 10V through the second half",
+    "A ramp rising from 0V to 10V across the current week, starting at midnight on Sunday",
+    "The week's ramp rounded down to 4 steps of 1 day 18 hours each, not the 7 daily steps the manual gives",
+    "10V through the first hundredth of each week and 0V for the rest of it, which is about 100 minutes rather than the 1ms the manual gives",
+    "10V through the first half of each week and 0V through the second half",
+    "0V through the first half of each week and 10V through the second half",
+    "A ramp rising from 0V to 10V across the current calendar month, the length of that month taken into account",
+    "The month's ramp rounded down to 12 steps, not the 4 weekly steps the manual gives",
+    "10V through the first hundredth of each month and 0V for the rest of it, which is about 7 hours rather than the 1ms the manual gives",
+    "10V through the first half of each month and 0V through the second half",
+    "0V through the first half of each month and 10V through the second half",
+    "A ramp across the current three-month season, counted from January, that reaches 10V after 90 days",
+    "The season's ramp rounded down to 3 steps, one per month",
+    "10V through the first hundredth of each season and 0V for the rest of it, which is about 22 hours rather than the 1ms the manual gives",
+    "10V through the first half of each season and 0V through the second half",
+    "0V through the first half of each season and 10V through the second half",
+    "A ramp across the current year that reaches 10V after 365 days, counted from local midnight on the 1st of January",
+    "The year's ramp rounded down to 12 steps of about 30 days each",
+    "10V through the first hundredth of each year and 0V for the rest of it, which is about 3 and a half days rather than the 1ms the manual gives",
+    "10V through the first half of each year and 0V through the second half",
+    "0V through the first half of each year and 10V through the second half",
+    "Note — nothing is patched into this module; every output follows the computer's own clock, in local time until the alt mode switch is flipped."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {},
+   "out": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 9,
+    "8": 10,
+    "9": 11,
+    "10": 12,
+    "11": 13,
+    "12": 14,
+    "13": 15,
+    "14": 16,
+    "15": 17,
+    "16": 18,
+    "17": 19,
+    "18": 20,
+    "19": 21,
+    "20": 22,
+    "21": 23,
+    "22": 24,
+    "23": 25,
+    "24": 26,
+    "25": 27,
+    "26": 28,
+    "27": 29,
+    "28": 30,
+    "29": 31,
+    "30": 32,
+    "31": 33,
+    "32": 34,
+    "33": 35,
+    "34": 36,
+    "35": 37,
+    "36": 38,
+    "37": 39,
+    "38": 40,
+    "39": 41
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "cv",
+     "11": "cv",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "cv",
+     "16": "cv",
+     "17": "trigger",
+     "18": "trigger",
+     "19": "trigger",
+     "20": "cv",
+     "21": "cv",
+     "22": "trigger",
+     "23": "trigger",
+     "24": "trigger",
+     "25": "cv",
+     "26": "cv",
+     "27": "trigger",
+     "28": "trigger",
+     "29": "trigger",
+     "30": "cv",
+     "31": "cv",
+     "32": "trigger",
+     "33": "trigger",
+     "34": "trigger",
+     "35": "cv",
+     "36": "cv",
+     "37": "trigger",
+     "38": "trigger",
+     "39": "trigger"
+    }
+   },
+   "notes": "The trigger outputs are not 1ms pulses: calendar.cpp:132 sets 10V while the unit's progress is below 0.01, so the pulse is a hundredth of the unit and lasts from 10ms on the second to about three and a half days on the year. The stepped ramps use the subdivision table at calendar.cpp:25, {4, 60, 24, 7, 4, 12, 3, 12} for second through year; the readme's table lists 60 for the hour, 24 for the day, 7 for the week and 4 for the month, which is the code's list shifted by one row. The season ramp divides by a fixed 90 days (calendar.cpp:118) while summing the real lengths of the months elapsed, so a 92-day season passes 10V before it ends, and the year ramp divides by 365 days (calendar.cpp:121), so it passes 10V on the last day of a leap year. Local time is re-read once a second (calendar.cpp:85); UTC is re-read every sample."
   },
   "Seed": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns one voltage into sixteen fixed random voltages, on sixteen jacks and on one polyphonic jack",
+    "Alt mode: every voltage is snapped to 0V or to 10V, which turns the module into a random gate source",
+    "Sets the seed for the sixteen voltages, the same voltage always giving the same set; unpatched, the seed is one fixed built-in value, the same at every launch, not the random one the manual describes",
+    "All sixteen voltages together on one 16-channel cable",
+    "One of the sixteen voltages the seed generates, anywhere from 0V to 10V",
+    "Note — the voltages are regenerated a hundred times a second, so they change only when the seed voltage changes."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "9": 4,
+    "10": 4,
+    "11": 4,
+    "12": 4,
+    "13": 4,
+    "14": 4,
+    "15": 4,
+    "16": 4
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "one fixed built-in seed",
+      "why": "seed.cpp:89 getVoltage() * 10000 cast to unsigned, channel 0 only; unpatched it keeps currentSeed, set once at seed.cpp:83"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "seed.cpp:100 setChannels(16); values from uniform_real_distribution{0, 10} at seed.cpp:85"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "seed.cpp:110 setVoltage with no channel argument"
+     }
+    }
+   },
+   "notes": "The unpatched seed is not random. seed.cpp:83 initialises currentSeed from a default-constructed std::mt19937, which has a fixed default seed, so every Seed module with an empty Seed jack produces the same sixteen voltages on every machine and at every launch; the readme says a random seed is used. The seed voltage is multiplied by 10000 and cast to unsigned int, so what a negative seed voltage does depends on the platform's float-to-unsigned conversion and was not tested here."
   },
   "Ouroboros": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Steps through the channels of a polyphonic cable one at a time, turning it into a monophonic sequence",
+    "Alt mode: the output becomes the average of the current channel and the next one, a fixed blend of the two rather than a slide between them",
+    "The channels to be played, one channel per step of the sequence",
+    "A rising edge above 2V advances one step",
+    "A rising edge above 2V returns the sequence to its first channel, at once if the clock input is above 0.1V and otherwise on the next clock edge; the maker's tooltip states this the other way round",
+    "Sets how many channels are played before the sequence wraps, the first channel alone at 0V and all of them at 10V",
+    "The channel the sequence has reached",
+    "Note — the drawing above the jacks plots each input channel as a dot placed by its voltage, from -10V at the left to +10V at the right, with a line across the channel being played."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V on a single step",
+      "why": "ouroboros.cpp:77 getChannels() sets the sequence length; :114 getVoltage(step)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "ouroboros.cpp:97 clockTrigger.process(rescale(v, 0.1, 2, 0, 1)), so the Schmitt trigger's 1.0 threshold falls at 2V"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "ouroboros.cpp:84 resetTrigger.process(rescale(v, 0.1, 2, 0, 1)); :85 compares the clock against 0.1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "10V",
+      "why": "ouroboros.cpp:80 unpatched reads 10V; :94 max(1, round(rescale(v, 0, 10, 1, channels)))"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "ouroboros.cpp:114 setVoltage with no channel argument"
+     }
+    }
+   },
+   "notes": "The reset rule in the code (ouroboros.cpp:84-91) matches the readme and contradicts the module's own tooltip: a reset edge while the clock is high resets immediately, and one while the clock is low is held until the next clock edge. The Length input is not clamped, so a voltage above 10V asks for more steps than the input has channels; the extra steps read 0V from the unset channels of the port."
   },
   "Append": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Joins the channels of up to sixteen cables end to end into one long list, and puts a window of that list out on a polyphonic cable",
+    "One of the sixteen signals joined into the list, contributing all of its channels at the place its number gives; an empty jack contributes nothing and the list closes up",
+    "Sets how many channels the output carries, one at 0V and as many as the list holds at 10V, never more than sixteen",
+    "Sets which channel of the list the output starts from, the first at 0V and the last at 10V, wrapping round the end of the list",
+    "The window of the joined list, as a polyphonic cable",
+    "Note — the list holds up to 256 channels, sixteen from each jack, and only sixteen of them can leave at once; Width and Rotation choose which.",
+    "Note — with no signal cables patched the output carries 0V on as many channels as Width sets, which is sixteen when Width is unpatched too."
+   ],
+   "param": {},
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 2,
+    "17": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "16": "cv",
+     "17": "cv"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "append.cpp:84-87 every channel of every signal jack is pushed into the buffer, bounded by getChannels()"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "10V",
+      "why": "append.cpp:101 clamp(getVoltage(), 0, 10), 10V when unpatched; :104 rescale to 1..buffer size, capped at 16"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "append.cpp:102 clamp(getVoltage(), 0, 10), 0V when unpatched; :107 rescale to 0..buffer size - 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "append.cpp:114 setChannels(output_channels)"
+     }
+    }
+   },
+   "notes": "Signal jacks 2 to 16 share one line with jack 1 because the code treats them identically (append.cpp:84). With no signal patched, Width is read through a different expression (append.cpp:93) that rescales 0-10V onto 1..17 before clamping, so the top of the range is reached slightly early."
   },
   "Sight": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Scope that compresses the past towards the left: the newest sample is drawn at the right edge, and each pixel further left covers a longer span of time than the one before",
+    "Alt mode: takes a sample every sample rather than a thousand times a second, at a heavy cost in CPU",
+    "The voltage drawn on the scope; the display spans -10V at the bottom to +10V at the top",
+    "Note — nothing is drawn until a cable is patched here; with the jack empty the trace stops advancing and holds what it last captured.",
+    "Note — the trace holds 8192 samples, which at the default rate is a little over 8 seconds of history."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {},
+   "family": {
+    "in": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "sight.cpp:105 advanceBuffer(getVoltage()), channel 0 only; sight.cpp:99 returns early when the jack is unpatched"
+     }
+    }
+   },
+   "notes": "The default sampling interval is 1ms (sight.cpp:100, a 0.001s timer), and the buffer is 8192 samples (sight.cpp:25), giving 8.192 seconds. The drawing maps sample age by log2, so the horizontal axis is not linear in time."
   },
   "Spellbook": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sequencer that plays a plain-text table: one row per step, one column per output, written in the maker's RhythML notation",
+    "Switches the Index input between reading a phasor across the whole sequence and reading a row number as a voltage",
+    "A rising edge above 1V moves on one row, wrapping round at the end of the sequence",
+    "A rising edge above 1V moves back one row, wrapping round at the start of the sequence",
+    "A rising edge above 1V returns to the first row, and the step inputs are ignored for the next 5ms",
+    "Sets the current row directly, the first row at 0V and the last at 10V, or by row number counted from zero when the switch is set to absolute; a cable here stops both step inputs from working",
+    "The voltages written into the text of the current row when Record Trigger fires, one channel per column",
+    "A rising edge above 1V writes the Record In voltages into the current row; a mono cable writes every Record In channel at once, while each channel of a polyphonic cable writes only its own column",
+    "Every column of the current row on one cable, with the channel count set by the polyphony mode on the menu",
+    "The voltage the current row gives that column: the cell's own value, 10V for a gate, a 1ms pulse for a trigger, or the value held over from an earlier row when the cell is blank",
+    "The position in the sequence, 0V on the first row rising to 10V on the last",
+    "The number of the current row as a voltage, 1V on the first row and rising a volt per row",
+    "Note — the module plays nothing until you click the black panel and type a sequence: one row per line, cells separated by commas, one column per output jack.",
+    "Note — click outside the text to commit an edit and parse it, or press Ctrl and Enter to commit without leaving the text.",
+    "Note — Ctrl and the bracket keys change the text size, and while the module is playing the text scrolls to keep the current row centred.",
+    "Note — drag the right-hand edge of the panel to make the module wider or narrower.",
+    "Note — a cell takes a decimal voltage, a percentage where 100% is 10V, a note name such as C4 or G#3, a MIDI number as m60, semitones as s7, cents as 100ct, or a frequency as 261.63Hz; C4 is 0V.",
+    "Note — in a cell, W or the bar character holds 10V for the whole step, T or the caret gives 0V for 1ms then 10V for 1ms then 0V, and X or the underscore drops to 0V for 1ms and then holds 10V.",
+    "Note — a cell the parser cannot read gives 0V, and anything after a question mark in a cell is a comment.",
+    "Note — comments in the first row are taken as column labels and become the names Rack shows when you hover the output jacks.",
+    "Note — a Page expander placed immediately to the right carries columns 17 onwards, and further Pages after it carry sixteen more each.",
+    "Menu — Widest row (constant channels) — the polyphonic output always carries as many channels as the widest row of the sequence",
+    "Menu — Non-blank cells only (variable) — the polyphonic output carries only the filled cells of the current row, packed into consecutive channels",
+    "Menu — Up to last non-blank (per row) — the polyphonic output carries the current row through to its last filled cell, blanks in the middle keeping their place; a new module starts here",
+    "Menu — Decimal (4 decimal places) — recorded voltages are written into the text as decimals such as 0.5833",
+    "Menu — Note names (quantized to semitones) — recorded voltages are rounded to the nearest semitone and written into the text as note names such as C4 or G#5"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "3": 3,
+    "1": 4,
+    "2": 5,
+    "4": 6,
+    "5": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 9,
+    "3": 9,
+    "4": 9,
+    "5": 9,
+    "6": 9,
+    "7": 9,
+    "8": 9,
+    "9": 9,
+    "10": 9,
+    "11": 9,
+    "12": 9,
+    "13": 9,
+    "14": 9,
+    "15": 9,
+    "16": 9,
+    "17": 10,
+    "18": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "17": "cv",
+     "18": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "spellbook.cpp:648 stepForwardTrigger.process(getVoltage()), Rack's default 0V and 1V thresholds; ignored while the Index jack is patched (:646)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "spellbook.cpp:573 resetTrigger.process(getVoltage()); :582 starts a 5ms window in which the step inputs are ignored"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "spellbook.cpp:660-678: relative mode scales the voltage over the whole sequence, absolute mode takes (int)V modulo the row count"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "spellbook.cpp:654 stepBackTrigger.process(getVoltage())"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "spellbook.cpp:626-629 getVoltage per channel, bounded by getChannels() at :597"
+     },
+     "5": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "spellbook.cpp:605 and :613 one SchmittTrigger per channel, bounded by getChannels() at :596"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "spellbook.cpp:786 setChannels(activeChannels), the count decided by the polyphony mode at :697-727"
+     },
+     "1": {
+      "poly": false,
+      "why": "spellbook.cpp:769 setVoltage with no channel argument"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "spellbook.cpp:686 currentStep / (rowCount - 1) * 10"
+     },
+     "18": {
+      "poly": false,
+      "why": "spellbook.cpp:687 currentStep + 1, a volt per row"
+     }
+    }
+   },
+   "notes": "Two things the readme does not match. In absolute index mode the row is (int)V modulo the row count (spellbook.cpp:663), which counts from zero, so 1V selects the second row rather than the first as the readme says; feeding the Absolute Index output back into the Index jack therefore lands one row late. And the Relative Index output divides by the row count minus one (spellbook.cpp:686), so a one-row sequence divides zero by zero and the jack carries a NaN. The sequence text is a custom text widget added with addChild, not a parameter, so it cannot be clicked for help; the same is true of the resize handles."
   },
   "Page": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Expander for Spellbook carrying sixteen more columns of its sequence; it goes immediately to the right of a Spellbook or of another Page",
+    "The sixteen columns this expander carries, together on one cable",
+    "One of the sixteen columns this expander carries: the first Page after a Spellbook carries columns 17 to 32, and each further Page the sixteen columns after that",
+    "Note — with no Spellbook or Page to its left this module has nothing to carry, and every output stays at 0V.",
+    "Note — the voltages arrive already worked out by the Spellbook, so clock, reset, index and the sequence text all belong to that module; this one has no controls of its own."
+   ],
+   "param": {},
+   "in": {},
+   "out": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "16": 2
+   },
+   "family": {
+    "out": {}
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "page.cpp:140 setChannels(activeChannels), counted from the columns the sequence actually holds"
+     },
+     "1": {
+      "poly": false,
+      "why": "page.cpp:136 setVoltage with no channel argument"
+     }
+    }
+   },
+   "notes": "Chained Pages work by each one passing the whole message on to its right with the position incremented (page.cpp:143-158), so a Page whose left neighbour is not a Spellbook or Page outputs nothing. The message carries up to 512 columns (spellbook_expander.hpp:23)."
   },
   "Stats": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Statistics of the channels of a polyphonic cable — mean, median, mode and six more — each on its own jack",
+    "Alt mode: recalculates every sample rather than every 10ms, at a heavy cost in CPU",
+    "The channels the statistics are calculated from",
+    "The input channels added together and divided by how many there are",
+    "The middle value of the input channels once sorted, or the average of the middle two when the count is even",
+    "Every value that occurs more than once and as often as any other, one per channel; values must match exactly, and with no repeats this jack carries no channels",
+    "All the input channels multiplied together, then the nth root of that taken, where n is the channel count; one channel at 0V makes the result 0V",
+    "All the input channels multiplied together, which reaches millions of volts from ordinary inputs",
+    "How many channels the input carries, at a volt each, so sixteen channels give 16V",
+    "The input channels added together, which passes 10V readily",
+    "The input channels sorted from lowest to highest, one per channel, despite the panel printing Sort",
+    "The input channels with duplicates dropped, two values counting as the same when they are within 0.001V of each other; the manual gives this tolerance as 0.0001V",
+    "Note — nothing is calculated until a cable is patched into the input, and the outputs hold whatever they last carried."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "8": 11
+   },
+   "family": {
+    "in": {},
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "stats.cpp:138 getChannels() bounds every calculation; :146 getVoltage(i)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "stats.cpp:157 setVoltage with no channel argument (MEAN_OUTPUT)"
+     },
+     "2": {
+      "poly": true,
+      "why": "stats.cpp:243 setChannels(modeChannels)"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 16V",
+      "why": "stats.cpp:139 setVoltage((float)numChannels)"
+     },
+     "7": {
+      "poly": true,
+      "why": "stats.cpp:176 setChannels(numChannels)"
+     },
+     "8": {
+      "poly": true,
+      "why": "stats.cpp:197 setChannels(distinctVoltages.size())"
+     }
+    }
+   },
+   "notes": "The Distinct tolerance is 0.001V (stats.cpp:118, the default argument of isDistinct), where the readme says 0.0001V. The jack the panel labels Sort is configured as \"Ascending\". The Mode calculation only counts values that are bit-for-bit equal (stats.cpp:219 uses ==), so voltages that merely look the same are not grouped. Ranges were left off the statistical outputs because they follow whatever is patched in; only Count has a range of its own."
   },
   "Blankt": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A blank panel that can be dragged to any width from 2HP to 96HP",
+    "Note — drag either edge of the panel to resize it; the width is saved with the patch, and a resize can be undone with the usual undo key.",
+    "Note — there is nothing to patch and nothing to set: the module has no jacks, no controls and no menu of its own."
+   ],
+   "param": {},
+   "in": {},
+   "out": {},
+   "notes": "Widths come from blankt.cpp:22-24: minimum 2HP, default 6HP, maximum 96HP. The resize handles are OpaqueWidgets, not parameters, so they cannot be clicked for help. process() is empty."
   },
   "Sort": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Reorders and filters the channels of a polyphonic cable, using two other polyphonic cables as the ranking and the filter",
+    "Alt mode: recalculates every sample rather than every 10ms, at a heavy cost in CPU",
+    "The channels to be reordered and filtered; how many channels it carries is how many channels of the two keys are read",
+    "Ranks the data channels: the data channel whose key voltage is lowest comes out first, and equal keys keep their original order; with nothing patched every key reads 0V and the order is unchanged",
+    "Keeps a data channel when its key channel is 1V or more and drops it from the cable otherwise; the manual says 5V. Unpatched, every key reads 0V, so the selecting outputs carry nothing",
+    "The data channels unchanged",
+    "The data channels put in the order the Sort Key ranks them",
+    "Only the data channels the Select Key keeps, packed into consecutive channels",
+    "The data channels put in the order the Sort Key ranks them, then reduced to the ones the Select Key keeps",
+    "The data channels the Select Key keeps, then sorted by their own voltages from lowest to highest; the maker's tooltip says the Sort Key orders them, and it does not",
+    "The data channels sorted by their own voltages from lowest to highest",
+    "The data channels sorted by their own voltages from highest to lowest",
+    "Note — with nothing patched into the Data input every output carries no channels at all."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11
+   },
+   "family": {
+    "in": {
+     "2": "trigger"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "sort.cpp:134 getChannels() sets maxChannels, which bounds every read of all three inputs"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V on every channel",
+      "why": "sort.cpp:142 getVoltage(i) when connected, 0.0f when not; :166 stable_sort on those values"
+     },
+     "2": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V on every channel",
+      "why": "sort.cpp:143 getVoltage(i) when connected, 0.0f when not; :182 and :195 compare against 1.0f"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "sort.cpp:153 setChannels(maxChannels)"
+     },
+     "2": {
+      "poly": true,
+      "why": "sort.cpp:187 setChannels(selectedData.size())"
+     }
+    }
+   },
+   "notes": "Two disagreements with the maker's own words. The Select Key threshold is 1.0V in the code (sort.cpp:182) where the readme says 5V; and the Selected, then Sorted output sorts the selected values by their own magnitude (sort.cpp:207, a plain std::sort on the voltages) rather than by the Sort Key, which is what both the readme and the port's tooltip describe."
   },
   "Spine": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Nine fixed offsets and inversions of one input, or nine constant voltages when nothing is patched",
+    "Alt mode: recalculates every sample rather than every 10ms",
+    "The voltage the nine outputs are built from; with nothing patched it counts as 0V",
+    "The input passed through unchanged, which is 0V when nothing is patched",
+    "One volt above the input",
+    "One volt below the input",
+    "Five volts above the input",
+    "Five volts below the input",
+    "Ten volts above the input",
+    "Ten volts below the input",
+    "The input with its sign flipped, so a rising voltage falls",
+    "The input subtracted from 10V, which turns a 0-10V signal upside down while keeping it between 0V and 10V",
+    "Note — every output carries the same number of channels as the input, and one channel when the input is empty."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "8": 11
+   },
+   "family": {
+    "in": {},
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "spine.cpp:109 getChannels() sets the channel count of every output; :119 reads 0 when the jack is unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "spine.cpp:112-113 every output is set to the input's channel count"
+     }
+    }
+   },
+   "notes": "No output is clamped, so the offsets can push a signal past ±10V (spine.cpp:123-139)."
   }
  }
 }

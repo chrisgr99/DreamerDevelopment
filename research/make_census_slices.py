@@ -65,7 +65,14 @@ def main():
                 got = [(x['index'], x['cx'], x['cy'])
                        for x in p.get('ports', []) if x['kind'] == kind]
                 entry[key] = {str(i): [cx, cy] for i, cx, cy in sorted(got)}
-            got = [(x['index'], x.get('cx'), x.get('cy')) for x in p.get('params', [])]
+            # A CENTRE, OR THE CORNER IF THAT IS ALL THERE IS. The positions file holds two
+            # shapes of record: early ones carry x and y alone, later ones add the width, height
+            # and centre. Reading only the centre turned twenty-four real widgets into
+            # [None, None], which downstream reads as "no widget, so no click can reach it" —
+            # the exact opposite of the truth, and it would have silently dropped eight sliders
+            # from one module's help.
+            got = [(x['index'], x.get('cx', x.get('x')), x.get('cy', x.get('y')))
+                   for x in p.get('params', [])]
             entry['paramPos'] = {str(i): [cx, cy] for i, cx, cy in sorted(got)}
         by[plugin][slug] = entry
 

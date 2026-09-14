@@ -33,11 +33,23 @@ Then **remove `"partial": true`** from the top of the file. That is what says th
 ## Where to look
 
 1. **The maker's source at the installed version.** The skeleton's `source` field has the URL. Most makers do not tag the release that shipped — find the commit whose `plugin.json` carries the installed version, and say in your report which commit you used.
+
+   **When several commits carry the same version, the installed binary settles it.** Makers often leave the version string alone while they keep working: 4ms's ProducerPack gained polyphony and bypass across a dozen commits all labelled 2.0.1. Pick something those commits changed, look for it in the installed `plugin.dylib` — a channel loop, a `setChannels`, a menu string — and you know which side of the change shipped. `nm` and `strings` answer most of these without a full disassembly. Say in your report how you settled it.
 2. **The compiled binary**, where there is no source. Every one examined so far has been unstripped: `otool -tvV`, one `Class::process` per model. Rack's ABI is the same in every plugin — `inputs` at Module+0x38, `outputs` at +0x50, port stride 0x50, the `channels` byte at Port+0x40. **The decisive test**: a read of the channels byte followed by a compare against zero is `isConnected()` and means nothing; a read that becomes a loop bound, or any read of `voltages[1]` and beyond, is real polyphony.
 3. **Manuals, READMEs, library pages.** `pypdf` is installed and reads PDF manuals; `pdftotext` is not.
 4. **The census slice**, `research/help/census/<Plugin>.json` — port names, knob names, positions.
 
 Where a manual and the code disagree, **the code wins**, and the disagreement goes in `notes`.
+
+### When the binary is stripped and the manual is all there is
+
+Most binaries carry full symbols. One did not — Ambivalent-Instruments exports `_init` and nothing else, so no function can be tied to a model and `process()` cannot be read at all. The fallback is the maker's manual, and the question then is whether that manual describes the build you have or an older one.
+
+**`check_numbers.py` answers it.** Quote the manual's figures, run the check, and see how many are present in the binary as literals. That run came back 48 of 48 against a 0% chance rate — strong evidence the manual matches this build — and three further figures it gives were absent, so those were left out of the lines.
+
+This inverts the tool: it was written to catch numbers nobody could point at, and here it points at a document and asks whether to believe it. Use it that way whenever the code cannot be read, and say in your report what the rate was.
+
+Where the manual is silent, **claim nothing**. A stripped binary cannot settle polyphony, and a blank is the correct answer.
 
 ## Never run `git checkout`, `git restore` or `git stash`
 

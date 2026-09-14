@@ -2,37 +2,356 @@
  "plugin": "gwrthiant",
  "source": "https://github.com/dustractor/gwrthiant",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "pysgota": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sixteen evenly spaced values between a start and an end voltage, each passed through a sine, then offset, scaled and taken modulo a chosen number, all sent out as one polyphonic cable",
+    "Sets the voltage the sixteen evenly spaced values begin at, over -10V to 10V",
+    "Sets the voltage the sixteen evenly spaced values end at, over -10V to 10V",
+    "Multiplies each of the sixteen values before the sine is taken, over -10 to 10, which sets how many cycles of the sine the span covers",
+    "Adds a constant to each sine result before it is scaled, over -10 to 10",
+    "Multiplies each offset sine result, over -10 to 10; at exactly 0 the sixteen values are never calculated and the output carries undefined data",
+    "Sets the number each value is taken modulo, over 0 to 10; a setting of 0 is treated as 0.001",
+    "Replaces the start knob with this voltage, so the knob does nothing while a cable is patched here and a cable resting at 0V sets the start to 0V",
+    "Replaces the end knob with this voltage, so the knob does nothing while a cable is patched here and a cable resting at 0V sets the end to 0V",
+    "Replaces the freq mult knob; a polyphonic cable gives each of the sixteen values its own multiplier, a monophonic one is used for all sixteen",
+    "Replaces the offset knob with this voltage, so the knob does nothing while a cable is patched here",
+    "Replaces the scale knob with this voltage; a cable resting at 0V leaves the output undefined",
+    "Replaces the modulus knob; a polyphonic cable gives each of the sixteen values its own modulus, a monophonic one is used for all sixteen",
+    "The sixteen calculated values, always sent as sixteen polyphonic channels",
+    "Note — Every input replaces its knob rather than adding to it, so patching a cable leaves that knob doing nothing until the cable is pulled."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12
+   },
+   "out": {
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the start knob",
+      "why": "pysgota.cpp:74-76 takes the knob, then overwrites it with getVoltage() when the jack is connected; no clamp follows"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the end knob",
+      "why": "pysgota.cpp:77-80 takes the knob, then overwrites it with getVoltage() when the jack is connected; no clamp follows"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the freq mult knob",
+      "why": "pysgota.cpp:83-91 calls readVoltages() into a 16-element array when the cable is polyphonic, and fills all 16 with getVoltage() when it is not"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the offset knob",
+      "why": "pysgota.cpp:95-98 takes the knob, then overwrites it with getVoltage() when the jack is connected; no clamp follows"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the scale knob",
+      "why": "pysgota.cpp:99-102 takes the knob, then overwrites it with getVoltage() when the jack is connected; line 119 then skips the whole calculation when it is exactly 0"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the modulus knob",
+      "why": "pysgota.cpp:105-113 calls readVoltages() into a 16-element array when the cable is polyphonic, and fills all 16 with getVoltage() when it is not; line 122 substitutes 0.001 for a modulus of 0"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "pysgota.cpp:124-125 calls setChannels(PORT_MAX_CHANNELS) then writeVoltages() with all 16 values"
+     }
+    }
+   },
+   "notes": "Source read at commit c13145d, the last commit carrying version 2.0.2 with exactly the six installed models. SCALE at exactly 0 is a maker fault: pysgota.cpp:119 guards the whole loop with if (!(scale == 0)), so the local array range[16] at line 118 is left uninitialised and line 125 writes it to the output. The six jacks replace their knobs rather than summing with them, which the panel does not say."
   },
   "gwreiddyn": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Converts a note voltage into the control voltage that sets the root note on various quantizer modules",
+    "The note taken as the root; only its pitch class is read, so the octave makes no difference",
+    "A voltage from 1V to 10.167V in twelve steps of 0.834V, which selects the root note on Bidoo's Dikt@t",
+    "A voltage from 0.84V to 10.01V in twelve steps of 0.834V, which selects the root note on quantizers with a twelve-step root control",
+    "Note — The maker's README names the quantizers the twelve output was tested against: JW-Modules Quantizer, NoteSeq and NoteSeq16, docB JTScaler, Alef's Bits Slips and SS-Modules Melodygen.",
+    "Note — Autinn's Fluencerator needs 5.83V subtracted from the twelve output before it will track, which the maker's README gives and the module does not do for you.",
+    "Note — Some quantizers take a note voltage as their root directly and need nothing from this module; the maker's README names Orange Line Mother and Grande Quant."
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 3
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "gwreiddyn.cpp:49-50 reads getVoltage() with no channel and takes fmod(10 + v, 1) * 12, so the octave is discarded and voltages down to -10V still wrap correctly"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1 to 10.167V",
+      "step": "stepped",
+      "why": "gwreiddyn.cpp:51-64 is a twelve-entry table from 1.0 to 10.167, written by setVoltage(v, 0) at line 80"
+     },
+     "1": {
+      "poly": false,
+      "range": "0.84 to 10.01V",
+      "step": "stepped",
+      "why": "gwreiddyn.cpp:65-78 is a twelve-entry table from 0.84 to 10.01, written by setVoltage(v, 0) at line 81"
+     }
+    }
+   },
+   "notes": "Source read at commit c13145d. The panel prints thirteen and twelve, which are the two output tables rather than a count of steps: both tables hold twelve entries, one per pitch class. Neither output calls setChannels, so both stay monophonic even when a polyphonic cable is patched into root."
   },
   "clwyd": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Reads a value as a sixteen-bit binary number and puts each bit out as a gate on its own channel of a polyphonic cable, with a control that rotates which bit each channel takes",
+    "Sets the number that is converted to binary, over 0 to 9.9999 scaled so the full travel covers the sixteen bits; it starts at 0, which leaves every gate low",
+    "Rotates which bit each of the sixteen gate channels reads; the -10 to 10 travel covers one whole turn in each direction, but negative settings do not wrap",
+    "Replaces the value knob with this voltage, 0V to 10V covering the sixteen bits, so the knob does nothing while a cable is patched here",
+    "Replaces the shift knob with this voltage, 1.6 bits of rotation per volt, so the knob does nothing while a cable is patched here",
+    "Sixteen channels of gate, 10V where that bit of the value is set and 0V where it is not",
+    "Note — The sixteen lamps carry the same sixteen gates the polyphonic output does, one lamp per channel.",
+    "Note — The module comes up with its value at 0, so every gate is low and the output is silent until the value is turned up or a cable is patched into it."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the value knob",
+      "why": "clwyd.cpp:70-72 overwrites the knob with getVoltage() when the jack is connected; line 79 then scales it by 6553.6 into an int with no clamp"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the shift knob",
+      "why": "clwyd.cpp:75-77 overwrites the knob with getVoltage() when the jack is connected; line 81 scales it by 1.6 into an int with no clamp"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "clwyd.cpp:126-127 calls setChannels(16) then writeVoltages() with an array built from 10.f * (bool) tests at lines 85-105"
+     }
+    }
+   },
+   "notes": "Source read at commit c13145d. The shift is applied as x << ((s + i) % 16) at clwyd.cpp:86-104. For a negative shift that expression asks for a negative shift count, which C++ leaves undefined; built with clang on arm64 the affected channels read 0 rather than wrapping round, so the rotation is not symmetric about zero. clwyd.cpp:80 holds a commented-out shift_f * 16.f, the scaling the maker replaced with 1.6. The value input is not clamped, so voltages above 10V and below 0V reach the int conversion and set bits the knob cannot."
   },
   "patrwm": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Converts a note voltage into the control voltage that selects patterns 1 to 99 on docB's HexSeqP2 sequencer",
+    "The note that picks the pattern, read over C1 to D#9; anything outside that span is held at its nearer end, and unpatched the module reads C1",
+    "A voltage from 0V to 9.9V in steps of 0.1V, one step per semitone, which selects the pattern number on HexSeqP2"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "-3 to 5.25V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "-3V",
+      "why": "patrwm.cpp:44-49 starts cv at -3.f, replaces it with getVoltage() only when the jack is connected, then clamps to -3.f and 5.25f"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 9.9V",
+      "step": "stepped",
+      "why": "patrwm.cpp:50-52 rounds (cv + 3) * 12 + 0.01 and multiplies by 0.1, after setChannels(1)"
+     }
+    }
+   },
+   "notes": "Source read at commit c13145d. The panel prints C1-D#9 beside the jack and Pattern beside the output; neither is a configInput or configOutput name, both of which the maker left empty."
   },
   "nilyniant": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Converts a note voltage into the control voltage that selects the sequence number on Impromptu's PhraseSeq16, PhraseSeq32 and GateSeq64",
+    "The note that picks the sequence, counted upward from C4; unpatched the module reads C4",
+    "A voltage of 0V to 10V reached over C4 to D#5, which selects sequences 1 to 16 on Impromptu's PhraseSeq16",
+    "A voltage of 0V to 10V reached over C4 to G6, which selects sequences 1 to 32 on Impromptu's PhraseSeq32 or GateSeq64"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 3
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "nilyniant.cpp:49-52 reads getVoltage() with no channel; lines 55 and 59 clamp both results to a floor of 0, so any negative note voltage gives the same output as C4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "nilyniant.cpp:54-56 scales the note by 12 and by two thirds, clamped to 0 and 10, after setChannels(1) at line 62"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "nilyniant.cpp:58-60 scales the note by 12 and by one third, subtracts 0.171 and clamps to 0 and 10, after setChannels(1) at line 63"
+     }
+    }
+   },
+   "notes": "Source read at commit c13145d. Neither output is rounded, so the voltage rises smoothly between notes rather than in steps; it is the receiving sequencer that quantises it to a sequence number. The Seq32 output subtracts a fixed 0.171 before clamping, which places C4 at the floor of the range."
   },
   "graddfa": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Converts a note voltage into the control voltage that selects the mode on Bidoo's Dikt@t quantizer",
+    "The note that picks the mode, read over C4 to A7; unpatched the module reads C4",
+    "A voltage from 0.017V to 10V, rising 0.222V per semitone of input, which selects the Dikt@t mode"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "graddfa.cpp:45-48 reads getVoltage() with no channel; line 51 clamps the result to a floor of 0, so any negative note voltage gives the same output as C4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0.017 to 10V",
+      "step": "continuous",
+      "why": "graddfa.cpp:49 computes cv * 12 * (10/45) + (2/12)/10, clamped to 0 and 10 at lines 51-52, after setChannels(1) at line 54"
+     }
+    }
+   },
+   "notes": "Source read at commit c13145d. The output is not rounded, so it rises smoothly between notes; C4 gives 0.0167V rather than 0V because of the fixed offset added at graddfa.cpp:49, which puts the value inside the first mode's band rather than on its boundary."
   }
  }
 }

@@ -1,18 +1,324 @@
 {
  "plugin": "RareBreeds_Orbits",
- "source": "https://github.com/RareBreeds/Orbits",
+ "source": "https://rarebreeds.github.io/Orbits/",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "RareBreeds_Orbits_Eugene": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Euclidean rhythm generator: it spreads a number of hits as evenly as it can around a cycle of up to 32 beats and fires a trigger on each hit as an external clock advances it",
+    "Sets how many beats the cycle runs for, 1 to 32, before it returns to the first beat",
+    "Sets how many of those beats are hits, from none at fully counter-clockwise to every beat at fully clockwise, with the hits spread around the cycle as evenly as they will go",
+    "Rotates the pattern around the cycle by up to 31 beats, wrapped to the current length; it changes which beats carry the hits, not how many there are",
+    "Scales the length CV jack before that voltage is added to the LENGTH knob, 0 to 1; at 1 five volts there moves the length by the full 31 beats",
+    "Scales the hits CV jack before that voltage is added to the HITS knob, 0 to 1; at 1 five volts there covers the whole range from no hits to every beat",
+    "Scales the shift CV jack before that voltage is added to the SHIFT knob, 0 to 1; at 1 five volts there moves the shift by the full 31 beats",
+    "Switches the direction the clock walks the cycle, clockwise when off and anticlockwise when on; a cable in the reverse CV jack takes the switch out of use",
+    "Turns every hit into a rest and every rest into a hit; a cable in the invert CV jack takes the switch out of use",
+    "Sets the cycle back to its first beat on each press",
+    "A rising edge plays the current beat and moves on to the next; with nothing patched here the rhythm never advances",
+    "A rising edge sets the cycle back to the first beat of the rhythm, which is always the top of the display",
+    "Scaled by the length CV knob and added to the LENGTH knob; five volts at full gain covers the whole 1 to 32 range, and the total is rounded to a whole number of beats",
+    "Scaled by the hits CV knob and added to the HITS knob; five volts at full gain covers the whole range, and the total is rounded to a whole number of hits",
+    "Scaled by the shift CV knob and added to the SHIFT knob; five volts at full gain covers the full 31 beats, and the total is rounded and wrapped to the current length",
+    "While a cable is here it replaces the reverse switch: above 1V the clock walks the cycle anticlockwise, and at 0V or below it walks clockwise again",
+    "While a cable is here it replaces the invert switch: above 1V hits and rests swap, and at 0V or below they go back",
+    "A rising edge randomises the controls ticked under Randomize Filter on the menu",
+    "10V on each hit, shaped as a pulse or a gate according to the Beat Mode menu item",
+    "A 10V pulse 1ms long when a new cycle starts, at the beat the EOC Mode menu item picks",
+    "Note — Nothing moves until a clock is patched into CLK. The module has no clock of its own.",
+    "Note — The round display shows the whole cycle with the current beat marked; hits are drawn as filled circles, and as empty circles while invert is on. It cannot be clicked.",
+    "Note — Bypassing the module passes the clock input straight through to the OUT jack.",
+    "Menu — Beat Mode: Pulse, Gate, Hold — sets the shape of the OUT jack: a 1ms pulse on each hit, a gate retriggered between successive hits, or a gate held across them",
+    "Menu — EOC Mode: On Repeat, First, Last — sets which beat raises the EOC jack: the first beat after a cycle has completed, the first beat of any cycle, or the last beat",
+    "Menu — Randomize Filter: Length, Length CV, Hits, Hits CV, Shift, Shift CV, Reverse, Invert — ticks which controls change when the module is randomised or the RND jack fires"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "9": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15,
+    "6": 16,
+    "7": 17
+   },
+   "out": {
+    "0": 18,
+    "1": 19
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/EugeneModule.cpp:155 passes this input's getVoltage() to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/EugeneModule.cpp:139 passes this input's getVoltage() to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/EugeneModule.cpp:82 to 87 read this input with getVoltage(), divide by 5, scale by the CV knob and 31, add the knob and round the total to a whole number of beats"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/EugeneModule.cpp:93 to 98 read this input with getVoltage(), divide by 5, scale by the CV knob, add the knob and round the total to a whole number of hits"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/EugeneModule.cpp:104 to 108 read this input with getVoltage(), divide by 5, scale by the CV knob and 31, add the knob and round and wrap the total to the current length"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/EugeneModule.cpp:113 to 116 read this input with getVoltage() into a dsp::SchmittTrigger only while it is connected, with default thresholds of 0V and 1V"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/EugeneModule.cpp:126 to 129 read this input with getVoltage() into a dsp::SchmittTrigger only while it is connected, with default thresholds of 0V and 1V"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/EugeneModule.cpp:149 passes this input's getVoltage() to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/EugeneModule.cpp:201 writes 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/EugeneModule.cpp:202 writes 10 or 0 to this output with setVoltage(), and src/OrbitsModule.cpp:65 sets the pulse length to 1e-3 seconds"
+     }
+    }
+   },
+   "notes": "Read from src/EugeneModule.cpp, src/OrbitsModule.cpp, src/EugeneWidget.cpp and manual/docs/index.md at commit 71660d9, the commit that raised the version to 2.0.4; the three later commits on the branch change a workflow file, the changelog and two SVG files. Parameter 8, RANDOM_KNOB_PARAM, is declared in src/EugeneModule.hpp but never given a widget in src/EugeneWidget.cpp, so it has no position, cannot be clicked, and gets no line; Polygene does place the equivalent button. The three CV jacks are stepped in effect rather than continuous: clampRounded at src/EugeneModule.cpp:5 adds a half and truncates, so the knob-plus-jack total lands on a whole number of beats or hits. The reverse and invert CV jacks use a Schmitt trigger with Rack's default thresholds, 0V and 1V, and while either is connected the matching panel switch is not read at all. The plugin-wide Theme menu item is cosmetic and carries no line, in line with the house rule. The display and its beat markers are drawn by a custom widget with no clickable parts."
   },
   "RareBreeds_Orbits_Polygene": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sixteen independent Euclidean rhythms in one module, each with its own length, density, shift and variation, clocked and sent out on the channels of one polyphonic cable",
+    "Chooses which of the sixteen rhythms the LENGTH, HITS, SHIFT, VARIATION, reverse and invert controls edit, 1 to 16, and picks that rhythm out on the display",
+    "Sets how many beats the chosen channel's cycle runs for, 1 to 32",
+    "Sets how many of the chosen channel's beats are hits, from none at fully counter-clockwise to every beat at fully clockwise",
+    "Rotates the chosen channel's pattern around its cycle by up to 31 beats, wrapped to that channel's length",
+    "Moves the chosen channel's pattern away from the even Euclidean one a beat at a time; at 0 per cent it is the plain Euclidean pattern, and no setting repeats an earlier pattern",
+    "Switches the direction the clock walks the chosen channel's cycle, clockwise when off and anticlockwise when on; a cable in the reverse CV jack takes the switch out of use",
+    "Turns every hit into a rest and every rest into a hit on the chosen channel; a cable in the invert CV jack takes the switch out of use",
+    "Randomises the chosen channel's settings, limited to the controls ticked under Randomize Filter on the menu",
+    "Sets every channel back to the first beat of its cycle on each press",
+    "A rising edge on a channel plays that channel's current beat and moves it on; the channel count of the cable patched here sets how many rhythms run and how many channels both outputs carry",
+    "A rising edge sets that channel back to the first beat of its cycle; a monophonic cable reaches every channel unless Sync is ticked under Mono Input Behavior",
+    "Divided by 5, multiplied by 31 and added to that channel's length, then rounded and clamped to 1 and 32 beats, despite the manual saying it is multiplied by the length knob",
+    "Divided by 5 and added to that channel's density, then multiplied by the length and rounded to a whole number of hits, despite the manual saying it is multiplied by the hits knob",
+    "Divided by 5, multiplied by 31 and added to that channel's shift, then rounded and wrapped to that channel's length, despite the manual saying it is multiplied by the shift knob",
+    "Divided by 5 and added to that channel's variation, then spread across every pattern available at that length and hit count, despite the manual saying it is multiplied by the knob",
+    "While a cable is here it replaces the reverse switch on every channel: above 1V that channel's clock walks anticlockwise, and at 0V or below it walks clockwise again",
+    "While a cable is here it replaces the invert switch on every channel: above 1V that channel's hits and rests swap, and at 0V or below they go back",
+    "A rising edge on a channel randomises that channel's settings, limited to the controls ticked under Randomize Filter on the menu",
+    "10V on each hit of that channel, shaped as a pulse or a gate according to the Beat Mode menu item",
+    "A 10V pulse 1ms long when that channel starts a new cycle, at the beat the EOC Mode menu item picks",
+    "Note — Nothing runs until a clock is patched into CLK. The channel count of that cable sets how many rhythms play, and channels with no clock are greyed out on the display.",
+    "Note — The display draws all sixteen rhythms at once with the channel the knobs edit picked out. It cannot be clicked.",
+    "Note — LENGTH, HITS, SHIFT and VARIATION change only the channel the channel knob selects, and they jump to that channel's stored settings when the channel is changed.",
+    "Note — Bypassing the module passes the clock input straight through to the OUT jack.",
+    "Menu — Beat Mode: Pulse, Gate, Hold — sets the shape of the OUT jack: a 1ms pulse on each hit, a gate retriggered between successive hits, or a gate held across them",
+    "Menu — EOC Mode: On Repeat, First, Last — sets which beat raises the EOC jack: the first beat after a cycle has completed, the first beat of any cycle, or the last beat",
+    "Menu — Randomize Filter: Length, Hits, Shift, Variation, Reverse, Invert — ticks which settings change when a channel is randomised",
+    "Menu — Mono Input Behavior: Sync, Length, Hits, Shift, Variation, Random — ticks the jacks on which a monophonic cable reaches only the first channel instead of every channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15,
+    "6": 16,
+    "7": 17,
+    "8": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 20
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/PolygeneModule.cpp:145 reads this input per channel through a dsp::SchmittTrigger with Rack's default thresholds of 0V and 1V, and src/PolygeneModule.cpp:394 takes its channel count"
+     },
+     "1": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/PolygeneModule.cpp:437 reads this input per channel through a dsp::SchmittTrigger with Rack's default thresholds of 0V and 1V"
+     },
+     "2": {
+      "poly": true,
+      "step": "stepped",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/PolygeneModule.cpp:114 to 116 read this input per channel, divide by 5, multiply by 31, add the channel's length and round the total to a whole number of beats"
+     },
+     "3": {
+      "poly": true,
+      "step": "stepped",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/PolygeneModule.cpp:121 to 123 read this input per channel, divide by 5, add the channel's density and round the total times the length to a whole number of hits"
+     },
+     "4": {
+      "poly": true,
+      "step": "stepped",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/PolygeneModule.cpp:128 to 130 read this input per channel, divide by 5, multiply by 31, add the channel's shift and round and wrap the total to the channel's length"
+     },
+     "5": {
+      "poly": true,
+      "step": "stepped",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/PolygeneModule.cpp:135 to 138 read this input per channel, divide by 5, add the channel's variation and round the total across the pattern count for that length and hits"
+     },
+     "6": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/PolygeneModule.cpp:82 reads this input with getPolyVoltage() into a per-channel dsp::SchmittTrigger, only while it is connected, with default thresholds of 0V and 1V"
+     },
+     "7": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/PolygeneModule.cpp:95 reads this input with getPolyVoltage() into a per-channel dsp::SchmittTrigger, only while it is connected, with default thresholds of 0V and 1V"
+     },
+     "8": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/PolygeneModule.cpp:428 reads this input per channel into a dsp::SchmittTrigger with Rack's default thresholds of 0V and 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/PolygeneModule.cpp:395 sets this output's channel count from the clock input's channel count and src/PolygeneModule.cpp:190 writes each channel by index"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/PolygeneModule.cpp:396 sets this output's channel count from the clock input's channel count, src/PolygeneModule.cpp:193 writes each channel, and src/OrbitsModule.cpp:65 sets the pulse length to 1e-3 seconds"
+     }
+    }
+   },
+   "notes": "Read from src/PolygeneModule.cpp, src/PolygeneWidget.cpp, src/OrbitsModule.cpp and manual/docs/index.md at commit 71660d9, the commit that raised the version to 2.0.4. The manual is wrong about all four value CV jacks: it says each voltage is divided by 5 and multiplied by the matching knob setting, but src/PolygeneModule.cpp:113 to 138 divide by 5 and ADD the result to the channel's stored setting, scaling by 31 for length and shift and by the pattern count for variation. There is no CV gain knob on this module at all, which is the likely source of the confusion, since Eugene has three. All of the value jacks are stepped in effect rather than continuous: clampRounded at src/PolygeneModule.cpp:35 adds a half and truncates, so the total lands on a whole beat, hit or pattern. The reverse and invert CV jacks read getPolyVoltage at src/PolygeneModule.cpp:82 and 95, so a monophonic cable there reaches every channel and they are not listed under Mono Input Behavior. The clock input's channel count alone decides how many rhythms run and how many channels the outputs carry, at src/PolygeneModule.cpp:394 to 396. The plugin-wide Theme menu item is cosmetic and carries no line."
   }
  }
 }

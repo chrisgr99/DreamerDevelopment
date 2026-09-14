@@ -313,6 +313,11 @@ def main():
     for name in sorted(os.listdir(HELP)):
         if not name.endswith('.json'):
             continue
+        # NOT EVERY JSON FILE HERE IS A PLUGIN. UNINSTALLED.json holds entries written for models
+        # their plugin no longer registers, kept so the work survives a maker's removal. Nothing
+        # in it can be shown, because no installed module would ever ask for it.
+        if name == 'UNINSTALLED.json':
+            continue
         with open(os.path.join(HELP, name)) as f:
             doc = json.load(f)
         plugin = doc['plugin']

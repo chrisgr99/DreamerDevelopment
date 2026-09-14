@@ -1,38 +1,830 @@
 {
  "plugin": "vanTies",
- "source": "https://github.com/matthiassars/vanTies",
+ "source": "https://github.com/matthiassars/vanTies (manual/ in the repository)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Ad": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An additive oscillator that sums up to 128 sine partials, with controls for how many there are, how far apart they are spaced, how they are weighted and which of them are sieved out",
+    "Sets the pitch of the fundamental, 0 giving C0 at 16.35Hz and each whole step up an octave, over a range of seven octaves",
+    "Sets the spacing of the partials in units of the fundamental: at 1 the spectrum is harmonic, below 1 it is squeezed, above 1 stretched, and at 0 every partial lands on one frequency",
+    "Sets how many partials are summed, one at the far left and doubling with each step to 128 at the far right",
+    "Left of centre it tilts the weight of the spectrum towards the low partials; right of centre the weights go flat and the lowest partial climbs instead",
+    "Sieves partials out: turned up from the middle it removes the proper multiples of 2, then 3, then 5, leaving the primes; turned down it removes the primes from the top, leaving the octaves",
+    "Sets how long the amplitude CV takes to travel from one partial to the next, up to 8 seconds; fully clockwise it freezes the buffer, and with nothing in the amp jack it tunes a comb filter",
+    "Sets the depth of the linear through-zero frequency modulation from the fm jack, none at the far left",
+    "An attenuverter, -1 to +1, on the stretch CV",
+    "An attenuverter, -1 to +1, on the number of partials CV",
+    "An attenuverter, -1 to +1, on the tilt CV",
+    "An attenuverter, -1 to +1, on the sieve CV",
+    "Restarts every partial's phase together and draws fresh delays for the random buffer order",
+    "Sets the pitch of the fundamental at a volt per octave, added to the pitch knob; the number of channels here sets the polyphony of the whole module",
+    "Modulates the frequency linearly and through zero, scaled by the fm knob; it does not reach the root output",
+    "Adds to the stretch knob through its attenuverter, a volt covering a tenth of the knob's travel at full attenuation",
+    "Adds to the number of partials knob through its attenuverter, a volt covering a tenth of the knob's travel at full attenuation",
+    "Adds to the tilt knob through its attenuverter, a volt covering a tenth of the knob's travel at full attenuation",
+    "Adds to the sieve knob through its attenuverter, a volt covering a tenth of the knob's travel at full attenuation",
+    "The CV recorded into the eight-second buffer that sets the partial amplitudes, 10V meaning full; patching this switches the amplitude section on and the comb filter off",
+    "Adds to the amp delay knob, a volt covering a tenth of its travel",
+    "Steps the buffer on each reading above 2.5V, which turns the amp delay knob into a clock divider rather than a time",
+    "A reading above 2.5V restarts every partial's phase together, so this can be used for oscillator sync",
+    "The summed partials for the left channel, up to 5V either way",
+    "The summed partials for the right channel, up to 5V either way; with nothing patched here both sums carry the same signal",
+    "The fundamental on its own as a sine wave, raised an octave for each octave the lowest partial has climbed; no frequency modulation reaches it",
+    "Note — the amplitude section does nothing until a cable is in the amp jack; with none there the amp delay knob tunes a comb filter instead",
+    "Note — the number of partials, the tilt, the sieve and the whole amplitude section are worked out once every 64 samples, so they cannot be modulated at audio rate; pitch, fm and stretch can",
+    "Note — the module resets and falls silent while all three of its outputs are unpatched",
+    "Note — the spectrogram along the top runs left to right from 0Hz to half the sample rate, with amplitude on a logarithmic scale; the left channel is drawn yellow and the right red",
+    "Menu — Quantize pitch knob: Continuous, Semitones, Octaves — snaps the pitch knob only, leaving the V/oct input unquantised",
+    "Menu — Quantize stretch: Continuous, Consonants, Harmonics — snaps the stretch after the knob and its CV are added; Consonants snaps to pure intervals, Harmonics to whole numbers",
+    "Menu — Stereo mode: Mono, Soft-panned, Hard-panned — spreads the partials across the two sum outputs, and it only takes effect while the right output is patched",
+    "Menu — CV buffer order: Low→high, High→low, Random — sets the order the amplitude CV travels through the partials",
+    "Menu — Empty buffer on reset — clears the amplitude buffer on a reset instead of leaving what is already in it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18,
+    "6": 19,
+    "7": 20,
+    "8": 21,
+    "9": 22
+   },
+   "out": {
+    "0": 23,
+    "1": 24,
+    "2": 25
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "trigger",
+     "9": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "Ad.cpp:149 takes the channel count from this jack and line 269 adds getPolyVoltage(c) to the pitch knob as an exponent of two",
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "1": {
+      "poly": true,
+      "why": "Ad.cpp:277-279 multiplies getPolyVoltage(c) by 0.2 and by the fm amount, then scales the frequency by one plus that",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "2": {
+      "poly": true,
+      "why": "Ad.cpp:257-258 adds 0.4 times the attenuverter times getPolyVoltage(c) to the stretch knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "3": {
+      "poly": true,
+      "why": "Ad.cpp:177-178 adds 0.7 times the attenuverter times getPolyVoltage(c) to the number of partials knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "4": {
+      "poly": true,
+      "why": "Ad.cpp:179-180 adds 0.2 times the attenuverter times getPolyVoltage(c) to the tilt knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "5": {
+      "poly": true,
+      "why": "Ad.cpp:181-182 adds 0.2 times the attenuverter times getPolyVoltage(c) to the sieve knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "6": {
+      "poly": true,
+      "why": "Ad.cpp:240 pushes 0.1 times getPolyVoltage(c) into the buffer, and line 220 uses isConnected() to switch the section on",
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "nothing recorded"
+     },
+     "7": {
+      "poly": true,
+      "why": "Ad.cpp:183-184 adds 0.1 times getPolyVoltage(c) to the amp delay knob, with no attenuator",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V"
+     },
+     "8": {
+      "poly": true,
+      "why": "Ad.cpp:226-227 sets the clock from getPolyVoltage(c) > 2.5f, a level test against 2.5V rather than a Schmitt trigger",
+      "range": "high above 2.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "unclocked, the delay read as a time"
+     },
+     "9": {
+      "poly": true,
+      "why": "Ad.cpp:158-159 resets on getPolyVoltage(c) > 2.5f, a level test against 2.5V rather than a Schmitt trigger",
+      "range": "high above 2.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Ad.cpp:150 setChannels from the V/oct jack's channel count"
+     },
+     "1": {
+      "poly": true,
+      "why": "Ad.cpp:151 setChannels from the V/oct jack's channel count"
+     },
+     "2": {
+      "poly": true,
+      "why": "Ad.cpp:152 setChannels from the V/oct jack's channel count"
+     }
+    }
+   },
+   "notes": "The fundamental frequency is the pitch knob plus the V/oct jack as an exponent of two times 16.35159783128741466737, the literal at Ad.cpp:270, which is C0. The knob runs -1 to 6, so seven octaves; the maker's manual says nine, which is the reach of the spectrum rather than of the knob. The CV scalings are at lines 177-184 and 257-258 and are all fractions of the knob travel, not volts per unit. The reset and clock jacks are plain level tests against 2.5V (lines 158 and 227), not Schmitt triggers, so a slow signal can retrigger them. The stereo mode in the menu is overridden to Mono whenever the right sum output is unpatched (lines 247-250). The panel prints 'root' over the third output while the maker's tooltip calls it 'fundamental'."
   },
   "Adje": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The spectrum of Ad without the oscillator: it puts out one polyphonic pitch and two polyphonic amplitudes, one channel per partial, for driving your own oscillators and VCAs",
+    "Sets which octave the fundamental falls in, -5 to 2, always snapped to a whole octave",
+    "Sets the spacing of the partials in units of the fundamental: at 1 the spectrum is harmonic, below 1 it is squeezed, above 1 stretched, and at 0 every partial lands on one frequency",
+    "Sets how many partials are generated, 1 to 15",
+    "Left of centre it tilts the weight of the spectrum towards the low partials; right of centre the weights go flat and the lowest partial climbs instead",
+    "Sieves partials out: turned up from the middle it removes the proper multiples of 2, then 3, then 5, leaving the primes; turned down it removes the primes from the top, leaving the octaves",
+    "Sets how long the amplitude CV takes to travel from one partial to the next, up to 4 seconds; fully clockwise it freezes the buffer",
+    "An attenuverter, -1 to +1, on the stretch CV",
+    "An attenuverter, -1 to +1, on the number of partials CV",
+    "An attenuverter, -1 to +1, on the tilt CV",
+    "An attenuverter, -1 to +1, on the sieve CV",
+    "Restarts the spectrum and draws fresh delays for the random buffer order",
+    "Transposes the whole spectrum at a volt per octave, added to the octave knob; only the first channel is read",
+    "Adds to the stretch knob through its attenuverter, a volt covering a tenth of the knob's travel at full attenuation",
+    "Adds to the number of partials knob through its attenuverter, a volt covering a fifth of the knob's travel at full attenuation; pushed below zero it also flips the sign of the stretch",
+    "Adds to the tilt knob through its attenuverter, a volt covering a tenth of the knob's travel at full attenuation",
+    "Adds to the sieve knob through its attenuverter, a volt covering a tenth of the knob's travel at full attenuation",
+    "The CV recorded into the four-second buffer that sets the partial amplitudes; patching this switches the amplitude section on",
+    "Adds to the amp delay knob, a volt covering a tenth of its travel",
+    "Steps the buffer on each reading above 2.5V, which turns the amp delay knob into a clock divider rather than a time",
+    "A reading above 2.5V restarts the spectrum",
+    "The pitch of each partial, a volt per octave, one channel per partial",
+    "The amplitude of each partial for the left channel, one channel per partial",
+    "The amplitude of each partial for the right channel, one channel per partial",
+    "Note — this module makes no sound; patch the pitch output to an oscillator and an amplitude output to a VCA, both of them polyphonic, and the oscillator through the VCA",
+    "Note — every input here is read on its first channel only, however many the cable carries",
+    "Note — the module resets and stops while all three of its outputs are unpatched",
+    "Note — Bufke is its expander and goes immediately to the right",
+    "Menu — Quantize stretch: Continuous, Consonants, Harmonics — snaps the stretch after the knob and its CV are added; Consonants snaps to pure intervals, Harmonics to whole numbers",
+    "Menu — Stereo mode: Mono, Soft-panned, Hard-panned — spreads the partials across the two amplitude outputs",
+    "Menu — CV buffer order: Low→high, High→low, Random — sets the order the amplitude CV travels through the partials",
+    "Menu — Empty buffer on reset — clears the amplitude buffer on a reset instead of leaving what is already in it",
+    "Menu — Channels — sets how many polyphony channels the three outputs carry, 1 to 16"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16,
+    "5": 17,
+    "6": 18,
+    "7": 19,
+    "8": 20
+   },
+   "out": {
+    "0": 21,
+    "1": 22,
+    "2": 23
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger",
+     "8": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Adje.cpp:142-143 adds getVoltage() to the rounded octave knob; no channel loop anywhere in the file",
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "1": {
+      "poly": false,
+      "why": "Adje.cpp:145-147 adds 0.4 times the attenuverter times getVoltage() to the stretch knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "2": {
+      "poly": false,
+      "why": "Adje.cpp:170-171 adds 1.4 times the attenuverter times getVoltage() to the number of partials knob, and line 191 flips the stretch when the sum goes negative",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "3": {
+      "poly": false,
+      "why": "Adje.cpp:172-173 adds 0.2 times the attenuverter times getVoltage() to the tilt knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "4": {
+      "poly": false,
+      "why": "Adje.cpp:174-175 adds 0.2 times the attenuverter times getVoltage() to the sieve knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "5": {
+      "poly": false,
+      "why": "Adje.cpp pushes getVoltage() into the buffer and uses isConnected() to switch the amplitude section on",
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "nothing recorded"
+     },
+     "6": {
+      "poly": false,
+      "why": "Adje.cpp:176-177 adds 0.1 times getVoltage() to the amp delay knob, with no attenuator",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V"
+     },
+     "7": {
+      "poly": false,
+      "why": "Adje.cpp sets the clock from getVoltage() > 2.5f, a level test against 2.5V rather than a Schmitt trigger",
+      "range": "high above 2.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "unclocked, the delay read as a time"
+     },
+     "8": {
+      "poly": false,
+      "why": "Adje.cpp:150-151 resets on getVoltage() > 2.5f, a level test against 2.5V rather than a Schmitt trigger",
+      "range": "high above 2.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Adje.cpp:133 setChannels from the module's channel count, which the Channels menu item sets"
+     },
+     "1": {
+      "poly": true,
+      "why": "Adje.cpp:134 setChannels from the module's channel count, which the Channels menu item sets"
+     },
+     "2": {
+      "poly": true,
+      "why": "Adje.cpp:135 setChannels from the module's channel count, which the Channels menu item sets"
+     }
+    }
+   },
+   "notes": "Adje reads every input with getVoltage() rather than getPolyVoltage, which the maker's manual states plainly: the CV inputs are monophonic and the polyphony is only on the outputs, where the channel count comes from the Channels menu item rather than from any jack. The octave knob is rounded unconditionally at Adje.cpp:141, so unlike Ad's pitch knob there is no continuous option for it. The number-of-partials CV is scaled 1.4 per volt against Ad's 0.7, and pushing the total below zero flips the sign of the stretch (line 191), which has no equivalent on Ad."
   },
   "Bufke": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A second amplitude buffer for Adje: it turns one CV into a polyphonic one with a different delay for each partial, and it goes immediately to the right of an Adje",
+    "Sets how long the CV takes to travel from one partial to the next, up to 4 seconds; fully clockwise it freezes the buffer",
+    "Draws fresh delays, and with the menu option on it also empties the buffer",
+    "A reading above 2.5V draws fresh delays, and with the menu option on it also empties the buffer",
+    "The CV recorded into the buffer; with nothing patched here the buffer is switched off and the output stops moving",
+    "Adds to the delay knob, a volt covering a tenth of its travel",
+    "Steps the buffer on each reading above 2.5V, which turns the delay knob into a clock divider rather than a time",
+    "The buffered CV, one channel per partial, matching the channel count of the Adje to the left",
+    "Note — with no Adje immediately to the left the module falls back to a fixed sixteen channels; a red arrow mark at the top left is what says a parent was found",
+    "Note — a Bufke can also follow another Bufke to its left, so several of them can be chained from one Adje",
+    "Note — a reset or a randomise on the parent Adje resets this module at the same moment",
+    "Note — the module stops while its output is unpatched",
+    "Menu — CV buffer order: Low→high, High→low, Random — sets the order the CV travels through the partials",
+    "Menu — Empty buffer on reset — clears the buffer on a reset instead of leaving what is already in it",
+    "Menu — Follow left module: Free, Sync clock, Get delay time — takes the clock, or the exact delay time, from the module to the left instead of from this panel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Bufke.cpp:125 resets on getVoltage() > 2.5f, a level test against 2.5V rather than a Schmitt trigger; no channel loop anywhere in the file",
+      "range": "high above 2.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V"
+     },
+     "1": {
+      "poly": false,
+      "why": "Bufke.cpp:173 pushes getVoltage() straight into the buffer, and line 155 uses isConnected() to switch the buffer on",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "nothing recorded, the buffer switched off"
+     },
+     "2": {
+      "poly": false,
+      "why": "Bufke.cpp:152-153 adds 0.1 times getVoltage() to the delay knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V"
+     },
+     "3": {
+      "poly": false,
+      "why": "Bufke.cpp:165-166 sets the clock from getVoltage() > 2.5f, a level test against 2.5V rather than a Schmitt trigger",
+      "range": "high above 2.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "unclocked, the delay read as a time"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Bufke.cpp:116 setChannels from the parent Adje's channel count, or sixteen when there is no parent"
+     }
+    }
+   },
+   "notes": "The reset input and the reset button carry no configInput or configParam name, so hovering either shows nothing; the panel prints 'reset' beside them. Bufke pushes the raw voltage into its buffer (Bufke.cpp:173) where Ad scales by a tenth first, so the output carries the same voltages that went in. With no parent the module falls back to sixteen channels and partial numbers 1 to 16 (lines 111-114). The buffer is four seconds long, matching Adje rather than Ad's eight."
   },
   "Funs": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator whose wave is built from a rational function, shaped by three parameters, with two related waves coming out at once",
+    "Sets the pitch, 0 giving C0 at 16.35Hz and each whole step up an octave, over a range of six octaves",
+    "Sets the depth of the linear through-zero frequency modulation from the fm jack, none at the far left",
+    "Sets where the peak of the wave falls, between the start of the cycle and the zero crossing that c sets",
+    "Sets where the wave passes seven tenths of its peak, between the peak that a sets and the zero crossing that c sets",
+    "Sets where the wave crosses zero within the cycle; at the centre there is no distortion and the wave is symmetrical",
+    "An attenuverter, -1 to +1, on the a CV",
+    "An attenuverter, -1 to +1, on the b CV",
+    "An attenuverter, -1 to +1, on the c CV",
+    "Sets the pitch at a volt per octave, added to the pitch knob; the number of channels here sets the polyphony of the whole module",
+    "Modulates the frequency linearly and through zero, scaled by the fm knob",
+    "Adds to the a knob through its attenuverter, a volt covering a tenth of its travel at full attenuation",
+    "Adds to the b knob through its attenuverter, a volt covering a tenth of its travel at full attenuation",
+    "Adds to the c knob through its attenuverter, a volt covering a tenth of its travel at full attenuation",
+    "The first of the two waves, up to 5V either way",
+    "The second of the two waves, up to 5V either way",
+    "Note — with all three shape knobs at the centre the two waves are close to a sine",
+    "Note — the two waves swap over between odd- and even-numbered polyphony channels, which spreads a chord across both outputs",
+    "Note — the display draws both waves with seven marked points on each, the first wave yellow and the second red",
+    "Menu — Quantize pitch knob: Continuous, Semitones, Octaves — snaps the pitch knob only, leaving the V/oct input unquantised",
+    "Menu — Restrict parameters (antialiasing) — holds the three shape knobs inside a range that keeps aliasing down; the range is wider at lower pitches and higher sample rates"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "Funs.cpp:70 takes the channel count from this jack and line 82 adds getPolyVoltage(ch) to the pitch knob as an exponent of two",
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "1": {
+      "poly": true,
+      "why": "Funs.cpp:84-86 multiplies getPolyVoltage(ch) by 0.2 and by the fm amount, then scales the frequency by one plus that",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "2": {
+      "poly": true,
+      "why": "Funs.cpp:91-92 adds 0.1 times the attenuverter times getPolyVoltage(ch) to the a knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "3": {
+      "poly": true,
+      "why": "Funs.cpp:93-94 adds 0.1 times the attenuverter times getPolyVoltage(ch) to the b knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "4": {
+      "poly": true,
+      "why": "Funs.cpp:95-96 adds 0.1 times the attenuverter times getPolyVoltage(ch) to the c knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Funs.cpp:72 setChannels from the V/oct jack's channel count"
+     },
+     "1": {
+      "poly": true,
+      "why": "Funs.cpp:73 setChannels from the V/oct jack's channel count"
+     }
+    }
+   },
+   "notes": "The two outputs are the two roots of the same phase-distortion equation, which is why the module has two of them rather than a mix control; the maker's manual works the algebra through. At Funs.cpp:104-110 the two waves are swapped for odd-numbered polyphony channels. The base frequency uses the same C0 literal, 16.35159783128741466737, as Ad and Sjang. XMAX_PARAM is declared in the ParamId enum but never configured and never given a widget, so it cannot be reached at all."
   },
   "Sjoegele": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A double pendulum worked out sample by sample, for smooth chaotic control voltages",
+    "Sets the length of the two rods, a micrometre at the far left to a metre at the far right, a millimetre at the centre; short rods swing fast and long ones slowly",
+    "Sets the gravity the pendulum falls under, marked with the surface gravity of Pluto, the Moon, Mercury, Earth, Jupiter and the Sun",
+    "Sets how much friction slows the swinging, none at the far left; this one takes effect straight away rather than waiting for a start",
+    "Sets both rods to an angle of π and starts them swinging, taking the length and gravity settings as they stand at that moment",
+    "Sets the length of the rods along with its knob, but only when the pendulum is started",
+    "Sets the gravity along with its knob, but only when the pendulum is started",
+    "Adds to the friction knob, a volt covering a tenth of its travel, and it takes effect straight away",
+    "A reading above 2.5V sets both rods to an angle of π and starts them swinging",
+    "The horizontal position of the first mass, -5V to +5V",
+    "The height of the first mass, 0V to 10V",
+    "The horizontal position of the second mass, -5V to +5V",
+    "The height of the second mass, 0V to 10V",
+    "5V for as long as the first rod's angle is zero, dropping back to 0V once that angle reaches π or stops changing",
+    "5V for as long as the second rod's angle is zero, dropping back to 0V once that angle reaches π or stops changing",
+    "Note — the length and gravity settings are only read at a start, so turning those knobs does nothing until the button is pressed or a gate arrives",
+    "Note — the number of polyphony channels is the widest of the four inputs, and each channel runs its own pendulum",
+    "Menu — x₂ y₂ relative — measures the second mass from the first rather than from the fixed pivot"
+   ],
+   "param": {
+    "2": 3,
+    "3": 4,
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "Sjoegele.cpp:64 adds 0.4 times getPolyVoltage(c) to the length knob inside start(), which is only called at a start",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "1": {
+      "poly": true,
+      "why": "Sjoegele.cpp:65 adds 1.2 times getPolyVoltage(c) to the gravity knob inside start(), which is only called at a start",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "2": {
+      "poly": true,
+      "why": "Sjoegele.cpp:82-83 adds 0.1 times getPolyVoltage(c) to the friction knob every sample",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "3": {
+      "poly": true,
+      "why": "Sjoegele.cpp:88 starts on getPolyVoltage(c) > 2.5f, a level test against 2.5V rather than a Schmitt trigger; line 77 takes the channel count from the widest input",
+      "range": "high above 2.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Sjoegele.cpp:79 setChannels on every output from the widest input's channel count"
+     },
+     "1": {
+      "poly": true,
+      "why": "Sjoegele.cpp:79 setChannels on every output from the widest input's channel count"
+     },
+     "2": {
+      "poly": true,
+      "why": "Sjoegele.cpp:79 setChannels on every output from the widest input's channel count"
+     },
+     "3": {
+      "poly": true,
+      "why": "Sjoegele.cpp:79 setChannels on every output from the widest input's channel count"
+     },
+     "4": {
+      "poly": true,
+      "why": "Sjoegele.cpp:79 setChannels on every output from the widest input's channel count"
+     },
+     "5": {
+      "poly": true,
+      "why": "Sjoegele.cpp:79 setChannels on every output from the widest input's channel count"
+     }
+    }
+   },
+   "notes": "The length knob is -6 to 0 and is raised as a power of ten to give metres (Sjoegele.cpp:63-68), so the panel's 1µm, 1mm and 1m marks are the ends and the middle of its travel. Gravity is 9.8 times two to the power of the knob, -6 to 6, so the centre is Earth. Friction is ten to the power of eight times the knob, minus one. The two angle outputs are 5V when high, not 10V (lines 111-112), although the maker's manual only says 'high gate'. The panel order of the six outputs is not their index order: the two angle outputs are indexes 4 and 5 and sit at the right of the two rows, after x and y."
   },
   "Sjang": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stochastic oscillator in the manner of Xenakis: the wave is a run of line segments whose end points wander at random from one cycle to the next",
+    "Sets the pitch, 0 giving C0 at 16.35Hz and each whole step up an octave, over a range of six octaves",
+    "Sets how far the timing of each segment's end point is allowed to wander from cycle to cycle, none at the far left",
+    "Sets how far the height of each segment's end point is allowed to wander from cycle to cycle, none at the far left",
+    "Pulls the wandering of the timings back towards the reference wave, so the pitch stays put instead of drifting",
+    "Pulls the wandering of the heights back towards the reference wave, so the shape stays close to it",
+    "Sets how many line segments make up one cycle, 3 to 64",
+    "An attenuverter, -1 to +1, on the time randomness CV",
+    "An attenuverter, -1 to +1, on the amplitude randomness CV",
+    "Puts every segment back on the reference wave",
+    "Throws fresh random values into every segment at once",
+    "Sets the pitch at a volt per octave, added to the pitch knob; the number of channels here sets the polyphony of the whole module",
+    "Adds to the time randomness knob through its attenuverter, a volt covering a tenth of its travel at full attenuation",
+    "Adds to the amplitude randomness knob through its attenuverter, a volt covering a tenth of its travel at full attenuation",
+    "Adds to the destruct pitch knob, a volt covering a tenth of its travel, with no attenuator",
+    "Adds to the destruct shape knob, a volt covering a tenth of its travel, with no attenuator",
+    "A rising edge past 2V puts every segment back on the reference wave",
+    "A rising edge past 2V throws fresh random values into every segment",
+    "The first of the two waves, up to 5V either way",
+    "The second of the two waves, up to 5V either way; it is a separate oscillator with its own random walk, and it is only computed while a cable is in it",
+    "Note — with both randomness knobs at zero the module puts out the reference wave unchanged, so it makes no sound of its own until one of them is raised",
+    "Note — the two outputs are two independent runs of the same process, not a stereo pair, although the maker's tooltips call them left and right",
+    "Menu — Quantize pitch knob: Continuous, Semitones, Octaves — snaps the pitch knob only, leaving the V/oct input unquantised",
+    "Menu — Reference wave form: Sine, Zero — sets the shape the segments are pulled back towards by the two destruct controls"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17
+   },
+   "out": {
+    "0": 18,
+    "1": 19
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "Sjang.cpp:80 takes the channel count from this jack and line 91 adds getPolyVoltage(c) to the pitch knob as an exponent of two",
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "1": {
+      "poly": true,
+      "why": "Sjang.cpp:101-102 adds 0.1 times the attenuverter times getPolyVoltage(c) to the time randomness knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "2": {
+      "poly": true,
+      "why": "Sjang.cpp:103-104 adds 0.1 times the attenuverter times getPolyVoltage(c) to the amplitude randomness knob",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "3": {
+      "poly": true,
+      "why": "Sjang.cpp:105 adds 0.1 times getPolyVoltage(c) to the destruct pitch knob, with no attenuator",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "4": {
+      "poly": true,
+      "why": "Sjang.cpp:106 adds 0.1 times getPolyVoltage(c) to the destruct shape knob, with no attenuator",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "5": {
+      "poly": true,
+      "why": "Sjang.cpp:111-113 resetTrigger[c].process(5 times the button plus getPolyVoltage(c), 0.1f, 2.f), so a rising edge is detected past 2V and armed again below 0.1V",
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V"
+     },
+     "6": {
+      "poly": true,
+      "why": "Sjang.cpp:114-116 randomizeTrigger[c].process(5 times the button plus getPolyVoltage(c), 0.1f, 2.f), so a rising edge is detected past 2V and armed again below 0.1V",
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Sjang.cpp:81 setChannels from the V/oct jack's channel count"
+     },
+     "1": {
+      "poly": true,
+      "why": "Sjang.cpp:82 setChannels from the V/oct jack's channel count, and line 118 only computes it while it isConnected()"
+     }
+    }
+   },
+   "notes": "The two randomness knobs are mapped exponentially at Sjang.cpp:107-108, (100 to the power of the knob, minus one, over 99), so the bottom of their travel is very fine. The second output uses oscillators 16 to 31 (line 118 and line 140) and is skipped entirely while it is unpatched, which saves processor time; the maker names the two outputs left and right in configOutput while the panel prints 'wave 1' and 'wave 2'. The right-hand destruct knob is DESTRUCT_A_PARAM, named 'destruct amp' in the tooltip, while the panel prints 'destruct shape' and the matching input is named 'destruct shape'. The reset and randomize buttons are added to their jacks before the Schmitt trigger, so pressing a button and patching its jack both work through the same detector."
   }
  }
 }

@@ -1,13 +1,114 @@
 {
  "plugin": "Bruer",
- "source": "https://github.com/bruer80/bruer-vcv",
+ "source": "https://github.com/bruer80/bruer-vcv/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "SEQ1": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sixteen-bit shift-register sequencer with a built-in quantiser and three Euclidean trigger generators, all of them running off one clock and one step count",
+    "Advances the sequence one step on each rising edge above 1V: the register shifts, the pitch is worked out again and the three Euclidean patterns are tested",
+    "Sends the sequence back to its first step on a rising edge above 1V, leaving the register's contents where they are",
+    "Clears every bit in the register and sends the sequence back to its first step when pressed, which leaves the pitch output at its lowest note",
+    "Sets the chance that a step feeds a fresh random bit into the register instead of looping the bit round from the end; at the bottom the pattern repeats unchanged, at the top every step is new",
+    "Sets how many steps the sequence runs before it repeats, 1 to 16, and that same count is the length of all three Euclidean patterns",
+    "Sets how many octaves the pitch output spans, 1 to 8, although the panel prints SCALE; which notes are allowed is chosen with the twelve buttons instead",
+    "Sets how many hits that Euclidean pattern spreads over the step count, 0 to 16; at 0 its output stays silent and at or above the step count every step fires",
+    "Puts that note into the set the pitch output is quantised to, or takes it out, with the lamp beside it lit while the note is in",
+    "The quantised pitch, 1V per octave with 0V as C4; the register is read as a binary number and spread over the octave range",
+    "A 10V trigger 5ms long on every step where that Euclidean pattern has a hit",
+    "Note — nothing moves until a clock is patched to CLK, because the module has no clock of its own",
+    "Note — the register starts empty, so the pitch output holds its lowest note until the Generate slider is raised and some steps have been clocked through",
+    "Note — the module saves none of its own state: the register, the chosen notes and the three Euclidean shifts all return to their startup values on loading, the note set to C major",
+    "Note — the two rows of lamps show the register's bits in red and each Euclidean pattern's hits in green, yellow and blue; they are lamps rather than controls and cannot be clicked for help",
+    "Menu — Euclid 1 Shift — rotates the first Euclidean pattern against the clock by 0 to 15 steps",
+    "Menu — Euclid 2 Shift — rotates the second Euclidean pattern against the clock by 0 to 15 steps",
+    "Menu — Euclid 3 Shift — rotates the third Euclidean pattern against the clock by 0 to 15 steps",
+    "Note — a shift other than zero rotates the lamps one way and the triggers the other, so the lit lamps then mark different steps from the ones that actually fire"
+   ],
+   "param": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 3,
+    "4": 7,
+    "5": 7,
+    "6": 7,
+    "7": 8,
+    "8": 8,
+    "9": 8,
+    "10": 8,
+    "11": 8,
+    "12": 8,
+    "13": 8,
+    "14": 8,
+    "15": 8,
+    "16": 8,
+    "17": 8,
+    "18": 8
+   },
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 10,
+    "3": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "SEQ1.cpp:303 passes getVoltage() with no channel argument to a SchmittTrigger at Rack's default thresholds of 0V and 1V; the module never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "SEQ1.cpp:286 passes getVoltage() with no channel argument to a SchmittTrigger at Rack's default thresholds of 0V and 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "SEQ1.cpp:473 writes the note number divided by twelve with setVoltage and no channel argument, and SEQ1.cpp:450-470 build that note number from the register and the octave range"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQ1.cpp:386 writes 10V or 0V from a PulseGenerator triggered for 0.005 seconds at SEQ1.cpp:344"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQ1.cpp:390 writes 10V or 0V from a PulseGenerator triggered for 0.005 seconds at SEQ1.cpp:347"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQ1.cpp:394 writes 10V or 0V from a PulseGenerator triggered for 0.005 seconds at SEQ1.cpp:350"
+     }
+    }
+   },
+   "notes": "Read at commit 8be57aa, the last commit to touch plugin.json and the one carrying the installed 2.0.3; its plugin.json is byte for byte the installed file, and the only later commit, fed0b77, changes the README alone. The module implements neither dataToJson nor dataFromJson, so the shift register, the twelve noteEnabled flags and the three Euclidean shifts are not saved with the patch; the note buttons are momentary, which means Rack saves nothing useful for them either and the note set comes back as the hard-coded C major on every load. The knob the panel prints SCALE is read at SEQ1.cpp:451 as an octave count, one to eight, and multiplied by twelve to give the number of semitones the output spans; the scale proper is the twelve note buttons. The knob the panel prints STEP is the sequence length, which is what its tooltip calls it. The Euclidean shift is applied in opposite directions in the two places it is used: SEQ1.cpp:337-339 shift the step index before testing the pattern, which moves the triggers earlier, while SEQ1.cpp:374-376 shift the lamp index after testing, which moves the display later, so with a non-zero shift the lamps and the triggers disagree. CLOCK_LIGHT is set every sample at SEQ1.cpp:270 and no LightWidget is ever added for it, so it can be neither seen nor clicked. The quantiser's nearest-note search at SEQ1.cpp:237-259 ranges from -12 to 24 semitones and stops as soon as the distance grows, so a step can be mapped to a note up to an octave below the octave its own index implies. Nothing here is polyphonic."
   }
  }
 }

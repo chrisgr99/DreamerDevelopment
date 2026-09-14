@@ -2,22 +2,330 @@
  "plugin": "AlteredStateMachines",
  "source": "https://codeberg.org/alteredstatemachines/alteredstatemachines-vcv",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Aristotle": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two-channel counterpoint sequencer: each of four stages carries a slider for channel A and one for channel B, and a trigger flips which of the two that stage feeds",
+    "Adds its setting to the A output while that stage is flipped to channel A, 0V fully down to 1.25V fully up, or 2V with the wider range chosen for channel A",
+    "Adds its setting to the B output while that stage is flipped to channel B, 0V fully down to 1.25V fully up, or 2V with the wider range chosen for channel B",
+    "Flips all four stages away from channel A on a rising edge above 2V, leaving the A output at 0V and the B output carrying all four of its sliders",
+    "Flips all four stages away from channel B on a rising edge above 2V, leaving the B output at 0V and the A output carrying all four of its sliders",
+    "Flips the first stage between channel A and channel B on each rising edge above 2V",
+    "Flips that stage between channel A and channel B on each rising edge above 2V; with no cable in it, the stage is flipped by every second trigger of the stage before it",
+    "The sum of the A sliders of whichever stages are flipped to channel A, so 0V to 5V, or 0V to 8V with the wider range chosen for channel A",
+    "The sum of the B sliders of whichever stages are flipped to channel B, so 0V to 5V, or 0V to 8V with the wider range chosen for channel B",
+    "Menu — 2V range for channel A — makes each of channel A's four sliders span 0V to 2V in place of 0V to 1.25V, so the A output reaches 8V",
+    "Menu — 2V range for channel B — makes each of channel B's four sliders span 0V to 2V in place of 0V to 1.25V, so the B output reaches 8V",
+    "Note — every stage comes up flipped to channel B, so the A output starts at 0V and the B output carries all four of its sliders",
+    "Note — a stage feeds one channel or the other and never both, so the two outputs together always carry the same set of four stages divided between them",
+    "Note — the lamp in a slider lights while that stage is feeding that channel, and the two lamps by the outputs brighten with the voltage each output is carrying",
+    "Note — on a sample where either reset jack fires, the stage triggers are not read at all, so a trigger arriving at the same moment as a reset is lost"
+   ],
+   "param": {
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 6,
+    "5": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "why": "src/tools/InsAndOuts.hpp:47 getVoltage() with no channel, :77 rescale(v, 0.1, 2, 0, 1) into a SchmittTrigger"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "why": "src/tools/InsAndOuts.hpp:47 getVoltage() with no channel, :77 rescale(v, 0.1, 2, 0, 1) into a SchmittTrigger"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "why": "src/Aristotle.cpp:38 SimpleTrigger on this input; InsAndOuts.hpp:77 thresholds 2V and 0.1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "normal": "half the rate of Trig 1",
+      "why": "src/Aristotle.cpp:40 NormalledTrigger falls back to the previous stage's CountTo(2), InsAndOuts.hpp:115"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "normal": "half the rate of Trig 2",
+      "why": "src/Aristotle.cpp:40 NormalledTrigger falls back to the previous stage's CountTo(2), InsAndOuts.hpp:115"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "normal": "half the rate of Trig 3",
+      "why": "src/Aristotle.cpp:40 NormalledTrigger falls back to the previous stage's CountTo(2), InsAndOuts.hpp:115"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Aristotle.hpp:78 setVoltage with no channel; four stages of up to 2V each in the wider range"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Aristotle.hpp:78 setVoltage with no channel; four stages of up to 2V each in the wider range"
+     }
+    }
+   },
+   "notes": "Params 0 and 1 hold the two voltage-range menu settings and have no widget, so no click reaches them. The stage counters are divide-by-two: a stage passes a high level on to the next stage's normalled trigger every second trigger it receives (src/tools/InsAndOuts.hpp:106-124), which makes the four stages a binary ripple counter when no trigger cables are patched past the first. The output range figure of 0 to 8V is the wider setting; the default range gives 0 to 5V."
   },
   "Medusa": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Weighted mingler: it fades between two input voltages across seven output jacks, each carrying a fixed mix of the two in steps of one sixth",
+    "One of the two voltages being mixed, all of output 1 and none of output 7; with nothing patched it reads a constant 6V",
+    "The other voltage, all of output 7 and none of output 1; with nothing patched it reads 0V",
+    "Carries the CV IN 1 voltage on its own",
+    "Five sixths of the CV IN 1 voltage added to one sixth of the CV IN 2 voltage",
+    "Two thirds of the CV IN 1 voltage added to one third of the CV IN 2 voltage",
+    "Half of the CV IN 1 voltage added to half of the CV IN 2 voltage",
+    "One third of the CV IN 1 voltage added to two thirds of the CV IN 2 voltage",
+    "One sixth of the CV IN 1 voltage added to five sixths of the CV IN 2 voltage",
+    "Carries the CV IN 2 voltage on its own",
+    "Note — this module has no controls at all: the proportion each output carries is fixed by the jack it comes from",
+    "Note — with nothing patched the seven outputs carry a fixed ladder of 6V, 5V, 4V, 3V, 2V, 1V and 0V, because an unpatched CV IN 1 reads 6V and an unpatched CV IN 2 reads 0V",
+    "Note — the lamp beside an output glows green for a positive voltage and red for a negative one, reaching full brightness at 10V"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "6V",
+      "why": "src/Medusa.cpp:28 NormalledInput over a ConstantVoltage of 6V; getVoltage() reads channel 0 only"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "src/Medusa.cpp:29 NormalledInput over a ZeroVoltage; getVoltage() reads channel 0 only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Medusa.cpp:34 setVoltage with no channel argument and no setChannels anywhere"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/Medusa.cpp:34 setVoltage with no channel argument and no setChannels anywhere"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/Medusa.cpp:34 setVoltage with no channel argument and no setChannels anywhere"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/Medusa.cpp:34 setVoltage with no channel argument and no setChannels anywhere"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/Medusa.cpp:34 setVoltage with no channel argument and no setChannels anywhere"
+     },
+     "5": {
+      "poly": false,
+      "why": "src/Medusa.cpp:34 setVoltage with no channel argument and no setChannels anywhere"
+     },
+     "6": {
+      "poly": false,
+      "why": "src/Medusa.cpp:34 setVoltage with no channel argument and no setChannels anywhere"
+     }
+    }
+   },
+   "notes": "The mix is a plain weighted sum, input 1 times (6 minus the output index) over 6 plus input 2 times the output index over 6 (src/Medusa.cpp:33), and nothing clamps it, so two 10V inputs give 10V out and larger inputs pass straight through. The ports are given the cv family because the panel itself prints CV IN on both inputs; the module would pass audio just as happily."
   },
   "Eris": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four by four matrix mixer: each of four inputs reaches each of four outputs through its own trimpot, with a fifth auxiliary input that has its own mute and is added to the first output",
+    "Mixes input A into output 1, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input B into output 1, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input C into output 1, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input D into output 1, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input A into output 2, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input B into output 2, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input C into output 2, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input D into output 2, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input A into output 3, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input B into output 3, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input C into output 3, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input D into output 3, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input A into output 4, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input B into output 4, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input C into output 4, silent fully anticlockwise and at full level fully clockwise",
+    "Mixes input D into output 4, silent fully anticlockwise and at full level fully clockwise",
+    "Passes the AUX input in the I position and silences it in the O position, fading over a few milliseconds rather than cutting, because the fade is modelled on a vactrol",
+    "One of the four signals the matrix mixes, reaching each output through the trimpot that pairs it with that output",
+    "One of the four signals the matrix mixes, reaching each output through the trimpot that pairs it with that output",
+    "One of the four signals the matrix mixes, reaching each output through the trimpot that pairs it with that output",
+    "One of the four signals the matrix mixes, reaching each output through the trimpot that pairs it with that output",
+    "A fifth input that goes through no trimpot: it passes the mute switch and the gain setting and is then added to output 1's mix at the 1+AUX jack",
+    "The four inputs summed through the four trimpots that pair them with output 1",
+    "The four inputs summed through the four trimpots that pair them with output 2",
+    "The four inputs summed through the four trimpots that pair them with output 3",
+    "The four inputs summed through the four trimpots that pair them with output 4",
+    "The same mix as output 1 with the AUX input added to it, after the mute switch and the gain setting",
+    "Menu — 2x gain for Auxiliary Input — doubles the AUX input before it is added, which is the jumper on the back of the hardware this module copies",
+    "Note — the four numbered outputs report themselves to Rack as 0, 1, 2 and 3, so the hover tooltip on the jack the panel calls 1 reads 0, and each tooltip is one behind the panel",
+    "Note — nothing limits the outputs: four 10V inputs with their trimpots fully up put 40V out of one jack, which is well past what most modules expect",
+    "Note — the AUX mute is modelled on a VTL5C3 vactrol, opening on an exponential with a time constant of 1.25ms and closing on one of 12.5ms, recalculated every 32 samples"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15,
+    "15": 16,
+    "16": 17
+   },
+   "in": {
+    "0": 18,
+    "1": 19,
+    "2": 20,
+    "3": 21,
+    "4": 22
+   },
+   "out": {
+    "0": 23,
+    "1": 24,
+    "2": 25,
+    "3": 26,
+    "4": 27
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/Eris.cpp:47 getVoltage() with no channel argument, multiplied by the trimpot value"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/Eris.cpp:47 getVoltage() with no channel argument, multiplied by the trimpot value"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/Eris.cpp:47 getVoltage() with no channel argument, multiplied by the trimpot value"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/Eris.cpp:47 getVoltage() with no channel argument, multiplied by the trimpot value"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/Eris.cpp:55 getVoltage() with no channel argument, times the vactrol gain and the aux gain multiple"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Eris.cpp:49 setVoltage with no channel argument and no setChannels anywhere"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/Eris.cpp:49 setVoltage with no channel argument and no setChannels anywhere"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/Eris.cpp:49 setVoltage with no channel argument and no setChannels anywhere"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/Eris.cpp:49 setVoltage with no channel argument and no setChannels anywhere"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/Eris.cpp:56 setVoltage with no channel argument and no setChannels anywhere"
+     }
+    }
+   },
+   "notes": "No family is given to any of these ports: the matrix carries whatever is patched into it, audio or control voltage, and the panel says nothing either way. The trimpot at a given panel position is param (row + 4 times column), where the row is the input letter and the column is the output number (src/Eris.cpp:87-89); the maker's own configParam numbering is input plus 4 times output, which comes to the same thing. Param 17 is the aux gain menu setting and has no widget. The four numbered outputs are configured with the names 0 to 3 (src/Eris.cpp:22) while the panel prints 1 to 4. The vactrol's own source comments say the ramps are 6ms and 60ms, while the constants in the same function are 0.00125 and 0.0125 seconds (src/Vactrol.hpp:44-51); the constants are what runs."
   }
  }
 }

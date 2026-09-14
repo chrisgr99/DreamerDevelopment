@@ -2,22 +2,231 @@
  "plugin": "SillySounds",
  "source": "https://github.com/loparcog/SillySounds",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Sesame": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock shaper: it bunches alternate beats of an incoming clock into pairs to make a swing, and can divide a beat into as many as eight even pulses when a trigger arrives",
+    "The clock this module reshapes; each rise above 1V is timed against the one before it, and that period is what the swing and the division work on",
+    "Sets the swing as a percentage, 0 to 100 in whole steps; it shortens the active part of each beat by that share of the clock period and delays the first beat of each pair by the same amount",
+    "swing mod — an attenuverter, -1 to +1, scaling how much the swing mod input moves the swing; at +1, 10V there covers the whole travel of %gap",
+    "swing mod input — divided by 10V, scaled by the swing mod knob and added to the %gap knob, with the total held between no swing and full swing",
+    "A momentary button; each press moves the swing onto the other beat of the pair, so the beats that were pushed apart are pushed together instead",
+    "Sets how many evenly spaced pulses one clock beat is divided into, 1 to 8 in whole steps",
+    "dupe mod — an attenuverter, -1 to +1, scaling how much the dupe mod input moves the number of pulses; at +1, 10V there shifts the count by the full eight",
+    "dupe mod input — read at the moment trig rises and added to the mult knob, 10V scaled by the dupe mod knob shifting the count by eight; the total is held between 1 and 8 and rounded down",
+    "Each rise above 1V divides the beat in progress into the number of pulses set by mult; the division is cleared at the next clock rise, so a fresh rise is needed for every beat",
+    "The reshaped clock, 0V or 10V, carrying as many channels as the wider of trig and the dupe mod input, and never fewer than one",
+    "Note — nothing comes out until a clock is patched to clock. With that jack empty the module skips all of its processing and holds the output at 0V.",
+    "Note — %gap at 100 leaves no active part of the beat at all, and the output stops.",
+    "Note — the red lamp above mult is lit from the moment a division is triggered until the next clock rise. The red lamp above %gap follows the output voltage.",
+    "Note — the swing is worked out once for the whole module and is the same on every channel. Only the division count is per channel.",
+    "Note — holding a constant 10V on trig, as the maker's README advises, divides the first beat only: trig reacts to a rise, and the division is cleared at every clock rise. Patch the clock into trig.",
+    "Note — one Schmitt trigger is shared across all channels of trig, so a polyphonic cable there does not give each channel its own edge detection."
+   ],
+   "param": {
+    "0": 2,
+    "1": 3,
+    "2": 6,
+    "3": 7,
+    "4": 5
+   },
+   "in": {
+    "0": 1,
+    "1": 4,
+    "2": 9,
+    "3": 8
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "trigger",
+     "3": "cv"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Sesame.cpp:115 passes getVoltage() — one channel — through a rack::dsp::SchmittTrigger, whose Rack 2 defaults take the edge above 1V and re-arm below 0V; src/Sesame.cpp:94 wraps the whole of the processing in isConnected() on this jack"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/Sesame.cpp:152-154 reads getVoltage() — one channel — divides it by 10, multiplies by the swing mod knob's -1 to +1 and adds it to the %gap knob divided by 100, then clamps the total to 0 and 1"
+     },
+     "2": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Sesame.cpp:97 takes the channel count from this jack and REPEATMOD, and src/Sesame.cpp:165 reads it with getPolyVoltage(c) inside that loop through a rack::dsp::SchmittTrigger, whose Rack 2 defaults take the edge above 1V"
+     },
+     "3": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "1 to 8V",
+      "why": "src/Sesame.cpp:97 takes the channel count from this jack, and src/Sesame.cpp:168-172 reads getPolyVoltage(c), divides by 10, multiplies by the dupe mod knob and by 8, adds the mult knob, clamps to 1 and 8 and floors the result"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Sesame.cpp:213 writes with setVoltage(v, c) over the channel loop and src/Sesame.cpp:219 calls setChannels(channels); the value at src/Sesame.cpp:186 and src/Sesame.cpp:194 is 10 minus a multiple of 10, so 0V or 10V"
+     }
+    }
+   },
+   "notes": "The panel prints mult where the maker's README calls the same knob freq; the panel name is used here.\n\nThe README's hint for the trig input — hold a constant 10V to divide every beat — is contradicted by the code. toggleTrigger is a rack::dsp::SchmittTrigger and fires only on a rise, while src/Sesame.cpp:127 refills parRepeat with 1 on every clock rise. A held voltage therefore divides one beat and no more.\n\ntoggleTrigger is a single scalar Schmitt trigger processed once per channel inside the loop at src/Sesame.cpp:163-165, so its armed state is shared by every channel of trig. The maker's plugin.json calls the division triggering polyphonic; the count per channel is genuinely separate, the edge detection is not.\n\nparRepeat is declared without an initialiser at src/Sesame.cpp:75 and is only filled on the first clock rise, so before any clock arrives its contents are whatever the allocation held.\n\nNo module in this plugin has a context menu of its own. The light and dark panel choice is Rack's own, shared by all three."
   },
   "Lola": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A recorder in the signal path: it copies its input to its output until you capture a stretch of that input and play the capture back instead",
+    "The signal captured and played back, and the signal copied to out at every moment when no capture is playing",
+    "rec input — a rise above 1V starts a capture and the next one ends it; starting a capture throws away the previous one and stops playback",
+    "rec button — press to start a capture and press again to end it; starting one throws away the previous capture and stops playback",
+    "play input — a rise above 1V plays the capture from its beginning, and a second rise part way through restarts it; with no capture stored it does nothing",
+    "play button — press to play the capture from its beginning; pressing during playback restarts it, and with no capture stored it does nothing",
+    "Press to end playback, after which out returns to copying the input",
+    "The capture while it is playing, and a copy of the input at every other moment; when the capture runs out playback ends and the copy resumes",
+    "Note — the module holds no capture when it is added to a patch, and play does nothing until one exists. Start a capture with the rec button or a rise on the rec input, and end it the same way.",
+    "Note — a capture holds 192000 samples. That is four seconds at a 48kHz sample rate, two at 96kHz, and the capture ends by itself on reaching the limit.",
+    "Note — playback advances by one stored sample for each sample of the engine, so a capture made at one sample rate plays back faster or slower after the rate is changed.",
+    "Note — the capture is held in memory only. It is not written into the patch file and is gone when the patch is closed.",
+    "Note — the output takes its channel count from the input jack rather than from the capture, so a polyphonic capture played back with the input unplugged produces no channels at all.",
+    "Note — the three red lamps show, from the top, that a capture is running, that playback is running, and that the stop button is held down."
+   ],
+   "param": {
+    "0": 3,
+    "1": 5,
+    "2": 6
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 4
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Lola.cpp:79 takes the channel count from this jack, src/Lola.cpp:127 stores getPolyVoltage(c) for each of them while capturing, and src/Lola.cpp:203 copies the same per channel to the output; nothing scales, clamps or rectifies the value, so whatever is patched comes back out"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Lola.cpp:84 passes getVoltage() — one channel — through a rack::dsp::SchmittTrigger, whose Rack 2 defaults take the edge above 1V and re-arm below 0V"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Lola.cpp:143 passes getVoltage() — one channel — through a rack::dsp::SchmittTrigger, whose Rack 2 defaults take the edge above 1V and re-arm below 0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Lola.cpp:192 writes the stored sample per channel while playing and src/Lola.cpp:203 writes getPolyVoltage(c) otherwise, with setChannels at src/Lola.cpp:208; no range can be stated because the jack carries back whatever was patched in"
+     }
+    }
+   },
+   "notes": "The signal input and the output carry whatever is patched in, so neither is given a family and neither is given a range.\n\nThe capture limit is a count of samples, not a duration: src/Lola.cpp:56 sets sampleMax to 192000 and the comment beside it assumes 48kHz. At 96kHz the same buffer holds two seconds.\n\nsrc/Lola.cpp:79 takes the channel count from the signal input and src/Lola.cpp:208 hands it to the output unconditionally. With nothing patched to the signal input, getChannels returns 0 and the output is set to 0 channels even in the middle of playing a capture back.\n\nThe stop button has a lamp of its own which is lit only while the button is held (src/Lola.cpp:171); it is not an indication of the playback state.\n\nThere is no dataToJson or dataFromJson anywhere in this plugin, so the capture does not survive a patch save.\n\nNo module in this plugin has a context menu of its own."
   },
   "Kyle": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An envelope follower: it tracks how far a signal swings and gives out both that envelope and its mirror image, for ducking one sound under another",
+    "The signal followed; its sign is discarded before use, so the envelope climbs to the size of the largest swing in either direction",
+    "Sets how fast the envelope falls, 0 to 10, the figure being the volts per second taken off the envelope while the input is below it",
+    "Bends the fall, -10 to +10; the rate is multiplied by e raised to this number times the seconds since the last peak, so a positive setting accelerates the fall and a negative one flattens it out",
+    "Scales the envelope, 0 passing it through unchanged and 1 multiplying it by ten, with the result limited to 10V",
+    "The envelope, 0V to 10V",
+    "The envelope taken away from 10V, so it drops as the input grows; patch it to a VCA to duck one signal under another",
+    "Note — decay arrives at 0, and at 0 the envelope never falls: it climbs to the largest swing so far and holds there. Turn decay up before expecting an envelope shape.",
+    "Note — once the input has been within 0.01V of zero for one second, out is forced to 0V and inv to 10V, whatever the envelope had reached.",
+    "Note — both outputs take their channel count from the input jack, so with nothing patched they carry no channels at all."
+   ],
+   "param": {
+    "0": 2,
+    "1": 3,
+    "2": 4
+   },
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Kyle.cpp:104 takes the channel count from this jack and src/Kyle.cpp:110 reads getPolyVoltage(c) for each of them through abs(), which discards the sign, so a negative swing raises the envelope exactly as the matching positive one does"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Kyle.cpp:60 writes with setVoltage(out, channel) and src/Kyle.cpp:140 calls setChannels; the value comes from src/Kyle.cpp:85, an abs() held to a maximum of 10"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Kyle.cpp:61 writes 10 minus the same value with setVoltage(10 - out, channel) and src/Kyle.cpp:141 calls setChannels; that value is an abs() held to a maximum of 10, so this jack runs from 0V to 10V the other way up"
+     }
+    }
+   },
+   "notes": "The decay knob's default of 0 makes the module inert on arrival: src/Kyle.cpp:38 configures it 0 to 10 with a default of 0, and src/Kyle.cpp:82-83 multiplies that value by the elapsed-time curve, so at 0 nothing is subtracted and the envelope only ever rises.\n\nThe amp knob is a gain of 1 + 9 times its value (src/Kyle.cpp:85), so its default of 0 is unity rather than silence.\n\nThe silence gate at src/Kyle.cpp:115-121 counts process calls, not seconds, and compares the count against args.sampleRate, which makes it one second at any sample rate. Below 0.01V the envelope keeps decaying for that second and is then forced to 0.\n\nThe maker's tooltip for the amp knob reads \"Amplication of output\", which is a typo for amplification.\n\nNo module in this plugin has a context menu of its own."
   }
  }
 }

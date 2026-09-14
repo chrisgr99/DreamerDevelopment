@@ -2,22 +2,240 @@
  "plugin": "HarmonicAnomalies",
  "source": "https://github.com/thestrangeagency/HarmonicAnomalies",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "HexNut": {
    "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "HexExCV": {
-   "lines": [
-    "TODO: what this module is"
-   ]
+    "A looping buffer of 21931 samples laid out on a hexagonal grid, with a write head and a read head that each move through it along three axes rather than in a line",
+    "Sets how the write head moves: in the first position it follows the write X, Y and Z knobs, in the second it walks a ring set by the write SIZE knob, in the third it spirals inside that ring",
+    "Sets how the read head moves: in the first position it follows the read X, Y and Z knobs, in the second it walks a ring set by the read SIZE knob, in the third it spirals inside that ring",
+    "Sets the radius of the ring the write head walks, from a single tile fully counter-clockwise to the full width of the grid fully clockwise, and it is read only in the second and third write modes",
+    "Sets the radius of the ring the read head walks, from a single tile fully counter-clockwise to the full width of the grid fully clockwise, and it is read only in the second and third read modes",
+    "Moves the write head along the grid's first axis by this much every sample, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre it does not move on that axis",
+    "Moves the write head along the grid's second axis by this much every sample, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre the head does not move on that axis",
+    "Moves the write head along the grid's third axis by this much every sample, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre the head does not move on that axis",
+    "Moves the read head along the grid's first axis by this much every sample, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre the head does not move on that axis",
+    "Moves the read head along the grid's second axis by this much every sample, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre the head does not move on that axis",
+    "Moves the read head along the grid's third axis by this much every sample, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre the head does not move on that axis",
+    "Sets how much of what is written replaces what was already in the tile: fully clockwise it overwrites, fully counter-clockwise it writes nothing and the buffer loops untouched",
+    "Widens the read head into a ring of surrounding tiles, from none up to a radius of 64; every tile on the ring is added to the one under the head and the sum divided by the square root of their number",
+    "Shortens the buffer, so fewer tiles are looped and the loop comes round sooner; fully clockwise the whole grid is used",
+    "The signal written into the buffer, taken one sample at a time at whatever tile the write head is on",
+    "The signal read out of the buffer, taken from whatever tile the read head is on, or from a ring of tiles around it when SPREAD is up",
+    "Note — with all six X, Y and Z knobs at dead centre neither head moves, so the output holds one steady voltage; turn at least one of them off centre for anything to loop",
+    "Note — the panel's grid is a picture of the buffer, brightening where a tile holds a signal, with the write head marked in red and the read head in blue; it cannot be clicked or dragged",
+    "Note — the HexNut CV Expander goes immediately to the right and adds voltage control of the six vector knobs, the two SIZE knobs and BLEND"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13
+   },
+   "in": {
+    "0": 14
+   },
+   "out": {
+    "0": 15
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "HexNut.cpp line 135, inputs[INPUT_INPUT].getVoltage() taken straight into setVoltage with no scaling or clamp"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "HexNut.cpp line 139, setVoltage of whatever the tile holds, with no scaling"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit 9f2eacb, whose plugin.json carries the installed 2.0.2 and the three installed modules; the repository's head adds a fourth module, Repeat, that this build does not have. The buffer length of 21931 tiles is the maker's own figure in Hex.hpp line 98 for a radius of 86, which is what HexNut is built with, and at the usual sample rate that is close to half a second. Parameter 4 is the grain size, declared on HexNut because HexaGrain inherits from it, but HexNut's widget never adds it: it has no position, cannot be clicked and gets no line. The input and the output carry no family: the module writes and reads plain samples and is used for audio and for control voltages alike. Both are read and written a single channel at a time, with getVoltage and setVoltage. There is no clock and no trigger: the heads advance by the knob values on every sample, so the loop time is set by how fast the heads are moving rather than by a tempo. The panel prints CLIP where the parameter is named Crop and SPREAD where it is named Read Ring Radius; the panel wins. The two mode controls are three-position switches driven by a plain parameter running 1 to 3, so their tooltip shows a number rather than the mode name."
   },
   "HexaGrain": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A looping buffer of 721 grains laid out on a hexagonal grid, with a write head and a read head that each move through it along three axes rather than in a line",
+    "Sets how the write head moves: in the first position it follows the write X, Y and Z knobs, in the second it walks a ring set by the write SIZE knob, in the third it spirals inside that ring",
+    "Sets how the read head moves: in the first position it follows the read X, Y and Z knobs, in the second it walks a ring set by the read SIZE knob, in the third it spirals inside that ring",
+    "Sets the radius of the ring the write head walks, from a single grain fully counter-clockwise to the full width of the grid fully clockwise, and it is read only in the second and third write modes",
+    "Sets the radius of the ring the read head walks, from a single grain fully counter-clockwise to the full width of the grid fully clockwise, and it is read only in the second and third read modes",
+    "Sets the length of the grain being written, 1ms fully counter-clockwise to 100ms fully clockwise; it changes only the grain under the write head, so grains keep the length they were given",
+    "Moves the write head along the grid's first axis by this much each grain written, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre it stays put on that axis",
+    "Moves the write head along the grid's second axis by this much each grain written, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre it stays put on that axis",
+    "Moves the write head along the grid's third axis by this much each grain written, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre it stays put on that axis",
+    "Moves the read head along the grid's first axis for this much every grain read, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre the head does not move on that axis",
+    "Moves the read head along the grid's second axis for this much every grain read, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre the head does not move on that axis",
+    "Moves the read head along the grid's third axis for this much every grain read, forwards clockwise of centre and backwards counter-clockwise of it; at dead centre the head does not move on that axis",
+    "Sets how much of what is written replaces what was already in the grain: fully clockwise it overwrites, fully counter-clockwise it writes nothing and the buffer loops untouched",
+    "Widens the read head into a ring of surrounding grains, from none up to a radius of 64; every grain on the ring is added to the one under the head and the sum divided by the root of their number",
+    "Shortens the buffer, so fewer grains are looped and the loop comes round sooner; fully clockwise the whole grid is used",
+    "The signal written into the buffer, one sample at a time into whatever grain the write head is on",
+    "The signal read out of the buffer, played from whatever grain the read head is on, or from a ring of grains around it when SPREAD is up",
+    "Note — with all six X, Y and Z knobs at dead centre neither head moves, so one grain is written and the same grain played over and over; turn at least one of them off centre for anything to loop",
+    "Note — a head only moves at the moment its grain comes round to its start, so shorter grains move the heads faster and changing the grain size changes the speed of reading as well",
+    "Note — the panel's grid is a picture of the buffer, brightening where a grain holds a signal, with the write head marked in red and the read head in blue; it cannot be clicked or dragged",
+    "Note — the HexNut CV Expander goes immediately to the right and adds voltage control of the six vector knobs, the two SIZE knobs and BLEND"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15
+   },
+   "out": {
+    "0": 16
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "HexNut.cpp line 135, inputs[INPUT_INPUT].getVoltage() taken straight into GrainHex::setVoltage with no scaling or clamp"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "HexNut.cpp line 139, setVoltage of whatever the grain plays back, with no scaling"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit 9f2eacb, whose plugin.json carries the installed 2.0.2. HexaGrain is HexNut with a radius of 16 instead of 86 and a whole grain in each cell instead of one sample, so the grid holds 721 grains, which is the maker's own figure in Hex.hpp line 97. Grain lengths run from 44 samples to 4410, set in GrainHex.hpp lines 3 and 4, which at the usual sample rate is 1ms to 100ms. The extra SIZE knob writes its length into the grain under the write head alone, at GrainHex.hpp line 110, so the grid ends up holding grains of several different lengths. The heads only step when the grain they are on wraps back to its start, at GrainHex.hpp lines 92 and 103, which is why the grain size changes how fast the loop runs. The picture on the panel shows each grain's average level rather than a sample. The input and the output carry no family, and both are single channel. The panel prints CLIP where the parameter is named Crop and SPREAD where it is named Read Ring Radius."
+  },
+  "HexExCV": {
+   "lines": [
+    "The CV expander for HexNut and HexaGrain, which goes immediately to the right of one of them and adds voltage control of nine of its knobs",
+    "Adds to HexNut's write X knob, 10V moving the write head a whole knob's worth further along that axis every sample",
+    "Adds to HexNut's write Y knob, 10V moving the write head a whole knob's worth further along that axis every sample",
+    "Adds to HexNut's write Z knob, 10V moving the write head a whole knob's worth further along that axis every sample",
+    "Adds to HexNut's write SIZE knob, 10V covering the whole of that knob's travel, and it changes the radius of the ring the write head walks",
+    "Adds to HexNut's read X knob, 10V moving the read head a whole knob's worth further along that axis every sample",
+    "Adds to HexNut's read Y knob, 10V moving the read head a whole knob's worth further along that axis every sample",
+    "Adds to HexNut's read Z knob, 10V moving the read head a whole knob's worth further along that axis every sample",
+    "Adds to HexNut's read SIZE knob, 10V covering the whole of that knob's travel, and it changes the radius of the ring the read head walks",
+    "Adds to HexNut's BLEND knob, 10V covering the whole of that knob's travel, from writing nothing into the buffer to overwriting it",
+    "Note — this module does nothing on its own: it belongs immediately to the right of a HexNut or a HexaGrain, which reads these jacks itself; with anything else to its left every jack is ignored",
+    "Note — the panel groups the jacks under WRITE and READ, and in each group they run X, Y, Z and then SIZE"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "HexNut.cpp lines 104 and 145, the voltage is scaled by 0.1 and added to a knob that runs -1 to 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "HexNut.cpp lines 105 and 146, the voltage is scaled by 0.1 and added to a knob that runs -1 to 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "HexNut.cpp lines 106 and 147, the voltage is scaled by 0.1 and added to a knob that runs -1 to 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "HexNut.cpp lines 108 and 124, scaled by 0.1, added to a knob that runs 0 to 1, then clamped to a radius of at least one tile"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "HexNut.cpp lines 110 and 151, the voltage is scaled by 0.1 and added to a knob that runs -1 to 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "HexNut.cpp lines 111 and 152, the voltage is scaled by 0.1 and added to a knob that runs -1 to 1"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "HexNut.cpp lines 112 and 153, the voltage is scaled by 0.1 and added to a knob that runs -1 to 1"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "HexNut.cpp lines 114 and 125, scaled by 0.1, added to a knob that runs 0 to 1, then clamped to a radius of at least one tile"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "why": "HexNut.cpp lines 116 and 136, scaled by 0.1, added to a knob that runs 0 to 1, then clamped to 0 to 1 in Hex.hpp line 139"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit 9f2eacb, whose plugin.json carries the installed 2.0.2. The expander's own process function is empty: it holds nine jacks and nothing else, and the base module reaches across and reads them at HexNut.cpp lines 100 to 118. That means it works only when it is the module immediately to the right of a HexNut or a HexaGrain, and it is that module that must be in the patch. Every jack is read with getVoltage, one channel only, and scaled by a tenth before being added to the corresponding knob. The sums for the six vector jacks are not clamped afterwards, so a large voltage can drive a head faster than the knob alone can; the two SIZE sums are clamped to a whole number of tiles between one and the grid radius, and the BLEND sum to between none and full overwrite. The jacks carry no printed names on the panel, only the WRITE, READ and BLEND group headings, so the order within a group comes from the maker's README and from the widget code."
   }
  }
 }

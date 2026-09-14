@@ -1,28 +1,359 @@
 {
  "plugin": "AmbushedCat",
- "source": "https://github.com/LegitCodeRed/AmbushedCat",
+ "source": "https://github.com/LegitCodeRed/AmbushedCat/tree/23cee72",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "TuringMaschine": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sixteen bit shift register sequencer after Music Thing Modular's Turing Machine, giving a stepped voltage, a gate from the register's top bit and a random bit stream",
+    "Sets how likely the bit coming round is replaced by a fresh random one; with the write switch off and Write Mode set to Standard the register repeats unchanged and this knob changes nothing",
+    "Sets how many of the register's top bits are read into the stepped output, 1 to 16; the loop itself is sixteen steps long whatever this is set to",
+    "Sets which way a newly written bit falls, fully anticlockwise always low, fully clockwise always high and even odds at the centre",
+    "Allows fresh random bits to be written into the register; switched off, the pattern comes round unchanged",
+    "Fills the register with a fresh random sixteen bit pattern and stores it as the pattern the reset input returns to",
+    "Shifts the register one place on each rising edge above 1V",
+    "Reloads the stored seed pattern on a rising edge above 1V, without shifting the register",
+    "Nothing in the module acts on this jack: its voltage is added to the change probability only after that probability has already been used, and the sum is then thrown away",
+    "Adds to the number of top bits read into the stepped output, 1.6 bits per volt, and the total is held between 1 and 16",
+    "Adds to the bias of a newly written bit, 10V covering the whole of the bias knob, and the total is held between always low and always high",
+    "The register's top bits read as a number and scaled between 0V and the top of the range set on the menu, which is 5V unless you change it",
+    "10V while the register's top bit is high, or a 50ms pulse each time that bit changes when Pulse Mode is set to Tap",
+    "A fresh random choice of 0V or 10V drawn every sample, taken from neither the register nor the clock",
+    "Menu — Mode: Normal, Poly Ryhtmic — Normal shifts the register once per clock; Poly Ryhtmic shifts it only on some clocks and writes no new bits at all, so the pattern is fixed",
+    "Menu — Pitch Output Range: 5V, 3V, 1V — sets the top of the stepped output's range",
+    "Menu — Write Mode: Standard, Evolving — Standard writes new bits only while the write switch is on; Evolving always writes them, at a tenth of the change knob's probability",
+    "Menu — Pulse Mode: Gate, Tap — Gate holds the pulse output high for as long as the register's top bit is high; Tap gives a 50ms pulse each time that bit changes",
+    "Note — both expanders go to the right: a Gates expander only works as the immediate right neighbour, while Flow expanders work anywhere down the chain of modules to the right",
+    "Note — the register is filled with a random pattern when the module is added, so a clock alone is enough to get a sequence out of it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "2": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TuringMaschine.cpp:179 puts getVoltage through a dsp::SchmittTrigger at its default 0V and 1V thresholds; no getPolyVoltage and no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TuringMaschine.cpp:159 puts getVoltage through a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     },
+     "2": {
+      "poly": false,
+      "normal": "0V, and read to no effect",
+      "why": "TuringMaschine.cpp:202-205 adds getVoltage/10 to the local change, which was last used at :199 and is never read again"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "TuringMaschine.cpp:209-211 multiplies getVoltage by 1.6, adds the Length knob and clamps the total to 1 and 16"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "TuringMaschine.cpp:187-190 turns getVoltage into getVoltage/10 plus 0.5, clamps that to 0 and 1, adds the Bias knob and subtracts 0.5"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "TuringMaschine.cpp:218-220 divides the bit value by its maximum and multiplies by getPitchScale, which is 5 unless the menu says 3 or 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringMaschine.cpp:225 and :233 write 10 or 0 to this output"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringMaschine.cpp:241-242 writes 10 or 0 from a fresh random::u32 every sample"
+     }
+    }
+   },
+   "notes": "The Change CV jack is dead. process() reads the Change knob into a local at :174, uses it inside the clock branch at :192-199, and only then adds the jack's voltage to that same local at :203, after which the local is never read again; the jack therefore has no effect on anything. The Length knob does not set the loop length, which is what its name and the maker's own module description imply: the shift register is always sixteen bits and always rotates all sixteen, and Length only chooses how many of the top bits are read out as a number and how many of the sixteen lamps are lit. In Poly Ryhtmic mode shift() returns before any mutation, so the Change knob, the Bias knob, the Bias CV and the write switch all do nothing in that mode. The panel carries no lettering on any control: the artwork is a PNG drawn over a blank SVG and prints only the module's name."
   },
   "TuringGateExpander": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for the TM Rythm sequencer, giving a gate from each of the top eight bits of its register plus four jacks combining some of them; it goes immediately to the right of the sequencer",
+    "10V while the top bit of the register is high, which is the bit the sequencer's own pulse output follows",
+    "10V while the second bit down from the top of the register is high",
+    "10V while the third bit down from the top of the register is high",
+    "10V while the fourth bit down from the top of the register is high",
+    "10V while the fifth bit down from the top of the register is high",
+    "10V while the sixth bit down from the top of the register is high",
+    "10V while the seventh bit down from the top of the register is high",
+    "10V while the eighth bit down from the top of the register is high",
+    "10V while either the sixth or the seventh bit down from the top of the register is high",
+    "10V while either the fourth or the sixth bit down from the top of the register is high",
+    "10V while either the top bit of the register or the fourth bit down from it is high",
+    "10V while any of the top bit, the fourth, the sixth or the seventh bit down from it is high",
+    "Menu — Gate Mode: Gate, Tap — Gate holds each output high for as long as its bit is high; Tap turns every output into a 50ms pulse fired each time its bit changes state",
+    "Note — this expander does nothing unless a TM Rythm is its immediate left neighbour; with anything else there, or nothing, every output is held at 0V"
+   ],
+   "out": {
+    "4": 8,
+    "5": 7,
+    "6": 6,
+    "7": 5,
+    "8": 4,
+    "9": 3,
+    "10": 2,
+    "11": 1,
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringGateExpander.cpp:82 and :103 write 10 or 0 to the eight single bit outputs and TuringGateExpander.cpp:85-88 and :129 to the four combinations"
+     }
+    }
+   },
+   "notes": "Seventeen outputs are configured but the widget adds only twelve, so outputs 12 to 16 have no jack on the panel and can never be clicked or patched. The eight single bit jacks carry bits 8 to 15 of the sequencer's register, taken from TuringGateExpander.cpp:67 where the message float is cast to a byte whose bit 7 is the register's top bit; the jack at the top of the column is bit 8, the lowest of the eight, and the bottom of the column is the register's top bit. The four combination jacks use the byte's bits 1, 2, 4 and 7. The panel carries no lettering on any jack."
   },
   "TuringVoltsExpander": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for the TM Rythm sequencer, adding up a voltage from whichever of the register's top five bits are high; it goes to the right of the sequencer",
+    "Sets the voltage this knob adds while its bit of the sequence is high, which is a fifth of what the knob reads: 0V to 2V from this one, and 10V with all five raised and all five bits high",
+    "The sum of the voltages from the knobs whose bits are high, 0V to 10V",
+    "Note — the knobs follow the register's top five bits in order down the panel, the topmost knob taking the fifth bit down from the top of the register and the bottom knob taking its top bit",
+    "Note — this expander works anywhere down the chain of modules to the right of a TM Rythm; with no sequencer anywhere to its left the output stays at 0V",
+    "Note — every knob comes up at zero, so the output is 0V until at least one of them is raised"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TuringVoltsExpander.cpp:47-53 sums params[i]*0.2 over the set bits, clamps the total to 0 and 10 and calls setVoltage"
+     }
+    }
+   },
+   "notes": "Each knob is configured 0 to 10V and its tooltip reads in those terms, but TuringVoltsExpander.cpp:49 multiplies it by 0.2 before adding it in, so one knob alone can contribute at most 2V and the full 10V needs all five knobs up and all five bits high. The module walks left through the chain looking for a TuringMaschine, so several of these can be chained; the sequencer's own loop at TuringMaschine.cpp:246-261 writes the top five bits to every one it finds to its right. The panel carries no lettering on any control."
   },
   "Tape": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo tape emulation with bias, saturation, wow and flutter, tone shaping, hiss and an output transformer, the tape type and speed chosen on the menu",
+    "Sets the gain into the tape, from silence through nominal at 1 to three times at the top; past 1 it also brings in the glue compression",
+    "Sets how hard the signal is pushed into the saturation stage, 0 to 4",
+    "Sets the tape's top end, moving a low pass corner from 200Hz to 20200Hz before the tape type and speed scale it",
+    "Sets the level after the transformer stage, silence to two and a half times",
+    "Sets how much bias signal is mixed in ahead of the saturation, and tilts the tone with it: above 1 the highs are lifted, below 1 the lows are",
+    "Sets the depth of the slow pitch drift, 0 to 1.5",
+    "Sets the depth of the fast pitch wobble, 0 to 2.5",
+    "Sets the level of the tape hiss added to the output, 0 to 6, quietened to a quarter while the signal is near silence and trimmed further as the tone is closed",
+    "Sets the level of the crackling noise bed added to the output, 0 to 6",
+    "Scales the pair of shelving filters picked on the menu, -1 to 1, negative settings turning that curve upside down",
+    "Sets how hard the output transformer is driven, 0 to 5, and it comes up at 0, which is unity into that stage",
+    "The left input, and the only one needed when the right is empty",
+    "The right input; with nothing patched here the left input feeds this side too",
+    "The processed left channel, or the two inputs averaged and processed once when the right output is empty",
+    "The processed right channel, and patching a cable here is also what puts the module into stereo",
+    "Note — with the right output empty the module runs in mono: the two inputs are averaged, put through one tape channel and sent to the left output alone. Patch the right output for two channels",
+    "Menu — Tape Mode: I, II, IV — picks the tape formulation, scaling the bias, drive, tone, hiss, static, wow and flutter and glue together",
+    "Menu — Tape Style: Vintage, Classic, Modern, Soulless — scales the hiss and static noise floor, Vintage at full and Soulless to nothing at all",
+    "Menu — Drive and Glue Mode: Single, Mix, Dark — picks the saturation circuit and how much of it is blended back in",
+    "Menu — Tape Speed: 7.5 IPS, 15 IPS, 30 IPS — a faster speed opens the tone, shrinks the wow and flutter depth and lowers the noise",
+    "Menu — EQ Curve: Bass, Highs, Mix — picks the pair of shelves the sweetspot knob scales",
+    "Menu — Transformer: Standard, Dark, Iron — picks which output transformer model the transformer load knob drives"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Tape.cpp:512 reads getVoltage and scales it by 0.2; there is no getPolyVoltage or channel loop in the module"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the left input",
+      "why": "Tape.cpp:513 falls back to the left input's value when isConnected is false"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Tape.cpp:520 and :525 write one processed channel, divided by 0.2, to this output"
+     },
+     "1": {
+      "poly": false,
+      "why": "Tape.cpp:521 writes 0 here while it is unpatched and :526 the processed right channel once it is"
+     }
+    }
+   },
+   "notes": "Whether the module runs in stereo is decided by an output cable, not an input one: Tape.cpp:514 sets stereo from outputs[RIGHT_OUTPUT].isConnected(), and with that jack empty the two inputs are averaged at :518 and one tape channel is used for both. The right input is normalled from the left at :513. Print-through is dead in this build: storePrint still fills its buffer but getPrintEcho at :65 returns zero, and tickDrift is never called, so eqDrift stays at 1. The panel carries no lettering on any control; the artwork is a PNG drawn over the SVG and prints only the module's name. The library screenshot for this plugin shows a later Tape with eleven CV jacks that the installed 2.0.0 build does not have."
   }
  }
 }

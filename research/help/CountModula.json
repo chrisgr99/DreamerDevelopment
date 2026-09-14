@@ -1,7 +1,7 @@
 {
  "plugin": "CountModula",
- "source": "https://github.com/countmodula/VCVRackPluginManuals/releases/download/v2.5.0/Count.Modula.Manual.V2.5.0.pdf",
- "read": "2026-09-11",
+ "source": "https://github.com/countmodula/VCVRackPluginManuals/releases/download/v2.6.0/Count.Modula.Manual.V2.6.0.pdf",
+ "read": "2026-09-14",
  "modules": {
   "AnalogueShiftRegister": {
    "lines": [
@@ -10742,6 +10742,187 @@
      }
     }
    }
+  },
+  "BinarySequencerPlus": {
+   "lines": [
+    "Sequencer built on a counter, mixing eight of the counter's divisions together in whatever proportions the knobs set to make a repeating control voltage",
+    "Picks which way the counter runs, up or down; a cable in the COUNT input takes this switch out of circuit",
+    "Sets the largest voltage the mix can reach, 1V to 10V in 1V steps, divided equally across the eight division knobs",
+    "Picks how the counter's eight divisions are worked out: B1 a binary ripple counter, B2 a binary counter, D the decimals 2 to 9, P the primes, F the Fibonacci numbers, E the evens and O the odds",
+    "Slews the output voltage so it glides between steps rather than jumping",
+    "Shapes the glide, linear at one end and logarithmic at the other",
+    "How much that division adds to the output voltage, -10 to 10, so it can pull the voltage down as well as push it up; it counts only while that division is active",
+    "Picks what the CLOCK and TRIG outputs follow: in the CLOCK position the clock input itself, in the DIV position only the clock pulses on which some division is active. A cable in GATE overrides it",
+    "Reverses the order of the eight divisions across the panel, so the longest division moves to the left; a cable in the FLIP input takes this switch out of circuit",
+    "A rising edge advances the counter; there is no clock inside, so nothing moves until one is patched here",
+    "A rising edge restarts the counter at the first count of the chosen mode",
+    "A high gate lets the sequencer run and a low gate pauses it, taking up again at the next clock; with nothing patched the sequencer runs",
+    "A voltage sampled at each rising clock edge, used in place of the SCALE switch as the total the division knobs share, each knob at full reaching an eighth of it; it is held within 10V either way",
+    "A high gate counts up and a low gate counts down, in place of the COUNT switch",
+    "A high gate gives the DIV gate mode and a low gate the CLOCK gate mode, in place of the GATE switch",
+    "A high gate reverses the order of the eight divisions, in place of the FLIP switch",
+    "Carries the clock while the sequencer runs: the clock input itself under the CLOCK gate mode, or only those pulses on which a division is active under the DIV mode",
+    "A 1ms trigger on each clock pulse the gate mode lets through",
+    "The eight division knobs summed for the divisions that are active, scaled by the SCALE switch or the S&H voltage, sampled at the clock edge and passed through LAG and SHAPE",
+    "The CV output with its sign flipped",
+    "Note — the eight lamps above the division knobs light for the divisions that are active on the current count",
+    "Menu — Initialize Division Mix Only — puts the eight division knobs back to their default positions and leaves the rest of the module as it is",
+    "Menu — Randomize Division Mix Only — sets the eight division knobs to random positions and leaves the rest of the module as it is",
+    "Note — this module is monophonic: only the first channel of a polyphonic cable is read, and every output carries a single channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "13": 7,
+    "14": 8,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14,
+    "6": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 17,
+    "2": 18,
+    "3": 19
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "BinarySequencerPlus.cpp:307 reads the jack with getVoltage into gpClock; GateProcessor (inc/GateProcessor.hpp) takes it high above 2V and low below 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "BinarySequencerPlus.cpp:299 reads the jack with getVoltage into gpReset; GateProcessor (inc/GateProcessor.hpp) takes it high above 2V and low below 0.1V"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "10V, so the sequencer runs",
+      "why": "BinarySequencerPlus.cpp:296 reads the jack with getNormalVoltage(10V) into gpRun; GateProcessor (inc/GateProcessor.hpp) takes it high above 2V and low below 0.1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the SCALE switch",
+      "why": "BinarySequencerPlus.cpp:372 clamps the jack's getVoltage to -10V to 10V and divides it by eighty to give the per-knob scale"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "the COUNT switch",
+      "why": "BinarySequencerPlus.cpp:293 reads the jack with getNormalVoltage of the switch into gpDir; GateProcessor (inc/GateProcessor.hpp) takes it high above 2V and low below 0.1V"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "the GATE switch",
+      "why": "BinarySequencerPlus.cpp:292 reads the jack with getNormalVoltage of the switch into gpGatemode; GateProcessor (inc/GateProcessor.hpp) takes it high above 2V and low below 0.1V"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "the FLIP switch",
+      "why": "BinarySequencerPlus.cpp:291 reads the jack with getNormalVoltage of the switch into gpFlip; GateProcessor (inc/GateProcessor.hpp) takes it high above 2V and low below 0.1V"
+     }
+    }
+   },
+   "notes": "Three figures in the maker's manual disagree with the code, and the code is what is written here. The manual says a knob at full scale equates to a sixth of the sampled S&H voltage; BinarySequencerPlus.cpp:372 divides by eighty against eight knobs of ±10, which is an eighth. The manual's prime row reads 1, 3, 5, 7, 11, 13, 15, 17; BinarySequencerPlus.cpp:76 holds 2, 3, 5, 7, 11, 13, 17, 19. The manual gives the B1 divisions as 2 to 256; BinarySequencerPlus.cpp:73 masks the counter with 1 to 128, one bit per knob. Because the numbers differ per mode and per flip state, the division knobs' own line names none of them; the knob's tooltip is renamed to the division it currently holds."
+  },
+  "MiniMix": {
+   "lines": [
+    "A no-frills four-input unity mixer: the four inputs summed, an output level control that can also invert, and an inverted copy of the output",
+    "Sets the level of both outputs: silence at the centre, rising to full in one direction and to full with the sign flipped in the other",
+    "One of the four inputs into the mix, added at unity",
+    "The four inputs summed and scaled by the LEVEL knob, clamped to 12V either way unless clipping is turned off",
+    "The mix with its sign flipped",
+    "Note — the LEVEL knob starts at the centre, which is silence, so nothing reaches either output until it is turned up",
+    "Note — the O/L lamp lights whenever the mix passes 12V, red for a monophonic mix and blue for a polyphonic one",
+    "Note — the inputs take polyphony and both outputs carry as many channels as the widest input; channels are summed one for one, so a monophonic cable contributes to channel one alone",
+    "Menu — Clipping — ticked, the mix is clamped to 12V either way; unticked it is left alone and can run past the rails"
+   ],
+   "param": {
+    "1": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "MiniMix.cpp:117 reads the jack with getVoltageSimd at the channel offset, across the widest input's channel count taken at MiniMix.cpp:105"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "MiniMix.cpp:118 reads the jack with getVoltageSimd at the channel offset, across the widest input's channel count taken at MiniMix.cpp:105"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "MiniMix.cpp:119 reads the jack with getVoltageSimd at the channel offset, across the widest input's channel count taken at MiniMix.cpp:105"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "MiniMix.cpp:120 reads the jack with getVoltageSimd at the channel offset, across the widest input's channel count taken at MiniMix.cpp:105"
+     }
+    }
+   },
+   "notes": "No family is given for any of these jacks: the module passes on whatever is patched into it. The first parameter, MODE_PARAM, is declared in the enum but never configured and has no widget on the panel, so it carries no line and no tag."
   }
  }
 }

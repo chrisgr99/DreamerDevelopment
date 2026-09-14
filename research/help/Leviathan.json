@@ -1,53 +1,969 @@
 {
  "plugin": "Leviathan",
- "source": "https://github.com/PlasmaChroma/Leviathan-Rack2",
+ "source": "https://github.com/PlasmaChroma/Leviathan-Rack2 (branch puffy-rc3, commit c37193d, the 2.9.1 build that shipped)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "IntegralFlux": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two function generators, each also a slew limiter and an envelope follower, feeding four attenuverter channels and a mixing bus that sums, inverts and takes the maximum",
+    "Sets how long that channel's rise takes, from a tenth of a millisecond at the far left to 1500 seconds at the far right",
+    "Sets how long that channel's fall takes, from a tenth of a millisecond at the far left to 1500 seconds at the far right",
+    "Bends both slopes of that channel: logarithmic at the far left, linear a third of the way up, exponential at the far right; the left half also stretches the stage times, the right half shortens them",
+    "Picks how CURVE is applied to that channel: Shark Fin bends the rise and the fall in opposite directions, Mirror bends both the same way, and Mirror is the position it starts in",
+    "Latches that channel into free running, so it retriggers itself the moment the fall ends; the lamp beside it is lit while looping",
+    "An attenuverter on that generator's output, silent at centre, full level clockwise and full level inverted anticlockwise; it feeds the numbered output below it and the mixing bus",
+    "An attenuverter on IN 2, silent at centre, full level clockwise and inverted anticlockwise; with IN 2 unpatched it scales a fixed 10V, giving a manual offset from -10V to +10V",
+    "An attenuverter on IN 3, silent at centre, full level clockwise and inverted anticlockwise; with IN 3 unpatched it scales a fixed 5V, giving a manual offset from -5V to +5V",
+    "A signal for that channel to slew; while the generator is idle the channel tracks this voltage at the rates set by SURGE and SINK, and while a cycle is running it is folded in gently instead",
+    "A rising edge above 1V starts a fresh rise on that channel; an edge during the rise is ignored, and one during the fall drops the output to 0V and restarts",
+    "A signal scaled by the attenuverter above it and sent to output 2 and the mixing bus; with nothing patched the channel reads a fixed 10V",
+    "A signal scaled by the attenuverter above it and sent to output 3 and the mixing bus; with nothing patched the channel reads a fixed 5V",
+    "Lengthens that channel's rise by half an octave of time per volt, and shortens it for negative voltage, over a span of twelve octaves either way",
+    "Lengthens that channel's fall by half an octave of time per volt, and shortens it for negative voltage, over a span of twelve octaves either way",
+    "Scales the rise and the fall of that channel together, positive voltage making the whole cycle faster and negative voltage slower",
+    "A voltage above 2.5V puts that channel into free running for as long as it is held, whatever the LOOP button is set to",
+    "That generator's output scaled by the attenuverter above it, clamped to ±10V; patching this jack takes the channel out of the OR, SUM and INV bus",
+    "IN 2 scaled by the attenuverter above it, clamped to ±10V; patching this jack takes the channel out of the OR, SUM and INV bus",
+    "IN 3 scaled by the attenuverter above it, clamped to ±10V; patching this jack takes the channel out of the OR, SUM and INV bus",
+    "A 10V gate on channel 1, going high at the top of the rise and staying high for the whole of the fall; with IN 1 patched and no cycle running it is high while the slew falls",
+    "A 10V gate on channel 4, high for the whole of the rise; with IN 4 patched and no cycle running it is high while the slew rises",
+    "That generator's output at full level, ahead of its attenuverter, swinging from 0V to 10.2V",
+    "The highest of the four channel voltages after their attenuverters, floored at 0V and clamped to 10V, counting only channels whose numbered output is unpatched",
+    "The four channel voltages after their attenuverters added together and clamped to ±10V, counting only channels whose numbered output is unpatched",
+    "The SUM voltage with its sign flipped, clamped to ±10V",
+    "Note — both attenuverters start at centre, where they pass nothing, so the numbered outputs and the mixing bus are silent until you turn one of them away from noon",
+    "Note — the two dark rectangles draw the shape of each channel's cycle, with a dot running along it while the channel is active; nothing on them can be clicked or dragged",
+    "Note — a channel with nothing patched into its signal or trigger jack and its LOOP button off holds at 0V; it needs a trigger, a loop or a patched signal before it puts anything out",
+    "Menu — Bandlimited EOR/EOC — smooths the edges of the EoR and EoC gates so they alias less at audio rates",
+    "Menu — Bandlimited CH1/CH4 Signal Outputs — smooths the jump the generator makes when a fall reaches the bottom, so the output aliases less at audio rates",
+    "Menu — Preview Tracer — draws a moving dot on each channel's curve display showing where that channel is in its cycle",
+    "Menu — Interpolate Timing Updates — spreads a change of rise or fall time across the samples between timing updates, removing the zipper tone heavy modulation otherwise causes",
+    "Menu — Timing Update Rate — sets how often the rise and fall times are recalculated from the knobs and the CV, at audio rate or one sample in four, eight, sixteen or thirty-two",
+    "Menu — Force Halo Dynamic Surface to NanoVG — draws the lit rings around the knobs without OpenGL"
+   ],
+   "param": {
+    "0": 6,
+    "11": 6,
+    "5": 7,
+    "8": 8,
+    "3": 1,
+    "4": 1,
+    "6": 2,
+    "7": 2,
+    "9": 3,
+    "10": 3,
+    "12": 4,
+    "13": 4,
+    "1": 5,
+    "2": 5
+   },
+   "in": {
+    "0": 9,
+    "5": 9,
+    "1": 10,
+    "4": 10,
+    "2": 11,
+    "3": 12,
+    "6": 13,
+    "7": 13,
+    "10": 14,
+    "11": 14,
+    "8": 15,
+    "9": 15,
+    "12": 16,
+    "13": 16
+   },
+   "out": {
+    "0": 17,
+    "3": 17,
+    "1": 18,
+    "2": 19,
+    "4": 20,
+    "10": 21,
+    "5": 22,
+    "9": 22,
+    "6": 23,
+    "7": 24,
+    "8": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "5": "cv",
+     "1": "trigger",
+     "4": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "6": "cv",
+     "7": "cv",
+     "10": "cv",
+     "11": "cv",
+     "8": "cv",
+     "9": "cv",
+     "12": "trigger",
+     "13": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "10": "trigger",
+     "5": "cv",
+     "9": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; the signal is soft-limited at 8V and mapped across the 0V to 10.2V slew span, so negative voltage is carried in",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "1": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; dsp::SchmittTrigger at its default 0.1V/1V thresholds, rising edge only",
+      "range": "high above 1V",
+      "negative": "ignored"
+     },
+     "2": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; process() reads 10V when INPUT_2_INPUT is unpatched and multiplies by the attenuverter gain, which runs -1 to +1",
+      "normal": "10V",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "3": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; process() reads 5V when INPUT_3_INPUT is unpatched and multiplies by the attenuverter gain, which runs -1 to +1",
+      "normal": "5V",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "4": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; dsp::SchmittTrigger at its default 0.1V/1V thresholds, rising edge only",
+      "range": "high above 1V",
+      "negative": "ignored"
+     },
+     "5": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; the signal is soft-limited at 8V and mapped across the 0V to 10.2V slew span, so negative voltage is carried in",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "6": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; computeStageTime soft-limits the CV at 8V, scales it by STAGE_CV_OCT_PER_V = 0.5 octaves per volt and clamps to CV_OCT_CLAMP = 12 octaves either way",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "7": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; computeStageTime soft-limits the CV at 8V, scales it by STAGE_CV_OCT_PER_V = 0.5 octaves per volt and clamps to CV_OCT_CLAMP = 12 octaves either way",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "8": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; bothTimeScaleFromCv soft-limits at 8V and returns a time multiplier either side of the neutral voltage",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "9": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; bothTimeScaleFromCv soft-limits at 8V and returns a time multiplier either side of the neutral voltage",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "10": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; computeStageTime soft-limits the CV at 8V, scales it by STAGE_CV_OCT_PER_V = 0.5 octaves per volt and clamps to CV_OCT_CLAMP = 12 octaves either way",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "11": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; computeStageTime soft-limits the CV at 8V, scales it by STAGE_CV_OCT_PER_V = 0.5 octaves per volt and clamps to CV_OCT_CLAMP = 12 octaves either way",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "12": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; processOuterChannel takes cycleCvHigh = voltage >= 2.5f as a level, not an edge",
+      "range": "high above 2.5V",
+      "negative": "ignored"
+     },
+     "13": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; processOuterChannel takes cycleCvHigh = voltage >= 2.5f as a level, not an edge",
+      "range": "high above 2.5V",
+      "negative": "ignored"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; process() clamps each variable output to ±10V",
+      "range": "±10V"
+     },
+     "1": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; process() clamps each variable output to ±10V",
+      "range": "±10V"
+     },
+     "2": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; process() clamps each variable output to ±10V",
+      "range": "±10V"
+     },
+     "3": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; process() clamps each variable output to ±10V",
+      "range": "±10V"
+     },
+     "4": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; process() writes 10V or 0V from the channel gate state",
+      "range": "0 to 10V"
+     },
+     "5": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: OUTER_V_MIN = 0.f and OUTER_V_MAX = 10.2f bound the integrator, and the unity jacks are written from it unscaled",
+      "range": "0 to 10.2V"
+     },
+     "6": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; orOut is clamped to 0 to 10V",
+      "range": "0 to 10V"
+     },
+     "7": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; sumOut is clamped to ±10V",
+      "range": "±10V"
+     },
+     "8": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; invOut is the negated sum, clamped to ±10V",
+      "range": "±10V"
+     },
+     "9": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: OUTER_V_MIN = 0.f and OUTER_V_MAX = 10.2f bound the integrator, and the unity jacks are written from it unscaled",
+      "range": "0 to 10.2V"
+     },
+     "10": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/IntegralFlux.cpp: every jack is read with getVoltage() and nothing in the plugin loops over an input's channels; process() writes 10V or 0V from the channel gate state",
+      "range": "0 to 10V"
+     }
+    }
+   },
+   "notes": "Commit c37193d on branch puffy-rc3 carries version 2.9.1 and a plugin.json byte-identical to the installed one; that is the build read. The module is a Make Noise Maths emulation and the maker keeps the Maths manual in doc/manuals. Panel lettering names the rise and fall controls SURGE and SINK and the shape control CURVE, while the maker's tooltips call them rise, fall and shape; the lines follow the panel. The shape-mode switch carries no printed label. EoR on channel 1 is high for the whole of the fall and EoC on channel 4 is high for the whole of the rise, which is the Maths behaviour but is not what either abbreviation suggests. Self-cycling is held to 1000Hz and external triggering to 2000Hz by enforceOuterSpeedLimit, which stretches both stage times when the pair would run faster. The curve previews and the crystal button are plain widgets with no parameter behind them, so no click on them reaches this feature."
   },
   "Proc": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A single function generator that is also a slew limiter and an envelope follower, with a freeze input and both a positive and an inverted output",
+    "Sets how long the rise takes, from a tenth of a millisecond at the far left to 1500 seconds at the far right",
+    "Sets how long the fall takes, from a tenth of a millisecond at the far left to 1500 seconds at the far right",
+    "Bends both slopes: logarithmic at the far left, linear a third of the way up, exponential at the far right; the left half also stretches the stage times, the right half shortens them",
+    "Latches the channel into free running, so it retriggers itself the moment the fall ends; the lamp beside it is lit while looping",
+    "Sets the peak the generated function reaches, from 0V to 10V, and starts at 8V; a signal being slewed passes at full level whatever this knob says",
+    "A signal to slew; while no cycle is running the output tracks this voltage at the rates set by SURGE and SINK, and while a cycle is running the signal is folded into it gently instead",
+    "A rising edge above 1V starts a fresh rise; an edge during the rise is ignored, one during the fall drops the output to 0V and restarts, and all of them are ignored while HALT is high",
+    "A voltage above 2.5V freezes the module: the output, both gates and the position in the cycle are held where they were, and triggers and looping are ignored until it falls back below 2.5V",
+    "Lengthens the rise by half an octave of time per volt, and shortens it for negative voltage, over a span of twelve octaves either way",
+    "Lengthens the fall by half an octave of time per volt, and shortens it for negative voltage, over a span of twelve octaves either way",
+    "Scales the rise and the fall together, positive voltage making the whole cycle faster and negative voltage slower",
+    "A 10V gate that goes high at the top of the rise and stays high for the whole of the fall; with a signal patched into INPUT and no cycle running it is high while the slew falls",
+    "A 10V gate that is high for the whole of the rise; with a signal patched into INPUT and no cycle running it is high while the slew rises",
+    "The generated function, or the slewed input signal, running upward from 0V",
+    "The same voltage as OUT+ with its sign flipped, so it runs downward from 0V",
+    "Note — with nothing patched into INPUT or TRIG and LOOP off, the module holds at 0V; it needs a trigger, a loop or a patched signal before it puts anything out",
+    "Note — the dark rectangle draws the shape of the cycle, with a dot running along it while the channel is active; nothing on it can be clicked or dragged",
+    "Menu — Bandlimited EOR/EOC — smooths the edges of the EoR and EoC gates so they alias less at audio rates",
+    "Menu — Bandlimited Signal Outputs — smooths the jump the generator makes when a fall reaches the bottom, so the output aliases less at audio rates",
+    "Menu — Preview Tracer — draws a moving dot on the curve display showing where the channel is in its cycle",
+    "Menu — Interpolate Timing Updates — spreads a change of rise or fall time across the samples between timing updates, removing the zipper tone heavy modulation otherwise causes",
+    "Menu — Timing Update Rate — sets how often the rise and fall times are recalculated from the knobs and the CV, at audio rate or one sample in four, eight, sixteen or thirty-two"
+   ],
+   "param": {
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "0": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "5": 10,
+    "4": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Proc.cpp: every jack is read with getVoltage() and nothing in the module loops over an input's channels; the signal is clamped into the 0V to 10V function span in slew mode, and in cycle mode soft-limited and folded in",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "1": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Proc.cpp: every jack is read with getVoltage() and nothing in the module loops over an input's channels; dsp::SchmittTrigger at its default 0.1V/1V thresholds, rising edge only",
+      "range": "high above 1V",
+      "negative": "ignored"
+     },
+     "2": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Proc.cpp: every jack is read with getVoltage() and nothing in the module loops over an input's channels; processChannel takes haltHigh = voltage >= 2.5f as a level, not an edge, and returns early while it is true",
+      "range": "high above 2.5V",
+      "negative": "ignored"
+     },
+     "3": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Proc.cpp: every jack is read with getVoltage() and nothing in the module loops over an input's channels; computeStageTime soft-limits the CV at 8V, scales it by STAGE_CV_OCT_PER_V = 0.5 octaves per volt and clamps to CV_OCT_CLAMP = 12 octaves either way",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "4": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Proc.cpp: every jack is read with getVoltage() and nothing in the module loops over an input's channels; bothTimeScaleFromCv soft-limits at 8V and returns a time multiplier either side of the neutral voltage",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "5": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Proc.cpp: every jack is read with getVoltage() and nothing in the module loops over an input's channels; computeStageTime soft-limits the CV at 8V, scales it by STAGE_CV_OCT_PER_V = 0.5 octaves per volt and clamps to CV_OCT_CLAMP = 12 octaves either way",
+      "negative": "swings",
+      "step": "continuous"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Proc.cpp: every jack is read with getVoltage() and nothing in the module loops over an input's channels; process() writes 10V or 0V from the gate state",
+      "range": "0 to 10V"
+     },
+     "1": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Proc.cpp: every jack is read with getVoltage() and nothing in the module loops over an input's channels; process() writes 10V or 0V from the gate state",
+      "range": "0 to 10V"
+     },
+     "2": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Proc.cpp: the function runs FUNCTION_V_MIN = 0.f to FG_V_MAX = 10.f, scaled down by the amplitude knob, and slew mode passes the input across the same span",
+      "range": "0 to 10V"
+     },
+     "3": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Proc.cpp: negOut = -outRendered, and outRendered runs 0V to 10V",
+      "range": "-10 to 0V"
+     }
+    }
+   },
+   "notes": "One channel of Integral Flux with a HALT input added and the mixing bus removed. Panel lettering names the controls INPUT, TRIG, LOOP, SURGE, BOTH, HALT, SINK and CURVE; the maker's tooltips call them Signal, Trigger, Cycle, Surge, Both CV, Halt CV, Sink and Curve, and the amplitude knob carries no printed label at all. HALT is checked as a level and makes processChannel return before anything is written, so the output and both gates freeze rather than falling to zero. The amplitude knob is applied only while a cycle is running: the slew path sets signalOutputGain back to 1, so a slewed signal passes at full level whatever the knob says. Self-cycling is held to 1000Hz and external triggering to 2000Hz. There is no loop CV jack on this module, only the button."
   },
   "TemporalDeck": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo turntable: it records what you play into a circular buffer and gives you a platter you can drag, freeze, reverse and slip, or loads a sound file to play instead",
+    "Sets how far back into the recording the playhead may travel, from none of it at the far left to the whole buffer at the far right; with a sample loaded it sets where the playback window ends",
+    "Scales how far a drag on the platter moves the playhead, half as far at the far left and twice as far at the far right",
+    "Keeps the recording running underneath while you move the platter, so releasing it returns the playhead to where the sound would have been; the menu sets how quickly it rejoins",
+    "Sets the playback speed, half speed at the far left, normal speed at centre and double speed at the far right; a cable in the RATE jack takes this knob out of the calculation entirely",
+    "Runs the playhead backwards; with a cable in the REV jack and Reverse CV set to Gated Control the direction follows the cable and this button does nothing",
+    "Stops the playhead and stops recording, holding whatever is in the buffer; with a cable in the FREEZE jack and Freeze CV set to Gated Control the state follows the cable and this button does nothing",
+    "Crossfades the outputs between the signal arriving at IN L and IN R and the sound coming off the buffer, dry at the far left and buffer only at the far right",
+    "Mixes the output back into what is being written to the buffer, so material repeats and builds up; at the far left nothing is fed back",
+    "Steps through the cartridge characters, which change the tone of the sound read off the platter",
+    "Adds a TD.Scope expander to the right of this module",
+    "The left channel of the signal written into the buffer",
+    "The right channel of the signal written into the buffer",
+    "Sets the playback speed, half speed at -10V, normal speed at 0V and double speed at +10V; while a cable is in this jack the RATE knob is ignored, so a cable resting at 0V pins the speed to normal",
+    "Moves the playhead while the scratch gate is high, one second of recording per volt, positive voltage moving forward toward the newest sound in the buffer and negative deeper into the past",
+    "A voltage above 1V hands the playhead to the POS jack for as long as it is held, and starts the scratch gesture that S.GATE and S.POS report",
+    "A voltage above 1V stops the playhead and stops recording; crossing below -1V instead sends the playhead back to the start of the buffer",
+    "A voltage above 1V runs the playhead backwards; in Gated Control it holds the direction for as long as it is high, in Pulsed Control each rising edge flips it",
+    "The left channel of the mix of the input signal and the sound coming off the buffer, set by WET",
+    "The right channel of the mix of the input signal and the sound coming off the buffer, set by WET",
+    "10V for as long as a scratch gesture is running, whether it came from dragging the platter, dragging a TD.Scope waveform or the GATE jack, and 0V otherwise",
+    "How far the playhead has moved since the scratch gesture began, one volt per second, positive meaning toward the newest sound; it reads 0V whenever S.GATE is low",
+    "Note — the round platter is a single drawn widget rather than a control: drag it to move the playhead, and nothing on it can be clicked for its own note",
+    "Note — the module records whatever arrives at IN L and IN R from the moment it is placed, so with nothing patched in and no sample loaded there is nothing in the buffer to play",
+    "Note — to play a sound file instead of the incoming signal, load it from the menu; the buffer, the platter and every transport control then work on the file",
+    "Menu — Load sample... — opens a file chooser for a WAV, FLAC or MP3 to play in place of what the module records",
+    "Menu — Clear sample — discards the loaded file and returns the module to recording its inputs",
+    "Menu — Convert live -> sample — freezes what is currently in the buffer into a loaded sample, so it stops being overwritten",
+    "Menu — Save sample... — writes a sample made from the buffer to a WAV file",
+    "Menu — Sample info — shows the loaded file's name and length, and says so when it was cut short to fit the buffer",
+    "Menu — Buffer range: 10 s, 20 s, 1 min stereo, 2 min stereo, 10 min stereo, 10 min mono — sets how much recording is held, and so how much memory the module takes",
+    "Menu — Scratch interpolation: Cubic, 6-point Lagrange, Sinc (CPU heavy) — picks the arithmetic used to read between samples while scratching, trading tone for processor time",
+    "Menu — HQ rate interpolation — uses the better arithmetic for ordinary playback as well as for scratching",
+    "Menu — Gate+Pos mode: Module sync, Glide / inertia — sets whether the POS jack snaps the playhead to its voltage or glides toward it",
+    "Menu — Reverse CV: Gated Control, Pulsed Control — sets whether the REV jack holds the direction while high or flips it on each rising edge",
+    "Menu — Freeze CV: Gated Control, Pulsed Control — sets whether the FREEZE jack holds the freeze while high or toggles it on each rising edge",
+    "Menu — Slip return speed: None, Slow, Normal, Instant — sets how quickly the playhead rejoins the newest point in the recording after a slip, or turns slip off",
+    "Menu — Vinyl — chooses the artwork drawn on the platter and its brightness, and downloads the maker's library of platter art"
+   ],
+   "param": {
+    "0": 1,
+    "2": 2,
+    "7": 3,
+    "1": 4,
+    "6": 5,
+    "5": 6,
+    "3": 7,
+    "4": 8,
+    "8": 9,
+    "9": 10
+   },
+   "in": {
+    "2": 11,
+    "3": 12,
+    "1": 13,
+    "0": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17
+   },
+   "out": {
+    "0": 18,
+    "2": 19,
+    "1": 20,
+    "3": 21
+   },
+   "family": {
+    "in": {
+     "2": "audio",
+     "3": "audio",
+     "1": "cv",
+     "0": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "2": "audio",
+     "1": "trigger",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: lagOffsetForPositionCv clamps to ±10V and multiplies by the sample rate, so one volt is one second of recording",
+      "range": "±10V",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "1": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: baseSpeedFromCv clamps the voltage to ±10V and maps -10V to half speed, 0V to normal and +10V to double; computeBaseSpeed uses it INSTEAD of the knob whenever the jack is connected",
+      "range": "±10V",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "2": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: readProcessSignalInputs reads every jack with getVoltage() and nothing in the module loops over an input's channels; inL is written into the buffer unaltered",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "3": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: readProcessSignalInputs reads every jack with getVoltage() and nothing in the module loops over an input's channels; inL is written into the buffer unaltered",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "4": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: kScratchGateThreshold = 1.f, tested as a level",
+      "range": "high above 1V",
+      "negative": "ignored"
+     },
+     "5": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: kFreezeGateThreshold = 1.f as a level, and consumeFreezeNegativeReset fires a position reset when the voltage crosses below -1V",
+      "range": "high above 1V",
+      "negative": "swings"
+     },
+     "6": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: kFreezeGateThreshold = 1.f is used for the reverse jack too",
+      "range": "high above 1V",
+      "negative": "ignored"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: readProcessSignalInputs reads every jack with getVoltage() and nothing in the module loops over an input's channels"
+     },
+     "1": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: scratchGateOut is set to 10.f or 0.f",
+      "range": "0 to 10V"
+     },
+     "2": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: readProcessSignalInputs reads every jack with getVoltage() and nothing in the module loops over an input's channels"
+     },
+     "3": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/TemporalDeck.cpp and src/TemporalDeckEngine.hpp: scratchPosOut is the movement in seconds, clamped to ±10V, and forced to 0 while the gate is low",
+      "range": "±10V"
+     }
+    }
+   },
+   "notes": "The RATE jack replaces the RATE knob rather than adding to it: computeBaseSpeed reads baseSpeedFromCv when the jack is connected and never looks at the knob, so a patched cable sitting at 0V holds normal speed and leaves the knob dead. The FREEZE and REV buttons are likewise inert whenever their jack is patched and the matching menu mode is Gated Control, which is the mode both come up in. The knob range and the CV range differ: the knob covers half to double speed across its travel, and the jack covers the same span across -10V to +10V. The FREEZE jack has a second function the panel does not show, and the maker's own tooltip does: crossing below -1V resets the playhead to the start of the buffer. The platter is an OpaqueWidget with no ParamWidget behind it, so dragging it works but no click on it reaches this feature; the same is true of the TD.Scope waveform. The cartridge and scope-spawn buttons carry no printed label."
   },
   "TDScope": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for Temporal Deck that draws the buffer as a scrolling waveform, and lets you drag that waveform to move the playhead",
+    "Note — it works only when placed immediately to the right of a Temporal Deck; on its own the screen stays dark and dragging it does nothing",
+    "Note — drag the waveform up or down to move Temporal Deck's playhead, the same gesture as turning the platter; the amber band across the picture marks where the playhead is",
+    "Note — there are no jacks and no knobs on this module: everything it shows comes from the Temporal Deck beside it, and everything you can set is on its right-click menu",
+    "Menu — Mono — draws one waveform made from both channels",
+    "Menu — Stereo (side-by-side) — draws the left and right channels as two waveforms next to each other",
+    "Menu — Inverted Vertical — flips the picture top to bottom, so the newest sound is drawn at the other end",
+    "Menu — Scope Range: Auto (window peak), +/-2.5V full width, +/-5V full width, +/-10V full width — sets the voltage that fills the width of the display, or scales it to the loudest part on screen",
+    "Menu — Colors: Default (Purple/Cyan), Classic (Green/Red), Monochrome (Gray/White), Fire (Red/Yellow), Retro Amber, Retro Green — picks the colour scheme the waveform is drawn in",
+    "Menu — Brightness — a slider setting how bright the waveform is drawn"
+   ],
+   "notes": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3): TDScope.cpp declares no parameters, inputs or outputs at all, only two lights, so the entry is a first line, notes and menu items. It reads leftExpander.module and checks it is a Temporal Deck, which means it goes to the RIGHT of the deck. The waveform is a plain display widget with drag handling of its own; no click on it reaches this feature. The Debug Render submenu is only built when the maker's debug flag is set and is left out."
   },
   "Undertow": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator giving a sine wave, a morphing wave that grows a spike out of that sine, and a square one octave down",
+    "Sets the pitch, from 10Hz at the far left to 10000Hz at the far right, and starts at 261.63Hz",
+    "Detunes the oscillator by up to a hundred cents either side of the pitch set by FREQ",
+    "Snaps FREQ to whole octaves above and below middle C instead of letting it run smoothly, and starts off",
+    "Sets how much of the voltage at the LIN FM jack reaches the frequency, none at the far left",
+    "Grows a triangular spike out of the trough of the sine on the MORPH output, wider and taller the further it is turned; at the far left the MORPH output is a plain sine",
+    "Sets how sharply the spike meets the sine around it, a soft join at the far left and a hard corner at the far right, and starts at the halfway point",
+    "Sets the pitch at a volt per octave, added to FREQ and FINE",
+    "Adds to the pitch at a volt per octave, with no attenuator of its own, so it does the same arithmetic as V/OCT",
+    "Modulates the frequency as a fraction of the current pitch, scaled by the LIN FM knob; the signal is stripped of any steady offset before it is used, so only its swing counts",
+    "Scales the MORPH knob rather than adding to it, reaching the full knob setting at 8V; while a cable is in this jack a voltage of 0V leaves the output a plain sine whatever the knob says",
+    "A rising edge above 1V restarts the waveform from the beginning of its cycle",
+    "A voltage above 1V lets the sub square run, and below that it holds the SUB output at 0V; with nothing patched the sub runs all the time",
+    "A sine wave at the pitch the module is set to, swinging ±5V",
+    "The sine with the spike grown out of it by MORPH, clamped to ±5V",
+    "A square wave one octave below the pitch the module is set to, swinging ±5V; it flips on each cycle of the main waveform",
+    "Note — the dark rectangle draws one cycle of the MORPH waveform as it is shaped; nothing on it can be clicked or dragged",
+    "Menu — Coarse Tune: Continuous, Octave Stepped — the same choice the OCT button makes, between a freely swept FREQ knob and one that snaps to octaves",
+    "Menu — Asymmetry: Off, Rising, Falling — lifts one flank of the morph spike so the waveform is no longer symmetrical, on whichever side is chosen",
+    "Menu — Analog character — puts a soft, level-dependent saturation on the sine and morph outputs",
+    "Menu — Preview tracer — draws a moving marker on the waveform display showing where in the cycle the oscillator is"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "4": 3,
+    "2": 4,
+    "3": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "audio",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Undertow.cpp: every jack is read with getVoltage() and the three outputs call setChannels(1); baseFreq = coarseHz * exp2(fineOctaves + vOct + expo), so the jack is an exponent in octaves",
+      "range": "1V per octave",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "1": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Undertow.cpp: every jack is read with getVoltage() and the three outputs call setChannels(1); the expo jack is added to vOct in the same exponent, with no scaling between them",
+      "range": "1V per octave",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "2": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Undertow.cpp: every jack is read with getVoltage() and the three outputs call setChannels(1); acCoupledLinFm removes the steady part, then drivenLinFm scales it by the LIN FM knob and it multiplies the base frequency",
+      "negative": "swings",
+      "step": "continuous"
+     },
+     "3": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Undertow.cpp: getShapeAmount returns shapeControlTaper(shapeKnob * (voltage / 8)), which clamps to 0 to 1, so 8V gives the full knob value and anything at or below 0V gives none",
+      "range": "0 to 8V",
+      "negative": "subtracts",
+      "step": "continuous"
+     },
+     "4": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Undertow.cpp: every jack is read with getVoltage() and the three outputs call setChannels(1); dsp::SchmittTrigger at its default 0.1V/1V thresholds, rising edge only",
+      "range": "high above 1V",
+      "negative": "ignored"
+     },
+     "5": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Undertow.cpp: sGateV is 10.f when the jack is unpatched, and sGateHigh is voltage >= 1.f as a level",
+      "range": "high above 1V",
+      "normal": "10V",
+      "negative": "ignored"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Undertow.cpp: every jack is read with getVoltage() and the three outputs call setChannels(1); each output is written at five times a unit waveform, the morph and sub outputs clamped to ±5V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Undertow.cpp: every jack is read with getVoltage() and the three outputs call setChannels(1); each output is written at five times a unit waveform, the morph and sub outputs clamped to ±5V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Undertow.cpp: every jack is read with getVoltage() and the three outputs call setChannels(1); each output is written at five times a unit waveform, the morph and sub outputs clamped to ±5V"
+     }
+    }
+   },
+   "notes": "The MORPH CV jack multiplies the MORPH knob instead of adding to it, and the divisor is 8 rather than 10: getShapeAmount returns shapeControlTaper(shapeKnob * (cv / 8)). So a patched cable resting at 0V, or any negative voltage, holds the morph at zero and leaves the knob dead, and the knob is only reached at 8V. The EXPO jack has no attenuator and is summed into the same exponent as V/OCT, so despite the panel calling it exponential FM it tracks a volt per octave exactly as the pitch input does. The S GATE jack is normalled to 10V, so the sub runs whenever nothing is patched, and a patched cable held low silences the SUB output. The FREQ knob covers 10Hz to 10000Hz while the pitch as a whole is clamped to 8Hz to 20000Hz, so modulation can reach a little beyond either end of the knob. The OCT button and the Coarse Tune menu items set the same parameter. The waveform display is a plain widget with no parameter behind it."
   },
   "Deepcache": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Replaces Rack's module browser with one that builds and stores every module's preview picture ahead of time, so scrolling the browser does not stall",
+    "Note — the module has no jacks and no knobs; placing it in the rack is the whole of using it, and taking it out puts the ordinary browser back",
+    "Note — the pictures are kept on disk under Leviathan/Deepcache in the Rack user folder and survive restarts, so the long first build happens once",
+    "Note — the lamps report what the caching is doing and the bar below them fills as it goes; they cannot be clicked",
+    "Note — a second copy of this module does nothing, and it stands aside entirely if another plugin has already replaced the browser, saying so on its menu",
+    "Menu — Rebuild cache — throws away every stored preview and builds them all again",
+    "Menu — Cache resolution — picks whether previews are stored at normal size or at double, which is sharper when browser cards are enlarged and takes about four times the memory",
+    "Menu — UI work budget: 0.5 ms, 1 ms, 2 ms, 4 ms, 8 ms — sets how long each drawn frame may spend building previews, trading a faster build for a smoother window",
+    "Menu — Cache statistics — reports how many previews are done, how many failed, how much memory they take and how long each one took to build"
+   ],
+   "notes": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3): Deepcache.cpp declares no parameters, inputs or outputs, so the entry is a first line, notes and menu items. Cache resolution is a plugin-wide setting held in Leviathan/Deepcache/settings.json rather than patch state, because changing it rebuilds the shared database. The module detects Stoermelder's MB and any other plugin that has taken the browser, and prints the conflict on its own menu instead of fighting for it."
   },
   "Iris": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator that turns a picture into a wavetable: each row of the image becomes one waveform, and a scan control sweeps down the rows",
+    "Sets the pitch, from 10Hz at the far left to 10000Hz at the far right, and starts at 261.63Hz; in LFO mode the same travel covers 0.01Hz to 100Hz",
+    "Detunes the oscillator by up to a hundred cents either side of the pitch set by FREQ",
+    "Snaps FREQ to whole octaves above and below middle C instead of letting it run smoothly, and starts off",
+    "Picks what the SYNC jack does: in the up position an edge restarts the waveform from the beginning, in the down position it reverses the direction of travel instead",
+    "Drops the pitch range to 0.01Hz through 100Hz, so the module works as a modulation source rather than an oscillator",
+    "Chooses which row of the picture is read as the waveform, the top row at the far left and the bottom row at the far right",
+    "Sets how much of the voltage at the SCAN jack is added to the SCAN knob, and reverses its sign anticlockwise of centre; at centre the jack does nothing",
+    "Sets how much of the voltage at the LIN FM jack reaches the frequency, none at the far left",
+    "Steps through which part of the picture's colour becomes the waveform: all three together, then red, then green, then blue; the four lamps beside it say which is chosen",
+    "Opens a short menu choosing where the picture comes from: an image file you pick, or the Nautiloid placed to the left of this module",
+    "Opens the settings that turn the picture into waveforms: two smoothing sliders, how the rows are levelled, which way up they are read, whether flat rows are trimmed, and whether the result is inverted",
+    "Sets the pitch at a volt per octave, added to FREQ and FINE; the number of channels on this jack sets how many voices the module runs",
+    "Modulates the frequency as a fraction of the current pitch, scaled by the LIN FM knob; the signal is stripped of any steady offset first, so only its swing counts",
+    "Moves the scan down and up the picture, ten volts covering the whole image at the attenuverter's full setting; it is added to the SCAN knob and the total is held between the top and bottom rows",
+    "A rising edge above 1V restarts the waveform, or reverses it when SOFT is chosen",
+    "The row of the picture chosen by SCAN, read as a waveform at the pitch the module is set to, swinging ±5V",
+    "The same waveform a quarter of a cycle ahead of OUT, swinging ±5V",
+    "Note — with no picture loaded the module makes sound anyway: the built-in table sweeps sine to triangle to saw to square as SCAN is turned, which is also what Clear image puts back",
+    "Note — the upper dark rectangle shows the picture the wavetable was made from, and the lower one draws the waveform currently being read; neither can be clicked",
+    "Note — to use a fractal instead of a file, place a Nautiloid immediately to the left and choose it from the source button; panning and zooming the fractal then reshapes the table as you go",
+    "Menu — Load image... — opens a file chooser for the picture the wavetable is built from",
+    "Menu — Reload image — reads the picture off disk again, picking up any change made to the file",
+    "Menu — Clear image — throws the picture away and goes back to the built-in sine, triangle, saw and square table",
+    "Menu — Embed image source in patch — saves the picture inside the patch file, so the patch sounds right on a machine that does not have the image",
+    "Menu — Seam smoothing — a slider setting how much the join between the end and start of each waveform is rounded off",
+    "Menu — Wave smoothing — a slider setting how much each waveform is smoothed along its length, trading detail for a quieter tone; it is on the image options button, not the panel menu",
+    "Menu — Normalize: Balanced, Global, Per row, Off — sets how the levels of the rows are evened out; it is on the image options button, not the panel menu",
+    "Menu — Row order: Top to bottom, Bottom to top — sets which end of the picture SCAN starts at; it is on the image options button, not the panel menu",
+    "Menu — Trim flat rows: Off, Gentle, Medium, Aggressive — drops rows of the picture with too little variation to make a waveform; it is on the image options button, not the panel menu",
+    "Menu — Per-row DC removal — takes the steady offset out of each row, so no waveform is off centre; it is on the image options button, not the panel menu",
+    "Menu — Invert conversion — turns the picture's light and dark the other way round before the waveforms are made; it is on the image options button, not the panel menu"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "6": 3,
+    "7": 4,
+    "5": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "9": 9,
+    "10": 10,
+    "8": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 17
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "audio",
+     "2": "cv",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "negative": "swings",
+      "step": "continuous",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Iris.cpp: process() takes the channel count from getChannels() on V/Oct and Scan CV, sets both outputs to it, and reads this jack with getPolyVoltage(channel) inside that loop; the voltage is summed into a pitch in octaves relative to C4 and clamped to -24 to +16 octaves"
+     },
+     "1": {
+      "poly": true,
+      "negative": "swings",
+      "step": "continuous",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Iris.cpp: process() takes the channel count from getChannels() on V/Oct and Scan CV, sets both outputs to it, and reads this jack with getPolyVoltage(channel) inside that loop; acCoupledLinFm removes the steady part, drivenLinFm scales it by the LIN FM knob, and it multiplies the base frequency"
+     },
+     "2": {
+      "poly": true,
+      "range": "±10V",
+      "negative": "swings",
+      "step": "continuous",
+      "sumRange": "0 to 10V",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Iris.cpp: scan = scanKnob + voltage * 0.1 * attenuverter, then clamped to 0 to 1, so 10V is the full sweep and the knob-plus-jack total is held inside the table"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Iris.cpp: process() takes the channel count from getChannels() on V/Oct and Scan CV, sets both outputs to it, and reads this jack with getPolyVoltage(channel) inside that loop; the voltage goes into dsp::SchmittTrigger at its default 0.1V/1V thresholds, rising edge only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Iris.cpp: setChannels(channels) from the V/Oct and Scan channel counts, and setVoltage(5.f * wave, channel)"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Iris.cpp: setChannels(channels) from the V/Oct and Scan channel counts, and setVoltage(5.f * quadWave, channel) where quadWave is the table sampled a quarter cycle ahead"
+     }
+    }
+   },
+   "notes": "The scan total is a sum of knob and attenuated jack clamped to the ends of the table, so the attenuverter at centre leaves the SCAN jack inert; that is the one place a patched cable looks dead. The SCAN sumRange is written as the voltage the knob-plus-jack total is worth, since the clamp itself is on the row index. Three of the panel's buttons open menus of their own rather than doing anything themselves, and the lines written as Menu items for them say so: the smoothing, normalize, row order, trim, DC removal and invert items are all on the image-options button's menu, not on the module's right-click menu. The FREQ knob covers 10Hz to 10000Hz, or 0.01Hz to 100Hz in LFO mode, while the pitch as a whole is clamped to 8Hz to 20000Hz and to 45 per cent of the sample rate. The wavetable is never empty: the constructor fills it with a sine-triangle-saw-square sweep, so the module makes sound with no file loaded. Nautiloid is read from leftExpander, so it goes to the left of Iris. The picture preview, the waveform display and the preview toggle beside them are plain widgets with no parameter behind them."
   },
   "Nautiloid": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A fractal explorer whose picture is handed to an Iris oscillator as its wavetable source, so panning and zooming the fractal reshapes the sound",
+    "Opens a list of the fourteen built-in fractals and draws the one you pick",
+    "Puts the view back to the whole fractal, at the starting zoom and centre",
+    "Zooms the view in and out continuously while a voltage is present, +10V zooming in at full speed, -10V out at full speed and 0V leaving the view where it is",
+    "Pans the view sideways at a speed set by the voltage, +10V moving right at full speed, -10V left, and 0V leaving the view where it is",
+    "Pans the view up and down at a speed set by the voltage, +10V moving one way at full speed, -10V the other, and 0V leaving the view where it is",
+    "Note — this module is marked hidden in the plugin, so it does not appear in Rack's module browser; the way to get one is the Iris right-click menu, which adds it",
+    "Note — place it immediately to the left of an Iris, not to the right; Iris only reads a Nautiloid that is its left neighbour",
+    "Note — drag the picture to pan, and use the mouse wheel over it to zoom; neither gesture can be clicked for its own note, because the picture is one drawn widget",
+    "Note — LOC CODE is a sixteen-character code for where you are in the fractal; the two small buttons beside it copy it to the clipboard and paste one back, which is how a view is shared"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "negative": "swings",
+      "step": "continuous",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Nautiloid.cpp: process() reads each jack with getVoltage() and nothing in the module loops over an input's channels; the voltage is divided by 10 and clamped to ±1, then used as a zoom rate"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "negative": "swings",
+      "step": "continuous",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Nautiloid.cpp: process() reads each jack with getVoltage() and nothing in the module loops over an input's channels; the voltage is divided by 10 and clamped to ±1, then used as a pan velocity"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "negative": "swings",
+      "step": "continuous",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Nautiloid.cpp: process() reads each jack with getVoltage() and nothing in the module loops over an input's channels; the voltage is divided by 10 and clamped to ±1, then used as a pan velocity"
+     }
+    }
+   },
+   "notes": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3): the module is listed with \"hidden\": true in the installed plugin.json, so it cannot be found in the module browser. Nautiloid checks rightExpander.module and requires that module's leftExpander to point back at it, so it is an expander that sits to the LEFT of the module it feeds, which is the opposite of the usual Rack convention; it feeds Iris, and Integral Flux uses it too, for the artwork behind the panel glass. Both buttons carry no printed label. The fractal picture, the location-code readout and the two clipboard buttons are plain widgets with no parameter behind them, so no click on them reaches this feature. A voltage smaller than 0.15V on any of the three jacks is treated as still, because the rate is tested against a 0.015 dead band after being divided by 10."
   },
   "Puffy": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo saturator with seven distortion characters, a limiter on the way out, and a puffer fish that shows how hard it is being driven",
+    "Sets how hard the signal is driven into the saturation, none at the far left, and starts a quarter of the way up",
+    "Sets how much of the voltage at the PUFF jack is added to the PUFF knob, and reverses its sign anticlockwise of centre; at centre the jack does nothing",
+    "Adjusts the level going into the saturation without changing the level coming out, 6dB quieter at the far left and 6dB louder at the far right, and starts at the centre where it does nothing",
+    "Crossfades between the signal arriving at the inputs and the saturated signal, dry at the far left and saturated only at the far right, where it starts",
+    "Picks the distortion character: BLOOM, SPINE, FRENZY, RIPTIDE, VOID, SWARM or TEETH; linked it sets both halves of the waveform, unlinked it shapes only the part below zero",
+    "Picks the distortion character used on the part of the signal above zero: BLOOM, SPINE, FRENZY, RIPTIDE, VOID, SWARM or TEETH; while the two are linked this control is overwritten by the other one",
+    "Makes the two character selectors follow each other, so one distortion shapes the whole waveform; unlinked, the halves of the waveform are shaped differently, and it starts linked",
+    "Steps through the limiter on the outputs: hard, soft, then off, and it starts on hard; the lamps beside it say which is chosen",
+    "Lets the fish leave the panel and swim about the rack, avoiding the mouse pointer and other Puffies; it starts off and nothing about the sound changes",
+    "Sets how far from the module the fish may wander while roaming, a short leash at the far left and most of a screen at the far right",
+    "The left channel of the signal to be saturated; with nothing patched into IN R this signal is sent to both channels",
+    "The right channel of the signal to be saturated; with nothing patched into IN L this signal is sent to both channels",
+    "Adds to the PUFF knob through the attenuverter beside it, ten volts covering the whole knob at its full setting",
+    "The left channel of the mix of dry and saturated signal, after the limiter",
+    "The right channel of the mix of dry and saturated signal, after the limiter",
+    "Note — with nothing patched into either input the module puts out silence; the fish is drawn and reacts to the controls all the same",
+    "Note — the fish is a meter: how far it inflates shows the drive reaching the saturation, how it moves shows the swing of the input, and its blush shows the limiter pulling the level down",
+    "Note — the fish picture and the waveform panel below it are drawn widgets, not controls, and no click on either reaches a note of its own",
+    "Menu — Roaming Mode — the same switch the roam button makes, letting the fish swim out of the panel and about the rack",
+    "Menu — Auto Deflate — pulls the output level down as PUFF is raised, by an amount fixed per character, so turning up the drive does not also turn up the volume"
+   ],
+   "param": {
+    "1": 1,
+    "3": 2,
+    "2": 3,
+    "4": 4,
+    "0": 5,
+    "5": 6,
+    "6": 7,
+    "8": 8,
+    "9": 9,
+    "7": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "normal": "the jack beside it",
+      "negative": "swings",
+      "step": "continuous",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Puffy.cpp: process() reads each jack with getVoltage(0) and both outputs call setChannels(1); with only one of the two audio jacks patched, process() copies that voltage to both channels"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the jack beside it",
+      "negative": "swings",
+      "step": "continuous",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Puffy.cpp: process() reads each jack with getVoltage(0) and both outputs call setChannels(1); with only one of the two audio jacks patched, process() copies that voltage to both channels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "negative": "swings",
+      "step": "continuous",
+      "sumRange": "0 to 10V",
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Puffy.cpp: amountTarget = clamp(PUFF knob + attenuverter * voltage / 10, 0, 1), so 10V is the whole knob and the total is held between the ends of its travel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Puffy.cpp: process() reads each jack with getVoltage(0) and both outputs call setChannels(1)"
+     },
+     "1": {
+      "poly": false,
+      "why": "Leviathan 2.9.1 source (commit c37193d, branch puffy-rc3), src/Puffy.cpp: process() reads each jack with getVoltage(0) and both outputs call setChannels(1)"
+     }
+    }
+   },
+   "notes": "The PUFF sumRange is written as the voltage the knob-plus-jack total is worth, since the clamp itself is on the drive amount. The maker's own tooltips name the two character switches \"Character (negative/linked)\" and \"Character (positive)\", which is the clearest statement anywhere of what they do: the panel prints neither name. While the link switch is on, synchronizeCharacterSelectionFromUi copies one selector onto the other, so turning the positive one has no lasting effect; it comes up linked. The maker's own specification in doc/puffy.md lists six characters and calls BLOOM the default; the shipped build has seven, with TEETH added, and the specification is behind the code. The roaming fish, the roaming range bar and the waveform panel all sit in custom widgets; the range bar is a real ParamWidget and can be clicked, the fish and the waveform panel cannot. Roaming and the limiter mode are held outside the parameter system in the module's own JSON, so the limiter button reports its state only through its lamps."
   }
  }
 }

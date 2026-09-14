@@ -2,57 +2,1491 @@
  "plugin": "ZZC",
  "source": "https://github.com/zezic/ZZC",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Clock": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A master clock putting out both beat triggers and a rising phase ramp, with its own swing on the double- and quadruple-time divisions.",
+    "Sets the tempo in whole beats per minute, 0 to 240, and the display reads it back.",
+    "Swings the double-time output, 1 to 99; 50 places its extra trigger halfway through the beat and higher numbers push it later.",
+    "Swings the quadruple-time output, 1 to 99; 50 spaces its four triggers evenly and higher numbers delay the second trigger of each half.",
+    "Starts and stops the clock; while it is stopped every trigger output stays at 0V.",
+    "Sends the phase back to 0 and fires a pulse from the RESET output.",
+    "Runs the clock backwards, counting the phase down from 10V instead of up.",
+    "Chooses how the tempo input is read: V/OCT doubles the tempo set by the BPM knob for every volt, V/BPS adds 60 BPM per volt. The word printed on the switch is the mode in use.",
+    "A voltage here takes over the tempo, scaled either as V/OCT or as V/BPS according to the switch that labels it.",
+    "A trigger here starts or stops the clock; with Run Input Mode set to Hold the clock instead runs for as long as this is above 1V.",
+    "A trigger here sends the phase back to 0 and fires the RESET output.",
+    "Patching a clock here makes the module follow it: the tempo is measured across three pulses and the phase is nudged into line on every pulse.",
+    "Patching a 0-10V ramp here makes the module follow that ramp rather than run its own, and the tempo reading is worked out from how fast the ramp climbs.",
+    "Bends the double-time swing away from its knob setting, reaching 1 at -5V and 99 at +5V.",
+    "Bends the quadruple-time swing away from its knob setting, reaching 1 at -5V and 99 at +5V.",
+    "One 1ms 10V trigger per beat, or a square that is high through the first half of each beat when Use Gates For has this output checked.",
+    "A ramp climbing from 0V to 10V once per beat; this is the signal the rest of the ZZC clock modules divide.",
+    "A trigger twice per beat, the second of the pair placed by the double-time swing knob.",
+    "A trigger four times per beat, spaced by both swing knobs together.",
+    "The running tempo as a voltage, one volt per beat per second.",
+    "The length of one beat in seconds as a voltage, held at 10V or below.",
+    "A 1ms 10V trigger each time the clock is started or stopped, or a gate held high for as long as it runs when Run Output Mode is set to Gate.",
+    "A 1ms 10V trigger whenever the clock is reset.",
+    "Note — A Divider, Div or Div (Expander) touching either side of this module is handed the phase ramp directly, with no patch cable; that is how the ZZC clock family is meant to be chained.",
+    "Note — With the pointer over the panel, the space bar starts and stops the clock.",
+    "Note — What is patched sets the tempo source, in this order: a cable at the CLK input wins, then the phase input, then the tempo input, and with none of them the BPM knob runs the module alone.",
+    "Note — A small lamp beside each of the four tempo-related inputs lights for the source actually in use.",
+    "Menu — Use Gates For: Main Clock Output, X2 Clock Output, X4 Clock Output — turns the named output from 1ms triggers into a square held high through the first half of each of its cycles",
+    "Menu — Reset on Start — sends the phase to 0 and fires the RESET output every time the clock is started",
+    "Menu — Reset on Stop — sends the phase to 0 and fires the RESET output every time the clock is stopped",
+    "Menu — Run Input Mode: Toggle, Hold — chooses whether a voltage at the run input flips the running state on each trigger, or holds the clock running while it is above 1V",
+    "Menu — Run Output Mode: Trigger, Gate — chooses whether the run output fires a 1ms trigger on each change or stays high for as long as the clock runs",
+    "Menu — Phase Output Range: -5V to +5V, 0V to +10V — subtracts 5V from the phase ramp or leaves it climbing from 0V",
+    "Menu — External Clock PPQN — sets how many pulses per quarter note the incoming clock sends, from 1 to 960, which is what the measured tempo is divided by",
+    "Menu — External CV Mode: V/OCT, V/BPS — sets how the tempo input is scaled, and moves the switch printed on the panel to match",
+    "Menu — Snap CV — rounds the tempo arrived at through the tempo input to a whole number of beats per minute"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13,
+    "6": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21,
+    "7": 22
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the BPM knob alone",
+      "why": "Clock.cpp:362-365 getVoltage(), no getChannels loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the RUN button alone",
+      "why": "Clock.cpp:173-188, getVoltage() > 1.0f and a SchmittTrigger"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the RST button alone",
+      "why": "Clock.cpp:190-195 externalResetTrigger.process(getVoltage())"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no external clock",
+      "why": "Clock.cpp:356, 386, 433"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "normal": "the clock's own phase",
+      "why": "Clock.cpp:443 getVoltage() / 10.0f, 478"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the swing knob alone",
+      "why": "Clock.cpp:207 clamp(getVoltage() / 5.0f, -1, 1)"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the swing knob alone",
+      "why": "Clock.cpp:216 clamp(getVoltage() / 5.0f, -1, 1)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Clock.cpp:460-465 setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Clock.cpp:480 phase * 10.0f"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Clock.cpp:467"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Clock.cpp:468"
+     },
+     "4": {
+      "poly": false,
+      "why": "Clock.cpp:482 bpm / 60.0f"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Clock.cpp:483 fminf(..., 10.0f)"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Clock.cpp:469-473"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Clock.cpp:474"
+     }
+    }
+   },
+   "notes": "The V/BPS and V/OCT words at the top left are not a label: they are the two frames of the switch above that jack (res/switches/ZZC-VBPSVOCT-Switch_0.svg and _1.svg), and clicking them flips the mode. The module comes up in V/OCT. Neither swing knob carries a printed name; each is joined by a drawn line to the double- or quadruple-time jack it governs."
   },
   "Divider": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Rescales a phase ramp by a ratio of two whole numbers, and adds swing to the result.",
+    "Sets the first number of the ratio, 1 to 99; raising it slows the output down.",
+    "Sets the second number of the ratio, 1 to 99; raising it speeds the output up.",
+    "Moves the beat away from the middle of the output cycle, 1 to 99, stretching the first part of the output ramp and squeezing the rest.",
+    "0-10V here sweeps the first number of the ratio between 1 and the number set by its knob, rounded to a whole number.",
+    "0-10V here sweeps the second number of the ratio between 1 and the number set by its knob, rounded to a whole number.",
+    "Bends the swing away from its knob setting, reaching 1 at -5V and 99 at +5V.",
+    "The phase ramp to rescale, 0-10V per cycle.",
+    "A trigger here sends the output phase to 0 and fires a pulse from the CLK output.",
+    "A 1ms 10V trigger at the swung beat of each output cycle, or a square held high through the first half of it when Gate Mode is on.",
+    "The rescaled phase ramp, 0V to 10V per cycle, with the swing already applied.",
+    "Note — Nothing happens until a phase ramp is patched to the PHASE input; this module never takes a phase from the module beside it.",
+    "Note — What it does with its neighbours is pass the ZZC clock connection along and add its own phase to it, for a Div (Expander) further down the row to pick up.",
+    "Menu — Gate Mode — replaces the 1ms trigger at the CLK output with a square held high through the first half of each output cycle",
+    "Menu — Tick on Start — fires an extra pulse at the moment the output cycle restarts, as well as at the swung beat"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the knob setting alone",
+      "why": "Divider.cpp:6-8 clamp(getVoltage(), 0, 10) then roundf"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the knob setting alone",
+      "why": "Divider.cpp:11-13 clamp(getVoltage(), 0, 10) then roundf"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the SWING knob alone",
+      "why": "Divider.cpp:21-27 clamp(getVoltage() / 5.0f, -1, 1)"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "normal": "no phase, and no output movement",
+      "why": "Divider.cpp:76-86 fmod(getVoltage(), 10.0f)"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no reset",
+      "why": "Divider.cpp:68 resetTrigger.process(getVoltage())"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Divider.cpp:118-122"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Divider.cpp:114 setVoltage(phaseOut)"
+     }
+    }
+   },
+   "notes": "The panel prints FROM over the first ratio jack and TO over the second, and leaves the two large knobs unnamed; the maker's tooltips call them Ratio Numerator and Ratio Denominator. The output rate is the second number divided by the first (Divider.cpp:16, ratio = to / from), so the knob the tooltip calls the numerator is the one that divides."
   },
   "FN-3": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Draws a sine, triangle or square from a phase ramp, with a pulse-width bend and a phase offset, on as many polyphonic channels as it is fed.",
+    "Bends the phase before the wave is drawn from it, 0 to 1; at 0.5 the wave is left alone, and moving away squeezes one half of the cycle and stretches the other.",
+    "Steps the wave through sine, triangle and square; the display names the one in use once the knobs have been left alone for two seconds.",
+    "Switches the output between 0-10V and ±5V, which the display reads back as UNI or BI.",
+    "Rotates the wave inside the cycle, a full turn either way at the ends of its travel.",
+    "Adds to the pulse-width bend, a tenth of the range per volt, and the total is clamped between 0 and 1.",
+    "Subtracts from the phase offset, a fifth of a turn per volt.",
+    "The phase ramp the wave is drawn from, 0-10V per cycle; with nothing patched the output holds at whatever level the phase offset alone points to.",
+    "The wave, 0V to 10V, or ±5V when the display reads BI.",
+    "Note — The display is two switches stacked on one another. Clicking its upper part steps the waveform; clicking the strip along its bottom edge switches between unipolar and bipolar output.",
+    "Note — The channel count comes from whichever of the three inputs carries the most, and the output is set to match.",
+    "Note — Each channel takes its own pulse width and phase offset from the matching channel of the PWM and SHIFT inputs."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the PWM knob alone",
+      "why": "FN.cpp:249 getVoltageSimd/10 + pwParam, clamp(0,1)"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the SHIFT knob alone",
+      "why": "FN.cpp:266 getVoltageSimd<float_4>(c) / -5.f + shiftParam"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "normal": "a phase held at the SHIFT setting",
+      "why": "FN.cpp:279 getVoltageSimd<float_4>(c) / 10.f, wrapped"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "FN.cpp:307-309 setVoltageSimd then setChannels(channels)"
+     }
+    }
+   },
+   "notes": "The sum of knob and CV is clamped to 0-1 for the pulse width (FN.cpp:250) but not for the phase offset, which is wrapped into a single turn instead (FN.cpp:280). The knob is snapped to hundredths, with extra detents at a third and two thirds in both directions (FN.cpp:168-180)."
   },
   "SC-VCA": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A two-channel amplifier whose output is bent into a ceiling rather than cut off at it.",
+    "Multiplies both channels by a factor of 0 to 2 before the clipping stage.",
+    "Sets the level the signal is clipped to, 0V to 10V.",
+    "Sets how much of the range below the clip level is bent rather than left straight, 0 to 1; at 0 the signal is cut off flat at the ceiling and at 1 the whole range is curved.",
+    "One of the two signals to be amplified and clipped; both channels share the knobs and the three CV inputs.",
+    "The amplified and clipped signal from one channel, carrying as many polyphonic channels as its input was given.",
+    "Scales the gain, 0-10V for silence to the full knob setting; negative voltage is clamped away.",
+    "Scales the clip ceiling down from its knob setting, 0-10V; negative voltage is clamped away.",
+    "Scales the softness down from its knob setting, 0-10V; negative voltage is clamped away.",
+    "Note — The lamp at the top lights green when the clipping stage is pulling the signal down and red when it is pulling it up, so it shows clipping rather than level.",
+    "Menu — Pre(Gain) CV Mode: Linear, Exponential — chooses whether the PRE input scales the gain in proportion to its voltage, or on a curve that stays quiet through most of its travel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "1": 4,
+    "2": 4,
+    "3": 6,
+    "4": 7,
+    "5": 8
+   },
+   "out": {
+    "0": 5,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "1": "audio",
+     "2": "audio",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "silence",
+      "why": "SC-VCA.cpp:69-73 getChannels() bounds a float_4::load loop"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "silence",
+      "why": "SC-VCA.cpp:69-73, the same processChannel on SIG2_INPUT"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PRE knob alone",
+      "why": "SC-VCA.cpp:84-110 isPolyphonic() branch, clamp(cv, 0, 1)"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the CLIP knob alone",
+      "why": "SC-VCA.cpp:114-124 clamp(getVoltages(c) / 10.f, 0, 1) * clipParam"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the SOFTNESS knob alone",
+      "why": "SC-VCA.cpp:135-145 clamp(getVoltages(c) / 10.f, 0, 1) * softnessParam"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "SC-VCA.cpp:169 out.setChannels(in.getChannels())"
+     },
+     "1": {
+      "poly": true,
+      "why": "SC-VCA.cpp:169, the same call for SIG2"
+     }
+    }
+   },
+   "notes": "Input 0 is declared in the source but no jack is ever added for it and nothing reads it (SC-VCA.cpp:39, and no CV_INPUT anywhere in process), so it gets no line and no tag. The PRE and CLIP knobs are concentric and share one census position, which means a click may resolve to either; both are described so that whichever answers is right about something on the panel. The CLIP input can only pull the ceiling down from the knob setting, never above it."
   },
   "SH-8": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight sample-and-hold cells sharing one source, with the trigger inputs normalled down the column.",
+    "The voltage the cells sample; with nothing patched here each cell takes a fresh noise value of its own instead.",
+    "Samples the source on a rising edge here; with nothing patched, this cell fires whenever the nearest patched trigger above it does.",
+    "Holds the voltage its row took at its last trigger, clamped to ±10V.",
+    "Note — The top trigger input has no row above it to follow, so with nothing patched there its cell never samples and its output stays at 0V.",
+    "Note — With nothing patched to NOISE the module makes its own source: each sample is drawn from a normal distribution and multiplied by 2, or by 4 when Range is set to +/- 10V, then clamped to ±10V.",
+    "Menu — Range: +/- 5V, +/- 10V — sets how far the module's own noise spreads when the NOISE input is empty, and changes nothing when a source is patched there"
+   ],
+   "param": {},
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the module's own noise",
+      "why": "SH-8.cpp:50-52 getVoltage() inside clamp(-10, 10)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the trigger row above it",
+      "why": "SH-8.cpp:47-62 triggers[i].process(getVoltage()), previousIsTriggered"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the trigger row above it",
+      "why": "SH-8.cpp:47-62 triggers[i].process(getVoltage()), previousIsTriggered"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the trigger row above it",
+      "why": "SH-8.cpp:47-62 triggers[i].process(getVoltage()), previousIsTriggered"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the trigger row above it",
+      "why": "SH-8.cpp:47-62 triggers[i].process(getVoltage()), previousIsTriggered"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the trigger row above it",
+      "why": "SH-8.cpp:47-62 triggers[i].process(getVoltage()), previousIsTriggered"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the trigger row above it",
+      "why": "SH-8.cpp:47-62 triggers[i].process(getVoltage()), previousIsTriggered"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the trigger row above it",
+      "why": "SH-8.cpp:47-62 triggers[i].process(getVoltage()), previousIsTriggered"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the trigger row above it",
+      "why": "SH-8.cpp:47-62 triggers[i].process(getVoltage()), previousIsTriggered"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SH-8.cpp:51 setVoltage(clamp(..., -10.f, 10.f))"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SH-8.cpp:51 setVoltage(clamp(..., -10.f, 10.f))"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SH-8.cpp:51 setVoltage(clamp(..., -10.f, 10.f))"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SH-8.cpp:51 setVoltage(clamp(..., -10.f, 10.f))"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SH-8.cpp:51 setVoltage(clamp(..., -10.f, 10.f))"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SH-8.cpp:51 setVoltage(clamp(..., -10.f, 10.f))"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SH-8.cpp:51 setVoltage(clamp(..., -10.f, 10.f))"
+     },
+     "7": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SH-8.cpp:51 setVoltage(clamp(..., -10.f, 10.f))"
+     }
+    }
+   },
+   "notes": "The normalling runs one way only and one step at a time: an unpatched trigger fires when the row immediately above it fired on this sample, and a patched row that does not fire stops the chain there (SH-8.cpp:47-62). The noise is regenerated per cell, so two cells triggered together with NOISE empty hold different values."
   },
   "SRC": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A hand-set voltage source with a display that reads out either in volts or as a note name.",
+    "Sets the whole-volt part of the output, -10V to +10V.",
+    "Adds a volt either way on top of that, snapped to twelfths of a volt, to tenths, or to nothing at all according to the menu.",
+    "Switches the output between the voltage set on the panel and 0V.",
+    "Adds to the voltage set by the two knobs; the total is clamped to ±11V.",
+    "A trigger here flips the output on or off; with ON set to Hold the output instead follows this jack combined with the button, on when exactly one of the two is raised.",
+    "The set voltage, or 0V while the module is switched off.",
+    "Note — While Fine is snapping to twelfths of a volt the display reads note names: 0V shows as c4, an i before the letter marks a sharp, and readings above 6V or below -4V end in h or l.",
+    "Note — Either of the other two Fine settings puts the display into plain volts.",
+    "Note — The module comes up switched on, and the lamp on the button stays lit while it is.",
+    "Menu — Fine: Snap to 1/12V — rounds the fine knob to twelfths of a volt and puts the display into note names",
+    "Menu — Fine: Snap to 1/10V — rounds the fine knob to tenths of a volt and puts the display into volts",
+    "Menu — Fine: Don't snap — leaves the fine knob continuous and puts the display into volts",
+    "Menu — ON: Toggle — makes each trigger at the ON input flip the output on or off",
+    "Menu — ON: Hold — makes the output state the ON input and the button combined, on when exactly one of the two is raised",
+    "Menu — Quantize CV like Fine knob — rounds the voltage arriving at the CV input the same way the fine knob is rounded"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "±11V",
+      "normal": "the knobs alone",
+      "why": "SRC.cpp:161 clamp(coarse + fine + getVoltage(), -11.0f, 11.0f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "swings",
+      "normal": "the ON button alone",
+      "why": "SRC.cpp:95-99 (bool)getVoltage() in Hold, SchmittTrigger otherwise"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±11V",
+      "why": "SRC.cpp:164 setVoltage(on ? voltage : 0.0f), voltage clamped to ±11"
+     }
+    }
+   },
+   "notes": "In Hold mode the ON input is cast straight to a bool (SRC.cpp:97), so any voltage that is not exactly zero counts as raised, negative ones included, and the result is exclusive-or'd with the button rather than replacing it. The maker's tooltip for the button is On/Off; the panel prints ON above the jack beside it, so the two carry the same word."
   },
   "Div": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Multiplies or divides a phase ramp by a whole number, in three units of panel width.",
+    "Sets the whole-number factor, -199 to 199; positive numbers run the output faster and negative numbers slower, and the display shows the number with a sign for which.",
+    "Scales the factor by a factor of two for every volt, and the result is rounded back to a whole number or to one over a whole number.",
+    "The phase ramp to multiply or divide, 0-10V per cycle.",
+    "A trigger here sends the output phase back to 0.",
+    "A square held high through the first half of each output cycle, or a 1ms 10V trigger at the start of it when Gate Mode is turned off.",
+    "The multiplied or divided phase ramp, 0V to 10V per cycle.",
+    "Note — Nothing moves until a phase ramp is patched to the PHASE input.",
+    "Note — This module hands its own phase to a Divider, Div or Div (Expander) touching either side of it, with no cable, but it never takes a phase from a neighbour itself.",
+    "Menu — Gate Mode — holds the CLK output high through the first half of each output cycle instead of firing a 1ms trigger at the start of it; this module comes up with it on"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "the knob setting alone",
+      "why": "Div.cpp:76 approxExp2_taylor5(cvVoltage + 20) / 1048576"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "normal": "no phase, and no output movement",
+      "why": "Div.cpp:148 phaseDivider.process(getVoltage()), fmod at PhaseDivider.hpp:41"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no reset",
+      "why": "Div.cpp:141 schmittTrigger.process(getVoltage())"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Div.cpp:155-157"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Div.cpp:154 setVoltage(phaseDivider.phase)"
+     }
+    }
+   },
+   "notes": "Knob and CV multiply rather than add: the knob gives a factor and the CV gives two to the power of its voltage, and the product is rounded to a whole number when it is above one, or to one over a whole number when it is below, then clamped to 199 (Div.cpp:83-90). The knob has no printed scale; the display carries the number."
   },
   "DivExp": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Multiplies or divides a phase ramp with no phase jack of its own: it takes the ramp from the ZZC clock module standing beside it.",
+    "Sets the whole-number factor, -199 to 199; positive numbers run the output faster and negative numbers slower, and the display shows the number with a sign for which.",
+    "Holds a change of factor back until the phase reaches a boundary the new factor lines up with, so the output stays in step with its source; the display blinks while a change is pending.",
+    "Chooses whether the phase is taken from the module on the left or the module on the right; a lamp lights for the side in use, and only while a ZZC clock module is actually there.",
+    "Scales the factor by a factor of two for every volt, and the result is rounded back to a whole number or to one over a whole number.",
+    "A square held high through the first half of each output cycle, or a 1ms 10V trigger at the start of it when Gate Mode is turned off.",
+    "The multiplied or divided phase ramp, 0V to 10V per cycle.",
+    "Note — This module has no phase input and no reset input, and does nothing at all until a Clock, Divider, Div or another Div (Expander) is placed immediately to its left or its right.",
+    "Note — The switch on the panel chooses which of the two sides the phase is taken from, and the reset arrives over the same connection.",
+    "Note — Several of these can be chained in a row, each adding its own phase to what it passes along, so Target transport source can pick out a module further down the row.",
+    "Menu — Gate Mode — holds the CLK output high through the first half of each output cycle instead of firing a 1ms trigger at the start of it; this module comes up with it on",
+    "Menu — Target transport source: Clock, Divider, Div, Div (Expander) — picks whose phase is taken from the chosen side; where no module of that sort has put a phase there, nothing drives this one"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "the knob setting alone",
+      "why": "Div.cpp:76 approxExp2_taylor5(cvVoltage + 20) / 1048576"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Div.cpp:381-383"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Div.cpp:380 setVoltage(phaseDivider.phase)"
+     }
+    }
+   },
+   "notes": "Inputs 1 and 2 (phase and reset) are declared in the shared DivBase code but no jack is added for either on this panel, so neither gets a line or a tag; the reset instead arrives over the bus from whichever module is being followed. The bus is a leftExpander/rightExpander message carrying four phases at once, one slot each for Clock, Divider, Div and Div (Expander) (Clock.cpp:3-23), which is why the menu can pick a module that is not the immediate neighbour."
   },
   "Polygate": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sixteen latching buttons, one per channel of a single polyphonic output.",
+    "Latches its own channel of the output high or low.",
+    "Latches its own channel of the output high or low; this button is one of channels 13 to 16, despite the panel printing 12-16 over the group.",
+    "All sixteen channels at once, each at 0V or at the voltage named by the menu Range.",
+    "Note — The buttons are read once every 256 samples rather than on every one, so a change at the output can lag the press slightly.",
+    "Menu — Invert Output — puts each channel's voltage out while its button is unlit and 0V while it is lit",
+    "Menu — Range: +5V, +10V — sets the voltage a switched-on channel carries"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Polygate.cpp:61 setChannels(16), :67 setVoltage(state ? range : 0.f, c)"
+     }
+    }
+   },
+   "notes": "The four group labels on the panel read 1-4, 5-8, 9-12 and 12-16; the last is wrong. Polygate.cpp:81-84 lays the buttons out as channels 1-4 and 5-8 down the left column and 9-12 and 13-16 down the right, and the tooltips name them Channel 13 to Channel 16, so the group under the 12-16 label is channels 13 to 16."
   },
   "Phaseque": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight-step sequencer driven by a phase ramp rather than by clock pulses, so each step has its own position, length and shape within the bar, and 32 patterns are held at once.",
+    "Turns the whole pattern against the incoming phase by hand, a full cycle over its travel; it is an endless encoder, so it has no ends.",
+    "Chooses what fills the time between incoming clock pulses: lit, the tempo measured from the clock itself; unlit, the BPM knob. It comes up lit.",
+    "Sets the tempo used when no clock is being followed, 0 to 240 BPM, and the tempo the V/OCT scaling is measured up from.",
+    "Reads the phase input as an absolute position in the bar rather than as a running count, which also fixes the pattern resolution at one step per cycle and disables the jump inputs.",
+    "Disengages the transport: the phase stops advancing and the gate output falls, while everything set on the panel stays put.",
+    "Sends the phase back to the start of the pattern.",
+    "Mutes and unmutes its own step of the pattern.",
+    "Pushes every step back onto its evenly spaced position in the bar, undoing the shifts.",
+    "Rotates the whole pattern one step earlier.",
+    "Rotates the whole pattern one step later.",
+    "Sets every step back to one eighth of the bar long.",
+    "Reverses the order of the steps within the bar.",
+    "Turns every step value upside down about zero.",
+    "Inverts every step gate at once, so muted steps play and playing steps fall silent.",
+    "Slides every step earlier or later together, by up to one step length either way.",
+    "Scales every step length together, from nothing at 0 to double at 2.",
+    "Blocks the pattern-changing inputs, so a patch cannot move off the pattern being edited.",
+    "Sets how many steps of the incoming phase make one pass of the pattern, 1 to 99, and the display reads it back.",
+    "Slides the whole pattern against the bar, a full pattern either way.",
+    "Randomly nudges every step attribute a little further from what was set, by an amount that grows as the knob is turned; turning it back does not undo the change.",
+    "Sets the voltage its step sends to the V output, -2V to +2V.",
+    "Sets how long its step lasts, from nothing to a quarter of the bar.",
+    "Moves its step earlier or later within the bar, by up to one eighth either way.",
+    "Sets the level the expression output starts its step at, -1 to +1 of the ±5V output swing.",
+    "Sets the level the expression output finishes its step at, -1 to +1 of the ±5V output swing.",
+    "Chooses how the tempo input is read: V/OCT doubles the BPM knob setting per volt, V/BPS reads the voltage straight as beats per second. The word on the switch is the mode in use.",
+    "A clock here steps the phase forward one resolution step per pulse, and the tempo between pulses is measured from it.",
+    "A voltage here sets the tempo, scaled either as V/OCT or as V/BPS according to the switch that labels it.",
+    "A 0-10V ramp here drives the sequencer directly, in place of any internal tempo; the BPM display goes dark while it is patched.",
+    "A trigger here engages or disengages the transport.",
+    "A trigger here sends the phase back to the start of the pattern.",
+    "A trigger here jumps to the pattern named by the voltage at the pattern-select jack.",
+    "Names a pattern by voltage, a twelfth of a volt per pattern, for the GOTO trigger to jump to.",
+    "A trigger here jumps to a pattern picked at random.",
+    "A trigger here moves one place left in the pattern grid.",
+    "A trigger here moves one row down in the pattern grid.",
+    "A trigger here moves one row up in the pattern grid.",
+    "A trigger here moves one place right in the pattern grid.",
+    "A trigger here advances to the next pattern in the grid, whether or not anything has been edited into it.",
+    "A trigger here goes back to the previous pattern that has been edited away from its default.",
+    "A trigger here goes on to the next pattern that has been edited away from its default.",
+    "Above 1V here, every step gate is inverted, the same way the GATE button does it.",
+    "Slides every step earlier or later, added to the shift knob, a step length either way over ±5V.",
+    "Scales every step length, multiplying the length knob by between nothing and double over ±5V.",
+    "Bends the shape of the expression envelope for every step at once; it replaces the curve figure rather than adding to it.",
+    "Steepens or flattens the expression envelope for every step at once; it replaces the power figure rather than adding to it.",
+    "A trigger here jumps the phase straight to the start of its own step.",
+    "A trigger here jumps the phase to the start of a step picked at random from those that are not muted.",
+    "A trigger here pulls the pattern a little back toward what was set; a voltage below -1V instead clears the mutation completely.",
+    "A trigger here nudges the pattern a little further from what was set.",
+    "High for as long as a step is playing, with a brief drop between one step and the next while Retrigger Gate between active steps is on.",
+    "The value of the step being played, -2V to +2V.",
+    "How far the step being played has been moved from its even position, ±5V for a full step length either way.",
+    "How much longer or shorter the step being played is than one eighth of the bar, ±5V.",
+    "An envelope running across the step being played, from its start level to its end level along the curve set for it, ±5V.",
+    "The curve figure of the step being played as a steady voltage, ±5V, taken from the vertical axis of that step's expression pad.",
+    "A ramp from 0V to 10V across the step being played, restarting at every step.",
+    "A 1ms 10V trigger whenever the pattern changes.",
+    "The pattern being played, as a twelfth of a volt per pattern.",
+    "High for as long as its own step is playing.",
+    "A 1ms 10V trigger each time the phase crosses the start of the pattern running backwards.",
+    "A ramp from 0V to 10V across the whole pattern, with the manual phase offset already added.",
+    "A 1ms 10V trigger each time the phase crosses the end of the pattern running forwards.",
+    "A 1ms 10V trigger whenever the pattern wraps round, whichever direction it is running.",
+    "Note — The module runs on a phase ramp rather than on clock pulses. A ramp at the PHASE input drives it directly and overrides everything else.",
+    "Note — With no phase ramp patched, a clock at the CLK input steps the pattern and the gaps between pulses are filled from the measured tempo; failing that a tempo voltage, failing that the knob.",
+    "Note — The 32 patterns are laid out as four rows of eight on the small display. Clicking a cell switches to that pattern; dragging one cell onto another copies the first into the second.",
+    "Note — The pattern grid and the large step display are each a single drawn widget, so nothing inside them can be clicked for help even though both can be edited by hand.",
+    "Note — The square pad in each step column is one drawn widget with no clickable control behind it, so it has no help of its own.",
+    "Note — Dragging a step's square pad sideways sets its expression power and up and down sets its curve; together they bend the shape the EXPR output takes across that step.",
+    "Note — The large display draws the eight steps against the bar and can be edited by dragging them.",
+    "Note — Three parameters have no widget on the panel at all: mutate, randomise and clear, left over from an earlier layout. The MUTA knob and the menu do that work now.",
+    "Menu — Copy Steps To Next Pattern — writes the eight steps of this pattern over the one after it in the grid",
+    "Menu — Copy Steps To Prev Pattern — writes the eight steps of this pattern over the one before it in the grid",
+    "Menu — Copy To All Patterns — writes this pattern over all 32",
+    "Menu — Copy Reso To All Patterns — gives every pattern the resolution this one has, leaving their steps alone",
+    "Menu — Randomize All Patterns — throws new step values, lengths and shifts into all 32 patterns",
+    "Menu — Randomize All Resolutions — gives every pattern a resolution picked at random between 1 and 99",
+    "Menu — Bake Mutation — takes whatever the MUTA knob has drifted the steps to and makes it the pattern, so the mutation can be cleared without losing it",
+    "Menu — Clear Pattern — puts this pattern back to eight evenly spaced steps at 0V",
+    "Menu — Retrigger Gate between active steps — drops the gate output for a tenth of a millisecond between one step and the next, so an envelope patched to it fires again",
+    "Menu — Polyphony: Monophonic, Polyphonic 8, Muta-Unison 16 — one step at a time, or all eight on eight channels, or all eight twice on sixteen, mutated and unmutated",
+    "Menu — External CV Mode: V/OCT, V/BPS — sets how the tempo input is scaled, and moves the switch printed on the panel to match",
+    "Menu — Snap CV — rounds the tempo arrived at through the tempo input to a whole number of beats per minute"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "14": 8,
+    "15": 9,
+    "16": 10,
+    "17": 11,
+    "21": 12,
+    "22": 13,
+    "23": 14,
+    "24": 15,
+    "25": 16,
+    "26": 17,
+    "27": 18,
+    "28": 19,
+    "29": 20,
+    "86": 26,
+    "6": 7,
+    "7": 7,
+    "8": 7,
+    "9": 7,
+    "10": 7,
+    "11": 7,
+    "12": 7,
+    "13": 7,
+    "30": 21,
+    "31": 21,
+    "32": 21,
+    "33": 21,
+    "34": 21,
+    "35": 21,
+    "36": 21,
+    "37": 21,
+    "38": 22,
+    "39": 22,
+    "40": 22,
+    "41": 22,
+    "42": 22,
+    "43": 22,
+    "44": 22,
+    "45": 22,
+    "46": 23,
+    "47": 23,
+    "48": 23,
+    "49": 23,
+    "50": 23,
+    "51": 23,
+    "52": 23,
+    "53": 23,
+    "54": 24,
+    "55": 24,
+    "56": 24,
+    "57": 24,
+    "58": 24,
+    "59": 24,
+    "60": 24,
+    "61": 24,
+    "78": 25,
+    "79": 25,
+    "80": 25,
+    "81": 25,
+    "82": 25,
+    "83": 25,
+    "84": 25,
+    "85": 25
+   },
+   "in": {
+    "0": 27,
+    "1": 28,
+    "2": 29,
+    "3": 30,
+    "4": 31,
+    "5": 32,
+    "6": 33,
+    "7": 34,
+    "8": 35,
+    "9": 36,
+    "10": 37,
+    "11": 38,
+    "12": 39,
+    "13": 40,
+    "14": 41,
+    "15": 42,
+    "16": 43,
+    "17": 44,
+    "18": 45,
+    "19": 46,
+    "28": 48,
+    "29": 49,
+    "30": 50,
+    "20": 47,
+    "21": 47,
+    "22": 47,
+    "23": 47,
+    "24": 47,
+    "25": 47,
+    "26": 47,
+    "27": 47
+   },
+   "out": {
+    "0": 51,
+    "1": 52,
+    "2": 53,
+    "3": 54,
+    "4": 55,
+    "5": 56,
+    "6": 57,
+    "7": 58,
+    "8": 59,
+    "17": 61,
+    "18": 62,
+    "19": 63,
+    "20": 64,
+    "9": 60,
+    "10": 60,
+    "11": 60,
+    "12": 60,
+    "13": 60,
+    "14": 60,
+    "15": 60,
+    "16": 60
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "cv",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "cv",
+     "20": "trigger",
+     "21": "trigger",
+     "22": "trigger",
+     "23": "trigger",
+     "24": "trigger",
+     "25": "trigger",
+     "26": "trigger",
+     "27": "trigger",
+     "28": "trigger",
+     "29": "trigger",
+     "30": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger",
+     "8": "cv",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger",
+     "18": "cv",
+     "19": "trigger",
+     "20": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:796 clockTrigger.process(inputs[CLOCK_INPUT].getVoltage())"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the BPM knob alone",
+      "why": "Phaseque.cpp:820-826 getVoltage(), no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "normal": "the internal transport",
+      "why": "Phaseque.cpp:740 getVoltage() / 10.0, wrapped into 0 to 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:332-334 clutchInputTrigger.process(getVoltage())"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:337-338 resetInputTrigger.process(getVoltage())"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:97+ goToInputTrigger, processPatternNav"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "pattern 1",
+      "why": "Phaseque.hpp:439 configInput 'Pattern Select, V/12P'; one twelfth of a volt per pattern, as the PTRN output at Phaseque.cpp:989"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:97-298 processPatternNav, rndInputTrigger.process(getVoltage())"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:97-298 processPatternNav, leftInputTrigger.process(getVoltage())"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:97-298 processPatternNav, downInputTrigger.process(getVoltage())"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:97-298 processPatternNav, upInputTrigger.process(getVoltage())"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:97-298 processPatternNav, rightInputTrigger.process(getVoltage())"
+     },
+     "12": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:97-298 processPatternNav, seqInputTrigger.process(getVoltage())"
+     },
+     "13": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:97-298 processPatternNav, prevPtrnInputTrigger.process(getVoltage())"
+     },
+     "14": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:97-298 processPatternNav, nextPtrnInputTrigger.process(getVoltage())"
+     },
+     "15": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the GATE button alone",
+      "why": "Phaseque.cpp:50-54 globalGateInternal ^ (getVoltage() > 1.0f)"
+     },
+     "16": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the shift knob alone",
+      "why": "Phaseque.cpp:59-62 clamp(getVoltage() * 0.2f * baseStepLen, -baseStepLen, baseStepLen)"
+     },
+     "17": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the length knob alone",
+      "why": "Phaseque.cpp:74-76 clamp(getVoltage(), -4.999f, 4.999f) * 0.2f + 1.0f"
+     },
+     "18": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "each step's own curve setting",
+      "why": "Phaseque.cpp:85-87 globalCurve = getVoltage()"
+     },
+     "19": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "each step's own power setting",
+      "why": "Phaseque.cpp:90-92 globalPower = getVoltage()"
+     },
+     "20": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:456-461 jumpInputsTriggers[i].process(getVoltage())"
+     },
+     "21": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:456-461 jumpInputsTriggers[i].process(getVoltage())"
+     },
+     "22": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:456-461 jumpInputsTriggers[i].process(getVoltage())"
+     },
+     "23": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:456-461 jumpInputsTriggers[i].process(getVoltage())"
+     },
+     "24": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:456-461 jumpInputsTriggers[i].process(getVoltage())"
+     },
+     "25": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:456-461 jumpInputsTriggers[i].process(getVoltage())"
+     },
+     "26": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:456-461 jumpInputsTriggers[i].process(getVoltage())"
+     },
+     "27": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:456-461 jumpInputsTriggers[i].process(getVoltage())"
+     },
+     "28": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no trigger",
+      "why": "Phaseque.cpp:465 rndJumpInputTrigger.process(getVoltage())"
+     },
+     "29": {
+      "poly": true,
+      "range": "high above 1V",
+      "negative": "swings",
+      "normal": "no mutation change",
+      "why": "Phaseque.cpp:356-372 getChannels() bounds a per-block loop; below -1V resets instead"
+     },
+     "30": {
+      "poly": true,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "no mutation change",
+      "why": "Phaseque.cpp:381-396 getChannels() bounds a per-block loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Phaseque.cpp:1036-1042 setChannels(channels), 1 / 8 / 16 by polyphony mode",
+      "range": "0 to 10V"
+     },
+     "1": {
+      "poly": true,
+      "why": "Phaseque.cpp:1036-1042 setChannels(channels), 1 / 8 / 16 by polyphony mode",
+      "range": "±2V"
+     },
+     "2": {
+      "poly": true,
+      "why": "Phaseque.cpp:1036-1042 setChannels(channels), 1 / 8 / 16 by polyphony mode",
+      "range": "±5V"
+     },
+     "3": {
+      "poly": true,
+      "why": "Phaseque.cpp:1036-1042 setChannels(channels), 1 / 8 / 16 by polyphony mode",
+      "range": "±5V"
+     },
+     "4": {
+      "poly": true,
+      "why": "Phaseque.cpp:1036-1042 setChannels(channels), 1 / 8 / 16 by polyphony mode",
+      "range": "±5V"
+     },
+     "5": {
+      "poly": true,
+      "why": "Phaseque.cpp:1036-1042 setChannels(channels), 1 / 8 / 16 by polyphony mode",
+      "range": "±5V"
+     },
+     "6": {
+      "poly": true,
+      "why": "Phaseque.cpp:1036-1042 setChannels(channels), 1 / 8 / 16 by polyphony mode",
+      "range": "0 to 10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:983-996 setVoltage(... ? 10.0f : 0.0f)"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:983-996 setVoltage(... ? 10.0f : 0.0f)"
+     },
+     "19": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:983-996 setVoltage(... ? 10.0f : 0.0f)"
+     },
+     "20": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:983-996 setVoltage(... ? 10.0f : 0.0f)"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "why": "Phaseque.cpp:988-989 patternIdx * 1.0f / 12.0f"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:1020, 1026 setVoltage(10.f)"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:1020, 1026 setVoltage(10.f)"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:1020, 1026 setVoltage(10.f)"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:1020, 1026 setVoltage(10.f)"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:1020, 1026 setVoltage(10.f)"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:1020, 1026 setVoltage(10.f)"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:1020, 1026 setVoltage(10.f)"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:1020, 1026 setVoltage(10.f)"
+     },
+     "18": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Phaseque.cpp:1002 setVoltage(phaseShifted * 10.f)"
+     }
+    }
+   },
+   "notes": "Parameters 18, 19 and 20 (mutate, randomise and clear) are configured but no widget is added for any of them, so no click can reach them; parameters 62 to 77 (expression curve and power) are driven by an XY pad added with addParam and no paramId, which the census records as index -1, so they cannot be tagged either. Both groups are covered by Note lines instead.\nThe panel prints SHIFT and LEN twice each in the lower left block, once over a knob and once over the jack beneath it, and SHIFT a third time over the pattern-shift knob in the middle; the lines say which is which rather than repeating the word.\nThe two expression outputs are marked only by glyphs — a curve over the first and a plus over the second — with the word EXPR between them. The maker's own tooltips name them Expression and Expression Curve, and that is the order the widget adds them in (PhasequeWidget.cpp:207-209).\nIn Polyphonic and Muta-Unison modes the LEN output carries the step shift rather than the step length: Phaseque.cpp:663 reads StepAttr::STEP_SHIFT where the monophonic path at Phaseque.cpp:614 reads STEP_LEN, and the polyphonic line also omits the * 5.f the monophonic one applies. That looks like a copy-and-paste fault in the maker's source; the LEN output's line describes the monophonic behaviour, which is the default."
   }
  }
 }

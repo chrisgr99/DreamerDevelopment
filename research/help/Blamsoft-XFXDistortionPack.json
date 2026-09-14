@@ -2,22 +2,348 @@
  "plugin": "Blamsoft-XFXDistortionPack",
  "source": "https://blamsoft.com/wp-content/uploads/2018/01/XFXDistortionPackUserManual.pdf",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Blamsoft-XFXGrunge": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo distortion modelled on a guitar pedal's diode clipper, with a filter that sweeps from dark to bright and a dry/wet mix",
+    "Runs the signal through the distortion when on; with it off the module is bypassed, and the switch crossfades between the two rather than stepping",
+    "Sweeps a filter from lowpass through mid-cut to highpass, taking the sound from darker to brighter; the readout runs 0 to 11",
+    "Sets the gain into the diode clipper, so turning it up squares the signal off harder; the clipping is soft rather than hard, despite the panel printing DIST",
+    "Sets how much of the distorted signal is in the output against the dry input, 0 to 100% wet",
+    "Sets the output gain",
+    "Adds to the TONE knob, where 10V covers the whole of that knob's travel",
+    "Adds to the DIST knob, where 10V covers the whole of that knob's travel",
+    "Adds to the MIX knob, where 10V covers the whole of that knob's travel",
+    "Adds to the LEVEL knob, where 10V covers the whole of that knob's travel",
+    "The left audio input into the distortion",
+    "The right audio input into the distortion",
+    "The left output, carrying the dry signal and the distortion in the proportion set by MIX",
+    "The right output, carrying the dry signal and the distortion in the proportion set by MIX",
+    "Note — the two channels are separate circuits and neither input is normalled to the other, so with nothing patched into IN II the OUT II jack stays at 0V",
+    "Note — the circuit is modelled around a signal of ±1, and the module divides each input by 5 and multiplies each output by 5 to suit it, so ±5V is the level it expects"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10,
+    "5": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DC1Module::process at 0x205c-0x2060 reads inputs[0].voltages[0] with no channel loop, 0x2080 multiplies it by 0.1 and adds it to the Tone knob, and 0x2098-0x20a0 clamps the sum to 0 and 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DC1Module::process at 0x20c0-0x20c4 reads inputs[1].voltages[0], 0x20d4 multiplies it by 0.1 into the Distortion knob, clamped to 0 and 1 at 0x20e8"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DC1Module::process at 0x2158-0x215c reads inputs[2].voltages[0], 0x216c multiplies it by 0.1 into the Mix knob, clamped to 0 and 1 at 0x2180"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DC1Module::process at 0x210c-0x2110 reads inputs[3].voltages[0], 0x2120 multiplies it by 0.1 into the Level knob, clamped to 0 and 1 at 0x2134"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DC1Module::process at 0x2190-0x21a4 reads inputs[4].voltages[0] only and multiplies it by 0.2 before handing it to the left channel of the circuit"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DC1Module::process at 0x21a8-0x21ac reads inputs[5].voltages[0] only and multiplies it by 0.2 before handing it to the right channel of the circuit"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "DC1Module::process at 0x2254 writes one value into outputs[0].voltages[0] and never calls setChannels; 0x22e4 multiplies it by 5"
+     },
+     "1": {
+      "poly": false,
+      "why": "DC1Module::process at 0x2278 writes one value into outputs[1].voltages[0] and never calls setChannels; 0x22f4 multiplies it by 5"
+     }
+    }
+   },
+   "notes": "Blamsoft publish no source. Read from the installed 2.0.2 binary: the module class is DC1Module, its constructor at 0x25f8 and process at 0x1e88. configParam gives Enable 0 to 1 default 1 with an EnableParamQuantity printing Off and On, Tone 0 to 1 default 0.5 shown as 0 to 11, Distortion 0 to 1 default 0.5 shown as 0 to 11, Mix 0 to 1 default 1 shown as 0 to 100%, Level 0 to 1 default 0.75 shown as 0 to 11. Each CV jack is added to its knob at 0.1 per volt and the sum clamped to the knob's own 0 to 1 range, so a CV cannot push a control past its ends. The panel art draws a line from each jack to the knob it feeds and the disassembly agrees with every one. Enable does not use Rack's bypass: it selects between two modes of the generated DSP, the active circuit and a delay line that matches the active path's latency, and the module runs both in parallel for a short crossfade whenever the switch changes. The maker's PDF manual was read on this pass with pypdf; it agrees throughout and is the source of the account of what the Tone filter does. The widget adds no context menu of its own. The 2.0.2 binary is the only published build of this plugin, so no commit had to be settled."
   },
   "Blamsoft-XFXOverdrive": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo overdrive modelled on a green guitar pedal, mixing a soft-clipped copy of the input back in under a lowpass tone control",
+    "Runs the signal through the overdrive when on; with it off the module is bypassed, and the switch crossfades between the two rather than stepping",
+    "Sweeps the lowpass filter on the output from a low corner up to a high one that lifts the top end; the readout runs 0 to 11",
+    "Sets the gain into the diode clipper that is mixed back with the input, so turning it up distorts more; the clipping is soft rather than hard",
+    "Sets how much of the overdriven signal is in the output against the dry input, 0 to 100% wet",
+    "Sets the output gain",
+    "Adds to the TONE knob, where 10V covers the whole of that knob's travel",
+    "Adds to the DRIVE knob, where 10V covers the whole of that knob's travel",
+    "Adds to the MIX knob, where 10V covers the whole of that knob's travel",
+    "Adds to the LEVEL knob, where 10V covers the whole of that knob's travel",
+    "The left audio input into the overdrive",
+    "The right audio input into the overdrive",
+    "The left output, carrying the dry signal and the overdrive in the proportion set by MIX",
+    "The right output, carrying the dry signal and the overdrive in the proportion set by MIX",
+    "Note — the two channels are separate circuits and neither input is normalled to the other, so with nothing patched into IN II the OUT II jack stays at 0V",
+    "Note — the circuit is modelled around a signal of ±1, and the module divides each input by 5 and multiplies each output by 5 to suit it, so ±5V is the level it expects"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10,
+    "5": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DC9Module::process at 0x7218-0x721c reads inputs[0].voltages[0] with no channel loop, multiplies it by 0.1 and adds it to the Tone knob before a clamp to 0 and 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DC9Module::process at 0x727c-0x7280 reads inputs[1].voltages[0], multiplies it by 0.1 into the Drive knob, clamped to 0 and 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DC9Module::process at 0x7314-0x7318 reads inputs[2].voltages[0], multiplies it by 0.1 into the Mix knob, clamped to 0 and 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DC9Module::process at 0x72c8-0x72cc reads inputs[3].voltages[0], multiplies it by 0.1 into the Level knob, clamped to 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DC9Module::process at 0x734c-0x7360 reads inputs[4].voltages[0] only and multiplies it by 0.2 before handing it to the left channel of the circuit"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DC9Module::process at 0x7364-0x7368 reads inputs[5].voltages[0] only and multiplies it by 0.2 before handing it to the right channel of the circuit"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "DC9Module::process at 0x7410 writes one value into outputs[0].voltages[0] and never calls setChannels; the value is multiplied by 5 before the write-back at the end of process"
+     },
+     "1": {
+      "poly": false,
+      "why": "DC9Module::process at 0x7434 writes one value into outputs[1].voltages[0] and never calls setChannels; the value is multiplied by 5 before the write-back at the end of process"
+     }
+    }
+   },
+   "notes": "Blamsoft publish no source. Read from the installed 2.0.2 binary: the module class is DC9Module, its constructor at 0x765c and process at 0x7044. configParam gives Enable 0 to 1 default 1 with an EnableParamQuantity printing Off and On, Tone 0 to 1 default 0.5 shown as 0 to 11, Drive 0 to 1 default 0.5 shown as 0 to 11, Mix 0 to 1 default 1 shown as 0 to 100%, Level 0 to 1 default 0.75 shown as 0 to 11. The jack-to-knob map, the 0.1 per volt CV law and the clamp are identical to Grunge's. The maker's PDF manual was read with pypdf; it is the source of the account of the Tone filter and of the drive stage being mixed with the input rather than replacing it. The widget adds no context menu of its own."
   },
   "Blamsoft-XFXTube": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo tube distortion modelling a triode preamp stage, with a guitar-amp tone stack in front of the output and a choice of four circuits",
+    "Runs the signal through the tube stage when on; with it off the module is bypassed, and the switch crossfades between the two rather than stepping",
+    "Cuts or boosts the bottom of the tone stack, -11 to +11 with 0 at the centre",
+    "Cuts or boosts the middle of the tone stack, -11 to +11 with 0 at the centre",
+    "Cuts or boosts the top of the tone stack, -11 to +11 with 0 at the centre",
+    "Sets the gain driving the triode, from a linear part of the circuit at the left end to saturation at the right; the readout runs 0 to 11",
+    "Switches the tone stack in and out; the stack is not flat with BASS, MID and TREB centred, so switching it in changes the sound on its own",
+    "Sets how much of the distorted signal is in the output against the dry input, 0 to 100% wet",
+    "Adds a bass boost, to make up the bottom end that the distortion's added harmonics mask; it comes up off",
+    "Sets the output gain",
+    "Chooses which of four sets of circuit values the triode is modelled with, printed A, B, C and D, each giving a slightly different tone",
+    "Adds to the DIST knob, where 10V covers the whole of that knob's travel",
+    "Adds to the MIX knob, where 10V covers the whole of that knob's travel",
+    "Adds to the LEVEL knob, where 10V covers the whole of that knob's travel",
+    "The left audio input into the tube stage",
+    "The right audio input into the tube stage",
+    "The left output, carrying the dry signal and the tube stage in the proportion set by MIX",
+    "The right output, carrying the dry signal and the tube stage in the proportion set by MIX",
+    "Note — BASS, MID, TREB, TONE, X-BASS and MODEL have no input jack, so those six take no voltage control",
+    "Note — the two channels are separate circuits and neither input is normalled to the other, so with nothing patched into IN II the OUT II jack stays at 0V",
+    "Note — the circuit is modelled around a signal of ±1, and the module divides each input by 5 and multiplies each output by 5 to suit it, so ±5V is the level it expects"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 17
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "audio",
+     "4": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "t00bModule::process at 0xab08-0xab0c reads inputs[0].voltages[0] with no channel loop, 0xab2c multiplies it by 0.1 into the Distortion knob, clamped to 0 and 1 at 0xab40"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "t00bModule::process at 0xabb0-0xabb4 reads inputs[1].voltages[0], 0xabc4 multiplies it by 0.1 into the Mix knob, clamped to 0 and 1 at 0xabd8"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "t00bModule::process at 0xab64-0xab68 reads inputs[2].voltages[0], 0xab78 multiplies it by 0.1 into the Level knob, clamped to 0 and 1 at 0xab8c"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "t00bModule::process at 0xabe8-0xabfc reads inputs[3].voltages[0] only and multiplies it by 0.2 before handing it to the left channel of the circuit"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "t00bModule::process at 0xac00-0xac04 reads inputs[4].voltages[0] only and multiplies it by 0.2 before handing it to the right channel of the circuit"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "t00bModule::process at 0xacac writes one value into outputs[0].voltages[0] and never calls setChannels; the value is multiplied by 5 before the write-back at the end of process"
+     },
+     "1": {
+      "poly": false,
+      "why": "t00bModule::process at 0xacd0 writes one value into outputs[1].voltages[0] and never calls setChannels; the value is multiplied by 5 before the write-back at the end of process"
+     }
+    }
+   },
+   "notes": "Blamsoft publish no source. Read from the installed 2.0.2 binary: the module class is t00bModule, its constructor at 0xaf2c and process at 0xa7e4. config declares 10 parameters, 5 inputs, 2 outputs and no lights. Three of the ten parameters are two-position switches rather than knobs, which the panel does not make obvious: Tone and Extra Bass are configured with an EnableParamQuantity printing Off and On, Tone defaulting on and Extra Bass defaulting off. Model is 0 to 3 with a ModelParamQuantity printing A, B, C and D. Bass, Mid and Treble are each 0 to 1 with a display multiplier of 22 and an offset of -11, so they read -11 to +11 and centre at 0. Distortion and Level read 0 to 11, Mix 0 to 100%. Only Distortion, Mix and Level have CV jacks. Changing Enable, Tone, Extra Bass or Model rebuilds the simulation and crossfades from the old one, so all four are stepped rather than smoothly swept. The DSP runs its circuit at 192000Hz whatever the patch rate, and loads its triode lookup tables from the plugin's own res folder at start; the binary also names table files for 48000, 96000 and 384000 that the plugin does not ship, but the 192000 path is the one the module selects, so nothing is missing at runtime. The maker's PDF manual was read with pypdf and agrees throughout; it is the source of the account of what the tone stack, Extra Bass and Model do, including the statement that the stack is not flat with the controls centred. The widget adds no context menu of its own."
   }
  }
 }

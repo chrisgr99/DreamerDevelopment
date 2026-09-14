@@ -1,68 +1,2106 @@
 {
  "plugin": "SmarTAZZStudio-Free",
- "source": "https://github.com/mlaban64/STS-Free",
+ "source": "https://mlaban.home.xs4all.nl/music.html (the twelve per-module manual pages under /music/VCV/, read 2026-09-14; the module sources read at commit 55aa542, the 2.4.1 release)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Multiplier": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Copies one signal, polyphony and all, to four outputs",
+    "The signal that is copied to all four outputs, with as many polyphonic channels as it carries",
+    "Carries a copy of the input, at the same number of polyphonic channels",
+    "Note — with nothing patched to the input the four outputs are not written at all and hold whatever they last carried"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "Multiplier.cpp Multiplier::process: getChannels() on this jack sets the channel count for all four outputs, and getVoltages() copies the whole channel array, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Multiplier.cpp Multiplier::process: setChannels(num_Channels) then writeVoltages of the input's whole voltage array, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "why": "Multiplier.cpp Multiplier::process: setChannels(num_Channels) then writeVoltages of the input's whole voltage array, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": true,
+      "why": "Multiplier.cpp Multiplier::process: setChannels(num_Channels) then writeVoltages of the input's whole voltage array, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": true,
+      "why": "Multiplier.cpp Multiplier::process: setChannels(num_Channels) then writeVoltages of the input's whole voltage array, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The jack carries whatever is patched to it, so no family is set. process() returns immediately when the input has no channels, which leaves the outputs at their last written voltages rather than at 0V."
   },
   "Splitter": {
    "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "Saw-VCO": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "Sine-VCO": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "Triangle-VCO": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "Pulse-VCO": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "Clipper": {
-   "lines": [
-    "TODO: what this module is"
-   ]
+    "Breaks a polyphonic cable out to four separate mono outputs, in channel order or sorted by voltage",
+    "The polyphonic signal to be broken out; channels beyond the fourth are dropped without warning",
+    "Carries one channel of the polyphonic input as a mono signal, picked by the sort order on the menu",
+    "Note — the lamp beside an output is lit while that output has a channel to carry",
+    "Note — an output with no channel to carry is not written at all, so it holds whatever voltage it last had",
+    "Menu — Sort Outputs: Channel, Pitch Up, Pitch Down — takes the input channel of matching number, or sorts the channels by voltage, lowest first or highest first",
+    "Note — with Pitch Down chosen and exactly three channels patched, an already-descending input comes out mis-sorted; the source is missing a comparison before its last swap"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "Splitter.cpp Splitter::process: getChannels() on this jack chooses the branch, and getVoltage(cur_Channel) reads channels 0 to 3 individually, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Splitter.cpp Splitter::process: setVoltage with no channel argument in every branch, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "why": "Splitter.cpp Splitter::process: setVoltage with no channel argument in every branch, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "why": "Splitter.cpp Splitter::process: setVoltage with no channel argument in every branch, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "why": "Splitter.cpp Splitter::process: setVoltage with no channel argument in every branch, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "In the Pitch Down branch for three channels the final swap of elements 0 and 1 has no `if (volt_In[0] < volt_In[1])` guard, unlike the matching Pitch Up branch, so the swap is unconditional and a descending input is left mis-sorted. The outputs are never zeroed when the channel count drops, so they hold stale voltages. The jacks carry whatever is patched to them, so no family is set."
   },
   "D-Octer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Takes a pitch voltage and puts it out again two octaves down, one down, one up and two up",
+    "The pitch voltage to be transposed, in as many polyphonic channels as the cable carries",
+    "Carries the input pitch with 2V taken off, two octaves down",
+    "Carries the input pitch with 1V taken off, one octave down",
+    "Carries the input pitch with 1V added, one octave up",
+    "Carries the input pitch with 2V added, two octaves up",
+    "Note — the transposed voltage is not checked against any audible range, so it can fall below or rise above anything a VCO will play",
+    "Note — with nothing patched to the input the four outputs are not written at all and hold whatever they last carried"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "D-Octer.cpp D_Octer::process: getChannels() sets the channel count on all four outputs and getVoltage(cur_Channel) reads each channel in a loop; the voltage is used by simple addition, with no clamp, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "D-Octer.cpp D_Octer::process: setChannels(num_Channels) then setVoltage(volt_In +/- 1.0 or 2.0, cur_Channel), commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "D-Octer.cpp D_Octer::process: setChannels(num_Channels) then setVoltage(volt_In +/- 1.0 or 2.0, cur_Channel), commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "D-Octer.cpp D_Octer::process: setChannels(num_Channels) then setVoltage(volt_In +/- 1.0 or 2.0, cur_Channel), commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "D-Octer.cpp D_Octer::process: setChannels(num_Channels) then setVoltage(volt_In +/- 1.0 or 2.0, cur_Channel), commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "process() returns immediately when the input has no channels, leaving the outputs at their last written voltages."
+  },
+  "Clipper": {
+   "lines": [
+    "Cuts a signal off at an upper and a lower threshold, or folds it back at them, adding harmonics either way",
+    "Scales the voltage at the upper threshold jack before it is added to the upper threshold knob, 0 to 1",
+    "Scales the voltage at the lower threshold jack before it is added to the lower threshold knob, 0 to 1",
+    "Sets the level above which the signal is cut or folded; the knob reads 0 to 5V and in the unipolar setting 5V is added to it, giving 5 to 10V",
+    "Sets the level below which the signal is cut or folded; the knob reads -5V to 0V and in the unipolar setting 5V is added to it, giving 0 to 5V",
+    "The signal to be clipped or folded, in as many polyphonic channels as the cable carries",
+    "Added to the upper threshold knob after its attenuator; while this jack is patched the unipolar setting's 5V offset is dropped and the total is held at or above 5V instead",
+    "Added to the lower threshold knob after its attenuator; while this jack is patched the unipolar setting's 5V offset is dropped and the total is held at or below 5V instead",
+    "Carries the clipped or folded signal at the same number of polyphonic channels as the input",
+    "Note — clipping and folding both take level off the signal and nothing puts it back, so an amplifier or a mixer after this module is usually wanted",
+    "Note — the modulation jacks are read one channel at a time and the same threshold is applied to every polyphonic channel",
+    "Note — nothing is computed unless both the input and the output are patched",
+    "Menu — Clip Method: Clip, Fold — chooses whether a signal past a threshold is held at the threshold or reflected back from it by the amount it overshot",
+    "Menu — Polarity: Unipolar (0..10V), Bipolar (-5V..5V) — chooses which voltage range the two threshold knobs cover; the unipolar setting adds 5V to each knob's reading",
+    "Note — the two threshold knobs both read Volt in Rack's own tooltip, and neither shows the 5V the unipolar setting adds",
+    "Note — the lower threshold attenuator is named Attenuation for Upper Threshold Modulation in Rack's tooltip; the source names both attenuators the same"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Clipper.cpp Clipper::process: getChannels() on this jack sets the output channel count and getVoltage(idx) reads each channel in the loop, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Clipper.cpp Clipper::process: UTM_in = getVoltage() with no channel argument, used as UTM_attn_param * UTM_in + UTM_param and then floored at 0.f or 5.f depending on the polarity setting, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Clipper.cpp Clipper::process: LTM_in = getVoltage() with no channel argument, used as LTM_attn_param * LTM_in + LTM_param and then capped at 0.f or 5.f depending on the polarity setting, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Clipper.cpp Clipper::process: setChannels(num_channels) then setVoltage(out_Volt, idx) per channel, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The audio jacks carry whatever is patched to them, so no family is set for them. The unipolar 5V offset is applied only in the branch taken when the modulation jack is unpatched; patching a modulation jack silently drops it, so in the unipolar setting the lower threshold shifts down by 5V and the upper threshold is pinned to 5V when its attenuator is at 0. Folding is a single reflection, out = 2 * threshold - out, not repeated. Both attenuators are configured with the name \"Attenuation for Upper Threshold Modulation\" and both threshold knobs with the name \"Volt\"."
+  },
+  "Sine-VCO": {
+   "lines": [
+    "A polyphonic sine oscillator with frequency, phase and volume modulation",
+    "Scales the voltage at the frequency modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Scales the voltage at the phase modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Scales the voltage at the volume modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Sets the frequency the oscillator plays at 0V, 10Hz to 20000Hz, starting at 261.626Hz for C4; the scale is linear in Hz, so most of the travel covers the top of the range",
+    "Shifts where in the cycle the wave starts, 0 to 1 of a cycle",
+    "Multiplies the output, 0 to 1; the wave itself runs to ±5V, so at 0.5 the output reaches ±2.5V",
+    "Sets the pitch at 1V per octave from the frequency knob's setting at 0V, and sets how many polyphonic voices the module plays",
+    "Multiplies the frequency by its own voltage times the attenuator times a half, so 10V at full attenuation lifts the frequency six-fold; the result is held between 10Hz and 20000Hz",
+    "Shifts the start of the cycle by its own voltage times the attenuator divided by ten, so 10V at full attenuation is a whole cycle, added to the phase knob",
+    "Added to the volume knob at its own voltage times the attenuator divided by ten, so 10V at full attenuation adds 1",
+    "Carries the sine wave, at the same number of polyphonic channels as the pitch input",
+    "Note — with nothing patched to V-In the oscillator plays one voice at the frequency knob's setting",
+    "Note — the three modulation jacks are read one channel at a time and the same modulation is applied to every polyphonic voice",
+    "Note — the volume total is not held to any range, so a large voltage at the volume jack can drive the output well past ±5V or turn it inside out by going negative",
+    "Note — the wave is read from a table of 1000 points with no filtering, so high notes alias",
+    "Note — this is the one oscillator in the plugin with no Band or Harmonics menu; the sine table needs neither"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "out": {
+    "0": 11
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Sine-VCO.cpp: getChannels() on this jack sets the output channel count and the loop bound, and freq = pitch_param * pow(2.f, getVoltage(idx)) per channel, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Sine-VCO.cpp: freq_mod = getVoltage() with no channel argument, used as freq + freq * freq_mod * attn * 0.5f and then held to 10Hz to 20000Hz, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Sine-VCO.cpp: phase_mod = getVoltage() with no channel argument, used as phase_param + phase_mod * attn * 0.1f, with 1.0 added back if the total goes negative, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Sine-VCO.cpp: volume_mod = getVoltage() with no channel argument, used as volume_param + volume_mod * attn * 0.1f with no clamp, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "Sine-VCO.cpp: setChannels then setVoltage(volume_out * wave, idx), the wave table being filled to ±5V, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The pitch knob is configured 10 to 20000 with a linear mapping, so it is a frequency knob rather than a note knob. The wave table is a single sine cycle scaled to ±5V, 1000 points, with no band limiting. volume_out is never clamped."
+  },
+  "Saw-VCO": {
+   "lines": [
+    "A polyphonic sawtooth oscillator with frequency, phase and volume modulation",
+    "Scales the voltage at the frequency modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Scales the voltage at the phase modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Scales the voltage at the volume modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Sets the frequency the oscillator plays at 0V, 10Hz to 20000Hz, starting at 261.626Hz for C4; the scale is linear in Hz, so most of the travel covers the top of the range",
+    "Shifts where in the cycle the wave starts, 0 to 1 of a cycle",
+    "Multiplies the output, 0 to 1; the wave itself runs to ±5V, so at 0.5 the output reaches ±2.5V",
+    "Sets the pitch at 1V per octave from the frequency knob's setting at 0V, and sets how many polyphonic voices the module plays",
+    "Multiplies the frequency by its own voltage times the attenuator times a half, so 10V at full attenuation lifts the frequency six-fold; the result is held between 10Hz and 20000Hz",
+    "Shifts the start of the cycle by its own voltage times the attenuator divided by ten, so 10V at full attenuation is a whole cycle, added to the phase knob",
+    "Added to the volume knob at its own voltage times the attenuator divided by ten, so 10V at full attenuation adds 1",
+    "Carries the sawtooth wave, at the same number of polyphonic channels as the pitch input",
+    "Note — with nothing patched to V-In the oscillator plays one voice at the frequency knob's setting",
+    "Note — the three modulation jacks are read one channel at a time and the same modulation is applied to every polyphonic voice",
+    "Note — the volume total is not held to any range, so a large voltage at the volume jack can drive the output well past ±5V or turn it inside out by going negative",
+    "Note — the wave is read from a table of 1000 points with no filtering, so high notes alias",
+    "Menu — Ramp: Up, Down — chooses whether the sawtooth rises through the cycle and drops at its end, or falls through it and jumps at its end",
+    "Menu — Band: Unlimited, Limited — chooses between a straight ramp, which is rich but aliases, and a ramp rebuilt from a set number of sine partials, which is duller and cleaner",
+    "Menu — Harmonics: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40, 50 — sets how many partials the Limited ramp is built from, starting at 10",
+    "Note — the Harmonics setting changes nothing while Band is set to Unlimited"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "out": {
+    "0": 11
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Sawtooth-VCO.cpp: getChannels() on this jack sets the output channel count and the loop bound, and freq = pitch_param * pow(2.f, getVoltage(idx)) per channel, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Sawtooth-VCO.cpp: freq_mod = getVoltage() with no channel argument, used as freq + freq * freq_mod * attn * 0.5f and then held to 10Hz to 20000Hz, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Sawtooth-VCO.cpp: phase_mod = getVoltage() with no channel argument, used as phase_param + phase_mod * attn * 0.1f, with 1.0 added back if the total goes negative, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Sawtooth-VCO.cpp: volume_mod = getVoltage() with no channel argument, used as volume_param + volume_mod * attn * 0.1f with no clamp, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "Sawtooth-VCO.cpp: setChannels then setVoltage(volume_out * wave, idx), the wave table being filled to ±5V, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "Four tables are held: band-unlimited and band-limited, each in an up and a down ramp. The band-limited ramp is the sum of sin(j * x) / j for j from 1 to the harmonic count, then scaled so its peak is 5V. Changing the Harmonics menu rebuilds the tables inside process(). The pitch knob is linear in Hz. volume_out is never clamped."
+  },
+  "Triangle-VCO": {
+   "lines": [
+    "A polyphonic triangle oscillator with frequency, phase and volume modulation",
+    "Scales the voltage at the frequency modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Scales the voltage at the phase modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Scales the voltage at the volume modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Sets the frequency the oscillator plays at 0V, 10Hz to 20000Hz, starting at 261.626Hz for C4; the scale is linear in Hz, so most of the travel covers the top of the range",
+    "Shifts where in the cycle the wave starts, 0 to 1 of a cycle",
+    "Multiplies the output, 0 to 1; the wave itself runs to ±5V, so at 0.5 the output reaches ±2.5V",
+    "Sets the pitch at 1V per octave from the frequency knob's setting at 0V, and sets how many polyphonic voices the module plays",
+    "Multiplies the frequency by its own voltage times the attenuator times a half, so 10V at full attenuation lifts the frequency six-fold; the result is held between 10Hz and 20000Hz",
+    "Shifts the start of the cycle by its own voltage times the attenuator divided by ten, so 10V at full attenuation is a whole cycle, added to the phase knob",
+    "Added to the volume knob at its own voltage times the attenuator divided by ten, so 10V at full attenuation adds 1",
+    "Carries the triangle wave, at the same number of polyphonic channels as the pitch input",
+    "Note — with nothing patched to V-In the oscillator plays one voice at the frequency knob's setting",
+    "Note — the three modulation jacks are read one channel at a time and the same modulation is applied to every polyphonic voice",
+    "Note — the volume total is not held to any range, so a large voltage at the volume jack can drive the output well past ±5V or turn it inside out by going negative",
+    "Note — the wave is read from a table of 1000 points with no filtering, so high notes alias",
+    "Menu — Band: Unlimited, Limited — chooses between a straight triangle, which aliases at high notes, and one rebuilt from a set number of sine partials, which is cleaner",
+    "Menu — Harmonics: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 — sets how many odd partials the Limited triangle is built from, starting at 10",
+    "Note — the Harmonics setting changes nothing while Band is set to Unlimited"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "out": {
+    "0": 11
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Triangle-VCO.cpp: getChannels() on this jack sets the output channel count and the loop bound, and freq = pitch_param * pow(2.f, getVoltage(idx)) per channel, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Triangle-VCO.cpp: freq_mod = getVoltage() with no channel argument, used as freq + freq * freq_mod * attn * 0.5f and then held to 10Hz to 20000Hz, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Triangle-VCO.cpp: phase_mod = getVoltage() with no channel argument, used as phase_param + phase_mod * attn * 0.1f, with 1.0 added back if the total goes negative, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Triangle-VCO.cpp: volume_mod = getVoltage() with no channel argument, used as volume_param + volume_mod * attn * 0.1f with no clamp, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "Triangle-VCO.cpp: setChannels then setVoltage(volume_out * wave, idx), the wave table being filled to ±5V, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The band-limited triangle is the sum over odd j of sin(j * x) / (j * j) with the sign flipped at each term, then scaled so its peak is 5V; the menu number is the count of odd partials used, so 10 reaches the 19th harmonic. The pitch knob is linear in Hz. volume_out is never clamped."
+  },
+  "Pulse-VCO": {
+   "lines": [
+    "A polyphonic pulse oscillator with pulse-width, frequency, phase and volume modulation",
+    "Scales the voltage at the frequency modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Scales the voltage at the phase modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Scales the voltage at the volume modulation jack, -1 to +1; at 0 that jack does nothing and a negative setting reverses the modulation",
+    "Scales the voltage at the pulse-width modulation jack, 0 to 1; at 0 that jack does nothing",
+    "Sets the frequency the oscillator plays at 0V, 10Hz to 20000Hz, starting at 261.626Hz for C4; the scale is linear in Hz, so most of the travel covers the top of the range",
+    "Shifts where in the cycle the wave starts, 0 to 1 of a cycle",
+    "Multiplies the output, 0 to 1; the wave itself runs to ±5V, so at 0.5 the output reaches ±2.5V",
+    "Sets how much of each cycle is spent at the high level, 1% to 99%, starting at 50%; it does nothing while Band is set to Limited",
+    "Sets the pitch at 1V per octave from the frequency knob's setting at 0V, and sets how many polyphonic voices the module plays",
+    "Multiplies the frequency by its own voltage times the attenuator times a half, so 10V at full attenuation lifts the frequency six-fold; the result is held between 10Hz and 20000Hz",
+    "Shifts the start of the cycle by its own voltage times the attenuator divided by ten, so 10V at full attenuation is a whole cycle, added to the phase knob",
+    "Added to the volume knob at its own voltage times the attenuator divided by ten, so 10V at full attenuation adds 1",
+    "Added to the pulse-width knob at its own voltage times the attenuator divided by ten, so 10V at full attenuation adds a whole cycle's worth; it does nothing while Band is set to Limited",
+    "Carries the pulse wave, at the same number of polyphonic channels as the pitch input",
+    "Note — with nothing patched to V-In the oscillator plays one voice at the frequency knob's setting",
+    "Note — the four modulation jacks are read one channel at a time and the same modulation is applied to every polyphonic voice",
+    "Note — the volume total is not held to any range, so a large voltage at the volume jack can drive the output well past ±5V or turn it inside out by going negative",
+    "Menu — Band: Unlimited, Limited — chooses between a hard-edged pulse computed from the phase, which aliases, and a fixed square wave rebuilt from a set number of odd sine partials, which is cleaner",
+    "Menu — Harmonics: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 — sets how many odd partials the Limited square is built from, starting at 10",
+    "Note — the pulse width is set only in the Unlimited setting; the Limited table is a square wave at an even half cycle and neither the pulse-width knob nor its jack reaches it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Pulse-VCO.cpp: getChannels() on this jack sets the output channel count and the loop bound, and freq = pitch_param * pow(2.f, getVoltage(idx)) per channel, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Pulse-VCO.cpp: freq_mod = getVoltage() with no channel argument, used as freq + freq * freq_mod * attn * 0.5f and then held to 10Hz to 20000Hz, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Pulse-VCO.cpp: phase_mod = getVoltage() with no channel argument, used as phase_param + phase_mod * attn * 0.1f, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Pulse-VCO.cpp: volume_mod = getVoltage() with no channel argument, used as volume_param + volume_mod * attn * 0.1f with no clamp, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Pulse-VCO.cpp: pulsewidth_mod = getVoltage() with no channel argument, used as 0.01f * pulsewidth_param + pulsewidth_mod * attn * 0.1f, which is read only in the band-unlimited branch of STS_My_Pulse, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "Pulse-VCO.cpp: setChannels then setVoltage(volume_out * STS_My_Pulse(...), idx), the pulse returning 5.0f or -5.0f and the table being scaled to a 5V peak, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "STS_My_Pulse reads pulse_width only in its band-unlimited branch; the band-limited branch returns a table built from sin(j * x) / j over odd j, which is a fixed 50 per cent square, so the Pulse knob and the PW-In jack are inert whenever Band is set to Limited. The pulse-width attenuator runs 0 to 1, unlike the other three attenuators which run -1 to 1. The pitch knob is linear in Hz."
   },
   "Ticker": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock with a master tempo and four clocks divided or multiplied from it, each with its own gate length, phase offset and swing",
+    "Sets the master tempo, 10 to 400 BPM, starting at 120; the display shows whatever tempo is in use",
+    "Stops the clock, sets every phase back to the start and sends a pulse from the Reset output",
+    "Starts the clock if it is stopped and stops it if it is running; the clock comes up stopped",
+    "Sets how much of each master cycle the master gate stays high, 10% to 90%, starting at 50%",
+    "Sets this clock's speed against the master, over 73 steps from a ninety-sixth of the master tempo to ninety-six times it; the display shows the division or multiplication in use",
+    "Shifts this clock's gate earlier or later within its cycle, -0.25 to 0.25 of a cycle",
+    "Sets how much of this clock's cycle its gate stays high, 10% to 90%, starting at 50%",
+    "Sets how far each of this clock's gates is displaced at random from where it would otherwise fall, 0% to 9.999% of a cycle either way; at 0 the gates are even",
+    "Sets the master tempo directly over 0 to 10V for 10 to 400 BPM, overriding the BPM knob while patched",
+    "A voltage above 2V stops the clock, sets every phase back to the start and sends a pulse from the Reset output; it has to fall below 0.1V before another will be taken",
+    "A voltage above 2V starts the clock if it is stopped and stops it if it is running; it has to fall below 0.1V before another will be taken",
+    "Sets the master gate length directly over 0 to 10V for 10% to 90%, overriding the Length knob while patched",
+    "Sets this clock's phase offset at a tenth of a cycle per volt, held to a quarter cycle either way; whether all four clocks read their jacks or their knobs turns on clock 1's phase jack alone",
+    "Sets this clock's gate length directly over 0 to 10V for 10% to 90%, overriding this clock's Length knob while patched",
+    "Sets this clock's swing amount directly over 0 to 10V for 0% to 9.999%, overriding this clock's Swing knob while patched",
+    "Carries the master gate, 10V for the fraction of each cycle set by the master Length control",
+    "Carries a 1ms pulse at 10V at the start of every master cycle",
+    "Carries a 1ms pulse at 10V whenever the module is reset, from the button or from the reset jack",
+    "Carries a 1ms pulse at 10V whenever the clock is started or stopped, from the button or from the run jack",
+    "Carries this clock's gate, 10V for the fraction of each of its cycles set by its own Length control",
+    "Carries a 1ms pulse at 10V at the start of each of this clock's cycles",
+    "Note — the clock comes up stopped whenever a patch is loaded; press Run or send a pulse to the run jack to start it",
+    "Note — changing the master tempo or any clock's division resets every phase to the start, so the clocks stay lined up",
+    "Note — the maker's manual gives the gate length range as 5% to 95% for the CV inputs; the code uses 10% to 90% throughout, for the knobs and the jacks alike",
+    "Note — the maker's manual calls the phase control half a cycle either way and its jack unipolar; the code holds the shift to a quarter cycle and reads the jack bipolar",
+    "Note — the maker's manual gives the swing jack's range as -5% to 5%; the code maps 0 to 10V onto 0% to 9.999%",
+    "Note — the BPM jack's reading is not held to any range, unlike every other CV input here, so a voltage outside 0 to 10V gives a tempo outside 10 to 400 BPM",
+    "Note — a clock's swing is a fresh random displacement taken after each gate, so the same swing setting never gives the same pattern twice"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 7,
+    "13": 7,
+    "14": 7,
+    "15": 7,
+    "16": 8,
+    "17": 8,
+    "18": 8,
+    "19": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 13,
+    "6": 13,
+    "7": 13,
+    "8": 14,
+    "9": 14,
+    "10": 14,
+    "11": 14,
+    "12": 15,
+    "13": 15,
+    "14": 15,
+    "15": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 17,
+    "2": 18,
+    "3": 19,
+    "4": 20,
+    "5": 20,
+    "6": 20,
+    "7": 20,
+    "8": 21,
+    "9": 21,
+    "10": 21,
+    "11": 21
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "normal": "the BPM knob",
+      "why": "Ticker.cpp Ticker::process: msr_BPM = 10 + 390 * getVoltage() * 0.1f inside an isConnected() branch that otherwise reads the knob, with no clamp and no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: resetTrigger.process(getVoltage(), 0.1f, 2.f), a Rack SchmittTrigger with the thresholds given explicitly, and no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: runTrigger.process(getVoltage(), 0.1f, 2.f), a Rack SchmittTrigger with the thresholds given explicitly, and no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the master Length knob",
+      "why": "Ticker.cpp Ticker::process: msr_Gate_Len = 10 + 80 * getVoltage() * 0.1f clamped to 10 and 90, inside an isConnected() branch that otherwise reads the knob, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this clock's Phase knob",
+      "why": "Ticker.cpp Ticker::process: clk_Phase_Shift[i] = getVoltage() * 0.1f clamped to -0.25 and 0.25; the isConnected() test is written against CLK_PHASE_INPUTS + 0 rather than + i, so clock 1's jack decides the branch for all four clocks, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this clock's Phase knob",
+      "why": "Ticker.cpp Ticker::process: clk_Phase_Shift[i] = getVoltage() * 0.1f clamped to -0.25 and 0.25; the isConnected() test is written against CLK_PHASE_INPUTS + 0 rather than + i, so clock 1's jack decides the branch for all four clocks, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this clock's Phase knob",
+      "why": "Ticker.cpp Ticker::process: clk_Phase_Shift[i] = getVoltage() * 0.1f clamped to -0.25 and 0.25; the isConnected() test is written against CLK_PHASE_INPUTS + 0 rather than + i, so clock 1's jack decides the branch for all four clocks, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this clock's Phase knob",
+      "why": "Ticker.cpp Ticker::process: clk_Phase_Shift[i] = getVoltage() * 0.1f clamped to -0.25 and 0.25; the isConnected() test is written against CLK_PHASE_INPUTS + 0 rather than + i, so clock 1's jack decides the branch for all four clocks, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "this clock's Length knob",
+      "why": "Ticker.cpp Ticker::process: clk_Gate_Len[i] = 10 + 80 * getVoltage() * 0.1f clamped to 10 and 90, inside an isConnected() branch that otherwise reads the knob, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "this clock's Length knob",
+      "why": "Ticker.cpp Ticker::process: clk_Gate_Len[i] = 10 + 80 * getVoltage() * 0.1f clamped to 10 and 90, inside an isConnected() branch that otherwise reads the knob, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "this clock's Length knob",
+      "why": "Ticker.cpp Ticker::process: clk_Gate_Len[i] = 10 + 80 * getVoltage() * 0.1f clamped to 10 and 90, inside an isConnected() branch that otherwise reads the knob, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "this clock's Length knob",
+      "why": "Ticker.cpp Ticker::process: clk_Gate_Len[i] = 10 + 80 * getVoltage() * 0.1f clamped to 10 and 90, inside an isConnected() branch that otherwise reads the knob, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this clock's Swing knob",
+      "why": "Ticker.cpp Ticker::process: clk_Swing_Amount[i] = 9.999f * getVoltage() * 0.1f clamped to -9.999 and 9.999, inside an isConnected() branch that otherwise reads the knob, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this clock's Swing knob",
+      "why": "Ticker.cpp Ticker::process: clk_Swing_Amount[i] = 9.999f * getVoltage() * 0.1f clamped to -9.999 and 9.999, inside an isConnected() branch that otherwise reads the knob, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this clock's Swing knob",
+      "why": "Ticker.cpp Ticker::process: clk_Swing_Amount[i] = 9.999f * getVoltage() * 0.1f clamped to -9.999 and 9.999, inside an isConnected() branch that otherwise reads the knob, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this clock's Swing knob",
+      "why": "Ticker.cpp Ticker::process: clk_Swing_Amount[i] = 9.999f * getVoltage() * 0.1f clamped to -9.999 and 9.999, inside an isConnected() branch that otherwise reads the knob, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(msr_GateState ? 10.f : 0.f) from a PulseGenerator triggered for msr_Gate_Len / (msr_Freq * 100), commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(msr_TrgState ? 10.f : 0.f) from a PulseGenerator triggered for 1e-3f, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(resetPulseState ? 10.f : 0.f) from a PulseGenerator triggered for 1e-3f, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(runPulseState ? 10.f : 0.f) from a PulseGenerator triggered for 1e-3f, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(clk_GateState[i] ? 10.f : 0.f) from a PulseGenerator triggered for clk_Gate_Len[i] / (clk_Freq[i] * 100), commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(clk_GateState[i] ? 10.f : 0.f) from a PulseGenerator triggered for clk_Gate_Len[i] / (clk_Freq[i] * 100), commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(clk_GateState[i] ? 10.f : 0.f) from a PulseGenerator triggered for clk_Gate_Len[i] / (clk_Freq[i] * 100), commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(clk_GateState[i] ? 10.f : 0.f) from a PulseGenerator triggered for clk_Gate_Len[i] / (clk_Freq[i] * 100), commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(clk_TrgState[i] ? 10.f : 0.f) from a PulseGenerator triggered for 1e-3f, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(clk_TrgState[i] ? 10.f : 0.f) from a PulseGenerator triggered for 1e-3f, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(clk_TrgState[i] ? 10.f : 0.f) from a PulseGenerator triggered for 1e-3f, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Ticker.cpp Ticker::process: setVoltage(clk_TrgState[i] ? 10.f : 0.f) from a PulseGenerator triggered for 1e-3f, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The phase CV branch is guarded by getInput(CLK_PHASE_INPUTS + 0).isConnected() inside the loop over all four clocks, so clock 1's phase jack decides whether every clock reads its jack or its knob; with clock 1 patched and clock 3 not, clock 3 reads 0V from an empty jack instead of its knob. MIN_GATE_LEN and MAX_GATE_LEN are 10 and 90, contradicting the manual's 5% to 95% for the CV inputs. MAX_PHASE_SHIFT is 0.25, contradicting the manual's half a cycle. MAX_SWING_AMOUNT is 9.999 and the swing jack maps 0 to 10V onto 0 to 9.999 per cent, contradicting the manual's -5% to 5%. The BPM CV has no bounds check while every other CV input here does. Swing is applied as (1 - 2 * random) * amount * 0.01, recomputed after each gate."
   },
   "Spiquencer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sequencer shaped like a bead board: on each gate a marble drops one row and either stays in its column or moves one to the right, and the knob it lands on sets the output voltage",
+    "Sets the voltage sent out when the marble lands here, -4V to 6V; the lamp at its centre lights while the marble is on it",
+    "Sets the chance that an incoming gate is acted on at all, 0 to 1, starting at 1",
+    "Transposes every knob in the triangle by whole octaves, -3 to 3",
+    "Spreads the notes of the chosen scale over this many octaves before starting again at the lowest, 1 to 6",
+    "A voltage above 2V drops the marble one row; it has to fall below 0.1V before another will be taken",
+    "A voltage above 2V puts the marble back on the top knob and sets the probability knob back to 1",
+    "Sets the probability directly over 0 to 10V for 0 to 1, overriding the probability knob while patched and turning the knob to match",
+    "Picks the root note the triangle is filled from, over the hundredths of a volt that a keyboard's C4 to B4 produce",
+    "Picks the scale or arpeggio the triangle is filled from over 0 to 10V, in the order the Scale/Arp menu lists them",
+    "Carries the voltage of the knob the marble is on, held until the next gate is acted on",
+    "Carries a copy of the incoming gate, for as long as that gate is high, and nothing at all for a gate the probability setting threw away",
+    "Note — changing the root note, the scale, the direction, the transpose or the octaves overwrites all 55 knobs at once, so anything set by hand is lost the moment one of those changes",
+    "Note — the marble starts on the top knob and drops one row per gate; after the tenth row it starts again at the top",
+    "Note — a reset is a full initialise: besides moving the marble back to the top it puts the probability knob back to 1",
+    "Note — the root note jack matches its voltage against eleven exact hundredths of a volt; anything between them is read as B, so a slewed source will not track it",
+    "Menu — Root Note: C, C#/Db, D, D#/Eb, E, F, F#/Gb, G, G#/Ab, A, A#/Bb, B — picks the note the scale is built from when the triangle is filled",
+    "Menu — Scale/Arp — picks the scale or arpeggio the triangle is filled from, twelve scales followed by sixteen arpeggios",
+    "Menu — Scale Direction: Up, Down — chooses whether the triangle is filled from the lowest note of the scale upwards or from the highest downwards"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 1,
+    "17": 1,
+    "18": 1,
+    "19": 1,
+    "20": 1,
+    "21": 1,
+    "22": 1,
+    "23": 1,
+    "24": 1,
+    "25": 1,
+    "26": 1,
+    "27": 1,
+    "28": 1,
+    "29": 1,
+    "30": 1,
+    "31": 1,
+    "32": 1,
+    "33": 1,
+    "34": 1,
+    "35": 1,
+    "36": 1,
+    "37": 1,
+    "38": 1,
+    "39": 1,
+    "40": 1,
+    "41": 1,
+    "42": 1,
+    "43": 1,
+    "44": 1,
+    "45": 1,
+    "46": 1,
+    "47": 1,
+    "48": 1,
+    "49": 1,
+    "50": 1,
+    "51": 1,
+    "52": 1,
+    "53": 1,
+    "54": 1,
+    "55": 2,
+    "56": 3,
+    "57": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "pitch",
+     "4": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "Spiquencer.cpp Spiquencer::process: gateTrigger.process(getVoltage(), 0.1f, 2.f), a Rack SchmittTrigger with the thresholds given explicitly, and no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "Spiquencer.cpp Spiquencer::process: resetTrigger.process(getVoltage(), 0.1f, 2.f) calling onReset(), with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the probability knob",
+      "why": "Spiquencer.cpp Spiquencer::process: prob_mod_Input = getVoltage() * 0.1f compared against random::uniform() and written back into PROBABILITY_PARAM, inside an isConnected() branch that otherwise reads the knob, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "stepped",
+      "normal": "the Root Note menu",
+      "why": "Spiquencer.cpp Spiquencer::process: ((int)(100.f * getVoltage())) % 100 matched against 0, 8, 16, 25, 33, 41, 50, 58, 66, 75 and 83, with anything else falling through to 11, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "normal": "the Scale/Arp menu",
+      "why": "Spiquencer.cpp Spiquencer::process: rootScale = 0.1f * (NO_ALL_SCALES_AND_ARPS - 0.1f) * getVoltage() inside an isConnected() branch that otherwise reads the menu, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "stepped",
+      "why": "Spiquencer.cpp Spiquencer::process: setVoltage of the current knob's value, the knobs being configured -4.f to 6.f, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Spiquencer.cpp Spiquencer::process: setVoltage(10.f) while gateTrigger.isHigh() after an accepted gate, and setVoltage(0.f) once it falls, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The knobs are configured -4.f to 6.f, which is wider than the ±5V spelling the range field allows; the output's real span is -4V to 6V. The whole grid is rewritten from ALL_SCALES_AND_ARPS whenever the root note, scale, direction, transpose or octave count changes, so hand-set knobs do not survive a menu change. A reset trigger calls onReset(), which is the module's initialise path and also forces the probability parameter back to 1. The root-note CV is matched against exact integer hundredths of a volt with no tolerance, so only the precise voltages a quantised C4-to-B4 source gives will select anything but B."
   },
   "Harmoblender": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A polyphonic oscillator built by adding sixteen sine waves, each with its own frequency multiple, level and phase",
+    "Sets how much of this sine wave goes into the sum, -1 to 1, starting at 0; a negative setting turns that sine upside down",
+    "Shifts where in its cycle this sine wave starts, 0 to 0.999 of a cycle",
+    "Multiplies the base frequency for this sine wave, a whole number from 0 to 32, starting at this block's own number counting left to right and top to bottom",
+    "Sets the base frequency the oscillator plays at 0V, 10Hz to 20000Hz, starting at 261.626Hz for C4; the scale is linear in Hz, so most of the travel covers the top of the range",
+    "Multiplies the sum of all sixteen sine waves, 0 to 1, starting at 0.5",
+    "Sets this sine wave's level directly over -10V to 10V for -1 to 1, overriding its Level knob while patched",
+    "Added to this sine wave's phase knob at a tenth of a cycle per volt, with the sign of the voltage thrown away so a negative voltage shifts the same way as a positive one",
+    "Multiplies the base frequency by its own voltage divided by ten, so 10V doubles it and -10V takes it to nothing; the result is held between 10Hz and 20000Hz",
+    "Sets the pitch at 1V per octave from the base frequency knob's setting at 0V, and sets how many polyphonic voices the module plays",
+    "Carries the sum of the sixteen sine waves after the output level knob, at the same number of polyphonic channels as the pitch input",
+    "Note — every Level knob starts at 0, so a freshly placed module is silent until at least one of them is raised",
+    "Note — the sum is not limited in any way; sixteen sines at full level reach far past ±10V, so keep the output level knob down and put a limiter after this module",
+    "Note — with nothing patched to V-In the oscillator plays one voice at the base frequency knob's setting",
+    "Note — a Mult knob at 0 does not silence its sine wave but freezes it at one point of the cycle, adding a fixed voltage to the output; the maker's manual says 0 does not add to the signal",
+    "Note — the level jacks replace their knobs while patched rather than adding to them, and the phase jacks add to theirs",
+    "Note — the Pitch In jack works two ways: with V-In empty it scales the knob's frequency, and with V-In patched it adds a fixed number of hertz taken from the knob, not from the note played",
+    "Note — the sixteen level jacks are labelled 0 to 10V in Rack's tooltips, but they read -10V to 10V as the manual says"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 2,
+    "17": 2,
+    "18": 2,
+    "19": 2,
+    "20": 2,
+    "21": 2,
+    "22": 2,
+    "23": 2,
+    "24": 2,
+    "25": 2,
+    "26": 2,
+    "27": 2,
+    "28": 2,
+    "29": 2,
+    "30": 2,
+    "31": 2,
+    "32": 3,
+    "33": 3,
+    "34": 3,
+    "35": 3,
+    "36": 3,
+    "37": 3,
+    "38": 3,
+    "39": 3,
+    "40": 3,
+    "41": 3,
+    "42": 3,
+    "43": 3,
+    "44": 3,
+    "45": 3,
+    "46": 3,
+    "47": 3,
+    "48": 4,
+    "49": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6,
+    "13": 6,
+    "14": 6,
+    "15": 6,
+    "16": 7,
+    "17": 7,
+    "18": 7,
+    "19": 7,
+    "20": 7,
+    "21": 7,
+    "22": 7,
+    "23": 7,
+    "24": 7,
+    "25": 7,
+    "26": 7,
+    "27": 7,
+    "28": 7,
+    "29": 7,
+    "30": 7,
+    "31": 7,
+    "32": 8,
+    "33": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "cv",
+     "20": "cv",
+     "21": "cv",
+     "22": "cv",
+     "23": "cv",
+     "24": "cv",
+     "25": "cv",
+     "26": "cv",
+     "27": "cv",
+     "28": "cv",
+     "29": "cv",
+     "30": "cv",
+     "31": "cv",
+     "32": "cv",
+     "33": "pitch"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "10": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "11": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "12": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "13": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "14": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "15": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this harmonic's Level knob",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Lvl[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "18": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "19": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "20": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "21": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "22": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "23": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "24": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "25": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "26": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "27": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "28": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "29": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "30": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "31": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Harmoblender.cpp Harmoblender::process: hrm_Phase_Shift[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "32": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Harmoblender.cpp Harmoblender::process: freq = pitch_param + pitch_param * getVoltage() * 0.1f without V/Oct, and freq + pitch_param * getVoltage() * 0.1f with it, then held to 10Hz and 20000Hz, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "33": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Harmoblender.cpp Harmoblender::process: getChannels() on this jack sets the output channel count and the loop bound, and freq = pitch_param * pow(2.f, getVoltage(idx)) per channel, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Harmoblender.cpp Harmoblender::process: setChannels then setVoltage(lvl_Multiplier * the sum of sixteen table reads, idx); each read is scaled to ±5V and multiplied by a level of up to 1, so the sum is not bounded by ±5V, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The level jacks replace the knob while patched; the phase jacks add to it after an abs(). A Mult of 0 makes STS_My_Sine index the table at the phase shift alone, which is a constant, not silence; the manual says a Mult of 0 does not add to the signal. In the branch taken with V/Oct patched the Pitch In modulation is pitch_param * V * 0.1 rather than freq * V * 0.1, so it is a fixed hertz offset independent of the note; the manual describes the jack as one octave up and down, which matches neither branch. The level inputs are configured with the name \"Harmonic n Level CV (0..10V)\" while the code reads them over ±10V. There is no clipping on the output."
   },
   "SuperZzzaw": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A polyphonic stereo oscillator built by stacking twelve sawtooth waves, each with its own level, phase, detune and pan",
+    "Sets how much of this sawtooth goes into the mix, -1 to 1, starting at 0; a negative setting turns that sawtooth upside down",
+    "Shifts where in its cycle this sawtooth starts, 0 to 0.999 of a cycle",
+    "Shifts this sawtooth's frequency away from the others, -5% to 5%",
+    "Places this sawtooth between the two outputs, -1 fully to the left output and 1 fully to the right",
+    "Sets the base frequency the oscillator plays at 0V, 10Hz to 20000Hz, starting at 261.626Hz for C4; the scale is linear in Hz, so most of the travel covers the top of the range",
+    "Multiplies the sum of all twelve sawtooths, 0 to 1, starting at 0.5",
+    "Sets this sawtooth's level directly over -10V to 10V for -1 to 1, overriding its Level knob while patched",
+    "Added to this sawtooth's phase knob at a tenth of a cycle per volt, with the sign of the voltage thrown away so a negative voltage shifts the same way as a positive one",
+    "Sets this sawtooth's detune directly at one per cent per volt, overriding its Detune knob while patched; 10V gives 10%, twice what the knob reaches",
+    "Sets this sawtooth's pan directly over -10V to 10V for -1 to 1, overriding its Pan knob while patched",
+    "Multiplies the base frequency by its own voltage divided by ten, so 10V doubles it; the result is held between 10Hz and 20000Hz",
+    "Sets the pitch at 1V per octave from the base frequency knob's setting at 0V, and sets how many polyphonic voices the module plays",
+    "Carries the whole mix when it is the only output patched, and the left side of the stereo image when the right output is patched as well",
+    "Carries the right side of the stereo image; it is held at 0V unless the left output is patched too",
+    "Note — every Level knob starts at 0, so a freshly placed module is silent until at least one of them is raised",
+    "Note — the mix is not limited in any way; twelve sawtooths at full level reach far past ±10V, so keep the output level knob down and put a limiter after this module",
+    "Note — panning does something only when both outputs are patched; with the left output alone the whole mix goes out of it at double the level the stereo pair would give",
+    "Note — with nothing patched to V-In the oscillator plays one voice at the base frequency knob's setting",
+    "Note — a sawtooth whose level is exactly 0 has its phase frozen while no V-In is patched, so raising its level starts it from wherever it stopped",
+    "Menu — Ramp: Up, Down — chooses whether each sawtooth rises through the cycle and drops at its end, or falls through it and jumps at its end",
+    "Menu — Band: Unlimited, Limited — chooses between a straight ramp, which is rich but aliases, and a ramp rebuilt from a set number of sine partials, which is duller and cleaner",
+    "Menu — Harmonics: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40, 50 — sets how many partials the Limited ramp is built from, starting at 10",
+    "Note — the Harmonics setting changes nothing while Band is set to Unlimited",
+    "Note — the Pitch In jack works two ways: with V-In empty a volt lifts the frequency by a tenth, and with V-In patched a volt doubles it, which the source marks as unfinished",
+    "Note — the maker's manual gives the detune jack's range as -1 to 1 for ±10V; the code reads it at one per cent per volt, so ±10V is ±10%"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "16": 2,
+    "17": 2,
+    "18": 2,
+    "19": 2,
+    "20": 2,
+    "21": 2,
+    "22": 2,
+    "23": 2,
+    "24": 3,
+    "25": 3,
+    "26": 3,
+    "27": 3,
+    "28": 3,
+    "29": 3,
+    "30": 3,
+    "31": 3,
+    "32": 3,
+    "33": 3,
+    "34": 3,
+    "35": 3,
+    "36": 4,
+    "37": 4,
+    "38": 4,
+    "39": 4,
+    "40": 4,
+    "41": 4,
+    "42": 4,
+    "43": 4,
+    "44": 4,
+    "45": 4,
+    "46": 4,
+    "47": 4,
+    "48": 5,
+    "49": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 7,
+    "2": 7,
+    "3": 7,
+    "4": 7,
+    "5": 7,
+    "6": 7,
+    "7": 7,
+    "8": 7,
+    "9": 7,
+    "10": 7,
+    "11": 7,
+    "12": 8,
+    "13": 8,
+    "14": 8,
+    "15": 8,
+    "16": 8,
+    "17": 8,
+    "18": 8,
+    "19": 8,
+    "20": 8,
+    "21": 8,
+    "22": 8,
+    "23": 8,
+    "24": 9,
+    "25": 9,
+    "26": 9,
+    "27": 9,
+    "28": 9,
+    "29": 9,
+    "30": 9,
+    "31": 9,
+    "32": 9,
+    "33": 9,
+    "34": 9,
+    "35": 9,
+    "36": 10,
+    "37": 10,
+    "38": 10,
+    "39": 10,
+    "40": 10,
+    "41": 10,
+    "42": 10,
+    "43": 10,
+    "44": 10,
+    "45": 10,
+    "46": 10,
+    "47": 10,
+    "48": 11,
+    "49": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "cv",
+     "20": "cv",
+     "21": "cv",
+     "22": "cv",
+     "23": "cv",
+     "24": "cv",
+     "25": "cv",
+     "26": "cv",
+     "27": "cv",
+     "28": "cv",
+     "29": "cv",
+     "30": "cv",
+     "31": "cv",
+     "32": "cv",
+     "33": "cv",
+     "34": "cv",
+     "35": "cv",
+     "36": "cv",
+     "37": "cv",
+     "38": "cv",
+     "39": "cv",
+     "40": "cv",
+     "41": "cv",
+     "42": "cv",
+     "43": "cv",
+     "44": "cv",
+     "45": "cv",
+     "46": "cv",
+     "47": "cv",
+     "48": "cv",
+     "49": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "10": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "11": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Level knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Level[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "18": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "19": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "20": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "21": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "22": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "23": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Phase[i] = abs(0.1f * getVoltage()) + the knob, so the sign is discarded, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "24": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "25": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "26": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "27": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "28": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "29": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "30": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "31": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "32": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "33": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "34": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "35": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Detune knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Detune[i] = 0.01f * getVoltage() inside an isConnected() branch that otherwise reads the knob as 0.01f * knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "36": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "37": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "38": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "39": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "40": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "41": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "42": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "43": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "44": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "45": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "46": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "47": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "this sawtooth's Pan knob",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: szz_Pan[i] = 0.1f * getVoltage() inside an isConnected() branch that otherwise reads the knob, with no channel argument, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "48": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: freq = pitch_param + 0.1f * pitch_param * getVoltage() without V/Oct, and freq + freq * getVoltage() with it, then held to 10Hz and 20000Hz, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "49": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: getChannels() on this jack sets both outputs' channel count and the outer loop bound, and freq = pitch_param * pow(2.f, getVoltage(channel)) per channel, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: setChannels then setVoltage(left_Out, channel) when both outputs are patched, and setVoltage(left_Out + right_Out, channel) when they are not; each sawtooth reaches ±5V before its level, so twelve of them are not bounded by ±5V, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "SuperZzzaw.cpp SuperZzzaw::process: setChannels then setVoltage(right_Out, channel) when both outputs are patched, and setVoltage(0.f, channel) when they are not, commit 55aa542, the 2.4.1 release commit, whose plugin.json carries the installed 2.4.1 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "Stereo is decided by both outputs being connected. In mono the code writes left_Out + right_Out, and both of those already hold the full mix, so the left output carries twice the level the stereo pair sums to. The detune jack is read as 0.01 * volts, giving ±10% for ±10V, against a knob that reaches ±5%; the manual gives the jack as -1 to 1. The Pitch In modulation is 0.1 * pitch_param * V in the branch with no V/Oct and freq * V in the branch with it, the latter marked \"// Future\" in the source. A sawtooth with a level of exactly 0 skips its phase accumulation in the mono branch but not in the polyphonic one."
   }
  }
 }

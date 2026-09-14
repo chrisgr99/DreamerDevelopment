@@ -2,32 +2,936 @@
  "plugin": "tapestry",
  "source": "https://github.com/shortwavlabs/vcv-tapestry/tree/main/src",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Tapestry": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A granular tape recorder: audio is recorded onto a reel, the reel is cut into segments by markers, and grains are played back from the current segment under knob and CV control",
+    "Crossfades the output between the incoming audio fully left and reel playback fully right; while recording over existing audio in replace mode it also sets how much of the old recording is kept",
+    "Sets the length of the grain read from the current segment: the whole segment fully left, about 1ms fully right, on a fourth-power curve",
+    "Scales the voltage at the grain size CV input, -1 to +1, before it is added to the GRAIN knob",
+    "Sets playback speed and direction: stopped at centre, forward to twice speed fully right, backwards at about 4.5 times speed fully left, though the manual calls that end 26 semitones down",
+    "Scales the voltage at the speed CV input, -1 to +1, before it is added to the SPEED knob",
+    "Sets how much the grains overlap: gaps between them below 15%, one seamless grain to 35%, two voices to 50%, three with stereo panning to 70%, and four with random pitch above that",
+    "Offsets where in the current segment the grain is read from: the start of the segment fully left, as far in as the grain length allows fully right",
+    "Scales the voltage at the scan CV input, -1 to +1, before it is added to the SCAN knob",
+    "Steps through the markers on the reel and moves playback to the one chosen; its top value follows the number of markers and it reads out from 1",
+    "Pressing it starts recording the input onto the reel and pressing it again stops; with a cable in the clock input recording begins on the next clock edge instead of immediately",
+    "Pressing it drops a marker at the playback position, cutting another segment out of the reel",
+    "Pressing it moves playback to the next marker, wrapping round after the last one",
+    "Pressing it deletes every marker, sets the marker count back to four and returns SLCT to its first position",
+    "Pressing it spreads markers evenly across the reel, stepping through 4, 8 and 16 on successive presses",
+    "Sets what pressing REC does to audio already on the reel: replace wipes the reel and every marker first, overdub keeps them and adds the new audio from the playback position",
+    "The left audio input, recorded onto the reel and crossfaded to the output by MIX, with ±5V taken as full scale",
+    "The right audio input; with nothing patched here the left input feeds both channels",
+    "Shifts the MIX crossfade, 8V covering the whole of the knob's travel; the total of knob and voltage is held inside that travel",
+    "Shifts the grain length after scaling by its attenuverter, 8V covering the whole of the GRAIN knob's travel; the total is held inside that travel",
+    "Shifts the playback speed after scaling by its attenuverter, 4V covering the whole of the SPEED knob's travel; the total is held inside that travel",
+    "Shifts the grain overlap, 5V covering the whole of the DENS knob's travel; the total is held inside that travel",
+    "Shifts the scan offset after scaling by its attenuverter, 8V covering the whole of the SCAN knob's travel; the total is held inside that travel",
+    "Shifts the marker chosen by SLCT, 5V covering the whole run of markers; the total is held inside that run",
+    "A rising edge past 2.5V starts the next grain when DENS is below about half, or sets the grain length to the measured clock period above it",
+    "Playback runs while this is above 2.5V and stops at the end of the grain once it falls; with nothing patched it counts as held high",
+    "A rising edge past 2.5V starts recording, and the next one stops it",
+    "A rising edge past 2.5V drops a marker at the playback position",
+    "A rising edge past 2.5V moves playback to the next marker",
+    "A rising edge past 2.5V deletes every marker and returns SLCT to its first position",
+    "A rising edge past 2.5V spreads markers evenly across the reel, stepping through 4, 8 and 16 on successive edges",
+    "The left output: the incoming audio and the reel playback mixed by MIX at ±5V, or the expander's processed signal when one is fitted",
+    "The right output: the incoming audio and the reel playback mixed by MIX at ±5V, or the expander's processed signal when one is fitted",
+    "An envelope follower on the output, 0V in silence and rising to 8V at full level",
+    "A 10V pulse 1ms long at the end of every grain and every segment",
+    "Note — the reel is empty when the module is added, so nothing plays until you record onto it with REC or load a WAV file from the panel menu",
+    "Note — the SPEED knob comes up at its centre, where playback is stopped, so a freshly added module is silent until it is moved off centre",
+    "Note — clicking the waveform display drops a marker at that point, clicking an existing marker moves playback to it, and right-clicking a marker deletes it",
+    "Note — a Tapestry Expander placed immediately to the right takes over the two audio outputs, feeding them through its bit crusher and filter",
+    "Note — two buttons held together give extra actions: REC with NXT levels the incoming audio, and REC with MRK records into a new segment",
+    "Note — NXT held with MRK deletes the current marker, and NXT held with REC deletes the audio of the current segment",
+    "Note — holding NXT with MRK for 3 seconds deletes every marker, and holding NXT with REC for 3 seconds erases the whole reel",
+    "Menu — Load Reel... — opens a file dialog and reads a WAV file onto the reel",
+    "Menu — Save Reel... — writes the reel out as a WAV file",
+    "Menu — Clear Reel — erases the recorded audio",
+    "Menu — Splice Count: 4 (click to cycle) — spreads that many markers evenly across the reel and steps the count on through 4, 8 and 16",
+    "Menu — Waveform Color: Red, Amber, Green, Baby Blue, Peach, Pink, White — sets the colour the recorded waveform is drawn in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15
+   },
+   "in": {
+    "0": 16,
+    "1": 17,
+    "2": 18,
+    "3": 19,
+    "4": 20,
+    "5": 21,
+    "6": 22,
+    "7": 23,
+    "8": 24,
+    "9": 25,
+    "10": 26,
+    "11": 27,
+    "12": 28,
+    "13": 29,
+    "14": 30
+   },
+   "out": {
+    "0": 31,
+    "1": 32,
+    "2": 33,
+    "3": 34
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Tapestry.cpp:178 reads it with getVoltage and divides by 5, so ±5V is full scale"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "the Audio L jack",
+      "why": "Tapestry.cpp:181-189: read with getVoltage and divided by 5; with nothing patched the left input is copied to the right"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 8V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 8V",
+      "why": "dsp/tapestry-dsp.h:394-398 divides it by kSosCvMax of 8, adds the Mix knob and clamps the total to 0..1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±8V",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "0 to 8V",
+      "why": "dsp/tapestry-dsp.h:400-402 divides it by kGeneSizeCvMax of 8, multiplies by the attenuverter, adds the knob and clamps the total to 0..1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±4V",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "±4V",
+      "why": "dsp/tapestry-core.h:364-365 divides it by kVariSpeedCvMax of 4, multiplies by the attenuverter, adds the knob and clamps the total to -1..+1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 5V",
+      "why": "dsp/tapestry-dsp.h:405-409 divides it by kMorphCvMax of 5, adds the Density knob and clamps the total to 0..1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±8V",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "0 to 8V",
+      "why": "dsp/tapestry-dsp.h:411-413 divides it by kSlideCvMax of 8, multiplies by the attenuverter, adds the knob and clamps the total to 0..1"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 5V",
+      "why": "dsp/tapestry-dsp.h:416-420 divides it by kOrganizeCvMax of 5, adds the Select knob and clamps the total to 0..1"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tapestry.cpp:473-478 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V, defined at dsp/tapestry-core.h:58"
+     },
+     "10": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tapestry.cpp:503-508 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V"
+     },
+     "11": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tapestry.cpp:527-532 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V"
+     },
+     "12": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tapestry.cpp:539-544 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V"
+     },
+     "13": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tapestry.cpp:551-556 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V"
+     },
+     "14": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tapestry.cpp:563-568 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V"
+     },
+     "9": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2.5V",
+      "negative": "ignored",
+      "normal": "high",
+      "why": "Tapestry.cpp:487-496 compares it with kGateTriggerThreshold of 2.5V and passes true when the jack is unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Tapestry.cpp:243 writes the mix multiplied by 5"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Tapestry.cpp:244 writes the mix multiplied by 5"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "dsp/tapestry-dsp.h:509 scales the envelope follower by kCvOutMax of 8; Tapestry.cpp:247 writes it"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Tapestry.cpp:250-255 triggers a PulseGenerator of kEosgPulseWidth 0.001s and writes 10V while it runs"
+     }
+    }
+   },
+   "notes": "SPEED is asymmetric in a way the maker's own comment and QUICKSTART.md contradict: dsp/tapestry-core.h:383-398 raises 2 to the power of semitones/12 for both directions, so the reverse end of the knob plays backwards at about 4.5 times speed rather than the 26 semitones down that kVariSpeedDownSemitones and the manual describe. QUICKSTART.md also says centre is normal forward playback; the code has a dead zone of 0.02 either side of centre that stops playback outright (dsp/tapestry-core.h:368-377), and the knob's default is centre, so a freshly added module is silent. The panel menu still uses the maker's older wording, Splice and Reel, where the panel prints MRK."
   },
   "TapestryExpander": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An effects expander for Tapestry, adding a bit crusher and a 24dB per octave resonant lowpass filter to its output; it goes immediately to the right of Tapestry",
+    "Sets the bit depth the crusher rounds the signal to: 16 bits fully right, 1 bit fully left",
+    "Sets how many samples the crusher holds each value for: one fully left, 64 fully right",
+    "Crossfades between Tapestry's audio and the bit-crushed version of it, with the crusher out of circuit fully left",
+    "Sets the filter cutoff on a logarithmic scale, 20Hz fully left to 20kHz fully right, and never above 45% of the sample rate",
+    "Sets the filter resonance, none fully left up to a feedback factor of nearly 4 fully right, trimmed back slightly as the cutoff rises",
+    "Crossfades between the bit crusher's output and the filtered version of it, with the filter out of circuit fully left",
+    "Sets the gain applied after both effects: silence fully left, unity at centre, twice fully right, after which the signal is soft-clipped and held inside ±1.5",
+    "Shifts the bit depth, 1V for one and a half bits; the total of knob and voltage is held between 1 and 16 bits",
+    "Shifts the sample hold length, 10V covering the whole of the RATE knob's travel; the total is held inside that travel",
+    "Shifts the bit crusher's dry-wet balance, 10V covering the whole of that knob's travel; the total is held inside that travel",
+    "Shifts the filter cutoff, 1V moving it by about an octave; the total of knob and voltage is held inside the knob's travel",
+    "Shifts the filter resonance, 10V covering the whole of the RES knob's travel; the total is held inside that travel",
+    "Shifts the filter's dry-wet balance, 10V covering the whole of that knob's travel; the total is held inside that travel",
+    "Note — with no Tapestry immediately to its left this module does nothing at all: it reads no audio, writes no audio and returns before any knob is read, and its green lamp stays dark",
+    "Note — the processed audio is handed back to Tapestry and leaves through Tapestry's own output jacks, which is why this module has no output of its own",
+    "Note — both dry-wet knobs come up fully left, so a freshly placed expander passes Tapestry's audio through with only a 20Hz DC blocker and the output gain applied"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {},
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "TapestryExpander.cpp:155 with getModulatedParam at line 108-117 adds 1.5 times the voltage to the knob; line 168 clamps the total to 1..16 bits"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "TapestryExpander.cpp:156 with getModulatedParam at line 108-117 adds a tenth of the voltage to the Rate knob; lines 169-174 clamp the total to 0..1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "TapestryExpander.cpp:157 with getModulatedParam at line 108-117 adds a tenth of the voltage to the Crusher Mix knob; lines 169-174 clamp the total to 0..1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "TapestryExpander.cpp:160 with getModulatedParam at line 108-117 adds a tenth of the voltage to the Cutoff knob; lines 169-174 clamp the total to 0..1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "TapestryExpander.cpp:161 with getModulatedParam at line 108-117 adds a tenth of the voltage to the Resonance knob; lines 169-174 clamp the total to 0..1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "TapestryExpander.cpp:162 with getModulatedParam at line 108-117 adds a tenth of the voltage to the Filter Mix knob; lines 169-174 clamp the total to 0..1"
+     }
+    }
+   },
+   "notes": "The filter's cutoff CV works out at almost exactly 1V per octave by coincidence rather than by design: TapestryExpander.cpp:160 adds a tenth of the voltage to a knob that dsp/tapestry-effects.h:88-92 maps logarithmically from 20Hz to 20kHz, and a thousandfold range over a tenth of the travel is a factor of 1.995. It is not declared as tracking and it shifts with the sample rate, since the top of the range is held to 45% of it."
   },
   "Korupt": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A fuzz and phase-locked-loop harmoniser: the input is squared into a fuzz, a tracking oscillator follows its pitch at a chosen interval, and a divider adds a subharmonic, the three then mixed together",
+    "Sets the level of the squared fuzz voice in the mix, on an audio taper",
+    "Sets the level of the subharmonic voice in the mix, on an audio taper",
+    "Sets the level of the tracking oscillator's voice in the mix, on an audio taper",
+    "Sets the gain applied to the mix, 0.02 fully left rising to 1.74 fully right, after which the output is clipped",
+    "Chooses the subharmonic interval by dividing its clock by 2 to 9: an octave down at the first position, three octaves and a major second down at the last",
+    "Chooses what clocks the subharmonic divider: the squared input, or the tracking oscillator",
+    "Chooses what the loop's control voltage does: glide, where it slews towards the tracked pitch, or vibrato, where a triangle is added to it as well",
+    "Sets the speed of the frequency modulator, about 0.45Hz to 95Hz of glide or 0.55Hz to 18.5Hz of vibrato, and with it how hard the loop is pumped towards the tracked pitch",
+    "Chooses the oscillator's interval by multiplying the tracked pitch by 1 to 8: unison at the first position, three octaves up at the last",
+    "Divides the input's edges by one, two or four before the loop compares them, so the oscillator tracks an octave or two octaves lower",
+    "The signal the module processes, with ±5V taken as full scale, despite the panel printing CV IN",
+    "Shifts the level of the squared voice, 10V covering the whole of the SQR MIX knob's travel; the total is held inside that travel",
+    "Shifts the level of the subharmonic voice, 10V covering the whole of the SUB MIX knob's travel; the total is held inside that travel",
+    "Shifts the level of the oscillator voice, 10V covering the whole of the OSC MIX knob's travel; the total is held inside that travel",
+    "Shifts the frequency modulator's speed, 10V covering the whole of the RATE knob's travel; the total is held inside that travel",
+    "Steps the subharmonic interval, 10V covering all eight positions of the SUB PGM knob; the total is rounded to a position and held inside them",
+    "Steps the oscillator's interval, 10V covering all eight positions of the OSC PGM knob; the total is rounded to a position and held inside them",
+    "The three voices mixed and scaled by VOLUME, ±5V at full scale and never beyond ±6.75V, despite the panel printing CV OUT",
+    "The squared fuzz voice on its own at ±5V, taken before the mix knobs",
+    "The subharmonic voice on its own at ±5V, taken before the mix knobs",
+    "The tracking oscillator's voice on its own at ±5V, taken before the mix knobs",
+    "How firmly the loop is locked, 0V when it is not tracking and rising to 10V when the oscillator reaches the multiple of the input pitch set by OSC PGM",
+    "Note — every voice is scaled by an envelope follower on the input, so all of them fall silent when the input does and the module makes no sound of its own",
+    "Note — three lamps report the loop: green that the input is loud enough to track, blue how firm the lock is, red how far the loop is from it",
+    "Note — the pitch is taken from the rising edges of the heavily squared input, so the module follows one note at a time",
+    "Note — the number of channels at the audio input sets the channel count of every output, with a separate loop and divider run for each channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17
+   },
+   "out": {
+    "0": 18,
+    "1": 19,
+    "2": 20,
+    "3": 21,
+    "4": 22
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Korupt.cpp:131 takes the channel count from this jack and line 137 reads it with getPolyVoltage; line 138 divides by 5 and clamps to ±1.5"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "Korupt.cpp:114 passes this jack to normalizedParam at lines 101-107, which reads it with getPolyVoltage, adds a tenth of it to the Square voice level knob and clamps the total to 0..1"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "Korupt.cpp:115 passes this jack to normalizedParam at lines 101-107, which reads it with getPolyVoltage, adds a tenth of it to the Subharmonic voice level knob and clamps the total to 0..1"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "Korupt.cpp:116 passes this jack to normalizedParam at lines 101-107, which reads it with getPolyVoltage, adds a tenth of it to the Oscillator voice level knob and clamps the total to 0..1"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "Korupt.cpp:120 passes this jack to normalizedParam at lines 101-107, which reads it with getPolyVoltage, adds a tenth of it to the Frequency modulator rate knob and clamps the total to 0..1"
+     },
+     "5": {
+      "poly": true,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "Korupt.cpp:121 passes this jack to steppedParam at lines 109-115, which reads it with getPolyVoltage, adds seven tenths of it to the Subharmonic interval knob and rounds the total into 0..7"
+     },
+     "6": {
+      "poly": true,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "Korupt.cpp:122 passes this jack to steppedParam at lines 109-115, which reads it with getPolyVoltage, adds seven tenths of it to the Master oscillator interval knob and rounds the total into 0..7"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "why": "Korupt.cpp:151 writes the mix multiplied by 5 and clamped to ±10V; korupt-dsp.h:439 has already held it inside ±1.35"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "why": "Korupt.cpp:152 writes the square voice multiplied by 5"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "why": "Korupt.cpp:153 writes the subharmonic voice multiplied by 5"
+     },
+     "3": {
+      "poly": true,
+      "range": "±5V",
+      "why": "Korupt.cpp:154 writes the oscillator voice multiplied by 5"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "why": "Korupt.cpp:155 writes the lock confidence, clamped to 0..1 at korupt-dsp.h:293, multiplied by 10"
+     }
+    }
+   },
+   "notes": "The panel letters the main audio jacks CV IN and CV OUT, while the maker's own tooltips call both of them Audio and Korupt.cpp:151 writes an audio mix there; the lines follow the code and name the conflict. The lock output is a continuous confidence figure rather than a gate (korupt-dsp.h:404-415), so it is coloured cv. The oscillator's own range is 18Hz to the lesser of 9800Hz and 36% of the sample rate (korupt-dsp.h:353-358), which caps how high the chosen interval can actually reach."
   },
   "Wyrd": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A self-contained voice and external processor: a tone core, a feedback delay and filter network, an internal gesture generator and an ambient reverb, with six momentary pads for playing the feedback",
+    "Sets the gain and saturation applied to the external input before its CV is taken, clean fully left and heavily driven fully right",
+    "Sets how much of the processed external signal is injected into the tone core",
+    "Sets the standing activation of the tone core, which is what makes it sound with nothing patched",
+    "Sets how much of the delay and filter feedback is mixed into the activation, and how much of it bleeds through when activation is low",
+    "Scales the voltage at the ACT CV jack, -1 to +1, before it is added to the activation",
+    "Sets the pitch of the tone core, 20Hz fully left to 10kHz fully right, although the readout claims 500Hz at the left end",
+    "Trims the pitch of the tone core by up to a semitone either way",
+    "Sets how far the pitch is modulated: by the delay's feedback with TONIC MOD unpatched, or by the voltage there when it is patched",
+    "Morphs the core tone from a plain triangle through a subharmonic blend, even harmonics, wavefolding and a pulse to a bright folded tone",
+    "Scales the voltage at the TONES CV jack, -1 to +1, before it is added to the tone morph",
+    "Sets the delay time, 5ms fully left to 2.45 seconds fully right, on an exponential scale",
+    "Trims the delay time by up to 12% of the TIME knob's travel either way",
+    "Sets how far the delay time is modulated, up to about five semitones: by the subharmonic with TIME MOD unpatched, or by the voltage there when it is patched",
+    "Scales the voltage at the TIME CV jack, -1 to +1, before half of it is added to the delay time",
+    "Sets how long the delay's feedback persists, and with it how close the network runs to self-oscillation",
+    "Scales the voltage at the DECAY CV jack, -1 to +1, before it is added to the decay",
+    "Sets the cutoff of the lowpass in the feedback path, 18Hz fully left to 18.5kHz fully right, and how much of that filtered signal is passed at all",
+    "Scales the voltage at the FILTER CV jack, -1 to +1, before it is added to the filter setting",
+    "Sets how much of the delay tail is held and how brightly it ages; with ABSORB CV patched it turns into a unipolar attenuator on that voltage",
+    "Crossfades the result between the dry tone and the delay's output on an equal-power curve; with BLEND CV patched it turns into a unipolar attenuator on that voltage",
+    "Sets the level of the two result outputs, silent fully left",
+    "Sets the rate of the internal agitation gesture, one cycle a minute fully left to 1kHz fully right",
+    "Skews the agitation gesture between rise and fall, 8% of the cycle spent rising fully left and 92% fully right",
+    "Scales the voltage at the SPEED CV jack, 0 to 1, before it is added to the agitation rate",
+    "Held down it pushes the activation up, by up to 0.72 of its range according to the touch source",
+    "Held down it nudges the delay time, by up to 0.24 of the TIME knob's travel according to the touch source",
+    "Held down it opens the feedback filter, by up to 0.28 of the FILTER knob's travel according to the touch source",
+    "Held down it pulls Absorb down by up to 0.58, which crumbles the delay tail",
+    "Held down it bends the pitch, by the touch source, the delay's feedback and the agitation gesture together",
+    "Held down it pushes Decay up by up to 0.43, towards unstable persistence",
+    "Sets the size of the reverb tank, a close haze fully left and a wide space fully right",
+    "Sets how long the reverb tail lasts, its loop gain running from 0.52 fully left to 0.985 fully right",
+    "Sets the density of the diffusion at the reverb's input and inside its tank",
+    "Sets the damping brightness of the reverb, 850Hz fully left to 18kHz fully right",
+    "Sets the depth and rate of the slow modulation of the reverb's delay lines, 0.25ms at 0.035Hz fully left to 7.5ms at about 0.5Hz fully right",
+    "Crossfades the two result outputs between the dry result and the reverb, on an equal-power curve",
+    "External audio to be conditioned by STRENGTH, with ±5V taken as full scale; anything below 8Hz is removed",
+    "Gates the agitation: with nothing patched the gesture repeats on its own, and with a cable here it rises once while the voltage is above 1.5V and is held at zero below it",
+    "Shifts the agitation rate through SPEED AMT, 5V covering the whole of the SPEED knob's travel; the total is held inside that travel",
+    "Shifts the activation through ACT AMT, 5V covering the whole of the activation range",
+    "Modulates the pitch through TONIC AMT; patching it replaces the delay feedback that otherwise does the modulating",
+    "Shifts the tone morph through TONES AMT, 10V covering the whole of the TONES knob's travel; the total is held inside that travel",
+    "Adds to the pitch of the tone core at 1V per octave",
+    "Modulates the delay time through TIME MOD AMT; patching it replaces the subharmonic that otherwise does the modulating",
+    "Shifts the delay time through TIME CV AMT, 20V covering the whole of the TIME knob's travel; the total is held inside that travel",
+    "Adds to the delay time with no attenuator of its own, 10V covering the whole of the TIME knob's travel",
+    "Shifts the decay through DECAY AMT, 10V covering the whole of the DECAY knob's travel; the total is held inside that travel",
+    "Sets the dry-wet blend once it is patched, 5V for full wet, scaled by the BLEND knob acting as an attenuator",
+    "Shifts the filter through FILTER AMT, 10V covering the whole of the FILTER knob's travel; the total is held inside that travel",
+    "Sets Absorb once it is patched, 10V for the full amount, scaled by the ABSORB knob acting as an attenuator",
+    "The conditioned external signal at audio rate, ±10V",
+    "An envelope follower on the conditioned external signal, 0 to 10V",
+    "The level of the delay's feedback as a smoothed bipolar CV, ±5V",
+    "The internal agitation gesture, 0 to 6V",
+    "The plain triangle from the tone core at its tonic pitch, ±5V, taken before TONES",
+    "A square and triangle mixed together an octave below the tonic, ±5V",
+    "The result at modular level, ±5V, after LEVEL and the reverb blend",
+    "The result at line level, a little over ±1.5V, after LEVEL and the reverb blend",
+    "Note — LEVEL comes up fully left, so both result outputs are silent until it is raised",
+    "Note — the module makes sound with nothing patched: raise LEVEL and CONSTANT and the tone core plays on its own",
+    "Note — each of the six touch pads is momentary, and what it injects is set by the touch source on the panel menu, a manual plate by default",
+    "Note — the reverb's decay, tone and modulation are each nudged by how far the delay feedback is swinging, so they shift a little as CV2 does",
+    "Menu — Touch source: Manual plate, CV1, CV2, Agitation, Sub harmonics, Strength, Noise — chooses the signal the six touch pads inject while they are held",
+    "Menu — Strength calibration: Factory, Line gentle, Modular hot — sets the gain, drive ceiling and envelope times the external input's conditioning uses"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15,
+    "15": 16,
+    "16": 17,
+    "17": 18,
+    "18": 19,
+    "19": 20,
+    "20": 21,
+    "21": 22,
+    "22": 23,
+    "23": 24,
+    "24": 25,
+    "25": 26,
+    "26": 27,
+    "27": 28,
+    "28": 29,
+    "29": 30,
+    "30": 31,
+    "31": 32,
+    "32": 33,
+    "33": 34,
+    "34": 35,
+    "35": 36
+   },
+   "in": {
+    "0": 37,
+    "1": 38,
+    "2": 39,
+    "3": 40,
+    "4": 41,
+    "5": 42,
+    "6": 43,
+    "7": 44,
+    "8": 45,
+    "9": 46,
+    "10": 47,
+    "11": 48,
+    "12": 49,
+    "13": 50
+   },
+   "out": {
+    "0": 51,
+    "1": 52,
+    "2": 53,
+    "3": 54,
+    "4": 55,
+    "5": 56,
+    "6": 57,
+    "7": 58
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "pitch",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Wyrd.cpp:57 reads it with getVoltage; wyrd-dsp.h:847 divides it by 5 and line 390 removes everything below 8Hz"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.5V",
+      "negative": "ignored",
+      "normal": "high",
+      "why": "wyrd-dsp.h:423 treats 1.5V and above as high, and lines 422-430 hold the gesture at zero when the jack is patched and low"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 5V",
+      "why": "wyrd-dsp.h:417 divides it by 5, multiplies by the Speed CV amount knob and clamps the total with the Speed knob to 0..1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Wyrd.cpp:60 reads it; wyrd-dsp.h:901 divides it by 5 and wyrd_core.vult line 149 multiplies by the attenuverter before adding it to the activation"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "the delay feedback",
+      "why": "wyrd-dsp.h:867 uses this jack when it is patched and the delay feedback when it is not, then divides by 5 at line 868"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "wyrd-dsp.h:873-875 divides it by 10, multiplies by the Tones CV attenuverter and clamps the total with the Tones knob to 0..1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "wyrd-dsp.h:865 adds this voltage straight to the pitch in volts, which wyrd_core.vult line 68 turns into hertz at two to the power of volts"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "the subharmonic output",
+      "why": "wyrd-dsp.h:915 uses this jack when it is patched and the tone core subharmonic when it is not, then divides by 5 at line 916"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "wyrd-dsp.h:909-911 divides it by 10, halves it, multiplies by the Time CV attenuverter and clamps the total to 0..1"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "wyrd-dsp.h:912-914 divides it by 10 and adds it straight to the Time knob, the total clamped to 0..1 at line 918"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "wyrd-dsp.h:888-890 divides it by 10, multiplies by the Decay CV attenuverter and clamps the total to 0..1"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "negative": "ignored",
+      "normal": "the BLEND knob",
+      "why": "wyrd-dsp.h:924-926 divides it by 5, clamps that to 0..1 and multiplies it by the Blend knob, which replaces the knob as the blend"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "wyrd-dsp.h:877-880 divides it by 10, multiplies by the Filter CV attenuverter and clamps the total to 0..1"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "the ABSORB knob",
+      "why": "wyrd-dsp.h:882-885 divides it by 10, clamps that to 0..1 and multiplies it by the Absorb knob, which replaces the knob as the absorb amount"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Wyrd.cpp:86 clamps it to ±10.5V; wyrd-dsp.h:934 scales a value already held inside ±1 by 10"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Wyrd.cpp:87 clamps it to 0..10V; wyrd-dsp.h:935 scales the envelope follower by 10"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Wyrd.cpp:88 clamps it to ±5V; wyrd-dsp.h:709 scales the smoothed feedback by 5"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 6V",
+      "why": "Wyrd.cpp:89 clamps it to 0..6V; wyrd-dsp.h:444 and 460 scale the gesture by 6"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Wyrd.cpp:90 clamps it to ±5.2V; wyrd-dsp.h:938 scales the core by 5"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Wyrd.cpp:91 clamps it to ±5.2V; wyrd-dsp.h:939 scales the subharmonic by 5"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Wyrd.cpp:109 and 111 clamp it to ±5.2V after scaling the blended result by 5"
+     },
+     "7": {
+      "poly": false,
+      "range": "±1.6V",
+      "why": "Wyrd.cpp:110 and 112 clamp it to ±1.6V after scaling the blended result by 1.5"
+     }
+    }
+   },
+   "notes": "The Tonic coarse knob's readout disagrees with the code: Wyrd.hpp:108 configures the display as 500 times 20 to the power of the knob, so it reads 500Hz at the left end, while wyrd-dsp.h:864 maps the same knob from 20Hz to 10kHz. The pitch the module plays is the code's. The Begin and End input is described by the maker as normalled high with a low gate stopping agitation; patching it also changes the gesture from a repeating cycle to a single rise that holds (wyrd-dsp.h:422-445), which the description does not say. The filter CV works out at almost exactly one octave per volt, as a tenth of the travel over an 18Hz to 18.5kHz logarithmic range is a factor of 2.005, but it is not declared as tracking and is left coloured cv."
   },
   "Drift": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A 3HP random voltage source: a smoothly fluctuating random CV carrying jitter, slow interference and occasional voltage slips, with an attenuverting blend for a second signal",
+    "Shifts the output up or down, -5V fully left, none at centre and +5V fully right",
+    "Sets how often a new random target is chosen, one every 100 seconds fully left rising to six a second fully right",
+    "Sets the depth of the random voltage before OFFSET is added, none fully left and ±5V fully right",
+    "Crossfades the output from the internal random voltage towards the input jack, towards the input inverted when turned anticlockwise, and changes nothing while that jack is unpatched",
+    "A second signal for the B knob to crossfade to, with ±5V taken as full scale",
+    "The random voltage scaled by RANGE and shifted by OFFSET, clipped at ±10V and always one channel",
+    "Note — the output moves on its own with nothing patched at all; the input is there only for the crossfade",
+    "Note — two lamps show the sign of the output, green for positive and red for negative, and a yellow one shows the jitter and the voltage slips"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Drift.cpp:22 reads it with getVoltage; drif-dsp.h:53 divides it by 5 and clamps that to ±1.4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "why": "drif-dsp.h:78 scales the core result by 5 and clamps it to ±10V; Drift.cpp:28 sets the jack to one channel"
+     }
+    }
+   },
+   "notes": "The B knob is read whatever is patched, but drift_core.vult line 133 sets the blend amount to zero unless the input jack is connected, so with nothing patched the knob has no effect on the output. The speed range is 0.01Hz to 6Hz: drift_core.vult line 33 raises e to 6.396929655 times the shaped knob, which is a factor of 600."
   }
  }
 }

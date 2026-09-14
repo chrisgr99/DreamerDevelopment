@@ -1,48 +1,815 @@
 {
  "plugin": "DogmanDevices",
- "source": "https://github.com/lancemgiles/Dogman-Devices-Rack",
+ "source": "https://github.com/lancemgiles/Dogman-Devices-Rack/blob/6c70bcc/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Water": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chorus and a tremolo running side by side on one input, mixed half and half at the output, after the maker's Water guitar pedal",
+    "Sets how much of the chorus is mixed in against the dry signal",
+    "Sets the speed of both effects at once, the chorus sines and the tremolo triangle running from the one knob",
+    "Sets how deeply the tremolo triangle shapes the level",
+    "Nothing in the module reads this trimmer; the chorus depth jack is scaled by the chorus depth knob itself, so it changes nothing",
+    "Attenuates the rate jack before it is added to the rate of both effects",
+    "Attenuates the tremolo depth jack before it is added to the depth knob",
+    "Raises and lowers the chorus depth, a volt moving it by half the setting of the depth knob itself",
+    "Raises and lowers the speed of both effects, exponentially, scaled by the trimmer beside it",
+    "Raises and lowers the tremolo depth, scaled by the trimmer beside it",
+    "The signal both effects work on",
+    "The chorus and the tremolo mixed in equal parts",
+    "Note — this is mono: one channel in, one channel out, whatever a polyphonic cable carries",
+    "Note — the two lamps at the top follow the chorus sine and the tremolo triangle, so the rate can be read off the panel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "out": {
+    "0": 11
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Water.cpp:138 reads the jack with getVoltage and multiplies it by half the chorus depth knob"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Water.cpp:171 and 204 read the jack and scale it by the trimmer before an exponential rate"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Water.cpp:227 reads the jack, multiplies it by a tenth and by the trimmer, and adds it to the depth"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Water.cpp:87 and 218 read the jack on channel one only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Water.cpp:257-261 writes one channel, the loop running once"
+     }
+    }
+   },
+   "notes": "Three things in this module do not match what the panel and the README promise. The chorus depth trimmer is configured and drawn but appears in no expression outside the widget, so it is dead (Water.cpp:41, 285). The three chorus LFOs are meant to be 120 and 240 degrees apart, but the offsets are written as std::sin(2*M_PI*(p - 120)) and (p - 240) at Water.cpp:187-193, and subtracting a whole number of cycles from a normalised phase leaves the three sines identical. The internal chorus feedback is multiplied by a variable passed into the delay function by value and never written back (Water.cpp:86-137), so it stays at zero. The module also declares a second output for testing the tremolo LFO which has no jack on the panel."
   },
   "TripLFO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three sine low-frequency oscillators at different phases, from one rate control, with a polyphonic output carrying all three",
+    "Sets the rate of all three oscillators, from a thirtieth of a hertz to a few hundred",
+    "Attenuates and inverts the rate jack before it is added to the rate, each volt doubling or halving it",
+    "Scales all three sines, from silence at the bottom to the full ±5V at the top",
+    "Adds a direct voltage to all three sines, from -5V to 5V",
+    "Sets the rate exponentially, a volt doubling it; a polyphonic cable here gives each channel its own rate and makes the three oscillators run independently",
+    "A sine at ±5V before the scale and offset knobs, the reference phase the other two are measured from",
+    "A sine at ±5V, about a tenth of a cycle behind the first output, despite the 120 degrees printed beside it",
+    "A sine at ±5V, about a fifth of a cycle behind the first output, despite the 240 degrees printed beside it",
+    "The three sines as one three-channel polyphonic cable",
+    "Note — it runs as soon as it is added to a patch; the rate jack is an addition to the knob rather than something it needs",
+    "Note — the maker warns that feeding more than about three channels into the rate jack can crash Rack"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "TripLFO.cpp:62 and 74 take the channel count from this jack and read each channel with getVoltage(i)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "TripLFO.cpp:66-97 sets the channel count from the rate jack and writes each channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "TripLFO.cpp:67-102 sets the channel count from the rate jack and writes each channel"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "TripLFO.cpp:68-107 sets the channel count from the rate jack and writes each channel"
+     },
+     "3": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "TripLFO.cpp:113 calls setChannels(3) and writes the three sines"
+     }
+    }
+   },
+   "notes": "The phase offsets are written as std::sin(radianPhase - 120) and (radianPhase - 240) at TripLFO.cpp:100 and 105. Those constants are radians, not degrees, so the spacing is 120 and 240 radians reduced into a cycle: roughly a tenth and a fifth of a cycle rather than the third and two-thirds the panel prints. The polyphonic output writes channels i, i+1 and i+2 inside the per-channel loop (TripLFO.cpp:114-116) while declaring three channels, so with a polyphonic rate cable the channels overwrite each other; with a monophonic rate jack it is correct."
   },
   "LogProb": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two logic inputs, each with its own chance of being let through, feeding AND, OR and exclusive-OR outputs, plus a separate inverter",
+    "Sets the chance that a gate arriving at the input below it is accepted, from never at the bottom to every time at the top",
+    "Attenuates and inverts the probability jack beside it before it is added to the probability knob",
+    "Shifts that input's probability, a volt covering the whole range at full attenuverter",
+    "One of the two gates the logic works on; it is read as high above 1V, and a fresh coin is tossed each time it leaves 0V",
+    "The gate to be inverted, read as high above 1V, which is separate from the two logic inputs",
+    "Carries 10V while both accepted gates are high",
+    "Carries 5V while the inverter input is patched and below 1V",
+    "Carries 10V while either accepted gate is high",
+    "Carries 10V while one accepted gate is high and the other is low",
+    "Note — with both probability knobs fully clockwise it behaves as a plain logic module, and lowering them drops gates at random",
+    "Note — the inverter output stays at 0V while nothing is patched to the inverter input, rather than sitting high"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 4,
+    "3": 4,
+    "4": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "LogProb.cpp:62 reads the jack with getPolyVoltage(c) inside the per-channel loop"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "LogProb.cpp:71 reads the jack with getPolyVoltage(c) inside the per-channel loop"
+     },
+     "2": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "LogProb.cpp:56-79 takes the channel count from this jack and reads each channel with getPolyVoltage(c)"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "LogProb.cpp:56-80 takes the channel count from this jack and reads each channel with getPolyVoltage(c)"
+     },
+     "4": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "LogProb.cpp:88-90 reads each channel with getPolyVoltage(i)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "LogProb.cpp:83-84 sets the channel count and writes each channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 5V",
+      "step": "stepped",
+      "why": "LogProb.cpp:87-90 sets the channel count and writes 5V or 0V per channel"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "LogProb.cpp:85-86 sets the channel count and writes each channel"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "LogProb.cpp:87-88 sets the channel count and writes each channel"
+     }
+    }
+   },
+   "notes": "The inverter output writes 5V rather than the 10V the three logic outputs use (LogProb.cpp:89). The two coin-toss results are single booleans shared by every channel (LogProb.cpp:32-33), so under polyphony the last channel's toss decides the result for all of them. The toss is taken by a BooleanTrigger fed the raw voltage (LogProb.cpp:60, 69), which counts any voltage other than zero as high, while the logic itself reads a gate as high only above 1V."
   },
   "ThreeHold": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three independent sample-and-hold units, each polyphonic, each with its own output level trimmer",
+    "Scales what that unit captures, from silence at the bottom to the full input at the top",
+    "The signal that unit samples",
+    "A rising edge makes that unit take a new sample; it reads high above 0.7V",
+    "The last sample that unit took, held until the next trigger",
+    "Note — the channel count of each unit comes from its own signal jack, so the three can run at different widths",
+    "Note — an output stays at 0V until its unit has been triggered at least once"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 2,
+    "3": 3,
+    "4": 2,
+    "5": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "cv",
+     "3": "trigger",
+     "4": "cv",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "ThreeHold.cpp:61-63 takes the channel count from this jack and reads each channel with getVoltage(c)"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "ThreeHold.cpp:61-63 takes the channel count from this jack and reads each channel with getVoltage(c)"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "ThreeHold.cpp:61-63 takes the channel count from this jack and reads each channel with getVoltage(c)"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 0.7V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ThreeHold.cpp:71 divides this jack by 0.7 per channel and passes it to a Schmitt trigger whose high threshold is 1"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 0.7V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ThreeHold.cpp:71 divides this jack by 0.7 per channel and passes it to a Schmitt trigger whose high threshold is 1"
+     },
+     "5": {
+      "poly": true,
+      "range": "high above 0.7V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ThreeHold.cpp:71 divides this jack by 0.7 per channel and passes it to a Schmitt trigger whose high threshold is 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "ThreeHold.cpp:65-67 sets the channel count from the matching signal jack and writes each channel"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "ThreeHold.cpp:65-67 sets the channel count from the matching signal jack and writes each channel"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "ThreeHold.cpp:65-67 sets the channel count from the matching signal jack and writes each channel"
+     }
+    }
+   }
   },
   "Clause": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A twelve-step sequencer with a voltage knob and a step output for every step, an internal clock, an adjustable length and an output scaler",
+    "Sets the voltage that step sends to the CV output, from -10V to 10V before the range knob scales it",
+    "Turns that step's contribution to the trigger output on and off, the lamp beside it showing the state",
+    "Sends the sequence back to step one",
+    "Starts and stops the sequence, the lamp beside it lit while it runs",
+    "Sets the tempo of the internal clock, from 15 to 960 beats a minute, and is ignored while a cable is in the clock jack",
+    "Sets how many steps are played before the sequence returns to the first, from 1 to 12",
+    "Scales the CV output, from silence at the bottom to the full ±10V of the step knobs at the top",
+    "A rising edge sends the sequence back to step one; it reads high above 2V",
+    "A rising edge starts or stops the sequence; it reads high above 2V",
+    "A rising edge advances the sequence by one step and takes the tempo away from the internal clock; it reads high above 2V",
+    "Carries 10V while that step is the one playing, and 0V otherwise",
+    "A 1ms trigger at 10V each time the sequence moves to a new step",
+    "A 1ms trigger at 10V each time the sequence moves to a step whose button is on",
+    "The voltage knob of the step playing, scaled by the range knob",
+    "Note — it comes up running with every step switched on, so it plays as soon as a clock or the internal tempo carries it",
+    "Note — a clock arriving during the 1ms reset pulse is ignored, so a reset and a clock on the same edge do not advance twice"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "16": 2,
+    "17": 2,
+    "18": 2,
+    "19": 2,
+    "20": 2,
+    "21": 2,
+    "22": 2,
+    "23": 2,
+    "24": 3,
+    "25": 4,
+    "26": 5,
+    "27": 6,
+    "28": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 11,
+    "2": 11,
+    "3": 11,
+    "4": 11,
+    "5": 11,
+    "6": 11,
+    "7": 11,
+    "8": 11,
+    "9": 11,
+    "10": 11,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Clause.cpp:122 passes the jack to a Schmitt trigger with thresholds of 0.1V and 2V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Clause.cpp:111 passes the jack to a Schmitt trigger with thresholds of 0.1V and 2V"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Clause.cpp:138 passes the jack to a Schmitt trigger with thresholds of 0.1V and 2V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:190 writes 10V or 0V on one channel"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:199 writes 10V or 0V on one channel from the step pulse"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Clause.cpp:197 writes 10V or 0V on one channel from the step pulse and the step button"
+     },
+     "14": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Clause.cpp:196 writes the step knob scaled by the range knob on one channel"
+     }
+    }
+   },
+   "notes": "The internal clock adds the external clock jack's voltage to the tempo (Clause.cpp:148), but that branch only runs while the jack is unpatched, so the addition is always zero. A clock-passthrough flag exists that would make the clock output follow an external clock's own gate, but nothing on the panel or in the menu sets it; it is false on a new module and turns true only when a saved patch lacks the key (Clause.cpp:249-254)."
   },
   "Blank": {
    "lines": [
-    "TODO: what this module is"
+    "A blank panel with the maker's artwork, carrying no controls of any kind"
    ]
   },
   "TriParDel": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three delay lines side by side with no connection between them, each with its own input, output and time control, plus a mixed and a polyphonic output",
+    "Sets the delay time of that line, from 1ms to 10 seconds",
+    "Attenuates and inverts the time jack beside it; at the top of its travel the jack is a volt to the octave on the delay time",
+    "Nothing in the module reads this knob; the feedback it scales is a value that is never carried from one sample to the next, so it stays at zero",
+    "Blends that line's delayed signal against its dry input",
+    "The signal that line delays",
+    "Shifts that line's delay time exponentially, scaled by the trimmer beside it",
+    "That line's delayed and dry signals blended by its own mix knob",
+    "The three lines summed and scaled to a third",
+    "The three lines as one three-channel polyphonic cable",
+    "Note — nothing is normalled between the three lines, so each needs its own input, and one signal fed to all three gives three taps of it",
+    "Note — Rack's bypass passes each input straight to the output below it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 4,
+    "10": 4,
+    "11": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 6,
+    "4": 6,
+    "5": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 7,
+    "2": 7,
+    "3": 8,
+    "4": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "TriParDel.cpp:123 reads the jack with getVoltageSum, which adds every channel of a polyphonic cable into one signal"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "TriParDel.cpp:123 reads the jack with getVoltageSum, which adds every channel of a polyphonic cable into one signal"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "TriParDel.cpp:123 reads the jack with getVoltageSum, which adds every channel of a polyphonic cable into one signal"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "TriParDel.cpp:132 adds the jack, scaled by the trimmer, to the exponent of a base-two delay rate"
+     },
+     "4": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "TriParDel.cpp:132 adds the jack, scaled by the trimmer, to the exponent of a base-two delay rate"
+     },
+     "5": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "TriParDel.cpp:132 adds the jack, scaled by the trimmer, to the exponent of a base-two delay rate"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "TriParDel.cpp:197-205 writes one channel with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "TriParDel.cpp:197-205 writes one channel with setVoltage"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "TriParDel.cpp:197-205 writes one channel with setVoltage"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "TriParDel.cpp:207 writes a third of the sum of the three lines on one channel"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "TriParDel.cpp:209-212 calls setChannels(3) and writes the three lines"
+     }
+    }
+   },
+   "notes": "The three Feedback knobs are read into a local variable that multiplies lastWet, but lastWet is a by-value parameter of the delay function whose assignment at TriParDel.cpp:174 never reaches the member it was copied from (TriParDel.cpp:122, 196-204). The member stays at its initial zero, so the feedback term is always zero and the knobs change nothing. The maker's own port description says the time jack is 1V per octave when the Time CV trimmer is at 100%, which the code bears out."
   },
   "Knife": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A noise source and a rough oscillator in one: a triangle crossfaded with a randomly scaled sawtooth, usable as an LFO, a dirty oscillator or a noise source",
+    "Sets the rate, from well below a hertz up into the audio range",
+    "Attenuates and inverts the rate jack before it is added to the rate, each volt doubling or halving it",
+    "Scales the output, from silence at the bottom to full at the top",
+    "Adds a direct voltage to the output; the knob reads from -1 to 1 but every unit is 5V at the jack, so it shifts the output by up to ±5V",
+    "Sets the rate exponentially, a volt doubling it; a polyphonic cable here gives each channel its own rate",
+    "The triangle and the randomised sawtooth mixed, seven parts triangle to three of saw, scaled and offset by the two trimmers",
+    "Note — the sawtooth is multiplied by a fresh random number every sample, which is where the noise comes from; at low rates it reads as noise that swells and fades, at high rates as a dirty oscillator",
+    "Note — it runs as soon as it is added to a patch, with no clock or gate needed",
+    "Note — the maker warns that feeding more than about three channels into the rate jack can crash Rack"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Knife.cpp:50-54 takes the channel count from this jack and reads it four channels at a time with getVoltageSimd"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Knife.cpp:73-78 writes four channels at a time and sets the channel count from the rate jack"
+     }
+    }
+   },
+   "notes": "The offset knob is configured with volts as its unit over a range of -1 to 1 (Knife.cpp:31), but the offset is added before the output is multiplied by five (Knife.cpp:71-74), so the tooltip understates it by a factor of five."
   }
  }
 }

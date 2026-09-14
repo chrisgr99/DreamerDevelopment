@@ -2,27 +2,309 @@
  "plugin": "BerserkAudio",
  "source": "https://github.com/NicolasMurphy/BerserkAudio",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Combverb": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A reverb built from eight comb filters and two allpass filters, with enough feedback on offer to make it ring on by itself",
+    "Sets the length of the reverb tail; the tooltip reads as a percentage, 0.1 seconds at 0% and 30 seconds approaching 100%, and above 100% the tail grows instead, reaching 24dB per second at 150%",
+    "A lowpass filter in the feedback path of each comb filter, sweeping from 18000Hz fully counter-clockwise down to 200Hz fully clockwise, so the tail loses its high end sooner as it is turned up",
+    "Crossfades the dry input against the reverb, dry alone fully counter-clockwise and reverb alone fully clockwise",
+    "Modulates the tail length, 10V covering the whole sweep of the FEEDBACK knob, and the knob and voltage are added and then clamped to the knob's own range",
+    "Modulates the damping, 10V covering the whole sweep of the DAMP knob, and the knob and voltage are added and then clamped to the knob's own range",
+    "Modulates the balance, 10V covering the whole sweep of the MIX knob, and the knob and voltage are added and then clamped to the knob's own range",
+    "The audio the reverb works on, and the dry half of what the MIX knob crossfades",
+    "The dry input and the reverb mixed together, clamped between -10V and 10V",
+    "Note — one channel in and one channel out; a polyphonic cable into the audio input is reduced to its first channel",
+    "Note — with FEEDBACK above the 100% mark the reverb keeps building with nothing patched into the audio input, and a tanh saturator inside each comb filter is what stops it running away",
+    "Note — the feedback and damping settings are recalculated once every 16 samples rather than every sample, so fast modulation of either CV input is smoothed out"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "0": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Combverb.cpp:135 reads getVoltage() with no channel argument, and line 154 writes one value with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "Combverb.cpp:136-137 adds getVoltage() * 0.1 to the 0 to 1 knob and clamps the total to 0 and 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "Combverb.cpp:144-145 adds getVoltage() * 0.1 to the 0 to 1 knob and clamps the total to 0 and 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "Combverb.cpp:138-139 adds getVoltage() * 0.1 to the 0 to 1 knob and clamps the total to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "Combverb.cpp:154 writes one value with setVoltage, never calls setChannels, and clamps to -10 and 10"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit b9d77ec, the only commit carrying version 2.1.0. The panel prints FEEDBACK, DAMP and MIX once per row, over both the knob and the CV jack beside it. The knob names the maker configured are Feedback, Damp and Mix. The decay figures come from DECAY_MIN 0.1, DECAY_MAX 30 and GROW_MAX 24 at Combverb.cpp:45-47, and the damping corners from DAMP_FC_MIN 200 and DAMP_FC_MAX 18000 at lines 39-40. UNITY_POS is two thirds and the Feedback parameter is configured with a display multiplier of 150, so the tooltip percentage and the knob travel line up with 100% at the two-thirds point. The input is scaled by INPUT_GAIN 0.015 before it reaches the comb filters; that is a fixed gain with no control over it, so it gets no line. The comb delay lengths are 521, 631, 769, 929, 1129, 1373, 1663 and 2017 samples and the allpass lengths 556 and 441, all fixed. The file says it is based on Freeverb. Every configured parameter and port is read in process(); nothing is configured twice and no jack is left unread."
   },
   "Scrambler": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A buffer effect that passes a run of samples through untouched, then records the next run, cuts it into chunks, shuffles them and plays the result back",
+    "Sets how many samples pass straight through before the module starts recording, a whole number from 0 to 3000; at 0 the recording starts at once",
+    "Sets how many samples are recorded and shuffled each time round, a whole number from 0 to 3000; at 0 the module passes its input through and does nothing else",
+    "Sets how many samples make up each chunk the recording is cut into before the chunks are shuffled, a whole number from 1 to 200; at 1 every single sample is reordered",
+    "Adds 1000 samples per volt to the pass-through length, and the total is held at 0 or above",
+    "Adds 1000 samples per volt to the length that is recorded and shuffled, and the total is clamped to 16384 samples, so this jack reaches lengths the knob cannot",
+    "Adds 1000 samples per volt to the chunk size, read once at the moment a recording fills rather than continuously, and the total is held at 1 or above",
+    "The audio the module passes through and records",
+    "The audio, carrying the input during the pass-through run, 0V while the module is recording, and the shuffled recording during playback",
+    "Note — the module repeats three phases: it passes the input through for the CLEAN samples, records the SCRAMBLE samples with its output at 0V, then plays those samples back shuffled",
+    "Note — the gap of silence while the module records is as long as the SCRAMBLE setting, so a long scramble length makes a long hole in the output",
+    "Note — samples left over when the recorded length does not divide evenly by the chunk size are appended to the end of the playback unshuffled",
+    "Note — one channel in and one channel out; a polyphonic cable into the audio input is reduced to its first channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "0": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Scrambler.cpp:81 reads getVoltage() with no channel argument"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Scrambler.cpp:71-73 adds getVoltage() * 1000 to the knob only when isConnected, then takes max(0, (int)value)"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Scrambler.cpp:76-79 adds getVoltage() * 1000 to the knob only when isConnected, then clamps the integer to 0 and 16384"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Scrambler.cpp:132-134 adds getVoltage() * 1000 to the knob only when isConnected, then takes max(1, (int)value), and only at the moment collectIndex reaches collectLen"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Scrambler.cpp:86, 95, 115 and 128 each write one value with setVoltage, and setChannels is never called"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit b9d77ec, the only commit carrying version 2.1.0. The panel prints CLEAN, SCRAMBLE and CHUNK once per row, over both the knob and the CV jack beside it; the parameter names the maker configured are Clean samples, Scramble samples and Chunk size. All three knobs have snapEnabled set, so they move in whole samples. The 1000 samples per volt scaling is the same on all three CV inputs, which on the chunk knob is a very coarse control: 0.2V already covers the knob's whole 1 to 200 range. The maker's own comment at Scrambler.cpp:28-32 gives 16384 as a hard buffer ceiling chosen for knob maximum plus worst-case CV. Every configured parameter and port is read in process(); nothing is configured twice and no jack is left unread."
   },
   "Xenizer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer that snaps an incoming pitch to one of eight built-in microtonal scales, none of which repeats at the octave",
+    "Chooses one of eight scales, named PBDE-71, F2 Toxin, Dimethylaminobenzene, Mycose, Alpha-Muurolene, Acridinone, 2-Octanoylfuran and Alpha-D-Galactose",
+    "Chooses which of the scale's twelve degrees is treated as the root, numbered 1 to 12, rotating the other degrees around it and lifting by one period any that would fall below the new root",
+    "Transposes the quantized pitch, -5V to 5V, added after the snapping so it moves the whole scale rather than being snapped itself",
+    "Adds one scale to the selection per volt, and the sum of knob and voltage is clamped to the eight scales",
+    "Adds one degree to the root selection per volt, and the sum of knob and voltage is clamped to the twelve degrees",
+    "Adds to the transposition, one octave per volt, and the sum of knob and voltage is not clamped",
+    "The pitch to be quantized, read at 1200 cents per volt",
+    "The pitch snapped to the nearest degree of the chosen scale, with the transposition added afterwards",
+    "Note — each scale carries its own period in place of the octave, and the eight run from 1495 cents to 4404 cents, so the output repeats at that interval rather than at 1200 cents",
+    "Note — the scales are twelve degrees each, the first being the root at 0 cents, and the period is the point at which the pattern starts again",
+    "Note — one channel in and one channel out; a polyphonic cable into the pitch input is reduced to its first channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "0": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Xenizer.cpp:128 reads getVoltage() with no channel argument and multiplies it by 1200 to get cents"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 7V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 7V",
+      "why": "Xenizer.cpp:111 adds getVoltage() to the switch value and clamps the integer to 0 and NUM_SCALES - 1, which is 7"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 11V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 11V",
+      "why": "Xenizer.cpp:113 adds getVoltage() to the switch value and clamps the integer to 0 and Scale::N - 1, which is 11"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Xenizer.cpp:114 adds getVoltage() to the -5 to 5 knob with no clamp, and line 154 adds that sum to the quantized pitch in volts"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "Xenizer.cpp:154 writes one value with setVoltage, dividing cents by 1200, and setChannels is never called"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit b9d77ec, the only commit carrying version 2.1.0. The panel prints SCALE, MODE and BASE once per row, over both the knob and the CV jack beside it; the parameter the panel marks BASE is configured as Base pitch. The scale names and their cent values are the SCALES table at Xenizer.cpp:16-66, read from .scl files; the periods are 3465.227865, 2789.930318, 4224.291077, 4329.865218, 4352.045060, 4404.286203, 1495.0 and 3769.436891 cents, which is where the 1495 to 4404 in the note comes from. The two selector knobs are configSwitch with printed choice names, the scales by name and the modes as 1 to 12. Quantizing searches the twelve rotated degrees and the period itself, so a pitch near the top of a period snaps up to the next period's root. Every configured parameter and port is read in process(); nothing is configured twice and no jack is left unread."
   },
   "XenScribe": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer that snaps an incoming pitch to a scale you type into the panel, one value in cents per line",
+    "The pitch to be quantized, read at 1200 cents per volt",
+    "The pitch snapped to the nearest value in the typed scale",
+    "Note — the module has no knobs; the scale is set only by typing into the text area that fills the panel, and that text area cannot be clicked for help",
+    "Note — type one number per line, in cents above the root, in rising order; the root at 0 cents is always there and is not typed, and the last line is the period at which the scale repeats",
+    "Note — a new module comes up holding 100 through 1200 in steps of 100, which is the ordinary twelve-tone equal-tempered octave",
+    "Note — text that does not parse into at least two numbers, or whose last number is not above zero, is thrown away and the last scale that did parse carries on working",
+    "Note — a line that is not a number at all is skipped rather than treated as zero",
+    "Note — the typed scale is saved and reloaded with the patch",
+    "Note — one channel in and one channel out; a polyphonic cable into the pitch input is reduced to its first channel"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "XenScribe.cpp:77 reads getVoltage() with no channel argument and multiplies it by 1200 to get cents"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "XenScribe.cpp:97 writes one value with setVoltage, dividing cents by 1200, and setChannels is never called"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit b9d77ec, the only commit carrying version 2.1.0. The panel has no lettering above the jacks because a multiline ui::TextField is placed over the whole of it at XenScribe.cpp:146-152; it is added with addChild and is not a ParamWidget, so it has no index in the census and no click on it can reach this help. The default scaleText at line 32 is the 12-TET octave. parseScale at line 47 takes each line through std::stof inside a try, so unparseable lines are dropped, and it only replaces the working scale when at least two values parsed and the last is above zero. The quantizer starts from an implicit root at 0 cents and also considers the last value, which is the period, so a pitch near the top of a period snaps up to the next period's root. The module has no parameters at all, so there is nothing that could be configured twice; the one input is read and the one output is written."
   }
  }
 }

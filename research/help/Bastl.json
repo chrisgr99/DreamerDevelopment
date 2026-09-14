@@ -1,13 +1,121 @@
 {
  "plugin": "Bastl",
- "source": "https://github.com/hemmer/bastl-vcv",
+ "source": "https://bastl-instruments.com/eurorack/modules/kompas",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Kompas": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A copy of Bastl's Kompas: three 32-step gate patterns named Latitude, Altitude and Longitude, each built at random from its own knob, all three stepped by one clock",
+    "Latitude knob — sets how likely each of the 32 steps is to be on, every step off at the bottom of its travel and every step on in the last hundredth of it",
+    "Altitude knob — sets how likely a step is to be kept where the Latitude and Longitude patterns agree, every step off at the bottom of its travel and every step on in the last hundredth",
+    "Longitude knob — sets the number of beats spread across each half of the 32 steps, one to eight, and how likely each of those beats is to survive a coin toss",
+    "Latitude CV — adds to the Latitude knob, 0V to 10V covering its whole travel, with negative voltage read as 0V; past about 9.9V every step of the pattern is on",
+    "Altitude CV — adds to the Altitude knob, 0V to 10V covering its whole travel, with negative voltage read as 0V; past about 9.9V every step of the pattern is on",
+    "Longitude CV — adds to the Longitude knob, 0V to 10V covering its whole travel, with negative voltage read as 0V; past about 9.9V every step of the pattern is on",
+    "Sets all three patterns so that the next clock lands on step 1; it counts as high at 2V and is ready again once it falls below 0.1V",
+    "Steps all three patterns on each rising edge, counting as high at 2V and low below 0.1V; the three outputs are high only while this input is high",
+    "Latitude trigger — 10V while the clock is high and the Latitude pattern's current step is on, and 0V the rest of the time",
+    "Altitude trigger — 10V while the clock is high and the Altitude pattern's current step is on, and 0V the rest of the time",
+    "Longitude trigger — 10V while the clock is high and the Longitude pattern's current step is on, and 0V the rest of the time",
+    "Note — nothing moves until a clock is patched to Clock. The patterns advance, the knobs and CV inputs are read, and the outputs go high only on and during a pulse there.",
+    "Note — a knob or its CV has to move by more than two parts in 1023 before a fresh pattern is drawn. That is what FIND NEW ROUTES on the panel means: nudge a knob to reroll that coordinate.",
+    "Note — the three patterns are tied together. Longitude is a beat pattern thinned by chance, Latitude is pure chance, and Altitude keeps only steps where those two agree.",
+    "Note — the module is monophonic: every jack reads or writes one channel.",
+    "Menu — Mode: Per-channel CV control, Per-channel reset — sets what the three CV jacks do: add to the knob beside them, or reset that one coordinate to the start of its pattern on a rising edge"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Kompas.cpp:141-146 reads the jack on each clock edge, clamps it to 0V and 10V, rescales that onto 0 to 1023 and adds it to the knob; :145 forces every step on once that number passes 1011. In Per-channel reset mode :143 contributes 0 and :126 uses the jack as a reset instead, high at 2V and re-armed below 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Kompas.cpp:141-146 reads the jack on each clock edge, clamps it to 0V and 10V, rescales that onto 0 to 1023 and adds it to the knob; :145 forces every step on once that number passes 1011. In Per-channel reset mode :143 contributes 0 and :126 uses the jack as a reset instead, high at 2V and re-armed below 0.1V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Kompas.cpp:141-146 reads the jack on each clock edge, clamps it to 0V and 10V, rescales that onto 0 to 1023 and adds it to the knob; :145 forces every step on once that number passes 1011. In Per-channel reset mode :143 contributes 0 and :126 uses the jack as a reset instead, high at 2V and re-armed below 0.1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Kompas.cpp:117 rescales the voltage from 0.1V and 2V onto 0 and 1 and puts it through a dsp::SchmittTrigger, so the edge is taken at 2V and re-armed below 0.1V; the step counter is then set to 31 so the next clock wraps to 0"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Kompas.cpp:133 rescales the voltage from 0.1V and 2V onto 0 and 1 and puts it through a dsp::SchmittTrigger; :153 multiplies each output by clockTrigger.isHigh(), so the outputs follow this jack's high time"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Kompas.cpp:153 writes the step value times clockTrigger.isHigh() times 10 with setVoltage on one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Kompas.cpp:153 writes the step value times clockTrigger.isHigh() times 10 with setVoltage on one channel"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Kompas.cpp:153 writes the step value times clockTrigger.isHigh() times 10 with setVoltage on one channel"
+     }
+    }
+   },
+   "notes": "Written against commit bbee836, the last of five commits whose plugin.json carries 2.0.0. The installed binary settles it: bbee836 replaced two separate menu items with a single createIndexPtrSubmenuItem, and plugin.dylib carries the mangled symbol for rack::createIndexPtrSubmenuItem<Kompas::Firmware> together with the strings \"Per-channel CV control\" and \"Per-channel reset\", which only the submenu form produces. The same commit widened the CV clamp from 5V to 10V, so the shipped build reads the full 0V to 10V.\n\nThe knobs run 0 to 1023 and are displayed as 0 to 1 (src/Kompas.cpp:77-79). Two thresholds inside that range matter and neither is printed anywhere: at or below 2 every step of the pattern is cleared, and above 1011 every step is set. The CV is rescaled onto the same 0 to 1023 scale and added, so CV alone can reach both thresholds.\n\nA pattern is redrawn only when the knob-plus-CV total moves by more than 2 from the value that drew the last one (:174, :239, :281). A knob sitting still therefore keeps its pattern, and the panel's FIND NEW ROUTES lettering is the instruction to move a knob.\n\nAltitude keeps a step where the Latitude and Longitude patterns hold the same value (:290), which includes steps where both are off, not only steps where both are on.\n\nThe three trigger lamps, the three pattern-changed lamps, the reset lamp and the clock lamp are lights rather than parameters, so none can be clicked for help.\n\nThe plugin's manualUrl points at Bastl's hardware product page, which describes the hardware module rather than this port; every figure above was read from the source.\n\nNo control is polyphonic: every read is getVoltage with no channel argument, every write is setVoltage with no channel argument, and nothing calls setChannels."
   }
  }
 }

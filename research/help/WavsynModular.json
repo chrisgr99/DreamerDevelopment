@@ -1,28 +1,497 @@
 {
  "plugin": "WavsynModular",
- "source": "https://github.com/mogrifier/wavsynmodular",
+ "source": "https://erichizdepski.wordpress.com/wavsynmodular-manual/",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Pleats": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A threshold shaper on the positive side of a signal: once the input plus BIAS rises past SET, the sample is replaced by the level AMT sets, and below that it passes straight through",
+    "Adds 0 to 5V to the input before it is compared with SET, and reaches the output no other way",
+    "Sets the level, 0 to 10V, that the input plus BIAS has to pass for the sample to be replaced",
+    "Sets the level a passing sample is replaced by, 0V fully left to 6V fully right",
+    "The signal to be processed, of which only the first channel is read",
+    "Replaces the SET knob with this voltage for as long as it is patched",
+    "Replaces the AMT knob for as long as it is patched: the size of the voltage, divided by 10 and multiplied by 6, becomes the replacement level",
+    "Replaces the BIAS knob with this voltage for as long as it is patched",
+    "The processed signal, always one channel",
+    "Note — each of the three CV jacks replaces its knob outright rather than adding to it, so patching one takes that knob out of use entirely",
+    "Note — only the positive side is treated: a sample whose total stays below the threshold passes through untouched, and the negative half of a waveform is never touched at all",
+    "Note — with AMT at zero a passing sample is set to 0.1V rather than to zero",
+    "Note — the module browser calls this a wavefolder, but the code replaces the sample with a level rather than reflecting it back, so what comes out is a flat step rather than a fold"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Pleats.cpp:72 reads channel one only with getVoltage(0) and the voltage is used unchanged"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "swings",
+      "normal": "the SET knob",
+      "why": "Pleats.cpp:79 uses this voltage in place of the Setpoint knob whenever the jack is connected"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "the AMT knob",
+      "why": "Pleats.cpp:84 takes the size of this voltage, divides by 10 and multiplies by 6 in place of the Amount knob"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "negative": "swings",
+      "normal": "the BIAS knob",
+      "why": "Pleats.cpp:78 uses this voltage in place of the Bias knob whenever the jack is connected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Pleats.cpp:108-109 writes one voltage and sets the channel count to one"
+     }
+    }
+   },
+   "notes": "The folding arithmetic reduces to a replacement rather than a fold: Pleats.cpp:92-103 computes delta as the sample minus the fold amount and then subtracts delta from the sample, which leaves the fold amount itself. The maker's own comment on line 104 asks what about the negative half, and nothing in the code treats it. The Amount CV jack takes the absolute value of its voltage, so it cannot drive the level below zero."
   },
   "Strange": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chaotic CV source: a Henon or Ikeda attractor stepped forward at a rate you set or at an external clock, with its two coordinates on the outputs and a gate for every step",
+    "Sets how often a new value is taken, on a logarithmic scale from one every 20 seconds fully left to 500 a second fully right; it is ignored while CLOCK is patched",
+    "Adds -2V to +2V to both CV outputs",
+    "Sets how much of each step the gate output stays high, from a thousandth of it to all of it",
+    "Chooses which attractor is stepped: Henon or Ikeda",
+    "Sets the constant the attractor is built on, mapped to between 0.7 and 1.0, which changes the run of values it produces",
+    "Takes the tempo from the time between two rising edges past 2V, one new value to the beat, and takes over from RATE",
+    "10V for the fraction of each step set by GATE and 0V for the rest of it",
+    "The attractor's first coordinate with BIAS added, held at that value until the next step",
+    "The attractor's second coordinate with BIAS added, held at that value until the next step",
+    "Note — in Ikeda mode the step rate also follows the attractor's own magnitude, so the steps come unevenly; in Henon mode that term is one and the rate is steady",
+    "Note — the attractor is put back to its starting point whenever a coordinate reaches -2.2V in Henon mode or -2V in Ikeda mode, which is what stops it sticking",
+    "Note — all three outputs are one channel, and the two CV outputs hold their value between steps"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Strange.cpp:87 runs a SchmittTrigger on this jack with thresholds of 0.1V and 2V, and line 93 measures the samples between rises"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Strange.cpp:122-123 and 129-130 write 10V or 0V and set the channel count to one"
+     },
+     "1": {
+      "poly": false,
+      "why": "Strange.cpp:187-188 writes the attractor coordinate plus the bias and sets the channel count to one"
+     },
+     "2": {
+      "poly": false,
+      "why": "Strange.cpp:189-190 writes the attractor coordinate plus the bias and sets the channel count to one"
+     }
+    }
+   },
+   "notes": "With no clock patched the step length is ten to the power of minus the Rate knob, multiplied by the squared modulus of the Ikeda value and by a fifth of the sample rate (Strange.cpp:116). In Henon mode that modulus is held at one, so the rate is steady; in Ikeda mode it moves with the attractor. The two CV outputs are the raw attractor coordinates with the bias added and are not clamped, so their range depends on the attractor rather than on any setting."
   },
   "Trip": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight-step sequencer with its own CV, time share and gate length for every step, plus chances to skip a step, reverse the order and change a setting at random",
+    "Adds a whole number of volts to every step's CV, -3 to +3, and is pulled back on its own if it would take the highest step above 6V",
+    "Quantizes the fractional part of each step's CV: none, twelve-tone, or quarter-tone",
+    "Shifts where the sequence starts by 0 to 7 places, and shifts it again by that much each time the sequence comes round",
+    "Sets the chance, up to 99%, that a step is passed over with its gate held low",
+    "Sets the chance, up to 100%, that the step order is turned back to front each time the sequence comes round",
+    "Sets the chance, up to 100%, that one setting on the panel is changed at random each time the sequence comes round",
+    "Sets how many bars the whole sequence is stretched over, 1 to 8",
+    "Sets the CV for step one, -3V to +6V",
+    "Sets the CV for step two, -3V to +6V",
+    "Sets the CV for step three, -3V to +6V",
+    "Sets the CV for step four, -3V to +6V",
+    "Sets the CV for step five, -3V to +6V",
+    "Sets the CV for step six, -3V to +6V",
+    "Sets the CV for step seven, -3V to +6V",
+    "Sets the CV for step eight, -3V to +6V",
+    "Sets how much of the bar step one takes; the eight of them are meant to add up to 100%",
+    "Sets how much of the bar step two takes; the eight of them are meant to add up to 100%",
+    "Sets how much of the bar step three takes; the eight of them are meant to add up to 100%",
+    "Sets how much of the bar step four takes; the eight of them are meant to add up to 100%",
+    "Sets how much of the bar step five takes; the eight of them are meant to add up to 100%",
+    "Sets how much of the bar step six takes; the eight of them are meant to add up to 100%",
+    "Sets how much of the bar step seven takes; the eight of them are meant to add up to 100%",
+    "Sets how much of the bar step eight takes; the eight of them are meant to add up to 100%",
+    "Sets how much of step one's own time its gate stays high, up to 99%",
+    "Sets how much of step two's own time its gate stays high, up to 99%",
+    "Sets how much of step three's own time its gate stays high, up to 99%",
+    "Sets how much of step four's own time its gate stays high, up to 99%",
+    "Sets how much of step five's own time its gate stays high, up to 99%",
+    "Sets how much of step six's own time its gate stays high, up to 99%",
+    "Sets how much of step seven's own time its gate stays high, up to 99%",
+    "Sets how much of step eight's own time its gate stays high, up to 99%",
+    "Pressing it scales all eight of the time-share knobs so that they add up to 100%",
+    "The clock the sequencer runs from: the time between two rising edges past 2V is taken as one beat, and four of those make the bar the time-share knobs divide",
+    "A rising edge past 2V sends the sequence back to its first step",
+    "The CV of whichever step is current, after quantizing and the OCT offset",
+    "10V while the current step's gate is high and 0V otherwise",
+    "Step one's CV, written only while step one is the current step and left at that value the rest of the time",
+    "Step two's CV, written only while step two is the current step and left at that value the rest of the time",
+    "Step three's CV, written only while step three is the current step and left at that value the rest of the time",
+    "Step four's CV, written only while step four is the current step and left at that value the rest of the time",
+    "Step five's CV, written only while step five is the current step and left at that value the rest of the time",
+    "Step six's CV, written only while step six is the current step and left at that value the rest of the time",
+    "Step seven's CV, written only while step seven is the current step and left at that value the rest of the time",
+    "Step eight's CV, written only while step eight is the current step and left at that value the rest of the time",
+    "10V while step one's gate is high, written only while step one is the current step",
+    "10V while step two's gate is high, written only while step two is the current step",
+    "10V while step three's gate is high, written only while step three is the current step",
+    "10V while step four's gate is high, written only while step four is the current step",
+    "10V while step five's gate is high, written only while step five is the current step",
+    "10V while step six's gate is high, written only while step six is the current step",
+    "10V while step seven's gate is high, written only while step seven is the current step",
+    "10V while step eight's gate is high, written only while step eight is the current step",
+    "Note — with nothing patched to CLOCK the module does nothing at all: no output is written and the sequence never advances",
+    "Note — the eight time-share knobs are meant to add up to 100%; a blue lamp lights while they do not, and the button beside the bar count scales them until they do",
+    "Note — a blue lamp above each step's jacks lights while that step's gate is high",
+    "Note — pattern evolution moves a real control: whatever it picks changes on the panel and stays changed"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15,
+    "15": 16,
+    "16": 17,
+    "17": 18,
+    "18": 19,
+    "19": 20,
+    "20": 21,
+    "21": 22,
+    "22": 23,
+    "23": 24,
+    "24": 25,
+    "25": 26,
+    "26": 27,
+    "27": 28,
+    "28": 29,
+    "29": 30,
+    "30": 31,
+    "31": 32
+   },
+   "in": {
+    "0": 33,
+    "1": 34
+   },
+   "out": {
+    "0": 35,
+    "1": 36,
+    "2": 37,
+    "3": 38,
+    "4": 39,
+    "5": 40,
+    "6": 41,
+    "7": 42,
+    "8": 43,
+    "9": 44,
+    "10": 45,
+    "11": 46,
+    "12": 47,
+    "13": 48,
+    "14": 49,
+    "15": 50,
+    "16": 51,
+    "17": 52
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Trip.cpp:265 runs a SchmittTrigger on this jack with thresholds of 0.1V and 2V, and line 272 measures the samples between rises"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Trip.cpp:305 runs a SchmittTrigger on this jack with thresholds of 0.1V and 2V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-6 to 9V",
+      "why": "Trip.cpp:378 writes the step's volts, which run -3V to 6V, plus the octave setting of -3 to 3"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Trip.cpp:405 and 421 write 10V or 0V and line 408 sets the channel count to one"
+     },
+     "2": {
+      "poly": false,
+      "range": "-6 to 9V",
+      "why": "Trip.cpp:377 writes that step's volts, which run -3V to 6V, plus the octave setting of -3 to 3, and only while that step is current"
+     },
+     "10": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Trip.cpp:407 and 423 write 10V or 0V to that step's own gate jack while that step is current"
+     },
+     "3": {
+      "poly": false,
+      "range": "-6 to 9V",
+      "why": "Trip.cpp:377 writes that step's volts, which run -3V to 6V, plus the octave setting of -3 to 3, and only while that step is current"
+     },
+     "11": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Trip.cpp:407 and 423 write 10V or 0V to that step's own gate jack while that step is current"
+     },
+     "4": {
+      "poly": false,
+      "range": "-6 to 9V",
+      "why": "Trip.cpp:377 writes that step's volts, which run -3V to 6V, plus the octave setting of -3 to 3, and only while that step is current"
+     },
+     "12": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Trip.cpp:407 and 423 write 10V or 0V to that step's own gate jack while that step is current"
+     },
+     "5": {
+      "poly": false,
+      "range": "-6 to 9V",
+      "why": "Trip.cpp:377 writes that step's volts, which run -3V to 6V, plus the octave setting of -3 to 3, and only while that step is current"
+     },
+     "13": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Trip.cpp:407 and 423 write 10V or 0V to that step's own gate jack while that step is current"
+     },
+     "6": {
+      "poly": false,
+      "range": "-6 to 9V",
+      "why": "Trip.cpp:377 writes that step's volts, which run -3V to 6V, plus the octave setting of -3 to 3, and only while that step is current"
+     },
+     "14": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Trip.cpp:407 and 423 write 10V or 0V to that step's own gate jack while that step is current"
+     },
+     "7": {
+      "poly": false,
+      "range": "-6 to 9V",
+      "why": "Trip.cpp:377 writes that step's volts, which run -3V to 6V, plus the octave setting of -3 to 3, and only while that step is current"
+     },
+     "15": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Trip.cpp:407 and 423 write 10V or 0V to that step's own gate jack while that step is current"
+     },
+     "8": {
+      "poly": false,
+      "range": "-6 to 9V",
+      "why": "Trip.cpp:377 writes that step's volts, which run -3V to 6V, plus the octave setting of -3 to 3, and only while that step is current"
+     },
+     "16": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Trip.cpp:407 and 423 write 10V or 0V to that step's own gate jack while that step is current"
+     },
+     "9": {
+      "poly": false,
+      "range": "-6 to 9V",
+      "why": "Trip.cpp:377 writes that step's volts, which run -3V to 6V, plus the octave setting of -3 to 3, and only while that step is current"
+     },
+     "17": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Trip.cpp:407 and 423 write 10V or 0V to that step's own gate jack while that step is current"
+     }
+    }
+   },
+   "notes": "Trip.cpp:288-290 returns from process as soon as it finds the clock jack unconnected, so without a clock nothing at all is written. The bar count passed to spaceScale is not used by it (Trip.cpp:589-601): the button normalises the eight time-share knobs to a total of one whatever the bar count says, and the count is applied separately when each step's length is worked out. The automatic reduction of the octave setting only inspects steps whose time share is above zero, so with every share at zero the octave is left alone and the CV outputs can reach 9V."
   },
   "Smitty": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sine oscillator built on a two-state recurrence, with two outputs a quarter cycle apart and one control that pushes the tone towards harmonics and aliasing",
+    "Adds a fixed amount to the oscillator's running state every sample, 0 to 2, which bends the sine towards harmonics and aliasing; with the ALIASING jack patched it scales that voltage instead",
+    "Drives the shape amount from a voltage, a fifth of it multiplied by half the SHAPE knob, so the knob has to be off zero for this jack to do anything",
+    "Sets the pitch at 1V per octave, with 0V giving C4 at 261.63Hz",
+    "The main output, five times the sine of the running state",
+    "The quadrature output, five times the sine of the other state, a quarter cycle from the main one",
+    "Note — no pitch input is needed: with nothing patched to V/OCT the oscillator runs at C4",
+    "Note — the oscillator resets its own state whenever the pitch changes at all, so a continuously moving V/OCT holds it at a standstill rather than sweeping it",
+    "Note — both outputs are one channel"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Smitty.cpp:68 reads channel one only with getVoltage, divides by 5 and multiplies by half the Shape knob"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Smitty.cpp:48-52 raises two to the power of this voltage against FREQ_C4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Smitty.cpp:79 writes five times a sine, with no channel count set"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Smitty.cpp:81 writes five times a sine, with no channel count set"
+     }
+    }
+   },
+   "notes": "Smitty.cpp:57-61 resets the oscillator state and sets epsilon to zero on any change of frequency, so while a V/OCT input is moving the module outputs five times the sine of a constant rather than a swept tone; it settles as soon as the pitch is held. With the shape CV patched the knob acts as its attenuator, so at a knob setting of zero the jack has no effect at all."
   }
  }
 }

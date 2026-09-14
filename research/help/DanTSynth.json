@@ -1,18 +1,264 @@
 {
  "plugin": "DanTSynth",
- "source": "https://github.com/Miff-Real/DanT.Synth",
+ "source": "https://github.com/Miff-Real/DanT.Synth/blob/main/docs/aocr.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "AOCR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Polyphonic signal processor that attenuverts, offsets, clips and rectifies, with a knob that sets which order those four stages run in",
+    "Chooses one of the 12 distinct orders for the attenuvert, offset, clip and rectify stages; the panel above spells the current one out as A, O, C and R against the positions 1 to 4",
+    "Multiplies the signal from -2x to +2x, inverting it below 0, and passing nothing at all at 0",
+    "Multiplies the attenuverter CV jack, -2x to +2x, before that voltage is added to the attenuverter knob",
+    "Adds a fixed voltage to the signal, -10V to +10V",
+    "Multiplies the offset CV jack, -2x to +2x, before that voltage is added to the offset knob",
+    "Chooses the clipping limits: none, ±10V or ±5V, with anything beyond the limit held at it",
+    "Chooses the rectification: none, Half, which flattens one side of the signal to 0V, or Full, which folds that side across to the other",
+    "[+] keeps the positive side of the signal and [-] the negative side; on Half the other side is flattened to 0V, on Full it is folded across",
+    "The signal to be processed; the number of channels patched here is the number the module runs and the number leaving the output",
+    "Added to the attenuverter knob at 1x per volt, after the trimpot above it scales the voltage; only its first channel is read, so one figure applies to every channel of the signal",
+    "Added to the offset knob at 1V per volt, after the trimpot beside it scales the voltage; only its first channel is read, so one figure applies to every channel of the signal",
+    "The processed signal, carrying as many channels as the signal input does",
+    "Note — with nothing patched into the signal input the module runs no channels and the output carries none either.",
+    "Note — the two grids of lamps show each polyphonic channel's voltage, above as it arrives and below after processing; green for positive, red for negative. Neither grid can be clicked.",
+    "Note — with the module bypassed, the signal input is passed straight through to the output."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11
+   },
+   "out": {
+    "0": 12
+   },
+   "family": {
+    "in": {
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/modules/aocr.cpp:183 loops to inputs[SGNL_INPUT].getChannels() reading getNormalPolyVoltageSimd; nothing clamps it before the chosen stages run"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/modules/aocr.cpp:253 reads getNormalVoltage(0.0f), a channel-0 read, multiplies it by the trimpot and adds it to the attenuverter knob"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/modules/aocr.cpp:259 reads getNormalVoltage(0.0f), a channel-0 read, multiplies it by the trimpot and adds it to the offset knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/modules/aocr.cpp:200 writes each block of four channels with setVoltageSimd and line 203 calls setChannels with the input's channel count"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit bbda641, the merge that carries version 2.0.2 in plugin.json (the version is set at 31ba4fb, tagged v2.0.2 in the commit subject).\n\nThe panel is drawn in code rather than from an SVG, so rsvg-convert gives nothing; the picture used was docs/img/aocr.png in the maker's own repository, checked against the label strings drawn at src/modules/aocr.cpp:690-720.\n\nThe two CV inputs are monophonic even though the signal path is polyphonic: readAttenuverter and readOffset (src/modules/aocr.cpp:253 and 259) use getNormalVoltage, which reads channel 0, and the resulting figure is applied to every channel. The maker's documentation does not mention this.\n\nOnly 12 of the 24 possible orderings are offered, because clip and rectify commute: the comment at src/dsp/att-off-clip-rect.hpp:8-11 says so and the enum lists each order with its equivalent.\n\nNeither the attenuverter nor the offset knob carries a printed name on the panel, so their lines lead with what they do.\n\nThe signal input and output are given no family. They take audio or CV with equal sense, and the maker's own documentation describes both uses."
   },
   "Bend": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Polyphonic V/Oct processor that bends incoming pitches on a trigger, for portamento, glides, pitch envelopes and pitch bends, with every control repeated as a CV input",
+    "Sets the bend length as a division or multiple of the clock patched into the clock input, from a 1/32 note through to eight beats; it has no effect while that input is empty",
+    "Sets the bend length in seconds, 0 to 10, and is what the module uses whenever nothing is patched into the clock input",
+    "Stops every bend in progress and returns each channel to the pitch arriving at the input",
+    "Starts a bend on every channel; its position is added to the bend trigger input, so holding it down also holds a bend open under the Gate-Bends method",
+    "Toward starts the bend a full Amount away from the incoming pitch and travels to it; Away starts at the incoming pitch and travels a full Amount from it",
+    "The up arrow bends above the incoming pitch, the down arrow below it",
+    "Sets how far the bend travels, 0 to 24 semitones in whole semitone steps",
+    "Curves the bend: centred at 0 it is a straight line, anticlockwise gives a logarithmic curve that moves fast then slow, and clockwise an exponential one that moves slow then fast",
+    "Hold keeps the pitch at the end of the bend until something releases it; Rtrn ends the bend once its duration runs out",
+    "Cont adds the bend to whatever pitch is arriving now, so a new note part way through a bend carries the bend with it; Smpl adds it to the pitch captured at the trigger instead",
+    "A rising edge through 1V; the gap between the last two edges is taken as one beat, and patching anything here switches the duration from the seconds knob to the beats knob",
+    "Added to the clocked duration knob at one notch per volt, the total then rounded to the nearest notch",
+    "Added to the timed duration knob at 1 second per volt, the total held at 0 or above; it can take the bend well past the knob's own 10 second limit",
+    "A rising edge through 1V stops the bend and returns the pitch; a monophonic cable stops every channel, a polyphonic cable stops only the channel the edge arrived on",
+    "A rising edge through 1V starts a bend, re-arming once the voltage falls to 0V or below; a monophonic cable starts every channel at once, a polyphonic cable starts only the channel the edge arrived on",
+    "The pitches to be bent, read as 1V per octave; the number of channels patched here is the number the module runs and the number leaving the output",
+    "Overrides the Away and Toward switch: any negative voltage forces Away, any positive voltage forces Toward, and 0V leaves the switch setting alone",
+    "Overrides the up and down switch: any negative voltage bends down, any positive voltage bends up, and 0V leaves the switch setting alone",
+    "Added to the Amount knob at 12 semitones per volt, unquantised and with no ceiling, so it can push the bend far past the knob's 24 semitones; the total is held at 0 or above",
+    "Added to the Shape knob one unit per volt and the total clamped to -1 to +1, so 1V by itself covers the whole curve from straight line to fully exponential",
+    "Overrides the Hold and Rtrn switch: any negative voltage forces Rtrn, any positive voltage forces Hold, and 0V leaves the switch setting alone",
+    "Overrides the Cont and Smpl switch: any negative voltage forces Smpl, any positive voltage forces Cont, and 0V leaves the switch setting alone",
+    "The incoming pitches with the current bend offset added to each, one channel for each channel arriving at the input",
+    "Note — nothing happens until a V/Oct signal is patched into the input. With it empty the module runs no channels, no trigger has any effect, and the output carries nothing.",
+    "Note — the row of lamps below the trigger button shows how far each polyphonic channel's bend has travelled, and which way it is going. It cannot be clicked.",
+    "Note — clocked mode needs two clock pulses before a beat length is known; until the second pulse arrives the module falls back to the seconds knob.",
+    "Menu — Unbend Envelope — in the Unbend submenu; the end of a bend glides back to the base pitch instead of snapping back to it",
+    "Menu — Inverse Shape — in the Unbend submenu; mirrors the Shape curve in time for the return glide, so a bend that moved fast then slow comes back slow then fast",
+    "Menu — Unbend Duration — in the Unbend submenu; sets the return glide's length as a percentage of the bend's own duration, 0% to 200%, and starts at 10%",
+    "Menu — Indefinite — in the Hold Method submenu; a held bend stays where it is until a reset arrives",
+    "Menu — Auto-Unhold — in the Hold Method submenu; a held bend ends once the incoming pitch differs from the pitch captured at the trigger by more than the Threshold setting",
+    "Menu — Threshold — in the Hold Method submenu; the pitch change that releases an Auto-Unhold bend, 1 to 100 cents",
+    "Menu — Gate-Bends — in the Hold Method submenu; the bend is held for as long as the trigger stays high and ends when it falls to 0V or below",
+    "Menu — Toggle Triggers — in the Hold Method submenu; each trigger alternates between starting a bend and ending one, and a reset always leaves it ended"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17,
+    "7": 18,
+    "8": 19,
+    "9": 20,
+    "10": 21,
+    "11": 22
+   },
+   "out": {
+    "0": 23
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "pitch",
+     "6": "cv",
+     "7": "cv",
+     "8": "pitch",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "src/modules/bend.cpp:406 passes getVoltage(), a channel-0 read, to a rack::dsp::SchmittTrigger with its default thresholds of 0 and 1 (Rack-SDK include/dsp/digital.hpp:107)"
+     },
+     "1": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/modules/bend.cpp:512-518 reads getNormalPolyVoltage(0.0f, channel) per channel, adds it to the knob and rounds the total to the nearest whole notch"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/modules/bend.cpp:526-527 reads getNormalPolyVoltage(0.0f, channel) per channel, adds it to the knob as seconds and holds the total at 0 or above with std::fmax"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/modules/bend.cpp:388-389 reads getNormalPolyVoltage(0.0f, c) for each of the 16 channels into its own SchmittTrigger with default thresholds of 0 and 1"
+     },
+     "4": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/modules/bend.cpp:465 adds getNormalPolyVoltage(0.0f, channel) to the trigger button and passes the sum to a per-channel SchmittTrigger with default thresholds of 0 and 1"
+     },
+     "5": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/modules/bend.cpp:227 takes the channel count from this jack and line 242 reads the channels with getNormalPolyVoltageSimd; the bend offset is added in volts per octave at src/dsp/bend-voct.hpp:45"
+     },
+     "6": {
+      "poly": true,
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/modules/bend.cpp:416-421 reads getNormalPolyVoltage(0.0f, channel) and uses only its sign: below 0 Away, above 0 Toward, exactly 0 the switch"
+     },
+     "7": {
+      "poly": true,
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/modules/bend.cpp:530-535 reads getNormalPolyVoltage(0.0f, channel) and uses only its sign: below 0 down, above 0 up, exactly 0 the switch"
+     },
+     "8": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/modules/bend.cpp:505-509 reads getNormalPolyVoltage(0.0f, channel), multiplies by 12 into semitones, adds the knob and holds the total at 0 or above with std::fmax; there is no upper clamp"
+     },
+     "9": {
+      "poly": true,
+      "range": "-1 to 1V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "-1 to 1V",
+      "why": "src/modules/bend.cpp:259-261 adds getNormalPolyVoltageSimd to the knob and clamps the sum to -1 to 1, so one volt spans the knob's whole range"
+     },
+     "10": {
+      "poly": true,
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/modules/bend.cpp:468-472 reads getNormalPolyVoltage(0.0f, channel) and uses only its sign: below 0 Rtrn, above 0 Hold, exactly 0 the switch"
+     },
+     "11": {
+      "poly": true,
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/modules/bend.cpp:252-256 reads getNormalPolyVoltageSimd and uses only its sign: below 0 Smpl, above 0 Cont, exactly 0 the switch"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/modules/bend.cpp:358 writes each block of four channels with setVoltageSimd and line 361 calls setChannels with the input's channel count"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit bbda641, the merge carrying version 2.0.2 in plugin.json.\n\nThe maker's docs/bend.md says the Bend Shape CV is \"scaled and added\" to the knob and expects ±5V. The code adds the raw voltage and then clamps the sum to -1 to +1 (src/modules/bend.cpp:261), with no scaling of any kind, so one volt covers the entire knob range and anything past that is simply clipped. The line says what the code does.\n\nThe enum comments in src/modules/bend.cpp:50-62 label most of the CV inputs \"mono\". They are not: every one of them is read with getNormalPolyVoltage or getNormalPolyVoltageSimd per channel, and the configInput names all begin \"[Poly]\". Only the External Clock input is genuinely monophonic, read with getVoltage at line 406.\n\nThe clocked duration knob covers fifteen notches: 1/32, 1/16T, 1/16, 1/8T, 1/16 dotted, 1/8, 1/8 dotted and 1/4 below centre, then whole beats from one to eight above it, the topmost of which reads 2/1 and lasts eight beats. The table is at src/modules/bend.cpp:18-22.\n\nThe panel is drawn in code rather than from an SVG; the picture used was docs/img/bend.png in the maker's own repository, checked against the label strings drawn at src/modules/bend.cpp:686-736. Several controls are marked with icons rather than words: a clock-and-arrow for the external clock, a wristwatch for the seconds knob, a bend symbol above the trigger button and a wrench above the reset button.\n\nThe plugin-wide Panel submenu sets bright and dark colours for the artwork. It is cosmetic and carried by both modules, so it gets no line."
   }
  }
 }

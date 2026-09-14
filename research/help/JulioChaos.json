@@ -2,22 +2,342 @@
  "plugin": "JulioChaos",
  "source": "https://github.com/JulioArgudo/JulioChaos-modules",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "JulioRossler": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chaotic oscillator that steps the Rössler attractor forward one sample at a time and puts its three coordinates out as three voltages, deterministic but never repeating",
+    "Sets how far the system is stepped forward on each sample, which works like a pitch control; fully counter-clockwise the system stops moving and the outputs go quiet",
+    "Sets the constant A of the equations, from 0.05 to 0.33, and its effect on the sound is not predictable",
+    "Sets the constant B of the equations, from 0.9 fully counter-clockwise down to 0.15 fully clockwise, and its effect on the sound is not predictable",
+    "Sets the constant C of the equations, from 5.5 to 16.5, and its effect on the sound is not predictable",
+    "Attenuates and inverts the voltage at the RATE input before it is added to the RATE knob, and at dead centre that input is ignored",
+    "Attenuates and inverts the voltage at the A input before it is added to the A knob, and at dead centre that input is ignored",
+    "Attenuates and inverts the voltage at the B input before it is added to the B knob, and at dead centre that input is ignored",
+    "Attenuates and inverts the voltage at the C input before it is added to the C knob, and at dead centre that input is ignored",
+    "Switches between two speed ranges: unlit the system is stepped seven times a sample and RATE reaches 600 steps a second, lit it is stepped once and RATE reaches 80",
+    "Shifts the step size away from the RATE knob, through the attenuverter above it; the total is held between stopped and the top of whichever range the HF/LF button is in",
+    "Shifts the A constant away from its knob, through the attenuverter above it; the total is held between 0.05 and 0.33",
+    "Shifts the B constant away from its knob, through the attenuverter above it; the total is held between 0.15 and 0.9",
+    "Shifts the C constant away from its knob, through the attenuverter above it; the total is held between 5.5 and 16.5",
+    "Puts the system back to its starting point on each rising edge past 2V, falling ready again below 0.1V; because the system is deterministic that makes it a sync input",
+    "The first coordinate of the system, direct voltage removed, reaching a few volts either way",
+    "The second coordinate of the system, direct voltage removed, reaching a few volts either way and covering a different part of the spectrum from the first",
+    "The third coordinate of the system, direct voltage removed and scaled down further because it swings much wider than the other two",
+    "Note — with RATE fully counter-clockwise nothing moves and all three outputs stay at 0V; turn RATE up for any sound at all",
+    "Note — each of the four CV inputs is read through the attenuverter above it, and every attenuverter starts at dead centre, so a cable alone changes nothing until that small knob is turned",
+    "Note — if the system runs away and any coordinate passes its limit, the module puts itself back to its starting point without being asked, which is heard as a click"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16,
+    "2": 17
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioRossler.cpp line 96, getVoltage multiplied by the attenuverter and by rateScale*0.037/sr, then the sum clamped"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioRossler.cpp line 98, getVoltage multiplied by the attenuverter and by 0.12, then the sum clamped to 0.05 to 0.33"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioRossler.cpp line 100, getVoltage multiplied by the attenuverter and by -0.34, then the sum clamped to 0.15 to 0.9"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioRossler.cpp line 102, getVoltage multiplied by the attenuverter and by 5, then the sum clamped to 5.5 to 16.5"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "JulioRossler.cpp line 117, resetTrigger.process(signal, 0.1f, 2.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "JulioRossler.cpp line 135, 0.2 times the direct-voltage-blocked x"
+     },
+     "1": {
+      "poly": false,
+      "why": "JulioRossler.cpp line 136, 0.2 times the direct-voltage-blocked y"
+     },
+     "2": {
+      "poly": false,
+      "why": "JulioRossler.cpp line 137, 0.03 times the direct-voltage-blocked z"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit 39d9429, whose plugin.json carries the installed 2.1.0; the repository's head is one commit later and changes only the README. The four CV inputs and the three outputs are all single channel, read with getVoltage and written with setVoltage. No output range is given because none is clamped: each is a coordinate of a chaotic system multiplied by a fixed factor, 0.2 for x and y and 0.03 for z, after a direct-voltage blocker, so how far it swings depends on where the constants are set. The runaway guard at line 115 tests each coordinate against 12V after scaling and drops the system back to x 0.1, y 0.3, z 0.9, which is the same state the RESET input produces. The RATE CV is scaled by rateScale times 0.037 over the sample rate, so its effect follows whichever range the HF/LF button is in. The maker's own comment beside the B constant reads 0.15 to 0.9 while the line computes 0.9 down to 0.15, so the knob runs backwards from what the comment suggests; the line above follows the code."
   },
   "JulioChua": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chaotic oscillator that steps the equations of Chua's circuit forward one sample at a time and puts its three coordinates out as three voltages, deterministic but never repeating",
+    "Sets how far the system is stepped forward on each sample, which works like a pitch control; fully counter-clockwise the system stops moving and the outputs go quiet",
+    "Sets the second constant of the equations, from 0.98 to 1.9, and its effect on the sound is not predictable",
+    "Sets the slope of the inner segment of the circuit's nonlinear element, from -1.143 to -1.23, and its effect on the sound is not predictable",
+    "Sets three constants of the equations at once, the first from 15.6 to 15.7, the third from 27.9 to 28.5 and the outer slope of the nonlinear element from -0.754 to -0.8",
+    "Attenuates and inverts the voltage at the RATE input before it is added to the RATE knob, and at dead centre that input is ignored",
+    "Attenuates and inverts the voltage at the P1 input before it is added to the P1 knob, and at dead centre that input is ignored",
+    "Attenuates and inverts the voltage at the P2 input before it is added to the P2 knob, and at dead centre that input is ignored",
+    "Attenuates and inverts the voltage at the P3 input before it is added to the P3 knob, and at dead centre that input is ignored",
+    "Switches between two speed ranges: unlit the system is stepped six times a sample and RATE reaches 800 steps a second, lit it is stepped once and RATE reaches 100",
+    "Shifts the step size away from the RATE knob, through the attenuverter above it; the total is held between stopped and the top of whichever range the HF/LF button is in",
+    "Shifts the second constant away from the P1 knob, through the attenuverter above it; the total is held between 0.98 and 1.9",
+    "Shifts the inner slope away from the P2 knob, through the attenuverter above it; the total is held between -1.23 and -1.143",
+    "Shifts all three of the constants the P3 knob sets, through the attenuverter above it, each held inside its own limits",
+    "Puts the system back to its starting point on each rising edge past 2V, falling ready again below 0.1V; because the system is deterministic that makes it a sync input",
+    "The first coordinate of the system, direct voltage removed, reaching a few volts either way",
+    "The second coordinate of the system, direct voltage removed and scaled up hard because it swings much less than the other two",
+    "The third coordinate of the system, direct voltage removed, reaching a few volts either way and covering a different part of the spectrum from the first",
+    "Note — with RATE fully counter-clockwise nothing moves and all three outputs stay at 0V; turn RATE up for any sound at all",
+    "Note — each of the four CV inputs is read through the attenuverter above it, and every attenuverter starts at dead centre, so a cable alone changes nothing until that small knob is turned",
+    "Note — if the system runs away and any coordinate passes 12, the module puts itself back to its starting point without being asked, which is heard as a click"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16,
+    "2": 17
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioChua.cpp line 100, getVoltage multiplied by the attenuverter and by rateScale*0.037/sr, then the sum clamped"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioChua.cpp line 104, getVoltage multiplied by the attenuverter and by 0.5, then the sum clamped to 0.98 to 1.9"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioChua.cpp line 108, getVoltage multiplied by the attenuverter and by -0.04, then the sum clamped to -1.23 to -1.143"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioChua.cpp lines 102, 106 and 110, the one voltage read three times and applied to three constants, each clamped separately"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "JulioChua.cpp line 124, resetTrigger.process(signal, 0.1f, 2.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "JulioChua.cpp line 149, 2.5 times the direct-voltage-blocked x"
+     },
+     "1": {
+      "poly": false,
+      "why": "JulioChua.cpp line 150, 8.5 times the direct-voltage-blocked y"
+     },
+     "2": {
+      "poly": false,
+      "why": "JulioChua.cpp line 151, 1.8 times the direct-voltage-blocked z"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit 39d9429, whose plugin.json carries the installed 2.1.0. The panel's three constant knobs are not one knob to one constant: P1 sets C2, P2 sets the inner slope m0, and P3 sets C1, C3 and the outer slope m1 together, at lines 88 to 92. The P3 input is likewise read three times, once for each of those. That is why P3 is the knob that changes the character most. The maker's comment beside C3 reads 27.6 to 28.5 while the line computes 27.9 to 28.5, so the comment is wrong and the line above follows the code. No output range is given because none is clamped: the three coordinates are multiplied by 2.5, 8.5 and 1.8 after a direct-voltage blocker, and how far each swings depends on where the constants sit. The runaway guard at line 122 tests each coordinate against 12 and drops the system back to x 0.1, y 0 and z 0. Every port is single channel."
   },
   "JulioLorentz84": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chaotic oscillator that steps the Lorenz 84 climate equations forward one sample at a time and puts their three coordinates out as three voltages, deterministic but never repeating",
+    "Sets how far the system is stepped forward on each sample, which works like a pitch control; fully counter-clockwise the system stops moving and the outputs go quiet",
+    "Sets the constant b of the equations, from 2.6 to 5, and its effect on the sound is not predictable",
+    "Sets the constant F of the equations, from 7.4 to 10, and its effect on the sound is not predictable",
+    "Sets the constant G of the equations, from 1.3 fully counter-clockwise down to 0.7 fully clockwise, and its effect on the sound is not predictable",
+    "Attenuates and inverts the voltage at the RATE input before it is added to the RATE knob, and at dead centre that input is ignored",
+    "Attenuates and inverts the voltage at the P1 input before it is added to the P1 knob, and at dead centre that input is ignored",
+    "Attenuates and inverts the voltage at the P2 input before it is added to the P2 knob, and at dead centre that input is ignored",
+    "Attenuates and inverts the voltage at the P3 input before it is added to the P3 knob, and at dead centre that input is ignored",
+    "Switches between two speed ranges: unlit the system is stepped six times a sample and RATE reaches 800 steps a second, lit it is stepped once and RATE reaches 100",
+    "Shifts the step size away from the RATE knob, through the attenuverter above it; the total is held between stopped and the top of whichever range the HF/LF button is in",
+    "Shifts the constant b away from the P1 knob, through the attenuverter above it; the total is held between 2.6 and 5",
+    "Shifts the constant F away from the P2 knob, through the attenuverter above it; the total is held between 7.4 and 10",
+    "Shifts the constant G away from the P3 knob, through the attenuverter above it; the total is held between 0.7 and 1.3",
+    "Puts the system back to its starting point on each rising edge past 2V, falling ready again below 0.1V; because the system is deterministic that makes it a sync input",
+    "Carries the z coordinate of the equations, direct voltage removed, despite the panel printing X; the three outputs are wired across",
+    "Carries the x coordinate of the equations, direct voltage removed, despite the panel printing Y; the three outputs are wired across",
+    "Carries the y coordinate of the equations, direct voltage removed, despite the panel printing Z; the three outputs are wired across",
+    "Note — with RATE fully counter-clockwise nothing moves and all three outputs stay at 0V; turn RATE up for any sound at all",
+    "Note — each of the four CV inputs is read through the attenuverter above it, and every attenuverter starts at dead centre, so a cable alone changes nothing until that small knob is turned",
+    "Note — if the system runs away and any coordinate passes 12, the module puts itself back to its starting point without being asked, which is heard as a click"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16,
+    "2": 17
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioLorentz84.cpp line 102, getVoltage multiplied by the attenuverter and by rateScale*0.037/sr, then the sum clamped"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioLorentz84.cpp line 104, getVoltage multiplied by the attenuverter and by 1.1, then the sum clamped to 2.6 to 5"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioLorentz84.cpp line 106, getVoltage multiplied by the attenuverter and by 1.2, then the sum clamped to 7.4 to 10"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "JulioLorentz84.cpp line 108, getVoltage multiplied by the attenuverter and by -0.2, then the sum clamped to 0.7 to 1.3"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "JulioLorentz84.cpp line 124, resetTrigger.process(signal, 0.1f, 2.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "JulioLorentz84.cpp line 143, X_OUTPUT is written 2.5 times the blocked z"
+     },
+     "1": {
+      "poly": false,
+      "why": "JulioLorentz84.cpp line 141, Y_OUTPUT is written 2.5 times the blocked x"
+     },
+     "2": {
+      "poly": false,
+      "why": "JulioLorentz84.cpp line 142, Z_OUTPUT is written 2.5 times the blocked y"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit 39d9429, whose plugin.json carries the installed 2.1.0. The three outputs are wired across the three coordinates, which the maker marks in the source with the comment cruzados: the jack printed X carries z, the jack printed Y carries x and the jack printed Z carries y, at lines 141 to 143. The other two modules in this plugin are wired straight through, so this is particular to Lorentz84. All three are multiplied by 2.5 after a direct-voltage blocker and none is clamped, so no output range is given. The constant a is fixed at 0.25 and has no control. The maker's comment beside F reads 7.3 to 10 while the line computes 7.4 to 10; the line above follows the code. The runaway guard at line 122 tests each coordinate against 12 and drops the system back to 0.1 on all three. Every port is single channel."
   }
  }
 }

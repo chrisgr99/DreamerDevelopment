@@ -2,17 +2,174 @@
  "plugin": "Kalliste",
  "source": "https://github.com/GabTiorbi/Kalliste",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "KArp": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An interactive harmonic sequencer: sixteen chords played in turn by an internal clock, with a six by sixteen grid choosing which notes of the chord now playing the arpeggio sounds",
+    "Sets how many of the sixteen chords the sequence plays before returning to the first, 1 to 16",
+    "Sets how many columns of the arpeggio grid are played within each chord, 1 to 16; the chord's time is divided evenly between them",
+    "Sets the octave of the chord now selected, 0 to 8, with 4 putting the root at 0V; selecting another chord brings that chord's own octave here",
+    "Sets the internal tempo, 1 to 300 BPM, which is the rate the sequence moves from one chord to the next",
+    "Sets the root note of its own chord in twelve steps, C at the bottom to B at the top; clicking it also makes that chord the selected one, and it is frozen for chords beyond the CHORDS LEN setting",
+    "A rising edge past 1V starts the sequence when it is stopped and stops it when it is running",
+    "A rising edge past 1V returns the sequence to the first chord and the first column of the arpeggio grid",
+    "A 5ms pulse at 10V each time the sequence moves on to the next chord, and 0V while the sequence is stopped",
+    "The notes of the arpeggio column now playing, 1V per octave, one channel per cell switched on in that column; a column with none on holds the pitches of the last column that had some",
+    "A 10V gate on each channel of the arpeggio pitch output, lasting the first 85% of each column and staying at 0V for a column with no cells switched on",
+    "The chord now playing as three polyphonic channels of 1V per octave: root, third and fifth",
+    "A 10V gate on three polyphonic channels while the sequence runs, dropping to 0V for 5ms at each change of chord so the next chord gets a fresh edge",
+    "The root note of the chord now playing, on its own, 1V per octave",
+    "Note — nothing moves until RUN is switched on. The module comes up stopped, and the clock output and both gate outputs rest at 0V until then.",
+    "Note — there is no clock input. BPM sets the rate of the chords, and ARP LEN divides each chord into that many arpeggio steps.",
+    "Note — the round button under a chord slider selects that chord. Clicking it again, once it is the selected one, steps that chord through major, minor, sus2, sus4, diminished and augmented.",
+    "Note — the round chord buttons, the RUN button and the RST SEQ button are drawings rather than knobs, so clicking any of them opens no help of its own.",
+    "Note — the arpeggio grid is one drawing rather than 96 controls, so no cell can be clicked for help. A click switches a cell on or off, and only columns within ARP LEN can be edited.",
+    "Note — the six rows of the arpeggio grid, upwards from the bottom, are the root, third and fifth of the chord and those same three an octave higher.",
+    "Note — Ctrl-click a grid cell to show a note name for about a second. The name is that note in the chord whose number matches the column, not the chord being played.",
+    "Note — the RUN button starts and stops the sequence, and the RST SEQ button returns it to the first chord and the first arpeggio column.",
+    "Note — K-SCENE goes immediately to the right of this module and stores and recalls its whole setup.",
+    "Menu — Clear ARP Matrix — switches every cell of the arpeggio grid off and returns to its first column, leaving the chords alone",
+    "Menu — Clear Chords — puts every chord back to a C major at octave 4 and returns to the first chord, leaving the arpeggio grid and the two length knobs alone"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 5,
+    "9": 5,
+    "10": 5,
+    "11": 5,
+    "12": 5,
+    "13": 5,
+    "14": 5,
+    "15": 5,
+    "16": 5,
+    "17": 5,
+    "18": 5,
+    "19": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "pitch",
+     "3": "trigger",
+     "4": "pitch",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "KArp.cpp:808 reads inputs[RUN_INPUT].getVoltage() with no channel argument into a dsp::SchmittTrigger, whose default thresholds are 0V and 1V, so a negative voltage reads low"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "KArp.cpp:812 reads inputs[RESET_INPUT].getVoltage() with no channel argument into a dsp::SchmittTrigger, whose default thresholds are 0V and 1V, so a negative voltage reads low"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "KArp.cpp:979 calls setChannels with the number of cells switched on in the column, up to 6, and line 998 writes one voltage per channel from getChordNoteVoltage at line 240"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "KArp.cpp:980 calls setChannels with the same count as the pitch output, and line 999 writes the same 10V or 0V to every channel"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "KArp.cpp:1009 calls setChannels(3) and line 1011 writes root, third and fifth from getChordNoteVoltage"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "KArp.cpp:1021 calls setChannels(3) and line 1033 writes the same 10V or 0V to all three channels"
+     },
+     "4": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "KArp.cpp:1016 writes one value with setVoltage and never calls setChannels; getRootVoltage at line 238 returns octave minus 4 plus the root in twelfths of a volt"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "KArp.cpp:1036 calls setChannels(1) and line 1038 writes 10V while a 5ms timer set at line 921 is running, 0V otherwise"
+     }
+    }
+   },
+   "notes": "Source read at commit d7e66fd, the head of the repository. The installed plugin.json is byte-identical to the one there and carries 2.0.1, which nine commits share; the two installed panel SVGs hash to the blobs from the initial import and have never changed, so they settle nothing. The four commits after the version bump that touch src/ (3dbf0f6, 1b0a1d9) only move font loading into draw() and fix module-browser rendering; process() and every control are identical across the whole 2.0.1 range, so the reading does not depend on which of them shipped. SEVENTEEN PARAMETERS CANNOT BE CLICKED FOR HELP. The sixteen chord-type buttons (MODE_1_PARAM upwards) and RUN are configured with configButton and configSwitch, but the widget constructor adds them with createWidgetCentered<KArpModeButton> and createWidgetCentered<KArpRunButton> — plain Widgets, not ParamWidgets — so the census records paramPos for only the first 20 of the 37 parameters and no click can reach the rest. They are covered by Note lines instead. The 96 grid cells and the RST SEQ button are plain widgets with no parameter at all. CTRL-CLICK PREVIEW NAMES THE WRONG CHORD. KArpMatrixButton::onButton calls getChordNoteName(column, row, ...), using the column number as the chord index, while buildActiveArpVoltages at line 604 sounds getChordNoteVoltage(activeChord, row). The name shown therefore matches what is played only when the sequence is on the chord of that number. A COMMENT CONTRADICTS THE CODE: the comment above KArp.cpp:1009 says CHORD_V/OCT carries six channels — root, third, fifth and those three an octave up — but the call is setChannels(3) and only three are written. Three is what the lines say. The six outputs have no configOutput call, so Rack shows no tooltip on any of them. K-SCENE reads leftExpander, so it goes to the right of K-ARP."
   },
   "KScene": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A scene manager for K-ARP: it stores whole K-ARP setups in sixteen slots and recalls them, either on a click or one after another as the chord sequence comes round",
+    "Chooses between storing scenes and playing them; in the storing position the module never recalls a scene by itself, leaving K-ARP free to be edited and heard",
+    "In the playing position, chooses whether the next stored scene is taken automatically at the end of each pass through the chord sequence, or only when you click a slot",
+    "A 5ms pulse at 10V at the end of each pass through K-ARP's chord sequence, sent before the scene changes or repeats",
+    "Note — this module goes immediately to the right of K-ARP and does nothing anywhere else: it reads the module on its left and ignores anything that is not K-ARP.",
+    "Note — the sixteen scene slots are drawings rather than knobs, so clicking one opens no help.",
+    "Note — while storing, a click arms a slot and a second click on it writes the current K-ARP setup there.",
+    "Note — while storing, a long press of three quarters of a second arms a filled slot for deletion, and a second click on it confirms.",
+    "Note — a click anywhere else on the panel cancels a slot that has been armed for writing or deletion.",
+    "Note — the AUTO and MANUAL switch is held at MANUAL while the module is storing, and is put back to AUTO the moment it returns to playing, so a MANUAL choice does not survive a trip through STORE.",
+    "Note — slots fill in order and cannot be skipped: a slot can be written only if every slot before it is already filled, and deleting one shifts the slots after it down to close the gap.",
+    "Note — while storing, Ctrl-click a filled slot to load it into K-ARP without arming anything, which is how a stored scene is brought back for editing.",
+    "Note — arming a slot to write or delete is refused while K-ARP is running; stop K-ARP first. Editing and listening are what the storing position is for while it runs.",
+    "Menu — Loop AUTO — sets whether the automatic playing returns to the first scene after the last one or stays on the last",
+    "Menu — EOC on RUN/RST — adds a pulse at the EOC output when K-ARP goes from stopped to running, so a sequencer downstream can be started in step",
+    "Menu — Clear all scenes — empties all sixteen slots"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "KScene.cpp:231 writes 10V while a 5ms timer set by fireEOCPulse at line 57 is running and 0V otherwise, with setVoltage and no setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit d7e66fd, settled the same way as K-ARP. The sixteen scene slots and their lamps are plain Widgets added with addChild (KSceneSlotButton, KSceneSlotLed) and have no parameter behind them, so the census records only the two switches in paramPos and no slot can be clicked for help; they are covered by Note lines. The AUTO/MANUAL switch is written to by process rather than only read: KScene.cpp:155 forces it to MANUAL on every sample while the module is in STORE, and line 160 sets it back to AUTO on the first sample after the switch returns to PLAY, so a MANUAL choice made in PLAY does not survive a trip through STORE. occupiedCount() at line 254 stops at the first empty slot, so the slots are a run from the first rather than sixteen independent stores."
   }
  }
 }

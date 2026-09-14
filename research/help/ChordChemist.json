@@ -1,13 +1,150 @@
 {
  "plugin": "ChordChemist",
- "source": "https://github.com/TheDrude/ChordChemist/tree/main/src",
+ "source": "https://github.com/TheDrude/ChordChemist/blob/main/ChordChemistManual.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "ChordChemist": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sixteen-step chord sequencer: each step names a degree of a scale, and on every clock the module builds a four-note chord on it, one voice per jack plus a polyphonic one",
+    "Sets how many steps the sequence runs before it returns to the first, 1 to 16",
+    "Sets the root the scale is built on, in semitones, with the display reading it out as a note name and octave",
+    "Picks the scale out of the 43 built in, with the display naming the one chosen",
+    "Sets the smallest gap the module leaves between one voice and the next, 0 to 12 semitones, which is what opens the chord out",
+    "Pressing it draws a fresh degree for all sixteen steps and a fresh chord quality for each of them",
+    "Sets which degree of the scale this step builds its chord on, 0 for the tonic up to 6",
+    "A rising edge past 1V moves the sequence on one step",
+    "A rising edge past 1V sends the sequence back to the first step",
+    "Sets the root outright, one volt per octave with 0V giving C4; while a cable is here the root knob is moved to match it and cannot be turned",
+    "Picks the scale outright, 0-10V spread evenly across all 43; while a cable is here the scale knob is moved to match it and cannot be turned",
+    "Sets the voice spacing outright, 0-10V giving 0 to 12 semitones; while a cable is here the spread knob is moved to match it and cannot be turned",
+    "Sets the sequence length outright, one volt for each step; while a cable is here the steps knob is moved to match it and cannot be turned",
+    "A rising edge past 1V draws a fresh degree and chord quality for all sixteen steps",
+    "The lowest note of the chord, one volt per octave",
+    "One of the three notes above the root, one volt per octave, given in rising order rather than as the third, fifth and extension the panel lettering promises",
+    "All four voices on one polyphonic cable, one volt per octave, and always four channels",
+    "Menu — Select Scale — opens a list of all 43 scales with a tick beside the one in use, and picking one moves the scale knob to it",
+    "Note — each step also carries a chord quality that only the randomiser sets: a doubled root, a seventh, a sixth, a ninth or an eleventh.",
+    "Note — nothing moves until a clock reaches the trigger jack; before the first edge all four outputs read 0V.",
+    "Note — the module saves nothing of its own in a patch, so every step's chord quality returns to the doubled root when that patch is loaded again."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6,
+    "13": 6,
+    "14": 6,
+    "15": 6,
+    "16": 6,
+    "17": 6,
+    "18": 6,
+    "19": 6,
+    "20": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12,
+    "6": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15,
+    "2": 15,
+    "3": 15,
+    "4": 16
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "pitch",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ChordCircle.cpp:190 reads it with getVoltage into a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ChordCircle.cpp:191 reads it with getVoltage into a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChordCircle.cpp:226-229 reads it with getVoltage, multiplies by 12, adds 36 and calls setValue on the root parameter, clamped to 0 and 60"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ChordCircle.cpp:232-238 divides it by 10, multiplies by 42 and calls setValue on the scale parameter, clamped to 0 and 42"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ChordCircle.cpp:220-223 divides it by 10, multiplies by 12 and calls setValue on the spread parameter, clamped to 0 and 12"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "1 to 16V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ChordCircle.cpp:214-217 clamps it to 1 and 16 and calls setValue on the steps parameter"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ChordCircle.cpp:198-200 adds it to the button's value and feeds the sum to a dsp::SchmittTrigger"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 2a337ce, the head of main, which is the second commit carrying version 2.0.3. The earlier one, 1cae193, returns early from ValueDisplay::draw and CircleDisplay::draw when there is no module; the installed binary's ValueDisplay::draw at 0x8610 instead branches to placeholder-drawing code on a null module, which is what 2a337ce changed, so that is the build that shipped. The manifest is byte for byte the installed one. Sixteen further inputs, indices 7 to 22, are declared as STEP_DEGREE_INPUT_0 to 15 and are given no PortWidget and read nowhere, so they get no line and no tag. The four CV jacks call setValue on their own knobs rather than adding to them, which the maker's manual calls motorized controls; the knob follows the cable and cannot be turned while it is patched, and it stays where the cable left it afterwards. The four voice lights are configured and set to full brightness on every clock but no LightWidget is ever added, so nothing on the panel shows them. The module defines no dataToJson, so the per-step chord qualities are lost when a patch is saved and every step reverts to the doubled root. Three things in the maker's manual disagree with the code and the code wins: the manual says a spread above half transposes the root down an octave, which nothing in process does; it gives the root CV range as 0V to 5V where the code reaches the ends of the parameter at -3V and +2V; and it names the three upper outputs as the third, fifth and extension where the code sorts and permutes the three upper pitch classes for the smallest total span and then writes them out in rising order."
   }
  }
 }

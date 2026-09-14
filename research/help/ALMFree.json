@@ -1,58 +1,1004 @@
 {
  "plugin": "ALMFree",
- "source": "no published source; read from the installed 2.2.2 build",
+ "source": "https://busycircuits.com/vcv/",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Beast": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A copy of ALM's Beast's Chalkboard: two precision adders, each passing its input straight through and offering two copies with a whole number of volts added",
+    "Adds a whole number of volts to the first section's pair of Out jacks, -2V to +2V in one-volt steps, and nothing at the centre",
+    "Adds a whole number of volts to the second section's pair of Out jacks, -2V to +2V in one-volt steps, and nothing at the centre",
+    "The signal the first section passes and adds to; it is also what the second section reads when nothing is patched there",
+    "The signal the second section passes and adds to; with nothing patched it takes the first section's input",
+    "The first input passed through with nothing added to it",
+    "The first input with the first switch's offset added",
+    "The second input passed through with nothing added to it",
+    "The second input with the second switch's offset added",
+    "Note — both switches come up at the centre, adding nothing, so out of the box the Out jacks carry exactly what the Thru jacks carry.",
+    "Note — nothing is clamped anywhere. The offset is added to whatever arrives, so a large input can be pushed past the range other modules expect.",
+    "Note — the module is monophonic: every jack reads or writes one channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "2": 6,
+    "3": 6,
+    "1": 7,
+    "4": 8,
+    "5": 8
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib BeastChalkboard::process at 0x2b40 reads one voltage from input 0 and writes it unchanged to output 0 and, with the -2..+2 switch added, to outputs 2 and 3; 0x2b48 reads input 1's channel count to decide whether input 1 or this one feeds the second section"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the first input",
+      "why": "plugin.dylib BeastChalkboard::process at 0x2b48-0x2b54 uses input 1's voltage only when its channel count is non-zero, and otherwise the voltage already read from input 0"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "plugin.dylib BeastChalkboard::process 0x2b5c writes the first input straight out, one channel, with no scaling and no clamp"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "plugin.dylib BeastChalkboard::process 0x2b68-0x2b70 adds param 0, whose configured range is -2 to +2 with snapping on (0x269c-0x26e4), to the first input and writes it out unclamped"
+     }
+    }
+   },
+   "notes": "There is no published source for this plugin: plugin.json carries no sourceUrl and no manualUrl, so everything here was read out of the installed 2.2.2 plugin.dylib, which is unstripped and carries one Class::process per model.\n\nThe switch is a five-position rotary: configParam at 0x269c and 0x2714 gives -2 to +2 in the unit V with snapEnabled set at 0x26e4, and the panel prints -2, -I, a zero symbol, +I and +2 around it. process adds that number of volts, so the module is an octave shifter when it is fed a 1V-per-octave pitch, which is what it is for.\n\nThe normal runs from the first section to the second, not the other way: process reads input 1's channel count and falls back to input 0. The panel prints a down-pointing triangle beside both In jacks, which on the second one points at nothing.\n\nBoth Out jacks of a section are written from the same value, so they are exact duplicates and share a line.\n\nThis model registers no context menu: nm shows appendContextMenu on the OAx2, Tangle, MCO, MFD, MegaTang and PipSlope widgets only."
   },
   "OAx2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A copy of ALM's O/A/x2: two channels, each multiplying its input by an attenuverter and adding a fixed voltage to the result",
+    "Adds a fixed voltage to the first channel, -10V to +10V, and comes up at the centre where it adds nothing",
+    "Scales the first channel's input between -2 and +2, silent at the centre of its travel and inverting below it; it comes up at the centre",
+    "Adds a fixed voltage to the second channel, -10V to +10V, and comes up at the centre where it adds nothing",
+    "Scales the second channel's input between -2 and +2, silent at the centre of its travel and inverting below it; it comes up at the centre",
+    "The signal the first channel scales; with nothing patched the channel puts out its offset alone",
+    "The signal the second channel scales; with nothing patched the channel puts out its offset alone",
+    "The first channel's input times its attenuverter plus its offset, clamped to ±12V",
+    "The second channel's input times its attenuverter plus its offset, clamped to ±12V; with MIX MODE on the first channel's result is added here too, unless a cable is in the first channel's output",
+    "Note — both attenuverters come up at the centre, where they pass nothing at all. A fresh module puts out only what the two offset knobs are set to, which is 0V.",
+    "Note — the two lamps beside each output show the sign of that output, one for voltage above 0V and one for below, reaching full at 10V.",
+    "Note — the module is monophonic: every jack reads or writes one channel.",
+    "Menu — MIX MODE — adds the first channel's result into the second channel's output; the addition stops while a cable is in the first channel's own output jack"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib OAx2::process 0x11eec-0x11efc reads one voltage, multiplies it by param 1 (configured -2 to +2 at 0x11b04) and adds param 0 (configured -10 to +10 at 0x11a9c); 0x11f2c-0x11f6c clamps the result to -12V and 12V"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib OAx2::process 0x11ef0-0x11f04 reads one voltage, multiplies it by param 3 and adds param 2; 0x11f08-0x11f28 adds the first channel's result when param 4 (Mix mode) is non-zero and output 0 is unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±12V",
+      "step": "continuous",
+      "why": "plugin.dylib OAx2::process 0x11f2c-0x11f6c clamps to -12V and 12V and writes one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "±12V",
+      "step": "continuous",
+      "why": "plugin.dylib OAx2::process 0x11fbc-0x11ffc clamps to -12V and 12V and writes one channel"
+     }
+    }
+   },
+   "notes": "No family is set on these jacks. The module is a DC-coupled offset and attenuverter pair; what a jack carries is whatever you decide to put in it, so a colour would be a guess.\n\nThe mix is a menu item, not a knob. Param 4 is configured (0x11c3c, 0 to 1, default 0) but no ParamWidget is created for it, so it has no position in the census and cannot be clicked for help; OAx2Widget::appendContextMenu at 0x12568 builds it with createBoolMenuItem under the name assembled inline at 0x125dc, which is MIX MODE in capitals.\n\nThe mix is also conditional in a way the name does not suggest: 0x11f14-0x11f24 reads output 0's channel count and contributes -0.0 instead of the first channel's value when that output is patched. Plug anything into the first channel's output and the second channel stops receiving it.\n\nThe attenuverter reaches ±2, so the module amplifies as well as attenuates. Both attenuverters default to 0, which is the middle of their travel and passes nothing.\n\nFour lights are driven from the two results at 0x11f78-0x11fb8 and 0x12008-0x12048, scaled by 0.1 so they reach full at 10V, with a separate lamp for each sign."
   },
   "Tangle": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A copy of ALM's Tangle Quartet: four voltage-controlled amplifiers with individual outputs and a mix that each channel drops out of when its own output is used",
+    "Sets that channel's level from silence to unity and comes up fully open; while that channel's Level CV jack is patched the knob stops setting the level and scales the jack's voltage instead",
+    "The signal that channel amplifies",
+    "Sets that channel's level, 0V for silence and the top of the chosen voltage range for the knob's full setting; a cable sitting at 0V therefore silences the channel",
+    "That channel's signal after its level; putting a cable in here takes the channel out of the Mix",
+    "The sum of those channels whose own output jacks are empty",
+    "Note — a channel leaves the Mix the moment a cable goes into its own output jack. That is how one module is split between a mix and separate destinations.",
+    "Note — nothing here is clamped. A level CV above the chosen voltage range drives the channel past unity gain.",
+    "Note — the lamp beside each channel follows that channel's level setting rather than the signal passing through it.",
+    "Note — the module is monophonic: every jack reads or writes one channel.",
+    "Menu — Voltage Range: 10V, 5V — sets the voltage the four Level CV jacks treat as a channel's full level"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib Tangle::process 0x17f60 reads one voltage and multiplies it by the channel gain worked out just above; the product goes straight to output 0 at 0x17f74 with no clamp"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib Tangle::process 0x17fb0 reads one voltage and multiplies it by the second channel's gain; the product goes to output 1 at 0x17fc0"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib Tangle::process 0x17ffc reads one voltage and multiplies it by the third channel's gain; the product goes to output 2 at 0x1800c"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib Tangle::process 0x18068 reads one voltage and multiplies it by the fourth channel's gain; the product goes to output 3 at 0x18078"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the knob alone",
+      "why": "plugin.dylib Tangle::process 0x17f34-0x17f50 reads the jack's channel count and, when it is patched, sets the gain to the jack's voltage times the knob divided by the voltage-range member at +0x148, which the menu at 0x18838 sets to 10 or 5; when it is unpatched the knob alone is the gain"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the knob alone",
+      "why": "plugin.dylib Tangle::process 0x17f80-0x17f9c, the same arrangement as the first Level CV jack, for the second channel"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the knob alone",
+      "why": "plugin.dylib Tangle::process 0x17fcc-0x17fe8, the same arrangement, for the third channel"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the knob alone",
+      "why": "plugin.dylib Tangle::process 0x1801c-0x18038, the same arrangement, for the fourth channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "plugin.dylib Tangle::process 0x17f74 writes one channel; 0x1805c reads this port's channel count and substitutes -0.0 in the mix sum when it is patched"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "plugin.dylib Tangle::process 0x18064-0x18094 adds the four channel values, each replaced by -0.0 when that channel's own output is patched, and writes the total to one channel"
+     }
+    }
+   },
+   "notes": "This is the plainest example in the plugin of a CV input that takes the knob over rather than adding to it. Tangle::process at 0x17f3c-0x17f50 computes gain = CV * knob / range when the Level CV jack is patched, and gain = knob when it is not. A patched cable resting at 0V silences the channel however far up the knob is, and the knob becomes an attenuator for the CV.\n\nThe four channels are written from the same shape of code and differ only in which port and which knob they use, so one line covers each role and the tags point all four at it.\n\nThe Mix jack is a normalled sum: 0x18048-0x18060 and 0x1807c-0x1808c read each channel output's channel count and drop that channel from the total when it is patched. The maker's own product page for the hardware describes the same behaviour.\n\nThe level knobs are configured 0 to 1 with a default of 1 and a display multiplier of 100 (0x17974-0x17998), so they are percentages and come up fully open. The lights are fed the gain value, not the audio.\n\nThe menu name is the literal string \"Voltage Range\" at 0x188b0, with the two choices assembled inline at 0x188d0 and 0x188e4 as 10V and 5V. The getter at 0x18ba0 compares the stored range against 5 and the setter at 0x18c98 stores 10 for index 0 and 5 for index 1, so 10V is the first choice and the one a new module has (set at 0x17054)."
   },
   "MCO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A copy of ALM's MCO: a digital wavetable oscillator giving a sub square, a gated pulse and the main wave at the same time",
+    "Sets the pitch over five and a half octaves: the frequency is 165Hz multiplied by two to the power of this setting, and then by the fine trim",
+    "Multiplies the frequency by between 1 and 2, which is one octave across its travel; it comes up in the middle at 1.5",
+    "Chooses which wave is read out of the table, from the start of the table to the end of it; it comes up at the start",
+    "Sets the width of the Pulse output across its whole range; it comes up at nothing",
+    "Sets the pitch at one volt per octave, multiplying the frequency by two to the power of the voltage",
+    "Moves the choice of wave, adding to the knob, with the voltage range chosen on the menu covering the knob's whole travel",
+    "Moves the pulse width, adding to the knob, with the voltage range chosen on the menu covering the knob's whole travel",
+    "Sets how many times the pulse pattern repeats inside one cycle of the wave, one to four across the chosen voltage range; there is no knob for this, so with nothing patched it stays at one",
+    "Restarts the wave from the beginning of the table whenever the voltage rises past 1V, and flips the sub square at the same moment",
+    "A square wave one octave below the pitch, swinging between -7V and 7V, which flips at the end of every cycle",
+    "The wave gated into a pulse: 7V wherever the phase falls outside the width set by the PWM control, and the wave itself inside it",
+    "The wave read out of the table at the set pitch, reaching ±7V at full scale",
+    "Note — the module is monophonic: every jack reads or writes one channel.",
+    "Note — a new module runs near 247Hz. The frequency is 165Hz times two to the power of the coarse setting, times the fine trim.",
+    "Menu — Input CV Range: 10V, 5V — sets the voltage the Wave, PWM and Type inputs treat as a full sweep of their control"
+   ],
+   "param": {
+    "2": 1,
+    "4": 2,
+    "0": 3,
+    "1": 4
+   },
+   "in": {
+    "2": 5,
+    "0": 6,
+    "1": 7,
+    "3": 8,
+    "4": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11,
+    "2": 12
+   },
+   "family": {
+    "in": {
+     "2": "pitch",
+     "0": "cv",
+     "1": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "plugin.dylib MCO::combine_cv_and_pot_data 0x5f48-0x5ff4 reads one voltage, multiplies it by the wave parameter's maximum, divides by the voltage-range member at +0x148, adds the knob and clamps the total to that parameter's own 0 to 100 range"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "plugin.dylib MCO::combine_cv_and_pot_data 0x5ff8-0x60a4, the same arrangement as the wave input, for the pulse-width parameter"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MCO::combine_cv_and_pot_data 0x6144-0x6150 reads one voltage, raises two to that power and multiplies the frequency already worked out from the coarse and fine controls at 0x6114-0x6130"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib MCO::combine_cv_and_pot_data 0x6154-0x61c8 divides one voltage by the voltage-range member and clamps it to the range of parameter 3, which is never given a configParam and so keeps Rack's default 0 to 1; MCO::process 0x5bf8-0x5c08 turns that into one, two, three or four"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib MCO::process 0x5c64-0x5c90 compares one voltage against 1.0, records the previous state in a byte and, on a rise, zeroes the phase accumulator and forces the sub square to flip"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±7V",
+      "step": "stepped",
+      "why": "plugin.dylib MCO::process 0x5d24-0x5d48 flips a byte at the end of each cycle and writes 7V or -7V to one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "±7V",
+      "step": "continuous",
+      "why": "plugin.dylib MCO::process 0x5cb0-0x5d04 compares the phase against the pulse width and writes either a flat 7V or the wave sample scaled by 7/32767, one channel"
+     },
+     "2": {
+      "poly": false,
+      "range": "±7V",
+      "step": "continuous",
+      "why": "plugin.dylib MCO::process 0x5d08-0x5d20 writes the wave sample scaled by 7/32767 to one channel"
+     }
+    }
+   },
+   "notes": "Parameter 3, the Type control, exists but has no knob and no configParam. MCO::MCO calls configParam for indices 0, 1, 2 and 4 only (0x562c, 0x5690, 0x5700, 0x5770); index 3 keeps the empty default quantity that Module::config creates, which is why the census records it with no name and no position. combine_cv_and_pot_data never reads params[3] either — only the Type jack, divided by the voltage range and clamped to that default 0 to 1. So the Type jack has no knob behind it at all and is the only way to change that setting. It gets no tag, because no click can reach the parameter.\n\nA second dead computation sits at 0x61cc-0x6268: the fine-tune parameter is combined with the Sync jack's voltage as though that jack were a CV, clamped, and stored at +0x178. Nothing reads +0x178. The Sync jack's real use is the level comparison in process at 0x5c64. The fine trim therefore has no CV input.\n\nThe frequency law is 165 * 2^coarse * fine. configParam at 0x5770 gives the coarse control -2.75 to 2.75 with a display base of 2 and a display multiplier of 165, and 0x5700 gives the fine control 1 to 2 with a default of 1.5. Both use MCO::FreqParamQuantity, whose getDisplayValueString reads a frequency the process code stores back into it, so the tooltips show hertz.\n\nOutputs are scaled by 7/32767 (the constant 0x396001C0 at 0x5cf4), so a full-scale sample leaves at 7V and the sub square is a hard ±7V.\n\nThe pulse output is not a plain square. 0x5cb0-0x5ce8 divides the cycle into as many parts as the Type setting asks for, compares the position inside the current part against the pulse width, and outputs a flat 7V outside it and the wave itself inside it. With Type at one and the width at zero the jack sits at 7V.\n\nThe maker's product page for the hardware describes \"Voltage control of frequency, waveshape, pulse width and distribution\" and \"3 Outputs; wavetable, PWM'd wavetable & sub\", which matches; it quotes no figures, so none were taken from it."
   },
   "PipSlope": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A copy of ALM's Pip Slope Mk2: a digital attack-and-decay envelope with a variable curve and three ways of repeating itself",
+    "Sets the attack time, shortest at the bottom of its travel and longest at the top; it comes up in the middle",
+    "Sets the decay time, shortest at the bottom of its travel and longest at the top; it comes up in the middle",
+    "Bends the curve of both stages, with one shape below the middle of its travel and its mirror image above; it comes up in the middle",
+    "Chooses how the envelope repeats: one shot at the bottom of its travel, then a band that repeats with the level halving, then a band of four to ten shortening repeats, and an endless loop near the top",
+    "Starts the envelope from zero whenever the voltage rises past 3V",
+    "Starts the envelope on a rise past 3V and then holds it at the top of the attack for as long as the voltage stays above 3V, letting the decay run once it falls",
+    "Lengthens the attack, adding to the knob; the top of the chosen voltage range adds about three quarters of the knob's own range, and negative voltage does nothing",
+    "Lengthens the decay, adding to the knob; the top of the chosen voltage range adds about three quarters of the knob's own range, and negative voltage does nothing",
+    "A pulse at the top of the chosen voltage range, 100 samples long, at the end of every envelope",
+    "The envelope, from 0V to the top of the chosen voltage range; the menu here offers 10V or 5V where the hardware offers 8V or 5V",
+    "Note — the module is monophonic: every jack reads or writes one channel.",
+    "Note — nothing happens until something triggers it. Patch a rising voltage above 3V into Trig or Gate, or turn the Loop control past about a quarter of its travel so that the envelope drives itself.",
+    "Note — one lamp follows the envelope level; a second lights while the Loop control is in its endless band.",
+    "Menu — Voltage Range: 10V, 5V — sets how high the Slope Out and the End of Slope pulse reach, and the voltage the two CV inputs treat as a full sweep"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 3V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib PipSlope::ManageHardware 0x1464c-0x146cc compares one voltage against 3.0 and against the value it saved from the previous sample, setting a flag only on the rise"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 3V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib PipSlope::ManageHardware 0x146d0-0x146f0 sets a flag on a rise past 3V, and PipSlope::slope_yield 0x14914-0x14948 reads the same jack's level against 3.0 every pass to decide whether to hold the envelope at the top of the attack"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib PipSlope::ManageHardware 0x14630-0x1467c skips the store when the voltage is below zero, and otherwise scales it by 767 divided by the voltage-range member; MillisecondCallback 0x14ad4-0x14af8 multiplies that by four and adds it to the knob's own 0 to 4094 value"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib PipSlope::ManageHardware 0x14640-0x146a8 and MillisecondCallback 0x14afc-0x14b18, the same arrangement as the attack CV, for the decay"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "plugin.dylib PipSlope::slope_yield 0x14a9c-0x14ac0 writes the voltage-range member for a countdown of 100 passes and then zero, one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "plugin.dylib PipSlope::process 0x1458c-0x145b0 scales the 12-bit envelope by the voltage-range member divided by 4095.5 and writes one channel"
+     }
+    }
+   },
+   "notes": "The code and ALM's own hardware page disagree about the output level. The page for the ALM028 says \"Selectable 5v or 8v max envelope level output\"; the menu here (built at 0x15130, name \"Voltage Range\", choices assembled inline at 0x151c8 and 0x151dc) offers 10V and 5V, and the setter stores 10 or 5 into the same member the output scaling reads. The Slope Out line carries that clause; a patch built around the hardware's 8V will be a third too loud here at the default setting.\n\nThe Loop control's bands come from MillisecondCallback at 0x14b2c-0x14c18, which reads the knob as a 0 to 4095 number and picks a mode: below 1001 one shot, 1001 and above a mode that halves the peak each repeat (slope_yield 0x149b4), 2001 and above a mode that runs four to ten repeats at shortening rates taken from a table (0x149e0 and 0x148cc), and 3401 and above a mode that retriggers itself every millisecond, which also lights a lamp at 0x14b48. ALM's page describes the hardware's three loop modes as \"Decreasing amplitude, decreasing time, and regular loop\", which is the same set.\n\nThe Gate input really does sustain. ManageHardware records only its rising edge, but slope_yield reads the jack's level directly at 0x14918 and freezes the envelope while it is above 3V.\n\nThe knobs are read as 12-bit numbers exactly as the hardware's firmware would see them: ManageHardware at 0x145dc scales each 0-to-1 parameter by 4095.5 and offsets the two time controls by 8191.5, and MillisecondCallback subtracts 8190 and clamps to 0..4094. The lamp at 0x14b4c is set to a brightness of 2, which Rack clamps to full.\n\nEvery figure here was read out of the binary. Nothing was taken from the hardware manual PDF, which was not opened."
   },
   "MegaTang": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A copy of ALM's MEGA-TANG: four channels with level, pan, mute and an effects send, summed into a stereo mix, with a stereo return and two optional expanders",
+    "Sets how much of that channel reaches the Send output, taken after its level and its mute; it comes up at nothing",
+    "Places that channel between the left and right mix outputs and comes up at the centre",
+    "Sets that channel's level from silence to unity and comes up fully open; while that channel's Levels CV jack is patched the knob stops setting the level and scales the jack's voltage instead",
+    "Silences that channel in the stereo mix and in the send; the channel's own output jack goes on carrying it at full level",
+    "The signal that channel mixes",
+    "Sets that channel's level, 0V for silence and the top of the chosen voltage range for the knob's full setting; a cable sitting at 0V therefore silences the channel",
+    "The left side of the effects return, added straight into the left mix output; nothing is copied to the right side, despite the (m) printed on the panel",
+    "The right side of the effects return, added straight into the right mix output",
+    "That channel's signal after its level, with the mute ignored; putting a cable in here takes the channel out of the stereo mix and out of the send",
+    "The left side of the mix: every channel whose own output is empty, at its panned level, plus the left return",
+    "The right side of the mix: every channel whose own output is empty, at its panned level, plus the right return",
+    "The four channels at their send settings, after their levels and mutes, added together",
+    "Note — the module is monophonic: every jack reads or writes one channel.",
+    "Note — the four send knobs come up at nothing, so the Send output is silent until one is raised. The level knobs come up fully open and the pans at the centre.",
+    "Note — a mute takes effect on the sample it is pressed, with no fade. ALM's page for the hardware describes soft-close mutes that avoid clicks; there is no smoothing in this port.",
+    "Note — MT-EX1 and MT-EX2 attach immediately to the right of this module. Either one is inert anywhere else.",
+    "Note — with an MT-EX1 attached, this module writes a line of debug text to standard output on every audio sample. It changes nothing about the sound but fills a log quickly.",
+    "Menu — Voltage Range: 10V, 5V — sets the voltage the four Levels CV jacks treat as a channel's full level"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 4,
+    "13": 4,
+    "14": 4,
+    "15": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 7,
+    "9": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 9,
+    "2": 9,
+    "3": 9,
+    "4": 10,
+    "5": 11,
+    "6": 12
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "audio",
+     "9": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MegaTang::process 0x f74c reads one voltage and multiplies it by the channel gain; the product goes to output 0 at 0xf758 without the mute, and the muted version feeds the mix at 0xf7a8"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the knob alone",
+      "why": "plugin.dylib MegaTang::process 0xf68c-0xf6a8 reads the jack's channel count and, when it is patched, sets the gain to the jack's voltage times the knob divided by the voltage-range member at +0x1d0; when it is unpatched the knob alone is the gain"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MegaTang::process 0xf9f8 reads one voltage and 0xfa04 adds it into the left mix total; no channel count is read for either return jack, so neither is normalled to the other"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MegaTang::process 0xf9fc reads one voltage and 0xfa0c adds it into the right mix total, with no normalling from the left"
+     }
+    },
+    "out": {
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "plugin.dylib MegaTang::process 0xfa14 writes the left total to one channel with no clamp"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "plugin.dylib MegaTang::process 0xf9f0 writes the send total to one channel with no clamp"
+     }
+    }
+   },
+   "notes": "The return is not mono-normalled. The panel prints (m) beside the left Return jack, which is ALM's mark for a jack that feeds both sides when used alone, and MFD in this same plugin does exactly that. MegaTang::process reads the two return jacks at 0xf9f8 and 0xf9fc with no channel-count test anywhere, so patching only the left return leaves the right side of the mix without it. The left return's own line carries a clause saying so.\n\nThe mute does not reach the channel's own output. The gain used for output 0 at 0xf74c-0xf758 is the level alone; the mute is applied separately at 0xf798 on the path into the mix and the send. Anyone using the channel outputs as direct outs will find the mute buttons do nothing to them.\n\nA channel leaves both the mix and the send as soon as its own output is patched: 0xf764, 0xf828, 0xf8e4 and 0xf99c read each output's channel count and skip that channel's contribution.\n\nThe expanders attach on the right. MegaTang::process reads rightExpander.module at +0x110 and compares its model against modelMTEX1 and modelMTEX2; MTEX1::process and MTEX2::process read leftExpander.module at +0xe8 and compare against modelMegaTang.\n\nA debug printf was left in. When the module on the right is an MT-EX1, 0xf6c8-0xf6d0 calls printf with the format string \"tang: C1 From: %.2f To: %.2f\\n\" on every sample, and MTEX1::process does the same with \"ex1: C1 From: %.2f To: %.2f\\n\" at 0xc784. Neither affects the audio.\n\nParameter ranges: sends 0 to 1 with a default of 0, pans 0 to 1 with a default of 0.5 and a display multiplier of 200, levels 0 to 1 with a default of 1, all as percentages (0xe964 onward). The mutes are latching buttons; the byte a MuteButton sets on mouse-down (0x110f0) only drives a second lamp and is not in the audio path.\n\nThe four channel outputs are numbered so that index 0 is the jack the panel labels 1, which is the bottom one of that column; the tags follow the index, not the panel order."
   },
   "MTEX1": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for MEGA-TANG, sitting immediately to its right: it adds a levelled mono input, two more mono inputs and a stereo pair to that module's mix, and three more sends",
+    "Sets the level of the Line In signal into MEGA-TANG's mix, from silence to unity; it comes up at silence",
+    "Sets how much of the Line In signal reaches MEGA-TANG's send, taken before the level control; it comes up at nothing",
+    "Sets how much of the In 5 signal reaches MEGA-TANG's send; it comes up at nothing",
+    "Sets how much of the In 6 signal reaches MEGA-TANG's send; it comes up at nothing",
+    "A mono signal added to both sides of MEGA-TANG's mix at the level set here, and separately to its send",
+    "A mono signal added to both sides of MEGA-TANG's mix at full level; it has no level control, only a send",
+    "A mono signal added to both sides of MEGA-TANG's mix at full level; it has no level control, only a send",
+    "The left side of a stereo pair added to MEGA-TANG's left mix output at full level",
+    "The right side of a stereo pair added to MEGA-TANG's right mix output at full level; with nothing patched it takes the left side of the pair",
+    "Note — nothing here does anything unless MEGA-TANG is the module immediately to the left. There are no output jacks: everything arrives in MEGA-TANG's mix and send.",
+    "Note — all four knobs come up at zero, so a freshly placed expander adds the two unlevelled inputs and the stereo pair to the mix and nothing else.",
+    "Note — while this module is attached, it and MEGA-TANG each write a line of debug text to standard output on every audio sample. It changes nothing about the sound but fills a log quickly.",
+    "Note — the module is monophonic: every jack reads one channel."
+   ],
+   "param": {
+    "1": 1,
+    "0": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MTEX1::process 0xc6fc-0xc70c multiplies one voltage by param 1 into the message slot MEGA-TANG adds to both mix sides, and 0xc744-0xc750 multiplies the same voltage by param 0 into the send slot"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MTEX1::process 0xc710-0xc714 passes one voltage unscaled into a mix slot, and 0xc754-0xc760 multiplies it by param 2 into a send slot"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MTEX1::process 0xc718-0xc71c passes one voltage unscaled into a mix slot, and 0xc764-0xc770 multiplies it by param 3 into a send slot"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MTEX1::process 0xc720-0xc724 passes one voltage unscaled into the left mix slot; 0xc728 reads the next jack's channel count and falls back to this one"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the left input beside it",
+      "why": "plugin.dylib MTEX1::process 0xc728-0xc740 reads this jack's channel count and uses its voltage when it is patched, and the left jack's voltage when it is not"
+     }
+    }
+   },
+   "notes": "MTEX1::process returns immediately unless leftExpander.module (+0xe8) has modelMegaTang as its model, so the module is completely inert anywhere except directly to the right of a MEGA-TANG. It has no outputs, which is why the census lists none.\n\nA debug printf was left in: 0xc784-0xc78c calls printf with the format \"ex1: C1 From: %.2f To: %.2f\\n\" on every sample while the module is attached. MEGA-TANG prints its own line in the same condition. This is the most visible fault in the plugin and it is in the shipping binary.\n\nThe Level knob applies only to the Line In. The In 5 and In 6 jacks are written into the mix message unscaled (0xc710, 0xc718), so they always arrive at full level; their knobs are sends only.\n\nThe send taken from the Line In is taken before the Level knob, not after it (0xc744 multiplies the raw voltage by param 0), so lowering the Level does not lower that send.\n\nThe Line In jack is named Variable in the maker's tooltip and Line In on the panel. The panel is the name used here.\n\nAll four knobs are configured 0 to 1 with a default of 0 and a display multiplier of 100 (0xc2cc onward)."
   },
   "MTEX2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for MEGA-TANG, sitting immediately to its right: a second effects send with its own four send levels and its own stereo return",
+    "Sets how much of that MEGA-TANG channel reaches this module's Send output, taken before that channel's level, pan and mute; it comes up at nothing",
+    "The left side of this send's return, added into MEGA-TANG's left mix output",
+    "The right side of this send's return, added into MEGA-TANG's right mix output; with nothing patched it takes the left return",
+    "The four MEGA-TANG channels at the send levels set here, added together and clamped to ±10V",
+    "Note — nothing here does anything unless MEGA-TANG is the module immediately to the left.",
+    "Note — this send is taken from the channel inputs before their level, pan and mute controls, so it does not follow the mix. MEGA-TANG's own send is taken after them.",
+    "Note — all four send knobs come up at nothing, so the Send output is silent until one is raised.",
+    "Note — the module is monophonic: every jack reads or writes one channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MTEX2::process 0xd378-0xd380 reads one voltage and writes it into the message slot MEGA-TANG adds to its left mix total"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the left return",
+      "why": "plugin.dylib MTEX2::process 0xd384-0xd39c reads this jack's channel count and uses its voltage when it is patched, and the left return's voltage when it is not"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "plugin.dylib MTEX2::process 0xd344-0xd374 multiplies the four channel voltages MEGA-TANG passed across by the four knobs in one vector operation, sums them, clamps to -10V and 10V and writes one channel"
+     }
+    }
+   },
+   "notes": "MTEX2::process returns immediately unless leftExpander.module (+0xe8) has modelMegaTang as its model.\n\nThe four values it multiplies are the raw channel input voltages: MegaTang::process at 0xf654-0xf674 copies inputs 0 to 3 into the message before any level, pan or mute is applied. This second send is therefore pre-fade, unlike MEGA-TANG's own, which is taken after the level and the mute.\n\nThe sum is the only clamped output anywhere in the expander pair: 0xd358-0xd36c limits it to -10V and 10V.\n\nAll four knobs are configured 0 to 1 with a default of 0 and a display multiplier of 100 (0xcee4 onward).\n\nNo debug printf is reached through this expander; the printf pair belongs to MT-EX1 and to MEGA-TANG's MT-EX1 branch."
   },
   "MFD": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A copy of ALM's MFD: a stereo crossfader between two inputs, with a cue bus for listening to either of them on its own",
+    "Crossfades between the two inputs on an equal-power curve, A alone at one end and B alone at the other; it comes up in the middle, where both are passed at a reduced level",
+    "Routes the A input to the Cue outputs; what leaves the main outputs is not changed by it",
+    "Routes the B input to the Cue outputs; what leaves the main outputs is not changed by it",
+    "The left side of the A input",
+    "The left side of the B input",
+    "The right side of the A input; with nothing patched it takes the left side of A, so a mono source fills both",
+    "The right side of the B input; with nothing patched it takes the left side of B, so a mono source fills both",
+    "Moves the crossfade, adding to the knob, with the chosen voltage range covering the knob's whole travel; the total is clamped at each end",
+    "The left sides of A and B crossfaded together",
+    "The right sides of A and B crossfaded together",
+    "The left sides of whichever inputs are cued, added together",
+    "The right sides of whichever inputs are cued, added together",
+    "Note — the Cue outputs are silent until one of the two cue buttons is on. They ignore the crossfader entirely, which is what makes them useful for lining a track up before it is faded in.",
+    "Note — the crossfade comes up in the middle, where both inputs are passing at a reduced level rather than either one at full.",
+    "Note — the module is monophonic: every jack reads or writes one channel.",
+    "Menu — Voltage Range: 10V, 5V — sets the voltage the X Fade CV input treats as a full sweep of the fader"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MFD::process 0xa2d8 reads one voltage; 0xa378 multiplies it by the cosine curve for the fader position, and 0xa3e0 reads the A right jack's channel count and falls back to this one"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib MFD::process 0xa2dc reads one voltage; 0xa37c multiplies it by the complementary cosine, and 0xa3c0 reads the B right jack's channel count and falls back to this one"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the left side of the A input",
+      "why": "plugin.dylib MFD::process 0xa3d0-0xa3e8 reads this jack's channel count and uses its voltage when patched, and the A left jack's when not"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the left side of the B input",
+      "why": "plugin.dylib MFD::process 0xa3b8-0xa3d4 reads this jack's channel count and uses its voltage when patched, and the B left jack's when not"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "plugin.dylib MFD::process 0xa310-0xa338 divides one voltage by the voltage-range member at +0x148, adds the fader knob and clamps the total to 0 and 1",
+      "sumRange": "0 to 10V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "plugin.dylib MFD::process 0xa378-0xa384 writes one channel; the two sides are multiplied by cos(x * pi/2) and cos((1-x) * pi/2), with pi/2 the double constant loaded at 0xa340"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "plugin.dylib MFD::process 0xa2c8-0xa304 adds the A left input when the A cue button is on and the B left input when the B cue button is on, and writes the total to one channel"
+     }
+    }
+   },
+   "notes": "The crossfade really is equal power, and the curve can be named exactly: MFD::process loads the double pi/2 at 0xa340 and calls cos twice, multiplying the A side by cos(x * pi/2) and the B side by cos((1 - x) * pi/2), where x is the fader position clamped to 0 and 1. ALM's page for the hardware says \"Approx equal power crossfading\", which agrees.\n\nBoth stereo inputs are mono-normalled: the right jack of each pair falls back to its own left jack (0xa3b8-0xa3e8), and the panel marks each left jack (m). This is the behaviour MEGA-TANG's return jacks print the same mark for and do not have.\n\nThe cue bus ignores the fader. 0xa2c8-0xa304 and 0xa3a0-0xa3f4 add the raw input voltages of whichever channels are cued, with no crossfade and no clamp.\n\nThe cue buttons are ALM BlueButtons with the momentary flag cleared in the constructor at 0xb554, so they hold their state rather than acting only while pressed. CueButton::onDragStart and onDragEnd (0xb778, 0xb7a4) set and clear a separate byte that drives a second lamp and is not read by the audio path. The lines avoid claiming either behaviour.\n\nThe X Fade CV is added to the knob and the total clamped, so negative voltage pulls the fader towards A and is not simply discarded, but it cannot pull it past A.\n\nNothing on this module is clamped to a voltage: only the fader position is."
   },
   "StereoSum": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A copy of ALM's Stereo Sum: four stereo inputs summed into two stereo outputs, with the first pair feeding the second unless you use it",
+    "One of the two left signals added into the first pair of outputs",
+    "One of the two right signals added into the first pair of outputs",
+    "One of the two left signals added into the second pair of outputs",
+    "One of the two right signals added into the second pair of outputs",
+    "The first pair's two left signals added together; leaving this jack empty passes that sum on to the second pair's left output as well",
+    "The first pair's two right signals added together; leaving this jack empty passes that sum on to the second pair's right output as well",
+    "The second pair's two left signals added together, plus the first pair's left sum whenever the first left output is empty",
+    "The second pair's two right signals added together, plus the first pair's right sum whenever the first right output is empty",
+    "Note — with the upper outputs empty the module is one four-into-one stereo mixer. Patch them and it becomes two separate two-into-one mixers.",
+    "Note — the left and right sides break apart on their own. Patching only the upper left output takes the left side out of the cascade and leaves the right side joined.",
+    "Note — the module has no controls at all and nothing is clamped anywhere: it adds the voltages as they arrive.",
+    "Note — the module is monophonic: every jack reads or writes one channel."
+   ],
+   "in": {
+    "0": 1,
+    "2": 1,
+    "1": 2,
+    "3": 2,
+    "4": 3,
+    "6": 3,
+    "5": 4,
+    "7": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib StereoSum::process 0x16658-0x16668 adds one voltage to the second left input and writes the total to output 0, unclamped"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib StereoSum::process 0x1669c-0x166ac adds one voltage to the second right input and writes the total to output 1, unclamped"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib StereoSum::process 0x1665c adds one voltage to the first left input on the way to output 0"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib StereoSum::process 0x166a0 adds one voltage to the first right input on the way to output 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib StereoSum::process 0x16684-0x16694 adds one voltage into the lower left total"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib StereoSum::process 0x166c4-0x166d4 adds one voltage into the lower right total"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib StereoSum::process 0x16688 adds one voltage into the lower left total"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib StereoSum::process 0x166c8 adds one voltage into the lower right total"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "plugin.dylib StereoSum::process 0x16668 writes the upper left sum to one channel; 0x16670-0x1667c reads this port's own channel count and contributes zero to the lower total when it is patched"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "plugin.dylib StereoSum::process 0x16694 writes the lower left total, which includes the upper left sum only while output 0 is unpatched"
+     }
+    }
+   },
+   "notes": "The cascade breaks per side, not per section. StereoSum::process reads output 0's channel count at 0x16670 and output 1's at 0x166b4, independently, so patching one of the upper outputs splits that side alone and leaves the other side of the stereo pair joined. Nothing on the panel shows this.\n\nThe module has no parameters at all, no lights and no context menu; process is 34 instructions of adds and two conditional selects.\n\nThe panel prints L and R over each input pair, a small circle over the first output pair and a small dot over the second, which is how the two halves are told apart."
   }
  }
 }

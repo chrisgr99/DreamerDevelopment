@@ -1,13 +1,51 @@
 {
  "plugin": "Hora-PCMDrumFree",
- "source": "http://hora-music.wifeo.com/manuals.php",
+ "source": "no published source; read from the installed 2.1.3 plugin.dylib, which carries full local symbols",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Hora-PCMDrumLDrum": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A one-voice sample player holding twenty-five LinnDrum drum sounds in five banks, fired from a jack or from the button on the panel",
+    "Note — The screen across the top shows the name of the chosen bank and the name of the chosen sample. It is a display rather than a control and cannot be clicked.",
+    "Note — The decay knob comes up fully anticlockwise, which cuts every sample off about a seventh of the way through. Turn it almost all the way up to hear a whole sample.",
+    "Chooses one of the five banks: Kick&Clap, Snare, Toms, Hat&crash and Extras",
+    "Plays the chosen sample once each time it is pressed",
+    "Chooses one of the five samples inside the bank",
+    "Sets the playback speed, 1 being the speed the sample was recorded at and 2 playing it eight times faster; the scale follows the cube of the setting",
+    "Sets how much louder the sample plays when the accent input is high as the trigger arrives, up to 70% above the ordinary level",
+    "Turned past halfway, the sample is read a whole step at a time with no interpolation, which roughens it at speeds away from normal; below halfway it changes nothing",
+    "Shortens the sample with a straight fade to silence; fully anticlockwise it cuts the sound about a seventh of the way through, and almost fully clockwise the whole sample plays",
+    "Read at the moment the trigger arrives: above 0.5V the sample plays at the louder level set by the Accent knob",
+    "Plays the chosen sample once when it rises past 0.5V",
+    "Adds to the playback speed set by Tune, a fifth of the recorded speed per volt, with the total held at a twentieth of the recorded speed or above",
+    "Stops the sample dead while it is above 0.5V",
+    "Read at the moment the trigger arrives: above 0.5V the sample plays backwards",
+    "Makes the fade quicker, a tenth of the decay knob's travel per volt",
+    "Steps on through all twenty-five samples from wherever the bank and sample knobs have left the choice, 2.5 samples per volt",
+    "The chosen sample, five times the level it is stored at and half as much again, so a full-scale sample peaks near 7.5V and more with accent"
+   ],
+   "param": {"0": 7, "1": 3, "2": 4, "3": 6, "4": 5, "5": 8, "6": 9},
+   "in": {"0": 10, "1": 11, "2": 12, "3": 13, "4": 14, "5": 15, "6": 16},
+   "out": {"0": 17},
+   "family": {
+    "in": {"0": "trigger", "1": "trigger", "2": "cv", "3": "trigger", "4": "trigger", "5": "cv", "6": "cv"},
+    "out": {"0": "audio"}
+   },
+   "props": {
+    "in": {
+     "0": {"poly": false, "range": "high above 0.5V", "step": "stepped", "negative": "ignored", "why": "LDrum::process +0x4864 reads inputs[0].voltages[0] and +0x49e8 tests it against 0.5, storing the result only on the frame a trigger starts"},
+     "1": {"poly": false, "range": "high above 0.5V", "step": "stepped", "negative": "ignored", "why": "LDrum::process +0x4998 reads inputs[1].voltages[0] and +0x49a0 tests it against 0.5, combined at +0x49b0 with the same test on the panel button"},
+     "2": {"poly": false, "step": "continuous", "negative": "subtracts", "why": "LDrum::process +0x4a54 reads inputs[2].voltages[0], multiplies it by 0.2 at +0x4a64 and adds it to the cube of the Tune knob, with the sum floored at 0.05"},
+     "3": {"poly": false, "range": "high above 0.5V", "step": "stepped", "negative": "ignored", "why": "LDrum::process +0x4868 reads inputs[3].voltages[0] and +0x4a3c tests it against 0.5, passing the result to DualSampler::process, which stops playback at +0x4f80"},
+     "4": {"poly": false, "range": "high above 0.5V", "step": "stepped", "negative": "ignored", "why": "LDrum::process +0x486c reads inputs[4].voltages[0] and +0x49f8 tests it against 0.5, storing the result only on the frame a trigger starts"},
+     "5": {"poly": false, "step": "continuous", "negative": "subtracts", "why": "LDrum::process +0x4820 reads inputs[5].voltages[0], multiplies it by 0.1 at +0x4830 and adds it to one plus a tenth less the decay knob, with the total floored at 0"},
+     "6": {"poly": false, "step": "stepped", "negative": "subtracts", "why": "LDrum::process +0x484c reads inputs[6].voltages[0], multiplies it by 2.5 and truncates it, then adds it to five times the bank plus the sample with the total clamped to 0 and 24"}
+    },
+    "out": {
+     "0": {"poly": false, "step": "continuous", "why": "LDrum::process +0x4acc multiplies the sampler's result by 1.5 and writes outputs[0].voltages[0]; DualSampler::process +0x5110 has already multiplied the stored sample by 5, or by 5 plus the accent amount"}
+    }
+   },
+   "notes": "HORA PUBLISH NO SOURCE, BUT THIS BINARY IS NOT UNREADABLE. nm on the installed 2.1.3 plugin.dylib returns 527 symbols, and LDrum::process, LDrum::LDrum, DualSampler::process, DualSampler::LoadSamples and screen_LDrum::draw are all present and readable. Everything here was read from that code; the maker's manual page was not used, and check_numbers was not needed. The five bank names are inline immediates in the constructor at +0xcef8 to +0xcf70, written into a table at module+0x970 with a stride of 0x18: Kick&Clap, Snare, Toms, Hat&crash and Extras. The sample number is five times the bank plus the sample knob plus the truncated sample CV, clamped to 0 and 24 at +0x4920. THE DECAY KNOB RUNS BACKWARDS FROM WHAT ITS NAME SUGGESTS AND ITS DEFAULT IS THE SHORTEST SETTING. LDrum::process +0x4800 computes 1.1 minus the knob, plus a tenth of the decay CV. DualSampler::process +0x50c8 leaves the sample untouched when that figure is 0.12 or less, and otherwise applies a straight fade of one minus six times the figure times the fraction of the sample played. With the knob at its default of 0 the figure is 1.1, so the fade reaches silence at about 0.15 of the sample; the fade is skipped only above about 0.98 of the knob's travel. The LoFi knob is configured as a continuous 0 to 1 parameter but is only ever compared against 0.5 at +0x4a44, so it behaves as a two-position switch: above halfway DualSampler reads the nearest stored sample, below halfway it interpolates between neighbours. Playback speed is the cube of the Tune knob, which is configured 0 to 2 with a default of 1, plus a fifth of the pitch CV, floored at 0.05; the samples are stored at 44100 and the step is scaled by 44100 over the engine rate at +0x4f3c. The accent and reverse inputs are levels read once, on the frame the trigger starts, not edges of their own. One light is configured, held at 5 while a trigger is high. There is no context menu. Panel lettering came from res/lowFiDrum.svg rendered with rsvg-convert: BANK, SAMPLE, Tune, Accent, LoFi, Trig, Choke, Rev and Out, with the decay knob marked only by a curve and the trigger button unlabelled. The maker's tooltips use different words again: FREQ for the knob the panel prints Tune, ACC for Accent, DECAY for the unmarked knob, and the input names carry the misspelling 'trigerring'."
   }
  }
 }

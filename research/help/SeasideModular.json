@@ -2,36 +2,846 @@
  "plugin": "SeasideModular",
  "source": "https://github.com/abluenautilus/SeasideModularVCV",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Proteus": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A generative sequencer: it invents a melody, loops it, changes it a little as it goes, and after a while throws it away and invents another",
+    "Sets how many steps of the melody are played before it loops, 1 to 32; a full 32-step melody stays in memory whatever this is set to",
+    "Picks the scale new melodies are drawn from: Major, Natural Minor, Harmonic Minor, Major Pentatonic, Minor Pentatonic, Dorian, Mixolydian, Chromatic, Tuning, Bhairavi and Ahir Bhairav",
+    "Sets how many loops go by before a new melody becomes likely, 1 to 50; at that count the chance of a new melody each loop has reached 50%",
+    "Sets the gate length as a share of the average time between clocks, a twentieth of it at the far left and all of it at the far right",
+    "Sets what share of the steps carry a note rather than a rest, 0.5% to 100%",
+    "Sets the chance that the melody is moved by an octave between loops, 0 to 100%",
+    "Sets the chance that single notes are changed between loops, 0 to 100%",
+    "Throws away the current melody and generates a new one straight away",
+    "Chooses how much may change: new melodies and note changes, note changes with the melody held, or nothing at all",
+    "Sets how far an octave move may reach: no move, one octave either way, or two octaves either way",
+    "Adds to the length knob, three steps per volt, the total held between 1 and 32",
+    "A rising edge past 2V moves the mode switch, in the way the Lock CV In Behavior menu item sets",
+    "Adds to the lambda knob, five loops per volt, counted in whole volts only",
+    "Adds to the gate knob, 10V covering the whole of its travel",
+    "Adds to the density knob, ten percentage points per volt",
+    "Adds to the octave chance knob, ten percentage points per volt",
+    "Adds to the note change knob, ten percentage points per volt",
+    "A rising edge past 2V throws away the current melody and generates a new one",
+    "Advances the sequence one step on each rising edge past 2V",
+    "A rising edge past 2V sends the sequence back to its first step",
+    "The pitch of the step being played, a volt per octave",
+    "A 10V gate on every step that carries a note, its length set by the GATE knob",
+    "Note — nothing plays until a clock is patched; the module has no clock of its own",
+    "Note — the four lamps step along with the sequence and grow brighter as a new melody becomes more likely; the small lamp at the top right lights when a pX is placed immediately to the right",
+    "Menu — Mutation can tranpose notes by octave: Off, On — lets a changed note be moved to a different octave as well, within the reach the RANGE switch sets",
+    "Menu — Lock CV In Behavior: 0-2, 0-1, 0-1-2, Hi/Low — sets what a trigger at LOCK does to the mode switch; Hi/Low holds everything locked while the jack is high"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17,
+    "7": 18,
+    "8": 19,
+    "9": 20
+   },
+   "out": {
+    "0": 21,
+    "1": 22
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Proteus.cpp:375-379 clamps the jack to ±10V, multiplies by three and adds it to the length knob, the sum held between 1 and 32; read at voltages[0] with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Proteus.cpp:348-351 reads the jack and passes rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) to a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Proteus.cpp:372 and 381 clamp the jack to ±10V, take its whole-volt part, multiply by five and add it to the lambda knob, the sum held between 1 and 50; read at voltages[0] with no channel loop"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Proteus.cpp:370 and 384 clamp the jack to ±10V, divide by ten and add it to the gate knob, the sum held between 0.1 and 1; read at voltages[0] with no channel loop",
+      "sumRange": "0 to 10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Proteus.cpp:373 and 380 clamp the jack to ±10V and take ten times it off the rest probability, the sum held between 0 and 100; read at voltages[0] with no channel loop"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Proteus.cpp:374 and 382 clamp the jack to ±10V, multiply by ten and add it to the octave chance knob, the sum held between 0 and 100; read at voltages[0] with no channel loop"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Proteus.cpp:371 and 383 clamp the jack to ±10V, multiply by ten and add it to the note change knob, the sum held between 0 and 100; read at voltages[0] with no channel loop"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Proteus.cpp:353-356 reads the jack and passes rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) to a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Proteus.cpp:338-341 reads the jack and passes rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) to a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Proteus.cpp:343-346 reads the jack and passes rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) to a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Proteus.cpp:725 setVoltage with no setChannels anywhere in the file"
+     },
+     "1": {
+      "poly": false,
+      "why": "Proteus.cpp:402-404 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "The CV scalings are all in process() at Proteus.cpp:370-385 and none of them is a volt per unit: length moves three steps per volt because maxSteps/10 is integer division, lambda is cast to int before scaling so it only responds in whole volts, and density, octave and mutate each move ten percentage points per volt. The gate knob is configured from 0.05 but the clamp after the CV sum has a floor of 0.1, so the shortest gate reachable with any CV patched is a tenth of the clock gap, and no gate is ever shorter than 10ms (line 518). The source comment beside mode 1 at line 419 says \"allow to regen but no mutations\", which is the wrong way round: that setting sets mutate true and accumulate false, so note changes carry on and new melodies stop, as the maker's README says."
   },
   "Jawari": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-string tanpura drone: each strum plucks the next string in turn, and a bridge control sets how much the strings buzz",
+    "Sets the shape of the bridge the strings rest on, a plain string tone at CLOSED and a buzzing one at OPEN",
+    "Transposes all four strings by 0 to 11 semitones",
+    "Transposes all four strings by 0 to 2 octaves",
+    "Sets the note the first string is tuned to, named in the Indian sargam from Sa to Ni; the other three stay on the root",
+    "Plucks the next string in the cycle each time it is pressed",
+    "Puts the cycle back to the start, so the next strum plucks the first string",
+    "Plucks the next string in the cycle on each rising edge past 2V",
+    "Adds to the bridge slider, 1V covering the whole of its travel, and the lamp on the slider shows the total",
+    "A rising edge past 2V puts the cycle back to the start, so the next strum plucks the first string",
+    "Transposes all four strings, a volt per octave rounded down to a semitone, and only between -1V and +2V",
+    "Transposes the first string on its own, a volt per octave rounded down to a semitone, and only between -1V and +2V",
+    "The four strings mixed together",
+    "Note — nothing sounds until a clock is patched to STRUM or the strum button is pressed",
+    "Note — both pitch jacks are read only at the moment a string is plucked, so a change of voltage is heard on the next strum rather than at once",
+    "Note — the maker suggests strumming slowly, around 60 BPM, for the sound of a real tanpura"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11
+   },
+   "out": {
+    "0": 12
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "trigger",
+     "3": "pitch",
+     "4": "pitch"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Jawari.cpp:272-277 plucks the next string on rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) through a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Jawari.cpp:261 adds the jack straight to the slider and holds the sum between 0 and 1, so one volt covers the whole slider; read at voltages[0] with no channel loop",
+      "sumRange": "0 to 1V"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Jawari.cpp:309-314 restarts the string order on rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) through a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Jawari.cpp:163 clamps the jack to between -1V and 2V and lines 198-216 split it into whole octaves and semitones to retune all four strings; read at voltages[0] with no channel loop"
+     },
+     "4": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Jawari.cpp:164 clamps the jack to between -1V and 2V and lines 172-190 split it into whole octaves and semitones to retune the first string; read at voltages[0] with no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Jawari.cpp:305 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "The two pitch jacks are clamped to between -1V and +2V at Jawari.cpp:163-164, so the instrument only transposes over three octaves however far the cable goes, and they are read inside doStep() rather than in process(), which is why a pitch change is only taken up at the next strum. The bridge CV at line 261 is added to the slider without any scaling, so a single volt sweeps the whole control rather than the ten volts the rest of the plugin uses. The strings are Karplus-Strong plucks with a comb filter alongside, mixed by the bridge control, and the output is run through a DC blocker and a gain compensation at lines 299-304."
   },
   "ProteusX": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A pattern bank and two extra controls for Proteus, and it goes immediately to the right of one",
+    "Stores the melody Proteus is playing in slot 1; a slot that already holds one has to be cleared first",
+    "Sends the melody stored in slot 1 back to Proteus, where the LENGTH and DENSITY knobs are applied to it",
+    "Empties slot 1 so a new melody can be stored there",
+    "Stores the melody Proteus is playing in slot 2; a slot that already holds one has to be cleared first",
+    "Sends the melody stored in slot 2 back to Proteus, where the LENGTH and DENSITY knobs are applied to it",
+    "Empties slot 2 so a new melody can be stored there",
+    "Stores the melody Proteus is playing in slot 3; a slot that already holds one has to be cleared first",
+    "Sends the melody stored in slot 3 back to Proteus, where the LENGTH and DENSITY knobs are applied to it",
+    "Empties slot 3 so a new melody can be stored there",
+    "Stores the melody Proteus is playing in slot 4; a slot that already holds one has to be cleared first",
+    "Sends the melody stored in slot 4 back to Proteus, where the LENGTH and DENSITY knobs are applied to it",
+    "Empties slot 4 so a new melody can be stored there",
+    "Stores the melody Proteus is playing in slot 5; a slot that already holds one has to be cleared first",
+    "Sends the melody stored in slot 5 back to Proteus, where the LENGTH and DENSITY knobs are applied to it",
+    "Empties slot 5 so a new melody can be stored there",
+    "Transposes every melody Proteus plays by 0 to 11 semitones",
+    "Makes Proteus play 0 to 32 silent beats at the end of each loop",
+    "A rising edge past 2V loads the next stored melody in the bank",
+    "A rising edge past 2V loads the previous stored melody in the bank",
+    "A rising edge past 2V loads one of the stored melodies at random",
+    "Adds to the transpose knob, 1V covering all 11 semitones",
+    "Adds to the rest knob, 1V covering all 32 beats",
+    "Note — this module does nothing on its own; the two knobs and the pattern bank only reach Proteus while one is placed immediately to the left, which the lamp at the top left shows",
+    "Note — a stored melody keeps its own notes, so loading one saved in a different scale plays that scale rather than the one Proteus is set to now"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15,
+    "15": 16,
+    "16": 17
+   },
+   "in": {
+    "0": 18,
+    "1": 19,
+    "2": 20,
+    "3": 21,
+    "4": 22
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ProteusX.cpp:495-500 reads the jack and passes rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) to a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ProteusX.cpp:505-510 reads the jack and passes rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) to a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ProteusX.cpp:515-520 reads the jack and passes rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) to a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "ProteusX.cpp:448 multiplies the jack by 11 and adds it to the transpose knob, the sum held between 0 and 11, so one volt covers the whole range; read at voltages[0] with no channel loop",
+      "sumRange": "0 to 1V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "ProteusX.cpp:449 multiplies the jack by 32 and adds it to the rest knob, the sum held between 0 and 32, so one volt covers the whole range; read at voltages[0] with no channel loop",
+      "sumRange": "0 to 1V"
+     }
+    }
+   },
+   "notes": "The module declares two outputs in its OutputId enum but adds no jack for either, so neither can be reached and neither gets a line. None of the five inputs is given a name with configInput, so hovering them shows nothing. The transpose and rest CVs are scaled so that one volt covers the whole control (ProteusX.cpp:448-449), not the ten volts used elsewhere in the plugin. At ProteusX.cpp:443-445 the save, load and clear buttons of a slot are all passed through the same SchmittTrigger, buttonTrigs[button], one after another in the same sample, so the three share one piece of edge-detection state; that is worth testing in the rack before relying on rapid presses."
   },
   "Tala": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sample-based tabla machine: twelve named strokes on buttons and jacks, plus stored traditional patterns played from a clock",
+    "Plays the Dha stroke",
+    "Plays the Dhin stroke",
+    "Plays the Dhit stroke",
+    "Plays the Dhun stroke",
+    "Plays the Ga stroke",
+    "Plays the Ge stroke",
+    "Plays the Ke stroke",
+    "Plays the Na stroke",
+    "Plays the Ta stroke",
+    "Plays the Ti stroke",
+    "Plays the Tin stroke",
+    "Plays the Tun stroke",
+    "A rising edge past 2V plays the Dha stroke",
+    "A rising edge past 2V plays the Dhin stroke",
+    "A rising edge past 2V plays the Dhit stroke",
+    "A rising edge past 2V plays the Dhun stroke",
+    "A rising edge past 2V plays the Ga stroke",
+    "A rising edge past 2V plays the Ge stroke",
+    "A rising edge past 2V plays the Ke stroke",
+    "A rising edge past 2V plays the Na stroke",
+    "A rising edge past 2V plays the Ta stroke",
+    "A rising edge past 2V plays the Ti stroke",
+    "A rising edge past 2V plays the Tin stroke",
+    "A rising edge past 2V plays the Tun stroke",
+    "Steps forward through the stored patterns, despite the maker's tooltip calling it Prev Theka",
+    "Steps back through the stored patterns, despite the maker's tooltip calling it Next Theka",
+    "Picks how a stroke's several samples are used: one fixed sample every time, each of them in turn, or one at random",
+    "Plays the next beat of the selected pattern on each rising edge past 2V",
+    "A rising edge past 2V sends the pattern back to its first beat",
+    "While this is high the strokes you trigger are accented; it is ignored while a pattern is playing",
+    "A rising edge past 2V picks one of the stored patterns at random",
+    "The left side of the tabla mix",
+    "The right side of the tabla mix",
+    "Note — the strokes play on their own, but the stored patterns need a clock patched before anything runs",
+    "Note — the display names the pattern and shows its beats, and it carries no control that can be clicked for help",
+    "Note — PLY lights while a pattern is running, SAM on the first beat of the cycle and ACC on an accented beat",
+    "Note — a pattern stops being treated as running once no clock has arrived for about as long as the last gap between clocks"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 25,
+    "13": 26,
+    "14": 27
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18,
+    "6": 19,
+    "7": 20,
+    "8": 21,
+    "9": 22,
+    "10": 23,
+    "11": 24,
+    "12": 28,
+    "13": 29,
+    "14": 30,
+    "15": 31
+   },
+   "out": {
+    "0": 32,
+    "1": 33
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tala.cpp:424-436 passes each stroke jack through rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) into a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Tala.cpp:487 setVoltage with no setChannels anywhere in the file"
+     },
+     "1": {
+      "poly": false,
+      "why": "Tala.cpp:488 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "The two pattern-stepping buttons are the wrong way round against their own tooltips: BUTTONUP_PARAM is named \"Prev Theka\" at Tala.cpp:140 and raises currentTheka at line 405, while BUTTONDOWN_PARAM is named \"Next Theka\" at line 141 and lowers it at line 410. The reset test at line 327 reads `if (currentResetTrig && !prevClockTrig)`, comparing the reset edge against the clock's previous state rather than the reset's own, so a reset arriving on the same sample as a clock is dropped. The interpolation buffer at line 119 is sized for 192kHz, which is the maker's stated ceiling. The accent gate is fixed at 0.125 seconds (line 250)."
   },
   "Raga": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sitar with nineteen synthesised strings: a plucked melody string, a drone, two tuned strings, thirteen sympathetic strings and a pair of chikaris",
+    "Strums the main, jora, second and third strings",
+    "Switched on, a change of pitch with no new strum bends the main string up or down to the new note instead of plucking it",
+    "Sets the level of the main string, the one the melody is plucked on; all the way down the string is switched off altogether and stops costing processor time",
+    "Sets the level of the jora string, the drone tuned to the root; all the way down the string is switched off altogether and stops costing processor time",
+    "Sets the level of the second string; all the way down the string is switched off altogether and stops costing processor time",
+    "Sets the level of the third string; all the way down the string is switched off altogether and stops costing processor time",
+    "Sets the level of the taraf strings that ring sympathetically; all the way down the string is switched off altogether and stops costing processor time",
+    "Sets the level of the chikari strings; all the way down the string is switched off altogether and stops costing processor time",
+    "Plucks the two chikari strings, which are tuned to the root an octave apart",
+    "Switches the Sa sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Re flat sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Re sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Ga flat sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Ga sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Ma sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Ma sharp sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Pa sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Dha flat sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Dha sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Ni flat sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the Ni sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Switches the upper Sa sympathetic string in or out of the set that rings when the main string matches it; it glows while that string is ringing",
+    "Sets the root note the whole instrument is tuned to, named as a Western note; its travel reaches C to B flat and stops short of B",
+    "Sets the note the second string is tuned to, named in the Indian sargam; its travel reaches Sa to Ni flat and stops short of Ni",
+    "Sets the note the third string is tuned to, named in the Indian sargam; its travel reaches Sa to Ni flat and stops short of Ni",
+    "Runs a finger across every enabled taraf string in turn",
+    "A rising edge past 2V strums the main, jora, second and third strings",
+    "Sets the pitch of the main string, a volt per octave, and only between -1V and +2V",
+    "A rising edge past 2V plucks the two chikari strings",
+    "Adds to the main string fader, 10V covering the whole of its travel",
+    "Adds to the jora string fader, 10V covering the whole of its travel",
+    "Adds to the second string fader, 10V covering the whole of its travel",
+    "Adds to the third string fader, 10V covering the whole of its travel",
+    "Adds to the taraf strings fader, 10V covering the whole of its travel",
+    "Adds to the chikari strings fader, 10V covering the whole of its travel",
+    "Transposes the root note of the whole instrument, a volt per octave rounded to the nearest semitone, and only between -1V and +2V",
+    "Transposes the second string on its own, a volt per octave rounded to the nearest semitone, and only between -1V and +2V",
+    "Transposes the third string on its own, a volt per octave rounded to the nearest semitone, and only between -1V and +2V",
+    "A rising edge past 2V runs a finger across the enabled taraf strings, despite the maker's tooltip calling it Taraf string tuning",
+    "All nineteen strings mixed together",
+    "Note — nothing sounds until a strum arrives, from the STRUM jack or the button beside it",
+    "Note — the tarafs are never plucked by an ordinary strum; they ring only when the main string lands on their pitch, or when the taraf strum is used"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14,
+    "15": 15,
+    "16": 16,
+    "17": 17,
+    "18": 18,
+    "19": 19,
+    "20": 20,
+    "21": 21,
+    "22": 22,
+    "23": 23,
+    "24": 24,
+    "25": 25,
+    "26": 26
+   },
+   "in": {
+    "0": 27,
+    "1": 28,
+    "2": 29,
+    "3": 30,
+    "4": 31,
+    "5": 32,
+    "6": 33,
+    "7": 34,
+    "8": 35,
+    "9": 36,
+    "10": 37,
+    "11": 38,
+    "12": 39
+   },
+   "out": {
+    "0": 40
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "pitch",
+     "10": "pitch",
+     "11": "pitch",
+     "12": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Raga.cpp:694-699 strums on rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) through a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Raga.cpp:560 clamps the jack to between -1V and 2V and line 433 turns it into a frequency at twelve semitones per volt; read at voltages[0] with no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Raga.cpp:657-662 plucks the chikaris on rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) through a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "9": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Raga.cpp:611 clamps the jack to between -1V and 2V and line 473 rounds twelve times it to a whole number of semitones; read at voltages[0] with no channel loop"
+     },
+     "10": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Raga.cpp:612 clamps the jack to between -1V and 2V and line 474 rounds twelve times it to a whole number of semitones; read at voltages[0] with no channel loop"
+     },
+     "11": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Raga.cpp:613 clamps the jack to between -1V and 2V and line 475 rounds twelve times it to a whole number of semitones; read at voltages[0] with no channel loop"
+     },
+     "12": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Raga.cpp:666-671 strums the tarafs on rescale(voltage, 0.1f, 2.0f, 0.f, 1.f) through a SchmittTrigger, at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Raga.cpp:633 clamps the jack to ±10V, divides by ten and adds it to that fader; read at voltages[0] with no channel loop",
+      "sumRange": "0 to 10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Raga.cpp:634 clamps the jack to ±10V, divides by ten and adds it to that fader; read at voltages[0] with no channel loop",
+      "sumRange": "0 to 10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Raga.cpp:635 clamps the jack to ±10V, divides by ten and adds it to that fader; read at voltages[0] with no channel loop",
+      "sumRange": "0 to 10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Raga.cpp:636 clamps the jack to ±10V, divides by ten and adds it to that fader; read at voltages[0] with no channel loop",
+      "sumRange": "0 to 10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Raga.cpp:637 clamps the jack to ±10V, divides by ten and adds it to that fader; read at voltages[0] with no channel loop",
+      "sumRange": "0 to 10V"
+     },
+     "8": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Raga.cpp:638 clamps the jack to ±10V, divides by ten and adds it to that fader; read at voltages[0] with no channel loop",
+      "sumRange": "0 to 10V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Raga.cpp:806 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "The taraf strum jack is configured as \"Taraf string tuning\" at Raga.cpp:240 but is read at line 666 as a trigger that strums the tarafs; the panel prints TARAF STRUM over it and the code agrees with the panel. The three tuning knobs are configured 1 to 11 (lines 254-260) against note tables holding twelve entries, so the last name in each table, B on the main knob and Ni on the second and third, cannot be selected. The module declares a right-hand audio output in its OutputId enum but adds no jack for it, so the instrument is mono and the second output can never be reached. GLIDETYPE_PARAM is configured at line 252 and read at line 649 but has no widget, so its linear-or-logarithmic choice is fixed at the default and cannot be changed from the panel. The fader sums at lines 633-638 clamp the knob and the CV separately but not the total, so a level above one is reachable."
   },
   "Blank_20HP": {
    "lines": [
-    "TODO: what this module is"
+    "A 20HP blank panel carrying the Seaside Modular mandala artwork; it has no controls and makes no sound"
    ]
   }
  }

@@ -2,17 +2,291 @@
  "plugin": "Hutara",
  "source": "https://github.com/hutara/Hutara-modules",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "FmOperator": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four oscillators — sine, saw, triangle and square — tuned in whole octaves from a shared pitch jack, each with its own volume, and all four summed again through a resampling stage",
+    "Sets the octave of the sine oscillator, four octaves either side of C4 at 261.63Hz, in whole steps",
+    "Sets the octave of the saw oscillator, four octaves either side of C4 at 261.63Hz, in whole steps",
+    "Sets the octave of the triangle oscillator, four octaves either side of C4 at 261.63Hz, in whole steps",
+    "Sets the octave of the square oscillator, four octaves either side of C4 at 261.63Hz, in whole steps",
+    "Sets how far the FM in jack moves the pitch of all four oscillators, -0.7 to 1.23 octaves per volt, and at 0 that jack has no effect",
+    "Crossfades the sine output between the plain sine and a folded waveshaped version, -0.5 to 1.5; at 0 the sine passes unshaped",
+    "Crossfades the saw output between the plain ramp and a folded waveshaped version, -0.5 to 1; at 0 the ramp passes unshaped",
+    "Crossfades the triangle output between the plain triangle and a folded waveshaped version, -0.5 to 1; at 0 the triangle passes unshaped",
+    "Scales the voltage at the central MoD jack before it reaches the sine, saw and triangle shaping, -0.5 to 1; with that jack unpatched the knob changes nothing",
+    "Scales the FM Amount jack before that voltage is added to the FM Input knob, -0.5 to 0.6; the setting is applied twice in the code, so the jack arrives multiplied by the square of it",
+    "Scales the sine output, 0 to 1, and scales the sine's share of the Resample output",
+    "Scales the saw output, 0 to 1, and scales the saw's share of the Resample output",
+    "Scales the triangle output, 0 to 1, and scales the triangle's share of the Resample output",
+    "Scales the square output, 0 to 1, and scales the square's share of the Resample output",
+    "Multiplies the voltage at the Resample jack, 0 to 0.8; that product is both the resampling rate and the final gain of the Resample output, so at 0 that output is silent",
+    "One volt per octave added to the sine oscillator's octave knob",
+    "One volt per octave added to the saw oscillator's octave knob",
+    "One volt per octave added to the triangle oscillator's octave knob",
+    "One volt per octave added to the square oscillator's octave knob",
+    "Frequency modulation for all four oscillators at once, scaled by the FM Input knob and added in octaves, so the modulation is exponential rather than linear",
+    "Scaled by the square of the FM Amount knob and added to the FM Input knob, varying how far the FM in jack moves the pitch",
+    "Added volt for volt to the Saw Psychedelic knob, shaping the saw further",
+    "Scaled by the Psychedelic CV knob and fed to all three waveshaping controls; the sine takes it scaled by the Sine Waveshaper knob too, the triangle takes it inverted",
+    "Added volt for volt to the Triangle Psychedelic knob, shaping the triangle further",
+    "Multiplied by the Resample knob to give both the resampling rate and the gain of the Resample output; with nothing patched here that output stays at 0V",
+    "One volt per octave added to the octave knob of all four oscillators at once",
+    "The sine wave, -5V to 5V at full Sine Volume with the Sine Waveshaper knob at 0",
+    "The saw ramp, 0 to 10V at full Saw Volume with the Saw Psychedelic knob at 0, running upward from zero rather than either side of it",
+    "The triangle wave, -5V to 5V at full Triangle Volume with the Triangle Psychedelic knob at 0",
+    "The square wave, -5V to 5V at full Square Volume; no waveshaping control is applied to it",
+    "The four waveform outputs added together, multiplied by a resampled square built from the same four phases and then by the Resample jack times the Resample knob, with no limiting",
+    "Note — The Resample output is silent until a cable is patched into the Resample jack: its level is that jack's voltage times the Resample knob, and an unpatched jack reads 0V.",
+    "Note — Every jack on the module is monophonic; only the first channel of a polyphonic cable is read.",
+    "Note — None of the four waveforms is anti-aliased. Each is built straight from a wrapping phase counter.",
+    "Note — The module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15
+   },
+   "in": {
+    "0": 16,
+    "1": 17,
+    "2": 18,
+    "3": 19,
+    "4": 20,
+    "5": 21,
+    "6": 22,
+    "7": 23,
+    "8": 24,
+    "9": 25,
+    "10": 26
+   },
+   "out": {
+    "0": 27,
+    "1": 28,
+    "2": 29,
+    "3": 30,
+    "4": 31
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:214 adds this input's getVoltage() to the sine octave knob and feeds the sum to a power of two"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:230 adds this input's getVoltage() to the saw octave knob and feeds the sum to a power of two"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:197 adds this input's getVoltage() to the triangle octave knob and feeds the sum to a power of two"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:249 adds this input's getVoltage() to the square octave knob and feeds the sum to a power of two"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:199, 216, 232 and 251 each multiply this input's getVoltage() by the FM amount and add it to that oscillator's octave exponent"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:178 multiplies this input's getVoltage() by the FM Amount knob, and src/Hutara.cpp:181 multiplies that by the knob again before adding it to the FM Input knob"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:240 and 241 add this input's getVoltage() to the Saw Psychedelic knob"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:185 scales this input's getVoltage() into the sine shaping, src/Hutara.cpp:240 into the saw shaping, and src/Hutara.cpp:169 and 201 into the triangle shaping inverted"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:201 and 202 add this input's getVoltage() to the Triangle Psychedelic knob"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:192 multiplies this input's getVoltage() by the Resample knob, and src/Hutara.cpp:279 multiplies the Resample output by that product"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Hutara.cpp:164 reads this input with getVoltage() and src/Hutara.cpp:197, 214, 230 and 249 add it to all four octave knobs"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Hutara.cpp:227 writes this output with setVoltage(), which is channel 1 alone"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/Hutara.cpp:246 writes this output with setVoltage(), which is channel 1 alone"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/Hutara.cpp:211 writes this output with setVoltage(), which is channel 1 alone"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Hutara.cpp:262 sets the square to -1 or 1 and src/Hutara.cpp:265 writes five times the volume knob times that"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/Hutara.cpp:279 writes this output with setVoltage(), which is channel 1 alone"
+     }
+    }
+   },
+   "notes": "Read from src/Hutara.cpp at commit 90c6a4e, the only state this repository has ever carried version 2.0.0 in. The repository also holds a stale copy of the same file at its root, with a WAVEFOLD parameter and a different jack layout; that copy does not match the installed module and was ignored. The saw output is unipolar because src/Hutara.cpp:243 computes two times the phase rather than two times the phase minus one, which the maker's README does not mention. The FM Amount knob multiplies its own jack twice, at src/Hutara.cpp:178 and again at 181, so the jack arrives scaled by the square of the knob; that reads as an oversight rather than a design. The variable psychedelicCVAll at src/Hutara.cpp:169 has the Psychedelic CV knob added to it at line 172 and is then never read, so that addition has no effect; only the inverted copy taken at line 171 reaches anything. The square wave is decided from the phase of the previous sample, at src/Hutara.cpp:254, one sample before the phase is advanced. The maker's README describes the Final Output as the combined output of all waveforms and does not say that it is multiplied by the Resample jack, so it does not mention that the output is silent with that jack unpatched."
   },
   "Hutara_Random_CV": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A random voltage and a random gate, both drawn fresh each time the input jack crosses 1V",
+    "Sets the limit the sampled voltage is clamped to, 0.25V to 10V; in bipolar mode that limit applies either side of zero, in unipolar mode from zero upwards",
+    "Switches the sampled voltage between swinging either side of zero and running from zero upwards; past the halfway point of its travel it is bipolar",
+    "Multiplies the raw random draw before it is clamped, 1 to 10 in whole steps; above 1 most draws land on the clamp, so the sampled voltage arrives near the ends of its range",
+    "Multiplies the GATE LENGTH setting before each gate is decided: position 1 by 0.25, position 2 by 0.125, position 3 by 0.625, so the middle position makes a gate least likely",
+    "Biases the chance that each new sample gives a 10V gate rather than 0V, scaled by the three-position switch; it sets no duration, despite the panel printing GATE LENGTH",
+    "Nothing in the module reads this control. The value it feeds is computed into a gate-speed figure that is then discarded, so the incoming trigger is never divided.",
+    "Added to the sampled voltage after the clamp, -5V to 5V, so it can push the S&H output past the Range setting",
+    "A level of 1V or more takes a new random sample and a new gate; the level must fall back below 1V before another can be taken, and the module produces nothing at all until one arrives",
+    "10V or 0V, drawn at random each time the input triggers and held until the next trigger",
+    "The random voltage drawn at the last trigger, clamped to the Range setting and then shifted by the OFFSET slider",
+    "0V while the gate output is at 10V and 10V while it is at 0V, changing only at a trigger",
+    "Note — Nothing here runs on its own. All three outputs change only when the input jack reaches 1V, and before the first trigger all three read 0V.",
+    "Note — Because the outputs start at 0V, the inverted gate output reads 0V until the first trigger rather than the 10V its name implies.",
+    "Note — The gate lasts until the next trigger arrives; there is no timer, so the pattern of gates depends entirely on how often the input is clocked.",
+    "Note — The module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Random.cpp:95 samples when this input's getVoltage() is 1 or more and src/Random.cpp:124 re-arms when it falls below 1, so a negative voltage never triggers"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Random.cpp:107 to 120 set this output to 10 or 0 with setVoltage(), which is channel 1 alone"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/Random.cpp:105 writes this output with setVoltage(), which is channel 1 alone"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Random.cpp:121 writes ten minus the gate output with setVoltage(), which is channel 1 alone"
+     }
+    }
+   },
+   "notes": "Read from src/Random.cpp at commit 90c6a4e, version 2.0.0. The Trigger Division knob is dead: src/Random.cpp:67 reads it, src/Random.cpp:79 divides a local gateSpeed by it, and gateSpeed is never read again anywhere in process(), so nothing the knob does reaches an output. The whole gateSpeed block at src/Random.cpp:70 to 93, including the clock-derived rate and the three-position switch's arm of it, is discarded the same way; only the switch's second use, at src/Random.cpp:108 to 117, has any effect, and there it scales the gate probability rather than a speed. That contradicts the maker's tooltip, which names the switch Random Gate Speed, and the README, which calls its three positions slow, medium and fast. The GATE LENGTH knob likewise sets no duration: src/Random.cpp:107 compares it against a random number from -1 to 1 to decide whether the gate is 10V or 0V, and the gate then holds until the next trigger. Because the comparison is against a range centred on zero, the chance of a gate never falls below one half at any setting. The README's claim that the strength knob's range is 1 to 10 and the S&H offset's is -5V to 5V both match the source; its claim that a voltage of 1V or higher is considered active also matches, but its statement that the clock input responds at a 0.1V threshold applies only to the discarded gateSpeed block."
   }
  }
 }

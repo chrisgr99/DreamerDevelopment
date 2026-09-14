@@ -1,53 +1,851 @@
 {
  "plugin": "AmbientModules",
- "source": "https://github.com/neilbgr/AmbientModules",
+ "source": "https://github.com/neilbgr/AmbientModules/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Blank": {
    "lines": [
-    "TODO: what this module is"
+    "A blank panel with no jacks and no controls, for filling a gap in the rack"
    ]
   },
   "Lunar50Drone": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Drone voice of five sawtooth oscillators through one envelope, with a knob that first detunes them together and then has them modulate each other",
+    "Tunes this oscillator, twelve octaves from eight below C4 up to four above it",
+    "Switches this oscillator on and off; it sounds while the button is lit, despite the column being headed MUTE",
+    "Lets the frequency CV reach this oscillator; with it unlit the oscillator ignores that input altogether",
+    "Scales the frequency CV before it reaches the oscillators, -100% to 100%, so that below zero the CV is inverted",
+    "Transposes all five oscillators down together over its first half, by up to two octaves; past halfway that holds and the oscillators start to frequency-modulate each other, up to an octave deep",
+    "Holds the envelope open for as long as it is lit, whatever the gate input is doing",
+    "Sets how long the envelope takes to rise, 1ms to 15 seconds",
+    "Sets how long the envelope takes to fall once the gate closes, 1ms to 15 seconds",
+    "Shifts all five oscillators together in octaves, through the attenuverter, and only reaches an oscillator whose MOD button is lit",
+    "A rising edge switches this oscillator on if it was off and off if it was on; only the first channel of a polyphonic cable is read",
+    "Opens the envelope while it is high, and is ignored while Hold is lit or a cable is patched to the envelope input",
+    "Adds to the Volt knob, 0-10V covering its whole travel",
+    "Replaces the envelope entirely while a cable is patched here, along with the gate input and the Hold button; 0-10V, so another module's envelope output drives this one",
+    "The five oscillators mixed and shaped by the envelope",
+    "The envelope currently shaping the mix, 0-10V",
+    "Menu — FM topology: Average of active others, Circular chain — chooses how the oscillators modulate one another once the Volt knob passes halfway",
+    "Menu — Oscillator mix: Fixed sum / 5 (legacy), Average of active oscillators, Soft-clip saturated sum — chooses how the five oscillators are combined into the output",
+    "Note — only oscillator 1 is switched on when the module is added, so the other four are silent until their buttons are lit.",
+    "Note — the frequency CV input is ignored by any oscillator whose MOD button is unlit, which follows the original hardware and is not a fault.",
+    "Note — the module's channel count follows whichever of the frequency CV, gate, Volt CV and envelope inputs carries the most channels."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 3,
+    "11": 3,
+    "12": 3,
+    "13": 3,
+    "14": 3,
+    "15": 4,
+    "16": 6,
+    "17": 7,
+    "18": 8,
+    "19": 5
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 10,
+    "3": 10,
+    "4": 10,
+    "5": 10,
+    "6": 11,
+    "7": 12,
+    "8": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "cv",
+     "8": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "normal": "0V",
+      "why": "Lunar50Drone.cpp:98 counts its channels and line 146 reads it with getPolyVoltage as an octave offset"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "why": "Lunar50Drone.cpp:105 puts this input through a Schmitt trigger read with getVoltage, so only channel 1 is seen"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "why": "Lunar50Drone.cpp:105 puts this input through a Schmitt trigger read with getVoltage, so only channel 1 is seen"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "why": "Lunar50Drone.cpp:105 puts this input through a Schmitt trigger read with getVoltage, so only channel 1 is seen"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "why": "Lunar50Drone.cpp:105 puts this input through a Schmitt trigger read with getVoltage, so only channel 1 is seen"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "why": "Lunar50Drone.cpp:105 puts this input through a Schmitt trigger read with getVoltage, so only channel 1 is seen"
+     },
+     "6": {
+      "poly": true,
+      "step": "stepped",
+      "why": "Lunar50Drone.cpp:98 counts its channels and line 154 puts each channel through a Schmitt trigger"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "Lunar50Drone.cpp:147 adds a tenth of this input to the Volt knob and clamps the total to 0 to 1"
+     },
+     "8": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "Lunar50Drone.cpp:151-152 divides this input by 10 and uses it in place of the internal envelope"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Lunar50Drone.cpp:182 sets this output's channel count"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Lunar50Drone.cpp:181 sets this output's channel count and line 178 writes the envelope times 10"
+     }
+    }
+   },
+   "notes": "The panel heads the activation column MUTE, but the parameter is \"Oscillator N active\" with the states Inactive and Active, and a lit button means the oscillator sounds (Lunar50Drone.cpp:54, 98). The Volt curve is in DroneVoice.hpp:41-42: 0 to 50% of the knob ramps a downward detune to two octaves, 50 to 100% holds that detune and ramps FM depth to one octave."
   },
   "LunarLFO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two low-frequency oscillators, each sweeping continuously between a triangle and a square wave",
+    "Sets the rate of its own oscillator, eighteen octaves from about 0.0039Hz to 1024Hz",
+    "Sweeps the shape of its own oscillator between a triangle at one end and a square at the other",
+    "The wave from its own oscillator, in the voltage range chosen on the menu",
+    "Menu — CV Range: 0V to +5V, 0V to +10V, -5V to +5V, -10V to +10V — sets the voltage range both outputs span; it starts at 0V to +5V, which is what the hardware does",
+    "Note — an oscillator only runs while a cable is patched to its output; unpatched, its phase is held at the start of the cycle."
+   ],
+   "param": {
+    "0": 2,
+    "1": 1,
+    "2": 2,
+    "3": 1
+   },
+   "out": {
+    "0": 3,
+    "1": 3
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "LunarLFO.cpp:74 and 81 write a single voltage rescaled into the chosen range, which starts at 0V to +5V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "LunarLFO.cpp:74 and 81 write a single voltage rescaled into the chosen range, which starts at 0V to +5V"
+     }
+    }
+   }
   },
   "LunarVCO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Oscillator with six waveforms, hard sync and a full ADSR envelope and VCA built in",
+    "Chooses the waveform: sine, triangle, inverted saw, square, saw morphing to inverted saw, or sine morphing to saw",
+    "Tunes the oscillator over half an octave either way",
+    "Lifts the oscillator by three octaves while it is lit",
+    "Adds an oscillator an octave below the main one while it is lit",
+    "Switches the FM input between linear and exponential response; exponential while it is lit",
+    "Sets the pulse width of the square wave, or the blend point of the two morphing waveforms, and does nothing to the other three",
+    "Scales the shape CV input, -100% to 100%, so that below zero the CV is inverted",
+    "Scales the FM input, -100% to 100%, so that below zero the modulation is inverted",
+    "Sets how long the envelope takes to rise to full, 1ms to 15 seconds",
+    "Sets how long the envelope takes to fall from full to the sustain level, 1ms to 15 seconds",
+    "Sets the level the envelope holds at while the gate stays high, 0% to 100%",
+    "Sets how long the envelope takes to fall to silence once the gate closes, 1ms to 15 seconds",
+    "Holds the envelope open for as long as it is lit, whatever the gate input is doing",
+    "Turns the envelope into a free-running cycle of attack and release, skipping the decay stage, once a gate has arrived or Hold is lit; the sustain knob then sets how high it climbs",
+    "Sets the pitch, 1V per octave with 0V giving C4",
+    "Modulates the frequency, linearly or exponentially as the FM mode button is set, scaled by the FM amount knob",
+    "Modulates the shape knob, scaled by the shape CV knob",
+    "A rising edge here sets the oscillator's phase back to the start, which hard-syncs it to whatever is patched",
+    "Opens the envelope while it is high, and is ignored while Hold is lit or a cable is patched to the envelope input",
+    "Replaces the envelope entirely while a cable is patched here, along with the gate input and the Hold button; 0-10V, so another module's envelope output drives this one",
+    "The oscillator with the envelope applied to its level",
+    "The envelope currently shaping the audio output, 0-10V",
+    "The oscillator's raw phase ramp, -5V to 5V and untouched by the envelope; patch it into another oscillator's sync input to lock the two together",
+    "Note — the module's channel count follows whichever of its CV inputs carries the most channels, including the envelope input."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20
+   },
+   "out": {
+    "0": 21,
+    "1": 22,
+    "2": 23
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "cv",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "normal": "0V",
+      "why": "LunarVCO.cpp:69 names it as 1V/octave and the process loop reads it per channel with getPolyVoltage"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "LunarVCO.cpp:70 configures it and the process loop reads it per channel with getPolyVoltage, scaled by the FM amount knob"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "LunarVCO.cpp:71 configures it and the process loop reads it per channel, scaled by the shape CV knob"
+     },
+     "3": {
+      "poly": true,
+      "step": "stepped",
+      "why": "LunarVCO.cpp:72 names it as a hard sync that resets the phase to 0, read per channel through a trigger"
+     },
+     "4": {
+      "poly": true,
+      "step": "stepped",
+      "why": "LunarVCO.cpp:82 configures the gate, which the process loop puts through a per-channel Schmitt trigger"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "LunarVCO.cpp:84 names it as overriding the internal envelope, gate and hold, read per channel and divided by 10"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "LunarVCO.cpp:73 configures the audio output, whose channel count is set from the module's channel count"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "LunarVCO.cpp:83 configures the envelope output, written as the envelope times 10"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "why": "LunarVCO.cpp:74 names this output Phase (-5V to +5V)"
+     }
+    }
+   }
   },
   "LunarPapaSrapa": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Noise and drone voice in which a slow square-wave modulator frequency- or amplitude-modulates an audio-rate square oscillator, mixed with white noise, with a sample and hold and an envelope of its own",
+    "Sets the rate of the modulator, 1Hz up to about 261.63Hz",
+    "Sets the pitch of the audio oscillator, from about 16.35Hz to about 2637Hz",
+    "Sends the modulator into the audio oscillator's frequency while it is lit; it can be lit alongside AM",
+    "Sends the modulator into the audio oscillator's level while it is lit; it can be lit alongside FM",
+    "Sets how strongly the modulator acts on the audio oscillator, 0% to 100%",
+    "Divides the modulator's rate down against the audio oscillator, 0% to 100%",
+    "Sets how much of the internal white noise is mixed into the output, 0% to 100%",
+    "Puts out clean white noise while it is lit, with the pitch, FM, AM and divider settings set aside; the panel marks it solo",
+    "Sets how long the envelope takes to rise, 1ms to 15 seconds",
+    "Sets how long the envelope takes to fall once the gate closes, 1ms to 15 seconds",
+    "Holds the envelope open for as long as it is lit, whatever the gate input is doing",
+    "Opens the envelope while it is high, and is ignored while Hold is lit or a cable is patched to the envelope input",
+    "Sets the pitch of the audio oscillator, 1V per octave added to the pitch knob",
+    "A rising edge takes a new sample of whatever is at the sample and hold input",
+    "The signal the sample and hold takes its samples from; with nothing patched it samples the internal noise",
+    "Replaces the envelope entirely while a cable is patched here, along with the gate input and the Hold button; 0-10V, so another module's envelope output drives this one",
+    "Adds to the modulation depth knob, 0-10V covering its whole travel, and each channel drives its own modulator",
+    "Adds to the divider knob, 0-10V covering its whole travel, and each channel drives its own modulator",
+    "The modulator on its own, running whether or not the envelope is open",
+    "The oscillator and noise mix with the envelope applied to its level",
+    "The envelope currently shaping the audio output, 0-10V",
+    "The voltage held since the last rising edge at the sample and hold clock",
+    "Note — the sample and hold section keeps a channel count of its own, taken from its clock and signal jacks, so it is independent of the rest of the panel.",
+    "Note — the noise source is one generator shared by every polyphonic channel rather than one per channel, which follows the hardware.",
+    "Note — the blue lamp flashes on each new sample and its brightness follows the size of the value held on channel 1."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16,
+    "5": 17,
+    "6": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 20,
+    "2": 21,
+    "3": 22
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "audio",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "stepped",
+      "why": "LunarPapaSrapa.cpp:191 counts its channels and line 208 puts each channel through a Schmitt trigger"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "normal": "0V",
+      "why": "LunarPapaSrapa.cpp:277 adds this input to the pitch knob with getPolyVoltageSimd"
+     },
+     "2": {
+      "poly": true,
+      "step": "stepped",
+      "why": "LunarPapaSrapa.cpp:259 counts its channels and line 261 puts each channel through a Schmitt trigger"
+     },
+     "3": {
+      "poly": true,
+      "normal": "the internal noise generator",
+      "why": "LunarPapaSrapa.cpp:262 reads this input with getPolyVoltage when it is connected and samples the internal noise when it is not"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "LunarPapaSrapa.cpp:206 divides this input by 10 and uses it in place of the internal envelope"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "LunarPapaSrapa.cpp:233 adds a tenth of this input to the modulation depth knob and clamps the total to 0 to 1"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "LunarPapaSrapa.cpp:239 adds a tenth of this input to the divider knob and clamps the total to 0 to 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "LunarPapaSrapa.cpp:252 sets this output's channel count"
+     },
+     "1": {
+      "poly": true,
+      "why": "LunarPapaSrapa.cpp:301 sets this output's channel count"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "LunarPapaSrapa.cpp:302 sets this output's channel count"
+     },
+     "3": {
+      "poly": true,
+      "why": "LunarPapaSrapa.cpp:267 sets this output's channel count from the sample and hold jacks"
+     }
+    }
+   }
   },
   "LunarSequencer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sequential voltage source of three, four or five steps, each with its own level and its own gate, run from an internal pulser or an external clock",
+    "Sets this step's level; the tooltip reads out the voltage it will put out in the range chosen on the menu",
+    "Switches this step's gate on and off; a step with its gate off plays its own level at the CV output all the same",
+    "Sets the sequence length; the switch reads 3, 5 and 4 from left to right, following the lever on the original hardware",
+    "Sets the rate of the internal pulser, which runs the sequence whenever nothing is patched to the clock input",
+    "An external clock; while a cable is patched here it replaces the internal pulser, and a step is taken on each rising edge",
+    "The level of the step the sequence has reached, in the range chosen on the menu",
+    "10V while the clock is high and the current step's gate button is lit, 0V otherwise, whatever shape the incoming clock has",
+    "The clock driving the sequence: the internal pulser, or a copy of the voltage at the clock input while one is patched",
+    "Menu — CV Range: 0V to +5V, 0V to +10V, -5V to +5V, -10V to +10V — sets the range the step levels are spread across, and the voltage the step knobs read out",
+    "Note — with nothing patched to the clock input the internal pulser runs the sequence on its own, as a clean square wave at half duty.",
+    "Note — the lamp beside a step is lit while that step is playing, and steps past the chosen length never light."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 3,
+    "11": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the internal pulser",
+      "why": "LunarSequencer.cpp:181 puts this input through a Schmitt trigger with thresholds of 0.1V and 1V, and lines 156-166 run the internal pulser when it is unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "LunarSequencer.cpp:193 writes a single voltage rescaled into the chosen range, which starts at 0V to +5V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "LunarSequencer.cpp:202 writes 10V or 0V"
+     },
+     "2": {
+      "poly": false,
+      "why": "LunarSequencer.cpp:188 writes the clock voltage, which is the raw input voltage when one is patched"
+     }
+    }
+   },
+   "notes": "A reset input is declared and its code written but commented out (LunarSequencer.cpp:124, 170-177), so the module has no reset. The stages switch really does read 3, 5, 4 from left to right: the labels and the lookup table both follow the original lever order (LunarSequencer.cpp:121, 149)."
   },
   "LunarJoystick": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A square pad you drag to set two voltages at once, each axis either dragged by hand or driven by its own CV input",
+    "Adds a steady -5V to 5V to that axis after the range has been applied, so it works the same whichever range is chosen",
+    "Sets the voltage range an incoming CV is read across before it is mapped onto the pad's own -5V to 5V: -5V to +5V, 0V to +10V for a MIDI CC converter, 0V to +5V, or -10V to +10V",
+    "The CV for that axis; while a cable is patched here it replaces the pad position, except for as long as you are dragging the pad",
+    "That axis's position plus its offset knob, lightly smoothed to take the steps out of a stepped CV or a jerky drag",
+    "Note — click anywhere in the square to jump the crosshair straight there, drag to move it, and double-click to return both axes to the centre at 0V.",
+    "Note — dragging the pad takes control back from a patched CV for as long as the mouse is down, and the CV takes over again when it is released.",
+    "Note — if the pointer leaves the square while you drag, the crosshair stops at the edge rather than sliding along it.",
+    "Note — the pad itself is one widget with no parameter behind it, so clicking it cannot reach a note of its own."
+   ],
+   "param": {
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the pad position for that axis",
+      "why": "LunarJoystick.cpp:110-116 rescales this input from the chosen range onto -5V to 5V and clamps it, and uses the pad position when nothing is patched"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the pad position for that axis",
+      "why": "LunarJoystick.cpp:110-116 rescales this input from the chosen range onto -5V to 5V and clamps it, and uses the pad position when nothing is patched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "LunarJoystick.cpp:120-126 writes a single voltage, the clamped position plus an offset knob of -5V to 5V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "LunarJoystick.cpp:120-126 writes a single voltage, the clamped position plus an offset knob of -5V to 5V"
+     }
+    }
+   },
+   "notes": "The X and Y position parameters carry the pad's own value and have no ParamWidget of their own (the XY pad is a single custom widget), so parameters 0 and 1 cannot be clicked and get no line. The offset knob is added after the range rescale, so the output can reach 10V with both at their extremes."
   },
   "LunarMixer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Nine-channel mixer with a level and a pan for each channel, summed to a stereo pair through a master level",
+    "Sets the level of its own channel, 0% to 100%",
+    "Places its own channel between the left and right outputs, at constant power so the loudness holds across the sweep",
+    "Sets the level of the stereo pair after the channels have been summed, 0% to 100%",
+    "One channel's signal; a polyphonic cable is summed to mono before that channel's own level and pan",
+    "The left side of the stereo mix",
+    "The right side of the stereo mix",
+    "Note — the channels are summed straight, with no gain compensation and no soft clipping, so use the channel levels to keep the total inside a sensible range."
+   ],
+   "param": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 1,
+    "17": 1,
+    "18": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio",
+     "8": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "LunarMixer.cpp:78 reads this input with getVoltageSum, which adds every channel of a polyphonic cable together"
+     },
+     "1": {
+      "poly": true,
+      "why": "LunarMixer.cpp:78 reads this input with getVoltageSum, which adds every channel of a polyphonic cable together"
+     },
+     "2": {
+      "poly": true,
+      "why": "LunarMixer.cpp:78 reads this input with getVoltageSum, which adds every channel of a polyphonic cable together"
+     },
+     "3": {
+      "poly": true,
+      "why": "LunarMixer.cpp:78 reads this input with getVoltageSum, which adds every channel of a polyphonic cable together"
+     },
+     "4": {
+      "poly": true,
+      "why": "LunarMixer.cpp:78 reads this input with getVoltageSum, which adds every channel of a polyphonic cable together"
+     },
+     "5": {
+      "poly": true,
+      "why": "LunarMixer.cpp:78 reads this input with getVoltageSum, which adds every channel of a polyphonic cable together"
+     },
+     "6": {
+      "poly": true,
+      "why": "LunarMixer.cpp:78 reads this input with getVoltageSum, which adds every channel of a polyphonic cable together"
+     },
+     "7": {
+      "poly": true,
+      "why": "LunarMixer.cpp:78 reads this input with getVoltageSum, which adds every channel of a polyphonic cable together"
+     },
+     "8": {
+      "poly": true,
+      "why": "LunarMixer.cpp:78 reads this input with getVoltageSum, which adds every channel of a polyphonic cable together"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "LunarMixer.cpp:84-85 write a single voltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "LunarMixer.cpp:84-85 write a single voltage"
+     }
+    }
+   }
   },
   "LunarPads": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Six pads putting out a gate each, for playing the drone voices by hand or from an external gate source",
+    "Holds its own gate output high; whether it stays high after the mouse is released depends on the latch setting on the menu",
+    "Raises its own pad's gate output whatever the pad is doing, so an external source can play it alongside the mouse",
+    "10V while its pad is pressed or its external gate input is high, 0V otherwise",
+    "Menu — Latch mode — makes a click on a pad switch its gate on and leave it on until the pad is clicked again; off by default, so a pad is held only while the mouse is down",
+    "Note — ctrl-click holds one pad down whatever the latch setting is, and pressing another pad releases every pad held that way unless ctrl is held at that moment as well.",
+    "Note — ctrl is read when the mouse is released, so a plain press becomes a held pad if ctrl goes down before the mouse comes up."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "LunarPads.cpp:67-72 ORs this input's level into the pad's own state with getVoltage"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "LunarPads.cpp:67-72 ORs this input's level into the pad's own state with getVoltage"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "LunarPads.cpp:67-72 ORs this input's level into the pad's own state with getVoltage"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "LunarPads.cpp:67-72 ORs this input's level into the pad's own state with getVoltage"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "LunarPads.cpp:67-72 ORs this input's level into the pad's own state with getVoltage"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "LunarPads.cpp:67-72 ORs this input's level into the pad's own state with getVoltage"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "LunarPads.cpp:72 writes 10V or 0V to this output"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "LunarPads.cpp:72 writes 10V or 0V to this output"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "LunarPads.cpp:72 writes 10V or 0V to this output"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "LunarPads.cpp:72 writes 10V or 0V to this output"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "LunarPads.cpp:72 writes 10V or 0V to this output"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "LunarPads.cpp:72 writes 10V or 0V to this output"
+     }
+    }
+   }
   }
  }
 }

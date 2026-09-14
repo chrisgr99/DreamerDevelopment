@@ -1,23 +1,43 @@
 {
  "plugin": "WhatTheRack",
- "source": "https://github.com/korfuri/WhatTheRack",
+ "source": "https://github.com/korfuri/WhatTheRack (README and source at commit 82c3c5e; plugin.json has been unchanged since 1193096, the 2.0.3 bump, and matches the installed file byte for byte)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "WhatTheRack": {
    "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "WhatTheJack": {
-   "lines": [
-    "TODO: what this module is"
-   ]
+    "A joke module that fills your patch with other people's module choices: one click drops a rack's worth of randomly picked modules into the patch beside the mouse",
+    "Note — Click the question mark and the module picks two VCOs, two LFOs, two VCAs, a sequencer, a clock, three effects, two filters, two envelopes, three utilities, a mixer and an audio interface.",
+    "Note — A scope arrives with the batch as well, alongside the audio interface, so the patch has an output to your speakers and a display from the start.",
+    "Note — The new modules appear at the mouse pointer and push the existing patch aside. Each is added to the undo history on its own, so undoing one click takes one press of undo per module.",
+    "Note — The picking runs off the tags each maker set on their own modules, so what you get depends on which plugins you have installed. Anything tagged External is left out.",
+    "Note — Clicking again adds another batch on top of the first. Nothing is removed and nothing is replaced.",
+    "Note — The question mark is drawn as a plain button rather than as a module parameter, so it cannot be clicked for help and it is not saved or restored with the patch.",
+    "Menu — Randomize Parameters — when this is on, every module the button spawns has its knobs randomized as it arrives; it comes up off"
+   ],
+   "notes": "WhatTheRack and WhatTheMod share one Module class and differ only in their widget, so the Randomize Parameters setting is stored in the same place for both.\n\nThe counts in the lines are the literal arguments to SpawnAFewModels in src/WhatTheRackModule.cpp: 2 VCOs, 2 LFOs, 2 VCAs, 1 sequencer, 1 clock, 3 effects, 2 filters, 2 envelopes, 3 miscellaneous, 1 mixer, and up to 10 from a \"basics\" list which in practice holds only Core's AudioInterface and Fundamental's Scope. That is 19 plus those two, which is what the README says. If a category has no installed modules with the right tag, fewer arrive.\n\nThe category lists are built once in the module's constructor, so a plugin installed after the module was placed is not seen until the module is placed again.\n\nNothing on this module can be clicked for help. There are no parameters, no inputs and no outputs, and the question mark is a CallbackButton (an SvgButton subclass) with no ParamWidget, so the census has empty position lists. The entry is all Note lines and one Menu line, which is what a module with no controls has to be.\n\nThe maker's own README warns that the plugin is doing something the Rack APIs do not encourage and that he is not certain it cannot crash Rack."
   },
   "WhatTheMod": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The one-at-a-time companion to WhatTheRack: ten buttons, each of which drops a single randomly picked module of that kind into the patch",
+    "Note — Each button picks one module at random from every installed plugin carrying its tag. VCO, LFO, VCA, SEQ, CLK, FX, VCF, ENV and MIX take their obvious kinds; WTF takes the utility group.",
+    "Note — The WTF button's utility group covers modules tagged as clock modulators, sample and holds, recorders, slew limiters, switches and utilities.",
+    "Note — The new module appears at the mouse pointer and pushes the existing patch aside to make room. It is added to the undo history, so one press of undo removes it.",
+    "Note — The picking is done from the tags each maker set on their own modules, so what you get depends on which plugins you have installed. Anything tagged External is left out.",
+    "Note — The ten question marks are drawn as plain buttons rather than as module parameters, so none of them can be clicked for help.",
+    "Menu — Randomize Parameters — when this is on, every module a button spawns has its knobs randomized as it arrives; it comes up off"
+   ],
+   "notes": "WhatTheMod and WhatTheRack are the same Module class with different widgets. The ten buttons on WhatTheMod call SpawnAFewModels with a count of 1 on the same category lists WhatTheRack draws its batch from.\n\nThe panel prints VCO, LFO, VCA, SEQ, CLK, FX, VCF, ENV, MIX and WTF down the left, in that order, and the buttons in src/WhatTheRackModule.cpp are added in that same order.\n\nThe widget declares its own `bool randomize_params = false` member which nothing reads: both the button callbacks and the menu item use the module's copy of the flag, not the widget's. It is harmless dead state.\n\nNothing on this module can be clicked for help — no parameters, no inputs, no outputs, and the buttons are CallbackButtons with no ParamWidget, so the census position lists are empty."
+  },
+  "WhatTheJack": {
+   "lines": [
+    "A joke module that patches cables for you: one click runs a cable from a randomly chosen output somewhere in the rack to a randomly chosen free input",
+    "Note — Click the question mark and one cable appears. The output is picked from every output in the patch, whether or not it already carries cables; the input is picked only from free ones.",
+    "Note — With no free input anywhere in the patch, or no output anywhere, the click does nothing and nothing is reported.",
+    "Note — The cable is added to the undo history, so one press of undo removes it.",
+    "Note — The question mark is drawn as a plain button rather than as a module parameter, so it cannot be clicked for help.",
+    "Note — The maker calls this one a work in progress in the plugin's README, on the grounds that cabling at random rarely gives a useful signal path."
+   ],
+   "notes": "src/WhatTheJack.cpp declares a GENERATE_BUTTON parameter and passes NUM_PARAMS to config, then never calls configParam for it and never adds a ParamWidget. The census shows one unnamed parameter and an empty paramPos, so the parameter exists in the module, has no ParamQuantity, cannot be turned, and cannot be clicked for help. It gets no line and no tag.\n\nwalkWidgetTree collects every PortWidget in the rack, filtering inputs by getTopCable so an occupied input is skipped, and applying no such filter to outputs. An output can therefore be given a second, third or twentieth cable.\n\nThe button is a CallbackButton (an SvgButton subclass) whose onButton handler fires on press rather than on release, so the cable appears the moment the mouse goes down.\n\nThe module has no inputs and no outputs at all."
   }
  }
 }

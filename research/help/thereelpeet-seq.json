@@ -1,18 +1,220 @@
 {
  "plugin": "thereelpeet-seq",
- "source": "https://github.com/boocup/thereelpeet-dyn",
+ "source": "https://github.com/boocup/thereelpeet-dyn/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "thereelpeet-seq": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two independent generative sequencer lanes, each playing a random pitch sequence at its own tempo with a note envelope, and a Dyn knob that turns steps into long held notes or into rests",
+    "Starts and stops that lane; the lamp is lit while it runs, and stopping it returns the lane to the first step, drops its pitch output to 0V and clears its envelope",
+    "Draws sixteen fresh random pitches for that lane, each between 0V and 5V, replacing the sequence in place while the lane carries on playing",
+    "Sets how many steps that lane plays before repeating, 2 to 16; the number under the knob is the current setting",
+    "Sets that lane's tempo, 1 to 240 BPM, one step per beat; the number under the knob is the current setting",
+    "At noon every step fires a short note; turned right a step may instead be held for a whole pass of the sequence, turned left a step may fall silent, and the chance of either is the knob position cubed",
+    "Sets the attack time of that lane's note envelope, 0 to 4 seconds; at 0 the envelope jumps straight to 10V",
+    "Sets the decay time of that lane's note envelope, 0 to 4 seconds measured from 10V down to 0V",
+    "That lane's current pitch, a random value between 0V and 5V held until the next note fires; it is 0V on a dropped step and 0V while the lane is stopped",
+    "That lane's note envelope, rising to 10V over the Rise time and falling over the Fall time, and holding at 10V for the length of a held note, despite the panel printing Gate",
+    "Note — neither lane produces anything until its Run button is pressed.",
+    "Note — there is no clock input and no clock output; each lane is timed by its own BPM knob and the two run independently of each other and of the rest of the patch.",
+    "Note — a lane fires a new note only once the previous envelope has finished, so a long Fall time, or a held note, makes the lane pass over steps until the envelope completes.",
+    "Note — the pitches are drawn at random between 0V and 5V and are not quantized; patch the 1v/O output through a quantizer for notes in a scale."
+   ],
+   "param": {
+    "0": 1,
+    "3": 1,
+    "1": 2,
+    "4": 2,
+    "2": 3,
+    "5": 3,
+    "6": 4,
+    "7": 4,
+    "8": 5,
+    "9": 5,
+    "10": 6,
+    "12": 6,
+    "11": 7,
+    "13": 7
+   },
+   "out": {
+    "0": 8,
+    "2": 8,
+    "1": 9,
+    "3": 9
+   },
+   "family": {
+    "out": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "pitch",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/TheReelPeet.cpp randomize() fills the sequence with random::uniform() * 5.f, and process() sets one voltage per output with no channel count"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/TheReelPeet.cpp processLane() ramps envLevel between 0.f and 10.f, and process() sets one voltage per output with no channel count"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/TheReelPeet.cpp randomize() fills the sequence with random::uniform() * 5.f, and process() sets one voltage per output with no channel count"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/TheReelPeet.cpp processLane() ramps envLevel between 0.f and 10.f, and process() sets one voltage per output with no channel count"
+     }
+    }
+   },
+   "notes": "The module has no inputs at all, so nothing in the patch can clock, reset or transpose it. The panel prints Gate under the envelope output while the maker's own port name calls it Envelope CV A (0-10V); the code produces an attack-sustain-decay ramp, not a gate. Rnd rewrites all sixteen slots of the sequence even when Length is shorter. The hold length is the Rise time plus one pass of the sequence, varied by up to a tenth either way."
   },
   "thereelpeet-evo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Single-lane sequencer holding four sixteen-step phrases that cross over and mutate as they play, with two optional built-in quantizers",
+    "Starts and stops the sequencer; starting it generates a fresh random walk and derives all four phrases from it, and stopping it returns to the first step and clears the envelope",
+    "Sets how many steps a phrase plays before wrapping, 2 to 16; the number under the knob is the current setting",
+    "Each press moves to the next mutation engine and the lamp shows which is in force, Gaussian to Markov to Interval and round again; the maker's tooltip also offers AI, which this build does not have",
+    "Sets the attack time of the note envelope, 0 to 4 seconds; at 0 the envelope jumps straight to 10V",
+    "Sets the decay time of the note envelope, 0 to 4 seconds measured from 10V down to 0V",
+    "Brings that phrase into the playing cycle or drops it out; switching it on re-seeds the phrase from the shared random walk, and the lamp pulses while that phrase is the one playing",
+    "Sets how far that phrase mutates each round, how likely it is to keep the result, and how many rests and ties it carries; fully left is close to frozen and fully right drifts hardest",
+    "Turns C on or off in the left-hand scale",
+    "Turns C sharp on or off in the left-hand scale",
+    "Turns D on or off in the left-hand scale",
+    "Turns D sharp on or off in the left-hand scale",
+    "Turns E on or off in the left-hand scale",
+    "Turns F on or off in the left-hand scale",
+    "Turns F sharp on or off in the left-hand scale",
+    "Turns G on or off in the left-hand scale",
+    "Turns G sharp on or off in the left-hand scale",
+    "Turns A on or off in the left-hand scale",
+    "Turns A sharp on or off in the left-hand scale",
+    "Turns B on or off in the left-hand scale",
+    "Turns C on or off in the right-hand scale",
+    "Turns C sharp on or off in the right-hand scale",
+    "Turns D on or off in the right-hand scale",
+    "Turns D sharp on or off in the right-hand scale",
+    "Turns E on or off in the right-hand scale",
+    "Turns F on or off in the right-hand scale",
+    "Turns F sharp on or off in the right-hand scale",
+    "Turns G on or off in the right-hand scale",
+    "Turns G sharp on or off in the right-hand scale",
+    "Turns A on or off in the right-hand scale",
+    "Turns A sharp on or off in the right-hand scale",
+    "Turns B on or off in the right-hand scale",
+    "Advances the sequence by one step on each rising edge above 1V; there is no internal clock, so the sequence moves only while pulses arrive here",
+    "Pulls each newly generated pitch a fifth of the way toward the voltage here, one volt per octave, typically taken from another instance's 1v/O output; with nothing patched no pull is applied",
+    "The current note as a pitch, between 0V and 5V, quantized to whichever scale governs the playing phrase and held until the next note; it is 0V while the sequencer is stopped",
+    "The note envelope, rising to 10V over the Rise time and falling over the Fall time, with a tied step freezing the fall so the note carries on, despite the panel printing Gate",
+    "Note — nothing plays until three things are done: press Run, patch a clock into Clock, and switch at least one phrase's toggle on.",
+    "Note — the quantizers are optional. The left one governs phrases 1 and 3 and the right one phrases 2 and 4, but where only one side has any note switched on, that side governs all four.",
+    "Note — with every note switched off on both quantizers the pitch output is not quantized at all, and carries the raw generated voltages.",
+    "Note — a new note fires only once the previous envelope has finished, so a Rise and Fall that together outlast the gap between clock pulses leave some steps silent.",
+    "Note — the step count and the changes of phrase are driven by the clock alone, and run at the same rate whether or not a step was audible.",
+    "Note — each phrase that is switched on plays four passes of the sequence before the next one takes over, and once every switched-on phrase has had its turn they all evolve.",
+    "Note — a phrase that has drifted from its starting version has a one in four chance, each time its turn comes round, of playing that original version for one pass instead.",
+    "Note — the Recall lamp is lit while a phrase is playing its original version rather than its evolved one.",
+    "Note — the Drift lamp flashes at the start of a phrase's turn when that phrase's content changed since it last played, and fades over about 7 seconds.",
+    "Note — generated pitches are pulled back toward 2.5V and pushed by whole octaves back inside 1.25V to 3.75V, so the melody stays within about two and a half octaves."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 7,
+    "10": 7,
+    "11": 7,
+    "12": 7,
+    "13": 8,
+    "14": 9,
+    "15": 10,
+    "16": 11,
+    "17": 12,
+    "18": 13,
+    "19": 14,
+    "20": 15,
+    "21": 16,
+    "22": 17,
+    "23": 18,
+    "24": 19,
+    "25": 20,
+    "26": 21,
+    "27": 22,
+    "28": 23,
+    "29": 24,
+    "30": 25,
+    "31": 26,
+    "32": 27,
+    "33": 28,
+    "34": 29,
+    "35": 30,
+    "36": 31
+   },
+   "in": {
+    "0": 32,
+    "1": 33
+   },
+   "out": {
+    "0": 34,
+    "1": 35
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/TheReelPeetEvo.cpp process(): clockTrig.process(inputs[CLOCK_INPUT].getVoltage()) with Rack's default SchmittTrigger thresholds, one voltage read per frame"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "no pull applied",
+      "why": "src/TheReelPeetEvo.cpp applyLink(): returns value unchanged unless isConnected(), else clamp(value + 0.2f * (getVoltage() - value), 0.f, 5.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/TheReelPeetEvo.cpp process() ends with setVoltage(outCV); every pitch is clamped to 0.f to 5.f in applyHomeGravity, applyLink and clampToSafeRange"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/TheReelPeetEvo.cpp process() ramps envLevel between 0.f and 10.f and ends with setVoltage(envLevel), with no channel count set"
+     }
+    }
+   },
+   "notes": "The installed build's tooltip for the Model button reads \"Cycle mutation engine (Gaussian/Markov/Interval/AI)\", but the AI engine was taken out before this release and NUM_ENGINES is 3: the button cycles three choices and the panel lists three. The README is correct and the tooltip is stale. The twenty-four note toggles are real ParamWidgets, so each can be clicked for help, but the panel prints no note names on them; the note each one stands for comes from the maker's own parameter names, which are laid out as a piano keyboard on its side with C at the bottom. The four Recall lamps, four Drift lamps, four phrase lamps, the Run lamp and the three engine lamps are lights rather than controls, so they carry no line of their own and are covered by the module's Note lines. The number of passes a phrase plays before the next takes over is fixed at four in the source and is not adjustable."
   }
  }
 }

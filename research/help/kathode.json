@@ -2,12 +2,103 @@
  "plugin": "kathode",
  "source": "https://github.com/ketodin/kathode#readme",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "kathode": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An X-Y oscilloscope that plots one input against the other as a glowing dot trace, with the colour, size, fade and angle of the picture each set by a knob and an attenuverted CV input",
+    "Attenuates and inverts the voltage at the HUE input before it is added to the HUE knob, with no effect at the centre and full effect either way at the ends",
+    "Sets the colour of the trace: green at the centre, and turning either way runs once round the colour wheel and back to green at the end of the travel",
+    "Attenuates and inverts the voltage at the GAIN input before it is added to the GAIN knob, with no effect at the centre and full effect either way at the ends",
+    "Sets the size of the picture: at the centre a ±10V signal exactly fills the display, and each step of 1 clockwise doubles it while each step counter-clockwise halves it",
+    "Attenuates and inverts the voltage at the AFTERGLOW input before it is added to the AFTERGLOW knob, with no effect at the centre and full effect either way at the ends",
+    "Sets how fast the trace fades out behind the beam; a little clockwise of the centre the whole stored trace stays lit and the rest of that travel changes nothing further",
+    "Attenuates and inverts the voltage at the ANGLE input before it is added to the ANGLE knob, with no effect at the centre and full effect either way at the ends",
+    "Rotates the picture about the centre of the display, one full turn at either end of the travel, so a quarter of the way out is a quarter turn",
+    "On keeps the trace inside the black display; Off lets it spill over the panel and out of the module when the gain pushes it past the edge",
+    "The horizontal position of the beam, ±10V spanning the display at the middle setting of GAIN",
+    "The vertical position of the beam, ±10V spanning the display at the middle setting of GAIN, positive voltage upwards",
+    "Shifts the colour of the trace, scaled by its attenuverter and added to the HUE knob; the sign is thrown away, so equal positive and negative voltages give the same colour",
+    "Changes the size of the picture, scaled by its attenuverter and added to the GAIN knob, each 1 in the total doubling or halving it",
+    "Changes how fast the trace fades, scaled by its attenuverter and added to the AFTERGLOW knob",
+    "Rotates the picture, scaled by its attenuverter and added to the ANGLE knob, 10 in the total making one full turn",
+    "Note — the display holds the last 4096 samples of the two inputs and draws each as a dot, which is about 90ms of signal at a 44.1kHz sample rate",
+    "Note — with X and Y both empty the beam stands as a single dot at the centre of the display, because an unpatched jack reads 0V",
+    "Note — the dots are drawn with their brightnesses added together, so a part of the picture the beam crosses twice comes out brighter than the rest"
+   ],
+   "param": {
+    "0": 9,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15
+   },
+   "family": {
+    "in": {
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "KathodeModule.cpp:94 reads getVoltage() with no channel into the x of one point, and KathodeDisplay.cpp:82 maps ±10V across the display at a Gain total of 0"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "KathodeModule.cpp:95 reads getVoltage() with no channel into the y of one point, which KathodeDisplay.cpp:82 negates so positive voltage goes up the screen"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "KathodeModule.cpp:107-109 multiplies getVoltage() with no channel by the attenuverter over 10 and adds the offset knob; KathodeDisplay.cpp:91 takes the absolute value of that total, so the sign is lost"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "KathodeModule.cpp:107-109 forms the total as for the other packs, and KathodeDisplay.cpp:26 raises 2 to it and divides by 10 to get the scale"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "KathodeModule.cpp:107-109 forms the total as for the other packs, and KathodeDisplay.cpp:104 turns it into a fade exponent clamped between 0.1 and 50"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "KathodeModule.cpp:107-109 forms the total as for the other packs, and KathodeDisplay.cpp:110 multiplies it by 2 pi over 10 to get the angle"
+     }
+    }
+   },
+   "notes": "Read at commit bf42573, the commit that set plugin.json to the installed 2.0.0 and renamed the module to Kathode; the one later commit, 4dd9d8b, removes a GitHub workflow and changes no code. The installed binary carries that commit's parameter names, Clips the oscilloscope render and Persistance Offset among them. Three much older commits also carry 2.0.0, but they are Paul Dempsey's GenericBlank template under a different model slug. The panel and the maker's tooltips disagree on four of the eight knob names: the panel prints HUE, GAIN, AFTERGLOW and ANGLE where the tooltips say Color, Scale, Persistance and Rotation, and the lines follow the panel. The Afterglow total is turned into an exponent clamped at 0.1, which it reaches at about 1.2, so roughly the top eight tenths of that knob's clockwise travel changes nothing; that is stated in the knob's line without the figure, since the figure is derived rather than stored. The X and Y jacks are given no family: a scope takes audio or CV equally and the module does nothing that distinguishes them. The sample decimation in process() has a fault: frameIndex is reset only when the whole buffer wraps, so after the first few samples of each pass every sample is stored rather than one in six, and the display holds 4096 consecutive samples instead of the half second the frameCount calculation aims at. The module has no outputs, no lights and no context menu of its own; the light and dark panels are Rack's own themed panel pair. Nothing is polyphonic: every jack is read with getVoltage() and no channel, and the binary imports neither setChannels nor getPolyVoltage."
   }
  }
 }

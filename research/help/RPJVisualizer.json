@@ -1,18 +1,250 @@
 {
  "plugin": "RPJVisualizer",
- "source": "https://github.com/kockie69/Visualizer",
+ "source": "https://github.com/kockie69/Visualizer/blob/main/docs/lowfatmilk.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "LFMFull": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An audio visualiser built on projectM: it draws MilkDrop and Winamp presets from the audio patched into it, in a window of its own that can be dragged anywhere, or onto a second monitor.",
+    "Switches between the whole library of visuals and your own playlist; it latches down and turns red while the playlist is the one being played.",
+    "Adds the visual now playing to the playlist, and only once. It does nothing while the playlist is the one being played.",
+    "Takes the visual now playing out of the playlist. It does nothing unless the playlist is the one being played.",
+    "Sets how long a visual is held before the next one, 0 to 300 seconds. It does nothing unless Cycle through visuals is on.",
+    "Sets how strongly a visual reacts to the audio, 0 to 5, from flat to very reactive.",
+    "Sets the beat level that brings on a hard cut to another visual, 0 to 5. It does nothing unless Hardcut enabled and Cycle through visuals are both on.",
+    "Sets the least time a visual is held before a hard cut can replace it, 0 to 300 seconds.",
+    "Moves to another visual: the next in order, or a random one while Cycle through visuals is on, or the next entry while the playlist is being played.",
+    "Moves back a visual: the one before in order, or a random one while Cycle through visuals is on, or the entry before while the playlist is being played.",
+    "The audio the visuals are drawn from. It also fills the second half of the sample buffer while R is unpatched.",
+    "The second channel of the audio the visuals are drawn from. Unpatched, the L input is read in its place.",
+    "A rise past 2V moves to another visual, and the jack re-arms once the voltage falls below 0.1V.",
+    "A rise past 2V moves back a visual, and the jack re-arms once the voltage falls below 0.1V.",
+    "Adds its voltage to the BEAT SENSITIVITY knob, one unit of sensitivity a volt, with no limit at either end.",
+    "Adds its voltage to the HARDCUT SENSITIVITY knob, one unit a volt, with no limit at either end.",
+    "Adds its voltage to the HARDCUT DURATION knob, one second a volt, with no limit at either end.",
+    "Note — the visuals are driven only by what is patched into L and R. With nothing patched the display runs on, reacting to silence.",
+    "Note — the window opens as soon as the module is placed and cannot be closed; deleting the module is what removes it.",
+    "Note — with the window in front, F, F4 or Enter goes full screen, Escape or Q leaves full screen and otherwise minimises the window, and R switches to a new visual.",
+    "Note — which visual is playing is picked from the panel menu, which ends in a search box and the whole list of visuals.",
+    "Note — the playlist is written and read with Rack's own preset commands on the module menu.",
+    "Menu — Cycle through visuals — moves to another visual on its own, on the TIMER setting and on hard cuts.",
+    "Menu — Window always on Top — keeps the visual window above the other windows on the screen.",
+    "Menu — Hardcut enabled — lets a strong enough beat cut to another visual before the TIMER has run out.",
+    "Menu — Aspectcorrection enabled — sets the flag a visual reads to keep circles and squares from being stretched when the display is not square.",
+    "Menu — Case sensitive Visual Search — makes the search box tell capitals from small letters.",
+    "Menu — Clear Playlist — empties the playlist.",
+    "Menu — Search visuals — a text box under the Visuals heading: what you type in it narrows the list of visuals below to the matching ones."
+   ],
+   "param": {
+    "7": 1,
+    "8": 2,
+    "9": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "0": 8,
+    "1": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15,
+    "6": 16
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 writes inputs[LEFT_INPUT].getVoltage()/5 into the sample buffer once a frame with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the L input",
+      "why": "src/Module.cpp step() at commit c372f06 writes inputs[LEFT_INPUT] into the odd sample slots whenever RIGHT_INPUT.isConnected() is false"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 feeds rescale(inputs[NEXT_PRESET_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f) to a dsp::SchmittTrigger"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 feeds rescale(inputs[PREV_PRESET_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f) to a dsp::SchmittTrigger"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 sets beatSensitivity from the knob then adds inputs[BEAT_INPUT].getVoltage() with no clamp"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 sets hardcutSensitivity from the knob then adds inputs[HARDCUT_INPUT].getVoltage() with no clamp"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 sets hardcutDuration from the knob then adds inputs[HARDCUT_DURATION_INPUT].getVoltage() with no clamp"
+     }
+    }
+   },
+   "notes": "The plugin is on the census skip list: instantiating either model crashes the scan, so there are no scanned positions and every position used here was read out of the ModuleWidget constructor in src/Module.cpp. The installed build is 2.1.15 and the shipped commit is c372f06. The crash is visible in the code: LFMModuleWidget's constructor calls glfwInit and glfwCreateWindow to open a second operating-system window and then builds a WindowedProjectMWidget which starts a projectM render thread; it also stores the ModuleWidget in the window's user pointer through reinterpret_cast<WindowedRenderer*>, which is not that type. PARAM_GRADIENT (index 6) and GRADIENT_INPUT (index 7) are configured on the shared LFMModule class and read every frame in step(), but this widget places no knob and no jack for either, and the panel art carries no GRADIENT lettering; both are left untagged and without a line. The three memory-free jacks beside the knobs carry no lettering on the panel. No Frames is on the panel menu only where ARCH_MAC is undefined, and the string is absent from the installed binary, so it is left out."
   },
   "LFMEmbedded": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An audio visualiser built on projectM: it reads the audio patched into it and draws MilkDrop and Winamp presets in a display fixed to the module.",
+    "Switches between the whole library of visuals and your own playlist; it latches down and turns red while the playlist is the one being played.",
+    "Adds the visual now playing to the playlist, and only once. It does nothing while the playlist is the one being played.",
+    "Takes the visual now playing out of the playlist. It does nothing unless the playlist is the one being played.",
+    "Sets how long a visual is held before the next one, 0 to 300 seconds. It does nothing unless Cycle through visuals is on.",
+    "Sets how strongly a visual reacts to the audio, 0 to 5, from flat to very reactive.",
+    "Sets the beat level that brings on a hard cut to another visual, 0 to 5. It does nothing unless Hardcut enabled and Cycle through visuals are both on.",
+    "Sets the least time a visual is held before a hard cut can replace it, 0 to 300 seconds.",
+    "Sets how light or dark the visual is drawn, 0 to 5.",
+    "Moves to another visual: the next in order, or a random one while Cycle through visuals is on, or the next entry while the playlist is being played.",
+    "Moves back a visual: the one before in order, or a random one while Cycle through visuals is on, or the entry before while the playlist is being played.",
+    "The audio the visuals are drawn from. It also fills the second half of the sample buffer while R is unpatched.",
+    "The second channel of the audio the visuals are drawn from. Unpatched, the L input is read in its place.",
+    "A rise past 2V moves to another visual, and the jack re-arms once the voltage falls below 0.1V.",
+    "A rise past 2V moves back a visual, and the jack re-arms once the voltage falls below 0.1V.",
+    "Adds its voltage to the BEAT SENSITIVITY knob, one unit of sensitivity a volt, with no limit at either end.",
+    "Adds its voltage to the HARDCUT SENSITIVITY knob, one unit a volt, with no limit at either end.",
+    "Adds its voltage to the HARDCUT DURATION knob, one second a volt, with no limit at either end.",
+    "Adds its voltage to the GRADIENT knob, one unit a volt, with no limit at either end.",
+    "Note — drag the right-hand edge of the module to make the display wider or narrower.",
+    "Note — the visuals are driven only by what is patched into L and R. With nothing patched the display runs on, reacting to silence.",
+    "Note — which visual is playing is picked from the panel menu, which ends in a search box and the whole list of visuals.",
+    "Note — the playlist is written and read with Rack's own preset commands on the module menu.",
+    "Menu — Cycle through visuals — moves to another visual on its own, on the TIMER setting and on hard cuts.",
+    "Menu — Show Visual Title — prints the name of the visual now playing over the display.",
+    "Menu — Hardcut enabled — lets a strong enough beat cut to another visual before the TIMER has run out.",
+    "Menu — Aspectcorrection enabled — sets the flag a visual reads to keep circles and squares from being stretched when the display is not square.",
+    "Menu — Case sensitive Visual Search — makes the search box tell capitals from small letters.",
+    "Menu — Clear Playlist — empties the playlist.",
+    "Menu — Search visuals — a text box under the Visuals heading: what you type in it narrows the list of visuals below to the matching ones."
+   ],
+   "param": {
+    "7": 1,
+    "8": 2,
+    "9": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "0": 9,
+    "1": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17,
+    "7": 18
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 writes inputs[LEFT_INPUT].getVoltage()/5 into the sample buffer once a frame with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the L input",
+      "why": "src/Module.cpp step() at commit c372f06 writes inputs[LEFT_INPUT] into the odd sample slots whenever RIGHT_INPUT.isConnected() is false"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 feeds rescale(inputs[NEXT_PRESET_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f) to a dsp::SchmittTrigger"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 feeds rescale(inputs[PREV_PRESET_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f) to a dsp::SchmittTrigger"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 sets beatSensitivity from the knob then adds inputs[BEAT_INPUT].getVoltage() with no clamp"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 sets hardcutSensitivity from the knob then adds inputs[HARDCUT_INPUT].getVoltage() with no clamp"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 sets hardcutDuration from the knob then adds inputs[HARDCUT_DURATION_INPUT].getVoltage() with no clamp"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Module.cpp step() at commit c372f06 sets gradient from the knob then adds inputs[GRADIENT_INPUT].getVoltage() with no clamp"
+     }
+    }
+   },
+   "notes": "The plugin is on the census skip list: instantiating either model crashes the scan, so there are no scanned positions and every position used here was read out of the ModuleWidget constructor in src/Module.cpp. The installed build is 2.1.15 and the shipped commit is c372f06. The crash is visible in the code: EmbeddedLFMModuleWidget builds an EmbeddedProjectMWidget in its constructor, which calls glfwCreateWindow and starts a projectM render thread, and then reads w->getRenderer()->window to build the resize handle; LFMModuleWidget calls glfwInit and glfwCreateWindow itself to open a second operating-system window, and stores the ModuleWidget in that window's user pointer through reinterpret_cast<WindowedRenderer*>, which is not that type. Both models share the LFMModule class, so all ten parameters and all eight inputs exist on both. No Frames is on the panel menu only where ARCH_MAC is undefined, and the string is absent from the installed binary, so it is left out."
   }
  }
 }

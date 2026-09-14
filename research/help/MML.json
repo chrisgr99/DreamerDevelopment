@@ -1,23 +1,140 @@
 {
  "plugin": "MML",
- "source": "https://github.com/CHLOzzz/MML/",
+ "source": "https://github.com/CHLOzzz/MML/blob/b3a4be0/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "LogQnt": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer that keeps the octaves a volt apart but re-tunes the twelve notes inside each one to the base-2 logarithms of whole numbers, the non-Pythagorean scale of The Apples in Stereo",
+    "The pitch to quantize: the whole-volt part is carried through as the octave, and the fractional part is cut into twelve equal steps which are then re-spaced onto the logarithmic scale",
+    "The re-tuned pitch; 0V in gives 0V out and each whole volt in moves the output by a whole volt, so octaves keep their spacing while the notes inside them move",
+    "Note — a negative input gives 0V at the output, so the module only follows pitches from 0V upwards",
+    "Note — with nothing patched into V/OCT the output is held at 0V",
+    "Note — one voltage in and one voltage out, mono, with nothing to set and no menu of its own"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/LogQnt.cpp line 34 reads inputs[INPUT].getVoltage(), with no getChannels or getPolyVoltage anywhere in the file; MMLFQFunction at line 59 returns 0 for any voltage below 0, and line 63 splits the voltage into floorf(vIn) and floorf(12 * fraction)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/LogQnt.cpp line 40 calls outputs[OUTPUT].setVoltage, and line 45 writes 0 when the input jack is not connected; the returned value adds floorf(vIn) to a fraction of an octave, so whole volts pass through as octaves"
+     }
+    }
+   },
+   "notes": "Open source, read at commit b3a4be0, whose plugin.json is byte-identical to the installed 2.1.0 build and whose res/LOG_QNT.svg matches the installed panel. The output is floor(v) - 1 + log2(log2(4 + floor(12 * fraction))). The twelve steps are far from equal: the first step of each octave is over two semitones wide and the steps narrow steadily, the twelfth landing just under a full octave. No figure from that arithmetic is quoted in the lines, since only the formula is in the source. The panel prints V/OCT over the input and OUT over the output, while the maker's tooltips read V/IN and V/OUT. The module has one global float, logV, shared by every instance, but it is written and read within a single process call so it causes no cross-talk."
   },
   "SqtQnt": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer that keeps the octaves a volt apart but re-tunes the twelve notes inside each one to the square roots of whole numbers",
+    "The pitch to quantize: the whole-volt part is carried through as the octave, and the fractional part is cut into twelve equal steps which are then re-spaced onto the square-root scale",
+    "The re-tuned pitch; 0V in gives 0V out and each whole volt in moves the output by a whole volt, so octaves keep their spacing while the notes inside them move",
+    "Note — a negative input gives 0V at the output, so the module only follows pitches from 0V upwards",
+    "Note — with nothing patched into V/OCT the output is held at 0V",
+    "Note — one voltage in and one voltage out, mono, with nothing to set and no menu of its own"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/SqtQnt.cpp line 34 reads inputs[INPUT].getVoltage(), with no getChannels or getPolyVoltage anywhere in the file; MMLFQFunction at line 57 returns 0 for any voltage below 0, and line 61 splits the voltage into floorf(vIn) and floorf(12 * fraction)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/SqtQnt.cpp line 40 calls outputs[OUTPUT].setVoltage, and line 45 writes 0 when the input jack is not connected; the returned value adds floorf(vIn) to a fraction of an octave, so whole volts pass through as octaves"
+     }
+    }
+   },
+   "notes": "Open source, read at commit b3a4be0, whose plugin.json is byte-identical to the installed 2.1.0 build and whose res/SQT_QNT.svg matches the installed panel. The output is floor(v) - 1 + log2(sqrt(4 + floor(12 * fraction))). This is the same scale the Power Quantizer gives with its knob at 2, which is that module's starting position. The panel prints V/OCT over the input and OUT over the output, while the maker's tooltips read V/IN and V/OUT."
   },
   "PowQnt": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer that keeps the octaves a volt apart and re-tunes the twelve notes inside each one by a power function, with a knob that moves the scale between whole families of tunings",
+    "Sets the exponent the scale is built on, 0.01 to 4, starting at 2 where the scale is the Square Root Quantizer's; lower settings flatten it towards equal temperament, higher ones widen the low steps",
+    "The pitch to quantize: the whole-volt part is carried through as the octave, and the fractional part is cut into twelve equal steps which are then re-spaced by the power function",
+    "The re-tuned pitch; 0V in gives 0V out and each whole volt in moves the output by a whole volt, so octaves keep their spacing while the notes inside them move",
+    "Note — a negative input gives 0V at the output, so the module only follows pitches from 0V upwards",
+    "Note — with nothing patched into V/OCT the output is held at -1V, an octave below where the other two quantizers rest, so an oscillator fed from it is already playing before any cable is in",
+    "Note — the knob carries no lettering on the panel; the maker's tooltip for it reads V/POW"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/PowQnt.cpp line 35 reads inputs[INPUT].getVoltage(), with no getChannels or getPolyVoltage anywhere in the file; MMLFQFunction at line 58 returns 0 for any voltage below 0, and line 62 splits the voltage into floorf(vIn) and floorf(12 * fraction)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/PowQnt.cpp line 41 calls outputs[OUTPUT].setVoltage, and line 46 writes -1 when the input jack is not connected; the returned value adds floorf(vIn) to a fraction of an octave, so whole volts pass through as octaves"
+     }
+    }
+   },
+   "notes": "Open source, read at commit b3a4be0, whose plugin.json is byte-identical to the installed 2.1.0 build and whose res/POW_QNT.svg matches the installed panel. The output is floor(v) - 1 + log2((2^p + ((4^p - 2^p) / 12) * floor(12 * fraction))^(1/p)), with p the knob, configured from 0.01 to 4 with a default of 2. At p = 2 the expression collapses to the Square Root Quantizer's; as p falls towards 0 the twelve steps approach equal spacing, that is equal temperament. The unpatched output of -1V is the maker's own choice and differs from the other two modules in the plugin, which write 0V; nothing in the README mentions it. The knob has no panel lettering, so its line starts with what it does. The README also proposes POW QNT 2, SIN QNT, ATN QNT, LIN QNT and EQT QNT for a later release; none of them is in the installed 2.1.0 plugin.json."
   }
  }
 }

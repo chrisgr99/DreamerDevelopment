@@ -1,23 +1,275 @@
 {
  "plugin": "modular80",
- "source": "https://github.com/cschol/modular80.git",
+ "source": "https://github.com/cschol/modular80/blob/v2/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Logistiker": {
    "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "RadioMusic": {
-   "lines": [
-    "TODO: what this module is"
-   ]
+    "A chaotic CV generator running the logistic map, r times x times one minus x, one step per clock, with x sent out as a voltage.",
+    "Sets the internal clock, 0.25Hz at the bottom of the travel to 64Hz at the top; nothing reads it while a cable is in EXT CLOCK, and the tooltip prints the exponent rather than the rate.",
+    "Sets the r term of the equation, 0 to 8; the default 3.56995 is where the map turns chaotic.",
+    "Sets the value x is put back to by a reset, 0 to 0.5.",
+    "Puts x back to the value set by the X0 knob, taking effect at the next clock step rather than at once.",
+    "Adds to the R knob, one unit of r per volt, the two together held between 0 and 8.",
+    "A rising edge puts x back to the value set by the X0 knob, at the next clock step.",
+    "One rising edge advances the map a step, and a cable here takes the place of the internal clock.",
+    "The current value of x, 0V to 10V.",
+    "Note — The module computes nothing at all while the output jack is unpatched.",
+    "Note — The internal clock runs on its own, so the map steps along with no clock cable patched.",
+    "Note — x is held between 0.00001 and 1, which keeps the map from settling on zero for good when r is low."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "2": 5,
+    "1": 6,
+    "0": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Logistiker.cpp:83 clkTrigger.process(inputs[CLK_INPUT].getVoltage()), a SchmittTrigger"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Logistiker.cpp:74 rstInputTrigger.process(inputs[RST_INPUT].getVoltage())"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 8V",
+      "why": "src/Logistiker.cpp:105 clamp(params[R_PARAM] + inputs[R_INPUT].getVoltage(), 0, 8)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Logistiker.cpp:113 setVoltage(clamp(x*10,-10,10)) with x clamped to 0.00001..1 at :109"
+     }
+    }
+   },
+   "notes": "The RATE knob is configured as configParam(RATE_PARAM, -2, 6, 2, \"Rate\", \" Hz\") with no display base or multiplier, so its tooltip reads -2 Hz to 6 Hz while the clock it sets is pow(2, value) hertz, 0.25Hz to 64Hz. The panel prints RATE, R, X0, RESET, EXT CLOCK and OUT; the maker's parameter name for the X0 knob is just X. Index order is not panel order for the jacks: the R input is index 2 and sits highest, the clock input is index 0 and sits lowest but one. Every port has a jack."
   },
   "Nosering": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight-stage shift register fed by white noise through two comparators, after Grant Richter's Noisering: one settles whether a fresh bit goes in, the other whether it is a nought or a one.",
+    "Sets the internal clock, 1Hz at the bottom of the travel up to a ceiling of 10000Hz; nothing reads it while a cable is in EXT CLOCK, and the tooltip prints the exponent rather than the rate.",
+    "Sets the odds that a fresh bit is fed in rather than the old one recycled: fully anticlockwise is always fresh, fully clockwise sends the same eight bits round and round.",
+    "Sets the odds that a fresh bit is a nought or a one: fully anticlockwise gives noughts, fully clockwise gives ones.",
+    "Inverts the bit leaving the end of the register before it goes back in, which also switches off the check that stops the register filling with all noughts or all ones.",
+    "One rising edge shifts the register one place, and a cable here takes the place of the internal clock.",
+    "Adds to the CHANGE knob, one unit of its travel per volt, the two together held between -10 and +10.",
+    "Adds to the CHANCE knob, one unit of its travel per volt, the two together held between -10 and +10.",
+    "Above 2V the bit leaving the end of the register is inverted before it goes back in, which the switch does too.",
+    "Replaces the internal white noise at the comparator that picks a nought or a one; the comparator picking fresh against old keeps the internal noise, where the README says this jack feeds both.",
+    "The module's own white noise, a fresh value every sample, ±10V.",
+    "The count of ones in the register at 1.28V each, giving nine levels from 0V to 10V.",
+    "The register read as a binary number, 5V for the newest bit down to 0.0390625V for the oldest, giving 256 levels from 0V to a little under 10V.",
+    "Note — The register comes up holding all noughts and both knobs come up fully anticlockwise, so the module feeds noughts in until the stale check pushes a one through.",
+    "Note — Unless the old bit is being inverted, a register holding all noughts or all ones forces the opposite bit in, so the outputs never settle on one steady voltage.",
+    "Note — The panel prints INV OUT over the switch where the maker's tooltip and README both call it Invert Old Data."
+   ],
+   "param": {
+    "2": 1,
+    "0": 2,
+    "1": 3,
+    "3": 4
+   },
+   "in": {
+    "2": 5,
+    "0": 6,
+    "1": 7,
+    "4": 8,
+    "3": 9
+   },
+   "out": {
+    "2": 10,
+    "0": 11,
+    "1": 12
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±10V",
+      "why": "src/Nosering.cpp:83 clamp(params[CHANGE_PARAM] + inputs[CHANGE_INPUT].getVoltage(), -10, 10)"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±10V",
+      "why": "src/Nosering.cpp:84 clamp(params[CHANCE_PARAM] + inputs[CHANCE_INPUT].getVoltage(), -10, 10)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Nosering.cpp:99 clkTrigger.process(inputs[EXT_RATE_INPUT].getVoltage()), a SchmittTrigger"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Nosering.cpp:92 sample = inputs[EXT_CHANCE_INPUT].getVoltage(), compared at :122 against the chance value, which is clamped to ±10"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Nosering.cpp:126 inputs[INV_OUT_INPUT].getVoltage() > 2.0f"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Nosering.cpp:168,173 sum of eight bits times 1.28, clamped 0..10"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Nosering.cpp:10,169,174 DAC_MULT2 weights 5 down to 0.0390625, clamped 0..10"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Nosering.cpp:87,175 random::uniform()*20-10 written straight out"
+     }
+    }
+   },
+   "notes": "The panel prints INV OUT where the parameter is named Invert Old Data and the README calls it INV OLD; all three are the same switch, and the code inverts the bit shifted out of the last stage before it re-enters the first. The README says the EXT CHANCE input replaces the internal noise for both the Chance and the Change comparators; the code uses it only for Chance, with the comment \"Always compare against White Noise\" on the Change comparison at src/Nosering.cpp:120. The INT_RATE knob is configured with a \" Hz\" suffix and no display base, so its tooltip reads 0 Hz to 14 Hz for a clock of 1Hz to 16384Hz, itself capped at 10000Hz. Index order is not panel order in either direction: the clock input is index 2 at the top and the noise output is index 2 above the two register outputs. Every port has a jack, and all three outputs are written every sample whether or not anything is patched."
+  },
+  "RadioMusic": {
+   "lines": [
+    "A sampler that plays a folder of audio files as radio stations: the knob picks a file, and every file runs on while unheard, so tuning to one drops you wherever it has reached.",
+    "Chooses which file of the loaded bank plays, the travel divided evenly among however many there are.",
+    "Sets where in the file playback restarts from, as a fraction of its length; with Pitch Mode on it sets the playback speed instead, over eight octaves centred on the middle of the travel.",
+    "Restarts the file from the point the START knob sets; in bank select mode it steps to the next bank instead.",
+    "Adds to the STATION knob at a fifth of the knob's travel per volt, so 5V covers the whole bank.",
+    "Adds to the START knob at a fifth of its travel per volt; with Pitch Mode on that works out at 1.6 octaves per volt, not the 1V per octave the source comment claims.",
+    "A rising edge restarts the file from the point the START knob sets.",
+    "The playing file, scaled so its loudest sample reaches 5V; with Stereo Output enabled it carries two channels on one cable.",
+    "Note — The module plays nothing until a root directory is picked from the right-click menu. That folder's audio files are the first bank and each subfolder is another, up to 16 and 2GB each.",
+    "Note — All four lamps blinking slowly means files are being read into memory; all four blinking fast means a file could not be read.",
+    "Note — In bank select mode the four lamps read the bank number as binary and the RESET button steps through the banks; leaving the mode loads the one you stopped on.",
+    "Note — Only .wav and .raw files are read unless All files allowed is on; a .raw file is taken as headerless 16-bit PCM at 44.1kHz.",
+    "Menu — Root Directory — opens a folder chooser and rescans; the chosen folder is the first bank and its subfolders are the rest",
+    "Menu — Enter Bank Select Mode — hands the RESET button and the four lamps over to picking a bank, and the item then reads Exit Bank Select Mode, which loads it",
+    "Menu — Clear Current Bank — unloads the bank that is playing and stops the sound",
+    "Menu — Stereo Output enabled — sends a stereo file out as two channels on one polyphonic cable and a mono file as the same signal on both; off, a stereo file is summed to one",
+    "Menu — Pitch Mode enabled — turns the START knob and its input into a playback speed spanning eight octaves rather than a start point",
+    "Menu — Looping enabled — starts a file again when it reaches its end; it is on when the module is added",
+    "Menu — Crossfade enabled — fades between the old file and the new one over about 25ms rather than cutting; it is on when the module is added",
+    "Menu — Files sorted — reads the files of a bank in name order rather than the order the folder hands back",
+    "Menu — All files allowed — reads every file in the folder rather than only those ending .wav or .raw"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "src/RadioMusic.cpp:1096 clamp(params[STATION_PARAM] + inputs[STATION_INPUT].getVoltage()/5, 0, 1)"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "src/RadioMusic.cpp:1072 and :1075 clamp(params[START_PARAM] + inputs[START_INPUT].getVoltage()/5, 0, 1)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/RadioMusic.cpp:1082 rstInputTrigger.process(inputs[RESET_INPUT].getVoltage())"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/RadioMusic.cpp:937 gain = 5/peak; :1182 setChannels(stereoOutputMode ? 2 : 1); :1196 two channels written in stereo mode"
+     }
+    }
+   },
+   "notes": "The START input is scaled by a fifth of the knob's travel per volt in both modes; the source comment at src/RadioMusic.cpp:1074 says \"Start input follows 1V/Oct\" in pitch mode, but the same expression is used and the speed is then pow(2, 8*speed - 4), which comes to 1.6 octaves per volt. The START knob's tooltip renames itself Pitch while Pitch Mode is on, and its default changes with it. The four lamps and the lamp inside the reset button are lights, not parameters, so they cannot be clicked for help. Panel order and index order agree. The README notes that this port implements none of the hardware firmware; the hardware's settings file, and the hardware gesture of holding reset to reach bank select, are both replaced by the right-click menu."
   }
  }
 }

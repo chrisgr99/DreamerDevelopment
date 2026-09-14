@@ -2,12 +2,156 @@
  "plugin": "matrix-sequencer",
  "source": "https://github.com/Retr0-code/Matrix-Sequncer",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "matrix-sequencer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four by four grid of knobs stepped through by a clock in one of three orders, with the voltage of the step now playing sent to a jack for its row, a jack for its column and a jack for the whole grid",
+    "Sets the voltage that step of the grid sends when the sequence reaches it, -10V to 10V",
+    "Chooses the playback order: 0 runs left to right along each row in turn, 1 alternates between rows and columns on each pass through the grid, and 2 spirals inwards from the top left corner",
+    "A rising edge past 1V moves the sequence on to the next step and sends that step's voltage to the outputs",
+    "Nothing in the module reads this jack. The flag it was meant to set is switched on when the module is made and is never changed again, so the sequence cannot be started or stopped from here.",
+    "Any voltage other than exactly 0V returns the sequence to the top left step, and holds it there for as long as that voltage is present",
+    "Chooses the playback order while a cable is in, the Algorithm knob being ignored meanwhile: exactly 0V gives the row order, above 0V up to 1V the alternating order, and above 1V or below 0V the spiral",
+    "The voltage of the last step played in the first row, held until the sequence returns to that row",
+    "The voltage of the last step played in the second row, held until the sequence returns to that row",
+    "The voltage of the last step played in the third row, held until the sequence returns to that row",
+    "The voltage of the last step played in the fourth row or in the first column, held until one of those is reached again; the first column arrives here because the column jacks are numbered low by one",
+    "The voltage of the last step played in the second column, despite the panel printing X1",
+    "The voltage of the last step played in the third column, despite the panel printing X2",
+    "The voltage of the last step played in the fourth column, despite the panel printing X3",
+    "Nothing in the module ever writes to this jack, so it stays at 0V; the first column's voltage goes to the Y4 jack instead",
+    "The voltage of the step now playing, whichever step that is, held until the next clock edge",
+    "Note — nothing happens until a clock reaches CLK. All nine outputs stay at 0V until the first rising edge arrives.",
+    "Note — an output holds its last voltage between visits rather than falling to 0V, so a row or column jack keeps the value of the last step played there.",
+    "Note — the lamp under a knob is lit while that step is the one playing.",
+    "Note — every output carries one channel, and every input is read on its first channel only.",
+    "Note — a reset moves the position back to the top left but leaves the spiral order's own bounds where they were, so a reset part way through a spiral leaves the two out of step until it finishes."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12,
+    "6": 13,
+    "7": 14,
+    "8": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "2": "trigger",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "8": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "matrix-sequencer.cpp:86 reads inputs[CLOCK_IN_INPUT].getVoltage() with no channel argument into a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "1": {
+      "poly": false,
+      "why": "matrix-sequencer.cpp declares _run at hpp line 80, sets it true in the initialiser list at line 4 and tests it at line 61; no assignment to _run exists anywhere, and inputs[RUN_IN_INPUT] is read nowhere in process"
+     },
+     "2": {
+      "poly": false,
+      "negative": "swings",
+      "why": "matrix-sequencer.cpp:67 tests inputs[RESET_IN_INPUT].getVoltage() for truth with no channel argument and no threshold, so any value that is not exactly zero, of either sign, resets the position at line 70 on every sample it is present"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 2V",
+      "step": "stepped",
+      "why": "matrix-sequencer.cpp:76 takes std::ceil of inputs[ALGORITHM_FM_INPUT].getVoltage() with no channel argument into a uint16_t, and lines 78-79 clamp anything at or above 3 down to 2; line 74 makes the jack override the knob whenever it is connected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "matrix-sequencer.cpp:95 writes the current step's knob with setVoltage and never calls setChannels; the knob is configured -10.f to 10.f at line 14"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "matrix-sequencer.cpp:95, as for the first row output"
+     },
+     "2": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "matrix-sequencer.cpp:95, as for the first row output"
+     },
+     "3": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "matrix-sequencer.cpp:95 writes it when the row index is 3, and line 96 writes outputs[x + 3], which is this same index when the column index is 0"
+     },
+     "4": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "matrix-sequencer.cpp:96 writes outputs[_current_step.x + 3]; X1_OUT_OUTPUT is index 4, so this jack is written when the column index is 1, the second column"
+     },
+     "5": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "matrix-sequencer.cpp:96 writes outputs[_current_step.x + 3]; X2_OUT_OUTPUT is index 5, reached when the column index is 2"
+     },
+     "6": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "matrix-sequencer.cpp:96 writes outputs[_current_step.x + 3]; X3_OUT_OUTPUT is index 6, reached when the column index is 3, the last column"
+     },
+     "7": {
+      "poly": false,
+      "why": "X4_OUT_OUTPUT is index 7, and the only writes in process are outputs[y] at line 95 with y at most 3, outputs[x + 3] at line 96 with x at most 3, and outputs[TOTAL_PITCH_OUT_OUTPUT] at line 97, which is index 8; nothing reaches index 7"
+     },
+     "8": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "matrix-sequencer.cpp:97 writes the current step's knob with setVoltage and never calls setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit b6424e5, the head of the repository; its plugin.json is byte-identical to the installed one and res/matrix-sequencer.svg hashes to the installed file. The version string went 2.0.0, then 2.0.1 for two commits, then back to 2.0.0 for the last two; src/ has not been touched since 58c055d, so every candidate carries the same code. THE COLUMN OUTPUTS ARE NUMBERED ONE PLACE LOW. matrix-sequencer.cpp:96 writes outputs[_current_step.x + 3], but X1_OUT_OUTPUT is index 4, not 3. So column 1 is written to index 3, which is the Y4 jack; column 2 to the jack printed X1; column 3 to X2; column 4 to X3; and index 7, the jack printed X4, is never written by anything and stays at 0V for the life of the module. All three writes on a step carry the same number, the current knob's voltage, so the collision on index 3 loses nothing, but the labelling is wrong by one for every column. THE RUN JACK IS DEAD. _run is set true in the constructor's initialiser list and no assignment to it exists anywhere in the plugin, so the guard at line 61 never fires and the voltage at RUN_IN_INPUT is never read. _reset, declared beside it, is never used at all. The maker's own tooltip on that jack reads 'Start sequence', which is why it gets a line saying it does nothing rather than being left untagged. RESET IS A LEVEL AND HAS NO THRESHOLD: line 67 tests the raw voltage for truth, so a held gate pins the sequencer at the top left and a voltage as small as a thousandth of a volt, of either sign, resets it. A NEGATIVE ALGORITHM CV SELECTS THE SPIRAL: line 76 assigns std::ceil of the voltage into a uint16_t, so a negative result wraps to a very large number and the clamp at line 78 brings it down to 2. The test for a value below zero at line 81 can never be true on an unsigned type. LeftRight_UpDown::callback reaches its second coordinate by taking the address of current_step.x and adding one (sequence_algorithms.cpp:28-29), which relies on the two uint8_t members being adjacent in memory. It works here, but it is not something the language promises. The spiral's furthest and nearest bounds are members of the algorithm object, and a reset at line 70 sets only the position, so the two can go out of step until the spiral completes. The panel prints CLK, RUN, RESET, Algorithm, Y Out and X Out; the total output jack carries no label of its own."
   }
  }
 }

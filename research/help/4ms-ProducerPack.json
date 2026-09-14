@@ -1,63 +1,1019 @@
 {
  "plugin": "4ms-ProducerPack",
- "source": "https://github.com/4ms/ProducerPack/",
+ "source": "https://github.com/4ms/ProducerPack/blob/f0cfb87a5f875b1ddb2fd7b54d61a282bee8088d/doc/Producer%20Pack%20User%20Manual.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "DJFilter": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo filter that sweeps from lowpass through unfiltered to highpass on one knob",
+    "Sweeps the filter: 20Hz to 7000Hz lowpass below the centre, no filtering across the centre, 300Hz to 7000Hz highpass above it; the tooltip reads the lowpass side as stopping at 2000Hz",
+    "Sets the filter Q, 0.707 fully anticlockwise rising to 3 fully clockwise",
+    "Picks how many filter stages are cascaded, giving 6dB, 12dB, 18dB or 24dB per octave",
+    "Left audio into the filter, and the signal used for both channels when the right jack is empty",
+    "Shifts the cutoff sweep, a tenth of the knob's travel per volt, added to the knob and clamped at each end",
+    "Right audio into the filter",
+    "Shifts the resonance, a tenth of the knob's travel per volt, added to the knob and clamped at each end",
+    "The filtered left channel, clamped to ±10V",
+    "The filtered right channel, clamped to ±10V",
+    "Note — the cutoff knob comes up at the centre, where audio passes through unfiltered; that dead zone covers the middle tenth of the travel, with a short crossfade into the filter either side of it."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "audio",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "DJFilter.cpp:110 getVoltage(), channel 0 only"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "DJFilter.cpp:115 getVoltage() * 0.1 added to the 0-1 knob, then clamped 0 to 1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the left input",
+      "why": "DJFilter.cpp:111 isConnected() ? getVoltage() : inL"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "DJFilter.cpp:119 getVoltage() * 0.1 added to the 0-1 knob, then clamped 0 to 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "DJFilter.cpp:196 clamp(outL, -10, 10)"
+     }
+    }
+   },
+   "notes": "The tooltip and the manual both give the lowpass half of the sweep as 20Hz to 2000Hz. The display code does use 2000Hz (DJFilter.cpp:19) but the audio path rescales the same half onto 20Hz to 7000Hz (DJFilter.cpp:133), so the figure shown is wrong everywhere except at the bottom of the sweep. The lowpass output is taken from the last stage's lowpass and the highpass from its highpass, with the stages cascaded through their highpass outputs (DJFilter.cpp:160)."
   },
   "Boost": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo gain stage that clips at ±5V, with a level control after the clipper",
+    "Sets the boost: with the range switch at 1x it runs from silence up to unity, and at 5x or 100x from unity up to that multiple",
+    "Picks the top of the gain knob's range, 1x, 5x or 100x",
+    "Scales the output after the clipper, 0 to 100%",
+    "Left audio in, and the signal sent to both outputs when the right jack is empty",
+    "Right audio in",
+    "The left channel boosted, clipped at ±5V and then scaled by the volume knob",
+    "The right channel boosted, clipped at ±5V and then scaled by the volume knob",
+    "Note — the lamp follows the right channel alone: red while that channel is being clipped and green while it is not, with the brightness following its level.",
+    "Note — with the left jack empty and the right jack patched, the left output is held at 0V."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Boost.cpp:64 getVoltage(), channel 0 only"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the left input",
+      "why": "Boost.cpp:70 the left input is used for the right output when this jack is unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Boost.cpp:66 clamp(boosted, -5, 5) before the volume knob scales it down"
+     }
+    }
+   },
+   "notes": "In the 1x position the gain is the knob value alone (Boost.cpp:44), so the knob attenuates rather than boosts there; in the other two positions it is 1 + knob * (multiplier - 1). The clipping lamp is driven only from the right channel's value (Boost.cpp:92), which the manual does not say."
   },
   "Spatializer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo widener: the input is delayed by a few milliseconds into both channels with the right one inverted, and that pair is blended against the dry mid signal",
+    "Picks whether the Time knob is read in milliseconds or in samples",
+    "Sets the delay, 1ms to 30ms, or 1 to 50 samples when the switch is set to samples",
+    "Spreads the delayed pair across the stereo field, from centred at 0% to fully separated at 100%",
+    "Crossfades the output between the dry mid signal at 0% and the widened side signal at 100%",
+    "Shifts the delay time, a tenth of the knob's travel per volt",
+    "Shifts the width, a tenth of the knob's travel per volt",
+    "Shifts the mid-to-side blend, a tenth of the knob's travel per volt",
+    "Left audio in; with the right jack empty this signal is used for both channels and the module works in its mono layout",
+    "Right audio in; patching it puts the module into its stereo layout, where the output is rebuilt from the mid and the side of the return signals",
+    "Takes the place of the internal delayed left signal in the output, for running the left send through an effect and back",
+    "Takes the place of the dry mid signal in the output",
+    "Takes the place of the internal delayed right signal in the output",
+    "The delayed left signal after the width spread, for feeding an effect",
+    "The two inputs summed and halved, before any delay",
+    "The delayed right signal after the width spread, inverted against the left one",
+    "Left output, the mid and the side blended as the Mid/Side knob sets",
+    "Right output, the mid and the side blended as the Mid/Side knob sets",
+    "Note — three lamps show the level of the mid and of each side; the mid lamp dims and the two side lamps brighten as Mid/Side is turned up.",
+    "Note — the delay length is recalculated from a slewed copy of the Time setting only at the moment the knob, the CV or the switch changes, so it settles part-way towards the value the knob shows."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Spatializer.cpp:88 getVoltage() * 0.1 added to the 0-1 knob, then clamped 0 to 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Spatializer.cpp:101 getVoltage() * 0.1 added to the 0-1 knob, then clamped 0 to 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Spatializer.cpp:108 getVoltage() * 0.1 added to the 0-1 knob, then clamped 0 to 1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Spatializer.cpp:84 getVoltage(), channel 0 only"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the left input",
+      "why": "Spatializer.cpp:86 isConnected() ? getVoltage() : inL, and :85 the same flag picks the mono or stereo path"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the left send",
+      "why": "Spatializer.cpp:142 isConnected() ? getVoltage() : wetL"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the mid send",
+      "why": "Spatializer.cpp:144 isConnected() ? getVoltage() : the dry sum"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the right send",
+      "why": "Spatializer.cpp:143 isConnected() ? getVoltage() : wetR"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Spatializer.cpp:137 setVoltage with no channel argument"
+     }
+    }
+   },
+   "notes": "delaySamples is computed inside the branch that runs only when the time control or the range switch changes, and it is computed from slewedTime, which is updated afterwards (Spatializer.cpp:90-100 and :111). The delay therefore tracks the knob only while the knob is actually moving, and settles wherever the slew had reached when the movement stopped. The buffer holds 2880 samples (Spatializer.cpp:58), more than the 30ms or 50 samples the controls can ask for at ordinary sample rates."
   },
   "StereoWidth": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Narrows or widens a stereo pair, then pans it",
+    "Below the centre it folds the two channels towards mono; above it the difference between them is added to one channel and taken from the other, with extra gain on that difference over the top quarter",
+    "Moves the balance between the channels, hard left at -50% and hard right at +50%; the quieter side is scaled down and the louder side up to double",
+    "Shifts the width, a tenth of the knob's travel per volt, added to the knob and clamped at each end",
+    "Shifts the pan, 10% per volt, added to the knob and clamped at each end",
+    "Left audio in",
+    "Right audio in; with this jack empty the module reads 0V for the right channel rather than copying the left, so a mono signal comes out halved",
+    "The left channel after the width and pan stages",
+    "The right channel after the width and pan stages"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "audio",
+     "3": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "StereoWidth.cpp:36 getVoltage() * 0.1 added to the 0-1 knob, then clamped 0 to 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "StereoWidth.cpp:60 getVoltage() * 10 added to the -50..50 knob, then clamped"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "StereoWidth.cpp:23 getVoltage(), channel 0 only"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "StereoWidth.cpp:24 plain getVoltage() with no isConnected test, so an empty jack reads 0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "StereoWidth.cpp:84 setVoltage with no channel argument"
+     }
+    }
+   },
+   "notes": "This is the one module in the pack with no left-to-right normalling: every other stereo module here falls back to the left input when the right jack is empty, and this one reads 0V (StereoWidth.cpp:24). Below the halfway point the two channels are crossfaded against their own average; above it the half-difference is added and subtracted, at full strength from 75% of the travel, with a gain of up to 2 on it beyond that (StereoWidth.cpp:38-45)."
   },
   "StereoCrossfader": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Crossfades between two stereo pairs on an equal-power law whose curve can be bent",
+    "Fades from the A pair at 0% through both at equal power in the centre to the B pair at 100%",
+    "Bends the fade curve from straight at 0% to logarithmic at 100%, which moves the level less at the ends of the travel and faster near the centre",
+    "Moves the fade; the knob is read as a voltage between -5V and +5V, this jack is added to it, and the total is clamped to that range",
+    "Left channel of the A pair",
+    "Right channel of the A pair; with this jack empty the A left signal is used for both",
+    "Left channel of the B pair",
+    "Right channel of the B pair; with this jack empty the B left signal is used for both",
+    "The left channels of the two pairs faded together",
+    "The right channels of the two pairs faded together"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "StereoCrossfader.cpp:25 getVoltage() added to the knob rescaled to -5..5V, then clamped",
+      "sumRange": "±5V"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "StereoCrossfader.cpp:50 getVoltage(), channel 0 only"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the A left input",
+      "why": "StereoCrossfader.cpp:51 isConnected() ? getVoltage() : aL"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "StereoCrossfader.cpp:52 getVoltage(), channel 0 only"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the B left input",
+      "why": "StereoCrossfader.cpp:53 isConnected() ? getVoltage() : bL"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "StereoCrossfader.cpp:56 setVoltage with no channel argument"
+     }
+    }
+   },
+   "notes": "The shaping is applied to each half of the fade separately and then passed through a sine law for equal power (StereoCrossfader.cpp:62-79). The output is not clamped."
   },
   "SeventiesEQ": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo equaliser after the Neve 1073: input gain, a fixed high shelf, a switchable mid band, a switchable low shelf and a highpass",
+    "Boosts the signal going into the equaliser, 1x with the knob down to 5x with it up",
+    "Boosts or cuts a shelf fixed at 10kHz, -15dB to +15dB",
+    "Boosts or cuts the mid band at whatever frequency the mid selector picks, -15dB to +15dB",
+    "Picks the centre frequency of the mid band: Off, 360Hz, 700Hz, 1.6kHz, 3.2kHz, 4.8kHz or 7.2kHz; at Off the mid band is skipped, and that is where the knob starts",
+    "Boosts or cuts the low shelf at whatever frequency the low selector picks, -15dB to +15dB",
+    "Picks the corner of the low shelf: Off, 35Hz, 60Hz, 110Hz or 220Hz; at Off the shelf is skipped, and that is where the knob starts",
+    "Picks the highpass corner: Off, 50Hz, 80Hz, 160Hz or 300Hz, applied as three cascaded one-pole stages; at Off the highpass is skipped, and that is where the knob starts",
+    "Scales the output after the equaliser, from silence to unity, and starts at a quarter",
+    "Passes both inputs straight to the outputs and puts out all the lamps",
+    "Left audio in, and the signal used for both channels when the right jack is empty",
+    "Right audio in",
+    "The left channel after the equaliser, clamped to ±10V",
+    "The right channel after the equaliser, clamped to ±10V",
+    "Note — three pairs of lamps meter the signal after the input gain, after the equaliser and at the output; each shows green below 5V and red at 5V or above."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SeventiesEQ.cpp:307 getVoltage(), channel 0 only"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the left input",
+      "why": "SeventiesEQ.cpp:308 isConnected() ? getVoltage() : inL"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "SeventiesEQ.cpp:428 clamp(eqOutL * outputVol, -10, 10)"
+     }
+    }
+   },
+   "notes": "The three frequency selectors each carry an Off position that the manual omits, and Off is the default, so a new module has only the input gain, the 10kHz shelf and the output level doing anything (SeventiesEQ.cpp:219-228). The input gain is 1 + 4 * knob (SeventiesEQ.cpp:325) while its tooltip is configured as a plain 5x multiplier of the knob, so the two agree only from the default position upwards and the tooltip reads 0x where the gain is really 1x. The high shelf is always in circuit; its frequency is fixed at 10kHz in the code and cannot be changed."
   },
   "SeventiesComp": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo compressor after the LA-2A, with a switchable ratio, makeup gain and a parallel blend",
+    "Lowers the level at which compression starts, from 1V with the knob down to 0V with it up, measured against an envelope follower on the two inputs averaged; the panel prints Amount",
+    "Picks the ratio used above that level, 3:1 as a compressor or 10:1 as a limiter",
+    "Makeup gain applied to the compressed signal, 0dB to 40dB, which is a multiplier of 1 to 100",
+    "Passes both inputs straight to the outputs and puts the lamp out",
+    "Blends the untouched input against the compressed and made-up signal, for parallel compression",
+    "Left audio in, and the signal used for both channels when the right jack is empty",
+    "Right audio in",
+    "The left channel compressed, made up and blended, clamped to ±10V",
+    "The right channel compressed, made up and blended, clamped to ±10V",
+    "Note — the lamp lights while either output reaches 9.9V, which is where the clamp starts.",
+    "Note — the detector follows both inputs averaged, so the channels are always reduced together; the attack is 10ms and the release 60ms, or 1.5 seconds once the envelope falls below 0.1."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SeventiesComp.cpp:31 getVoltage(), channel 0 only"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the left input",
+      "why": "SeventiesComp.cpp:32 isConnected() ? getVoltage() : inL"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "SeventiesComp.cpp:86 clamp(outL, -10, 10)"
+     }
+    }
+   },
+   "notes": "The threshold is 1 - knob (SeventiesComp.cpp:46) and is compared against the rectified average of the inputs in volts, so even with the knob down most audio at ordinary levels is above it. The gain reduction is 1 / (1 + over * (ratio - 1)), which is a softer law than the stated 3:1 and 10:1 ratios (SeventiesComp.cpp:80). The panel prints Amount where the tooltip and the manual say Peak Reduction."
   },
   "Decay": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Decay envelope with a VCA built in: a trigger restarts the fall, and the envelope opens the audio path",
+    "Sets the decay length as a fraction of whatever the range switch allows, with a floor of 1ms",
+    "Picks the longest decay the knob can reach: 30ms, 200ms or 5 seconds",
+    "Shifts the decay length, a fifth of the knob's travel per volt, added to the knob and clamped at each end",
+    "A rising edge above 1V restarts the envelope at its 5V peak",
+    "The signal the envelope opens; it passes at full level while the envelope is at 5V and is silent once the envelope has fallen away",
+    "The envelope, jumping to 5V at each trigger and falling exponentially towards 0V",
+    "The audio input multiplied by the envelope",
+    "Note — the lamp beside the range switch follows the height of the envelope.",
+    "Note — the knob sets one time constant, so the envelope falls to about a third of its height in that time, and it is cut to 0V once it drops below 1mV."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "audio"
+    },
+    "out": {
+     "0": "cv",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Decay.cpp:37 getVoltage() * 0.2 added to the 0-1 knob, then clamped 0 to 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Decay.cpp:83 a rising edge is trig >= 1V with the previous sample below 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Decay.cpp:95 getVoltage(), channel 0 only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Decay.cpp:88 the envelope is set to 5 at each trigger and only decays from there"
+     },
+     "1": {
+      "poly": false,
+      "why": "Decay.cpp:96 audioIn * envelope * 0.2, so unity at the envelope's peak"
+     }
+    }
+   },
+   "notes": "The trigger is a plain threshold comparison rather than a Schmitt trigger (Decay.cpp:83), so a signal hovering at 1V can retrigger. The decay CV is scaled by 0.2 against the 0-1 knob, so 5V covers the whole range, where most of the other modules in this pack scale their CV by 0.1 and need 10V for the same span."
   },
   "AuxSends": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three stereo send and return loops around a stereo path, each with level controls and CV",
+    "Sets how much signal goes to that send pair, 0 to 100%",
+    "Chooses whether that send is taken before the dry level knob or after it",
+    "Sets how much of that return pair is added to the output, 0 to 100%",
+    "Sets the level of the dry signal in the output, 0 to 100%",
+    "Shifts that send level, a fifth of the knob's travel per volt",
+    "Shifts that return level, a fifth of the knob's travel per volt",
+    "Left channel coming back from that loop; nothing from the loop reaches the output until this jack is patched",
+    "Right channel coming back from that loop; with it empty the left return of the same loop is used for both",
+    "Left audio into the module, and the signal used for both channels when the right jack is empty",
+    "Right audio into the module",
+    "Shifts the dry level, a fifth of the knob's travel per volt, clamped to ±5V before it is added",
+    "Left channel of that send, at the level its own knob sets",
+    "Right channel of that send, at the level its own knob sets",
+    "Left output: the dry signal at its set level plus every patched return, clamped to ±10V",
+    "Right output: the dry signal at its set level plus every patched return, clamped to ±10V",
+    "Note — a send pair is only calculated while one of its two output jacks is patched, and a return is only read while its left jack is patched.",
+    "Note — a lamp beside each send and each return follows the level passing through it, refreshed every 256 samples."
+   ],
+   "param": {
+    "0": 2,
+    "1": 1,
+    "2": 2,
+    "3": 1,
+    "4": 2,
+    "5": 1,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 7,
+    "9": 8,
+    "10": 7,
+    "11": 8,
+    "12": 9,
+    "13": 10,
+    "14": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 12,
+    "3": 13,
+    "4": 12,
+    "5": 13,
+    "6": 14,
+    "7": 15
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "audio",
+     "7": "audio",
+     "8": "audio",
+     "9": "audio",
+     "10": "audio",
+     "11": "audio",
+     "12": "audio",
+     "13": "audio",
+     "14": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "AuxSends.cpp:117 computeCVKnobSum divides the voltage by 5 and adds it to the 0-1 knob, then clamps"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "AuxSends.cpp:117 computeCVKnobSum, used for the return knobs at :133"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "AuxSends.cpp:132 the loop is read only when this jack is connected; :134 getVoltage()"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the left return of that loop",
+      "why": "AuxSends.cpp:135 isConnected() ? getVoltage() * gain : returnL"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "why": "AuxSends.cpp:104 getVoltage(), channel 0 only"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the left input",
+      "why": "AuxSends.cpp:105 isConnected() ? getVoltage() : rawInL"
+     },
+     "14": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "AuxSends.cpp:108 clamp(getVoltage(), -5, 5) / 5 added to the 0-1 knob, then clamped"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "AuxSends.cpp:125 setVoltage with no channel argument"
+     },
+     "6": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "AuxSends.cpp:198 clamp(outL, -10, 10)"
+     }
+    }
+   },
+   "notes": "The three loops are written out three times in the source with identical code, so one line covers each kind of control. Pre fader takes the signal before the dry level knob and post fader after it (AuxSends.cpp:122). The send CV, return CV and dry CV all divide by 5, so 5V covers a knob's whole range here."
   },
   "Bitcrusher": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo sample-rate reducer and bit crusher, with a resonant filter after them",
+    "Sets the rate the input is sampled and held at, 15000Hz fully anticlockwise down to 20Hz fully clockwise; the tooltip calls this Clock Frequency where the panel says Sample Rate",
+    "Sets how many bits each sample is rounded to, 16 fully anticlockwise through to 1 fully clockwise; at 16 the signal passes unrounded and at 1 it becomes a square between -5V and +5V",
+    "Blends the untouched input against the crushed and filtered signal",
+    "Sets the filter corner, 20Hz fully anticlockwise to 15000Hz fully clockwise, rising evenly with the knob; the tooltip reads a far lower frequency everywhere except the two ends",
+    "Sets the filter Q, 0.1 fully anticlockwise rising to 5.1 fully clockwise",
+    "Picks lowpass or highpass for the filter after the crusher",
+    "Scales the output, 0 to 100%, after the dry and wet are mixed",
+    "Shifts the sampling rate, a tenth of the knob's travel per volt, clamped to ±5V before it is added",
+    "Shifts the bit depth by three bits per volt, clamped to ±5V before it is added",
+    "Shifts the dry and wet blend, a tenth of the knob's travel per volt, clamped to ±5V before it is added",
+    "Shifts the filter corner, a tenth of the knob's travel per volt, clamped to ±5V before it is added",
+    "Shifts the filter Q, a tenth of the knob's travel per volt, clamped to ±5V before it is added",
+    "Shifts the output level, a tenth of the knob's travel per volt, clamped to ±5V before it is added",
+    "Left audio in, and the signal used for both channels when the right jack is empty",
+    "Right audio in",
+    "The left channel crushed, filtered, blended and clamped to ±5V",
+    "The right channel crushed, filtered, blended and clamped to ±5V",
+    "Note — the rounding works on a window from -5V to +5V, so anything louder than that is flattened at those bounds before it reaches the filter."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13,
+    "6": 14,
+    "7": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 17
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "audio",
+     "7": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Bitcrusher.cpp:188 clamp(getVoltage(), -5, 5) / 10 added to the 0-1 knob, then clamped"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Bitcrusher.cpp:205 clamp(getVoltage(), -5, 5) / 5 * 15, three bits per volt"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Bitcrusher.cpp:158 getNormalizedParam clamps to ±5V and divides by 10"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Bitcrusher.cpp:158 getNormalizedParam, used for the cutoff at :226"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Bitcrusher.cpp:158 getNormalizedParam, used for the resonance at :227"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Bitcrusher.cpp:158 getNormalizedParam, used for the volume at :240"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Bitcrusher.cpp:178 getVoltage(), channel 0 only"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the left input",
+      "why": "Bitcrusher.cpp:180 isConnected() ? getVoltage() : leftIn"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Bitcrusher.cpp:243 clamp(crossfade(...) * volume, -5, 5)"
+     }
+    }
+   },
+   "notes": "The cutoff knob's tooltip is configured as an exponential 20 * 750^value while the filter itself uses 20Hz + value * 14980Hz (Bitcrusher.cpp:127 and :228), so the two agree only at the ends of the travel: at the halfway point the tooltip says about 548Hz where the filter is at about 7510Hz. The manual gives the cutoff range as 20Hz to 8000Hz; the code's top is 15000Hz. The panel prints Sample Rate where the parameter is named Clock Frequency."
   },
   "DrumBus": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight mono inputs mixed down to a stereo pair, each with its own level, pan and mute",
+    "Sets the level of that channel in the mix, 0 to 100%, and starts at half",
+    "Places that channel in the stereo image on an equal-power law, hard left at -50% and hard right at +50%",
+    "Takes that channel out of the mix",
+    "Scales the whole mix, 0 to 100%",
+    "One of the eight mono inputs; an unpatched jack is skipped entirely",
+    "The left side of the mix, clamped to ±10V",
+    "The right side of the mix, clamped to ±10V",
+    "Note — a centred channel is fed to each output at about 71% of its level, which is what the equal-power pan law gives, rather than at full level to both."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 1,
+    "4": 2,
+    "5": 3,
+    "6": 1,
+    "7": 2,
+    "8": 3,
+    "9": 1,
+    "10": 2,
+    "11": 3,
+    "12": 1,
+    "13": 2,
+    "14": 3,
+    "15": 1,
+    "16": 2,
+    "17": 3,
+    "18": 1,
+    "19": 2,
+    "20": 3,
+    "21": 1,
+    "22": 2,
+    "23": 3,
+    "24": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "DrumBus.cpp:156 getVoltage(), channel 0 only; :125 an unconnected channel is skipped"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "DrumBus.cpp:166 clamp(leftMix, -10, 10)"
+     }
+    }
+   },
+   "notes": "Pan gains are cos and sin of the pan position over a quarter turn (DrumBus.cpp:147), so a centred channel is at 0.707 in each output. With the master volume at zero the whole process function returns early and both outputs are held at 0V (DrumBus.cpp:111)."
   }
  }
 }

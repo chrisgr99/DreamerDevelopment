@@ -1,23 +1,308 @@
 {
  "plugin": "Hugelton",
- "source": "no published source; read from the installed 2.0.1 build",
+ "source": "no published source; read from the installed 2.0.1 binary, which carries full C++ symbols",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "K102": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Digital oscillator built from three: a primary and a secondary wavetable oscillator combined by one of three methods, and a third oscillator used as a modulator",
+    "Chooses the primary oscillator's waveform, one of eight",
+    "Sets the harmonic content of the primary oscillator, in sixteen steps",
+    "Sets the primary oscillator's pitch, in semitones, over three octaves",
+    "Sets the harmonic content of the secondary oscillator, in sixteen steps",
+    "Sets the secondary oscillator's pitch, in semitones, over three octaves",
+    "Chooses what the tertiary oscillator modulates: Pitch A/B, Pitch B or Alpha",
+    "Chooses which pair of waveforms the tertiary oscillator draws from: Square/Random, Up/Down or Triangle/Sine",
+    "Sets the tertiary oscillator's rate, marked in Hz, doubling for each unit of the knob's travel and passing 1Hz at the centre",
+    "Sets how far the tertiary oscillator moves whatever it has been pointed at",
+    "Sets how much of the secondary oscillator is worked into the primary, by whichever method is chosen",
+    "Chooses how the two oscillators are combined: Phase, Multiply or Fade",
+    "Switches the sync between the two oscillators on or off",
+    "Sets the output level, silent at one end and the whole ±5V swing at the other",
+    "Picks which waveform of the pair the tertiary oscillator uses: Bank A gives square, up and triangle, and Bank B gives random, down and sine",
+    "Chooses how the secondary oscillator is tuned: Free makes its frequency knob a semitone offset from the primary's pitch, and Detune reads it against middle C instead",
+    "Chooses the secondary oscillator's waveform: Sine to Sawtooth sweeps its own shape, and Copy from A takes the primary's",
+    "Sets the pitch at 1V per octave, clamped to 0 to 5V, so a negative voltage does nothing; the secondary oscillator moves only one semitone per volt from the same jack",
+    "Added to the alpha knob, one volt moving it a tenth of its travel, and held between none and full",
+    "Added to the primary oscillator's harmonics, one and a half steps per volt, and held between none and fifteen",
+    "The oscillator, clamped to ±5V",
+    "Note — the signal is put through a sixteen-bit quantiser with a dither noise added before it leaves the module, which is what gives it its grain",
+    "Note — the panel is lettered in Japanese with an English subtitle under each section: PRIMARY OSCILLATOR, SECONDARY OSCILLATOR, TERTIARY OSCILLATOR and COMPOUND UNIT"
+   ],
+   "param": {
+    "1": 1,
+    "0": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "8": 6,
+    "9": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "15": 15,
+    "14": 16
+   },
+   "in": {
+    "0": 17,
+    "1": 18,
+    "2": 19
+   },
+   "out": {
+    "0": 20
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "K102::process at 0x1264, clamped to 0 and 5 before use"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the alpha knob alone",
+      "why": "K102::process at 0x13bc tests the channel count and at 0x13d4 adds voltage times 0.1"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the harmonics slider alone",
+      "why": "K102::process at 0x13e8 tests the channel count and at 0x13f8 adds voltage times 1.5"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "K102::process at 0x1bc0, clamped to -5 and 5 then setVoltage"
+     }
+    }
+   },
+   "notes": "Read from the installed 2.0.1 binary, which carries full C++ symbols; the plugin publishes no source. Two pitch faults. The primary oscillator's frequency is 261.6256 times two to the power of (knob minus twelve plus twelve times the pitch voltage) over twelve (K102::process, 0x1240 to 0x12c0), so the knob's own tooltip, which is configured with a semitone display base against 261.6256, reads exactly one octave above the note that is sounding. And the secondary oscillator in its Detune setting adds the pitch voltage to a semitone count without multiplying by twelve (0x12f4), so it rises one semitone per volt where the primary rises an octave; the two therefore part company as soon as a keyboard is patched. In the Free setting the secondary is instead a ratio of the primary's frequency, clamped to plus or minus twenty-four semitones. Both oscillator frequencies are finally clamped between 0.1Hz and 20000Hz. The pitch input is clamped to 0 to 5V before anything is done with it. The output passes through a sixteen-bit quantiser with a rand()-based dither term added (0x1b64 to 0x1bc0) before the plus or minus 5V clamp. The switch choices are the maker's own strings: LFO Mode is Pitch A/B, Pitch B and Alpha; LFO Waveform is Square/Random, Up/Down and Triangle/Sine; LFO Bank is Bank A (Sq/Up/Tri) and Bank B (Rnd/Down/Sin); Method is Phase, Multiply and Fade; Sync is Off and On; OSC B Mode is Free and Detune; OSC B Bank Copy is Sine to Sawtooth and Copy from A. Index order is not panel order for the inputs: the middle jack is input three, the modulation one."
   },
   "K104": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two independent ADSR envelope generators, each with a shape control and a polarity switch",
+    "Sets the attack time of the first envelope, 1ms at one end and 10 seconds at the other",
+    "Sets the decay time of the first envelope, 1ms at one end and 10 seconds at the other",
+    "Sets the level the first envelope holds while its gate stays high",
+    "Sets the release time of the first envelope, 1ms at one end and 10 seconds at the other",
+    "Bends the first envelope's segments from a squared curve at one end through a straight line at the middle to a square-root curve at the other",
+    "Sets the attack time of the second envelope, 1ms at one end and 10 seconds at the other",
+    "Sets the decay time of the second envelope, 1ms at one end and 10 seconds at the other",
+    "Sets the level the second envelope holds while its gate stays high",
+    "Sets the release time of the second envelope, 1ms at one end and 10 seconds at the other",
+    "Bends the second envelope's segments from a squared curve at one end through a straight line at the middle to a square-root curve at the other",
+    "Turns the first envelope's output upside down; the setting named Positive is the one that inverts it, and Negative passes the envelope through as it is",
+    "Turns the second envelope's output upside down; the setting named Positive is the one that inverts it, and Negative passes the envelope through as it is",
+    "A voltage of 1V or more opens the first envelope, and dropping below it starts the release",
+    "A voltage of 1V or more opens the second envelope, and dropping below it starts the release",
+    "Scales the first envelope's attack, decay and release times together, in 256 steps; the jack reads as half the knob settings while nothing is patched",
+    "Scales the second envelope's attack, decay and release times together, in 256 steps; the jack reads as half the knob settings while nothing is patched",
+    "The first envelope, 0 to 10V",
+    "The second envelope, 0 to 10V",
+    "Note — the attack, decay and release times a knob shows are the times before the control CV jack scales them; with that jack empty the real times are half of what the tooltip reads",
+    "Note — the panel is lettered in Japanese with the English subtitles ENVELOPE GENERATOR I and ENVELOPE GENERATOR II over the two halves"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "10": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 9,
+    "11": 10,
+    "8": 11,
+    "9": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16
+   },
+   "out": {
+    "0": 17,
+    "1": 18
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "K104::process at 0x89ec, compared with fcmp against 1.0f and cset ge"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "K104::process at 0x8a8c, compared with fcmp against 1.0f and cset ge"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V, which halves the three times",
+      "why": "K104::quantizeCV at 0x8978, voltage times 0.05 plus 0.5, clamped to 0 and 1, then quantised to 256 steps"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V, which halves the three times",
+      "why": "K104::quantizeCV at 0x8978, voltage times 0.05 plus 0.5, clamped to 0 and 1, then quantised to 256 steps"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "K104::process at 0x8a80, envelope times 10 then setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "K104::process at 0x8af0, envelope times 10 then setVoltage"
+     }
+    }
+   },
+   "notes": "Read from the installed 2.0.1 binary. Two findings. The polarity switch is configured with the choices Positive and Negative at values 0 and 1, and the code selects one minus the envelope when the parameter is BELOW 0.5 (K104::process, 0x8a70) - so the choice named Positive, which is also the default, is the one that turns the envelope upside down. And the control CV jack is not an offset but a multiplier on the attack, decay and release parameters: quantizeCV maps the voltage to voltage times 0.05 plus 0.5, clamped to 0 to 1 and quantised to 256 steps, and that factor multiplies all three times before they reach the envelope (0x8a48 to 0x8a54). An unpatched jack reads 0V, which gives a factor of one half, so the module's real times are half the times its own tooltips display, and only at plus 10V do the two agree. The sustain parameter is not scaled. The times themselves are 0.001 seconds times 10000 to the power of the parameter, so 1ms to 10 seconds. The curve control is an exponent of two to the power of one minus twice the parameter (K104::getShapedEnvelope, 0x8944), giving a squared curve at zero, a straight line at one half and a square root at one."
   },
   "K108": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two digital filters the audio passes through in turn, each choosing between a low pass, a high pass and a plain amplifier, and between a ladder and a biquad model",
+    "Chooses what Filter Unit I does to the signal: Low Pass, High Pass, or VCA, which passes it through unfiltered",
+    "Chooses what Filter Unit II does to the signal: Low Pass, High Pass, or VCA, which passes it through unfiltered",
+    "Sets the resonance of Filter Unit I, from none at the bottom to full at the top",
+    "Sets the resonance of Filter Unit II, from none at the bottom to full at the top",
+    "Sets the cutoff frequency of Filter Unit I, 20Hz at the left end and 20000Hz at the right",
+    "Sets the cutoff frequency of Filter Unit II, 20Hz at the left end and 20000Hz at the right",
+    "Chooses the model Filter Unit I is built on, Ladder or Biquad",
+    "Chooses the model Filter Unit II is built on, Ladder or Biquad",
+    "The audio to be filtered; with this jack empty the module puts out 0V and nothing else happens",
+    "Added to the Unit I cutoff slider, a tenth of its travel per volt, which comes out close to 1V per octave",
+    "Added to the Unit II cutoff slider, a tenth of its travel per volt, which comes out close to 1V per octave",
+    "Added to both resonance sliders at once, a tenth of their travel per volt",
+    "The filtered audio, clamped to ±5V",
+    "Note — nothing comes out until a cable is in the audio input; the module returns 0V on every sample while that jack is empty",
+    "Note — both filter units come up set to VCA, so a freshly placed module passes audio through without filtering it until the two type switches are moved",
+    "Note — the panel is lettered in Japanese with the English subtitles FILTER UNIT I, FILTER UNIT II and TRAVELER over its three sections"
+   ],
+   "param": {
+    "5": 1,
+    "6": 2,
+    "2": 3,
+    "3": 4,
+    "0": 5,
+    "1": 6,
+    "7": 7,
+    "8": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "out": {
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "K108::process at 0xb1b8 reads only the channel count and at 0xb218 only voltages[0]"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the Unit I cutoff slider alone",
+      "why": "K108::process at 0xb240, voltage times 0.1 clamped to -1 and 1, added to the parameter"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the Unit II cutoff slider alone",
+      "why": "K108::process at 0xb2ac, voltage times 0.1 clamped to -1 and 1, added to the parameter"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the two resonance sliders alone",
+      "why": "K108::process at 0xb1e0, voltage times 0.1 added to both resonance parameters"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "K108::process at 0xb4f0, clamped to -5 and 5 then setVoltage"
+     }
+    }
+   },
+   "notes": "Read from the installed 2.0.1 binary. The module carries a ninth parameter, Volume, configured 0 to 1 with a default of 0.8 - and it has no ParamWidget on the panel and is never read in process, so it can be neither turned nor heard. It gets no line here because no click can reach it. Both filter type switches default to VCA, the middle of their three settings, so a freshly placed K108 filters nothing. The cutoff parameters are configured with a display base of 1000 and a multiplier of 20, which is 20Hz to 20000Hz; a cutoff CV of one volt moves the parameter a tenth of its travel, and a tenth of three decades is 0.997 of an octave, so those jacks are within a third of a per cent of 1V per octave and are coloured as pitch. The resonance CV jack is shared: one voltage is added to BOTH filters' resonance parameters. Process returns 0V immediately when the audio input has no cable (0xb1b8). The filter models are named Ladder and Biquad in configSwitch, at values 0 and 1; the panel prints them in Japanese under the English heading FILTER I TYPE, while the low pass, high pass and VCA switch is the one the maker's tooltip calls Filter A Type."
   }
  }
 }

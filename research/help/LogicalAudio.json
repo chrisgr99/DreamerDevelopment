@@ -1,33 +1,423 @@
 {
  "plugin": "LogicalAudio",
- "source": "https://github.com/AgostoSound",
+ "source": "https://github.com/AgostoSound/LogicalAudio/blob/300b90aae2a136fbf809b059438f1ec65f317b7a/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "L-Carrier": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Passes an audio signal to six outputs, each one open only while the logic condition it is named for holds between the two logic inputs",
+    "One of the two logic inputs; it counts as high only at exactly 10V, and every other voltage counts as low",
+    "The signal the six outputs carry; each output whose condition holds carries whatever is here, and every other output carries 0V",
+    "Carries the audio input while both A and B are at exactly 10V, and 0V otherwise",
+    "Carries the audio input while either A or B is at exactly 10V, and 0V while neither is",
+    "Carries the audio input while exactly one of A and B is at exactly 10V, and 0V otherwise",
+    "Carries the audio input unless both A and B are at exactly 10V, and 0V while both are",
+    "Carries the audio input while neither A nor B is at exactly 10V, and 0V while either one is",
+    "Carries the audio input while A and B agree, either both at exactly 10V or both away from it, and 0V while they differ",
+    "Note — A and B read high only at exactly 10V. A 5V gate, or a 10V gate that an attenuator has touched at all, counts as low and opens nothing.",
+    "Note — each output fades in and out over 12 samples when its condition changes, so a gate does not click.",
+    "Note — with nothing patched into Audio in, every open output carries 0V, so the module makes no sound of its own.",
+    "Note — the two lamps beside the jacks light while A and while B are at 10V, and the green lamp in the logic drawing lights while A and B differ.",
+    "Note — this module is monophonic: only the first channel of a polyphonic cable is read, and each output carries one channel."
+   ],
+   "param": {},
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/L-Carrier.cpp:83 compares the voltage with 10.0f for exact equality; src/L-Carrier.cpp:80 reads it with getVoltage() and no channel index"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/L-Carrier.cpp:84 compares the voltage with 10.0f for exact equality; src/L-Carrier.cpp:81 reads it with getVoltage() and no channel index"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/L-Carrier.cpp:79 reads it with getVoltage() and no channel index, and lines 100 to 105 multiply it by each gate's fade"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/L-Carrier.cpp:100 to 105 call setVoltage with no channel index and setChannels is never called"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/L-Carrier.cpp:100 to 105 call setVoltage with no channel index and setChannels is never called"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/L-Carrier.cpp:100 to 105 call setVoltage with no channel index and setChannels is never called"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/L-Carrier.cpp:100 to 105 call setVoltage with no channel index and setChannels is never called"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/L-Carrier.cpp:100 to 105 call setVoltage with no channel index and setChannels is never called"
+     },
+     "5": {
+      "poly": false,
+      "why": "src/L-Carrier.cpp:100 to 105 call setVoltage with no channel index and setChannels is never called"
+     }
+    }
+   },
+   "notes": "The high test is an exact float comparison with 10.0f (src/L-Carrier.cpp:83), which the maker's own doc states as well (docs/L-Carrier.md, Functionality Overview). It is the single most surprising thing about the module and is written into the input's line for that reason. The output named Nor in configOutput is the NOT_OUT_OUTPUT enum member, and the panel prints Nor; it carries the NOR of A and B, so the enum name is an internal misnomer only. This module has no parameters at all."
   },
   "L-Random": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four random voltage sources stepping to a new value on their own timers: a signed and an unsigned output for each of a left and a right pair",
+    "Sets how long that output holds each value, 50ms at 1 rising to 450ms at 9, so a higher setting changes more slowly",
+    "Replaces that output's Freq knob while a cable is here, -5V giving the 50ms setting and +5V the 450ms setting, with anything beyond either end clamped",
+    "Sets the size of that output's signed values: the knob setting times 0.44 gives the middle of a band a volt either side, and the sign is drawn afresh each time",
+    "Sets the size of that output's unsigned values: the band runs from one below the knob setting to one above it, so 0V to 2V at 1 and 8V to 10V at 9; the maker's tooltip calls this control Spread",
+    "Replaces the LvL knob for that signed output while a cable is here, -5V giving 0.36 and +5V giving 3.96 as the middle of the band",
+    "Replaces the LvL knob for that unsigned output while a cable is here, -5V giving 0.8 and +5V giving 8.8 as the setting the band is built from",
+    "Sets the hold time for all four outputs while the general switch is on, 50ms at 1 rising to 450ms at 9",
+    "Sets the size of the values for all four outputs while the general switch is on; the maker's tooltip calls this control Spread",
+    "Puts all four outputs onto the two knobs above it and makes the module draw a single random value for all of them; the eight CV jacks are ignored while it is on",
+    "A random voltage that can come out positive or negative, replaced by a fresh one each time its own timer comes round",
+    "A random positive voltage, replaced by a fresh one each time its own timer comes round",
+    "Note — the four Freq knobs in the columns come up at 0, which is below their own range of 1 to 9, so each output draws a new value every sample until its knob is moved.",
+    "Note — a CV jack replaces its knob rather than adding to it, and every CV jack is ignored while the general switch is on.",
+    "Note — with the general switch on, one random value is drawn each sample; the signed outputs take it as it stands and the unsigned outputs take twice its size.",
+    "Note — the timers run on the computer's clock rather than on Rack's sample count, so the hold times do not follow the sample rate.",
+    "Note — this module is monophonic: only the first channel of a polyphonic cable is read, and each output carries one channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 3,
+    "6": 3,
+    "5": 4,
+    "7": 4,
+    "8": 7,
+    "9": 8,
+    "10": 9
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 5,
+    "6": 5,
+    "5": 6,
+    "7": 6
+   },
+   "out": {
+    "0": 10,
+    "2": 10,
+    "1": 11,
+    "3": 11
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/L-Random.cpp:122 clamps it to -5..5 and maps it to 1..9, and lines 221 to 228 use it in place of the knob only when the jack is connected"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/L-Random.cpp:122 clamps it to -5..5 and maps it to 1..9, and lines 221 to 228 use it in place of the knob only when the jack is connected"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/L-Random.cpp:122 clamps it to -5..5 and maps it to 1..9, and lines 221 to 228 use it in place of the knob only when the jack is connected"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/L-Random.cpp:122 clamps it to -5..5 and maps it to 1..9, and lines 221 to 228 use it in place of the knob only when the jack is connected"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/L-Random.cpp:145 clamps it to -5..5 and maps it to 0.36..3.96 for a bipolar output, and lines 231 and 235 use it in place of the knob"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/L-Random.cpp:145 clamps it to -5..5 and maps it to 0.36..3.96 for a bipolar output, and lines 231 and 235 use it in place of the knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/L-Random.cpp:146 clamps it to -5..5 and maps it to 0.8..8.8 for a unipolar output, and lines 233 and 237 use it in place of the knob"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/L-Random.cpp:146 clamps it to -5..5 and maps it to 0.8..8.8 for a unipolar output, and lines 233 and 237 use it in place of the knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/L-Random.cpp:265 to 284 and 302 to 332 call setVoltage with no channel index and setChannels is never called"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/L-Random.cpp:265 to 284 and 302 to 332 call setVoltage with no channel index and setChannels is never called"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/L-Random.cpp:265 to 284 and 302 to 332 call setVoltage with no channel index and setChannels is never called"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/L-Random.cpp:265 to 284 and 302 to 332 call setVoltage with no channel index and setChannels is never called"
+     }
+    }
+   },
+   "notes": "The panel prints Freq and LvL over the knob rows and the words Just one beside the switch, while configParam names them Freq, Spread and GENERAL SWITCH (src/L-Random.cpp:70 to 81); the panel is followed and the disagreement named in each line. The four column Freq knobs are configured with a minimum of 1 and a default of 0 (src/L-Random.cpp:72 to 75), so a fresh module starts them below their own range and the timer interval is zero. The hold interval is the setting times 50ms (src/L-Random.cpp:242) measured on std::chrono::steady_clock rather than on the sample clock. The bipolar knob value is multiplied by 0.44 before use (src/L-Random.cpp:203 and 215) but a bipolar CV is not, because the CV assignment happens after that line. In Just one mode the spread_2, spread_3 and spread_4 values are computed and then never used, and the unipolar outputs take the absolute value of the single drawn number doubled (src/L-Random.cpp:261)."
   },
   "L-Panel": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A blank panel carrying the plugin wordmark, a NOT gate symbol and a cartoon face, meant to fill a gap in a rack",
+    "Note — this module has no inputs, no outputs and no parameters. It draws its artwork and does nothing else."
+   ],
+   "param": {},
+   "in": {},
+   "out": {},
+   "family": {
+    "in": {},
+    "out": {}
+   },
+   "notes": "src/L-Panel.cpp declares PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN and LIGHTS_LEN all as zero and process() has an empty body. STYLE's exception for a panel whose whole purpose is to be looked at applies here."
   },
   "L-Rantics": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two random voltage sources, each drawing a new value on the rising edge of its own clock input and holding it until the next one",
+    "Sets the base level that channel's values are built on, stepping from 1 to 9, with each new value the setting plus a random volt either way",
+    "Chooses whether the two outputs keep a randomly drawn sign, so a value can come out negative, or are always positive; the lamps either side of the switch show which position it is in",
+    "Chooses whether new values are fired by the two Tic inputs or by a clock inside the module that fires at random moments between 0.2 and 1 second apart",
+    "A clock for the left channel: a rising edge to 1V or more draws a new value. With nothing patched into Tic 2, this jack drives both channels.",
+    "A clock for the right channel: a rising edge to 1V or more draws a new value. With nothing patched into Tic 1, this jack drives both channels.",
+    "Replaces the left LvL knob while a cable is here, -5V giving 1 and +5V giving 11; patching here also switches the right channel onto its own CV jack, whether or not that jack has a cable",
+    "Replaces the right LvL knob, but only while the left channel's CV jack also has a cable; on its own this jack changes nothing",
+    "That channel's random voltage, held until its clock fires again: the base level plus a random volt either way, signed or not as the polarity switch allows",
+    "Note — with the tic switch set to the inputs and nothing patched into either Tic jack, both outputs stay at 0V and no values are drawn.",
+    "Note — a value is the base level plus a random volt either way, so a setting of 9 reaches 10V and a CV of +5V reaches 12V. The maker's manual gives the range as -1V to +1V.",
+    "Note — the right channel's level CV jack is tested against the left jack's cable rather than its own, so it does nothing alone, and patching only the left jack forces the right channel's level to 6.",
+    "Note — the maker's manual says each level CV jack overrides its own channel's knob, which is not what the module does.",
+    "Note — with the tic switch set to the internal clock, each channel is fired on about half of the clock's moments, independently of the other.",
+    "Note — the internal clock's timer is shared by every copy of this module in a patch, so two of them set to the internal clock fire together.",
+    "Note — this module is monophonic: only the first channel of a polyphonic cable is read, and each output carries one channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the Tic 2 jack",
+      "why": "src/L-Rantics.cpp:135 tests the voltage against 1.0f, and line 140 copies the Tic 2 reading into this channel when only Tic 2 is connected"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the Tic 1 jack",
+      "why": "src/L-Rantics.cpp:136 tests the voltage against 1.0f, and line 139 copies the Tic 1 reading into this channel when only Tic 1 is connected"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/L-Rantics.cpp:97 clamps it to -5..5 and adds 6, giving 1..11, and line 120 uses it in place of the left knob when this jack is connected"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/L-Rantics.cpp:124 reads this jack, but line 123 tests L_CV_INPUT rather than R_CV_INPUT for the cable, so the jack is only consulted while the left one is patched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/L-Rantics.cpp:206 calls setVoltage with no channel index and setChannels is never called"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/L-Rantics.cpp:207 calls setVoltage with no channel index and setChannels is never called"
+     }
+    }
+   },
+   "notes": "Line 123 of src/L-Rantics.cpp reads `if (inputs[L_CV_INPUT].isConnected())` where the right channel is being resolved; the body then reads R_CV_INPUT. The right level CV is therefore gated on the left jack's cable. docs/L-Rantics.md says each CV input overrides its own knob, which the code does not do. The manual also gives the output range as -1V to +1V, or 0V to +2V unipolar, but src/L-Rantics.cpp:173 adds the level, which is 1 to 9 from the knob or 1 to 11 from CV, to a random value between -1 and +1. The internal-clock timer and interval are function-level statics inside process() (src/L-Rantics.cpp:130), so they are shared by every instance of the model in the patch. The source comment there says 0.4 to 1.2 seconds; the expression gives 0.2 to 1.0. The polarity LightId names are the reverse of the behaviour they show, but the lamps sit beside the panel glyph that matches what each switch position does, so nothing visible is wrong."
   },
   "L-Noises": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two gated noise sources sharing one white-noise generator, each with its own noise colour, its own logic condition and its own level",
+    "Chooses the noise colour for the right-hand channel, which feeds Out 2: pink, white or brown; the maker's tooltip for it reads Noise L mode",
+    "Chooses the noise colour for the left-hand channel, which feeds Out 1: pink, white or brown; the maker's tooltip for it reads Noise R mode",
+    "Chooses which logic condition has to hold between Signal A and Signal B before that channel's noise reaches its output: AND, OR, XOR, NAND, NOR or XNOR",
+    "Sets that channel's output level as a percentage from 0 to 100; it comes up at 1, which is almost silent",
+    "One of the two logic inputs; it counts as high above 5V and low at or below it",
+    "The noise for that channel while its logic condition holds, and 0V while it does not",
+    "Note — both Vol knobs come up at 1 out of 100, so a fresh module is almost silent until they are turned up.",
+    "Note — the two channels are fed from one white-noise draw per sample, so with both colour switches in the same position the two outputs carry the same signal.",
+    "Note — the pink filter state and the brown integrator are shared by both channels, so two channels set to the same colour track each other exactly.",
+    "Note — the two colour switches wear each other's tooltips: the switch on the left is named Noise R mode and feeds Out 1, and the one on the right is named Noise L mode and feeds Out 2.",
+    "Note — a channel set to brown fades over about 12 samples when its logic condition changes; pink and white switch instantly.",
+    "Note — the two lamps beside the input jacks light while Signal A and Signal B are above 5V.",
+    "Note — this module is monophonic: only the first channel of a polyphonic cable is read, and each output carries one channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 3,
+    "4": 4,
+    "5": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 5V",
+      "why": "src/L-Noises.cpp:117 tests the voltage against 5.0f and line 109 reads it with getVoltage() and no channel index"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 5V",
+      "why": "src/L-Noises.cpp:118 tests the voltage against 5.0f and line 110 reads it with getVoltage() and no channel index"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/L-Noises.cpp:144 and 146 call setVoltage with no channel index and setChannels is never called"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/L-Noises.cpp:151 and 153 call setVoltage with no channel index and setChannels is never called"
+     }
+    }
+   },
+   "notes": "configSwitch at src/L-Noises.cpp:47 gives NOISER_PARAM the name \"Noise L mode\" and line 48 gives NOISEL_PARAM the name \"Noise R mode\". The widget places NOISER_PARAM at x 45.5mm, the right-hand column, and NOISEL_PARAM at x 15.687mm, the left; process() reads NOISEL_PARAM into n_type_l which drives OUTL_OUTPUT, the left output. The two tooltips are therefore swapped relative to the controls, and each line says so. The panel prints A and B over the two input jacks and Out 1 and Out 2 under the two output jacks, with no L or R lettering anywhere. Both channels take the same white sample (src/L-Noises.cpp:125) and generateNoise keeps one set of pink filter states and one brown accumulator as module members (lines 35 to 36), so two channels set to the same colour are identical and two set to brown integrate the same accumulator twice per sample. VOLL_PARAM and VOLR_PARAM are configured 0 to 100 with a default of 1 (lines 54 and 55) and divided by 100 in use."
   }
  }
 }

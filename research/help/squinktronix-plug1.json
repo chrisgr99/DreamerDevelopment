@@ -1,28 +1,443 @@
 {
  "plugin": "squinktronix-plug1",
- "source": "https://github.com/squinkylabs/SqHarmony",
+ "source": "https://github.com/squinkylabs/SqHarmony/blob/main/docs/harmony.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "sqh-harmony1": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four-part chord generator: it reads one pitch as a scale degree and voices a triad for bass, tenor, alto and soprano, choosing the voicing by the common-practice voice-leading rules",
+    "Sets the root of the key, C through B; both the chord generator and the quantizer on the Root input follow it",
+    "Sets the mode of the key, one of the seven diatonic modes; both the chord generator and the quantizer on the Root input follow it",
+    "Chooses how inversions are treated: don't care, discourage two inverted chords in a row, or discourage inverted chords altogether",
+    "Chooses the spread of the four voices: closest together, the ordinary vocal ranges, or the full extended range, in the reverse order to the one the tooltip names",
+    "Switches on the rule used when two chords share no notes: the three upper voices move one way and the bass the other, each to the nearest scale degree",
+    "Shifts the incoming scale degree by up to seven degrees either way before the chord is picked, so the harmony moves in key rather than by semitones",
+    "The chord's scale degree, read as a pitch at 1V per octave and quantized to the key; the octave makes no difference, and a change of quantized degree generates a new chord",
+    "Generates a new chord on each rising edge above 1.6V, so a held pitch can be re-voiced; a change of input pitch also generates one unless Retrig. on notes and CV is turned off",
+    "Sets the key root and mode from a twelve-channel Poly External Scale cable: under 4V a note outside the scale, under 9V a note in it, above that the root",
+    "The bass voice at 1V per octave; it is the lowest voice, so it always carries one channel",
+    "The tenor voice at 1V per octave, with the bass ahead of it on channel 0 when the bass jack is unpatched",
+    "The alto voice at 1V per octave, preceded by the bass and tenor on their own channels where their jacks are unpatched",
+    "The soprano voice at 1V per octave, preceded by any lower voice whose jack is unpatched, so patching this jack alone carries all four voices with the bass on channel 0",
+    "Menu — Repetition avoidance: off, 4, 8, 13 — sets how many recent chords the generator refuses to repeat",
+    "Menu — Sharps&Flats: Default+sharps, Default+flats, Sharps, Flats — chooses how a note that could be written either way is spelled on the score",
+    "Menu — Black notes on white paper — reverses the colours the score is drawn in",
+    "Menu — Retrig. on notes and CV — generates a chord whenever the input pitch changes, not only when a trigger arrives; with it off and Trig patched, the trigger is the only thing that generates one",
+    "Menu — Trigger delay — delays the Trig input by 5 samples, so a pitch that arrives a sample or two behind the trigger is the one used; it comes up on",
+    "Note — the score at the top is a display only, showing the last bar or two of chords with the scale degree in roman numerals and the figured bass under each",
+    "Note — the number printed under each output jack is how many channels that jack is carrying",
+    "Note — the red lamp beside PES lights when that cable has fewer than twelve channels or carries a scale the module does not recognise"
+   ],
+   "param": {
+    "3": 1,
+    "4": 2,
+    "5": 3,
+    "6": 4,
+    "7": 5,
+    "10": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv"
+    },
+    "out": {
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "composites/Harmony.h:370 reads getVoltage(0) only, then ScaleQuantizer::run"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1.6V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "composites/Harmony.h:364 GateDelay::process(input, 1) then GateTrigger; util/Constants.h:6-11 cGateHi 1.6V, cGateLow 0.1V"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "composites/Harmony.h:256-281 needs 12 channels; under 4V not in scale, under 9V in scale, above that root"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "composites/Harmony.h:191-207 the first port in the loop always gets setChannels(1) because debt is zero"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "composites/Harmony.h:196 setChannels(1 + debt), debt counting the unpatched jacks below it"
+     },
+     "3": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "composites/Harmony.h:196 setChannels(1 + debt), debt counting the unpatched jacks below it"
+     },
+     "4": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "composites/Harmony.h:196 setChannels(1 + debt), debt counting the unpatched jacks below it"
+     }
+    }
+   },
+   "notes": "The switch printed C sets Style::Ranges directly from the param value (composites/Harmony.h:237), where the enum is ENCOURAGE_CENTER, VOCAL_RANGE, WIDE_RANGE in that order, but configSwitch names the three positions 'None (wide)', 'Encourage Center', 'Narrow (vocal range)' (src/Harmony1Module.h:52). The tooltip therefore names the outer two positions the wrong way round; the line describes the code. Output 0 is a quantizer output that was never given a widget, so no click can reach it. Params 0, 1, 2, 8, 9, 11 and 12 carry menu settings and hidden state and have no widget. Trigger delay and Retrig. on notes and CV both default on; Repetition avoidance defaults to off."
   },
   "sqh-arpeggiator1": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Arpeggiator: voltages arriving on its polyphonic CV inputs are collected in a buffer and played back one per clock, in an order set by the mode",
+    "Chooses the playback order: up, down, up+down, down+up, up then down, down then up, inside-out, outside-in, order played, repeat low, repeat high, shuffle",
+    "Sets how many of the most recent input voltages the buffer keeps, 1 to 16; fully anticlockwise it keeps the last 32, which is the most it can hold",
+    "Sets how many notes are played before the pattern starts over, 1 to 16; fully anticlockwise the pattern runs its natural length, which is however many notes are in the buffer",
+    "Keeps notes in the buffer when their gate falls, so they accumulate as you play; switching it off empties the buffer of everything whose gate is already low",
+    "Overrides the mode control while patched, a twelfth of a volt per mode from 0V, clamped at both ends of the list",
+    "Overrides the Hold switch while patched: above 1.5V notes accumulate, below it they are dropped when their gate falls",
+    "Advances the arpeggio one step on each rising edge above 1.6V; the gate output follows the shape of this input, so a narrow clock gives short notes",
+    "Returns playback to the first step of the pattern on a rising edge above 1.6V",
+    "Re-shuffles the playback order at the end of the current cycle on a rising edge, in shuffle mode; unpatched, the order is re-shuffled every cycle",
+    "The voltages to arpeggiate: a channel is written into the buffer when its gate goes high, so this normally takes a polyphonic cable at 1V per octave",
+    "A second voltage per channel, sampled at the same moment as CV and carried through the arpeggiation with it, so it comes out at the CV2 output beside the note it arrived with",
+    "Writes that channel's CV and CV2 into the buffer when it rises above 1.6V and drops that note when it falls; a mono cable here samples every channel of the CV input at once",
+    "The arpeggiated voltage from the CV input, monophonic, changing on each clock",
+    "The value the CV2 input carried for the note now playing, monophonic",
+    "10V while the clock input is high and there is something in the buffer to play, 0V otherwise",
+    "Menu — Reset Mode II — holds the reset until the next clock, which carries out the reset instead of acting as a clock; with it off the reset happens on its own rising edge",
+    "Menu — Gate+Clock Delay — delays the gate input by 5 samples and the clock input by 10, so a CV that arrives a sample or two late is the one sampled",
+    "Note — nothing plays until there are notes in the buffer: patch a polyphonic CV and its gates, or turn Hold on and feed notes in one at a time",
+    "Note — nothing advances without a clock either; the module has no clock of its own",
+    "Note — the module quantizes nothing, so any voltage can be fed through it, and the modes reorder voltages rather than pitches"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "5": 5,
+    "4": 6,
+    "2": 7,
+    "3": 8,
+    "7": 9,
+    "0": 10,
+    "6": 11,
+    "1": 12
+   },
+   "out": {
+    "0": 13,
+    "3": 14,
+    "1": 15
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "composites/Arpeggiator.h:117 channels read as the polyphony, :186 getVoltage(channel) per channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1.6V",
+      "step": "continuous",
+      "why": "composites/Arpeggiator.h:136-143 loops over the channel count; util/Constants.h:11 cGateHi 1.6V"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1.6V",
+      "step": "continuous",
+      "why": "composites/Arpeggiator.h:166 clockOnlyDelay.process(input, 1), then SeqClock's GateTrigger"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1.6V",
+      "step": "continuous",
+      "why": "composites/Arpeggiator.h:168 getVoltage(0) into SeqClock::updateOnce, whose resetProcessor is a GateTrigger"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1.5V",
+      "step": "stepped",
+      "normal": "the Hold switch",
+      "why": "composites/Arpeggiator.h:252-256 getVoltage(0) compared against 1.5, only when isConnected"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 0.91V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the mode control",
+      "why": "composites/Arpeggiator.h:240-246 getVoltage(0) times 12, clamped to 0 and to the last of the 12 modes"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "why": "composites/Arpeggiator.h:187 getVoltage(channel) for the channel whose gate went high"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1.6V",
+      "step": "continuous",
+      "why": "composites/Arpeggiator.h:157 getVoltage(0) into a GateTrigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "composites/Arpeggiator.h:209 setVoltage(..., 0) and no setChannels anywhere"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "composites/Arpeggiator.h:226-229 cGateOutHi 10V or cGateOutLow 0V on channel 0"
+     },
+     "3": {
+      "poly": false,
+      "why": "composites/Arpeggiator.h:210 setVoltage(..., 0) and no setChannels anywhere"
+     }
+    }
+   },
+   "notes": "The Mode CV range is written as 0 to 0.91V because the code clamps voltage times 12 to the last of the twelve modes, which is 11/12V. The maker's manual says the Hold input is off at 0V or less and on above 5V; the code compares against 1.5V (composites/Arpeggiator.h:254), and the code is what ships. The manual also gives the Schmitt trigger threshold as 1.0V, where util/Constants.h:11 has 1.6V. Mode names in the manual differ from the ones the dropdown prints: the list is 'up then down' and 'down then up', not 'up and down' and 'down and up' (util/ArpegPlayer.h:54). Output 2 is an unused end-of-cycle output with no widget. Params 4 to 8 are hidden state and menu settings with no widget. Reset Mode II comes up on."
   },
   "sqh-harmony2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Diatonic chord generator: six transposers each shift the input pitch by a number of scale degrees and octaves, and the enabled ones come out together as one polyphonic chord",
+    "Transposes that row by this many scale degrees above the input, 0 to +11; a third is +2 and a fifth is +4",
+    "Shifts that row by whole octaves, -2 to +2, on top of its scale-degree setting",
+    "Turns that row on and off, lighting while it is on; each enabled row adds one channel to the V/Oct output",
+    "Sets the root of the scale that the quantizing and the transposing are done in",
+    "Sets the scale that the quantizing and the transposing are done in, the seven diatonic modes and a further six scales",
+    "Adds to the transposition of every enabled row, a twelfth of a volt per scale degree; a polyphonic cable feeds each enabled row its own channel, in panel order from the top",
+    "Sets the scale root from a voltage, a twelfth of a volt per semitone, wrapping within the octave",
+    "Sets the scale from a voltage, a twelfth of a volt per scale, wrapping through the list; Mode CV only diatonic cuts that list to the seven modes",
+    "The pitch every enabled row transposes, read from channel 0 at 1V per octave and quantized to the scale",
+    "Sets the scale root and mode from a twelve-channel Poly External Scale cable: under 4V a note outside the scale, under 9V a note in it, above that the root",
+    "The chord at 1V per octave, one channel per enabled row, in panel order from the top",
+    "The current scale as a twelve-channel Poly External Scale cable: 0V for a note outside it, 8V for a note in it and 10V for the root",
+    "Menu — Mode CV only diatonic — cuts the Mode input's list to the seven diatonic modes; the panel's own mode picker offers every scale either way",
+    "Menu — Sharps&Flats: Default+sharps, Default+flats, Sharps, Flats — chooses how a note that could be written either way is named",
+    "Note — nothing comes out until one of the six rows is enabled with its button; with none enabled the V/Oct output carries no channels",
+    "Note — the scale can be set from the panel pickers, from the Key and Mode inputs or from the PES input, and whichever changed most recently is the one in force",
+    "Note — with a cable in XP, the number printed beside an enabled row is the total transposition that row is applying, in scale degrees",
+    "Note — the red lamp beside the PES input lights when that cable has fewer than twelve channels or carries a scale the module does not recognise"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "24": 3,
+    "25": 3,
+    "26": 3,
+    "27": 3,
+    "28": 3,
+    "29": 3,
+    "30": 4,
+    "31": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "cv",
+     "3": "pitch",
+     "4": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "composites/Harmony2.h:434-443 a channel per enabled row when channels > 1, voltage times 12 rounded to whole scale degrees"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "stepped",
+      "why": "composites/Harmony2.h:253-267 getVoltage(0), fraction times 12 rounded and wrapped into 0 to 11"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "why": "composites/Harmony2.h:285-297 getVoltage(0) times 12, taken modulo the number of scales on offer"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "composites/Harmony2.h:427 getVoltage(0) only, then the scale quantizer"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "composites/Harmony2.h:338-360 needs 12 channels; under 4V not in scale, under 9V in scale, above that root"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "composites/Harmony2.h:326-333 channels set to the number of enabled rows"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "composites/Harmony2.h:377-401 twelve channels, 8V in scale and 10V for the root"
+     }
+    }
+   },
+   "notes": "The Key input's scaling is not a straight 1V per octave read: composites/Harmony2.h:259-267 takes the fractional part of the voltage, so the octave is discarded and the root wraps within twelve semitones. The XP input has no range field because the transposition it adds is unbounded in the code; the resulting degree is wrapped into the scale by ScaleNote::transposeDegree. Params 12 to 23 report state back to the panel and params 32 and 33 carry the two menu settings; none of them has a widget. The maker's manual lists the mode CV mapping with 12/12V absent and 13/12V as Chromatic; the code takes the voltage modulo the number of scales, so 12/12V is the first scale again."
   },
   "sqh-visualizer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Chord recogniser: it names the chord arriving on its polyphonic pitch input, draws it in standard notation and puts the chord's root out as a pitch",
+    "Sets the root of the key signature the notation is written in, and leans the spelling of note and chord names towards that key; chord recognition is not changed by it",
+    "Sets the mode of the key signature the notation is written in, one of the seven diatonic modes; chord recognition is not changed by it",
+    "The notes to identify, at 1V per octave, one per channel of a polyphonic cable; the octave a note is in and any doubling of it make no difference to the chord that is named",
+    "Restricts the reading to those pitch channels whose gate here is above 5V; unpatched, every channel of the pitch input is read",
+    "Sets the key signature from a twelve-channel Poly External Scale cable: under 4V a note outside the scale, under 9V a note in it, above that the root",
+    "The key signature as a twelve-channel Poly External Scale cable: 0V for a note outside it, 8V for a note in it and 10V for the root",
+    "The root of the recognised chord at 1V per octave, holding the last root it found while the input is not a chord it recognises",
+    "10V while the input is a recognised chord, 0V when it is not",
+    "Note — the chords recognised are the major, minor, diminished, augmented, sus2 and sus4 triads, four sevenths and four ninths, each in any inversion; anything else is named as unrecognised",
+    "Note — the staff and the chord name are a display; nothing has to be patched to the outputs for them to work",
+    "Note — the red lamp beside the PES input lights when that cable has fewer than twelve channels or carries a scale the module does not recognise"
+   ],
+   "param": {
+    "4": 1,
+    "5": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 8
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "composites/Visualizer.h:129-147 loops over getChannels() and quantizes each channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 5V",
+      "step": "continuous",
+      "normal": "every pitch channel read",
+      "why": "composites/Visualizer.h:134-138 unconnected means all gates true, otherwise getVoltage(channel) > 5"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "PESConverter.h:20-45 needs 12 channels; under 4V not in scale, under 9V in scale, above that root"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "PESConverter.h:59-62 twelve channels, 8V in scale and 10V for the root"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "composites/Visualizer.h:196 writes ROOT_OUTPUT.value, which is channel 0, and sets no channel count"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "composites/Visualizer.h:188-197 10V when a chord is recognised, 0V when it is not"
+     }
+    }
+   },
+   "notes": "Params 0 to 3 report the recognised chord back to the panel display and param 6 carries the Sharps&Flats menu setting; none of them has a widget. The gate test at composites/Visualizer.h:137 compares the channel index with > rather than >=, so when the gate cable has fewer channels than the pitch cable the first channel past the end of the gate cable is read as 0V rather than being excluded outright; either way it is treated as a low gate. The module runs its chord recognition once every 32 samples unless the Root or Valid output is patched, in which case it runs every sample (composites/Visualizer.h:202-207)."
   }
  }
 }

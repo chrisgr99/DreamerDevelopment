@@ -2,12 +2,78 @@
  "plugin": "camouflage",
  "source": "https://github.com/thement/camouflage",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "FakeTapeDelay": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A tape delay with a fixed length of tape and a variable playback speed, so changing the speed changes the delay time and bends the pitch of whatever is already recorded on the tape",
+    "Sets the tape speed, from 0.1 to 2 times real time; the delay time is the tape length divided by this, so 0.5 gives twice the tape length and 2 gives half of it",
+    "Scales the delayed signal where it is added to the input, from none to 100%; that sum both goes back onto the tape and leaves the Out jack, so at zero Out carries the dry signal alone",
+    "Attenuates the voltage at the Speed input before it is added to the tape speed, passing none of it at the counter-clockwise end and all of it at the clockwise end",
+    "Adds to the tape speed after the Amount knob attenuates it, 10V adding 1 to the speed; the sum is clamped between 0.1 and 2, and the scaling is linear in speed rather than in octaves",
+    "Replaces the signal read off the tape; patch an effect from Send to here to treat the delay inside the feedback loop",
+    "The signal recorded onto the tape, added to the delayed signal before it is written",
+    "The signal read off the tape, before the Return jack can replace it and before the feedback mix",
+    "The input added to the delayed signal scaled by Feedback, which is the same mix that is written back onto the tape",
+    "Note — the tape is 100ms long until you pick another length from the module's menu, and nothing on the panel shows which length is in use",
+    "Note — the signal written onto the tape passes a four-pole lowpass at the tape speed times half the sample rate, so it filters only below a speed of 1; the output has no filter and aliases above it",
+    "Menu — Delay Buffer Size: 30 ms, 100 ms, 300 ms, 1 sec — sets the length of the tape, which is the delay time at a tape speed of 1"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 6,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 8,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "FakeTapeDelay.cpp:87 reads getVoltage() with no channel argument, and the disassembly of FakeTapeDelay::process holds no setChannels call and no read past voltages[0]"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FakeTapeDelay.cpp:82 reads getVoltage() with no channel, multiplies it by the Amount knob and divides by 10 into the speed sum, which line 83 clamps to 0.1 and 2.0"
+     },
+     "2": {
+      "poly": false,
+      "normal": "the signal read off the tape",
+      "why": "FakeTapeDelay.cpp:98 tests isConnected and line 99 reads getVoltage() with no channel, replacing the tape output outright"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "FakeTapeDelay.cpp:116 writes one value with setVoltage and the module never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "FakeTapeDelay.cpp:97 writes one value with setVoltage and the module never calls setChannels"
+     }
+    }
+   },
+   "notes": "Read at commit 3d836d1, the commit that bumped plugin.json to the installed 2.4.2; the only later commit on the repository, b0725bd, adds a diagram to the README and changes no code. The maker's README calls the big knob Time and describes a Time modulation input, but commit 7967e07 renamed the parameter to speed and the panel prints Tape Speed, with the modulation jack printed Speed and its attenuator printed Amount. The README also says the insert return goes after the delay line and before the mix, which the code bears out: the Return jack substitutes for the tape output entirely rather than being added to it. The Out jack carries the input plus the delayed signal scaled by Feedback, so Feedback doubles as the wet level and the output is dry when it is at zero; the README's signal diagram shows this and the panel does not. The 50-sample offset between the write and read points in the buffer is left out of the lines, being too small to hear. The tape length is saved with the patch."
   }
  }
 }

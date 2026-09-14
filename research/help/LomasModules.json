@@ -2,17 +2,274 @@
  "plugin": "LomasModules",
  "source": "https://github.com/LomasModules/LomasModules.git",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "AdvancedSampler": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A one-voice player for the .wav files in a folder on disk, with a recorder for capturing a new one into the same list",
+    "Opens a file browser; pick any file and every .wav file in that folder is read into memory, up to 256 of them",
+    "Starts the sample from its START position; pressing it again restarts from there. It does nothing until a sample is loaded",
+    "Turns looping on and off: with it on the sample jumps back to START each time it reaches END instead of stopping",
+    "Starts recording what arrives at IN, and a second press stops it; the press is ignored unless IN is patched",
+    "Chooses which of the loaded .wav files plays, sweeping the whole folder from the first file at the left to the last at the right",
+    "Sets where playback begins, 0 to 100 per cent of the sample's length; for a sample under 2 seconds the knob is squared, giving finer control near the start",
+    "Sets where playback ends, 0 to 100 per cent of the sample's length; set below START and the sample is read backwards",
+    "Shifts the playback speed, marked in semitones and running ±24 semitones; 0 plays the file at its written pitch",
+    "Sets the rise time of the amplitude envelope, 1ms at the left and 1 second at the centre; at the far right the rise never completes and nothing is heard. With Hold / Decay chosen it sets a hold time",
+    "Sets the fall time of the amplitude envelope, 1ms at the left and 1 second at the centre; at the far right the level holds and the sample plays through without fading",
+    "Added to the SAMPLE knob at 10% of the folder per volt, moving the choice of file",
+    "Added to the START knob at 10% of the sample per volt",
+    "Added to the END knob at 10% of the sample per volt",
+    "A pulse here starts recording, and the next pulse stops it; it is ignored unless IN is patched",
+    "Added to the TUNE knob at one volt per octave of playback speed, with the total held between -4 and +4 octaves",
+    "Added to the ATTACK knob at 10% of its travel per volt",
+    "Added to the DECAY knob at 10% of its travel per volt",
+    "The signal recorded into the current slot, read as ±5V and clipped there",
+    "A pulse here starts the sample from its START position",
+    "The sample, scaled to ±5V and shaped by the attack and decay envelope; 0V while nothing is playing",
+    "A 1ms pulse at 10V each time playback reaches the END position, whether it then loops or stops",
+    "Note — nothing plays until a folder is loaded: click LOAD and pick any file, and every .wav file beside it is read in.",
+    "Note — only the first channel of each .wav file is read, so a stereo file plays as its left channel alone.",
+    "Note — pressing REC moves the SAMPLE knob to the far right and records into a new slot after the last loaded file.",
+    "Note — a recording stops on its own after 441000 samples, which is 10 seconds at a 44.1kHz engine rate and shorter at a higher one.",
+    "Note — a file whose own sample rate differs from the engine rate is corrected as it plays, so it sounds at its written pitch.",
+    "Note — the screen draws the sample's name, its number in the folder, its waveform, the START and END markers and the play position. It is a drawing only, and nothing on it can be clicked or dragged.",
+    "Menu — Envelope: Attack / Decay, Hold / Decay — chooses whether the ATTACK knob sets a rise time or a time the envelope holds at full level before the decay",
+    "Menu — Interpolation: None, Linear, Hermite, BSPLine — sets how a value between two stored samples is worked out when TUNE moves playback off the file's own rate",
+    "Menu — Slice mode — quantises START and END to sixteenths of the sample and draws the division marks on the screen",
+    "Menu — Low cpu mode — nothing in the module reads this setting and it is not written into the patch, so turning it on changes nothing",
+    "Menu — Trim sample — shortens the sample in memory to the section between START and END; with START above 0 the copy runs past the end of its own buffer, so the result cannot be relied on",
+    "Menu — Save sample — writes the sample in memory into the loaded folder as a new 32-bit mono .wav file"
+   ],
+   "param": {
+    "0": 5,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 6,
+    "5": 7,
+    "6": 1,
+    "7": 3,
+    "8": 2,
+    "9": 4
+   },
+   "in": {
+    "0": 11,
+    "1": 15,
+    "2": 16,
+    "3": 17,
+    "4": 12,
+    "5": 13,
+    "6": 18,
+    "7": 14,
+    "8": 19
+   },
+   "out": {
+    "0": 21,
+    "1": 20
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "audio",
+     "7": "trigger",
+     "8": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "src/AdvancedSampler.cpp getClipIndex() calls getParamModulated(SAMPLE_PARAM, 0.1f), which is clamp(params[SAMPLE_PARAM].getValue() + inputs[SAMPLE_INPUT].getVoltage() * 0.1f, 0.f, 1.f); no channel loop anywhere in the file"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "-4 to 4V",
+      "why": "src/AdvancedSampler.cpp SinglePass() calls getParamModulated(TUNE_PARAM, 1.0f, -4.0f, 4.0f), so the jack adds one octave per volt to the knob and the total is clamped to ±4 octaves"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "src/AdvancedSampler.cpp SinglePass(): getParamModulated(ATTACK_PARAM, 0.1f), clamp(knob + volts * 0.1f, 0.f, 1.f)"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "src/AdvancedSampler.cpp SinglePass(): getParamModulated(DECAY_PARAM, 0.1f), clamp(knob + volts * 0.1f, 0.f, 1.f)"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "src/AdvancedSampler.cpp getPhaseStart() calls getParamModulated(START_PARAM, 0.1f), clamp(knob + volts * 0.1f, 0.f, 1.f)"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "src/AdvancedSampler.cpp getPhaseEnd() calls getParamModulated(END_PARAM, 0.1f), clamp(knob + volts * 0.1f, 0.f, 1.f)"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/AdvancedSampler.cpp process(): clip_cache_[getClipIndex()].rec(inputs[AUDIO_INPUT].getVoltage() / 5.0f), and AudioClip::rec stores clamp(sample, -1.0f, 1.0f)"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/AdvancedSampler.cpp process(): rec_trigger_.process(inputs[REC_INPUT].getVoltage()) on a dsp::SchmittTrigger, whose Rack 2 defaults are 0.1V low and 1V high; guarded by inputs[AUDIO_INPUT].isConnected()"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/AdvancedSampler.cpp process(): play_trigger.process(inputs[PLAY_INPUT].getVoltage()) on a dsp::SchmittTrigger with Rack 2's 0.1V and 1V defaults"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/AdvancedSampler.cpp SinglePass(): setVoltage(eoc_pulse_.process(args.sampleTime) ? 10 : 0); eoc_pulse_.trigger() takes dsp::PulseGenerator's default 1e-3 second length"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/AdvancedSampler.cpp SinglePass(): outputs[AUDIO_OUTPUT].setVoltage(filter_out * 5), with the stored sample clamped to ±1 by AudioClip; no setChannels call in the file"
+     }
+    }
+   },
+   "notes": "Menu item Low cpu mode sets AdvancedSampler::low_cpu_ and nothing reads it: grep finds the member only at its declaration and in the menu item's onAction and step. It is also absent from dataToJson, so it is not even remembered. Menu item Trim sample is defective. AudioClip::trim computes samples_to_copy = (end - start) * n and remove_l = start * n, then copies with `for (int i = remove_l; i < samples_to_copy; i++)`, which stops at samples_to_copy rather than remove_l + samples_to_copy; the second loop then pushes samples_to_copy values back out of a vector holding only samples_to_copy - remove_l of them, reading past its end. Trimming from a start of 0 is the only safe case. A fourth light, REC_LIGHT_BLUE, is declared in the LightIds enum, is never set in process() and has no LightWidget on the panel. process() calls light_timer_.process(args.sampleTime) twice per sample, once on its own line and once inside the comparison, so the lamp refresh runs at twice the intended rate; this is cosmetic. The recording limit is a fixed sample count, maxRecordSamples = 44100 * 10, not a fixed duration, so it shortens as the engine rate rises. Envelope times come from the baked env_time_ table in src/dsp/LutEnvelope.hpp, which runs from an increment of 1000 per second at the left through 1 at the centre to 0 at the right; setMinMaxTime is never called, so the table is used as written and the far right of either knob is a stage that never completes."
   },
   "GateSequencer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A gate sequencer holding four patterns of up to 64 steps each, edited 16 steps at a time on the button grid",
+    "Shows that quarter of the pattern's 64 steps on the button grid. Half a second's hold clears those 16 steps if the quarter is already shown, or copies the shown 16 steps into it if it is not",
+    "Switches that step of the shown quarter on or off in the playing pattern. Hold it for half a second and the pattern's last step is moved to that step",
+    "Queues that pattern to start playing at the next quantization boundary. Hold it for half a second and, on the playing pattern, it is cleared; on another pattern, the playing pattern is copied into it",
+    "The clock that advances the sequence by one step per rising edge, and whose own high time becomes the length of the gate at GATE",
+    "A pulse here returns the sequence to its first step, either at once or at the next clock pulse",
+    "10V while the current step is on and the clock is above 0.01V, and 0V otherwise",
+    "Note — nothing comes out until a clock is patched to CLOCK, because the gate is the clock's own high time gated by the step.",
+    "Note — a new module starts with all four patterns empty and every pattern 16 steps long; click grid buttons to put steps in.",
+    "Note — the gate at GATE is high only while the clock is high, so the gate length follows the clock's pulse width rather than a setting on the panel.",
+    "Note — place a second Gate Sequencer immediately to the right of this one and it takes the step count, the clock and the pattern selection from this one, ignoring its own CLOCK and RESET jacks.",
+    "Note — a chained Gate Sequencer keeps its own steps and its own pattern lengths, and any number can be chained in a row.",
+    "Note — a grid lamp is blue where the step is on, green on the step playing now, dim red on the step set as the pattern's last, and dim blue on a step that is on but past the last step.",
+    "Note — a lamp in the top row is blue on the quarter shown on the grid, green on the quarter holding the step playing now, and dim red on the quarter holding the pattern's last step.",
+    "Note — a lamp in the bottom row is green on the pattern playing now and blue on the pattern queued to play next.",
+    "Menu — Reset mode: Next clock input., Instant — chooses whether a pulse at RESET returns to the first step immediately or at the next clock pulse",
+    "Menu — Global quantization: 4 Bars, 1 Bar, 1/16 — sets the number of clock pulses a queued pattern is held back before it starts playing: 64, 16 or 1"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "16": 2,
+    "17": 2,
+    "18": 2,
+    "19": 2,
+    "20": 2,
+    "21": 2,
+    "22": 2,
+    "23": 2,
+    "24": 3,
+    "25": 3,
+    "26": 3,
+    "27": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/GateSequencer.cpp process(): clock_tiggrer_.process(inputs[CLOCK_INPUT].getVoltage()) on a dsp::SchmittTrigger with Rack 2's 0.1V and 1V defaults; the same jack is then read again as gate_in = inputs[CLOCK_INPUT].getVoltage() > .01f"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/GateSequencer.cpp process(): reset_trigger_.process(inputs[RESET_INPUT].getVoltage()) on a dsp::SchmittTrigger with Rack 2's 0.1V and 1V defaults"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/GateSequencer.cpp process(): outputs[GATE_OUTPUT].setVoltage(gate_out ? 10.0f : 0.0f), one call with no setChannels"
+     }
+    }
+   },
+   "notes": "Two parameters are configured and have no widget, so no click can reach them and they get no line: KNOB_PARAM + 0, named \"Trigger prob\" with a 0 to 100 per cent display, and KNOB_PARAM + 3, named \"Pattern length\" over 0 to 63 steps. Neither is added by GateSequencerWidget and neither is read anywhere in process() or UpdateUI(), so they do nothing even from a script; the census accordingly has no paramPos for indices 4 to 7. KNOB_PARAM + 1 and + 2 are allocated by the ENUMS macro and never configured at all. The panel calls the top row EDIT PAGE, the grid PATTERN EDITOR and the bottom row PATTERN SELECT; the maker's parameter names are Page 1 to 4, Step and Pattern 1 to 4. Chaining is by Rack's expander messages and both sides are the same model: a module with a Gate Sequencer on its left reads beat counter, clock high state, queued pattern and playing pattern from it and skips its own CLOCK and RESET handling entirely. global_quatization_ is not written to dataToJson, so the Global quantization choice comes back at its default of 16 (1 Bar) whenever a patch is loaded; reset_mode_index_ is saved and defaults to 1, which is Instant. A long press is half a second: LongPressButton::step(value, delta_time) fires LONG_PRESS at pressedTime >= 0.5f. A clock pulse arriving within 1ms of a reset is ignored, from the reset_timer_.time > 1e-3f guard. onReset() clears the gates and sets every pattern length back to 15, meaning 16 steps, but leaves beat_counter_ where it was."
   }
  }
 }

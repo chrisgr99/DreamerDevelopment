@@ -2,37 +2,650 @@
  "plugin": "ChaoticInstruments",
  "source": "no published source; read from the installed 2.0.0 build",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "FFTF": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An FFT freeze: it holds the spectrum of what is coming in at the moment you freeze it and plays that back as a sustained pad, and passes the input through untouched the rest of the time",
+    "Freezes the spectrum and holds it; on the Toggle setting each press switches the freeze on or off, and on the Momentary setting the freeze lasts only while the button is held",
+    "Sets how much of the frozen spectrum is heard against the dry input, and is read only while the freeze is on, so with the freeze off the output is the input alone",
+    "Sets the length of the analysis window, from 128 samples up to about one second; with a clock at CLK it instead snaps to note lengths from a sixty-fourth up to a whole note",
+    "Attenuates and inverts the voltage at the WINDOW input before it is added to the WINDOW knob",
+    "Sets how far the analysis frames overlap, a hop of half the window at the counter-clockwise end and an eighth of it at the clockwise end, which smears the sound across time",
+    "Attenuates and inverts the voltage at the SHAPE input before it is added to the SHAPE knob",
+    "Reads the clock as straight, triplet or dotted note lengths, which changes the set of window lengths the WINDOW knob can reach",
+    "Sets how long the analysis window takes to move to a new length, from an immediate jump at the counter-clockwise end to one whole window length at the clockwise end",
+    "The left audio input, and the signal the right channel uses as well while IN R is empty",
+    "The right audio input; with nothing patched here it takes whatever is at IN L",
+    "Freezes the spectrum: on the Toggle setting each rising edge above 1V switches the freeze on or off, and on the Momentary setting the freeze holds while this reads above 0.1V",
+    "Moves the analysis window length, scaled by its attenuverter, with 5V covering the whole of the WINDOW knob's travel",
+    "Moves the frame overlap, scaled by its attenuverter, with 5V covering the whole of the SHAPE knob's travel",
+    "A clock here makes the window lengths note values of that clock; the rate is taken from the time between rising edges above 1V",
+    "The left output: the left input while the freeze is off, and that input mixed with the frozen spectrum while it is on",
+    "The right output: the right input while the freeze is off, and that input mixed with the frozen spectrum while it is on",
+    "Note — nothing is held until the freeze is switched on, by the button or by a gate at the FREEZE input; until then the module passes its input straight through and the MIX knob does nothing",
+    "Note — the display draws the spectrum the module is analysing",
+    "Menu — Freeze behavior: Momentary (hold gate), Toggle (on/off) — chooses whether the button and the gate hold the freeze while they are down or switch it on and off; the module starts on Toggle",
+    "Menu — Clock rate: 1 PPQ (1/4 note), 2 PPQ (1/8 note), 4 PPQ (1/16 note), 24 PPQ — tells the module how many pulses the clock sends per beat, which sets what the window lengths are measured against"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "read from the installed 2.0.0 plugin.dylib; FFTF::process at 0x3538 reads inputs[0] voltages[0] and writes it straight into the analysis ring; the binary contains no getChannels, getPolyVoltage or setChannels at all"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the left input",
+      "why": "read from the installed 2.0.0 plugin.dylib; FFTF::process at 0x353c tests inputs[1] channels and uses inputs[0] voltage when it is zero"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; FFTF::process at 0x3470 and 0x34d0 compares inputs[2] voltage against 1.0 and 0.1 as a Schmitt trigger"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; FFTF::process at 0x3310 multiplies inputs[3] by 0.2 and by the attenuverter before adding it to the window knob and clamping to 0 to 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; FFTF::process at 0x33dc multiplies inputs[4] by 0.2 and by the attenuverter before adding it to the shape knob and clamping to 0 to 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; FFTF::process at 0x3280 compares inputs[5] voltage against 1.0 and 0.1 as a Schmitt trigger and counts samples between rising edges"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "read from the installed 2.0.0 plugin.dylib; FFTF::process at 0x3614 writes outputs[0] voltages[0] once and never sets a channel count"
+     },
+     "1": {
+      "poly": false,
+      "why": "read from the installed 2.0.0 plugin.dylib; FFTF::process at 0x3628 writes outputs[1] voltages[0] once and never sets a channel count"
+     }
+    }
+   },
+   "notes": "Closed source; everything here was read from the installed 2.0.0 binary. The window length is resolved by resolveWindowN at 0x1108: free-running it is 128 samples at the counter-clockwise end rising to capN, which is the sample rate times 1.024 capped at 262144, so about one second; clocked it is chosen from the beat divided by 1, 2, 4, 8, 16, 32 and 64, with any candidate under 128 samples or over the cap dropped. Clock division multiplies the beat by 2/3 for Triplet and 1.5 for Dotted. Shape sets the analysis hop to half the window times 2 to the power of minus twice the knob. The dry/wet mix is slewed towards its target at 50 per second and is forced to zero whenever the freeze is off, so an unfrozen FFTF is a straight wire. Nothing in the plugin reads a channel count, so every port is mono. The panel menu also carries Reload panel and Poll SVG for reload, which every module in this plugin has and which only reload the panel artwork; they are left out."
   },
   "ModalFilter": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A state-variable filter and a bank of tuned resonators fed from the same input, with a knob to blend between the two",
+    "Sets the frequency of both the filter and the resonators, 20Hz at the counter-clockwise end and 18000Hz at the clockwise end; while a cable is in the 1V/OCT input this knob is not read at all",
+    "Scales the voltage at the FM input, one octave per volt at the clockwise end, nothing at the centre and inverted counter-clockwise",
+    "Sweeps the filter from low pass through band pass to high pass",
+    "Attenuates and inverts the voltage at the MORPH input before it is added to the MORPH knob",
+    "Sets the filter resonance, a Q of 0.5 at the counter-clockwise end and 15 at the clockwise end",
+    "Attenuates and inverts the voltage at the RESO input before it is added to the RESO knob",
+    "Chooses the resonator's partial series and fades between neighbours in it: harmonic string, odd-harmonic tube, stiff string, tuned bar, free-free bar, circular membrane, square membrane, bell, plate",
+    "Attenuates and inverts the voltage at the MODEL input before it is added to the MODEL knob",
+    "Sets how long the resonators ring after the input stops, from 0.05 seconds at the counter-clockwise end to 5 seconds at the clockwise end, measured as the time to fall 60dB",
+    "Attenuates and inverts the voltage at the DECAY input before it is added to the DECAY knob",
+    "Crossfades the output between the state-variable filter and the resonator bank",
+    "The audio input, which feeds the filter and the resonators together",
+    "Sets the frequency of the filter and the resonators at one volt per octave from C4 at 261.63Hz, and while a cable is here the CUTOFF knob is ignored",
+    "Modulates the frequency in octaves per volt, scaled by the FM knob",
+    "Moves the filter between low pass and high pass, scaled by its attenuverter, with 5V covering the whole of the MORPH knob's travel",
+    "Modulates the resonance, scaled by its attenuverter, with 5V covering the whole of the RESO knob's travel",
+    "Moves the choice of resonator model, scaled by its attenuverter, with 5V covering the whole of the MODEL knob's travel",
+    "Modulates the ring time, scaled by its attenuverter, with 5V covering the whole of the DECAY knob's travel",
+    "The filter and resonator mix, five times the internal signal level and clipped at 10V",
+    "Note — a Modal Filter Expander placed immediately to the right adds five more resonator voices, each tuned away from this module's frequency",
+    "Menu — Partials: Low (6), Mid (12), High (24), Full (32) — sets how many partials each resonator computes, which is how bright and how costly it is; the module starts on Mid"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16,
+    "5": 17,
+    "6": 18
+   },
+   "out": {
+    "0": 19
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilter::process at 0x1b95c reads inputs[0] voltages[0] and scales it by 0.2; the binary contains no getChannels or setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilter::process at 0x1b838 reads inputs[1] voltage into exp2f, and at 0x1b804 tests inputs[1] channels to choose 261.6256Hz as the base instead of the knob"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilter::process at 0x1b8a8 multiplies inputs[2] by the FM depth knob and adds it to the 1V/oct voltage before exp2f"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilter::process at 0x1b8c0 multiplies inputs[3] by 0.2 and by the attenuverter before adding it to the morph knob and clamping to 0 to 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilter::process at 0x1b8ec multiplies inputs[4] by 0.2 and by the attenuverter before adding it to the resonance knob and clamping to 0 to 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilter::process at 0x1b914 multiplies inputs[5] by 0.2 and by the attenuverter before adding it to the model knob and clamping to 0 to 1"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilter::process at 0x1b92c multiplies inputs[6] by 0.2 and by the attenuverter before adding it to the decay knob and clamping to 0 to 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilter::process at 0x1b994 multiplies the engine output by 5 and clamps it to plus and minus 10 before writing outputs[0] voltages[0]"
+     }
+    }
+   },
+   "notes": "Closed source; read from the installed 2.0.0 binary. The frequency base is 20 times 900 to the power of the cutoff knob, giving 20Hz to 18000Hz, but ModalFilter::process at 0x1b804 tests whether the 1V/oct jack is connected and, when it is, replaces that base with 261.6256Hz and never reads the knob again, so a patched cable sitting at 0V pins the filter to C4. Resonance is 0.5 times 30 to the power of the knob and decay is 0.05 times 100 to the power of the knob. The nine model names are literals in the binary at 0x3a8ef: Harmonic string, Odd-harmonic tube, Stiff string, Tuned bar, Free-free bar, Circular membrane, Square membrane, Bell and Plate / cymbal; the ninth is shortened to plate on its line to keep it inside the line length, and the model knob fades between neighbouring pairs, which the tooltip shows as one name, an arrow, the next name and a percentage. The expander is found through the right-hand expander slot at Module+0x110 and its model is checked, so only a Modal Filter Expander counts and only on the right. Nothing in the plugin reads a channel count, so every port is mono; the maker's description of the expander as adding polyphonic voices means several resonators, not Rack polyphony. The panel menu also carries Reload panel and Poll SVG for reload, which every module in this plugin has and which only reload the panel artwork; they are left out."
   },
   "ModalFilterExpander": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for Modal Filter that adds five more resonator voices, each tuned away from that filter's own frequency; it goes immediately to the right of the Modal Filter it belongs to",
+    "Switches the five voice knobs between reading as semitones and reading as hertz",
+    "Tunes its voice away from the Modal Filter's frequency, by up to 24 semitones either way when the switch is set to semitones, or by up to 500Hz either way when it is set to hertz",
+    "Silences its voice while it is on, and lights while it is",
+    "Moves its voice's offset, added to that voice's knob, with 5V covering the whole of the knob's travel",
+    "Note — this module does nothing on its own; it has to be placed immediately to the right of a Modal Filter, and its five voices are then added to that module's resonator bank",
+    "Note — the display reads the Modal Filter's current frequency as a note name, a frequency in hertz and an offset in cents, and reads NOT CONNECTED when there is no Modal Filter beside it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilterExpander::process at 0x21770 multiplies inputs[0] by 0.2 and adds it to the voice knob, clamping to plus and minus 1; the binary contains no getChannels or setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilterExpander::process at 0x217b8 multiplies inputs[1] by 0.2 and adds it to the voice knob, clamping to plus and minus 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilterExpander::process at 0x217e4 multiplies inputs[2] by 0.2 and adds it to the voice knob, clamping to plus and minus 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilterExpander::process at 0x21814 multiplies inputs[3] by 0.2 and adds it to the voice knob, clamping to plus and minus 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; ModalFilterExpander::process at 0x21844 multiplies inputs[4] by 0.2 and adds it to the voice knob, clamping to plus and minus 1"
+     }
+    }
+   },
+   "notes": "Closed source; read from the installed 2.0.0 binary. ModalFilterExpander::process at 0x21708 looks at the left-hand expander slot at Module+0xe8 and checks that the neighbour's model is Modal Filter, so the module is inert anywhere else. Each voice offset runs minus 1 to plus 1; ModalEngine::process at 0x1bd24 turns it into a frequency either as the filter frequency times 2 to the power of twice the offset, which is 24 semitones at the end of the knob, or as the filter frequency plus the offset times 500Hz, according to the unit switch, and the result is clamped to between 20Hz and 0.4899 of the sample rate. The switch defaults to semitones. A muted voice is skipped entirely. The five mute buttons are plain parameters used as latches, each with its own lamp. Nothing in the plugin reads a channel count, so every port is mono. The panel menu carries only Reload panel and Poll SVG for reload, which every module in this plugin has and which only reload the panel artwork."
   },
   "WaveguideDelay": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A feedback delay whose time is a grid step of a clock, with damping in the loop and a pitch input that turns it into a Karplus-Strong string",
+    "Picks the delay length as a fraction of the beat, in thirteen steps from eight beats at the counter-clockwise end down to a five-hundred-and-twelfth of one at the clockwise end",
+    "Attenuates and inverts the voltage at the TIME input before it is added to the TIME knob",
+    "Sets how much of the delay output goes back into it, from 0.95 inverted at the counter-clockwise end through no feedback at the centre to 0.95 at the clockwise end",
+    "Attenuates and inverts the voltage at the FEEDBACK input before it is added to the FEEDBACK knob",
+    "Sets the base delay time, from 20ms to 2 seconds, that the TIME fraction multiplies while no clock is patched; with a clock patched nothing in the module reads it, despite the panel printing GLITCH",
+    "Damps the repeats, setting how much of the top end the feedback path keeps each time round",
+    "Crossfades the dry input against the delayed signal on an equal-power curve",
+    "Attenuates and inverts the voltage at the GLITCH input before it is added to the GLITCH knob",
+    "The audio input into the delay line",
+    "A clock here sets the beat the delay fraction is measured against, taken from rising edges above 1V; when it stops for more than two beats the module falls back to the GLITCH knob for its base time",
+    "Moves the delay fraction, scaled by its attenuverter, with 5V covering the whole of the TIME knob's travel",
+    "Moves the feedback amount, scaled by its attenuverter, with 5V covering the whole of the FEEDBACK knob's travel",
+    "A rising edge above 1V starts the delay line again from empty, crossfading into it over the crossfade time set on the menu",
+    "Sets the delay length from a pitch instead, one volt per octave from C4 at 261.63Hz, which plays the delay as a plucked string; below the crossover frequency on the menu it is ignored",
+    "Moves the base delay time, scaled by its attenuverter, with 5V covering the whole of the GLITCH knob's travel; with a clock patched it changes nothing",
+    "The delayed signal mixed with the dry input, five times the internal signal level and clipped at 10V",
+    "Note — with nothing patched to CLK the delay time comes from the knob printed GLITCH, which is the only thing that knob does; a clock at CLK takes that job over and leaves the knob inert",
+    "Menu — Delay units: Straight, Triplet, Dotted — reads the beat as straight, triplet or dotted note lengths, which scales every step the TIME knob can take",
+    "Menu — Crossfade time — sets how long the delay takes to fade from its old length into a new one",
+    "Menu — KS / clock crossover — sets the frequency above which a pitch at the 1V/OCT input takes the delay length over; below it that input does nothing"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "8": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14,
+    "6": 15
+   },
+   "out": {
+    "0": 16
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "pitch",
+     "6": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "read from the installed 2.0.0 plugin.dylib; WaveguideDelay::process at 0x26a84 reads inputs[0] voltages[0] and scales it by 0.2; the binary contains no getChannels or setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; WaveguideDelay::process at 0x265bc compares inputs[1] voltage against 1.0 and 0.1 as a Schmitt trigger and counts samples between rising edges"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; WaveguideDelay::process at 0x2682c multiplies inputs[2] by 0.2 and by the attenuverter, adds the knob, clamps to 0 to 1 and rounds it to one of thirteen grid steps"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±0.95V",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; WaveguideDelay::process at 0x268e8 multiplies inputs[3] by 0.2 and by the attenuverter, adds the knob and clamps the total to the pair of constants at 0x38558, which are plus and minus 0.95"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; WaveguideDelay::process at 0x266e8 compares inputs[4] voltage against 1.0 and 0.1 as a Schmitt trigger, and 0x266e0 reads it only when the jack is connected"
+     },
+     "5": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; WaveguideDelay::process at 0x269e8 reads inputs[5] voltage into exp2f and multiplies by 261.6256Hz, guarded at 0x269b8 by the jack being connected"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; WaveguideDelay::process at 0x267d8 multiplies inputs[6] by 0.2 and by the attenuverter before adding it to the glitch knob and clamping to 0 to 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "read from the installed 2.0.0 plugin.dylib; WaveguideDelay::process at 0x26ad4 multiplies by 5 and clamps to plus and minus 10 before writing outputs[0] voltages[0]"
+     }
+    }
+   },
+   "notes": "Closed source; read from the installed 2.0.0 binary. The parameter the maker names Glitch, and the panel prints GLITCH, is read in exactly one place: WaveguideDelay::process at 0x267cc, the branch taken when the clock is absent or has stopped for more than two beats, where it becomes 0.02 times 100 to the power of the knob, that is 20ms to 2 seconds of base delay time. It has no other effect anywhere in the function, so with a clock patched the knob, its attenuverter and its CV jack are all dead. Grain Shift Delay, which is built the same way, takes that base time from a Base time menu item instead, so this looks like a knob that was repurposed and never relabelled. The thirteen grid ratios are the floats at 0x38660, 8 down to 1/512. The delay is clamped to between 2 samples and four seconds. Tone runs 0 to 1 on the knob and is mapped to minus 1 to plus 1 before it reaches the damping filter in WGDelayEngine::stepBuffer at 0x26ffc. Feedback runs minus 0.95 to plus 0.95 with a default at the centre, so the module starts with no repeats. Delay units is a menu item with no panel control, and has no widget position, so it gets no tag. Nothing in the plugin reads a channel count, so every port is mono. The panel menu also carries Reload panel and Poll SVG for reload, which every module in this plugin has and which only reload the panel artwork; they are left out."
   },
   "GrainShiftDelay": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A granular texturiser feeding a clock-synced crossfade delay, with a single-sideband frequency shifter in the feedback path",
+    "Sets how thickly the grains are launched and how far each is thrown from where it belongs: one every half window and no throw counter-clockwise, one every eighth and a 180ms throw clockwise",
+    "Attenuates and inverts the voltage at the SCATTER input before it is added to the SCATTER knob",
+    "Picks the delay length as a note value of the beat, in nine steps from two whole notes at the counter-clockwise end down to a hundred-and-twenty-eighth note at the clockwise end",
+    "Attenuates and inverts the voltage at the TIME input before it is added to the TIME knob",
+    "Shifts the delayed signal in frequency, marked minus 12 to plus 12 semitones but applied as a flat shift in hertz, the ends of the travel reaching the Max shift figure on the menu",
+    "Attenuates and inverts the voltage at the SHIFT input before it is added to the SHIFT knob",
+    "Sets how much of the delay output goes back into it, none at the counter-clockwise end and 0.98 at the clockwise end",
+    "Attenuates and inverts the voltage at the FEEDBACK input before it is added to the FEEDBACK knob",
+    "Crossfades the dry input against the granulated and delayed signal on an equal-power curve",
+    "The audio input into the granulator",
+    "A clock here sets the beat the delay's note value is measured against, taken from rising edges above 1V; with nothing patched the delay runs at the Base time on the menu instead",
+    "Moves the grain density and throw, scaled by its attenuverter, with 5V covering the whole of the SCATTER knob's travel",
+    "Moves the delay's note value, scaled by its attenuverter, with 5V covering the whole of the TIME knob's travel",
+    "Moves the frequency shift, scaled by its attenuverter, with 5V moving it 12 semitones at the attenuverter's clockwise end",
+    "Moves the feedback amount, scaled by its attenuverter, with 5V covering the whole of the FEEDBACK knob's travel",
+    "The granulated and delayed signal mixed with the dry input, five times the internal signal level and clipped at 10V",
+    "Menu — Grain size — sets how long each grain is, in milliseconds; the module starts at 50ms",
+    "Menu — Base time — sets the delay time used while no clock is patched to CLK; the module starts at 0.5 seconds",
+    "Menu — Crossfade — sets how long the delay takes to fade from its old length into a new one; the module starts at 20ms",
+    "Menu — Max shift — sets the frequency shift, in hertz, that the ends of the SHIFT knob's travel reach; the module starts at 1000Hz"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15
+   },
+   "out": {
+    "0": 16
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "read from the installed 2.0.0 plugin.dylib; GrainShift::process at 0x125a0 reads inputs[0] voltages[0] and scales it by 0.2; the binary contains no getChannels or setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; GrainShift::process at 0x125c4 compares inputs[1] voltage against 1.0 and 0.1 as a Schmitt trigger and counts samples between rising edges"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; GrainShift::process at 0x12544 multiplies inputs[2] by 0.2 and by the attenuverter before adding it to the scatter knob and clamping to 0 to 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; GrainShift::process at 0x1272c multiplies inputs[3] by 0.2 and by the attenuverter, adds the knob, clamps to 0 to 1 and rounds it to one of nine note values"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; GrainShift::process at 0x127e8 multiplies inputs[4] by 2.4 and by the attenuverter before adding it to the shift knob and clamping to plus and minus 12 semitones"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 0.98V",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; GrainShift::process at 0x12854 multiplies inputs[5] by 0.2 and by the attenuverter, adds the knob and clamps the total to between 0 and 0.98"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "read from the installed 2.0.0 plugin.dylib; GrainShift::process at 0x128fc multiplies by 5 and clamps to plus and minus 10 before writing outputs[0] voltages[0]"
+     }
+    }
+   },
+   "notes": "Closed source; read from the installed 2.0.0 binary. The nine note values are the floats at 0x36200, 8 beats down to a thirty-second of one, displayed by DivParamQuantity as 2/1 through 1/128. Scatter sets the grain launch spacing to the grain length divided by two times 4 to the power of the knob, and the random throw to 0.18 of a second times the knob. The frequency shift is the knob in semitones divided by 12 and multiplied by the Max shift figure, so the marking in semitones is a scale on a linear shift rather than a transposition. The four menu figures start at 50ms grain, 0.5 seconds base time, 20ms crossfade and 1000Hz maximum shift, which are the constants at 0x36150. There is a tenth parameter, index 4, that the maker calls Feel: GrainShift::process at 0x12770 reads it and multiplies the delay by 2/3 for Triplet or 1.5 for Dotted, but neither panel SVG carries the feel-switch element the widget looks for and the context menu does not offer it, so it has no widget position, cannot be clicked or turned, and is stuck on Straight. It gets no line and no tag. The sumRange spelling of the feedback clamp is written as a voltage because the field takes no other shape; the quantity itself is a gain, not a voltage. Nothing in the plugin reads a channel count, so every port is mono. The panel menu also carries Reload panel and Poll SVG for reload, which every module in this plugin has and which only reload the panel artwork; they are left out."
   },
   "Yao": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock-synced generative LFO: two sine phasors beat against each other to make a slow envelope, and an I Ching change engine keeps moving the rate, the depth of the beating and the phase between them",
+    "Multiplies or divides the clock to set the beat rate, in fourteen steps from a division by 8 up to a multiplication by 8; the module starts at the clock rate itself",
+    "Sets how far the two phasors cancel: at 0% the envelope is flat and at 100% the beat falls to a full null once each cycle",
+    "Sets the phase offset between the two phasors, 0 to 360 degrees, which shifts where in the cycle the envelope's dip falls",
+    "Sets the chance, on each beat, that the change engine takes a step; at 0% nothing ever changes and at 100% a step falls on every beat, eight of them carrying one trigram line across and flipping it",
+    "Chooses the shape of the internal modulator that the change engine steers the rate, the symmetry and the phase with: sine, triangle, saw or square",
+    "Multiplies or divides the clock to set the internal modulator's rate, in the same fourteen steps the beat rate offers; the module starts at the clock rate itself",
+    "A clock here sets the beat everything in the module is measured against, taken from rising edges above 1V; with nothing patched the module runs from an internal beat of 2Hz",
+    "A rising edge above 1V glides both phasors back to the start of their cycles by the shorter way round, rather than jumping them",
+    "The beating envelope, 0V to 10V or -5V to +5V according to the menu, despite this being the jack the panel prints GATE",
+    "A 1ms pulse at 10V at the start of every beat cycle, despite this being the jack the panel prints CV",
+    "Note — the panel prints GATE over the jack that carries the envelope and CV over the jack that carries the pulse; the two labels are the wrong way round",
+    "Note — the disc brightens and dims with the envelope, and one of the eight lamps around it shows which trigram the change engine currently holds",
+    "Menu — CV OUT range: 0 V – 10 V, -5 V – +5 V — sets whether the envelope output swings from zero upwards or around zero"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; Yao::process at 0x2be94 compares inputs[0] voltage against 1.0 and 0.1 as a Schmitt trigger and counts samples between rising edges; the binary contains no getChannels or setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "read from the installed 2.0.0 plugin.dylib; Yao::process at 0x2c044 compares inputs[1] voltage against 1.0 and 0.1 as a Schmitt trigger, guarded by the jack being connected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "read from the installed 2.0.0 plugin.dylib; Yao::process at 0x2c344 multiplies the envelope by 10, and subtracts 5 when the range setting is not zero, before writing outputs[0] voltages[0]"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "read from the installed 2.0.0 plugin.dylib; Yao::process at 0x2c380 writes either 10 or 0 into outputs[1] voltages[0], holding 10 for a timer set to 0.001 seconds at each cycle wrap"
+     }
+    }
+   },
+   "notes": "Closed source; read from the installed 2.0.0 binary. The two output jacks are printed the wrong way round. Yao::process writes the envelope to outputs[0] at 0x2c35c and the pulse to outputs[1] at 0x2c380, and the maker's own port names agree, calling them Envelope CV and Beat gate. The widget binds outputs[0] to the SVG element named cv and outputs[1] to the one named gate, but the two panel files disagree about where those elements are: in Yao.svg the circle named gate is at x 112.83 and cv at 158.5, while in Yao-dark.svg they are the other way round, and no other panel in the plugin has such a mismatch. SvgHelper::findNamed searches whichever theme's file is loaded, so which physical hole carries which signal depends on the theme the module was created under. The scanned positions here are from a dark-theme Rack, where outputs[0], the envelope, is the left jack, under the lettering GATE, and outputs[1], the pulse, is the right one under CV. In the light theme they land the other way round and the lettering is then correct. The lettering itself sits at the same place in both files. Somebody should tell the maker. The fourteen clock ratios are printed by the RatioQuantity as /8, /6, /4, /3, /2, then multiplications by 2/3, 3/4, 1, 1.5, 2, 3, 4, 6 and 8, with the default at index 7, which is times 1. The change engine, Yao::changeTick at 0x2c878, draws a random number each beat and does nothing unless it falls below the Mutability knob; otherwise it moves one of three depth values by 0.125 towards 0 or 1 depending on the matching trigram bit, and when a depth reaches its end that bit flips and one of the other two lines is chosen at random. The three depths modulate the beat rate as a power of two, the symmetry and the phase. The beat frequency is clamped to 50Hz and the clock period to a floor of two samples. Nothing in the plugin reads a channel count, so every port is mono. The panel menu also carries Reload panel and Poll SVG for reload, which every module in this plugin has and which only reload the panel artwork; they are left out."
   }
  }
 }

@@ -1,93 +1,2440 @@
 {
  "plugin": "Coffee",
- "source": "https://github.com/CoffeeVCV/CoffeeVCV/blob/master/README.md",
+ "source": "https://github.com/CoffeeVCV/CoffeeVCV (README.md and the module sources read at commit dfb2174)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Between": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "On each trigger, puts out one random voltage lying between the two voltages you set",
+    "Fires the module once, as a rising edge at the trigger jack does",
+    "Multiplies the first voltage after its offset knob has been added, -5 to 5",
+    "Multiplies the second voltage after its offset knob has been added, -5 to 5",
+    "Adds -5V to 5V to the first voltage before it is multiplied by its scale knob",
+    "Adds -5V to 5V to the second voltage before it is multiplied by its scale knob",
+    "A rising edge here picks a new random voltage and holds it at the output",
+    "One end of the range the random voltage falls in, taken before the offset and scale above it are applied",
+    "The other end of the range the random voltage falls in, taken before the offset and scale below it are applied",
+    "Holds the random voltage picked at the last trigger until the next one",
+    "Note — nothing is computed at all while the output is unpatched, so patch the output first",
+    "Note — the two ends of the range can be set from the offset knobs alone, with nothing patched to either input jack"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8
+   },
+   "out": {
+    "0": 9
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Between.cpp Between::process: a Rack SchmittTrigger at its default 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Between.cpp Between::process: the jack is added to the offset knob and multiplied by the scale knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Between.cpp Between::process: the jack is added to the offset knob and multiplied by the scale knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Between.cpp Between::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "process() returns immediately when the output is unpatched, so no trigger is acted on and the lights and value do not move."
   },
   "Travel": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Slides from one voltage to another over a set time, starting on a trigger and pulsing when it arrives",
+    "Starts a slide, as a rising edge at the trigger jack does",
+    "Sets the slide time, 0 to 1 multiplied by the scale switch beneath it",
+    "Multiplies the slide time by 1, 10 or 100",
+    "Multiplies the starting voltage after its offset knob has been added, -5 to 5",
+    "Adds -5V to 5V to the starting voltage before it is multiplied by its scale knob",
+    "Multiplies the target voltage after its offset knob has been added, -5 to 5",
+    "Adds -5V to 5V to the target voltage before it is multiplied by its scale knob",
+    "Bends the slide away from a straight line, -5 to 5; at 0 the slide is linear, positive settings start slowly and negative settings start quickly",
+    "In the Track position the two voltages and the timing keep being read while a slide is running, and a new trigger restarts it; in Hold they are frozen at the moment the slide starts",
+    "A rising edge here starts a slide from the first voltage to the second",
+    "Sets the slide time in seconds, multiplied by the scale switch, and overrides the duration knob while patched",
+    "Bends the slide away from a straight line over -5V to 5V, and overrides the shape knob while patched",
+    "The voltage the slide starts from, before the offset and scale knobs beneath it are applied",
+    "The voltage the slide ends at, before the offset and scale knobs beneath it are applied",
+    "Carries the sliding voltage, and holds the last value it reached between slides",
+    "Sends a 1ms pulse when a slide reaches its end; patch it back to the trigger jack to make the slide repeat",
+    "Note — with nothing patched to either voltage input the slide runs between the two offset knob settings",
+    "Note — the lamp beside the duration controls dims as the slide runs and goes out when it finishes",
+    "Note — the maker's README describes Track and Hold as a right-click menu item; in this build it is the switch at the top of the panel and there is no menu"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Travel.cpp Travel::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Travel.cpp Travel::updateInputs: the jack replaces the duration knob and is multiplied by the scale switch; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Travel.cpp Travel::updateInputs: the jack is clamped to ±5V and divided by 5; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Travel.cpp Travel::updateInputs: the jack has the offset added and is multiplied by the scale knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Travel.cpp Travel::updateInputs: the jack has the offset added and is multiplied by the scale knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Travel.cpp Travel::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Travel.cpp Travel::process: a 1ms pulse generator writing 10V, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The README for this version says Track and Hold live on the context menu; the code has no appendContextMenu and puts the choice on a panel switch instead."
   },
   "HiLo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Takes two voltages and puts the larger of them out of one jack and the smaller out of the other",
+    "Takes a fresh pair of readings, as a rising edge at the trigger jack does",
+    "Adds -5V to 5V to the first voltage before it is multiplied by the scale knob beneath it",
+    "Multiplies the first voltage after its offset knob has been added, -5 to 5",
+    "Adds -5V to 5V to the second voltage before it is multiplied by the scale knob beneath it",
+    "Multiplies the second voltage after its offset knob has been added, -5 to 5",
+    "A rising edge here takes a fresh pair of readings and updates both outputs",
+    "One of the two voltages compared, taken before the offset and scale knobs beneath it are applied",
+    "The other voltage compared, taken before the offset and scale knobs beneath it are applied",
+    "Carries whichever of the two voltages is the larger",
+    "Carries whichever of the two voltages is the smaller",
+    "Note — in the module's default Hold mode the outputs only move when the trigger jack rises or the button is pressed",
+    "Menu — Track — keeps both outputs following the inputs continuously, but only while nothing is patched to the trigger jack",
+    "Menu — Hold — updates the outputs only on a trigger or a button press, and is the setting the module comes up in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "HiLo.cpp HiLo::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "HiLo.cpp HiLo::process: the jack has the offset added and is multiplied by the scale knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "HiLo.cpp HiLo::process: the jack has the offset added and is multiplied by the scale knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "HiLo.cpp HiLo::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "HiLo.cpp HiLo::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "Track mode is ignored whenever a cable is present at the trigger jack, so a patched trigger always wins."
   },
   "Some": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Passes a random share of its eight inputs through to the matching outputs and silences the rest",
+    "Makes a fresh choice, as a rising edge at the trigger jack does",
+    "Sets the share of the connected inputs that is passed, 0 for none and 1 for all",
+    "A rising edge here makes a fresh choice of which inputs to pass",
+    "Sets the share of connected inputs that is passed, 0V to 10V read as 0 to 1, and overrides the probability knob while patched",
+    "One of the eight signals offered for selection; only connected inputs are counted in the draw",
+    "Carries the input on the same row while that row is chosen, and 0V while it is not; the green lamp beside it shows which",
+    "Note — nothing moves until the trigger jack rises or the button is pressed; before the first trigger every output is at 0V",
+    "Note — the count that is passed is the number of connected inputs multiplied by the probability and rounded down, so four connected inputs at 0.5 pass two"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 5,
+    "9": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Some.cpp Some::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Some.cpp Some::process: the jack is clamped to 0 to 1 and replaces the probability knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some.cpp Some::process: the jack is copied straight to the matching output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some.cpp Some::process: the jack is copied straight to the matching output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some.cpp Some::process: the jack is copied straight to the matching output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some.cpp Some::process: the jack is copied straight to the matching output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some.cpp Some::process: the jack is copied straight to the matching output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some.cpp Some::process: the jack is copied straight to the matching output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some.cpp Some::process: the jack is copied straight to the matching output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some.cpp Some::process: the jack is copied straight to the matching output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The eight signal jacks carry whatever you patch into them and are copied unchanged, so no port colour can say what belongs there."
   },
   "Together": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight clock dividers driving triggers, gates and four summed voltage columns, with randomisers on every group of controls",
+    "Advances the sequence one step, as a rising edge at the clock jack does",
+    "Sets the step count back to zero, as a rising edge at the reset jack does",
+    "Applies the nudge or randomise action to all thirty-two voltage knobs at once",
+    "Sets how far a nudge moves a voltage knob, 0 to 1",
+    "Picks what the randomise buttons do: Nudge moves a control up or down by the nudge amount, Random replaces it with a new value anywhere in its range",
+    "Sets how often that row fires, once every 1 to 64 steps of the clock; at 0 the row never fires",
+    "Sets that row's contribution to the first column output, -1V to 1V, counted only on the steps where the row fires",
+    "Sets that row's contribution to the second column output, -1V to 1V, counted only on the steps where the row fires",
+    "Sets that row's contribution to the third column output, -1V to 1V, counted only on the steps where the row fires",
+    "Sets that row's contribution to the fourth column output, -1V to 1V, counted only on the steps where the row fires",
+    "Applies the nudge or randomise action to all eight voltage knobs in that column",
+    "Applies the nudge or randomise action to the four voltage knobs in that row",
+    "Held down, that row's divider is left alone by the divider randomiser",
+    "Sets the chance that row produces a trigger and a gate on a step where it fires, 0 for never and 1 for always",
+    "Applies the nudge or randomise action to all eight dividers, skipping any row whose lock is held",
+    "Multiplies that column's summed voltage before it reaches the output, -5 to 5",
+    "Nothing in the module reads this knob; the second column's offset knob is added to all four column outputs, because the code offsets every column with the same knob",
+    "Adds -5V to 5V to every column output, not only to the second one",
+    "A rising edge here advances the sequence one step",
+    "A rising edge here sets the step count back to zero",
+    "A rising edge here applies the nudge or randomise action to all thirty-two voltage knobs",
+    "Nothing in the module reads this jack; the divider randomiser can be fired only from the button beside it",
+    "A rising edge here applies the nudge or randomise action to all eight voltage knobs in that column",
+    "A rising edge here applies the nudge or randomise action to the four voltage knobs in that row",
+    "Sends a 1ms pulse whenever any row fires and its probability lets it through",
+    "Goes to 10V on any step where at least one row fires, and back to 0V on a step where none does",
+    "Sends a 1ms pulse on the steps where that row fires and its probability lets it through",
+    "Goes to 10V on a step where that row fires and its probability lets it through, and stays high until the next step",
+    "Carries that column's summed voltage: the knobs of every row that fired on this step, added together, multiplied by the column's scale knob and offset",
+    "Note — a row only fires when the step count divides exactly by its divider setting, so a row set to 4 fires on every fourth clock",
+    "Note — the code reads the second column's offset knob for all four columns, so turning the first, third or fourth changes nothing and turning the second shifts every column"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "73": 15,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6,
+    "13": 7,
+    "14": 7,
+    "15": 7,
+    "16": 7,
+    "17": 7,
+    "18": 7,
+    "19": 7,
+    "20": 7,
+    "21": 8,
+    "22": 8,
+    "23": 8,
+    "24": 8,
+    "25": 8,
+    "26": 8,
+    "27": 8,
+    "28": 8,
+    "29": 9,
+    "30": 9,
+    "31": 9,
+    "32": 9,
+    "33": 9,
+    "34": 9,
+    "35": 9,
+    "36": 9,
+    "37": 10,
+    "38": 10,
+    "39": 10,
+    "40": 10,
+    "41": 10,
+    "42": 10,
+    "43": 10,
+    "44": 10,
+    "45": 11,
+    "46": 11,
+    "47": 11,
+    "48": 11,
+    "49": 12,
+    "50": 12,
+    "51": 12,
+    "52": 12,
+    "53": 12,
+    "54": 12,
+    "55": 12,
+    "56": 12,
+    "57": 13,
+    "58": 13,
+    "59": 13,
+    "60": 13,
+    "61": 13,
+    "62": 13,
+    "63": 13,
+    "64": 13,
+    "65": 14,
+    "66": 14,
+    "67": 14,
+    "68": 14,
+    "69": 14,
+    "70": 14,
+    "71": 14,
+    "72": 14,
+    "74": 16,
+    "75": 16,
+    "76": 16,
+    "77": 16,
+    "78": 17,
+    "79": 18,
+    "80": 17,
+    "81": 17
+   },
+   "in": {
+    "0": 19,
+    "1": 20,
+    "2": 21,
+    "3": 22,
+    "4": 23,
+    "5": 23,
+    "6": 23,
+    "7": 23,
+    "8": 24,
+    "9": 24,
+    "10": 24,
+    "11": 24,
+    "12": 24,
+    "13": 24,
+    "14": 24,
+    "15": 24
+   },
+   "out": {
+    "0": 25,
+    "1": 26,
+    "2": 27,
+    "3": 27,
+    "4": 27,
+    "5": 27,
+    "6": 27,
+    "7": 27,
+    "8": 27,
+    "9": 27,
+    "10": 28,
+    "11": 28,
+    "12": 28,
+    "13": 28,
+    "14": 28,
+    "15": 28,
+    "16": 28,
+    "17": 28,
+    "18": 29,
+    "19": 29,
+    "20": 29,
+    "21": 29
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger",
+     "18": "cv",
+     "19": "cv",
+     "20": "cv",
+     "21": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: resetTrigger.process is called with explicit 0.1V and 2V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: nudgeTrigger.process is called with explicit 0.1V and 2V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "why": "Together.cpp Together::process: the index I_DIVTRIG appears nowhere in process(), so the jack is never read, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "12": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "13": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "14": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "15": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: these triggers are processed with explicit 0.1V and 1V thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Together.cpp Together::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "18": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Together.cpp Together::process: the summed column value times the scale knob plus an offset, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "19": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Together.cpp Together::process: the summed column value times the scale knob plus an offset, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "20": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Together.cpp Together::process: the summed column value times the scale knob plus an offset, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "21": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Together.cpp Together::process: the summed column value times the scale knob plus an offset, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "Two faults are provable in the source. The column offset line reads params[P_OFFSET + 1] inside the loop over all four columns, so only the second offset knob has any effect and it applies to all four outputs. And the Step CV jack, input 3, is declared and drawn but its index never appears in process(), so only the button beside it fires the divider randomiser. The maker's tooltips for the third and fourth column knobs both read Group 2."
   },
   "Tumble": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chain of eight countdowns that take turns on the clock, producing bursts of triggers and gates",
+    "Advances the chain one count, as a rising edge at the clock jack does",
+    "Sets every counter back to its starting value and stops all the outputs",
+    "Starts the chain running, and stops it again on a second press",
+    "In the Once position the chain stops when the last counter runs out; in Loop it starts again on the next clock",
+    "Sets how many clocks that counter runs for, 0 to 64; a counter set to 0 is skipped",
+    "A rising edge here advances the chain one count",
+    "A rising edge here sets every counter back to its starting value",
+    "A rising edge here starts the chain running, and a second edge stops it",
+    "Sends a 1ms pulse on every clock that counter takes",
+    "Goes to 10V while the clock is high and that counter is the one currently counting",
+    "Sends a 1ms pulse on every clock any counter takes",
+    "Follows the clock input, 10V while the clock is high and 0V while it is low, whether or not a counter is running",
+    "Sends a 1ms pulse when the last counter with a non-zero setting reaches zero",
+    "Note — nothing happens until the chain is started: set at least one counter above zero, then press or trigger Start, and the green lamp beside it shows the chain is running",
+    "Note — only one counter runs at a time. The chain works down from the first, and a counter starts only when the one before it has reached zero",
+    "Note — the global gate follows the clock input directly rather than reporting whether any counter is active, which is not what the maker's README describes"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 5,
+    "9": 5,
+    "10": 5,
+    "11": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 9,
+    "2": 9,
+    "3": 9,
+    "4": 9,
+    "5": 9,
+    "6": 9,
+    "7": 9,
+    "8": 10,
+    "9": 10,
+    "10": 10,
+    "11": 10,
+    "12": 10,
+    "13": 10,
+    "14": 10,
+    "15": 10,
+    "16": 11,
+    "17": 12,
+    "18": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger",
+     "18": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "18": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tumble.cpp Tumble::process: triggers are 1ms pulses and gates are held at 10V, one setVoltage with no channel, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The global gate output is set from the clock Schmitt trigger's high state alone, regardless of whether any counter is counting; the README describes it as active when any column output is active. The Start jack's tooltip reads Stat Trig, a typo in the maker's source."
   },
   "Set": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two independent channels, each adding an offset to a voltage and multiplying the result",
+    "Multiplies the voltage on that channel after the offset has been added, -10 to 10",
+    "Adds -10V to 10V to the voltage on that channel before it is multiplied",
+    "Replaces that channel's scale knob while patched, the voltage here used as the multiplier",
+    "Replaces that channel's offset knob while patched, the voltage here added to the input",
+    "The voltage that channel works on",
+    "Carries the channel's input with its offset added and the result multiplied by its scale",
+    "Note — a cable at an offset or scale jack takes the place of its knob rather than being added to it, so the knob stops doing anything while the cable is in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 4,
+    "3": 4,
+    "4": 5,
+    "5": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set.cpp Set::process: each jack is read with getVoltage() and no channel argument and used directly, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set.cpp Set::process: each jack is read with getVoltage() and no channel argument and used directly, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set.cpp Set::process: each jack is read with getVoltage() and no channel argument and used directly, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set.cpp Set::process: each jack is read with getVoltage() and no channel argument and used directly, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set.cpp Set::process: each jack is read with getVoltage() and no channel argument and used directly, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set.cpp Set::process: each jack is read with getVoltage() and no channel argument and used directly, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set.cpp Set::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set.cpp Set::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "Output 2 is declared in the code as a debug output, is given no name and no jack on the panel, and cannot be reached."
   },
   "Fork": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two coin tosses, each choosing between two input voltages and holding the winner at its output",
+    "Throws that coin once, as a rising edge at its trigger jack does",
+    "Sets which way the coin is weighted, -1 always picking the upper input, 1 always picking the lower, and 0 an even chance",
+    "A rising edge here throws that coin",
+    "One of the two voltages the coin chooses between, and the lamp beside it lights when it wins",
+    "The other voltage the coin chooses between, and the lamp beside it lights when it wins",
+    "Sets which way the coin is weighted over -1V to 1V, and overrides the chance knob while patched",
+    "Holds the voltage of whichever input last won, until the next throw",
+    "Note — the output holds its last value between throws, and reads 0V until the first one",
+    "Note — the button is ignored while the trigger jack is holding any voltage other than 0V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 4,
+    "3": 4,
+    "4": 5,
+    "5": 5,
+    "6": 6,
+    "7": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "6": "cv",
+     "7": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Fork.cpp Fork::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Fork.cpp Fork::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fork.cpp Fork::process: the winning jack is copied straight to the output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fork.cpp Fork::process: the winning jack is copied straight to the output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fork.cpp Fork::process: the winning jack is copied straight to the output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fork.cpp Fork::process: the winning jack is copied straight to the output; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "-1 to 1V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Fork.cpp Fork::process: the jack replaces the chance knob and is compared against a random number in -1 to 1; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "-1 to 1V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Fork.cpp Fork::process: the jack replaces the chance knob and is compared against a random number in -1 to 1; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fork.cpp Fork::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fork.cpp Fork::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The A and B jacks are copied unchanged, so no port colour can say what belongs there. The ready flag is cleared whenever the trigger jack reads anything other than exactly 0V, which is why a held-high trigger blocks the button."
   },
   "Some2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sends one voltage to a random handful of its eight outputs and holds the others at 0V",
+    "Makes a fresh choice, as a rising edge at the trigger jack does",
+    "Sets how many of the eight outputs are in the draw, 0 to 8, counting from the first",
+    "Sets the share of those outputs that is switched on, 0 for none and 1 for all",
+    "A rising edge here makes a fresh choice of which outputs to switch on",
+    "The voltage sent to whichever outputs are switched on",
+    "Sets the share of the outputs in the draw that is switched on, 0V to 10V read as 0 to 1, and overrides the probability knob while patched",
+    "Sets how many outputs are in the draw, one output per volt, and overrides the selection knob while patched",
+    "Carries the input voltage while this output is switched on and 0V while it is not; the inner lamp shows it is switched on and the outer lamp that it is in the draw",
+    "Note — nothing moves until the trigger jack rises or the button is pressed, and the probability knob comes up at zero, so raise it before triggering"
+   ],
+   "param": {
+    "1": 1,
+    "2": 2,
+    "3": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 8,
+    "2": 8,
+    "3": 8,
+    "4": 8,
+    "5": 8,
+    "6": 8,
+    "7": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Some2.cpp Some2::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some2.cpp Some2::process: the jack is copied straight to the switched-on outputs; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Some2.cpp Some2::process: the jack is clamped to 0 to 1 and replaces the probability knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "Some2.cpp Some2::process: the jack is truncated to a whole number, clamped to 0 to 8 and replaces the selection knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some2.cpp Some2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some2.cpp Some2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some2.cpp Some2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some2.cpp Some2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some2.cpp Some2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some2.cpp Some2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some2.cpp Some2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Some2.cpp Some2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "Parameter 0 is declared in the code, is given no name and no widget, and cannot be reached. The probability knob comes up at 0, which means the first trigger switches nothing on until it is raised."
   },
   "Tap": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three buttons, each giving a trigger pulse when pressed and a gate that stays high while it is held",
+    "Sends a 1ms pulse from the trigger output beneath it and holds its gate output at 10V while pressed",
+    "Sends a 1ms pulse each time the button above is pressed",
+    "Holds 10V while the button above is held down and 0V when it is released",
+    "Note — the module has no inputs at all: the three buttons are the only way to make it do anything"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 3,
+    "4": 3,
+    "5": 3
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tap.cpp Tap::process: a 1ms pulse or a held 10V, one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tap.cpp Tap::process: a 1ms pulse or a held 10V, one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tap.cpp Tap::process: a 1ms pulse or a held 10V, one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tap.cpp Tap::process: a 1ms pulse or a held 10V, one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tap.cpp Tap::process: a 1ms pulse or a held 10V, one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Tap.cpp Tap::process: a 1ms pulse or a held 10V, one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "configButton is called once with P_BUTTON rather than inside the loop, so the second and third buttons carry no name and hovering them shows no tooltip."
   },
   "Fork2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Compares one voltage against a threshold and sends one of two other voltages, modified or not, to a single output",
+    "Takes a fresh reading of the source voltage, as a rising edge at the trigger jack does",
+    "Sets the voltage the source is compared against, -10V to 10V; above it the left half is used, at or below it the right half",
+    "Multiplies that half's result, -10 to 10",
+    "Adds -10V to 10V to that half's input before it is multiplied",
+    "In the Modify position the source voltage is added to that half's input before the offset and scale; in Replace the source is dropped and only that half's input is used",
+    "A rising edge here takes a fresh reading of the source voltage",
+    "Sets the comparison threshold, and overrides the threshold knob while patched",
+    "The voltage that half sends on, after its offset and scale and, in Modify, with the source added",
+    "The voltage that is compared against the threshold, and the one Modify adds in",
+    "Carries the result of whichever half the comparison picked",
+    "Sends a 1ms pulse when the comparison changes over to that half, and the lamp above lights while that half is the one in use",
+    "Note — with nothing patched to the trigger jack the source is read continuously; patch a trigger there and the source is only read on a rising edge",
+    "Note — the output is recalculated only when the source voltage changes, so turning the offset, scale or threshold knobs does nothing until the source moves"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 3,
+    "4": 4,
+    "5": 4,
+    "6": 5,
+    "7": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 8,
+    "4": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11,
+    "2": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Fork2.cpp Fork2::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Fork2.cpp Fork2::process: the jack replaces the threshold knob, whose range is -10V to 10V; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fork2.cpp Fork2::process: the jack is sampled and compared against the threshold; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fork2.cpp Fork2::process: the jack has the offset added and is multiplied by the scale knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fork2.cpp Fork2::process: the jack has the offset added and is multiplied by the scale knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fork2.cpp Fork2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Fork2.cpp Fork2::process: a 1ms pulse generator writing 10V, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Fork2.cpp Fork2::process: a 1ms pulse generator writing 10V, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The whole output stage sits inside a test for the sampled source having changed, so a still source freezes the module against every knob on the panel."
   },
   "Some3": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Passes a random share of the sixteen channels of one polyphonic cable and silences the rest",
+    "Makes a fresh choice, as a rising edge at the trigger jack does",
+    "Moves the block of channels in play one channel towards the first",
+    "Moves the block of channels in play one channel towards the sixteenth",
+    "Sets the first channel of the block in play, 0 to 16",
+    "Sets the channel the block in play stops before, 0 to 16",
+    "Sets the share of the channels in the block that is passed, 0 for none and 1 for all",
+    "Sets the number the random choices are generated from, so that a reset replays the same sequence of choices",
+    "Reloads the seed, which makes the next choices repeat the run that followed the last reload",
+    "Picks what voltage range the two selection jacks are read over: 0-1v, 0-10v or 0-16v, spread across the sixteen channels",
+    "A rising edge here makes a fresh choice of which channels to pass",
+    "Sets the share of the block that is passed, 0V to 1V, and overrides the probability knob while patched; the red lamp lights if the voltage falls outside that range",
+    "Sets the first channel of the block, read over the range set by the scaling switch, and overrides the start knob while patched; the red lamp lights if the block would start out of range",
+    "Sets the channel the block stops before, read over the range set by the scaling switch, and overrides the end knob while patched; the red lamp lights if the block would end out of range",
+    "The polyphonic cable whose channels are passed or silenced",
+    "A rising edge here moves the block one channel towards the first",
+    "A rising edge here moves the block one channel towards the sixteenth",
+    "A rising edge here reloads the seed",
+    "Carries sixteen channels: the chosen ones carry their channel of the input and the rest carry 0V",
+    "Note — nothing moves until the trigger jack rises or the button is pressed, and the output is monophonic and silent until then",
+    "Note — with nothing patched to the input the chosen channels carry 10V, which makes the module usable as a random gate source on its own",
+    "Note — a monophonic cable at the input is copied to every chosen channel",
+    "Note — the orange lamps show which channels are in the block and the green lamps which of them are passing"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15,
+    "6": 16,
+    "7": 17
+   },
+   "out": {
+    "0": 18
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Some3.cpp Some3::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Some3.cpp Some3::process: the jack is clamped to 0 to 1 and replaces the probability knob; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "Some3.cpp Some3::process: the jack is rescaled from 0 to the scaling switch value onto 0 to 16 channels; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "Some3.cpp Some3::process: the jack is rescaled from 0 to the scaling switch value onto 0 to 16 channels; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Some3.cpp Some3::getOutput: the jack is read per channel with getVoltage(channel) when it is polyphonic, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Some3.cpp Some3::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Some3.cpp Some3::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Some3.cpp Some3::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Some3.cpp Some3::process: setChannels(16) is called on the output and each channel is written separately, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "An input cable with fewer channels than the block reaching into it gives 10V on the channels beyond its own count. The shift buttons move both the start and end knobs together, so the block keeps its length."
   },
   "Juice": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight voltage knobs with sixteen memory slots, recalled by a button, a trigger or a voltage",
+    "Stores the eight knob settings into the slot shown on the display and marks that slot as used",
+    "Loads the slot shown on the display back into the eight knobs",
+    "Steps the display to the next slot, without loading anything",
+    "Steps the display to the previous slot, without loading anything",
+    "Loads the next slot that has something stored in it",
+    "Loads the previous slot that has something stored in it",
+    "Loads a stored slot at random, choosing the next or the previous one by a coin toss",
+    "Sets the voltage on that row, -10V to 10V, and is what a save writes into the slot",
+    "Picks the slot by voltage, one slot per volt from 1V, and loads it the moment the voltage changes",
+    "A rising edge here loads a stored slot at random, choosing the next or the previous one by a coin toss",
+    "A rising edge here loads the previous slot that has something stored in it",
+    "A rising edge here loads the next slot that has something stored in it",
+    "Carries the voltage of the knob on that row",
+    "Note — the slot buttons do nothing until something has been stored: press Save to fill the slot on the display, and the small green lamp lights for a slot that has been filled",
+    "Note — the two-digit display shows the slot number, 1 to 16",
+    "Menu — Polyphonic — puts all eight voltages on the first output as eight channels, and leaves the other seven outputs holding whatever they last carried",
+    "Menu — Monophonic — puts each voltage on its own output, and is the setting the module comes up in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 8,
+    "9": 8,
+    "10": 8,
+    "11": 8,
+    "12": 8,
+    "13": 8,
+    "14": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 13,
+    "2": 13,
+    "3": 13,
+    "4": 13,
+    "5": 13,
+    "6": 13,
+    "7": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1 to 8V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "Juice.cpp Juice::process: the jack is truncated to a whole number and clamped to 1 to 16, one slot per volt; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Juice.cpp Juice::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Juice.cpp Juice::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Juice.cpp Juice::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Juice.cpp Juice::process: setChannels is called on this output alone and is 8 in polyphonic mode, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Juice.cpp Juice::process: each row writes one channel of its own output, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Juice.cpp Juice::process: each row writes one channel of its own output, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Juice.cpp Juice::process: each row writes one channel of its own output, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Juice.cpp Juice::process: each row writes one channel of its own output, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Juice.cpp Juice::process: each row writes one channel of its own output, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Juice.cpp Juice::process: each row writes one channel of its own output, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Juice.cpp Juice::process: each row writes one channel of its own output, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The select jack accepts 1V to 16V, one slot per volt; the range field is limited to the spellings this project allows and cannot say 16. Parameter 6, the random recall button, is never passed to configButton and so carries no tooltip. In polyphonic mode outputs 2 to 8 are never written again and hold whatever they last carried."
   },
   "Twinned2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two eight step pitch and gate sequences running together, with a per step chance deciding which of them is heard",
+    "Advances the sequence one step, as a rising edge at the clock jack does",
+    "Sends the sequence back to its first step",
+    "Sets the number of steps the sequence runs before it returns to the first, 1 to 8",
+    "Sets the voltage the A/B select jack is compared against, 0V to 10V; below it sequence A plays and at or above it sequence B",
+    "Sets the note for that step of that sequence, 0V to 1V, added to the octave knob beside it",
+    "Sets the octave for that step of that sequence, -10 to 10, added to the note knob beside it",
+    "Sets the chance that step plays from sequence B rather than sequence A, 0 always giving A and 1 always giving B",
+    "Sets the gate length for that step of that sequence, as a share of one clock beat; 0 mutes the step and 1 holds the gate for the whole beat",
+    "Sets how far a randomise trigger moves a control, as a share of its full range",
+    "Randomises the eight note knobs of that sequence, by the amount set by the randomise knob",
+    "Randomises the eight gate knobs of that sequence, by the amount set by the randomise knob",
+    "Replaces every control covered by the Module Randomization menu with a fresh random value",
+    "A rising edge here advances the sequence one step",
+    "A rising edge here sends the sequence back to its first step",
+    "Chooses the sequence directly instead of by chance: below the threshold knob sequence A plays, at or above it sequence B",
+    "Sets the number of steps, read over the range set by the Step Input Scale menu; the red lamp lights when the voltage would give a step count outside 1 to 8",
+    "Plays that sequence's notes from a polyphonic cable, one channel per step, in place of its note and octave knobs",
+    "Sets that sequence's gate lengths from a polyphonic cable, one channel per step",
+    "A rising edge here randomises the eight note knobs of that sequence",
+    "A rising edge here randomises the eight gate knobs of that sequence",
+    "Carries the pitch of whichever sequence won the chance on this step",
+    "Carries sequence A's pitch on every step, whether or not it won",
+    "Carries sequence B's pitch on every step, whether or not it won",
+    "Sends a 1ms pulse as the sequence reaches its last step",
+    "Carries sequence B's gates",
+    "Carries sequence A's gates",
+    "Carries the gates of whichever sequence won the chance on this step",
+    "Note — nothing moves until a clock reaches the clock jack or the button beside it is pressed",
+    "Note — gate length is measured against the time between the last two clocks, so the gates settle to the right length only after the second clock",
+    "Note — the two small lamps under each chance knob show which sequence that step last played from",
+    "Menu — Polyphonic Gate Out — puts each step's gate on its own channel of the three gate outputs instead of putting them all on one",
+    "Menu — Update knobs from polyphony inputs — moves the note and gate knobs to match a polyphonic cable as it plays, so the panel shows what is being played",
+    "Menu — Copy A V1 -> B — copies sequence A's eight note knobs onto sequence B's",
+    "Menu — Copy A V2 -> B — copies sequence A's eight octave knobs onto sequence B's",
+    "Menu — Copy B V1 -> A — copies sequence B's eight note knobs onto sequence A's",
+    "Menu — Copy B V2 -> A — copies sequence B's eight octave knobs onto sequence A's",
+    "Menu — Copy A Gates -> B — copies sequence A's eight gate knobs onto sequence B's",
+    "Menu — Copy B Gates -> A — copies sequence B's eight gate knobs onto sequence A's",
+    "Menu — Randomize Notes only — the four randomise buttons and jacks move the note knobs and leave the octaves alone",
+    "Menu — Randomize Notes and Octave — the four randomise buttons and jacks move the note and octave knobs together",
+    "Menu — Include V1 (Notes) — whether the big randomise button touches the note knobs",
+    "Menu — Include V2 (Octaves) — whether the big randomise button touches the octave knobs",
+    "Menu — Include Gates — whether the big randomise button touches the gate knobs",
+    "Menu — Include Probability — whether the big randomise button touches the chance knobs",
+    "Menu — Include Steps — whether the big randomise button touches the step count",
+    "Menu — 0.0 to 1.0 — reads the steps jack over a one volt range",
+    "Menu — 0.0 to 8.0 — reads the steps jack over an eight volt range",
+    "Menu — 0.0 to 10.0 — reads the steps jack over a ten volt range, and is the setting the module comes up in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "60": 9,
+    "65": 12,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 5,
+    "9": 5,
+    "10": 5,
+    "11": 5,
+    "12": 5,
+    "13": 5,
+    "14": 5,
+    "15": 5,
+    "16": 5,
+    "17": 5,
+    "18": 5,
+    "19": 5,
+    "20": 6,
+    "21": 6,
+    "22": 6,
+    "23": 6,
+    "24": 6,
+    "25": 6,
+    "26": 6,
+    "27": 6,
+    "28": 6,
+    "29": 6,
+    "30": 6,
+    "31": 6,
+    "32": 6,
+    "33": 6,
+    "34": 6,
+    "35": 6,
+    "36": 7,
+    "37": 7,
+    "38": 7,
+    "39": 7,
+    "40": 7,
+    "41": 7,
+    "42": 7,
+    "43": 7,
+    "44": 8,
+    "45": 8,
+    "46": 8,
+    "47": 8,
+    "48": 8,
+    "49": 8,
+    "50": 8,
+    "51": 8,
+    "52": 8,
+    "53": 8,
+    "54": 8,
+    "55": 8,
+    "56": 8,
+    "57": 8,
+    "58": 8,
+    "59": 8,
+    "61": 10,
+    "62": 10,
+    "63": 11,
+    "64": 11
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 17,
+    "6": 18,
+    "7": 18,
+    "8": 19,
+    "9": 19,
+    "10": 20,
+    "11": 20
+   },
+   "out": {
+    "0": 21,
+    "1": 22,
+    "2": 23,
+    "3": 24,
+    "4": 25,
+    "5": 26,
+    "6": 27
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "cv",
+     "7": "cv",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: the jack is compared against the threshold knob, whose range is 0V to 10V; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "Twinned2.cpp Twinned2::process: the jack is rescaled from 0 to the Step Input Scale value onto 0 to 8 steps; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "Twinned2.cpp Twinned2::getCVOut: the jack is read per step with getPolyVoltage(step), commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "Twinned2.cpp Twinned2::getCVOut: the jack is read per step with getPolyVoltage(step), commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Twinned2.cpp Twinned2::process: the jack is read per step with getPolyVoltage(i) to set the gate knobs, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Twinned2.cpp Twinned2::process: the jack is read per step with getPolyVoltage(i) to set the gate knobs, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Twinned2.cpp Twinned2::process: the note and octave knobs summed, one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Twinned2.cpp Twinned2::process: the note and octave knobs summed, one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Twinned2.cpp Twinned2::process: the note and octave knobs summed, one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: a 1ms pulse generator writing 10V, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: setChannels is called on these three outputs and is the step count when polyphonic gates are on, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: setChannels is called on these three outputs and is the step count when polyphonic gates are on, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Twinned2.cpp Twinned2::process: setChannels is called on these three outputs and is the step count when polyphonic gates are on, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "In the randomise-trigger loop the two lines that pick the octave parameter sit outside their if statements, so the octave written is always sequence B's whichever of the four randomise controls was used; this only shows when the menu is set to Randomize Notes and Octave. Gate length is worked out from the measured interval between the last two clocks, so the first gate after a clock change is the wrong length."
   },
   "Set2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "One large knob whose position is the output, with four stored settings it slides to over a set time",
+    "Sets the output voltage, 0 to 1 before the scale and offset knobs are applied",
+    "Stores the knob's present position into that preset, and a second press clears it again",
+    "Starts a slide from wherever the knob is to that stored preset, over that preset's time",
+    "Sets that preset's slide time, 0 to 1 multiplied by the scale switch above it",
+    "Bends that preset's slide away from a straight line, -1 to 1; at 0 the slide is linear, positive settings start slowly and negative settings start quickly",
+    "Multiplies that preset's slide time by 1, 10 or 100",
+    "Multiplies the knob position before the offset is added, -10 to 10",
+    "Adds -10V to 10V to the output after the scale has been applied",
+    "Scales the knob position; with a cable here the knob reads as a share of this voltage rather than of one volt",
+    "A rising edge here starts a slide to that preset",
+    "Sets that preset's slide time in seconds, multiplied by the scale switch, and overrides that preset's time knob while patched",
+    "Carries the knob position, multiplied by the scale knob with the offset added",
+    "Carries the difference between the output and the value the knob would give at its top, which makes a mirror of the output",
+    "Sends a 1ms pulse when a slide to that preset finishes",
+    "Note — a Go button or jack does nothing until that preset has been stored: press its small set button first, and the small orange lamp beside it lights for a preset that holds something",
+    "Note — moving the big knob during a slide stops the slide where it is",
+    "Menu — Global End of Cycle — sends every preset's finished pulse from the first end of cycle jack",
+    "Menu — Separate End of Cycles — sends each preset's finished pulse from its own jack, and is the setting the module comes up in",
+    "Menu — Ignore retriggers — a second Go on the preset already running is ignored",
+    "Menu — Retrigger stops cycle — a second Go on the preset already running stops the slide where it is",
+    "Menu — Retrigger restarts cycle — a second Go on the preset already running starts the slide again from the knob's present position"
+   ],
+   "param": {
+    "0": 1,
+    "21": 7,
+    "22": 8,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 4,
+    "10": 4,
+    "11": 4,
+    "12": 4,
+    "13": 5,
+    "14": 5,
+    "15": 5,
+    "16": 5,
+    "17": 6,
+    "18": 6,
+    "19": 6,
+    "20": 6
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 10,
+    "3": 10,
+    "4": 10,
+    "5": 11,
+    "6": 11,
+    "7": 11,
+    "8": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 14,
+    "4": 14,
+    "5": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set2.cpp Set2::process: the knob value is multiplied by this jack before the scale and offset; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Set2.cpp Set2::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Set2.cpp Set2::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Set2.cpp Set2::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Set2.cpp Set2::process: Rack SchmittTriggers at their default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set2.cpp Set2::process: the jack replaces that preset time knob and is multiplied by the scale switch; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set2.cpp Set2::process: the jack replaces that preset time knob and is multiplied by the scale switch; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set2.cpp Set2::process: the jack replaces that preset time knob and is multiplied by the scale switch; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set2.cpp Set2::process: the jack replaces that preset time knob and is multiplied by the scale switch; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set2.cpp Set2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Set2.cpp Set2::process: one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Set2.cpp Set2::process: a 1ms pulse generator writing 10V, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Set2.cpp Set2::process: a 1ms pulse generator writing 10V, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Set2.cpp Set2::process: a 1ms pulse generator writing 10V, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Set2.cpp Set2::process: a 1ms pulse generator writing 10V, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "A preset's Go button and its Go jack share one Schmitt trigger object, which is processed twice per sample, so a held-high jack keeps the button from working. The ring of small lamps round the big knob shows its position, with a red lamp marking the preset being slid to."
   },
   "Any": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight trigger inputs combined into one, either as an OR or as an AND",
+    "Picks whether the output fires when any connected input fires, or only when all of them fire on the same sample",
+    "One of the eight triggers combined; only connected inputs are counted",
+    "Sends a 1ms pulse when the combination is satisfied",
+    "Note — in the AND position every connected input has to rise on the same sample, so it suits gates coming from one clock rather than triggers arriving at slightly different times",
+    "Note — unconnected inputs are left out of the count, so a single connected input in the AND position behaves as an OR"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Any.cpp Any::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Any.cpp Any::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Any.cpp Any::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Any.cpp Any::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Any.cpp Any::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Any.cpp Any::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Any.cpp Any::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Any.cpp Any::process: a Rack SchmittTrigger at its default thresholds; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Any.cpp Any::process: a 1ms pulse generator writing 10V, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The AND test compares the number of rising edges seen this sample against the number of connected inputs, so the edges must be exactly simultaneous. The output is declared with an empty name and shows no tooltip."
   },
   "Quant": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantiser that snaps an incoming pitch to the nearest of the twelve notes you leave switched on",
+    "Shifts the output by whole octaves, -5 to 5",
+    "Shifts the incoming pitch by 0 to 12 semitones before it is snapped",
+    "Switched on, that note is one the pitch can be snapped to; switched off it is skipped",
+    "Sets the octave shift, one octave per volt, and overrides the octave knob while patched; the knob moves to follow it",
+    "Sets the semitone shift, one semitone per volt, and overrides the semitone knob while patched; the knob moves to follow it",
+    "The pitch to be snapped, at a volt per octave",
+    "Carries the snapped pitch, at a volt per octave",
+    "Note — the output does not move at all while nothing is patched to the pitch input",
+    "Note — all twelve notes come up switched on, which passes the pitch through at the nearest semitone",
+    "Note — switching every note off leaves the output stuck around ten volts above the octave setting, because the code has no note to fall back on"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 3,
+    "13": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "-5 to 5V",
+      "step": "stepped",
+      "negative": "swings",
+      "why": "Quant.cpp Quant::process: the jack is truncated to a whole number and clamped to -5 to 5; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "Quant.cpp Quant::process: the jack is truncated to a whole number and clamped to -12 to 12; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "Quant.cpp Quant::process: the jack is split into an octave and a pitch class and snapped to the nearest enabled note; every voltage on this module is read with getVoltage() and no channel argument, so only the first channel of a cable is used, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "stepped",
+      "why": "Quant.cpp Quant::process: the chosen note plus the octave, one setVoltage with no channel argument, commit dfb2174, the 2.4.1 release merge, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "With every note button off the search never finds a candidate, the best-note variable keeps its initial value of 10, and the module writes a light index of minus one; the output then reads about 10V above the octave setting. The semitone jack is clamped to -12 to 12 while its knob only covers 0 to 12."
   }
  }
 }

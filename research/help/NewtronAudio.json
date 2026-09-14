@@ -2,12 +2,165 @@
  "plugin": "NewtronAudio",
  "source": "https://github.com/zebedeezac/NewtronAudio",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "sequence_enhancer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Takes a clock, a pitch and an optional gate, and runs them through one of eight fixed 16-step patterns that shorten the gate and shift the pitch by whole octaves",
+    "Chooses which of the eight 16-step patterns runs, each one a fixed list of gate lengths and octave shifts",
+    "Scales the octave shifts the pattern carries, from none at the bottom of its travel to the full shift at the top; the result is rounded to whole octaves",
+    "Sets how long a step is against the clock, in seven positions: a quarter, a third, a half, the same, four thirds, twice and four times the clock rate, despite the fifth reading 1.5x in its tooltip",
+    "Sets how much of a step the gate is high for, from fully closed at the bottom of its travel to the whole step at the top, before the pattern shortens it",
+    "Sets how far the pattern is allowed to shorten the gate: at the bottom of its travel the gate keeps the length the slider set, and at the top the pattern's own length is used",
+    "Attenuates and inverts the voltage at the speed CV jack, -1 to +1, and holds that jack at nothing in the centre",
+    "Attenuates and inverts the voltage at the gate length CV jack, -1 to +1, and holds that jack at nothing in the centre",
+    "Steps the chosen pattern on, 0V to 10V covering the eight; the voltage is cut to whole volts before it is used, so a fraction of a volt changes nothing",
+    "Adds to the octave scaling, 10V covering the whole of it, and a negative voltage takes it back down",
+    "Adds to how far the pattern may shorten the gate, 10V covering the whole of it, and a negative voltage takes it back down",
+    "Moves the step length through its seven positions, six of them at 10V with the trimpot above the jack turned fully up",
+    "Adds to the gate length through the trimpot above the jack, the whole span at 10V with the trimpot fully up",
+    "Takes the pitch that the pattern's octave shifts are added to",
+    "A clock here is what drives the whole module; every step is measured against the time between the last two rising edges",
+    "A trigger here returns the pattern to its first of 16 steps",
+    "An optional gate that latches the two outputs: while a cable is patched here, the pitch output changes only on a rising edge at this jack, and the gate output is held low until one arrives",
+    "The pitch from the pitch input with the pattern's octave shift added, as whole volts of octave",
+    "A 10V gate for each step, as long as the gate slider and the pattern between them make it",
+    "Note — nothing happens at all without a clock: with no cable at CLK the module's process is skipped entirely, both outputs keep whatever they last held, and there is no run button",
+    "Note — the gate input is optional and is most use on a polyphonic voice, where it sets which incoming note each channel holds; a monophonic patch usually needs only the clock",
+    "Note — every input is polyphonic and the module runs as many channels as the input with the most has; an input carrying one channel is used for all of them",
+    "Note — the channel count is taken again only when a step falls, so patching a cable with more channels takes effect on the next step rather than at once",
+    "Note — the eight patterns are fixed in the module and cannot be edited; each is 16 steps of gate length and octave shift, and there is no menu on the module at all",
+    "Note — the two trimpots do nothing unless a cable is patched to the jack below them; the algorithm, pitch and rhythm CV jacks have no trimpot and are taken at their full voltage"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13,
+    "6": 14,
+    "7": 15,
+    "8": 16
+   },
+   "out": {
+    "0": 17,
+    "1": 18
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "pitch",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/sequence_enhancer.cpp setInputs() passes getPolyVoltage(c) into setAlg(int, int), whose body is trunc(cv * 0.7) added to the knob and clamped to 0..7"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/sequence_enhancer.cpp setInputs() adds inputs[PITCH_AMOUNT_CV_INPUT].getPolyVoltage(c) * 0.1f to the knob, and setPitch clamps the total to 0..1"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/sequence_enhancer_channel.hpp setRhythm clamps (getPolyVoltage(c) * 0.1f) plus the knob to 0..1"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/sequence_enhancer_channel.hpp setSpeed takes int speedCV = cv * atten * 0.6f, adds it to the slider and clamps the total to 0..6"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/sequence_enhancer_channel.hpp setGateLength takes cv * atten * 0.1f only when the jack is connected, and tick() clamps slider plus that to 0..1"
+     },
+     "5": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/sequence_enhancer_channel.hpp tick() sets pitchOut = pitchIn + pitchMod, where pitchMod is a whole number of octaves from the algOct table"
+     },
+     "6": {
+      "poly": true,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/helpers/GateProcessor.hpp set() rescales the voltage between 0.1V and 2V into a dsp::SchmittTrigger, and setInputs() feeds it with getPolyVoltage(c)"
+     },
+     "7": {
+      "poly": true,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/helpers/GateProcessor.hpp set() rescales the voltage between 0.1V and 2V into a dsp::SchmittTrigger, and setInputs() feeds it with getPolyVoltage(c)"
+     },
+     "8": {
+      "poly": true,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/helpers/GateProcessor.hpp set() rescales the voltage between 0.1V and 2V into a dsp::SchmittTrigger, and setInputs() feeds it with getPolyVoltage(c)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/sequence_enhancer.cpp setOutputs() calls setChannels(numChannels) and then setVoltage(channel[c].pitchOutput(), c), which is the input pitch plus whole octaves"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/sequence_enhancer.cpp setOutputs() calls setChannels(numChannels) and then setVoltage(channel[c].gateOutput(), c), which tick() sets to 10.f or 0.f"
+     }
+    }
+   },
+   "notes": "Read from the maker's source and README at commit e6aebea, the head of main and the only commit carrying the installed 2.0.1. Panel names were read from a render of res/sequence_enhancer.svg: ALG., PITCH, RYTM., SPD., GATE, CLK, RST, IN, OUT. Several are printed twice — SPD. and GATE each label a slider, a trimpot and a CV jack, and GATE also labels the gate input and the gate output — and the labels are set below their group rather than beside each control, so no line leads with one. Index order is not panel order. The parameters run Algorithm, Pitch Amount, Speed slider, Gate Length slider, Rhythm Amount, Speed trimpot, Gate trimpot, so index 4 is the lowest knob on the right while indexes 5 and 6 are the two trimpots further up on the left. The inputs are worse: index 5 is the pitch input in the second row from the bottom, while indexes 6, 7 and 8 are CLK, RST and GATE along the bottom row, and indexes 0 to 4 are the five CV jacks scattered up the panel. Three conflicts with the maker's own text. The README lists the speed slider as 1/4x, 1/2x, 3/4x, 1x, 2x, 3x, 4x; the code's clockMult table in sequence_enhancer_channel.hpp updateSpeed gives 4, 3, 2, 1, 0.75, 0.5 and 0.25 clocks per step, which is a quarter, a third, a half, the same, four thirds, twice and four times the clock. The maker's own switch labels in configSwitch agree with the code except at the fifth position, which they print as 1.5x where the table gives four thirds; the line follows the table. The README also says all CV inputs can be attenuated where only speed and gate length have a trimpot. The algorithm CV is declared as setAlg(int param, int cv) and called with a float voltage, so the voltage is truncated to whole volts before the 0.7 scaling; this is very likely not what was meant, but it is what the installed build does. There is no context menu and no lights, so there are no menu lines."
   }
  }
 }

@@ -1,23 +1,266 @@
 {
  "plugin": "PdArray",
- "source": "https://github.com/mgunyho/PdArray",
+ "source": "https://github.com/mgunyho/PdArray/blob/8bd796f/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Array": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A row of stored values that you draw with the mouse, record into or load from a wav file, and read out with a voltage that moves a cursor along it",
+    "Moves the playback cursor along the array, the bottom of the range set by POS RANGE reading the first value and the top the last; a polyphonic cable gives every channel its own cursor",
+    "Carries the stored value under the cursor with no smoothing, stepping from one value to the next",
+    "Carries the value under the cursor smoothed with a four-point curve through the neighbouring values, the same interpolation the tabread4~ object in Pure Data uses",
+    "Sets the voltage span that sweeps a cursor from the start of the array to the end, +10V, ±5V or ±10V, and applies to POS and REC POS alike",
+    "Sets the voltage span that the bottom and top of the array stand for, +10V, ±5V or ±10V, and applies to the signal being recorded and to both outputs",
+    "Writes REC IN into the array while the button is held, or starts and stops the recording at each click when the recording mode is Toggle; it glows while recording",
+    "Sets the point in the array that a recorded value is written to, read over the span set by POS RANGE",
+    "The signal written into the array while recording, read over the span set by I/O RANGE and clipped to it",
+    "A high gate records REC IN for as long as it lasts, or a rising edge starts and stops the recording when the recording mode is Toggle; it reads high above 2V",
+    "Note — drag across the display with the mouse to draw the array; the pointer's height sets the value under it, and a fast drag draws a straight line through the values it passes over",
+    "Note — the number under SIZE is how many values the array holds; click it and type a new one, up to 999999, and new values are added at 0V",
+    "Note — recording is monophonic: only the first channel of REC IN and REC POS is read, however many the cable carries",
+    "Note — the array comes up holding ten values rising evenly from the bottom to the top, and Reset array contents on the menu puts them back",
+    "Note — bypassing the module passes REC IN straight to both outputs",
+    "Note — loading a wav file locks drawing, and Disable drawing on the menu unlocks it again",
+    "Menu — Reset array contents — replaces the array with ten values rising evenly from the bottom to the top",
+    "Menu — Set array contents to zero — sets every value in the array to 0V, keeping its length",
+    "Menu — Sort array contents — reorders the values already in the array into a rising ramp",
+    "Menu — Add fade in/out to prevent clicks — fades the start and the end of the array towards 0V, over the number of values printed beside the item",
+    "Menu — Disable drawing — stops the mouse from changing the array, which loading a wav file switches on by itself",
+    "Menu — Recording mode: Gate, Toggle — chooses whether the REC input and button record while they are high or held, or start and stop the recording at each rising edge and click",
+    "Menu — Load .wav file... — reads a wav file into the array, keeping the current SIZE and filling only that many values, with the duration of the present array printed beside the item",
+    "Menu — Load .wav file and resize array... — reads a wav file into the array and sets SIZE to the length of the file, up to 999999 values",
+    "Menu — Data persistence: Save full array data to patch file, Save path to loaded sample, Don't save array data — chooses what the patch stores of the array",
+    "Menu — Interpolation at boundary: Constant, Mirror, Periodic — chooses what the smooth output reads past the ends of the array: the end value held, the array folded back, or the array repeated"
+   ],
+   "param": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "in": {
+    "0": 1,
+    "1": 8,
+    "2": 7,
+    "3": 9
+   },
+   "out": {
+    "0": 2,
+    "1": 3
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Array.cpp:365-369 sets the output channel count from getChannels on this jack and reads getVoltage(chan) once per channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "Array.cpp:362 reads it with a plain getVoltage, so only the first channel is recorded"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Array.cpp:350 reads it with a plain getVoltage, rescales it over the POS RANGE span and clamps it to the array"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "Array.cpp:352 rescales this jack from 0.1V and 2V onto 0 and 1 before a default dsp::SchmittTrigger, so it reads high above 2V and low below 0.1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Array.cpp:366 and 373 set the channel count from the POS input and write one voltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "why": "Array.cpp:367 and 419 set the channel count from the POS input and write one voltage per channel"
+     }
+    }
+   },
+   "notes": "No range is given for POS, REC POS, REC IN or the two outputs because the POS RANGE and I/O RANGE switches change them between 0 to 10V, ±5V and ±10V (Array.cpp:320-347). That also settles what a negative voltage does: on the ±5V and ±10V settings it is part of the span, and on the +10V setting it is clamped to the start of the array or the bottom of its value span (lines 350 and 369). No family is given for REC IN or the two outputs: the module stores and replays whatever voltage is given to it, so those jacks carry audio, CV or an envelope according to what is in the array. The SIZE box and the array display are plain widgets rather than parameters, so no click on them reaches this help; the drawing gesture and the SIZE box are covered by notes instead. Holding the platform modifier key while clicking the display leaves the array alone (Array.cpp:516-523). Arrays longer than 5000 values are saved beside the patch as a wav file rather than inside it.",
+   "read": "2026-09-14"
   },
   "Miniramp": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Small envelope generator that sends a linear ramp from 0V to 10V over a set time when it is triggered, with a gate, an end-of-cycle pulse and a finished flag beside it",
+    "Sets the length of the ramp, from 1ms to 10 seconds with the switch at LOG and from 0 to 10 seconds with it at LIN, and the figure in seconds is printed on the display",
+    "Sets how much a volt at the CV input changes the ramp, clockwise from the centre lengthening it and counter-clockwise shortening it, by as much as 10 seconds per 10V at either end",
+    "Chooses how the duration knob is read: LIN spreads 0 to 10 seconds evenly across its travel, LOG spreads 1ms to 10 seconds across it so that the short times get most of the turn",
+    "Lengthens or shortens the ramp by the amount set by the CV AMT knob, with the total held between 0 and 10 seconds",
+    "A rising edge starts the ramp from 0V, restarting it if one is already running; it reads high above 2V",
+    "A rising edge stops the ramp at once and drops it to its finished value; it reads high above 2V",
+    "The ramp itself, climbing evenly from 0V to 10V over the set time and resting at 0V or 10V as the menu sets",
+    "Carries 10V from the start of the ramp until it finishes, and 0V at all other times",
+    "Carries a 1ms pulse of 10V at the moment the ramp finishes",
+    "Carries 10V whenever no ramp is running and 0V while one is, which is the GATE output turned upside down",
+    "Note — the module makes nothing until a trigger arrives at TRG IN; the duration knob alone starts nothing",
+    "Note — a polyphonic cable in TRG IN or CV makes every output polyphonic with that many ramps; a monophonic cable in TRG IN, CV or STOP acts on all of the channels at once",
+    "Menu — Ramp value when finished: 0V, 10V — chooses what the RAMP output holds once the ramp has ended, which at 10V prevents a click when a sample is being played from an Array",
+    "Menu — Send EOC on STOP — sends the EOC pulse when a trigger at STOP cuts the ramp short, as well as when the ramp reaches its end",
+    "Menu — Update duration only on trigger — freezes the duration at the value it had when the last trigger arrived, instead of following the knob and CV while the ramp runs"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 5,
+    "1": 4,
+    "2": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "Miniramp.cpp:223-224 reads it with getPolyVoltage(c) inside a loop bounded by the channel count taken at line 210, rescaling 0.1V and 2V onto 0 and 1 before a default dsp::SchmittTrigger"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Miniramp.cpp:220-221 reads it with getPolyVoltage(c) and adds it, scaled by the CV AMT knob, to the knob duration, the total clamped to 0 and 10 seconds"
+     },
+     "2": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "Miniramp.cpp:228-233 reads it with getPolyVoltage(c), rescaling 0.1V and 2V onto 0 and 1 before a default dsp::SchmittTrigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Miniramp.cpp:255-267 writes the ramp per channel and line 279 sets the channel count from the trigger and CV inputs"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Miniramp.cpp:268 writes 10.0f or 0.0f per channel and line 280 sets the channel count"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Miniramp.cpp:269 writes 10.0f or 0.0f per channel from a generator triggered with 1e-3f at line 251, and line 281 sets the channel count"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Miniramp.cpp:270 writes 0.0f while the gate is high and 10.0f otherwise, per channel, and line 282 sets the channel count"
+     }
+    }
+   },
+   "notes": "Duration law: linear mode returns the knob value in seconds, 0 to 10; logarithmic mode raises ten to a power spread from -3 to 1 across the knob, giving 1ms to 10 seconds (Miniramp.cpp:7-8 and 168-183). CV depth is in seconds per 10V and follows the same two laws (lines 187-202). The channel count at line 210 is written as inputs[CV_AMT_PARAM], which indexes the input list with a parameter id; the id happens to be 1 and input 1 is the CV jack, so the count is right by coincidence. The STOP input's channel count is not counted, matching the maker's statement that polyphony comes from TRG IN and CV. The four port lights are written from channel 0 only, which the maker marks as unfinished in a comment.",
+   "read": "2026-09-14"
   },
   "Ministep": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Counter that steps a voltage up or down on triggers and wraps round at the top, for stepping through an Array like a sequencer",
+    "A rising edge sets the counter back to its first step; it reads high above 2V",
+    "A rising edge moves the counter up by the step size, wrapping round to the first step after the last; it reads high above 2V",
+    "A rising edge moves the counter down by the step size, wrapping round to the last step after the first; it reads high above 2V",
+    "Sets how many steps the counter moves at each trigger, rounded towards zero; 10V is the whole count of steps, or one step per volt when the scale mode is changed, and a negative voltage reverses it",
+    "Carries the counter as a voltage: the steps spread evenly from 0V up to 10V, or one volt per step when the output mode is changed",
+    "Note — the number under MAX is how many steps the counter runs before it wraps; click it and type a new one, up to 999",
+    "Note — the counter moves only on triggers, so nothing changes until INC or DEC is patched",
+    "Note — with nothing patched into SCL the step size is 1, and patching a cable holding 0V there sets the step size to zero and stops the counter moving",
+    "Note — a polyphonic cable in INC, DEC or RST gives one counter per channel, and a monophonic cable in any of them acts on every counter at once",
+    "Note — a trigger at INC and one at DEC in the same sample leave the counter where it is",
+    "Menu — Scale mode: 10V = max, 1V per step — chooses how SCL is read, either the whole count of steps across 10V or one step per volt",
+    "Menu — Output mode: max = 10V, 1V per step — chooses what the OUT jack carries, either the steps spread evenly from 0V up to 10V or one volt per step counting from 0V",
+    "Menu — Offset output by half step — raises the output by half a step, so each step lands in the middle of its share of the range rather than at the bottom"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "Ministep.cpp:142-144 reads it with getPolyVoltage(c) inside a loop bounded by the channel count taken at line 132, rescaling 0.1V and 2V onto 0 and 1 before a default dsp::SchmittTrigger"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "Ministep.cpp:145-147 reads it with getPolyVoltage(c) inside a loop bounded by the channel count taken at line 132, rescaling 0.1V and 2V onto 0 and 1 before a default dsp::SchmittTrigger"
+     },
+     "2": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "Ministep.cpp:148-150 reads it with getPolyVoltage(c) inside a loop bounded by the channel count taken at line 132, rescaling 0.1V and 2V onto 0 and 1 before a default dsp::SchmittTrigger"
+     },
+     "3": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "a step size of 1",
+      "why": "Ministep.cpp:152-160 reads it with getPolyVoltage(c) and truncates to an integer, taking 1 when the jack is unpatched; a negative value is kept and reverses the direction"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Ministep.cpp:176-178 writes one voltage per channel and line 180 sets the channel count; the value is the step number scaled to 10V, or the step number itself in the other output mode"
+     }
+    }
+   },
+   "notes": "The output range in the default output mode runs from 0V to just under 10V: the last step is one step short of 10V because the step number is divided by the whole count (Ministep.cpp:176-178). In the 1V per step mode the top voltage is one less than the count of steps. The MAX box is a plain text widget rather than a parameter, so no click on it reaches this help; it is covered by a note. SCL is read per channel but its own channel count is not part of the counter's channel count, so a polyphonic SCL against a monophonic INC gives one counter scaled by the first SCL channel.",
+   "read": "2026-09-14"
   }
  }
 }

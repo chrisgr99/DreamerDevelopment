@@ -69,7 +69,92 @@
      "5": "trigger"
     }
    },
-   "notes": "The EOA, EOD, EOS and EOR jacks are named for the end of each stage and the maker's tooltips call them the attack, decay, sustain and release period. The code holds each one at 10V and drops it to 0V during its own stage, so the useful edge is the rise at the end of the stage; the lines follow the code."
+   "notes": "The EOA, EOD, EOS and EOR jacks are named for the end of each stage and the maker's tooltips call them the attack, decay, sustain and release period. The code holds each one at 10V and drops it to 0V during its own stage, so the useful edge is the rise at the end of the stage; the lines follow the code.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "ADSR.cpp:129 clamps this jack alone with clamp(v / 10.0f, 0.0f, 1.0f) before adding it to the knob"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "ADSR.cpp:130 clamps this jack alone with clamp(v / 10.0f, 0.0f, 1.0f) before adding it to the knob"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "ADSR.cpp:132 clamps this jack alone with clamp(v / 10.0f, 0.0f, 1.0f) before adding it to the knob"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "EnvelopeGenerator.hpp:106 clamps the knob plus this jack over ten at zero"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ADSR.cpp:146 feeds this jack to a dsp::SchmittTrigger at its default 1V and 0V thresholds"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ADSR.cpp:147 feeds this jack to a dsp::SchmittTrigger at its default 1V and 0V thresholds"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ADSR.cpp:141 clamps the knob plus this jack over 2.5 to the range 0.1 to 4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "ADSR.cpp:151 writes the envelope, which runs 0 to 1, multiplied by ten"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "ADSR.cpp:152 writes ten minus the envelope multiplied by ten"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "ADSR.cpp:159 writes 10V or 0V from a pulse generator"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "ADSR.cpp:165 writes 10V or 0V from a pulse generator"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "ADSR.cpp:171 writes 10V or 0V from a pulse generator"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "ADSR.cpp:177 writes 10V or 0V from a pulse generator"
+     }
+    }
+   }
   },
   "Bitcrusher": {
    "lines": [
@@ -101,7 +186,30 @@
     "out": {
      "0": "audio"
     }
-   }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "polarity": "bipolar",
+      "why": "Bitcrusher.cpp:106 divides this jack by five into a signal the crusher treats as running -1 to 1"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "why": "Bitcrusher.cpp:107 adds this jack to the knob and truncates the sum to a whole number of bits, one bit per volt"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Bitcrusher.cpp:113 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     }
+    }
+   },
+   "notes": "The bit count is one bit per volt added to the knob and nothing clamps it (Bitcrusher.cpp:107), so a large voltage takes the quantiser past the knob's eight bits or below zero."
   },
   "BlankPanel": {
    "lines": [
@@ -205,7 +313,121 @@
      "3": "audio"
     }
    },
-   "notes": "Inputs 13 and 14 are declared in the code as level CV jacks but are not placed on the panel and are never read, so they carry no line. The LEVEL knobs therefore have no CV input."
+   "notes": "Inputs 13 and 14 are declared in the code as level CV jacks but are not placed on the panel and are never read, so they carry no line. The LEVEL knobs therefore have no CV input. The two CLEAR inputs need a full 10V. Delay.cpp:368 and 480 divide the jack by ten and clamp the result to 0 to 1 before handing it to a trigger whose threshold is 1, so anything under 10V never reaches it with the button at rest. The two TIME inputs behave differently in the two clock modes: free running, the jack is clamped to 0 to 1 on its own, so a negative voltage does nothing; clocked, the knob and jack are summed first and a negative voltage pulls the knob down.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Delay.cpp:227 feeds this jack to a dsp::SchmittTrigger at its default 1V and 0V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "why": "Delay.cpp:220 divides this jack by ten into a 0 to 1 delay time"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "why": "Delay.cpp:254 divides this jack by ten into a 0 to 1 delay time"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Delay.cpp:319 clamps the knob plus this jack over ten symmetrically between -1 and 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Delay.cpp:430 clamps the knob plus this jack over ten symmetrically between -1 and 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Delay.cpp:391 clamps the knob plus this jack over ten at zero"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Delay.cpp:401 clamps the knob plus this jack over ten at zero"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Delay.cpp:503 clamps the knob plus this jack over ten at zero"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Delay.cpp:513 clamps the knob plus this jack over ten at zero"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Delay.cpp:416 clamps the knob plus this jack over ten at zero"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Delay.cpp:528 clamps the knob plus this jack over ten at zero"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Delay.cpp:318 reads this jack as a signal and multiplies it by the level knob"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Delay.cpp:429 reads this jack as a signal and multiplies it by the level knob"
+     },
+     "15": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 10V",
+      "why": "Delay.cpp:368 divides this jack by ten, clamps it to 0 to 1 and feeds a trigger whose threshold is 1"
+     },
+     "16": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 10V",
+      "why": "Delay.cpp:480 divides this jack by ten, clamps it to 0 to 1 and feeds a trigger whose threshold is 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Delay.cpp:418 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Delay.cpp:530 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Delay.cpp:413 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Delay.cpp:525 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     }
+    }
+   }
   },
   "TreasureVCO": {
    "lines": [
@@ -270,7 +492,67 @@
     "out": {
      "0": "audio"
     }
-   }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ExperimentalVCO.cpp:104 multiplies this jack by twelve into a semitone pitch"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.01V",
+      "why": "ExperimentalVCO.hpp:78 subtracts 0.01 from this jack and resets on the crossing above zero"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "ExperimentalVCO.cpp:132 adds three times this jack to the knob, clamps the sum to 0 to 13 and truncates it to a whole waveform number"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ExperimentalVCO.cpp:111 adds 120 times this jack to the knob and clamps the sum to 512 to 2047"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ExperimentalVCO.cpp:114 adds this jack, scaled by its attenuator, to the knob and clamps the sum to 0.01 to 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ExperimentalVCO.cpp:120 adds this jack, scaled by its attenuator, to the knob and clamps the sum to 0.01 to 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ExperimentalVCO.cpp:126 adds this jack, scaled by its attenuator, to the knob and clamps the sum to 0.01 to 1"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "ExperimentalVCO.cpp:106 adds this jack, scaled by its attenuator, to the same semitone pitch the volt per octave jack feeds",
+      "polarity": "bipolar"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "ExperimentalVCO.cpp:145 passes the output through saturate2(), which Resources.hpp:26 fixes at five"
+     }
+    }
+   },
+   "notes": "The FM input is exponential, not linear. ExperimentalVCO.cpp:106 adds it to the same semitone pitch figure the volt per octave jack feeds, so it shifts pitch by the same doubling law rather than adding to frequency."
   },
   "Fade": {
    "lines": [
@@ -314,6 +596,48 @@
      "4": "cv",
      "5": "cv",
      "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fade.cpp:73 reads this jack as a signal to be crossfaded"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fade.cpp:74 reads this jack as a signal to be crossfaded"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fade.cpp:82 reads this jack as a signal to be crossfaded"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Fade.cpp:83 reads this jack as a signal to be crossfaded"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Fade.cpp:72 clamps the knob plus this jack over ten at zero"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Fade.cpp:81 clamps the knob plus this jack over ten at zero"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Fade.cpp:90 clamps the knob plus this jack over ten at zero"
+     }
     }
    }
   },
@@ -392,7 +716,49 @@
      "11": "cv"
     }
    },
-   "notes": "Parameters 0, 4 and 10 and inputs 1 and 5 are declared in the code but are not placed on the panel, so they carry no line."
+   "notes": "Parameters 0, 4 and 10 and inputs 1 and 5 are declared in the code but are not placed on the panel, so they carry no line. The wave outputs run ±5V with the offset switch off and 0 to 10V with it on: LowFrequencyOscillator.hpp gives every wave a +1 offset in that mode and MLFO.cpp multiplies by five either way, so no fixed range is written for them.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "MLFO.cpp:117 adds this jack, scaled by its attenuator, to a pitch LowFrequencyOscillator.hpp:19 raises two to",
+      "negative": "swings"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "MLFO.cpp:161 adds this jack, scaled by its attenuator, to a pitch LowFrequencyOscillator.hpp:19 raises two to",
+      "negative": "swings"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.01V",
+      "why": "LowFrequencyOscillator.hpp:26 divides this jack by 0.01 into a trigger whose threshold is 1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "MLFO.cpp:145 adds this jack to the wave knob, one wave per volt, and clamps the sum to 0 to 4"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "MLFO.cpp:187 adds this jack to the wave knob, one wave per volt, and clamps the sum to 0 to 4"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "MLFO.cpp:202 clamps the knob plus this jack over ten at zero"
+     }
+    }
+   }
   },
   "Morph": {
    "lines": [
@@ -424,6 +790,56 @@
    "family": {
     "in": {
      "8": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Morpher.cpp:100 reads this jack as a signal to be crossfaded"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Morpher.cpp:101 reads this jack as a signal to be crossfaded"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Morpher.cpp:102 reads this jack as a signal to be crossfaded"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Morpher.cpp:103 reads this jack as a signal to be crossfaded"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Morpher.cpp:104 reads this jack as a signal to be crossfaded"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Morpher.cpp:105 reads this jack as a signal to be crossfaded"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Morpher.cpp:106 reads this jack as a signal to be crossfaded"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Morpher.cpp:107 reads this jack as a signal to be crossfaded"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Morpher.cpp:113 clamps the knob plus this jack over ten at zero"
+     }
     }
    }
   },
@@ -467,6 +883,40 @@
     "15": 4,
     "16": 4,
     "17": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Mult.cpp:104 reads this jack as a signal and adds or subtracts it"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Mult.cpp:104 reads this jack as a signal and adds or subtracts it"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Mult.cpp:113 reads this jack as a signal and adds or subtracts it"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Mult.cpp:113 reads this jack as a signal and adds or subtracts it"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Mult.cpp:121 reads this jack as a signal and adds or subtracts it"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Mult.cpp:121 reads this jack as a signal and adds or subtracts it"
+     }
+    }
    }
   },
   "Noise": {
@@ -500,6 +950,29 @@
     "out": {
      "0": "audio",
      "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "Noise.cpp:119 clamps this jack alone with clamp(v / 10.0f, 0.0f, 1.0f) and multiplies the noise by it"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Noise.cpp:120 passes the output through saturate2(), which Resources.hpp:26 fixes at five"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Noise.cpp:128 passes the output through saturate2(), which Resources.hpp:26 fixes at five"
+     }
     }
    }
   },
@@ -552,7 +1025,42 @@
      "0": "audio"
     }
    },
-   "notes": "The LOW and HIGH knobs disagree between sources: their tooltips display 10Hz to 8kHz, while the code scales the knob to 0 to 20kHz. The lines give no figure for that reason."
+   "notes": "The LOW and HIGH knobs disagree between sources: their tooltips display 10Hz to 8kHz, while the code scales the knob to 0 to 20kHz. The lines give no figure for that reason.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Phaser.cpp:545 clamps the knob plus this jack over ten at zero"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Phaser.cpp:558 clamps the knob plus this jack over ten at zero"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Phaser.cpp:560 clamps the knob plus this jack over ten at zero"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "polarity": "bipolar",
+      "why": "Phaser.cpp:554 divides this jack by five into a signal the phaser treats as running -1 to 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Phaser.cpp:573 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     }
+    }
+   }
   },
   "RandomSource": {
    "lines": [
@@ -597,7 +1105,48 @@
      "0": "cv",
      "1": "cv"
     }
-   }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "RandomSource.cpp:70 feeds this jack to a dsp::SchmittTrigger at its default 1V and 0V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the sample range knob plus its CV",
+      "why": "RandomSource.cpp:75 reads this jack with getNormalVoltage(range), which supplies the sample range knob plus its attenuated CV when nothing is patched"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "RandomSource.cpp:94 adds this jack over ten to the slew knob with nothing bounding the sum below"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "RandomSource.cpp:67 adds this jack over five, scaled by its attenuator, to the range knob",
+      "negative": "swings"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "RandomSource.cpp:82 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "RandomSource.cpp:109 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     }
+    }
+   },
+   "notes": "With nothing patched into the sample input, RandomSource.cpp:75 normals it to the sample range figure and line 79 then multiplies the held value by that same figure, so the sample and hold output holds a steady voltage rather than a random one."
   },
   "Ring": {
    "lines": [
@@ -637,6 +1186,46 @@
      "0": "audio",
      "1": "audio"
     }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "polarity": "bipolar",
+      "why": "RingMod.cpp:74 divides this jack by five into a signal the ring modulator treats as running -1 to 1"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "polarity": "bipolar",
+      "why": "RingMod.cpp:75 divides this jack by five into a signal the ring modulator treats as running -1 to 1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "polarity": "bipolar",
+      "why": "RingMod.cpp:83 divides this jack by five into a signal the ring modulator treats as running -1 to 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "polarity": "bipolar",
+      "why": "RingMod.cpp:84 divides this jack by five into a signal the ring modulator treats as running -1 to 1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "RingMod.cpp:77 clamps the knob plus this jack over ten at zero"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "RingMod.cpp:86 clamps the knob plus this jack over ten at zero"
+     }
+    }
    }
   },
   "SimpleSlider": {
@@ -664,6 +1253,26 @@
    "family": {
     "in": {
      "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "slider.cpp:54 reads this jack as a signal to be crossfaded"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "slider.cpp:55 reads this jack as a signal to be crossfaded"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "slider.cpp:53 clamps the knob plus this jack over ten at zero"
+     }
     }
    }
   },
@@ -735,7 +1344,182 @@
      "14": "cv",
      "15": "cv"
     }
-   }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SwitchedMult.cpp:189 reads this jack as a signal and adds or subtracts it into the selected bus"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SwitchedMult.cpp:189 reads this jack as a signal and adds or subtracts it into the selected bus"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SwitchedMult.cpp:189 reads this jack as a signal and adds or subtracts it into the selected bus"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SwitchedMult.cpp:189 reads this jack as a signal and adds or subtracts it into the selected bus"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SwitchedMult.cpp:189 reads this jack as a signal and adds or subtracts it into the selected bus"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SwitchedMult.cpp:189 reads this jack as a signal and adds or subtracts it into the selected bus"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SwitchedMult.cpp:189 reads this jack as a signal and adds or subtracts it into the selected bus"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SwitchedMult.cpp:189 reads this jack as a signal and adds or subtracts it into the selected bus"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SwitchedMult.cpp:186 adds quadraticBipolar of this jack over ten to the switch and clamps the sum between -1 and 1"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SwitchedMult.cpp:186 adds quadraticBipolar of this jack over ten to the switch and clamps the sum between -1 and 1"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SwitchedMult.cpp:186 adds quadraticBipolar of this jack over ten to the switch and clamps the sum between -1 and 1"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SwitchedMult.cpp:186 adds quadraticBipolar of this jack over ten to the switch and clamps the sum between -1 and 1"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SwitchedMult.cpp:186 adds quadraticBipolar of this jack over ten to the switch and clamps the sum between -1 and 1"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SwitchedMult.cpp:186 adds quadraticBipolar of this jack over ten to the switch and clamps the sum between -1 and 1"
+     },
+     "14": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SwitchedMult.cpp:186 adds quadraticBipolar of this jack over ten to the switch and clamps the sum between -1 and 1"
+     },
+     "15": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SwitchedMult.cpp:186 adds quadraticBipolar of this jack over ten to the switch and clamps the sum between -1 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "7": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "8": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "9": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "10": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "11": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "12": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "13": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "14": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     },
+     "15": {
+      "poly": false,
+      "range": "±10V",
+      "why": "SwitchedMult.cpp:197 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     }
+    }
+   },
+   "notes": "The eight A/B control inputs are not linear: SwitchedMult.cpp:186 passes each through dsp::quadraticBipolar before dividing by ten, so the voltage is squared with its sign kept and the switch moves slowly near zero and quickly near ten volts."
   },
   "PAN-VCA": {
    "lines": [
@@ -791,7 +1575,40 @@
      "5": "audio"
     }
    },
-   "notes": "The panel prints SUM- and the manual calls it the difference of the two inputs, but the code computes 1V minus the sum of the two attenuated channels. The line follows the code. Input 2 and outputs 2 and 3 are declared in the code, are not placed on the panel and are never read."
+   "notes": "The panel prints SUM- and the manual calls it the difference of the two inputs, but the code computes 1V minus the sum of the two attenuated channels. The line follows the code. Input 2 and outputs 2 and 3 are declared in the code, are not placed on the panel and are never read. The pan CV is discontinuous at exactly 0V. VCA.cpp:69 and 80 test the voltage with if(cv), so at exactly zero the plain cosine and sine pan law is used, and at any other voltage — including a vanishingly small one — the gains are multiplied by 1+(cv+1)/5 on the left and 1-(cv-1)/5 on the right, which is a step change of a fifth as the voltage leaves zero.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "VCA.cpp:106 reads this jack as a signal"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "VCA.cpp:107 reads this jack as a signal"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "VCA.cpp:115 clamps this jack alone with clamp(v / 10.0f, 0.0f, 1.0f) and multiplies the level by it"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "VCA.cpp:126 clamps this jack alone with clamp(v / 10.0f, 0.0f, 1.0f) and multiplies the level by it"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "VCA.cpp:69 and 80 take this jack straight into the pan law, with a separate branch for exactly 0V"
+     }
+    }
+   }
   },
   "OSCiX": {
    "lines": [
@@ -914,7 +1731,118 @@
      "7": "audio"
     }
    },
-   "notes": "Parameter 30 is an unmarked button over the OSCiX lettering, the easter egg the manual hints at. Parameters 1, 2, 7 to 13 and 18, inputs 2, 8 and 9, and outputs 0 and 1 are declared in the code but are not placed on the panel, so they carry no line."
+   "notes": "Parameter 30 is an unmarked button over the OSCiX lettering, the easter egg the manual hints at. Parameters 1, 2, 7 to 13 and 18, inputs 2, 8 and 9, and outputs 0 and 1 are declared in the code but are not placed on the panel, so they carry no line. The two linear FM inputs are exponential. VCO.cpp:511 and 593 add them, scaled by their attenuators, to the same semitone pitch figure the volt per octave jacks feed, so they shift pitch by the same doubling law rather than adding to frequency.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "VCO.cpp:508 multiplies this jack by twelve into a semitone pitch"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "VCO.cpp:590 multiplies this jack by twelve into a semitone pitch"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VCO.cpp:611 adds this jack over ten to the width knob, and setPulseWidth at VCO.cpp:130 clamps the sum to 0.01 to 0.99"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "VCO.cpp:511 adds this jack, scaled by its attenuator, to the same semitone pitch the volt per octave jack feeds",
+      "polarity": "bipolar"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "VCO.cpp:593 adds this jack, scaled by its attenuator, to the same semitone pitch the volt per octave jack feeds",
+      "polarity": "bipolar"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "VCO.cpp:524 clamps this jack, scaled by its attenuator, to 0 to 2 before raising the exponential base to it"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "VCO.cpp:601 clamps this jack, scaled by its attenuator, to 0 to 2 before raising the exponential base to it"
+     },
+     "10": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.01V",
+      "why": "VCO.cpp:149 subtracts 0.01 from this jack and syncs on the crossing above zero"
+     },
+     "11": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.01V",
+      "why": "VCO.cpp:149 subtracts 0.01 from this jack and syncs on the crossing above zero"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "why": "VCO.cpp:640 reads this jack as the signal fed to the folder in place of the oscillators"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VCO.cpp:658 clamps the fold gain knob plus this jack over ten at zero"
+     },
+     "14": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "VCO.cpp:550 adds this jack to the hardsync switch and takes the sum as on above zero"
+     },
+     "15": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "VCO.cpp:613 adds this jack to the hardsync switch and takes the sum as on above zero"
+     },
+     "16": {
+      "poly": false,
+      "step": "continuous",
+      "why": "VCO.cpp:511 adds this jack to the FM index knob and multiplies the whole frequency modulation term by the result, with nothing bounding it below",
+      "negative": "swings"
+     },
+     "17": {
+      "poly": false,
+      "step": "continuous",
+      "why": "VCO.cpp:648 multiplies this jack by its attenuator into the fold shape"
+     },
+     "18": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VCO.cpp:650 adds this jack over 2.5 to the knob and clamps the sum to 0 to 4"
+     },
+     "19": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VCO.cpp:652 adds this jack over 2.5 to the knob and clamps the sum to 0 to 4"
+     }
+    },
+    "out": {
+     "7": {
+      "poly": false,
+      "range": "±10V",
+      "why": "VCO.cpp:660 passes the fold output through saturate(), which Resources.hpp:23 fixes at ten"
+     }
+    }
+   }
   },
   "Rogue": {
    "lines": [
@@ -981,7 +1909,42 @@
      "5": "audio",
      "6": "audio"
     }
-   }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.01V",
+      "why": "VCO.cpp:149 subtracts 0.01 from this jack and syncs on the crossing above zero"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "VCO.cpp:881 multiplies this jack by twelve into a semitone pitch"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "VCO.cpp:884 adds this jack, scaled by its attenuator, to the same semitone pitch the volt per octave jack feeds",
+      "polarity": "bipolar"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "VCO.cpp:890 clamps this jack, scaled by its attenuator, to 0 to 2 before raising the exponential base to it"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VCO.cpp:899 adds this jack over ten to the width knob, and setPulseWidth at VCO.cpp:130 clamps the sum to 0.01 to 0.99"
+     }
+    }
+   },
+   "notes": "The linear FM input is exponential. VCO.cpp:884 adds it, scaled by its attenuator, to the same semitone pitch figure the volt per octave jack feeds."
   },
   "Wavefolder": {
    "lines": [
@@ -1036,7 +1999,39 @@
      "0": "audio"
     }
    },
-   "notes": "Algorithm I applies UP to the part of the signal above the fold window and DN to the part below it; algorithm II swaps them. The lines say so rather than naming a side."
+   "notes": "Algorithm I applies UP to the part of the signal above the fold window and DN to the part below it; algorithm II swaps them. The lines say so rather than naming a side.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Wavefolder.cpp:97 reads this jack as the signal to be folded"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Wavefolder.cpp:103 multiplies this jack by its attenuator and divides by five into the fold shape"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Wavefolder.cpp:98 adds this jack over 2.5 to the knob and clamps the sum to 0 to 4"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Wavefolder.cpp:99 adds this jack over 2.5 to the knob and clamps the sum to 0 to 4"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Wavefolder.cpp:115 clamps this jack alone, scaled by its attenuator and divided by five, to 0 to 1 before adding it to the gain knob"
+     }
+    }
+   }
   },
   "WaveShaper": {
    "lines": [
@@ -1090,6 +2085,52 @@
     },
     "out": {
      "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "WaveShaper.cpp:88 reads this jack as a signal to be shaped"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "WaveShaper.cpp:89 reads this jack as a signal to be shaped"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "WaveShaper.cpp:90 reads this jack as a signal to be shaped"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "WaveShaper.cpp:91 reads this jack as a signal to be shaped"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "WaveShaper.cpp:97 multiplies this jack by its attenuator into the shape amount"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "WaveShaper.cpp:98 multiplies this jack by its attenuator into the shape amount"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "WaveShaper.cpp:99 multiplies this jack by its attenuator into the shape amount"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "WaveShaper.cpp:112 passes the output through saturate(), which Resources.hpp:23 fixes at ten"
+     }
     }
    }
   },
@@ -1183,7 +2224,136 @@
      "9": "trigger"
     }
    },
-   "notes": "The output jacks are numbered 1 to 9 on the panel but the code orders them differently, so the panel number and the port index do not match. Outputs 10, 11 and 12 are internal inverters of IN3 and are not placed on the panel."
+   "notes": "The output jacks are numbered 1 to 9 on the panel but the code orders them differently, so the panel number and the port index do not match. Outputs 10, 11 and 12 are internal inverters of IN3 and are not placed on the panel. The three clock inputs read high at any voltage other than 0V, negative voltages included: XSEQ.cpp:145, 149 and 182 assign the jack's float straight to a bool. Lines 131 to 133 do build proper triggers that demand a full 10V, but lines 139 and 140 throw those results away before they are used, so the trigger path is dead code.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "why": "XSEQ.cpp:145 assigns this jack's voltage to a bool, so any voltage other than 0V reads high"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "why": "XSEQ.cpp:149 assigns this jack's voltage to a bool, so any voltage other than 0V reads high"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "why": "XSEQ.cpp:182 assigns this jack's voltage to a bool, so any voltage other than 0V reads high"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "XSEQ.cpp:153 adds quadraticBipolar of this jack over ten to the button, clamps the sum between -1 and 1 and truncates it to whole -1, 0 or 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "XSEQ.cpp:185 adds quadraticBipolar of this jack over ten to the button, clamps the sum between -1 and 1 and truncates it to whole -1, 0 or 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "XSEQ.cpp:236 adds quadraticBipolar of this jack over ten to the button, clamps the sum between -1 and 1 and truncates it to whole -1, 0 or 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "XSEQ.cpp:268 adds quadraticBipolar of this jack over ten to the button, clamps the sum between -1 and 1 and truncates it to whole -1, 0 or 1"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "XSEQ.cpp:319 adds quadraticBipolar of this jack over ten to the button, clamps the sum between -1 and 1 and truncates it to whole -1, 0 or 1"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "XSEQ.cpp:369 adds quadraticBipolar of this jack over ten to the button, clamps the sum between -1 and 1 and truncates it to whole -1, 0 or 1"
+     },
+     "9": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "XSEQ.cpp:419 adds quadraticBipolar of this jack over ten to the button, clamps the sum between -1 and 1 and truncates it to whole -1, 0 or 1"
+     },
+     "10": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "XSEQ.cpp:469 adds quadraticBipolar of this jack over ten to the button, clamps the sum between -1 and 1 and truncates it to whole -1, 0 or 1"
+     },
+     "11": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "why": "XSEQ.cpp:519 adds quadraticBipolar of this jack over ten to the button, clamps the sum between -1 and 1 and truncates it to whole -1, 0 or 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "XSEQ.cpp:166 writes ten times the logic result, so 10V or 0V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "XSEQ.cpp:166 writes ten times the logic result, so 10V or 0V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "XSEQ.cpp:166 writes ten times the logic result, so 10V or 0V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "XSEQ.cpp:166 writes ten times the logic result, so 10V or 0V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "XSEQ.cpp:166 writes ten times the logic result, so 10V or 0V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "XSEQ.cpp:166 writes ten times the logic result, so 10V or 0V"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "XSEQ.cpp:166 writes ten times the logic result, so 10V or 0V"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "XSEQ.cpp:166 writes ten times the logic result, so 10V or 0V"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "XSEQ.cpp:166 writes ten times the logic result, so 10V or 0V"
+     }
+    }
+   }
   }
  },
  "notes": "Every MSM module's right-click menu carries the same cosmetic Theme pair, Classic (default) and Night Mode, set from a MenuLabel and two MenuItems in each widget's appendContextMenu. It changes only which panel SVG is drawn, so it is deliberately left out of the entries. Two modules keep a Theme line: BlankPanel, where the theme is the whole of what the module does, and TreasureVCO, whose Theme menu adds two choices of its own, Espen's Treasure | Jedi and Omri's Treasure | Mushroom. CrazyMult's Type item changes what the module computes and is not cosmetic, so it keeps its line. The plugin has no knob, port or display menus and no panel gestures: every appendContextMenu is on a ModuleWidget, and src/ contains no onButton, onDoubleClick or createContextMenu override."

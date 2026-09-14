@@ -1,33 +1,895 @@
 {
  "plugin": "eightfold",
- "source": "https://github.com/scanner-darkly/eightfold",
+ "source": "https://github.com/scanner-darkly/eightfold/blob/a541c5c/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "SDOrcasHeartV2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight-voice algorithmic sequence generator: instead of programming notes you pick the scale and set the algorithm, and it produces eight note CVs and gates plus four modulation CVs and gates",
+    "Steps the scale selection on each press, from scale A to scale B to both scales stacked an octave apart and back",
+    "Changes the scale selection: a rising edge past 2V flips between A and B, or a high voltage picks B and a low one picks A, depending on the menu setting",
+    "Raises every note taken from scale A by one octave",
+    "Raises every note taken from scale B by one octave",
+    "Any voltage above 0V here raises every note taken from scale A by one octave, as the switch beside it does when it is up",
+    "Any voltage above 0V here raises every note taken from scale B by one octave, as the switch beside it does when it is up",
+    "While this is on, changing the scale A preset overwrites the twelve note buttons of scale A; turn it off to keep edits you make by hand",
+    "While this is on, changing the scale B preset overwrites the twelve note buttons of scale B; turn it off to keep edits you make by hand",
+    "Picks one of sixteen five-note presets for scale A, stepping from 1 to 16; it changes nothing until the preset switch beside it is on",
+    "Picks one of sixteen five-note presets for scale B, stepping from 1 to 16; it changes nothing until the preset switch beside it is on",
+    "Moves the scale A preset selection after being added to the knob, 10V covering all sixteen presets",
+    "Moves the scale B preset selection after being added to the knob, 10V covering all sixteen presets",
+    "Puts that note into scale A, or takes it out; the generator picks only from the notes that are in",
+    "Puts that note into scale B, or takes it out; the generator picks only from the notes that are in",
+    "Sets the internal clock, from 32 BPM at the left to 2048 BPM at the right; it has no effect while a cable is in the clock input",
+    "Adds to the internal clock tempo, 10V covering the whole span from 32 BPM to 2048 BPM",
+    "Sets how many steps the sequence runs before it wraps and fires the reset output, 1 to 64",
+    "Moves the sequence length after being added to the knob, 10V covering the whole 1 to 64 span",
+    "Transposes every note CV, -3V to +3V at a volt per octave",
+    "Transposes every note CV, added volt for volt to the knob at a volt per octave with no scaling",
+    "Sets the note gate length as a fraction of one step, 0.01 to 2, so a setting of 1 holds the gate for a whole step; the maker's tooltip prints the value in seconds",
+    "Moves the gate length after being added to the knob, 10V covering the whole 0.01 to 2 span",
+    "Sets how many of the eight voices produce gates, 1 to 8; the note CV outputs above the count keep moving but their gates stay low",
+    "Moves the voice count after being added to the knob, 10V covering the whole 1 to 8 span",
+    "Delays each voice's gate a little further than the one before it, spreading a chord into a strum across up to one step",
+    "Moves the strum amount after being added to the knob, 10V covering the whole span",
+    "Sets the divisors and phases of the eight internal tracks whose on and off states the notes are built from, stepping from 0 to 127",
+    "Moves the algorithm X value after being added to the knob, 10V covering the whole 0 to 127 span",
+    "Picks which of the eight internal tracks feed each voice's note and which of sixteen gate patterns is used, stepping from 0 to 127",
+    "Moves the algorithm Y value after being added to the knob, 10V covering the whole 0 to 127 span",
+    "Steps each voice along the scale by this many notes, 0 to 12; above 6 each voice is shifted one step further than the one before it, fanning the voices apart",
+    "Moves the scale shift after being added to the knob, 10V covering the whole 0 to 12 span",
+    "Sets how often a voice is silenced and for how many steps, 0 to 16, thinning the sequence as it is raised",
+    "Moves the silence amount after being added to the knob, 10V covering the whole 0 to 16 span",
+    "Reads each voice further back through the last eight steps, -8 to +8, so the voices play the same material against itself in time",
+    "Moves the rotation after being added to the knob, 10V covering the whole -8 to +8 span",
+    "Feeds the module's own note CV outputs back into its algorithm controls, 0 to 127; the higher it goes the more controls it reaches",
+    "Moves the cross modulation after being added to the knob, 10V covering the whole 0 to 127 span",
+    "A rising edge past 2V advances the sequence one step; a cable here stops the internal clock",
+    "A rising edge past 2V sets the sequence back to its first step and fires the reset output",
+    "A 1ms 10V pulse on every step, whether the step came from the internal clock or from the clock input",
+    "A 1ms 10V pulse each time the sequence wraps round to its first step, and on every reset",
+    "The note for voice one, as a volt per octave; it also carries all eight voices as an eight-channel polyphonic cable",
+    "The note for that voice, as a volt per octave",
+    "The gate for voice one, 10V while it is open and 0V otherwise; it also carries all eight voices as an eight-channel polyphonic cable",
+    "The gate for that voice, 10V while it is open and 0V otherwise",
+    "The first modulation CV, stepping in thirds of a volt between 0V and about 9.7V; it also carries eight modulation CVs as an eight-channel polyphonic cable",
+    "That modulation CV, stepping in thirds of a volt between 0V and about 9.7V",
+    "The first modulation gate, 10V or 0V; it also carries eight modulation gates as an eight-channel polyphonic cable",
+    "That modulation gate, 10V or 0V",
+    "Note — the module runs on its own clock until a cable is patched into the clock input, at which point the SPEED knob stops mattering and each rising edge is one step.",
+    "Note — the note buttons are the scale: with no note switched on in the selected scale every gate stays low and every note CV holds at one value.",
+    "Note — a preset switch left on overwrites the note buttons of its scale every time the preset changes, including when its CV moves. Switch it off after choosing a preset to keep edits made by hand.",
+    "Note — the two polyphonic modulation jacks carry eight channels each, although only four of the modulation voices have a jack of their own.",
+    "Note — six of the controls are only read on a step: the voice count, the two algorithm values, the shift, the space and the rotation. Turning one takes effect at the next clock, not at once.",
+    "Note — note CVs are clamped to plus or minus 10V, so patching a note output back into the transposition input cannot run away.",
+    "Note — the eight modulation CVs and gates are built from the same eight internal tracks the notes are, so they move in step with the sequence rather than independently of it.",
+    "Menu — Scale Switch Mode: Trigger, Gate — sets how the scale input works: a rising edge flips between the two scales, or a high voltage selects scale B and a low one selects scale A"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 4,
+    "3": 7,
+    "4": 8,
+    "5": 9,
+    "6": 10,
+    "7": 15,
+    "8": 17,
+    "9": 19,
+    "10": 21,
+    "11": 23,
+    "12": 25,
+    "13": 27,
+    "14": 29,
+    "15": 31,
+    "16": 33,
+    "17": 35,
+    "18": 37,
+    "19": 13,
+    "20": 13,
+    "21": 13,
+    "22": 13,
+    "23": 13,
+    "24": 13,
+    "25": 13,
+    "26": 13,
+    "27": 13,
+    "28": 13,
+    "29": 13,
+    "30": 13,
+    "31": 14,
+    "32": 14,
+    "33": 14,
+    "34": 14,
+    "35": 14,
+    "36": 14,
+    "37": 14,
+    "38": 14,
+    "39": 14,
+    "40": 14,
+    "41": 14,
+    "42": 14
+   },
+   "in": {
+    "0": 2,
+    "1": 5,
+    "2": 6,
+    "3": 11,
+    "4": 12,
+    "5": 16,
+    "6": 18,
+    "7": 20,
+    "8": 22,
+    "9": 24,
+    "10": 26,
+    "11": 28,
+    "12": 30,
+    "13": 32,
+    "14": 34,
+    "15": 36,
+    "16": 38,
+    "17": 39,
+    "18": 40
+   },
+   "out": {
+    "0": 41,
+    "1": 42,
+    "2": 43,
+    "3": 44,
+    "4": 44,
+    "5": 44,
+    "6": 44,
+    "7": 44,
+    "8": 44,
+    "9": 44,
+    "10": 45,
+    "11": 46,
+    "12": 46,
+    "13": 46,
+    "14": 46,
+    "15": 46,
+    "16": 46,
+    "17": 46,
+    "18": 47,
+    "19": 48,
+    "20": 48,
+    "21": 48,
+    "22": 49,
+    "23": 50,
+    "24": 50,
+    "25": 50
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "pitch",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "trigger",
+     "18": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch",
+     "8": "pitch",
+     "9": "pitch",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger",
+     "18": "cv",
+     "19": "cv",
+     "20": "cv",
+     "21": "cv",
+     "22": "trigger",
+     "23": "trigger",
+     "24": "trigger",
+     "25": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:390 rescales it from 0.1V and 2V for a SchmittTrigger in trigger mode; src/SDOrcasHeartV2.cpp:393 instead tests it against zero in gate mode"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "src/SDOrcasHeartV2.cpp:661 tests getVoltage() against 0 and adds a volt to every note taken from scale A"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "src/SDOrcasHeartV2.cpp:662 tests getVoltage() against 0 and adds a volt to every note taken from scale B"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the Scale Preset A knob's span over ten, adds the knob and clamps the total to 1 to 16"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the Scale Preset B knob's span over ten, adds the knob and clamps the total to 1 to 16"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "subtracts",
+      "why": "src/SDOrcasHeartV2.cpp:441 multiplies it by (2048 - 32) / 10 and adds it to the knob's BPM before taking sixty over the result"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the LENGTH knob's span over ten, adds the knob and clamps the total to 1 to 64 steps"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:444 adds it to the TRANS knob volt for volt with no scaling, and the sum is added to every note CV"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the GATE L knob's span over ten, adds the knob and clamps the total to 0.01 to 2"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the VOICES knob's span over ten, adds the knob and clamps the total to 1 to 8"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the SPREAD knob's span over ten, adds the knob and clamps the total to 0 to 1"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the ALGO X knob's span over ten, adds the knob and clamps the total to 0 to 127"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the ALGO Y knob's span over ten, adds the knob and clamps the total to 0 to 127"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the SHIFT knob's span over ten, adds the knob and clamps the total to 0 to 12"
+     },
+     "14": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the SPACE knob's span over ten, adds the knob and clamps the total to 0 to 16"
+     },
+     "15": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the ROTATE knob's span over ten, adds the knob and clamps the total to -8 to 8"
+     },
+     "16": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDOrcasHeartV2.cpp:356 in getCombinedValue multiplies it by the XMOD knob's span over ten, adds the knob and clamps the total to 0 to 127"
+     },
+     "17": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "src/SDOrcasHeartV2.cpp:603 rescales it from 0.1V and 2V into 0 and 1 before a dsp::SchmittTrigger, whose default thresholds are 0 and 1"
+     },
+     "18": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "src/SDOrcasHeartV2.cpp:488 rescales it from 0.1V and 2V into 0 and 1 before a dsp::SchmittTrigger, whose default thresholds are 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:714 writes 10 or 0 from a dsp::PulseGenerator triggered for 1e-3 seconds at line 623"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:715 writes 10 or 0 from a dsp::PulseGenerator triggered for 1e-3 seconds at lines 489 and 497"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/SDOrcasHeartV2.cpp:692 calls setChannels(8) on this jack and line 689 writes every voice into it; line 686 clamps each note CV to -10V..10V"
+     },
+     "10": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:693 calls setChannels(8) on this jack and line 690 writes every voice's gate into it"
+     },
+     "18": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:707 calls setChannels(8) on this jack; lines 699 and 703 write all eight modulation CVs, which line 526 reduces to a whole number modulo 30 divided by 3"
+     },
+     "22": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:706 calls setChannels(8) on this jack; lines 696 and 702 write all eight modulation gates"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/SDOrcasHeartV2.cpp:688 writes this jack with setVoltage() and no channel index; line 686 clamps the note CV to -10V..10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/SDOrcasHeartV2.cpp:688 writes this jack with setVoltage() and no channel index; line 686 clamps the note CV to -10V..10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/SDOrcasHeartV2.cpp:688 writes this jack with setVoltage() and no channel index; line 686 clamps the note CV to -10V..10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/SDOrcasHeartV2.cpp:688 writes this jack with setVoltage() and no channel index; line 686 clamps the note CV to -10V..10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/SDOrcasHeartV2.cpp:688 writes this jack with setVoltage() and no channel index; line 686 clamps the note CV to -10V..10V"
+     },
+     "8": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/SDOrcasHeartV2.cpp:688 writes this jack with setVoltage() and no channel index; line 686 clamps the note CV to -10V..10V"
+     },
+     "9": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/SDOrcasHeartV2.cpp:688 writes this jack with setVoltage() and no channel index; line 686 clamps the note CV to -10V..10V"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:689 writes this jack with setVoltage() and no channel index"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:689 writes this jack with setVoltage() and no channel index"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:689 writes this jack with setVoltage() and no channel index"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:689 writes this jack with setVoltage() and no channel index"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:689 writes this jack with setVoltage() and no channel index"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:689 writes this jack with setVoltage() and no channel index"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:689 writes this jack with setVoltage() and no channel index"
+     },
+     "19": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:700 writes this jack with setVoltage() and no channel index, from a value reduced modulo 30 and divided by 3 at line 526"
+     },
+     "20": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:700 writes this jack with setVoltage() and no channel index, from a value reduced modulo 30 and divided by 3 at line 526"
+     },
+     "21": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:700 writes this jack with setVoltage() and no channel index, from a value reduced modulo 30 and divided by 3 at line 526"
+     },
+     "23": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:697 writes this jack with setVoltage() and no channel index"
+     },
+     "24": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:697 writes this jack with setVoltage() and no channel index"
+     },
+     "25": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDOrcasHeartV2.cpp:697 writes this jack with setVoltage() and no channel index"
+     }
+    }
+   },
+   "notes": "GATE_LEN_PARAM is configured with the unit \" sec\" at src/SDOrcasHeartV2.cpp:373, but updateParameters at src/SDOrcasHeartV2.cpp:446 multiplies the knob value by the step time before use, so the knob is a fraction of a step rather than a number of seconds; the control's line says so. SPEED is a 0..3 parameter displayed as BPM through a display base of 4 and a multiplier of 32 (src/SDOrcasHeartV2.cpp:361), which gives 32 BPM at the left and 2048 BPM at the right. The two polyphonic modulation jacks are given eight channels (src/SDOrcasHeartV2.cpp:706 and 707) although MODOUTPUTCOUNT is 4, so four of the eight modulation voices can be reached only through the polyphonic cable. updateSyncedParameters is called only on a step (src/SDOrcasHeartV2.cpp:616), which is why the voice count, both algorithm values, the shift, the space and the rotation take effect at the next clock rather than at once. The twenty-four note buttons carry no lettering on the panel; their names come from configSwitch at src/SDOrcasHeartV2.cpp:212 to 225, and the panel prints only A and B beside the two rows. The maker's wiki (https://github.com/scanner-darkly/eightfold/wiki/Orca's-Heart-v2) agrees with the code everywhere it was checked, apart from being silent on the gate length unit."
   },
   "SDLines": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A meter that draws each channel of a polyphonic cable as its own line, up to sixteen of them",
+    "The voltages to draw; each channel gets one line, and nothing is drawn while the jack is empty",
+    "Note — a line is white for a positive voltage, red for a negative one and grey at exactly 0V. A voltage past either end of the chosen range is drawn black at the end it ran past.",
+    "Note — the module has no parameters and no outputs; the range and the drawing style are on its right-click menu.",
+    "Menu — Mode: Horizontal, Vertical — draws each channel as a line across the panel at its voltage, or as a bar standing up from the zero line",
+    "Menu — Range: 0 .. +10, -10 .. +10, 0 .. +5, -5 .. +5 — sets the span the display covers; on the two ranges that reach below zero the zero line runs across the middle"
+   ],
+   "param": {},
+   "in": {
+    "0": 1
+   },
+   "out": {},
+   "family": {
+    "in": {},
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/SDLines.cpp:146 bounds the drawing loop by getChannels() capped at 16, and line 103 reads getVoltage(i) for each channel"
+     }
+    }
+   },
+   "notes": "No family is written for the input: the module draws whatever is patched into it and gives the voltage no meaning of its own, which is the case STYLE reserves for leaving the colour off. Range and Mode are stored in the module's own JSON (src/SDLines.cpp:32) rather than as parameters, so neither can be clicked for help; they are written as Menu lines. The four ranges are the arrays at src/SDLines.cpp:21 and 22."
   },
   "SDFormation": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns one voltage into eight, fanned out from it by a spacing you set, with a tilt that bends the spacing and a random offset per voice",
+    "Scales the input before anything else, from -1 through zero to +1, so a setting below zero inverts it; it comes up at +1",
+    "Adds a fixed offset of -10V to +10V after the gain, so the eight voltages can be produced with nothing patched in at all",
+    "Sets the gap between one voice and the next, -1.4V to +1.4V, with the eight voltages collapsing onto each other at zero",
+    "Chooses which way the eight fan out from the input voltage: downward from it, centred on it, or upward from it",
+    "Bends the spacing so the gaps grow towards the ends or towards the middle, -1 to +1 with no bend at the centre; the bend is scaled by SPREAD",
+    "Sets how much of its own random offset each voice is given, -1 to +1; each voice keeps the number it was given until a new set is drawn",
+    "Scales the SPREAD CV input before it is added to the SPREAD knob, and inverts it below centre; it comes up at zero, so the jack does nothing until this is turned",
+    "Scales the TILT CV input before it is added to the TILT knob, and inverts it below centre; it comes up at zero, so the jack does nothing until this is turned",
+    "Scales the RANDOM CV input before it is added to the RANDOM knob, and inverts it below centre; it comes up at zero, so the jack does nothing until this is turned",
+    "Moves SPREAD after the attenuverter above it, 10V covering the knob's whole span, and the total is held inside the knob's range",
+    "Moves TILT after the attenuverter above it, 10V covering the knob's whole span, and the total is held inside the knob's range",
+    "Moves RANDOM after the attenuverter above it, 10V covering the knob's whole span, and the total is held inside the knob's range",
+    "A rising edge draws a fresh random number for every one of the eight voices; it reads high above 2V and low below 0.1V",
+    "The single voltage the eight are built from; only the first channel of a cable is read",
+    "The eight voltages as an eight-channel polyphonic cable, voice one first",
+    "The same eight voltages as an eight-channel polyphonic cable, in the opposite order",
+    "Note — the random numbers are held until a rising edge arrives at TRIG, and they are saved with the patch, so a patch reloads with the same fan-out it had.",
+    "Note — fanning upward adds each voice's random offset, fanning downward subtracts it, and the centred setting spreads it either side of the voice.",
+    "Note — with nothing patched into INPUT the module produces eight voltages anyway, built from the OFFSET knob alone."
+   ],
+   "param": {
+    "8": 1,
+    "7": 2,
+    "1": 3,
+    "0": 4,
+    "3": 5,
+    "5": 6,
+    "2": 7,
+    "4": 8,
+    "6": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "3": 12,
+    "2": 13,
+    "4": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "cv"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDFormation.cpp:80 scales it by the attenuverter and by the knob's span over ten, adds it to the SPREAD knob and clamps the total to that knob's range"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDFormation.cpp:80 scales it by the attenuverter and by the knob's span over ten, adds it to the TILT knob and clamps the total to that knob's range"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "src/SDFormation.cpp:80 scales it by the attenuverter and by the knob's span over ten, adds it to the RANDOM knob and clamps the total to that knob's range"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "src/SDFormation.cpp:98 rescales it from 0.1V and 2V into 0 and 1 before a dsp::SchmittTrigger, whose default thresholds are 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/SDFormation.cpp:90 reads it with getVoltage() and no channel index, multiplies it by the gain knob and adds the offset knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/SDFormation.cpp:140 calls setChannels(8) and the loops above write one voltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/SDFormation.cpp:141 calls setChannels(8) and the loops above write the same eight voltages at index 7 minus the voice number"
+     }
+    }
+   },
+   "notes": "No family is written for INPUT, OUT or REV: the module fans out whatever voltage it is given and gives it no meaning of its own. getCombinedValue at src/SDFormation.cpp:77 is what makes 10V cover a knob's whole span — the CV is multiplied by the attenuverter and by (max - min) / 10 before being added, then the total is clamped to the knob's own range. The centred setting uses a per-voice tilt factor built from tiltMin 0.255 (src/SDFormation.cpp:35) rather than the straight-line factor the up and down settings use. The eight random numbers are uniform 0 to 1 and are stored in the patch (src/SDFormation.cpp:144)."
   },
   "SDTransgate": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Adds a transposition in semitones to each of eight polyphonic channels, applied only while that channel's gate is high",
+    "Sets what that channel is transposed by while its gate is high, stepping from -12 to +12 semitones and added as that many twelfths of a volt",
+    "Holds all eight gates high so every transposition is applied at once and the gate jacks are ignored; it does that in the position the maker's tooltip calls Off",
+    "A gate for one channel: above 0V that channel's transposition is applied. A cable here takes that channel over from the GATES jack.",
+    "Carries a gate for each channel that has no cable in its own jack, one per polyphonic channel; channels past the end of this cable follow its last channel",
+    "The voltages to transpose, one per polyphonic channel; channels past the end of the cable repeat its last channel",
+    "The eight transposed voltages, always as an eight-channel polyphonic cable",
+    "Note — the output always carries eight channels, whatever the input cable holds; channels the input does not reach repeat its last one.",
+    "Note — with nothing patched into IN every channel starts from 0V, so the output is each gated channel's transposition on its own.",
+    "Note — the lamp beside a gate jack lights while that channel's gate is high, whether the gate came from that jack, from GATES, or from the all-on switch.",
+    "Note — a gate counts as high above 0V, so any positive voltage opens it."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 4,
+    "9": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/SDTransgate.cpp:104 tests getVoltage() against 0 with no channel index, and line 103 uses getChannels() only to decide whether this jack takes over from GATES"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/SDTransgate.cpp:104 tests getVoltage() against 0 with no channel index, and line 103 uses getChannels() only to decide whether this jack takes over from GATES"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/SDTransgate.cpp:104 tests getVoltage() against 0 with no channel index, and line 103 uses getChannels() only to decide whether this jack takes over from GATES"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/SDTransgate.cpp:104 tests getVoltage() against 0 with no channel index, and line 103 uses getChannels() only to decide whether this jack takes over from GATES"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/SDTransgate.cpp:104 tests getVoltage() against 0 with no channel index, and line 103 uses getChannels() only to decide whether this jack takes over from GATES"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/SDTransgate.cpp:104 tests getVoltage() against 0 with no channel index, and line 103 uses getChannels() only to decide whether this jack takes over from GATES"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/SDTransgate.cpp:104 tests getVoltage() against 0 with no channel index, and line 103 uses getChannels() only to decide whether this jack takes over from GATES"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/SDTransgate.cpp:104 tests getVoltage() against 0 with no channel index, and line 103 uses getChannels() only to decide whether this jack takes over from GATES"
+     },
+     "8": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "src/SDTransgate.cpp:105 reads getVoltage(i) per channel and line 97 takes the last channel's value as the fallback for channels past the end"
+     },
+     "9": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "normal": "0V on every channel",
+      "why": "src/SDTransgate.cpp:113 reads getVoltage(i) per channel and adds the knob divided by 12, which is a semitone at a volt per octave; line 93 supplies the last channel for channels past the end"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/SDTransgate.cpp:118 calls setChannels(8) and line 115 writes one voltage per channel"
+     }
+    }
+   },
+   "notes": "configSwitch at src/SDTransgate.cpp:60 gives ALL_ON_PARAM the choice names {\"On\", \"Off\"} in that order, so value 0 reads as On and value 1 as Off; process() at line 100 turns every gate on when the value is 1, the position the tooltip calls Off. The names are therefore the wrong way round and the switch's line says so. An individual gate jack takes priority through getChannels() rather than isConnected(), which is the same test. The transpose knobs are snapped to whole semitones (src/SDTransgate.cpp:65)."
   },
   "SDComparator": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Compares one voltage against eight thresholds and raises a gate for each threshold the voltage has reached",
+    "Sets that channel's threshold, -10V to +10V, added to the matching channel of the LEVELS input",
+    "Raises only the gate for the highest threshold the input has reached, instead of every gate at or below it; it does that in the position the maker's tooltip calls Off",
+    "Adds to the threshold knobs, one polyphonic channel per knob in order; a channel the cable does not reach adds nothing",
+    "The voltage compared against the eight thresholds; only the first channel of a cable is read",
+    "10V while the input has reached that channel's threshold and 0V otherwise, or 10V only while that threshold is the highest one reached if the dot switch is set that way",
+    "The eight gates as an eight-channel polyphonic cable, one channel per threshold",
+    "Note — every threshold knob comes up at 0V, so on a fresh module all eight gates go high as soon as the input reaches 0V, which an empty jack already does.",
+    "Note — a gate goes high when the input is level with its threshold, not only once it is past it.",
+    "Note — in the dot setting at most one gate is high at a time, and none is high while the input is below every threshold.",
+    "Note — the lamp beside a gate output lights while that gate is high.",
+    "Note — where two thresholds are set to the same voltage the dot setting picks the earlier of the two."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V on every channel",
+      "why": "src/SDComparator.cpp:100 reads getVoltage(i) for channels below getChannels() and substitutes 0 beyond that, then adds the matching knob"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "src/SDComparator.cpp:91 reads it with getVoltage() and no channel index and line 101 compares it with each threshold"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDComparator.cpp:113 and 119 write 10 or 0 with no channel index"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDComparator.cpp:113 and 119 write 10 or 0 with no channel index"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDComparator.cpp:113 and 119 write 10 or 0 with no channel index"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDComparator.cpp:113 and 119 write 10 or 0 with no channel index"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDComparator.cpp:113 and 119 write 10 or 0 with no channel index"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDComparator.cpp:113 and 119 write 10 or 0 with no channel index"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDComparator.cpp:113 and 119 write 10 or 0 with no channel index"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDComparator.cpp:113 and 119 write 10 or 0 with no channel index"
+     },
+     "8": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/SDComparator.cpp:124 calls setChannels(8) and lines 114 and 120 write one gate per channel"
+     }
+    }
+   },
+   "notes": "configSwitch at src/SDComparator.cpp:60 gives DOT_PARAM the choice names {\"On\", \"Off\"} in that order, so value 0 reads as On and value 1 as Off; process() at line 110 uses dot behaviour when the value is 1, the position the tooltip calls Off. The names are the wrong way round and the switch's line says so. The comparison at line 101 is >= rather than >, and the highest-threshold search at line 104 uses a strict > so an earlier of two equal thresholds wins. The range written for the input is the range over which it can do anything, since every threshold is clamped to -10V..+10V; the jack itself is not clamped."
   }
  }
 }

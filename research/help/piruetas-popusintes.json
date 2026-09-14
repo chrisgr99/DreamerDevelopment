@@ -1,53 +1,596 @@
 {
  "plugin": "piruetas-popusintes",
- "source": "https://github.com/piruetasxyz/popusintes-rack",
+ "source": "https://github.com/piruetasxyz/popusintes-rack/tree/260e008",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "ataconso": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A pulse oscillator built as two 555 timer chips would be wired, one running free and triggering the other, whose pulse length is set in milliseconds rather than as a fraction of the cycle",
+    "Sets the frequency of the free-running oscillator, four octaves either side of C4",
+    "Sets how long the output stays high after each trigger, 0.1ms to 20ms, which changes the timbre without changing the rate",
+    "Shifts the frequency by 0.8 octaves per volt, added to the frequency knob and clamped to four octaves either side of C4; it does not track a volt per octave",
+    "Lengthens the output pulse by 2ms per volt, added to the pulse-length knob and clamped between 0.1ms and 20ms",
+    "The rectangular wave, switching between -5V and 5V",
+    "Note — a trigger arriving during an output pulse is discarded rather than lengthening it, so with the pulse longer than the oscillator's period the rate is governed by the pulse length, not the knob",
+    "Note — nothing on the panel is lettered; the artwork carries the module name and no control labels at all"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Ataconso.cpp process(): altura += getVoltage()*((4-(-4))/10) then clamped to ±4 octaves"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Ataconso.cpp process(): timbreMs += getVoltage()*(TIMBRE_MS_MAX/10) then clamped to 0.1..20ms"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Ataconso.cpp process(): setVoltage(salida > 0 ? 5.0f : -5.0f)"
+     }
+    }
+   },
+   "notes": "The panels in this plugin carry no control lettering, so every line here is written from the maker's source and tooltips. The frequency CV is deliberately not a volt-per-octave input; the source says so in a comment and scales it to the knob's own range instead. The refusal to retrigger while the pulse is high is written into the source on purpose, to copy a real 555 monostable."
   },
   "compa": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two comparators, each putting out a 10V gate while one of its two inputs is above the other",
+    "The voltage tested against a2; the a output goes high while this one is the greater",
+    "The voltage a1 is tested against; the a output goes high while a1 is above this one",
+    "The voltage tested against b2; the b output goes high while this one is the greater",
+    "The voltage b1 is tested against; the b output goes high while b1 is above this one",
+    "Carries 10V while a1 is above a2 and 0V otherwise, and stays at 0V unless both a1 and a2 are patched",
+    "Carries 10V while b1 is above b2 and 0V otherwise, and stays at 0V unless both b1 and b2 are patched",
+    "Note — a channel does nothing until both of its inputs are patched: with one cable alone the output holds 0V and the lamp stays dark",
+    "Note — nothing on the panel is lettered; the artwork carries the module name and no control labels at all"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Compa.cpp process(): getVoltage() on one channel only, guarded by isConnected()"
+     },
+     "1": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Compa.cpp process(): getVoltage() on one channel only, guarded by isConnected()"
+     },
+     "2": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Compa.cpp process(): getVoltage() on one channel only, guarded by isConnected()"
+     },
+     "3": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Compa.cpp process(): getVoltage() on one channel only, guarded by isConnected()"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Compa.cpp process(): setVoltage(10.f * salidaA)"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Compa.cpp process(): setVoltage(10.f * salidaB)"
+     }
+    }
+   },
+   "notes": "The four inputs are given no family: the module compares whatever two voltages are fed to it, and nothing in the code narrows what those are meant to be. The isConnected() guard means an unpatched channel is not simply comparing zero against zero, it is held at 0V."
   },
   "envo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two envelope generators, each a linear rise to 10V followed straight away by a linear fall, with a second input that drops the envelope and starts it again",
+    "Sets how long channel a takes to climb from 0V to 10V, 0.001 to 5 seconds",
+    "Sets how long channel a takes to fall from 10V back to 0V, 0.001 to 5 seconds",
+    "Sets how long channel b takes to climb from 0V to 10V, 0.001 to 5 seconds",
+    "Sets how long channel b takes to fall from 10V back to 0V, 0.001 to 5 seconds",
+    "A rising edge past 1V starts the channel a envelope; an edge arriving while that envelope is already running is discarded",
+    "A rising edge past 1V sends the channel a envelope down to 0V at about 10V per second, and a new rise starts when it arrives there",
+    "A rising edge past 1V starts the channel b envelope; an edge arriving while that envelope is already running is discarded",
+    "A rising edge past 1V sends the channel b envelope down to 0V at about 10V per second, and a new rise starts when it arrives there",
+    "The channel a envelope, 0V to 10V",
+    "The channel b envelope, 0V to 10V",
+    "Note — there is no sustain stage and no gate: the fall begins the instant the rise reaches 10V, whatever the trigger is doing",
+    "Note — nothing on the panel is lettered; the artwork carries the module name and no control labels at all"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "comun/CanalEnvo.hpp procesar(): detectorPulso.process(entradaPulso, 0.1f, 1.0f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "comun/CanalEnvo.hpp procesar(): detectorForzar.process(entradaForzar, 0.1f, 1.0f)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "comun/CanalEnvo.hpp procesar(): detectorPulso.process(entradaPulso, 0.1f, 1.0f)"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "comun/CanalEnvo.hpp procesar(): detectorForzar.process(entradaForzar, 0.1f, 1.0f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Envo.cpp process(): setVoltage(salidaA), CanalEnvo clamps 0..10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Envo.cpp process(): setVoltage(salidaB), CanalEnvo clamps 0..10V"
+     }
+    }
+   },
+   "notes": "The forced fall is written in the source as a fast ramp, but its step is (10.0f - 0.001f) * sampleTime, which works out at about 10V per second and takes roughly a second from the top. The lines describe the measured rate rather than the source's comment. CanalEnvo.hpp holds the state machine for both channels."
   },
   "panel": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A blank panel 5HP wide, with no controls and nothing to patch"
+   ],
+   "notes": "The model slug is panel and the name in the browser is pane; the source file is Pane.cpp. The module's process() does nothing."
   },
   "recta": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two rectangular-wave oscillators, each with its own pitch, pulse width and volt-per-octave input",
+    "Sets the pitch of oscillator A, four octaves either side of C4",
+    "Sets the share of each cycle oscillator A spends at 5V, 1% to 99%",
+    "Sets the pitch of oscillator B, four octaves either side of C4",
+    "Sets the share of each cycle oscillator B spends at 5V, 1% to 99%",
+    "Raises the pitch of oscillator A by one octave per volt, added to its frequency knob with no clamp",
+    "Shifts the pulse width of oscillator A by 10% per volt, added to its width knob and clamped between 1% and 99%",
+    "Raises the pitch of oscillator B by one octave per volt, added to its frequency knob with no clamp",
+    "Shifts the pulse width of oscillator B by 10% per volt, added to its width knob and clamped between 1% and 99%",
+    "The rectangular wave from oscillator A, switching between -5V and 5V",
+    "The rectangular wave from oscillator B, switching between -5V and 5V",
+    "Note — the two oscillators share nothing: no sync, no through-zero, and no common pitch control",
+    "Note — nothing on the panel is lettered; the artwork carries the module name and no control labels at all"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "pitch",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Recta.cpp procesarCanal(): altura = paramFrecuencia + entradaVoct; frecuencia = FREQ_C4 * pow(2, altura)"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Recta.cpp procesarCanal(): anchoPulso += entradaPwm * 0.1f then clamped to 0.01..0.99"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Recta.cpp procesarCanal(): altura = paramFrecuencia + entradaVoct; frecuencia = FREQ_C4 * pow(2, altura)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Recta.cpp procesarCanal(): anchoPulso += entradaPwm * 0.1f then clamped to 0.01..0.99"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Recta.cpp procesarCanal(): returns 5.0f or -5.0f"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Recta.cpp procesarCanal(): returns 5.0f or -5.0f"
+     }
+    }
+   },
+   "notes": "The frequency knob is clamped to four octaves either side of C4 but the volt-per-octave input is not clamped at all, so a large voltage will take an oscillator far above the audible range. The oscillator is a naive phase accumulator with no anti-aliasing."
   },
   "relo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock with two pulse outputs, the second running at a set percentage above or below the tempo of the first, with a resync that restarts both",
+    "Sets the tempo of both channels, 30 to 360 pulses per minute",
+    "Restarts both channels' counters and fires a pulse on each at that instant",
+    "Offsets the channel b tempo from the tempo knob, -10% to 10%",
+    "Attenuates and inverts the channel b offset CV, -1 to 1, before it is added to the offset knob",
+    "A rising edge past 1V restarts both channels' counters and fires a pulse on each",
+    "Shifts the channel b offset by 2% per volt with the attenuverter fully clockwise, and the total offset is clamped between -10% and 10%",
+    "A 1ms pulse to 10V at the rate set by the tempo knob",
+    "A 1ms pulse to 10V at the tempo knob's rate altered by the channel b offset",
+    "Note — the two channels are free-running counters, so any offset at all pulls them steadily apart; the resync button and the resync input are the only things that bring them back together",
+    "Note — nothing on the panel is lettered; the artwork carries the module name and no control labels at all"
+   ],
+   "param": {
+    "0": 1,
+    "3": 2,
+    "1": 3,
+    "2": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Relo.cpp process(): entradaResinc.process(getVoltage()) with Rack's default 0/1V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "comun/CanalRelo.hpp calcularPpmDesfasado(): desfase = perilla + voltaje * aten * 2, clamped to ±10"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Relo.cpp process(): setVoltage(10.f * salidaA)"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Relo.cpp process(): setVoltage(10.f * salidaB)"
+     }
+    }
+   },
+   "notes": "The offset is a percentage of the base tempo, not a phase shift, despite the maker's tooltip calling it desfase. CanalRelo.hpp holds the counter and pulse generator for both channels; the pulse length is fixed at 1ms and is not adjustable."
   },
   "rerelo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock with four pulse outputs: one at the tempo knob's rate, and three more each offset from it by a percentage, all restarted together by the resync",
+    "Sets the base tempo for all four channels, 30 to 360 pulses per minute",
+    "Restarts all four channels' counters and fires a pulse on each at that instant",
+    "Offsets the channel b tempo from the tempo knob, -10% to 10%",
+    "Attenuates and inverts the channel b offset CV, -1 to 1, before it is added to the channel b offset knob",
+    "Offsets the channel c tempo from the tempo knob, -10% to 10%",
+    "Attenuates and inverts the channel c offset CV, -1 to 1, before it is added to the channel c offset knob",
+    "Offsets the channel d tempo from the tempo knob, -10% to 10%",
+    "Attenuates and inverts the channel d offset CV, -1 to 1, before it is added to the channel d offset knob",
+    "A rising edge past 1V restarts all four channels' counters and fires a pulse on each",
+    "Shifts the channel b offset by 2% per volt with the channel b attenuverter fully clockwise, and the total offset is clamped between -10% and 10%",
+    "Shifts the channel c offset by 2% per volt with the channel c attenuverter fully clockwise, and the total offset is clamped between -10% and 10%",
+    "Shifts the channel d offset by 2% per volt with the channel d attenuverter fully clockwise, and the total offset is clamped between -10% and 10%",
+    "A 1ms pulse to 10V at the rate set by the tempo knob, with no offset applied to it",
+    "A 1ms pulse to 10V at the tempo knob's rate altered by the channel b offset",
+    "A 1ms pulse to 10V at the tempo knob's rate altered by the channel c offset",
+    "A 1ms pulse to 10V at the tempo knob's rate altered by the channel d offset",
+    "Note — channel a is the reference and has no offset control of its own; the other three are set relative to it",
+    "Note — the four channels are free-running counters, so any offset at all pulls them steadily apart; the resync button and the resync input are the only things that bring them back together",
+    "Note — nothing on the panel is lettered; the artwork carries the module name and no control labels at all"
+   ],
+   "param": {
+    "0": 1,
+    "7": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Rerelo.cpp process(): entradaResinc.process(getVoltage()) with Rack's default 0/1V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "comun/CanalRelo.hpp calcularPpmDesfasado(): desfase = perilla + voltaje * aten * 2, clamped to ±10"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "comun/CanalRelo.hpp calcularPpmDesfasado(): desfase = perilla + voltaje * aten * 2, clamped to ±10"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "comun/CanalRelo.hpp calcularPpmDesfasado(): desfase = perilla + voltaje * aten * 2, clamped to ±10"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Rerelo.cpp process(): setVoltage(10.f * salidaA)"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Rerelo.cpp process(): setVoltage(10.f * salidaB)"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Rerelo.cpp process(): setVoltage(10.f * salidaC)"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Rerelo.cpp process(): setVoltage(10.f * salidaD)"
+     }
+    }
+   },
+   "notes": "The panel puts the four channels in four columns but the parameter indices run tempo, then b offset and b attenuverter, c offset and c attenuverter, d offset and d attenuverter, and the resync button last at index 7 in the leftmost column. The tags follow the positions in the census, not the index order. The offset is a percentage of the base tempo, not a phase shift, despite the maker's tooltip calling it desfase."
   },
   "secu": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two four-step sequencers, each advancing one step on a rising edge at its own clock input and putting out the voltage set for the step it has reached",
+    "Sets the voltage channel a puts out on its first step, 0V to 5V",
+    "Sets the voltage channel a puts out on its second step, 0V to 5V",
+    "Sets the voltage channel a puts out on its third step, 0V to 5V",
+    "Sets the voltage channel a puts out on its fourth step, 0V to 5V",
+    "Sets the voltage channel b puts out on its first step, 0V to 5V",
+    "Sets the voltage channel b puts out on its second step, 0V to 5V",
+    "Sets the voltage channel b puts out on its third step, 0V to 5V",
+    "Sets the voltage channel b puts out on its fourth step, 0V to 5V",
+    "A rising edge past 1V advances channel a by one step, wrapping from the fourth step back to the first",
+    "A rising edge past 1V advances channel b by one step, wrapping from the fourth step back to the first",
+    "The voltage of the channel a step the sequencer has reached, 0V to 5V",
+    "The voltage of the channel b step the sequencer has reached, 0V to 5V",
+    "Note — a channel does nothing until a clock is patched to its own input: the two channels have separate clocks and neither is normalled to the other",
+    "Note — there is no reset input and no run control; a channel starts from its first step when the patch is loaded and is only moved on by its clock",
+    "Note — nothing on the panel is lettered; the artwork carries the module name and no control labels at all"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "comun/CanalSecu.hpp procesar(): detectorBordes.process(entradaTrigger) with Rack's default 0/1V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "comun/CanalSecu.hpp procesar(): detectorBordes.process(entradaTrigger) with Rack's default 0/1V thresholds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Secu.cpp process(): setVoltage(salidaA), step knobs configured 0.0 to 5.0"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Secu.cpp process(): setVoltage(salidaB), step knobs configured 0.0 to 5.0"
+     }
+    }
+   },
+   "notes": "The maker's tooltips number the steps from 1, while a source comment says the steps are counted 0 to 3 to celebrate computation; nothing the reader can see uses the zero-based numbering, so the lines follow the tooltips. The current step is not saved with the patch."
   },
   "suma": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A 4HP panel with no controls on it, listed in the module browser as a mixer",
+    "Note — this module has no inputs, no outputs and no knobs at all, and its process() does nothing; there is nothing to patch and nothing to set, despite the name and the mixer tag in the browser"
+   ],
+   "notes": "Suma.cpp declares zero parameters, inputs and outputs and an empty process(). The panel artwork is plain colour blocks with no lettering, not even the module name. It appears to be a placeholder that shipped in 2.2.0; the README lists suma as mezcladores (mixers)."
   }
  }
 }

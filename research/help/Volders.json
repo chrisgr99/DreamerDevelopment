@@ -2,42 +2,369 @@
  "plugin": "Volders",
  "source": "https://github.com/Acked-1/Volders",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "LFO-01": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A low-frequency oscillator with four waveshapes and a switch between two speed ranges",
+    "Sets the rate on an exponential scale: 0.01Hz to 2Hz with the range switch at S, and 0.1Hz to 20Hz at F",
+    "Chooses the shape: sine, triangle, a saw falling from positive to negative, or square",
+    "Sets the speed range, S for 0.01Hz to 2Hz and F for 0.1Hz to 20Hz",
+    "Returns the waveform to the start of its cycle on each rising edge, reading high above 1V and low below 0V",
+    "The oscillator, ±5V",
+    "Note — the lamp glows green while the output is positive and red while it is negative"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "LFO-01.cpp:71 resetTrigger.process(inputs[RESET_INPUT].getVoltage()) with Rack's default 0V and 1V thresholds, and no getChannels anywhere"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "LFO-01.cpp:111 setVoltage(value * 5.f) where every waveform branch produces -1 to 1, with no setChannels"
+     }
+    }
+   },
+   "notes": "Read from the source at tag 2.1.2 (commit d57e97e), which is the installed build. The module adds nothing to Rack's right-click menu, so there are no menu lines. The two range figures come from LFO-01.cpp:78-81, baseFreq of 0.01 or 0.1 raised through a factor of 200. The saw falls rather than rises (line 100, 1 - 2*phase), which the maker's summary does not say."
   },
   "VCA-01": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A voltage-controlled amplifier with a manual level knob and a switch between linear and exponential response",
+    "Sets the gain, 0 to 100 per cent, which the control voltage then scales",
+    "Chooses the response, L applying the level as it reads and E raising it to the fourth power so the lower part of the dial is far quieter",
+    "The signal to be amplified, taken with all its polyphonic channels",
+    "Scales the gain, 0V for silence and 10V for whatever LEVEL is set to; more than 10V does nothing further and a negative voltage silences the output",
+    "The amplified signal, with as many channels as the signal input",
+    "Note — with nothing patched to CV the LEVEL knob alone sets the gain, and the module comes up fully open",
+    "Note — bypassing the module passes the signal input straight to the output in place of silencing it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "VCA-01.cpp:59 channels = inputs[IN_INPUT].getChannels() and line 93 getVoltage(c) per channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "gain left to the LEVEL knob",
+      "why": "VCA-01.cpp:71-79 skips the CV entirely when the jack is empty, otherwise gain *= clamp(getPolyVoltage(c)/10.f, 0.f, 1.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "VCA-01.cpp:96 outputs[OUT_OUTPUT].setChannels(channels) taken from the signal input"
+     }
+    }
+   },
+   "notes": "Read from the source at tag 2.1.2 (commit d57e97e), which is the installed build. The module adds nothing to Rack's right-click menu, so there are no menu lines. configBypass(IN_INPUT, OUT_OUTPUT) at line 52 is why a bypassed VCA-01 still passes signal. The exponential curve is the linear gain to the fourth power (line 87); the maker's comment calls that roughly -60dB at the bottom of the dial, which is a derived figure and is not quoted in a line."
   },
   "ENV-01": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An ADSR envelope generator that runs one independent envelope for every channel of its gate input",
+    "Sets how fast the envelope rises to full, on an exponential scale between 1ms and 10 seconds",
+    "Sets how fast the envelope falls from full towards the sustain level, on an exponential scale between 1ms and 10 seconds",
+    "Sets the level the envelope falls towards and holds while the gate stays high, 0 to 100 per cent of full",
+    "Sets how fast the envelope falls to silence once the gate drops, on an exponential scale between 1ms and 10 seconds",
+    "Starts a fresh attack on each rising edge and begins the release when it falls, reading high above 1V and low below 0V; the number of channels here is the number of envelopes that run",
+    "The envelope, 0 to 10V, with one channel per channel of the gate",
+    "Note — nothing comes out until a gate is patched, since the envelope starts only on a rising edge there",
+    "Note — a rising edge partway through the release starts the attack again from the level the envelope had reached, in place of jumping to silence first"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "ENV-01.cpp:83 channels = inputs[GATE_INPUT].getChannels() and line 91-95 getPolyVoltage(c) into a per-channel SchmittTrigger at Rack's default 0V and 1V thresholds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ENV-01.cpp:136 setVoltage(env[c] * 10.f, c) and line 139 setChannels(channels)"
+     }
+    }
+   },
+   "notes": "Read from the source at tag 2.1.2 (commit d57e97e), which is the installed build. The module adds nothing to Rack's right-click menu, so there are no menu lines. The 1ms and 10 second endpoints are ENV_MIN_TIME and ENV_MAX_TIME at lines 6-7, fed through knobToSeconds. They are the one-pole time constant rather than the time the stage takes to finish: the attack aims at 1.2 and stops at 1.0 (lines 12, 106-111), so a full rise takes rather longer than the figure on the knob. No derived figure is quoted in the lines. The decay approaches the sustain level and never formally arrives, so there is no separate sustain stage in the code."
   },
   "MIX-01": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-channel mixer, each channel with its own level knob, summed to a single output",
+    "Sets the level of that channel in the sum, 0 to 100 per cent",
+    "One of the four signals to be summed, scaled by its own level knob",
+    "The four channels summed, carrying as many polyphonic channels as the widest input",
+    "Note — the lamp turns red once the sum passes 10V and otherwise brightens with the level of the sum",
+    "Note — nothing limits the sum, so four hot signals at full level can leave the output well past 10V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "MIX-01.cpp:51 takes the widest getChannels of the four and line 61 reads getPolyVoltage(c)"
+     },
+     "1": {
+      "poly": true,
+      "why": "MIX-01.cpp:51 takes the widest getChannels of the four and line 61 reads getPolyVoltage(c)"
+     },
+     "2": {
+      "poly": true,
+      "why": "MIX-01.cpp:51 takes the widest getChannels of the four and line 61 reads getPolyVoltage(c)"
+     },
+     "3": {
+      "poly": true,
+      "why": "MIX-01.cpp:51 takes the widest getChannels of the four and line 61 reads getPolyVoltage(c)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "MIX-01.cpp:68 setChannels(channels), the widest of the four inputs"
+     }
+    }
+   },
+   "notes": "Read from the source at tag 2.1.2 (commit d57e97e), which is the installed build. The module adds nothing to Rack's right-click menu, so there are no menu lines. The clip threshold of 10V is at line 72. The knobs carry no label of their own on the panel; the row number between the jack and the knob is the only marking, and the maker names them Channel 1 level and so on in the tooltip."
   },
   "CLK-01": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock generator sending a 1ms trigger at a rate you set, with a choice of four divisions",
+    "Sets the underlying tick rate on an exponential scale, 0.1Hz to 20Hz",
+    "Sends one trigger for every 1, 2, 4 or 8 underlying ticks",
+    "Restarts the count on a rising edge, sending a trigger at once and putting the division back to its first tick, reading high above 1V and low below 0V",
+    "A 1ms trigger at 10V",
+    "Note — the clock runs from the moment the module is placed; there is no start switch and no way to stop it short of bypassing the module"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "CLK-01.cpp:63 resetTrigger.process(inputs[RESET_INPUT].getVoltage()) at Rack's default 0V and 1V thresholds, with no getChannels anywhere"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "CLK-01.cpp:84 setVoltage(high ? 10.f : 0.f) with no setChannels"
+     }
+    }
+   },
+   "notes": "Read from the source at tag 2.1.2 (commit d57e97e), which is the installed build. The module adds nothing to Rack's right-click menu, so there are no menu lines. The rate range 0.1Hz to 20Hz is CLK_MIN_HZ and CLK_MAX_HZ at lines 5-6, the pulse width CLK_PULSE_SEC at line 11 and the divisors at line 14. The division counter wraps rather than being reset when the knob is turned, so a change of division lands on the next tick."
   },
   "NSE-01": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A noise source switchable between white and pink, with a sample and hold beside it",
+    "Chooses the noise colour, W for white and P for pink",
+    "The noise, ±5V",
+    "The signal the sample and hold takes its samples from; with nothing patched here it samples the module's own noise",
+    "Takes a sample on each rising edge, reading high above 1V and low below 0V",
+    "The voltage caught at the last trigger, held until the next one, and 0V before the first",
+    "Note — the sample and hold output holds at 0V until a trigger is patched to TRIG",
+    "Note — the pink setting is a three-section filter trimmed to about the same level as the white setting, so the switch does not jump the output level"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 2,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "1": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the module's own noise",
+      "why": "NSE-01.cpp:72-74 reads getVoltage() when isConnected and falls back to the module's own noise otherwise, with no getChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "NSE-01.cpp:71 trigTrigger.process(inputs[TRIG_INPUT].getVoltage()) at Rack's default 0V and 1V thresholds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "NSE-01.cpp:64,66 noiseVolts = noise * 5.f from a source uniform in -1 to 1, with no setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "NSE-01.cpp:77 setVoltage(held) with no setChannels; the range of held follows whatever feeds the sample and hold input"
+     }
+    }
+   },
+   "notes": "Read from the source at tag 2.1.2 (commit d57e97e), which is the installed build. The module adds nothing to Rack's right-click menu, so there are no menu lines. The pink filter is Paul Kellet's economy version, coefficients at lines 54-60; the 0.11 scaling at line 60 is what matches its level to the white path. The sample and hold input is given no family because it carries whatever is patched to it. The maker's summary calls the module a white and pink noise source with sample and hold, which the code matches."
   },
   "ATT-01": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An attenuverter with an offset: it scales the input, inverts it if the knob is turned back, and adds a fixed voltage",
+    "Scales the input, -1 to +1; at the centre nothing of the input passes, clockwise it passes through, anticlockwise it passes inverted",
+    "Adds a fixed voltage to the scaled signal, -5V to 5V",
+    "The signal to be scaled, taken with all its polyphonic channels",
+    "The input scaled by ATT with OFF added, clamped to ±12V, and with as many channels as the input",
+    "Note — with nothing patched to IN the module is a manual voltage source, the OFF knob alone setting the output",
+    "Note — the lamp glows green while the first channel of the output is positive and red while it is negative"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "ATT-01.cpp:42 channels = inputs[IN_INPUT].getChannels() and line 53 getVoltage(c) per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±12V",
+      "why": "ATT-01.cpp:58 clamp(v, -12.f, 12.f) and line 66 setChannels(channels)"
+     }
+    }
+   },
+   "notes": "Read from the source at tag 2.1.2 (commit d57e97e), which is the installed build. The module adds nothing to Rack's right-click menu, so there are no menu lines. Neither jack is given a family: the module scales and offsets whatever is patched to it, so a colour would be a guess. The knob defaults to +1 rather than to the centre (line 32), so a new ATT-01 passes its input at full level. The ±12V clamp at line 58 is the only limiting in the module."
   }
  }
 }

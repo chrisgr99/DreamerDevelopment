@@ -2,37 +2,1206 @@
  "plugin": "fruitsofkarma",
  "source": "https://github.com/alexey-komarov/fruitsofkarma-vcvrack",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Quadro360": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Mixes eight inputs into four outputs by geometry: the inputs stand on a circle and the outputs at the corners of a square, and each input reaches each output in proportion to how close the two are",
+    "Turns the whole ring of inputs around the centre, -360 to +360 degrees",
+    "Sets how far the inputs stand from the centre, 0 for all eight piled at the middle and 100 for the full circle",
+    "Sets how far the four output corners stand from the centre, 0 for all four at the middle and 100 for the full square",
+    "One of the eight inputs, fixed at its own point on the ring; it arrives at each output in proportion to its closeness to that output's corner",
+    "Turns the ring further, 18 degrees per volt, added to the ANGLE knob",
+    "Moves the inputs in or out, 10 units per volt on the same 0 to 100 scale as the knob, added to the RADIUS IN knob and never allowed below 0",
+    "Moves the output corners in or out, 10 units per volt on the same 0 to 100 scale as the knob, added to the RADIUS OUT knob and never allowed below 0",
+    "One of four outputs, each standing at its own corner of the square; every input arrives here scaled by 128 minus its distance from this corner, over 128, so a distance beyond 128 inverts it",
+    "Note — The three CV jacks are read once per input channel, so a polyphonic cable into any of them moves each channel's ring independently.",
+    "Note — The outputs take as many channels as the widest of the connected inputs, and an input with fewer channels contributes nothing to the ones it does not have.",
+    "Note — With nothing patched into any of the eight inputs the outputs are set to no channels at all."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 5,
+    "9": 6,
+    "10": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 8,
+    "2": 8,
+    "3": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "src/Quadro360.cpp:75 getChannels bounds the loop"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Quadro360.cpp:79 getVoltage(c) inside the channel loop"
+     },
+     "9": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Quadro360.cpp:80 getVoltage(c), fmax against 0"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Quadro360.cpp:81 getVoltage(c), fmax against 0"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Quadro360.cpp:99 setChannels from the widest input"
+     }
+    }
+   },
+   "notes": "None of the eleven inputs or four outputs is named in configInput or configOutput, so Rack's own tooltips are blank on all of them. The eight signal inputs are placed on the panel at angles that run the opposite way round from the angles the DSP gives them (widget loop at src/Quadro360.cpp:132-137 uses (2-i)*pi/4, process at line 82-83 uses i*0.785), so the drawn ring and the computed ring rotate in opposite directions; nothing on screen shows this. The constructor fills a 32769-float sqrts table but writes only sqrts[0], and the table is never read. Each output's gain is (128 - distance)/128, which is about 0.29 with both radius knobs at 100, and goes negative once the distance passes 128, which is reachable with the radius CVs."
   },
   "PowVCO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Oscillator that builds its wave from four quarters, each a curve of the form y equals x to the power n, with a switch that turns the whole thing into a one-shot envelope",
+    "Sets the pitch, -54 to +54 semitones around C4 at 261.63Hz",
+    "Divides the frequency, 1 for none and 128 for the lowest, on a continuous scale rather than whole steps",
+    "Sets the exponent of the first quarter of the wave, -10 to +10",
+    "Sets the exponent of the second quarter of the wave, -10 to +10",
+    "Sets the exponent of the third quarter of the wave, -10 to +10",
+    "Sets the exponent of the fourth quarter of the wave, -10 to +10",
+    "Down, the module runs free as an oscillator; up, it plays its shape once on each reset and then holds, and RESET becomes the trigger that starts it",
+    "Down, the wave is passed at whatever level the exponents produce; up, it is held to ±10V before the output halves it",
+    "Sets the pitch, 1V per octave, added to the FREQ knob",
+    "Adds to the POW1 knob, one unit of exponent per volt, and the total is not held to the knob's own range",
+    "Adds to the POW2 knob, one unit of exponent per volt, and the total is not held to the knob's own range",
+    "Adds to the POW3 knob, one unit of exponent per volt, and the total is not held to the knob's own range",
+    "Adds to the POW4 knob, one unit of exponent per volt, and the total is not held to the knob's own range",
+    "Sets the phase back to the start while the voltage here is at or above 1V; it is a level and not an edge, so a held gate pins the oscillator at the start of its cycle",
+    "The wave, or the envelope when ENV is up, at half the internal level, so ±5V with CLIP up",
+    "Note — The four POW jacks are read as single voltages, so one polyphonic cable into V/OCT gives every channel the same four exponents.",
+    "Note — The small green drawing at the top shows the shape the four exponents make, redrawn as they are turned."
+   ],
+   "param": {
+    "0": 1,
+    "5": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14
+   },
+   "out": {
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/PowVCO.cpp:123-128 getChannels and getPolyVoltage"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/PowVCO.cpp:101 getVoltage, one channel only"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/PowVCO.cpp:102 getVoltage, one channel only"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/PowVCO.cpp:103 getVoltage, one channel only"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/PowVCO.cpp:104 getVoltage, one channel only"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/PowVCO.cpp:112 isConnected and getVoltage >= 1, a level test"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/PowVCO.cpp:124 setChannels from the V/OCT input"
+     }
+    }
+   },
+   "notes": "None of the six inputs or the output is named in configInput or configOutput, so Rack's tooltips are blank on all of them. RESET is tested as a level, not an edge, and it zeroes every one of the 16 channel phases at once even in polyphonic use. The module has two separate code paths: with V/OCT patched it runs a per-channel loop, and with V/OCT unpatched it runs a single-voice path. In the single-voice path the envelope's end-of-run setVoltage(0) at line 163 is overwritten by the unconditional setVoltage at line 178, so the output there holds the last computed sample instead of being forced to zero; with the default POW4 that value is 0V anyway, but with a negative POW4 and CLIP up it rests at 10V. In the polyphonic path the zero stands. The POW jacks add to their knobs with no clamp on the sum, so exponents outside -10 to +10 are reachable."
   },
   "ColoredGlass": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Draws a field of coloured polygons that drift out from a centre, with a knob and a CV jack for every property of them",
+    "Sets how many particles are drawn, 0 to 20000",
+    "Adds one particle per volt to the AMOUNT knob",
+    "Turns each particle about its own centre, -180 to +180 degrees",
+    "Turns each particle further, 18 degrees per volt, added to the ROTATE knob",
+    "Sets how many corners each particle has, 0 to 10, and a particle left with none is not drawn at all",
+    "Adds one corner per volt to the EDGES knob",
+    "Sets how solid each particle is, 0 for invisible and 255 for fully opaque",
+    "Adds 25.5 of opacity per volt to the OPACITY knob",
+    "Bends the outlines by stretching the angle between their corners, 0 for none to 10",
+    "Adds a tenth of a unit of distortion per volt to the DISTORT knob",
+    "Sets the width of the outline drawn round each particle, 0 to 10",
+    "Adds one unit of outline width per volt to the STROKE knob",
+    "Sets the size of the particles, 0 to 200, before each one's own random share is added",
+    "Adds 50 of radius per volt to the RADIUS knob",
+    "Turns the whole field of particles about the centre of the picture, -180 to +180 degrees",
+    "Turns the whole field further, 18 degrees per volt, added to the ROTATE ALL knob",
+    "Sets how much of each particle's own fixed random angle, 0 to 360 degrees, is added to ROTATE, 0 for none and 1 for all of it",
+    "Adds a tenth per volt to the randomness on ROTATE",
+    "Sets how much of each particle's own fixed random corner count, 1 to 5, is added to EDGES, 0 for none and 1 for all of it",
+    "Adds a whole unit per volt to the randomness on EDGES, whose own travel stops at 1",
+    "Sets how much of each particle's own fixed random opacity, 1 to 250, is added to OPACITY, 0 for none and 1 for all of it",
+    "Adds a tenth per volt to the randomness on OPACITY",
+    "Adds a second bending that stretches the corners sideways as well, 0 for none to 5",
+    "Adds half a unit per volt to the MORE knob",
+    "Sets how much of each particle's own fixed random width, 0 to 3, is added to STROKE, 0 for none and 1 for all of it",
+    "Adds a whole unit per volt to the randomness on STROKE, whose own travel stops at 1",
+    "Sets how much of each particle's own fixed random radius, 1 to 50, is added to RADIUS, 0 for none and 1 for all of it",
+    "Adds a tenth per volt to the randomness on RADIUS",
+    "Sets how fast the particles are carried round the centre, -1 to +1, and holds them at one angle at 0",
+    "Adds a tenth per volt to the ROT. SPEED knob",
+    "Shifts the whole picture sideways, -100 to +100",
+    "Shifts the picture sideways by 10 more per volt, added to the X knob",
+    "Shifts the whole picture up and down, -100 to +100",
+    "Shifts the picture up and down by 10 more per volt, added to the Y knob",
+    "Sets how fast each particle travels out from the centre, -10 to +10; a particle driven back past the centre turns round and travels out again",
+    "Adds one unit per volt to the SPEED knob",
+    "Scales the red in every particle, 10 for full strength and 0 for none; a negative setting wraps the number round rather than removing the red",
+    "Adds one unit per volt to the RED knob",
+    "Scales the green in every particle, 10 for full strength and 0 for none; a negative setting wraps the number round rather than removing the green",
+    "Adds one unit per volt to the GREEN knob",
+    "Scales the blue in every particle, 10 for full strength and 0 for none; a negative setting wraps the number round rather than removing the blue",
+    "Adds one unit per volt to the BLUE knob",
+    "Puts every particle back to the place and the random shape it was given when the module was added",
+    "Puts every particle back to its starting place while the voltage here is above 0V; it is a level and not an edge, so a held gate keeps the picture pinned at its start",
+    "Note — The picture is the large black square, which carries no controls and cannot be clicked for help.",
+    "Note — The particles, their settings and the running rotation are kept in file-wide variables rather than per module, so two of these in one patch share a single field of particles.",
+    "Note — None of the CV jacks is limited: the sum of knob and voltage is used as it stands, so a jack can carry a setting well past the end of its own knob's travel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 5,
+    "3": 7,
+    "4": 9,
+    "5": 11,
+    "6": 13,
+    "7": 15,
+    "8": 17,
+    "9": 19,
+    "10": 21,
+    "11": 23,
+    "12": 25,
+    "13": 27,
+    "14": 29,
+    "15": 31,
+    "16": 33,
+    "17": 35,
+    "18": 37,
+    "19": 39,
+    "20": 41,
+    "21": 43
+   },
+   "in": {
+    "0": 2,
+    "1": 4,
+    "2": 6,
+    "3": 8,
+    "4": 10,
+    "5": 12,
+    "6": 14,
+    "7": 16,
+    "8": 18,
+    "9": 20,
+    "10": 22,
+    "11": 24,
+    "12": 26,
+    "13": 28,
+    "14": 30,
+    "15": 32,
+    "16": 34,
+    "17": 36,
+    "18": 38,
+    "19": 40,
+    "20": 42,
+    "21": 44
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "14": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "15": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "16": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "17": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "18": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "19": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     },
+     "20": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/ColoredGlass.cpp:168-188 getVoltage, one channel, added to the knob"
+     }
+    }
+   },
+   "notes": "None of the 22 inputs is named in configInput, so Rack's tooltips are blank on all of them. Particles[], ParticlesCopy[], Settings and colorshift are file-scope globals (src/ColoredGlass.cpp:46-78), not members, so every instance in a patch writes the same state; the last module's process() of each frame decides what all of them draw. The randomness jacks on EDGES and STROKE add a whole unit per volt while their knobs run only 0 to 1, whereas the other randomness jacks add a tenth per volt; the scalings are at src/ColoredGlass.cpp:168-188. RESET is a level test on the sum of the button and the jack, so a held gate above 0V restores the starting particles on every frame. The RED, GREEN and BLUE results are cast to an unsigned byte by nvgRGBA, so negative settings wrap; the factory default for RED is -9. There are no outputs."
   },
   "ScaleMerger": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Probability quantiser holding two scales at once: the pitches both scales contain always sound, and the pitches only one of them has are let through by chance",
+    "Chooses the first scale from a list of 43, chromatic at the bottom, and writes 1 or 0 into all twelve of that scale's probability knobs, losing whatever was set there",
+    "Rotates the first scale to a new root, C at the bottom through to B, and writes 1 or 0 into all twelve of that scale's probability knobs, losing whatever was set there",
+    "Chooses the second scale from a list of 43, chromatic at the bottom, and writes 1 or 0 into all twelve of that scale's probability knobs, losing whatever was set there",
+    "Rotates the second scale to a new root, C at the bottom through to B, and writes 1 or 0 into all twelve of that scale's probability knobs, losing whatever was set there",
+    "Flips that pitch in the first scale between full chance and none by writing 1 or 0 into its probability knob; the scale's name then reads CUSTOM",
+    "Flips that pitch in the second scale between full chance and none by writing 1 or 0 into its probability knob; the scale's name then reads CUSTOM",
+    "Flips that pitch in both scales at once: if either scale has it, both drop it, and if neither has it, both take it",
+    "Sets the chance of that pitch in the first scale, 0 for never and 1 for every trigger",
+    "Sets the chance of that pitch in the second scale, 0 for never and 1 for every trigger",
+    "Scales the chance of the pitches that only the first scale has, and leaves the pitches shared with the second scale alone; it is fully open when the module is added",
+    "Scales the chance of the pitches that only the second scale has, and leaves the pitches shared with the first scale alone; it is fully closed when the module is added",
+    "Steps past the first SCALE knob's setting, the whole list of 43 across 10V, wrapping round the end; the size of the voltage is used and its sign is thrown away",
+    "Steps past the second SCALE knob's setting, the whole list of 43 across 10V, wrapping round the end; the size of the voltage is used and its sign is thrown away",
+    "Steps past the first KEY knob's setting, all twelve keys across 10V, wrapping round the end; the size of the voltage is used and its sign is thrown away",
+    "Steps past the second KEY knob's setting, all twelve keys across 10V, wrapping round the end; the size of the voltage is used and its sign is thrown away",
+    "Adds to that pitch's chance in the first scale, a whole unit per volt, and the total is held between 0 and 1",
+    "Adds to that pitch's chance in the second scale, a whole unit per volt, and the total is held between 0 and 1",
+    "Adds to the first scale's unique-pitch chance, a whole unit per volt, and the total is held between 0 and 1",
+    "Adds to the second scale's unique-pitch chance, a whole unit per volt, and the total is held between 0 and 1",
+    "The pitch to be quantised; it is read only at the moment a trigger arrives",
+    "On each rising edge a fresh random number is drawn for every one of the twelve pitches, and the voltage at IN is quantised against whichever pitches those draws allow",
+    "The quantised pitch, held unchanged until the next trigger",
+    "Note — Nothing comes out until both IN and TRIGGER are patched, and the output carries the smaller of their two channel counts.",
+    "Note — When the random draw allows no pitch at all, the previous pitch is sent again.",
+    "Note — The lamp by each first-scale knob shows that pitch’s chance there, the lamp by each second-scale knob its chance in that scale, and the row at the foot the greater of the two.",
+    "Note — To move from one scale to the other, close both PROBABILITY knobs, which leaves only the pitches the two share, then set the new scale and open its own PROBABILITY knob.",
+    "Note — Quantising works inside one octave and never rounds across the top of it, so a pitch near the octave is pulled down to the nearest allowed pitch below rather than to the one above."
+   ],
+   "param": {
+    "62": 1,
+    "64": 2,
+    "63": 3,
+    "65": 4,
+    "60": 10,
+    "61": 11,
+    "0": 5,
+    "12": 6,
+    "24": 7,
+    "36": 8,
+    "48": 9,
+    "1": 5,
+    "13": 6,
+    "25": 7,
+    "37": 8,
+    "49": 9,
+    "2": 5,
+    "14": 6,
+    "26": 7,
+    "38": 8,
+    "50": 9,
+    "3": 5,
+    "15": 6,
+    "27": 7,
+    "39": 8,
+    "51": 9,
+    "4": 5,
+    "16": 6,
+    "28": 7,
+    "40": 8,
+    "52": 9,
+    "5": 5,
+    "17": 6,
+    "29": 7,
+    "41": 8,
+    "53": 9,
+    "6": 5,
+    "18": 6,
+    "30": 7,
+    "42": 8,
+    "54": 9,
+    "7": 5,
+    "19": 6,
+    "31": 7,
+    "43": 8,
+    "55": 9,
+    "8": 5,
+    "20": 6,
+    "32": 7,
+    "44": 8,
+    "56": 9,
+    "9": 5,
+    "21": 6,
+    "33": 7,
+    "45": 8,
+    "57": 9,
+    "10": 5,
+    "22": 6,
+    "34": 7,
+    "46": 8,
+    "58": 9,
+    "11": 5,
+    "23": 6,
+    "35": 7,
+    "47": 8,
+    "59": 9
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "6": 14,
+    "7": 15,
+    "4": 18,
+    "5": 19,
+    "2": 20,
+    "3": 21,
+    "8": 16,
+    "20": 17,
+    "9": 16,
+    "21": 17,
+    "10": 16,
+    "22": 17,
+    "11": 16,
+    "23": 17,
+    "12": 16,
+    "24": 17,
+    "13": 16,
+    "25": 17,
+    "14": 16,
+    "26": 17,
+    "15": 16,
+    "27": 17,
+    "16": 16,
+    "28": 17,
+    "17": 16,
+    "29": 17,
+    "18": 16,
+    "30": 17,
+    "19": 16,
+    "31": 17
+   },
+   "out": {
+    "0": 22
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "6": "cv",
+     "7": "cv",
+     "4": "cv",
+     "5": "cv",
+     "2": "pitch",
+     "3": "trigger",
+     "8": "cv",
+     "20": "cv",
+     "9": "cv",
+     "21": "cv",
+     "10": "cv",
+     "22": "cv",
+     "11": "cv",
+     "23": "cv",
+     "12": "cv",
+     "24": "cv",
+     "13": "cv",
+     "25": "cv",
+     "14": "cv",
+     "26": "cv",
+     "15": "cv",
+     "27": "cv",
+     "16": "cv",
+     "28": "cv",
+     "17": "cv",
+     "29": "cv",
+     "18": "cv",
+     "30": "cv",
+     "19": "cv",
+     "31": "cv"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/ScaleMerger.cpp:253-259 getVoltage, abs then modulo"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/ScaleMerger.cpp:261-267 getVoltage, abs then modulo"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/ScaleMerger.cpp:274-280 getVoltage, abs then modulo"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/ScaleMerger.cpp:282-288 getVoltage, abs then modulo"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:223-228 getProb, added to the knob and clamped"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:223-228 getProb, added to the knob and clamped"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/ScaleMerger.cpp:405-419 getChannels and getPolyVoltage"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/ScaleMerger.cpp:234-240 getChannels and BooleanTrigger on each channel"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "20": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "21": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "22": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "23": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "24": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "25": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "26": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "27": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "28": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "29": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "18": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "30": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     },
+     "19": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:381-388 added to the knob and clamped"
+     },
+     "31": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/ScaleMerger.cpp:384-392 added to the knob and clamped"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/ScaleMerger.cpp:411 setChannels from the smaller of IN and TRIGGER"
+     }
+    }
+   },
+   "notes": "None of the 32 inputs or the output is named in configInput or configOutput, so Rack's tooltips are blank on all of them. scales[] holds 43 rows but scaleNames[] is written with a missing comma between \"UKRAINIAN DORIAN\" and \"TURKISH\" (src/ScaleMerger.cpp:64), so the two run together as one name and the array supplies only 42 of its 43 entries: the 42nd scale shows as UKRAINIAN DORIANTURKISH and the 43rd, the top of the SCALE knob, has a null name that the display's sprintf prints as (null). Quantising compares the fractional part of the input against each pitch's fractional position as integers scaled by 10000 (normalize(), line 209), with no wrap, so the distance from a pitch near the top of the octave to C is measured the long way round and the result never rounds up into the next octave. probs2 is computed twice, once through getProb and once by a direct expression at line 384, which gives the same answer. The unique-pitch PROBABILITY knobs multiply only pitches that one scale has and the other does not; shared pitches are never scaled. The per-channel loop at line 413 returns from process() rather than continuing when a channel has no trigger, so later channels are not written that sample; their jack voltages persist, which is the intended result anyway."
   },
   "Math": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Nine two-input arithmetic cells — three dividing, three raising to a power and three multiplying — and six single-input logarithms",
+    "The A side of one A*B cell, which sets how many channels that cell's output carries",
+    "The B side of one A*B cell, read channel by channel against the A side",
+    "The A side of one A/B cell, which sets how many channels that cell's output carries",
+    "The B side of one A/B cell, the divisor, read channel by channel against the A side",
+    "The A side of one A to the power B cell, which sets how many channels that cell's output carries",
+    "The B side of one A to the power B cell, the exponent, read channel by channel against the A side",
+    "The input to one natural logarithm",
+    "The input to one base 2 logarithm",
+    "The input to one base 10 logarithm",
+    "A times B for that cell, in volts, with no scaling and no limit",
+    "A divided by B for that cell, in volts, with no scaling and no limit",
+    "A raised to the power B for that cell, in volts, with no scaling and no limit",
+    "The natural logarithm of the voltage at its own In jack",
+    "The base 2 logarithm of the voltage at its own In jack",
+    "The base 10 logarithm of the voltage at its own In jack",
+    "Note — A cell is worked out only while both of its inputs and its own output are patched; with any of the three missing the output jack holds whatever value it last had.",
+    "Note — Each cell takes its channel count from its A input, and reads the B input channel by channel, so a one-channel B against a polyphonic A gives 0V on every channel past the first.",
+    "Note — Nothing here is scaled or clipped. Dividing by 0V, or taking the logarithm of 0V or of a negative voltage, puts an infinity or a not-a-number on the output jack and into whatever it feeds."
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "12": 4,
+    "13": 4,
+    "14": 4,
+    "6": 5,
+    "7": 5,
+    "8": 5,
+    "15": 6,
+    "16": 6,
+    "17": 6,
+    "18": 7,
+    "19": 7,
+    "20": 8,
+    "21": 8,
+    "22": 9,
+    "23": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 10,
+    "2": 10,
+    "3": 11,
+    "4": 11,
+    "5": 11,
+    "6": 12,
+    "7": 12,
+    "8": 12,
+    "9": 13,
+    "10": 13,
+    "11": 14,
+    "12": 14,
+    "13": 15,
+    "14": 15
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "src/Math.cpp:72 getChannels bounds the loop"
+     },
+     "9": {
+      "poly": true,
+      "why": "src/Math.cpp:77 getVoltage(c) inside the channel loop"
+     },
+     "18": {
+      "poly": true,
+      "why": "src/Math.cpp:95 getChannels bounds the loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Math.cpp:73 setChannels from the A input"
+     }
+    }
+   },
+   "notes": "No port here is named in configInput or configOutput, so Rack's tooltips are blank on all 24 inputs and 15 outputs. Every cell is guarded by isConnected on both inputs and on its own output, so an unpatched output jack means the arithmetic is skipped and the jack keeps its last written value rather than falling to zero. There are no parameters at all. Nothing is clamped: a division by zero writes an infinity, and std::log of a negative voltage writes a not-a-number, either of which propagates into anything patched downstream. The B input is read with getVoltage(c) rather than getPolyVoltage(c), so it is not spread across channels. No family is given to any jack, because these carry whatever is patched into them."
   },
   "CellularAuto": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sequencer that reads its steps off a 64 by 256 grid grown from a one-dimensional cellular automaton, through a movable window that a polyphonic clock splits into rows",
+    "Puts every channel back to the first cell of its own slice of the window, and releases the four buttons",
+    "Mirrors the whole grid left to right",
+    "Mirrors the whole grid top to bottom",
+    "Grows the grid again from the cells set on the top bar, using the current RULE and ITER settings, and replaces whatever was there",
+    "Chooses which of the 256 elementary automaton rules is used to grow the grid, 0 to 255; the number in use is printed at the right of the display",
+    "Sets how many extra passes of 256 rows are run before the grid that is kept, 0 to 1000, each one carrying on from where the last left off",
+    "Sets the left edge of the window into the grid, 0 to 64; the window is trimmed if it would run past the right-hand edge",
+    "Sets the top edge of the window into the grid, 0 to 256; the window is trimmed if it would run past the bottom",
+    "Sets how many cells wide the window is, 0 to 64; at 0 the module stops sending anything",
+    "Sets how many cells tall the window is, 0 to 256",
+    "Steps that channel on by one cell on each rising edge, running left to right along a row and then on to the next",
+    "Puts every channel back to the first cell of its own slice on a rising edge above 1V",
+    "Mirrors the grid left to right on a rising edge above 1V",
+    "Mirrors the grid top to bottom on a rising edge above 1V",
+    "Grows the grid again on a rising edge above 1V, as the INIT button does",
+    "Shifts the rule number, 25.6 rules per volt, added to the RULE knob and never allowed below 0",
+    "Shifts the pass count, 100 passes per volt, added to the ITER knob and never allowed below 0",
+    "Shifts the left edge of the window, 6.4 cells per volt, added to the LEFT knob",
+    "Shifts the top edge of the window, 25.6 cells per volt, added to the TOP knob",
+    "Shifts the width of the window, 6.4 cells per volt, added to the WIDTH knob",
+    "Shifts the height of the window, 25.6 cells per volt, added to the HEIGHT knob",
+    "5V for one clock pulse when the first channel returns to the start of the window, and nothing at all on the other channels",
+    "5V while the clock is high and the cell under that channel is set, so it follows the shape of the clock pulse",
+    "5V for as long as that channel stands on a set cell, held until the clock moves it on",
+    "Menu — Clear Initial State — empties the top bar of the display, so the next INIT grows an empty grid",
+    "Note — The module sends nothing until a clock is patched, and nothing until the grid has been grown: set some cells on the top bar of the display and press INIT.",
+    "Note — Clicking a cell on the top bar of the display turns it on or off. The rightmost cell of that bar has a third state, drawn white, which takes the grid down to 63 cells across.",
+    "Note — Clicking inside the zoomed view on the right of the display turns that cell of the grid on or off by hand.",
+    "Note — A polyphonic clock splits the window into that many equal slices, one per channel, each read from its own starting cell: a 16 by 8 window is 128 steps on one channel and 8 rows of 16 on eight.",
+    "Note — The window is drawn as a rectangle on the whole-grid view at the left of the display, with the cells inside it shown large at the right."
+   ],
+   "param": {
+    "6": 1,
+    "8": 2,
+    "9": 3,
+    "4": 4,
+    "5": 5,
+    "7": 6,
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "9": 15,
+    "10": 16,
+    "11": 17,
+    "5": 18,
+    "6": 19,
+    "7": 20,
+    "8": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23,
+    "2": 24
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "9": "trigger",
+     "10": "cv",
+     "11": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/CellularAuto.cpp:331-333 getChannels and a BooleanTrigger per channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/CellularAuto.cpp:319-322 added to the button, SchmittTrigger"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/CellularAuto.cpp:258-261 added to the button, SchmittTrigger"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/CellularAuto.cpp:275-278 added to the button, SchmittTrigger"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/CellularAuto.cpp:247-250 added to the button, SchmittTrigger"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/CellularAuto.cpp:239-241 getVoltage times 25.6, added to the knob"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/CellularAuto.cpp:80-82 getVoltage times 100, added to the knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/CellularAuto.cpp:154-156 getVoltage times 6.4, added to the knob"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/CellularAuto.cpp:158-160 getVoltage times 25.6, added to the knob"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/CellularAuto.cpp:162-164 getVoltage times 6.4, added to the knob"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/CellularAuto.cpp:166-168 getVoltage times 25.6, added to the knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 5V",
+      "why": "src/CellularAuto.cpp:304 setChannels from the clock"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 5V",
+      "why": "src/CellularAuto.cpp:302 setChannels from the clock"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 5V",
+      "why": "src/CellularAuto.cpp:303 setChannels from the clock"
+     }
+    }
+   },
+   "notes": "None of the twelve inputs or the three outputs is named in configInput or configOutput, so Rack's tooltips are blank on all of them. Input 4 (ROTATE_INPUT) and parameter 10 (ROTATE_PARAM) are declared in the enums and given no widget, and ROTATE_PARAM has no configParam either, so neither can be reached or clicked; the jacks around them are not renumbered. The panel prints LEFT and TOP where configParam names the parameters X and Y. EOS tests Positions[c] == 0 (src/CellularAuto.cpp:354), but every channel above the first restarts at c * cells rather than 0, so EOS fires only on channel 0 however many channels the clock carries. RULE is clamped below at 0 and not above, and the rule byte is applied with a bitwise and against 1 << index, so anything above 255 acts as its remainder. Each ITER pass runs a full 256 rows carrying on from the last, so the grid kept is the last 256 generations. The four button inputs are summed with their buttons before a SchmittTrigger, so a steady voltage above 1V holds the trigger high and blocks further presses of the button beside it."
   }
  }
 }

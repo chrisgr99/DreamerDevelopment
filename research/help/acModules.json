@@ -1,63 +1,902 @@
 {
  "plugin": "acModules",
- "source": "https://github.com/gwygonik/acModules",
+ "source": "https://github.com/gwygonik/acModules/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Pick6": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A finger-picking trigger sequencer: each incoming pick moves through an eight-step pattern and fires one of six string triggers, with a matching note voltage.",
+    "A rising edge past 2V moves the pattern on one step and fires the trigger for whichever string that step names.",
+    "Chooses the pattern, 1 to 50; the last two are the custom slots a Pick6p expander edits.",
+    "Takes over the pattern knob while a cable is here: 0V to 10V spans the 50 patterns, and the knob is moved to follow.",
+    "A rising edge past 2V puts the sequence back before its first step and restarts the measure count.",
+    "Adds and removes notes as the pattern repeats: it moves picks off strings the chord mutes, drops picks from full patterns every eighth measure, and fills in skipped steps.",
+    "Chooses what happens at the end of a pattern: loop it, play the next pattern once and come back, or play a silent bar and come back.",
+    "Six channels of note voltage plus six channels of mute flag, where 0V plays the string and anything above 4.9V mutes it; a thirteenth channel is ignored.",
+    "The note voltage of the string the current step picked.",
+    "Six channels of trigger, one per string; a 10V pulse 1ms long comes out of the channel for the string that was picked.",
+    "A 10V pulse 1ms long on every step that picks a string, whichever string it was.",
+    "Note — Nothing moves until triggers arrive at PICK. The module has no clock of its own.",
+    "Note — With nothing patched to POLY IN the six note voltages are those of an open E chord, so the CV output is useful with no chord source at all.",
+    "Note — A Pick6p placed immediately to the right edits the last two patterns; a lamp in each module's name lights when they are joined.",
+    "Menu — Muted Note CV to 0V — sends 0V out of the CV output on a step that is muted or skipped, instead of holding the previous step's voltage.",
+    "Menu — Smart Riff in Blank Pattern — lets the smart riff add notes while a blank pattern is playing, which is otherwise left silent.",
+    "Menu — Offset End Of Pattern — reverses the order of the end-of-pattern setting, so the next or silent bar is played first and the chosen pattern second."
+   ],
+   "param": {
+    "0": 2,
+    "2": 5,
+    "1": 6
+   },
+   "in": {
+    "0": 1,
+    "2": 3,
+    "1": 4,
+    "3": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Pick6.cpp process(): inTrigger.process(getVoltage(), 0.01f, 2.f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Pick6.cpp process(): inReset.process(getVoltage(), 0.01f, 2.f)"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Pick6.cpp process(): clamp(rescale(getVoltage(), 0, 10, 1, 50), 1, 50), written back into the knob"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "an open E chord",
+      "why": "src/Pick6.cpp process(): getChannels() chooses the branch and getPolyVoltage(i) reads channels 0 to 11"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/Pick6.cpp process(): setVoltage(inCV), which is a note voltage from the poly input or the built-in E chord"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "why": "src/Pick6.cpp process(): setVoltage(10.f, i) for six channels and setChannels(6)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pick6.cpp process(): monoPickOutput.trigger(1e-3f) and setVoltage(10.f)"
+     }
+    }
+   },
+   "notes": "The polyphonic CV input is only read on two of the three possible cases: the code handles 12 or more channels (six notes plus six mutes) and fewer than 6 channels (the highest channel is copied up to fill the rest), but a cable carrying 6 to 11 channels matches neither branch and is not read at all, leaving the previous note values in place. The README describes the 12-channel and the fewer-than-six cases and does not mention the gap. The poly input's range is left blank because channels 1 to 6 carry pitch while 7 to 12 carry a 0V or 10V flag. The trigger thresholds are 0.01V low and 2V high rather than Rack's usual 0V and 1V. The pattern CV writes its value back into the knob, so the knob cannot be turned by hand while that jack is patched."
   },
   "Ov3rCross": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A three-way router driven by voltage: the control CV picks one of three zones, and the CV and any incoming trigger are sent to that zone's pair of jacks.",
+    "The control voltage that picks the zone, clamped to -5V through +10V; with nothing patched here a trigger generates a random voltage instead.",
+    "A rising edge sends a 1ms trigger out of whichever zone the control voltage is in, and with no control CV patched it also rolls a fresh random voltage.",
+    "A signal to route instead of the control voltage; the zone is chosen by the control voltage, and this is what comes out of that zone.",
+    "Sets the boundary between the middle and the high zone, -5V to +10V; it cannot be taken below the LOW knob.",
+    "Sets the boundary between the low and the middle zone, -5V to +10V; it cannot be taken above the HIGH knob.",
+    "Carries the routed voltage while the control voltage is at or above the high cutoff.",
+    "A 10V trigger 1ms long when a trigger arrives while the control voltage is at or above the high cutoff.",
+    "Carries the routed voltage while the control voltage is between the two cutoffs.",
+    "A 10V trigger 1ms long when a trigger arrives while the control voltage is between the two cutoffs.",
+    "Carries the routed voltage while the control voltage is at or below the low cutoff.",
+    "A 10V trigger 1ms long when a trigger arrives while the control voltage is at or below the low cutoff.",
+    "Note — A zone's CV output keeps the last voltage that was sent to it, so two of the three always hold an old value unless the menu's mute item is on.",
+    "Note — With a trigger patched and no control CV, the module becomes a three-way random trigger, and the two cutoff knobs set how likely each zone is.",
+    "Menu — Sample and Hold Control CV — makes the zone follow the control voltage only at the moment a trigger arrives, rather than tracking it continuously; it needs a trigger patched to do anything.",
+    "Menu — Mute Non-Active Outputs To 0V — ramps the two inactive CV outputs down to 0V instead of leaving them at their last voltage.",
+    "Menu — Random CV Range: -5V to 10V, -5V to 5V, 0V to 10V, 0V to 5V — sets the span of the random voltage generated on a trigger when no control CV is patched.",
+    "Menu — Output Trigger on CV Zone Change — fires a zone's trigger output when the control voltage moves into that zone; it does nothing while the sample and hold item is on."
+   ],
+   "param": {
+    "0": 4,
+    "1": 5
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10,
+    "5": 11
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger"
+    },
+    "out": {
+     "1": "trigger",
+     "3": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "-5 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Ov3rCross.cpp process(): clamp(getVoltage(), -5.f, 10.f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Ov3rCross.cpp process(): inTrigger.process(rescale(getVoltage(), 0.1f, 2.f, 0.f, 1.f))"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Ov3rCross.cpp setState(): outVoltage = sendCVThru ? cvThru : cvIN, with no clamp or scaling of its own"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Ov3rCross.cpp process(): pulseOutputs[0].trigger(1e-3f), setVoltage(10.f)"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Ov3rCross.cpp process(): pulseOutputs[1]"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Ov3rCross.cpp process(): pulseOutputs[2]"
+     },
+     "0": {
+      "poly": false,
+      "why": "src/Ov3rCross.cpp process(): setVoltage on OUTPUT_CV_HIGH, mono; the voltage is the control CV or whatever is patched to CV THRU, so no range is claimed"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/Ov3rCross.cpp process(): setVoltage on OUTPUT_CV_MID, mono; the voltage is the control CV or whatever is patched to CV THRU, so no range is claimed"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/Ov3rCross.cpp process(): setVoltage on OUTPUT_CV_LOW, mono; the voltage is the control CV or whatever is patched to CV THRU, so no range is claimed"
+     }
+    }
+   },
+   "notes": "The three CV outputs carry whatever is patched to CV THRU when that jack is in use, so their family and range depend on what the patch feeds them and both are left blank rather than guessed; when CV THRU is empty they carry the control voltage and so span -5V to +10V. The CV THRU signal is passed through with no clamping. The trigger input is rescaled so that 0.1V reads as low and 2V as high, which is a higher threshold than Rack's usual 1V. The two cutoff knobs are stopped from crossing: the code sets the HIGH knob's minimum to LOW plus 0.05V and the LOW knob's maximum to HIGH minus 0.05V every sample. The zone boundaries are inclusive at both ends: at or below LOW is the low zone and at or above HIGH is the high zone. Every jack is read with getVoltage(), so nothing is polyphonic."
   },
   "Pick6p": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for Pick6 that goes immediately to its right, giving the two custom patterns at the end of Pick6's pattern list a knob per step.",
+    "Sets which string that step of the first custom pattern picks, 1 to 6, or 0 for a step that picks nothing.",
+    "Sets which string that step of the second custom pattern picks, 1 to 6, or 0 for a step that picks nothing.",
+    "Note — A lamp in the name of each module lights when this is attached to a Pick6. With no Pick6 on its left, the knobs change nothing.",
+    "Note — The two custom patterns are the last two entries on Pick6's pattern knob; a pick indicator above each column lights while Pick6 is playing that one.",
+    "Menu — Copy...: Left to Right, Right to Left, From Pick6 to Left, From Pick6 to Right — copies one column into the other, or the pattern Pick6 is playing into a column.",
+    "Menu — Clear...: Left Pattern, Right Pattern, Both Pattern — sets every step of that column to 0, which picks nothing."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2
+   },
+   "notes": "The module has no jacks at all: it talks to Pick6 only through Rack's expander messages, and so must be directly to its right. The eighth knob in each column is named \"Step 0\" in its tooltip because the maker's format string takes the step number modulo 8; the panel prints 8 and that is the step it edits. The maker's menu prints \"Both Pattern\" rather than \"Both Patterns\", and it is written here as it appears."
   },
   "Chord4Roy": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A guitar-shaped chord generator: one polyphonic output carrying six string notes, six mute flags and the root note.",
+    "Sets the root note of the chord, one of the twelve semitones.",
+    "Chooses the chord: plain root, min, 7, Maj7, min7, 6, min6 or Sus.",
+    "Takes over the root note knob while a cable is here: 0V to 10V spans the twelve notes, or 1V per octave with the menu item on.",
+    "Takes over the chord knob while a cable is here: 0V to 10V spans the eight chords.",
+    "Chooses open-neck voicings or bar voicings; there are no bar shapes for min6 or Sus, and those fall back to the open ones.",
+    "Chooses whether strings not played in a chord are marked muted on channels 7 to 12 or left as open strings.",
+    "Takes over the style switch while a cable is here: below 5V chooses open voicings and 5V or more chooses bar, and the panel switch moves to follow.",
+    "Thirteen channels: 1 to 6 are the string notes at 1V per octave, 7 to 12 are 0V for played and 10V for muted, and 13 is the root note whether or not it is muted in the chord.",
+    "Note — There is no CV input for the mutes switch, only for the style switch.",
+    "Menu — Use V/Oct Root Note Selection — reads the root note jack as 1V per octave instead of 0V to 10V; the output stays in one octave whatever octave comes in.",
+    "Menu — PianoMan Mode — puts out piano voicings in the same six-note shape: channel 1 is the root an octave down, 2 to 4 chord notes, 5 a chord note or the root up an octave, 6 the second note up."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 5,
+    "3": 6
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Chord4Roy.cpp process(): clamp(rescale(getVoltage(), 0, 10, 1, 12), 1, 12); with useVOctNoteInput it is read as 1V per octave instead"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Chord4Roy.cpp process(): clamp(rescale(getVoltage(), 0, 10, 1, 8), 1, 8)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Chord4Roy.cpp process(): getVoltage() < 5.f chooses open, otherwise bar, and the result is written back into the switch"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/Chord4Roy.cpp process(): setVoltage(..., i) for 13 channels and setChannels(13)"
+     }
+    }
+   },
+   "notes": "The output always carries thirteen channels, and the mute channels are 0V or 10V rather than pitches, so the 1V per octave range applies only to channels 1 to 6 and 13. The style CV writes its result back into the panel switch every sample, so that switch cannot be moved by hand while a cable is in its jack. The README says bar chords do not exist for min6 or Sus and the code confirms it: rows 15 and 16 of the chord table, which are the bar shapes for min6 and Sus, are exact copies of the open-neck rows 7 and 8. Every input is read with getVoltage(), so a polyphonic cable into one of them is read on its first channel only. The chord names here are the ones the module's own display prints."
   },
   "Rhythm1101": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A 16-step drum sequencer with four trigger tracks: each step's knob is a number whose binary digits say which of the four tracks fire.",
+    "A rising edge past 2V moves the sequence on one step and fires whichever tracks that step names.",
+    "A rising edge past 2V puts the sequence back before its first step and restores the pattern from its stored version, dropping any mutation.",
+    "Chooses the pattern, 1 to 16; changing it loads that pattern into the sixteen step knobs.",
+    "Takes over the pattern knob while a cable is here: 0V to 10V spans the 16 patterns, and the knob is moved to follow.",
+    "Sets how many of the sixteen steps are played before the sequence wraps, 1 to 16.",
+    "Sets which tracks that step fires, 0 to 15: 1 is track 1, 2 is track 2, 4 is track 3, 8 is track 4, and any sum of those fires all of them; 0 fires nothing and 15 fires all four.",
+    "Adds extra triggers on rhythmically likely steps for the length of one measure, without changing the stored pattern.",
+    "Sets which tracks the mutation may add to, 0 to 15, read the same way a step knob is; the four lamps beside it show the choice.",
+    "A 10V trigger 1ms long on every step whose value includes track 1.",
+    "A 10V trigger 1ms long on every step whose value includes track 2.",
+    "A 10V trigger 1ms long on every step whose value includes track 3.",
+    "A 10V trigger 1ms long on every step whose value includes track 4.",
+    "Note — Nothing moves until triggers arrive at STEP. The module has no clock of its own.",
+    "Note — Turning the pattern knob overwrites the step knobs with that pattern, and moving a step knob writes back into the stored pattern, replacing the factory groove until the menu restores it.",
+    "Note — All sixteen patterns are saved with the patch, edits included.",
+    "Menu — Shift Pattern: Shift Right, Shift Left — moves every step of the current pattern one place around the sixteen.",
+    "Menu — Mutation Frequency: 1:1, 1:2, 1:3, 1:4 — sets how often a mutation is rolled: every measure, every second, every third or every fourth.",
+    "Menu — Clear Current Pattern — sets every step of the current pattern to 0.",
+    "Menu — Clear All Patterns — sets every step of all sixteen patterns to 0.",
+    "Menu — Reset to Factory Patterns — replaces all sixteen patterns with the grooves the module ships with, losing any edits."
+   ],
+   "param": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6,
+    "13": 6,
+    "14": 6,
+    "15": 6,
+    "16": 3,
+    "17": 5,
+    "18": 7,
+    "19": 8
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 4
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Rhythm1101.cpp process(): inTrigger.process(getVoltage(), 0.01f, 2.f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Rhythm1101.cpp process(): inReset.process(getVoltage(), 0.01f, 2.f)"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Rhythm1101.cpp process(): clamp(rescale(getVoltage(), 0, 10, 1, 16), 1, 16), written back into the knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Rhythm1101.cpp process(): monoStepOutput[i].trigger(1e-3f) and setVoltage(10.f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Rhythm1101.cpp process(): monoStepOutput[1]"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Rhythm1101.cpp process(): monoStepOutput[2]"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Rhythm1101.cpp process(): monoStepOutput[3]"
+     }
+    }
+   },
+   "notes": "The panel prints MONO OUT above the four trigger jacks, which are numbered 1 to 4 and are separate mono outputs rather than one mixed one. The bit order was checked against getBinaryOfNumAt: track 1 is the units bit, so a step value of 1 fires the first jack and 8 the fourth, matching the README. The sixteen step knobs share one line and the four trigger outputs are written separately because each names a different track. The trigger thresholds are 0.01V low and 2V high rather than Rack's usual 0V and 1V. The pattern CV writes its value back into the knob, so the knob cannot be turned by hand while that jack is patched. Every jack is read with getVoltage(), so nothing is polyphonic."
   },
   "Merc8or": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A polyphonic CV remapper: set the range the incoming voltage covers and the range it should come out in, and it rescales and limits every channel between the two.",
+    "Sets the top of the range the input is expected to cover, -10V to +10V; it cannot be taken below the input LOW knob.",
+    "Sets the bottom of the range the input is expected to cover, -10V to +10V; it cannot be taken above the input HIGH knob.",
+    "Sets the voltage the top of the input range comes out at, -10V to +10V.",
+    "Sets the voltage the bottom of the input range comes out at, -10V to +10V.",
+    "The CV to remap, up to 16 channels; anything outside the input range is clamped to it first.",
+    "The remapped CV, with the same number of channels as the input and 0 channels while nothing is patched in.",
+    "Note — Setting the output HIGH below the output LOW inverts the mapping, which is the same thing the menu's invert item does.",
+    "Note — A MOREc8or placed immediately to the right adds CV control of the output range, along with remote inverting and linking; a lamp in each module's name lights when they are joined.",
+    "Menu — Quick Set Input Range...: 0V to 10V, 0V to 5V, -5V to 5V, -10V to 10V — sets the two input range knobs to a common pair of values.",
+    "Menu — Quick Set Output Range...: 0V to 10V, 0V to 5V, -5V to 5V, -10V to 10V, 1 Octave @ 1V, 1 Octave @ 2V, 2 Octaves @ 1V, 2 Octaves @ 2V — sets the two output range knobs.",
+    "Menu — Invert Output — swaps the two output range values, so the mapping runs the other way.",
+    "Menu — Output Snapping...: None, Octaves, Semitones — rounds the output range knobs and the output voltage to whole volts or to twelfths of a volt.",
+    "Menu — Add Half-Semitone Offset — adds half a semitone to the snapped output, which stops some 1V per octave modules flickering between two notes; it is inside the Output Snapping submenu."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Merc8or.cpp process(): getChannels() bounds the loop and getPolyVoltage(i) reads each channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "-10 to 10V",
+      "why": "src/Merc8or.cpp process(): setVoltage(cvOUT[i], i) and setChannels(numChannels)"
+     }
+    }
+   },
+   "notes": "The two input range knobs are prevented from crossing: every sample the code sets the HIGH knob's minimum to the LOW value plus 0.05V and the LOW knob's maximum to HIGH minus 0.05V, so the input range can never be inverted, only the output range can. With nothing patched to the input the output is set to zero channels rather than 0V. The maker documents the module as a polyphonic remapper and the code bears that out: all channels are converted through one set of settings."
   },
   "Pul5es": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A pulse counter: count incoming triggers and send one out when the count is reached, once or over and over.",
+    "A rising edge past 2V sets the count back to zero and re-arms the output.",
+    "A rising edge past 2V adds one to the count.",
+    "Sets how many incoming triggers it takes to fire the output, 2 to 256.",
+    "Takes over the OUT ON knob while a cable is here: 0V to 10V covers 2 to 256, and the knob is moved to follow.",
+    "Starts the count again after firing, so the output fires every time that many triggers arrive; without it the output fires once and then stays quiet until a reset.",
+    "A rising edge past 2V flips the loop setting, or with the gate option on the menu holds it on while the voltage is above 0.2V.",
+    "A 10V trigger 1ms long when the count is reached.",
+    "Note — Nothing happens until triggers arrive at STEP. The module has no clock of its own.",
+    "Menu — Invert Pulse Logic — sends a trigger out on every incoming trigger except the one the count lands on.",
+    "Menu — Use Gate For Loop On/Off — makes the loop jack read a level rather than an edge, looping only while the voltage is above 0.2V.",
+    "Menu — Only Count With Gate On — stops the counting and the output entirely unless the gate option is on and its gate is high."
+   ],
+   "param": {
+    "0": 3,
+    "1": 5
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 4,
+    "3": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Pul5es.cpp process(): inReset.process(getVoltage(), 0.01f, 2.f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Pul5es.cpp process(): inPulse.process(getVoltage(), 0.01f, 2.f)"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Pul5es.cpp process(): clamp(rescale(getVoltage(), 0, 10, 2, 256), 2, 256), written back into the knob"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Pul5es.cpp process(): inLoop.process(getVoltage(), 0.01f, 2.f), or a level compare against 0.2f under the gate option"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pul5es.cpp process(): pulseOutput.trigger(1e-3f) and setVoltage(10.f)"
+     }
+    }
+   },
+   "notes": "The trigger thresholds here are 0.01V low and 2V high rather than Rack's usual 0V and 1V, so a source that only reaches 1V never clocks this module. The OUT ON CV writes its result straight back into the knob every sample, so the knob cannot be moved by hand while a cable is in that jack. The README describes the loop jack only inside an HTML comment, so the published text does not mention it although the jack is on the panel and works. Every jack is read with getVoltage(), so nothing is polyphonic."
   },
   "CFor2N2ForC": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Reads the note an incoming 1V per octave voltage names and puts out the voltage set for that note, along with a trigger on one of twelve channels.",
+    "The note to look at, clamped to -5V through +10V; only the position within the octave matters, not which octave.",
+    "A rising edge past 2V sends a trigger out of the channel belonging to the note currently at the CV input.",
+    "The voltage set for whichever note the input is on.",
+    "Twelve channels of trigger, one per note of the octave; a 10V pulse 1ms long comes out of the channel for the note at the input.",
+    "Sets the voltage the CV output carries while the input is on C, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on C#, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on D, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on D#, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on E, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on F, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on F#, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on G, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on G#, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on A, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on A#, -5V to +10V.",
+    "Sets the voltage the CV output carries while the input is on B, -5V to +10V.",
+    "Note — Nothing comes out unless a cable is patched to the CV input. With that jack empty the CV output holds 0V and no trigger ever fires.",
+    "Note — The trigger is held back for five samples after it arrives, so a note voltage changing at the same moment as the trigger is read first.",
+    "Menu — Output Trigger On Note Change — fires the trigger for a note when the incoming voltage moves onto it, without needing a trigger patched."
+   ],
+   "param": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12,
+    "8": 13,
+    "9": 14,
+    "10": 15,
+    "11": 16
+   },
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/CFor2N2ForC.cpp process(): clamp(getVoltage(), -5.f, 10.f), a negative voltage is shifted up by 10V and only the fractional part is used"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/CFor2N2ForC.cpp process(): inTrigger.process(getVoltage(), 0.01f, 2.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-5 to 10V",
+      "why": "src/CFor2N2ForC.cpp process(): setVoltage(inCV), the knob value, knobs configured -5 to 10"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "why": "src/CFor2N2ForC.cpp process(): setVoltage(10.f, i) for i in 0..11 and setChannels(12)"
+     }
+    }
+   },
+   "notes": "The CV output is monophonic and the trigger output always carries exactly twelve channels whether or not anything is patched in. A negative input voltage is shifted up by 10V before the note is worked out, so the twelve zones line up the same way across the whole -5V to +10V span. The module does nothing at all with the CV jack empty, which the README does not say. Every input is read with getVoltage(), so a polyphonic cable is read on its first channel only."
   },
   "MOREc8or": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A right-side expander for Merc8or that goes immediately beside it, adding CV control of its output range along with remote inverting and linking.",
+    "Inverts Merc8or's output range each time it is pressed.",
+    "Inverts Merc8or's output range: with the switch set to Trig a rising edge past 2V flips it, and with the switch set to Gate it stays inverted only while the voltage is above 0V.",
+    "Chooses whether the invert jack is read as a trigger that flips the state or as a gate that holds it while high.",
+    "Holds Merc8or's two output range voltages a fixed distance apart, so moving its output LOW knob carries the HIGH one with it; while this is on, the invert controls do nothing.",
+    "Sets Merc8or's output HIGH directly, -10V to +10V; it does nothing while LINK is on.",
+    "Sets Merc8or's output LOW directly, -10V to +10V.",
+    "Note — A lamp in the name of each module lights when this is attached to a Merc8or. With no Merc8or on its left, nothing here has any effect.",
+    "Note — Patching either range jack disables the invert controls, and patching both disables the link as well."
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 4
+   },
+   "in": {
+    "0": 2,
+    "1": 5,
+    "2": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/MOREc8or.cpp process(): trigInvert.process(getVoltage(), 0.01f, 2.f) in Trig mode; getVoltage() > 0.f in Gate mode"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/MOREc8or.cpp process(): clamp(getVoltage(), -10.f, 10.f) sent to Merc8or as cvHigh"
+     },
+     "2": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/MOREc8or.cpp process(): clamp(getVoltage(), -10.f, 10.f) sent to Merc8or as cvLow"
+     }
+    }
+   },
+   "notes": "The module declares one output in its enum but the widget adds no port for it, so it has no jack and no census position and gets no line. The invert jack's gate mode fires on both edges of the gate: each change of level asks Merc8or to toggle, so the range is inverted while the gate is high and back again when it falls. Every jack is read with getVoltage(), so nothing here is polyphonic even though Merc8or itself is."
   },
   "CRBVi": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A two-dimensional performance pad: dragging across it puts out a note voltage from the horizontal position and a level from the vertical one, with a gate while the finger is down.",
+    "Sets the octave the left edge of the pad starts at, -5 to +4.",
+    "Sets how many octaves the pad covers, 1 to 3.",
+    "Quantises the note output to the guide the menu is set to, instead of sliding smoothly across the pad.",
+    "Chooses the shape mapping the vertical position to the level: straight, two eased curves, a sine, and a step that jumps to full as soon as the pad is touched.",
+    "An external signal for the pad to act as a VCA on, polyphonic.",
+    "The note from the horizontal position at 1V per octave, clamped to ±5.08V.",
+    "The level from the vertical position with the curve applied, 0V to 10V unless the menu says otherwise.",
+    "10V while the pad is being dragged and 0V when it is let go.",
+    "The external input passed through the pad's vertical position as a VCA, with the same number of channels; it is silent while the pad is not being dragged.",
+    "Five channels: the note, the level with the curve applied, the gate, the raw horizontal position at 0V to 10V and the raw vertical position.",
+    "Note — Nothing comes out until you drag on the pad with the mouse. The gate is high only while the button is held down.",
+    "Note — The pad is the instrument: the bars drawn across it are note guides, and the left-to-right position sets the pitch while the up-and-down position sets the level.",
+    "Menu — Show Guides — draws the note guide bars on the pad; turning it off leaves a plain surface.",
+    "Menu — Guide Type...: Semitones, Quartertones, Octaves — sets what the guide bars mark out, and with snapping on, what the note output snaps to.",
+    "Menu — Y-Axis Range (Non-VCA): 0V to 10V (Default), 0V to 5V, -5V to 5V — sets the span of the volume output; it does not change the VCA output."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "3": 3,
+    "2": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/CRBVi.cpp process(): getChannels() bounds the loop and getPolyVoltage(i) reads each channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/CRBVi.cpp process(): clamp(..., -5.08f, 5.08f) into setVoltage(curVolt)"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/CRBVi.cpp getVoltageCurve(): the default yAxisRangeMode multiplies by 10 and clamps 0 to 10"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/CRBVi.cpp process(): setVoltage(isDragging ? 10.f : 0.f)"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/CRBVi.cpp process(): setChannels(inputs[INPUT_VCA].getChannels()); it carries whatever is patched to the external input, scaled"
+     },
+     "4": {
+      "poly": true,
+      "why": "src/CRBVi.cpp process(): setChannels(5); the five channels carry different quantities"
+     }
+    }
+   },
+   "notes": "The XY pad is a custom display widget rather than a parameter, so it has no census position and no click on it can reach this help; what it does is carried on a Note line instead. The X output is clamped to ±5.08V, which is a little over five octaves and not a round number. The VCA output follows the channel count of the external input, and puts out a single channel of 0V when nothing is patched there. The raw polyphonic output always carries exactly five channels. The curve applied to the VCA output is not quite the one applied to the Y output: the second curve setting uses a different formula in each (getVoltageCurve against getVCAVoltageCurve), and the Y output's menu range setting does not apply to the VCA at all."
   },
   "CRBViXL": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A wide two-dimensional performance pad: dragging across it puts out a note voltage from the horizontal position and a level from the vertical one, with a modulation input that can be routed to either.",
+    "Sets the octave the left edge of the pad starts at, -5 to +4.",
+    "Sets how many octaves the pad covers, 1 to 5.",
+    "Quantises the note output to the guide the menu is set to, instead of sliding smoothly across the pad.",
+    "Chooses the shape mapping the vertical position to the level: straight, two eased curves, a sine, and a step that jumps to full as soon as the pad is touched.",
+    "The modulation source; a polyphonic cable uses its first channel for the note routing and its second for the level routing.",
+    "Tells the module what span the modulation voltage covers so it can be scaled to plus or minus one: -5V to +5V, 0V to +10V or 0V to +5V.",
+    "Sets how much of the modulation is added to the note output, -1 to +1, at half a semitone per unit.",
+    "Passes the modulation going to the note output through the curve as well, scaled by where the finger is vertically.",
+    "Sets how much of the modulation is added to the level output, -1 to +1; it only has an effect while the pad is being dragged.",
+    "Passes the modulation going to the level output through the curve as well.",
+    "Applies the level modulation to the VCA output too, multiplying the gain by it.",
+    "An external signal for the pad to act as a VCA on, polyphonic.",
+    "The note from the horizontal position at 1V per octave plus any note modulation, clamped to ±10V.",
+    "The level from the vertical position with the curve applied, 0V to 10V unless the menu says otherwise.",
+    "10V while the pad is being dragged and 0V when it is let go.",
+    "The external input passed through the pad's vertical position as a VCA, clamped to ±5V, with the same number of channels; it is silent while the pad is not being dragged.",
+    "Five channels: the note, the level with the curve applied, the gate, the raw horizontal position at 0V to 10V and the raw vertical position.",
+    "Note — Nothing comes out until you drag on the pad with the mouse. The gate is high only while the button is held down.",
+    "Note — The pad is the instrument: the bars drawn across it are note guides, and the left-to-right position sets the pitch while the up-and-down position sets the level.",
+    "Note — The modulation routings do nothing without a cable in MOD IN, and the level routing does nothing unless the pad is being dragged.",
+    "Menu — Show Guides — draws the note guide bars on the pad; turning it off leaves a plain surface.",
+    "Menu — Guide Type...: Semitones, Quartertones, Octaves — sets what the guide bars mark out, and with snapping on, what the note output snaps to.",
+    "Menu — Y-Axis Range (Non-VCA): 0V to 10V (Default), 0V to 5V, -5V to 5V — sets the span of the volume output; it does not change the VCA output.",
+    "Menu — Show Modulation While Playing — draws where the modulation is moving the note and the level while the pad is dragged."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "3": 3,
+    "2": 4,
+    "9": 6,
+    "4": 7,
+    "6": 8,
+    "5": 9,
+    "7": 10,
+    "8": 11
+   },
+   "in": {
+    "1": 5,
+    "0": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/CRBViXL.cpp process(): getChannels() bounds the loop and getPolyVoltage(i) reads each channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/CRBViXL.cpp process(): getChannels() > 1 reads channels 0 and 1; scaleModVoltage() maps the switch's span to -1 through 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/CRBViXL.cpp process(): clamp(curVolt + modVoltageX, -10.f, 10.f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/CRBViXL.cpp voltToOutputRange(); the default range multiplies by 10 and clamps 0 to 10"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/CRBViXL.cpp process(): setVoltage(isDragging ? 10.f : 0.f)"
+     },
+     "3": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/CRBViXL.cpp getVCAVoltageCurve(): clamp(outVolt * inVoltage, -5.f, 5.f); setChannels follows the external input"
+     },
+     "4": {
+      "poly": true,
+      "why": "src/CRBViXL.cpp process(): setChannels(5); the five channels carry different quantities"
+     }
+    }
+   },
+   "notes": "The XL covers 1 to 5 octaves where CRBVi covers 1 to 3, and its note output is clamped to ±10V after modulation rather than to the ±5.08V the unmodulated position is clamped to. The modulation input reads channel 1 for the note routing and channel 2 for the level routing, so a two-channel cable drives the two axes separately; a single-channel cable drives both from the same voltage. The modulation range switch does not limit the jack, it only tells the scaling what span to expect, and the scaled result is clamped to plus or minus one. The XY pad is a custom display widget with no census position, so no click on it can reach this help; what it does is carried on a Note line. The raw polyphonic output always carries exactly five channels, and the VCA output carries a single channel of 0V when nothing is patched to the external input."
   }
  }
 }

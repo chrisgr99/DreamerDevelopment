@@ -2,12 +2,106 @@
  "plugin": "Calvario",
  "source": "https://github.com/HydrangeaSystems/Calvario",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Calvario": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A 3HP cross-modulator: two inputs are scaled, turned into 32-bit integers, XORed bit for bit, shifted left, and crossfaded against the first input untouched",
+    "Scales the first input on its way into the XOR, from nothing at the bottom of its travel to a fifth of full scale at the top; it comes up at the bottom",
+    "Scales the second input on its way into the XOR, from nothing at the bottom of its travel to a fifth of full scale at the top; it comes up at the bottom",
+    "Sets how far the XOR result is shifted left before it leaves the module: two bits in the Soft position, four in the Hard position, where the extra shift overflows the 32-bit result and wraps it",
+    "Crossfades the output between the first input untouched at the bottom of its travel and the XOR result alone at the top; it comes up at the centre, an equal blend of the two",
+    "One of the two signals XORed together, clamped to ±5V before it is scaled and converted; the same signal, unclamped and unscaled, is also the dry side of the crossfade",
+    "The other of the two signals XORed together, clamped to ±5V before it is scaled and converted; it reaches the output through the XOR and by no other path",
+    "Adds to the first input's scaling, ±5V covering the knob's whole travel; the total is never clamped, so negative voltage drives the scaling below zero and inverts that input before the XOR",
+    "Adds to the second input's scaling, ±5V covering the knob's whole travel; the total is never clamped, so negative voltage drives the scaling below zero and inverts that input before the XOR",
+    "Adds to the crossfade setting, but clamped to 0V and 1V first, so 1V is the most it can do and moves the crossfade a fifth of its travel; negative voltage contributes nothing",
+    "The crossfade of the first input against the XOR result, clamped to ±5V",
+    "Note — both scaling knobs come up at the bottom, where the XOR reads zero from both inputs. Until one is raised the output carries the first input alone, at half level.",
+    "Note — the module is monophonic: every jack reads or writes one channel.",
+    "Note — the lamp follows the absolute output voltage and reaches full brightness at 5V.",
+    "Note — the panel carries no lettering at all, so the only names these controls have are the tooltips Rack shows on hover."
+   ],
+   "param": {
+    "1": 1,
+    "2": 2,
+    "0": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Calvario.cpp:62 reads one channel with getVoltage; :69 clamps it to -5V and 5V and scales by 0.2 for the XOR path, while :66 keeps the unclamped voltage as the dry side of the crossfade at :90"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Calvario.cpp:63 reads one channel with getVoltage; :70 clamps it to -5V and 5V and scales by 0.2; it is used only at :74 and :78 on the way into the XOR"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Calvario.cpp:57 clamps the jack to -5V and 5V, scales it by 0.2 to give -1 to 1, and adds that to the 0 to 1 knob with no clamp on the sum, so the product at :73 can be negative"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Calvario.cpp:58 clamps the jack to -5V and 5V, scales it by 0.2 to give -1 to 1, and adds that to the 0 to 1 knob with no clamp on the sum, so the product at :74 can be negative"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Calvario.cpp:59 calls math::clamp on the jack with no bounds given, which takes Rack's defaults of 0 and 1 (include/math.hpp:106), then scales by 0.2; :89 adds that to the knob and clamps the sum to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/Calvario.cpp:93 clamps the result to -5V and 5V before :94 writes one channel with setVoltage"
+     }
+    }
+   },
+   "notes": "Read at commit bf4acd2 of HydrangeaSystems/Calvario, the head of the repository. Three commits carry version 2.3.1 — a59a841, db7930d and bf4acd2 — and the only difference between them in src/ is renaming: _5_OVER_MAX_INT32 became 5.f * MIN_Q31 where MIN_Q31 is 1/INT_MAX, and abs(output / 5.f) became abs(output * .2f). Both pairs are arithmetically the same, so the behaviour is identical across all three and the version did not need settling further. The installed res/calvario.svg hashes the same as the blob at every one of them.\n\nThe mix CV jack is almost certainly a mistake in the code. Line 59 reads math::clamp(inputs[SIGNAL_MIX_MOD_OUT].getVoltage()) with no bounds, so it takes Rack's defaults of 0 and 1 rather than the -5 and 5 that lines 57 and 58 pass explicitly for the two gain CV jacks in the same block. The jack therefore responds only between 0V and 1V, and at its ceiling shifts the crossfade by 0.2 out of a range of 1. Nothing the maker publishes claims otherwise — there is no manual, manualUrl in plugin.json is empty, and the panel has no lettering — so this is not written as a contradiction, only as what the jack does.\n\nThere is no hardware manual and no README: commit db7930d deleted the README and the logo, and the repository at 2.3.1 holds nothing but source and a licence. Every fact here is from the source.\n\nThe BLINK_LIGHT lamp does have a LightWidget and is set every sample, but a light is not one of the three lists Help.cpp walks, so it takes a Note line rather than a tag."
   }
  }
 }

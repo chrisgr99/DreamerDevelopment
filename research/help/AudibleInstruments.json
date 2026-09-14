@@ -58,7 +58,42 @@
      "0": "audio"
     }
    },
-   "notes": "The trigger input calls Strike() on the oscillator, which re-excites the physical and percussive models and resets the phase of the others. The hardware's internal AD envelope is not implemented here: the port zeroes the settings block and exposes only meta_modulation, vco_drift and signature, so no envelope is applied to level, timbre or colour. The model count is 47, not the 48 often quoted: the shape parameter is scaled to MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, which is index 46 of the 47-entry table in Braids.cpp."
+   "notes": "The trigger input calls Strike() on the oscillator, which re-excites the physical and percussive models and resets the phase of the others. The hardware's internal AD envelope is not implemented here: the port zeroes the settings block and exposes only meta_modulation, vco_drift and signature, so no envelope is applied to level, timbre or colour. The model count is 47, not the 48 often quoted: the shape parameter is scaled to MACRO_OSC_SHAPE_LAST_ACCESSIBLE_FROM_META, which is index 46 of the 47-entry table in Braids.cpp. FM does two different jobs. With meta modulation off it is added to the pitch in volts; with it on, Braids.cpp:84 uses a tenth of the same voltage to scan the model list instead, so the same cable changes the sound rather than the tuning.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Braids.cpp:72 tests this input against 1V with getVoltage() alone"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Braids.cpp:101 adds this input to the coarse and fine knobs and Braids.cpp:104 turns the sum into a pitch at twelve semitones per volt"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Braids.cpp:81 multiplies this input by the FM knob; Braids.cpp:103 adds the result to the pitch, or Braids.cpp:84 shifts the model instead when meta modulation is on"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Braids.cpp:94 divides this input by 5, multiplies by the MOD knob and adds the TIMBRE knob, and Braids.cpp:96 clamps the total to 0..1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Braids.cpp:95 divides this input by 5 and adds the COLOR knob, and Braids.cpp:97 clamps the total to 0..1"
+     }
+    }
+   }
   },
   "Plaits": {
    "lines": [
@@ -132,6 +167,52 @@
     "out": {
      "0": "audio",
      "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "Plaits.cpp:133 takes getChannels() on the V/OCT jack to set the voice count and Plaits.cpp:204 reads this input with getPolyVoltage(c), scaled by a fifth into the model modulation"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "polarity": "bipolar",
+      "why": "Plaits.cpp:133 takes getChannels() on the V/OCT jack to set the voice count and Plaits.cpp:208 reads this input with getPolyVoltage(c), scaled by an eighth into the -1 to +1 timbre modulation"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Plaits.cpp:133 takes getChannels() on the V/OCT jack to set the voice count and Plaits.cpp:206 reads this input with getPolyVoltage(c), multiplied by 6 into the frequency modulation in semitones"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "polarity": "bipolar",
+      "why": "Plaits.cpp:133 takes getChannels() on the V/OCT jack to set the voice count and Plaits.cpp:209 reads this input with getPolyVoltage(c), scaled by an eighth into the -1 to +1 morph modulation"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "polarity": "bipolar",
+      "why": "Plaits.cpp:133 takes getChannels() on the V/OCT jack to set the voice count and Plaits.cpp:207 reads this input with getPolyVoltage(c), scaled by a fifth into the -1 to +1 harmonics modulation"
+     },
+     "5": {
+      "poly": true,
+      "why": "Plaits.cpp:133 takes getChannels() on the V/OCT jack to set the voice count and Plaits.cpp:211 reads this input with getPolyVoltage(c), scaled by a third into the trigger modulation"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Plaits.cpp:133 takes getChannels() on the V/OCT jack to set the voice count and Plaits.cpp:212 reads this input with getPolyVoltage(c), scaled by an eighth into the level modulation"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Plaits.cpp:133 takes getChannels() on this input to set the voice count and Plaits.cpp:205 multiplies it by 12 into the note in semitones"
+     }
     }
    }
   },
@@ -264,7 +345,104 @@
      "1": "audio"
     }
    },
-   "notes": "Which output carries which signal was settled from the Mutable resonator code: at minimum SPACE the left jack carries the resonator and the right jack the raw exciter. Strength is inverted relative to the hardware: the Mutable manual describes positive CV boosting the excitation, while the plugin computes 1 minus the voltage over 5, so 0V gives full strength and 5V silences it. The plugin behaviour is what the line describes."
+   "notes": "Which output carries which signal was settled from the Mutable resonator code: at minimum SPACE the left jack carries the resonator and the right jack the raw exciter. Strength is inverted relative to the hardware: the Mutable manual describes positive CV boosting the excitation, while the plugin computes 1 minus the voltage over 5, so 0V gives full strength and 5V silences it. The plugin behaviour is what the line describes.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Elements.cpp:157 takes getChannels() on this input to set the voice count and Elements.cpp:224 multiplies it by 12 into the note in semitones"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and Elements.cpp:225 reads this input with getPolyVoltage(c), scales it by a fifth and by the FM knob into the pitch modulation"
+     },
+     "2": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and Elements.cpp:226 reads this input with getPolyVoltage(c) and tests it against 1V"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and Elements.cpp:227 reads this input with getPolyVoltage(c), divides it by 5 and subtracts that from 1, clamping the result to 0..1, so 0V gives full strength and 5V none"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and Elements.cpp:163 reads this input with getPolyVoltage(c) and divides it by 5 into the external blow signal"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and Elements.cpp:164 reads this input with getPolyVoltage(c) and divides it by 5 into the external strike signal"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and the BIND macro at Elements.cpp:209 reads this input with getPolyVoltage(c), scales it by a fifth times its attenuverter and clamps the knob-plus-input total at 0"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and the BIND macro at Elements.cpp:209 reads this input with getPolyVoltage(c), scales it by a fifth times its attenuverter and clamps the knob-plus-input total at 0"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and the BIND macro at Elements.cpp:209 reads this input with getPolyVoltage(c), scales it by a fifth times its attenuverter and clamps the knob-plus-input total at 0"
+     },
+     "9": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and the BIND macro at Elements.cpp:209 reads this input with getPolyVoltage(c), scales it by a fifth times its attenuverter and clamps the knob-plus-input total at 0"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and the BIND macro at Elements.cpp:209 reads this input with getPolyVoltage(c), scales it by a fifth times its attenuverter and clamps the knob-plus-input total at 0"
+     },
+     "11": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and the BIND macro at Elements.cpp:209 reads this input with getPolyVoltage(c), scales it by a fifth times its attenuverter and clamps the knob-plus-input total at 0"
+     },
+     "12": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and the BIND macro at Elements.cpp:209 reads this input with getPolyVoltage(c), scales it by a fifth times its attenuverter and clamps the knob-plus-input total at 0"
+     },
+     "13": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and the BIND macro at Elements.cpp:209 reads this input with getPolyVoltage(c), scales it by a fifth times its attenuverter and clamps the knob-plus-input total at 0"
+     },
+     "14": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and the BIND macro at Elements.cpp:209 reads this input with getPolyVoltage(c), scales it by a fifth times its attenuverter and clamps the knob-plus-input total at 0"
+     },
+     "15": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Elements.cpp:157 takes getChannels() on the V/OCT jack to set the voice count and Elements.cpp:220 reads this input with getPolyVoltage(c), scales it by a fifth times its attenuverter and clamps the knob-plus-input total to 0..2"
+     }
+    }
+   }
   },
   "Tides": {
    "lines": [
@@ -337,7 +515,67 @@
      "3": "cv"
     }
    },
-   "notes": "Both gate outputs run inverted against the Mutable manual, which has HIGH TIDE going high at the end of the rise and LOW TIDE going high at the end of the fall, each staying high until the cycle restarts or the envelope is retriggered. The plugin holds each one high through its segment and drops it at the end, so the lines describe the plugin. Clock sync differs too: the manual engages the phase-locked mode by holding the range switch for a second, while the plugin locks to the CLOCK input whenever a cable is patched there. The Sheep firmware also disables clock sync: set_sync is called with the CLOCK input's connected state ANDed with the firmware being off."
+   "notes": "Both gate outputs run inverted against the Mutable manual, which has HIGH TIDE going high at the end of the rise and LOW TIDE going high at the end of the fall, each staying high until the cycle restarts or the envelope is retriggered. The plugin holds each one high through its segment and drops it at the end, so the lines describe the plugin. Clock sync differs too: the manual engages the phase-locked mode by holding the range switch for a second, while the plugin locks to the CLOCK input whenever a cable is patched there. The Sheep firmware also disables clock sync: set_sync is called with the CLOCK input's connected state ANDed with the firmware being off.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "±5V",
+      "why": "Tides.cpp:115 divides this input by 5, adds the knob and clamps the total to -1..1, the span a fifth of ±5V covers"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "±5V",
+      "why": "Tides.cpp:116 divides this input by 5, adds the knob and clamps the total to -1..1, the span a fifth of ±5V covers"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "±5V",
+      "why": "Tides.cpp:117 divides this input by 5, adds the knob and clamps the total to -1..1, the span a fifth of ±5V covers"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.7V",
+      "why": "Tides.cpp:139 tests this input against 0.7V with getVoltage() alone"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.7V",
+      "why": "Tides.cpp:137 tests this input against 0.7V with getVoltage() alone"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Tides.cpp:107 multiplies this input by 12 into the pitch in semitones"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0.1V",
+      "why": "Tides.cpp:108 reads this input with getNormalVoltage(0.1), divides by 5 and multiplies by the FM knob before adding it to the pitch"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 8V",
+      "negative": "ignored",
+      "normal": "8V",
+      "why": "Tides.cpp:132 reads this input with getNormalVoltage(8.0), divides by 8 and clamps that alone to 0..1"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.7V",
+      "why": "Tides.cpp:141 tests this input against 0.7V with getVoltage() alone; Tides.cpp:125 also puts the generator into clocked mode whenever a cable is present"
+     }
+    }
+   }
   },
   "Tides2": {
    "lines": [
@@ -414,6 +652,61 @@
      "1": "cv",
      "2": "cv",
      "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 10V",
+      "negative": "subtracts",
+      "why": "Tides2.cpp:232 divides this input by 10, multiplies by the cubed attenuverter and clamps the knob-plus-input total to 0..1, the span a tenth of 0 to 10V covers"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Tides2.cpp:205 multiplies this input by its attenuverter and by 12 into a frequency modulation in semitones, clamped to plus or minus eight octaves"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Tides2.cpp:204 multiplies this input by 12 and adds the frequency knob, clamping the note to plus or minus eight octaves"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 10V",
+      "negative": "subtracts",
+      "why": "Tides2.cpp:234 divides this input by 10, multiplies by the cubed attenuverter and clamps the knob-plus-input total to 0..1, the span a tenth of 0 to 10V covers"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 10V",
+      "negative": "subtracts",
+      "why": "Tides2.cpp:233 divides this input by 10, multiplies by the cubed attenuverter and clamps the knob-plus-input total to 0..1, the span a tenth of 0 to 10V covers"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 10V",
+      "negative": "subtracts",
+      "why": "Tides2.cpp:235 divides this input by 10, multiplies by the cubed attenuverter and clamps the knob-plus-input total to 0..1, the span a tenth of 0 to 10V covers"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.7V",
+      "why": "Tides2.cpp:193 tests this input against 1.7V with getVoltage() alone"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.7V",
+      "why": "Tides2.cpp:196 tests this input against 1.7V with getVoltage() alone; Tides2.cpp:211 also puts the generator into clocked mode whenever a cable is present"
+     }
     }
    }
   },
@@ -500,7 +793,75 @@
      "1": "audio"
     }
    },
-   "notes": "The load and save button beside the mode button is drawn on the panel and configured as a parameter, but the plugin never reads it, so its line says that nothing reads it and the tag points there. DENSITY at its centre gives a grain overlap of exactly zero: the granular processor leaves overlap at 0 for values between 0.47 and 0.53, and the sample player scales the grain count by the cube of overlap, so no grains are sown until the knob leaves that band. A trigger at TRIG still sows one."
+   "notes": "The load and save button beside the mode button is drawn on the panel and configured as a parameter, but the plugin never reads it, so its line says that nothing reads it and the tag points there. DENSITY at its centre gives a grain overlap of exactly zero: the granular processor leaves overlap at 0 for values between 0.47 and 0.53, and the sample player scales the grain count by the cube of overlap, so no grains are sown until the knob leaves that band. A trigger at TRIG still sows one.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Clouds.cpp:164 tests this input against 1V with getVoltage() alone"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Clouds.cpp:133 tests this input against 1V with getVoltage() alone"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Clouds.cpp:165 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Clouds.cpp:166 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Clouds.cpp:167 adds this input to the pitch knob and multiplies the sum by 12 into semitones, clamped to plus or minus four octaves"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Clouds.cpp:176 divides this input by 5 and adds it to whichever parameter the BLEND button has selected, and that parameter is then clamped to 0..1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Clouds.cpp:120 multiplies this input by the input gain and divides by 5 into the left recording channel"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the IN L jack",
+      "why": "Clouds.cpp:121 takes the left channel instead when nothing is patched here"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Clouds.cpp:168 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Clouds.cpp:169 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     }
+    }
+   }
   },
   "Warps": {
    "lines": [
@@ -555,7 +916,53 @@
      "0": "audio",
      "1": "audio"
     }
-   }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "normal": "2V",
+      "why": "Warps.cpp:78 divides this input by 5, adds the knob and clamps the total to 0..1; in the internal oscillator algorithms Warps.cpp:96 instead reads it with getNormalVoltage(2.0) as a pitch at twelve semitones per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Warps.cpp:79 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Warps.cpp:80 divides this input by 5, adds an eighth of the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Warps.cpp:91 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±16V",
+      "why": "Warps.cpp:102 divides this input by 16 into a 16-bit sample and clamps it there, so anything beyond ±16V clips"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±16V",
+      "why": "Warps.cpp:103 divides this input by 16 into a 16-bit sample and clamps it there, so anything beyond ±16V clips"
+     }
+    }
+   },
+   "notes": "LEVEL 1 and ALGORITHM each do a second job. In the internal oscillator algorithms Warps.cpp:96 reads LEVEL 1 as the oscillator's pitch at twelve semitones per volt, normalled to 2V when nothing is patched. In the frequency shifter algorithm Warps.cpp:94 reads ALGORITHM a second time, on its own and clamped to ±5V, as the shift amount."
   },
   "Rings": {
    "lines": [
@@ -632,7 +1039,58 @@
      "1": "audio"
     }
    },
-   "notes": "Strummer::Process decides the internal strum: a V/OCT cable makes a note change of more than 0.4 semitones the strum; failing that, an audio cable makes an onset in that signal the strum; with neither patched the firmware sets strum to false and comments that nothing is connected."
+   "notes": "Strummer::Process decides the internal strum: a V/OCT cable makes a note change of more than 0.4 semitones the strum; failing that, an audio cable makes an onset in that signal the strum; with neither patched the firmware sets strum to false and comments that nothing is connected.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rings.cpp:155 divides this input by 5, multiplies it by 3.3 times its squared attenuverter and adds the BRIGHTNESS knob; the total is clamped at 0"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "1V",
+      "why": "Rings.cpp:168 reads this input with getNormalVoltage(1.0), divides by 5 and scales it by 48 times 3.3 times the quartic FM knob, clamped to plus or minus four octaves"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rings.cpp:156 divides this input by 5, multiplies it by 3.3 times its squared attenuverter and adds the DAMPING knob; the total is clamped at 0"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Rings.cpp:153 divides this input by 5, multiplies it by 3.3 times its squared attenuverter and adds the STRUCTURE knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rings.cpp:157 divides this input by 5, multiplies it by 3.3 times its squared attenuverter and adds the POSITION knob; the total is clamped at 0"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Rings.cpp:112 tests this input against 1V with getVoltage() alone; Rings.cpp:171 also turns off the internal strummer whenever a cable is present"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "normal": "1/12V",
+      "why": "Rings.cpp:161 reads this input with getNormalVoltage(1/12.0) and multiplies it by 12 into the note in semitones"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Rings.cpp:107 divides this input by 5 into the exciter audio; Rings.cpp:170 also turns off the internal exciter whenever a cable is present"
+     }
+    }
+   }
   },
   "Links": {
    "lines": [
@@ -667,7 +1125,41 @@
     "in": {},
     "out": {}
    },
-   "notes": "No families: every jack carries whatever is patched into the section, audio or CV alike. The middle section's two outputs both carry the same sum; nothing in the code inverts either of them."
+   "notes": "No families: every jack carries whatever is patched into the section, audio or CV alike. The middle section's two outputs both carry the same sum; nothing in the code inverts either of them.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Links.cpp:52 takes getChannels() on this input to set the section's width and Links.cpp:55 reads every channel with getVoltage(c)"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Links.cpp:69 takes getChannels() on this input to set the section's width and Links.cpp:72 sums it with the other jack using getPolyVoltage(c)"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Links.cpp:69 takes getChannels() on this input to set the section's width and Links.cpp:72 sums it with the other jack using getPolyVoltage(c)"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Links.cpp:84 takes getChannels() on this input to set the section's width and Links.cpp:87 sums it with the other two jacks using getPolyVoltage(c)"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Links.cpp:84 takes getChannels() on this input to set the section's width and Links.cpp:87 sums it with the other two jacks using getPolyVoltage(c)"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Links.cpp:84 takes getChannels() on this input to set the section's width and Links.cpp:87 sums it with the other two jacks using getPolyVoltage(c)"
+     }
+    }
+   }
   },
   "Kinks": {
    "lines": [
@@ -711,6 +1203,37 @@
      "5": "audio",
      "6": "cv"
     }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Kinks.cpp:73 negates this input, Kinks.cpp:74 half-wave rectifies it and Kinks.cpp:75 takes its absolute value, all with getVoltage() alone"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Kinks.cpp:76 takes the maximum and Kinks.cpp:77 the minimum of this input and the other logic jack, with getVoltage() alone"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Kinks.cpp:76 takes the maximum and Kinks.cpp:77 the minimum of this input and the other logic jack, with getVoltage() alone"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the module's own white noise",
+      "why": "Kinks.cpp:60 reads this input with getNormalVoltage(noise), where noise is the white noise the module generates for its own noise output"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.7V",
+      "why": "Kinks.cpp:59 divides this input by 0.7 before a Rack dsp::SchmittTrigger at its default 1V high threshold"
+     }
+    }
    }
   },
   "Shades": {
@@ -743,6 +1266,28 @@
    "family": {
     "in": {},
     "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "5V",
+      "why": "Shades.cpp:47 reads this input with getNormalVoltage(5.0) and scales it by the channel's knob"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "5V",
+      "why": "Shades.cpp:47 reads this input with getNormalVoltage(5.0) and scales it by the channel's knob"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "5V",
+      "why": "Shades.cpp:47 reads this input with getNormalVoltage(5.0) and scales it by the channel's knob"
+     }
+    }
    }
   },
   "Branches": {
@@ -788,6 +1333,35 @@
      "1": "trigger",
      "2": "trigger",
      "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "Branches.cpp:55 takes getChannels() on this input to set the channel's width and Branches.cpp:66 tests every channel against 2V"
+     },
+     "1": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 2V",
+      "normal": "the channel 1 input",
+      "why": "Branches.cpp:54 takes the channel 1 input instead when nothing is patched here; Branches.cpp:66 tests every channel against 2V"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "polarity": "unipolar",
+      "why": "Branches.cpp:70 reads this input with getPolyVoltage(c) and divides it by 10 into the 0 to 1 probability the knob sets"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "polarity": "unipolar",
+      "why": "Branches.cpp:70 reads this input with getPolyVoltage(c) and divides it by 10 into the 0 to 1 probability the knob sets"
+     }
     }
    }
   },
@@ -835,6 +1409,58 @@
      "7": "cv"
     },
     "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "5V",
+      "why": "Blinds.cpp:66 reads this input with getNormalVoltage(5.0) and multiplies it by the channel's gain"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "±10V",
+      "why": "Blinds.cpp:62 divides this input by 5, multiplies by the CV attenuverter and adds the gain knob, and Blinds.cpp:63 clamps the total to -2..2, the span a fifth of ±10V covers"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "5V",
+      "why": "Blinds.cpp:66 reads this input with getNormalVoltage(5.0) and multiplies it by the channel's gain"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "±10V",
+      "why": "Blinds.cpp:62 divides this input by 5, multiplies by the CV attenuverter and adds the gain knob, and Blinds.cpp:63 clamps the total to -2..2, the span a fifth of ±10V covers"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "5V",
+      "why": "Blinds.cpp:66 reads this input with getNormalVoltage(5.0) and multiplies it by the channel's gain"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "±10V",
+      "why": "Blinds.cpp:62 divides this input by 5, multiplies by the CV attenuverter and adds the gain knob, and Blinds.cpp:63 clamps the total to -2..2, the span a fifth of ±10V covers"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "5V",
+      "why": "Blinds.cpp:66 reads this input with getNormalVoltage(5.0) and multiplies it by the channel's gain"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "±10V",
+      "why": "Blinds.cpp:62 divides this input by 5, multiplies by the CV attenuverter and adds the gain knob, and Blinds.cpp:63 clamps the total to -2..2, the span a fifth of ±10V covers"
+     }
+    }
    }
   },
   "Veils": {
@@ -881,6 +1507,58 @@
      "7": "cv"
     },
     "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Veils.cpp:57 reads this input with getVoltage() alone and multiplies it by the channel's gain knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "Veils.cpp:59 divides this input by 5 and takes the greater of that and zero, and Veils.cpp:60 clamps the result to 0..2"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Veils.cpp:57 reads this input with getVoltage() alone and multiplies it by the channel's gain knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "Veils.cpp:59 divides this input by 5 and takes the greater of that and zero, and Veils.cpp:60 clamps the result to 0..2"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Veils.cpp:57 reads this input with getVoltage() alone and multiplies it by the channel's gain knob"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "Veils.cpp:59 divides this input by 5 and takes the greater of that and zero, and Veils.cpp:60 clamps the result to 0..2"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Veils.cpp:57 reads this input with getVoltage() alone and multiplies it by the channel's gain knob"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "Veils.cpp:59 divides this input by 5 and takes the greater of that and zero, and Veils.cpp:60 clamps the result to 0..2"
+     }
+    }
    }
   },
   "Frames": {
@@ -944,7 +1622,45 @@
     },
     "out": {}
    },
-   "notes": "The FR. STEP output is drawn on the panel and configured, but the plugin never writes to it, so its line says that nothing writes to it and the tag points there. With no keyframes stored the module calls set_immediate for a knob that has moved, so the knobs set the gains directly and the FRAME knob does not move them. The four gain knobs default to zero."
+   "notes": "The FR. STEP output is drawn on the panel and configured, but the plugin never writes to it, so its line says that nothing writes to it and the tag points there. With no keyframes stored the module calls set_immediate for a knob that has moved, so the knobs set the gains directly and the FRAME knob does not move them. The four gain knobs default to zero.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Frames.cpp:169 reads this input with getVoltage() alone, and Frames.cpp:174 normals it into every channel input that has no cable"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the ALL jack",
+      "why": "Frames.cpp:174 reads this input with getNormalVoltage(all), where all is the ALL jack's voltage"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the ALL jack",
+      "why": "Frames.cpp:174 reads this input with getNormalVoltage(all), where all is the ALL jack's voltage"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the ALL jack",
+      "why": "Frames.cpp:174 reads this input with getNormalVoltage(all), where all is the ALL jack's voltage"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the ALL jack",
+      "why": "Frames.cpp:174 reads this input with getNormalVoltage(all), where all is the ALL jack's voltage"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Frames.cpp:94 divides this input by 10, multiplies by the animation attenuverter and by 65535, and adds that to the frame position"
+     }
+    }
+   }
   },
   "Stages": {
    "lines": [
@@ -1026,7 +1742,89 @@
      "5": "cv"
     }
    },
-   "notes": "A single segment with no gate patched and no loop set is routed to ProcessZero in the firmware's process function table, so its output sits at 0V; the same segment with loop set is routed to ProcessFreeRunningLFO. The module allows two looping segments in a group, which mark a loop's start and end; toggling a third clears the loop from the other two."
+   "notes": "A single segment with no gate patched and no loop set is routed to ProcessZero in the firmware's process function table, so its output sits at 0V; the same segment with loop set is routed to ProcessFreeRunningLFO. The module allows two looping segments in a group, which mark a loop's start and end; toggling a third clears the loop from the other two.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 8V",
+      "negative": "subtracts",
+      "why": "Stages.cpp:225 divides this input by 8, adds the stage's slider and clamps the total to 0..1, the span an eighth of 0 to 8V covers"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.7V",
+      "why": "Stages.cpp:340 tests this input against 1.7V with getVoltage() alone"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 8V",
+      "negative": "subtracts",
+      "why": "Stages.cpp:225 divides this input by 8, adds the stage's slider and clamps the total to 0..1, the span an eighth of 0 to 8V covers"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.7V",
+      "why": "Stages.cpp:340 tests this input against 1.7V with getVoltage() alone"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 8V",
+      "negative": "subtracts",
+      "why": "Stages.cpp:225 divides this input by 8, adds the stage's slider and clamps the total to 0..1, the span an eighth of 0 to 8V covers"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.7V",
+      "why": "Stages.cpp:340 tests this input against 1.7V with getVoltage() alone"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 8V",
+      "negative": "subtracts",
+      "why": "Stages.cpp:225 divides this input by 8, adds the stage's slider and clamps the total to 0..1, the span an eighth of 0 to 8V covers"
+     },
+     "9": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.7V",
+      "why": "Stages.cpp:340 tests this input against 1.7V with getVoltage() alone"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 8V",
+      "negative": "subtracts",
+      "why": "Stages.cpp:225 divides this input by 8, adds the stage's slider and clamps the total to 0..1, the span an eighth of 0 to 8V covers"
+     },
+     "10": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.7V",
+      "why": "Stages.cpp:340 tests this input against 1.7V with getVoltage() alone"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 8V",
+      "negative": "subtracts",
+      "why": "Stages.cpp:225 divides this input by 8, adds the stage's slider and clamps the total to 0..1, the span an eighth of 0 to 8V covers"
+     },
+     "11": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.7V",
+      "why": "Stages.cpp:340 tests this input against 1.7V with getVoltage() alone"
+     }
+    }
+   }
   },
   "Marbles": {
    "lines": [
@@ -1126,6 +1924,69 @@
      "5": "cv",
      "6": "cv"
     }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Marbles.cpp:466 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Marbles.cpp:495 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.7V",
+      "why": "Marbles.cpp:384 tests this input against 1.7V with getVoltage() alone; Marbles.cpp:460 also puts the t section into external clock mode whenever a cable is present"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Marbles.cpp:464 divides this input by 5, adds the rate knob and multiplies the sum by 60"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Marbles.cpp:468 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Marbles.cpp:444 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Marbles.cpp:497 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "sumRange": "0 to 5V",
+      "negative": "subtracts",
+      "why": "Marbles.cpp:493 divides this input by 5, adds the knob and clamps the total to 0..1, the span a fifth of 0 to 5V covers"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.7V",
+      "why": "Marbles.cpp:388 tests this input against 1.7V with getVoltage() alone; Marbles.cpp:481 also clocks the X section from it whenever a cable is present"
+     }
+    }
    }
   },
   "Ripples": {
@@ -1176,6 +2037,38 @@
      "1": "audio",
      "2": "audio",
      "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Ripples.cpp:70 takes getChannels() on the IN jack to set the channel count and Ripples.cpp:80 reads this input with getPolyVoltage(c); ripples.hpp:177 turns it into the resonance control current alongside the knob"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Ripples.cpp:70 takes getChannels() on the IN jack to set the channel count and Ripples.cpp:81 reads this input with getPolyVoltage(c); ripples.hpp:172 adds it to the cutoff in volts, and ripples.hpp:60 of the filter core works in octaves from the knob's top frequency"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Ripples.cpp:70 takes getChannels() on the IN jack to set the channel count and Ripples.cpp:82 reads this input with getPolyVoltage(c); ripples.hpp:173 multiplies it by the FM knob and adds it to the same cutoff in volts"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Ripples.cpp:70 takes getChannels() on this input to set the channel count and Ripples.cpp:83 reads every channel with getVoltage(c) as the filter's audio"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "12V",
+      "why": "Ripples.cpp:70 takes getChannels() on the IN jack to set the channel count and Ripples.cpp:84 reads this input with getPolyVoltage(c); ripples.hpp:183 substitutes the 12V constant kGainNormalV when no cable is present, which is what holds the amplifier open"
+     }
     }
    }
   },
@@ -1276,6 +2169,80 @@
      "5": "audio",
      "6": "audio"
     }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:162 reads this input with getPolyVoltage(c); shelves.hpp:371 adds it to the band's cutoff in volts, an octave per volt"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:163 reads this input with getPolyVoltage(c); shelves.hpp:384 scales it by kGainPerVolt, which shelves.hpp:67 sets to 3dB per volt"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:164 reads this input with getPolyVoltage(c); shelves.hpp:371 adds it to the band's cutoff in volts, an octave per volt"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:165 reads this input with getPolyVoltage(c); shelves.hpp:384 scales it by kGainPerVolt, which shelves.hpp:67 sets to 3dB per volt"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:166 reads this input with getPolyVoltage(c); shelves.hpp:376 subtracts the knob's equivalent voltage from it and drives the Q amplifier with the difference"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:167 reads this input with getPolyVoltage(c); shelves.hpp:371 adds it to the band's cutoff in volts, an octave per volt"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:168 reads this input with getPolyVoltage(c); shelves.hpp:384 scales it by kGainPerVolt, which shelves.hpp:67 sets to 3dB per volt"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:169 reads this input with getPolyVoltage(c); shelves.hpp:376 subtracts the knob's equivalent voltage from it and drives the Q amplifier with the difference"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:170 reads this input with getPolyVoltage(c); shelves.hpp:371 adds it to the band's cutoff in volts, an octave per volt"
+     },
+     "9": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:171 reads this input with getPolyVoltage(c); shelves.hpp:384 scales it by kGainPerVolt, which shelves.hpp:67 sets to 3dB per volt"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:172 reads this input with getPolyVoltage(c); shelves.hpp:368 adds it to all four bands' cutoffs at once, an octave per volt"
+     },
+     "11": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Shelves.cpp:119 takes getChannels() on the IN jack to set the channel count and Shelves.cpp:173 reads this input with getPolyVoltage(c); shelves.hpp:369 adds it to all four bands' gain CVs at once, at the 3dB per volt of shelves.hpp:67"
+     },
+     "12": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Shelves.cpp:119 takes getChannels() on this input to set the channel count and Shelves.cpp:161 reads every channel with getVoltage(c) as the filter's audio"
+     }
+    }
    }
   },
   "Streams": {
@@ -1334,7 +2301,45 @@
      "1": "audio"
     }
    },
-   "notes": "No prerequisite note was written: with EXCITE unpatched the LEVEL input still reads its 8V normal through the LEVEL MOD attenuator, and it was not established from the code whether that alone opens the amplifier in every channel function, so no claim is made about the module being silent at startup. The unpatched signal input reads 5V, not the 3.4V of the hardware's internal normal: kSignalInNormalV is 5.f in Streams/streams.hpp. The unpatched level input reads 8V, kLevelNormalV."
+   "notes": "No prerequisite note was written: with EXCITE unpatched the LEVEL input still reads its 8V normal through the LEVEL MOD attenuator, and it was not established from the code whether that alone opens the amplifier in every channel function, so no claim is made about the module being silent at startup. The unpatched signal input reads 5V, not the 3.4V of the hardware's internal normal: kSignalInNormalV is 5.f in Streams/streams.hpp. The unpatched level input reads 8V, kLevelNormalV.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Streams.cpp:265 takes getChannels() on the two signal jacks to set the channel count and Streams.cpp:301 reads this input with getPolyVoltage(c)"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "5V",
+      "why": "Streams.cpp:265 takes getChannels() on the two signal jacks to set the channel count and Streams.cpp:302 reads this input with getPolyVoltage(c); streams.hpp:115 substitutes the 5V constant kSignalInNormalV when no cable is present"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "8V",
+      "why": "Streams.cpp:265 takes getChannels() on the two signal jacks to set the channel count and Streams.cpp:303 reads this input with getPolyVoltage(c); streams.hpp:120 substitutes the 8V constant kLevelNormalV when no cable is present"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Streams.cpp:265 takes getChannels() on the two signal jacks to set the channel count and Streams.cpp:304 reads this input with getPolyVoltage(c)"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "5V",
+      "why": "Streams.cpp:265 takes getChannels() on the two signal jacks to set the channel count and Streams.cpp:305 reads this input with getPolyVoltage(c); streams.hpp:117 substitutes the 5V constant kSignalInNormalV when no cable is present"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "8V",
+      "why": "Streams.cpp:265 takes getChannels() on the two signal jacks to set the channel count and Streams.cpp:306 reads this input with getPolyVoltage(c); streams.hpp:122 substitutes the 8V constant kLevelNormalV when no cable is present"
+     }
+    }
+   }
   }
  }
 }

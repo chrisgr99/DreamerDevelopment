@@ -1,13 +1,131 @@
 {
  "plugin": "ESeries",
- "source": "https://github.com/VCVRack/ESeries",
+ "source": "http://synthtech.com/docs/E340_manual.pdf",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "E340": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A bank of up to eight oscillators tuned to one pitch, then detuned against each other and modulated by filtered noise, summed to a single sawtooth and a single sine.",
+    "Sets the pitch in semitones, 8 octaves from -48 to +48; 0 gives C4 at 261.63Hz.",
+    "Sets the pitch over one semitone either side of COARSE, despite the manual giving about half an octave.",
+    "Attenuates the FM input, from nothing at 0 to a quarter of an octave per volt at 10.",
+    "Detunes the oscillators either side of the centre pitch; the amount is the cube of the setting, so it stays small for most of the travel and reaches 21 semitones at the top.",
+    "Sets how deep the filtered noise pushes each oscillator's pitch around; the depth is the cube of the setting, and at 10 the wandering runs to several octaves.",
+    "Sets the corner of the lowpass on that noise, and so how fast the wandering is, from 0.1Hz rising as the sixth power of the setting; it is continuous, not the six steps of the manual.",
+    "Chooses how many oscillators run, 2, 4 or 8; the sum is divided by that number, so the level stays the same, despite the manual saying a setting of 2 is louder.",
+    "Sets the pitch of every oscillator together, 1V/octave, added to COARSE and FINE; the number of channels patched here is the module's polyphony.",
+    "Modulates the pitch of every oscillator, through the FM knob, which at 10 gives a quarter of an octave per volt.",
+    "Hard-syncs every oscillator, resetting the phases on each upward crossing of 0V, rather than at the +0.25V threshold the manual gives.",
+    "Adds to the SPREAD knob, a tenth of its travel per volt, with the total held between 0 and 10.",
+    "Adds to the CHAOS knob, a tenth of its travel per volt, with the total held between 0 and 10.",
+    "Adds to the CHAOS BW knob, a tenth of its travel per volt, with the total held between 0 and 10.",
+    "The sawtooth waves of every running oscillator, summed and divided by their number, ±5V, through a 20Hz high-pass that removes the offset.",
+    "The sine waves of every running oscillator, summed and divided by their number, ±5V, through a 20Hz high-pass that removes the offset.",
+    "Note — There are no attenuators on the CV inputs. A ±5V signal reaches the whole of a control's range only with that control's knob at its midpoint, because the total is clamped.",
+    "Note — The module is polyphonic. Every polyphonic channel runs its own bank of oscillators with its own noise, so a chord comes out as a chord of clouds rather than one.",
+    "Note — The oscillators are stopped altogether while both output jacks are empty, and restart from wherever their phases were left.",
+    "Menu — Spread tuning: Fourths, Fifths — chooses the intervals the detuned oscillators are spread across; Initialize puts it back to Fourths."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "audio",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/E340.cpp:261 channels = max(inputs[PITCH_INPUT].getChannels(), 1); :279 getVoltage(c) added to COARSE/12"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "nothing; the FM knob has no effect",
+      "why": "src/E340.cpp:280-282 isConnected() guard then pitch += FM_PARAM/4 * getPolyVoltage(c), unclamped; manual page 2 gives inputs as -5V to +5V"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "nothing; sync is off while the jack is empty",
+      "why": "src/E340.cpp:269 syncEnabled = isConnected(); :305 getPolyVoltage(c); :118-122 crossing of 0 with syncValue >= 0"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "src/E340.cpp:287-288 clamp(SPREAD_PARAM + getPolyVoltage(c)/10, 0, 1)"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "src/E340.cpp:293-294 clamp(CHAOS_PARAM + getPolyVoltage(c)/10, 0, 1)"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "src/E340.cpp:299-300 clamp(CHAOS_BW_PARAM + getPolyVoltage(c)/10, 0, 1)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/E340.cpp:310 setVoltage(5 * sawOutput, c), :314 setChannels(channels); sawTotal /= channels at :174"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/E340.cpp:309 setVoltage(5 * sinOutput, c), :313 setChannels(channels); sinTotal /= channels at :155"
+     }
+    }
+   },
+   "notes": "Read at commit cb66598. Five commits carry 2.0.2 — 5a9e123, 8e618a4, dc81478, f3094e1 and cb66598 — and they differ in behaviour: dc81478 added the configInput/configOutput names, f3094e1 added the Spread tuning menu, cb66598 added E340::onReset. The installed binary was the test: nm -C on plugin.dylib lists E340::onReset(), which only exists from cb66598, and strings shows 'Spread tuning', 'Fourths' and 'Fifths'. So HEAD is what shipped.\n\nThe DSP is not vendored. Despite being a licensed port of Synthesis Technology hardware, the whole oscillator is written out in src/E340.cpp, derived from Fundamental's VCO (the file says so at :12); only the panel graphics are Synthesis Technology's, per LICENSE.md. So every figure quoted above is from source, not from the hardware manual.\n\nThree places where the hardware manual does not describe this build, and the line says so in each case:\n- FINE. The manual says '~0.5 octaves'. configParam runs -1 to +1 (:232) and the value is divided by 12 (:283), so it is one semitone either way, a sixth of what the manual gives.\n- CHAOS BW. The manual says the bandwidth changes 'in 6 steps'. The knob is continuous and the corner is 0.1 * (x+1)^6 (:301), so the six is an exponent here, not a number of steps.\n- SYNC. The manual gives a threshold of '+0.25V'. The code detects an upward crossing of zero (:118-122), with no threshold at all.\n\nA fourth disagreement is left out of the lines because it is about loudness rather than a control: the manual says fewer VCOs are louder, because the hardware attenuates as VCOs are added. The port divides the sum by the VCO count in both cases (:155, :174), so all three DENSITY settings come out at the same nominal level.\n\nThe manual's claim that sync resets both outputs to -5V is not what the code does either — saw(0) is 0, not -1 — but nothing is claimed about it in the lines.\n\nThe manual also describes a trim pot on the circuit board for 1V/octave tracking and a set of unused jumpers. Neither exists here.\n\nSPREAD is cubed (:289) and the spread tunings are ±21, ±9, ±3 and ±15 semitones in Fourths and ±24, ±12, -5/+7 and -17/+19 in Fifths (:52-63), so at full spread the widest pair is 21 semitones either side of centre in Fourths and 24 in Fifths. With DENSITY at 2 only the first pair is used, which is the widest one.\n\nThe panel prints the DENSITY positions 8, 4 and 2 from top to bottom; the switch comes up at the top, on 8 (:237).\n\nThere are no lights and no hidden controls: seven params, six inputs and two outputs, all with a widget and all tagged."
   }
  }
 }

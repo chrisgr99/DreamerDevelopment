@@ -1,23 +1,502 @@
 {
  "plugin": "SchlappiEngineering",
- "source": "https://github.com/SchlappiEngineering/Schlappi-vcv",
+ "source": "https://github.com/SchlappiEngineering/Schlappi-vcv (source at commit b0f405f, the state that shipped as 2.0.0), with the hardware manuals linked from the installed plugin.json",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "BTFLD": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four bit analogue to digital converter used as a wavefolder and distortion: the signal is gain staged, read as a number from 0 to 15, and the bits, the steps and the folded remainder each get a jack",
+    "Sets the gain applied to the signal at IN before it reaches the converter, from silence at the left, through unity at the centre, to twice the signal at the right",
+    "Attenuates the voltage at the CV input before it is added to the GAIN setting; at full turn 10V at that jack adds one to the gain",
+    "Picks the voltage range. At +10 the signal reaches the converter unchanged and every output runs 0V up. At ±5 a 5V offset is added first, the bit outputs swing -5V to +5V, and the rest is AC coupled",
+    "The signal read by the converter, multiplied by the gain; with nothing patched it reads 0V, despite the hardware manual saying 10V is normalled here",
+    "Voltage over the gain, scaled by the CV knob beside it; with nothing patched the folded output is fed back into this jack, so the module modulates its own gain",
+    "Added to the signal after the gain stage and before the converter, at full level and with no attenuation of its own",
+    "The remainder left when the stepped number is subtracted from the converter's input, amplified to a 0 to 10V sawtooth that restarts at every step",
+    "The eights bit of the converted number as a gate, high while the converter reads 8 or more",
+    "The fours bit of the converted number as a gate, high while the converter reads 4 to 7 or 12 to 15",
+    "The twos bit of the converted number as a gate, high while the converter reads 2, 3, 6, 7, 10, 11, 14 or 15",
+    "The ones bit of the converted number as a gate, high while the converter reads an odd number",
+    "The converted number as a staircase of sixteen evenly spaced levels starting at 0V, the top one a sixteenth short of 10V, with any part of the signal above that top step added on top of it",
+    "Note — The lamp drawn beside the stepped output is never lit: the module sets every other indicator each sample and never sets this one.",
+    "Note — The column of eight lamps shows the converter's input level in sixteen steps, two to a lamp. At +10 they fill from the bottom; at ±5 the lower four invert and read out from the middle.",
+    "Note — Every jack is read on one channel only, so a polyphonic cable is used at its first channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "out": {
+    "0": 7,
+    "4": 8,
+    "3": 9,
+    "2": 10,
+    "1": 11,
+    "5": 12
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/btfld.cpp line 185 reads inputs[INPUT_INPUT].getVoltage() with no channel loop; line 202 clamps the gain-staged signal to 0 to 11.7V, so at the +10 range anything below 0V is discarded"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the folded output",
+      "why": "src/btfld.cpp line 177: the jack is read when connected and the folded output's own voltage is used when it is not; line 178 adds knob times jack times 0.1 to the gain, so a negative voltage lowers the gain and can take it below zero"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/btfld.cpp lines 192 and 200: the jack is read with getVoltage and added to the gain-staged signal before the 0 to 11.7V clamp at line 202"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/btfld.cpp line 256 sets one voltage with no setChannels anywhere in the file"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/btfld.cpp line 224 sets one voltage with no setChannels anywhere in the file"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/btfld.cpp line 224 sets one voltage with no setChannels anywhere in the file"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/btfld.cpp line 224 sets one voltage with no setChannels anywhere in the file"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/btfld.cpp line 224 sets one voltage with no setChannels anywhere in the file"
+     },
+     "5": {
+      "poly": false,
+      "why": "src/btfld.cpp line 249 sets one voltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "Three places where the hardware manual and the code disagree, the code winning each time. (1) The manual says of IN that \"If no input is detected then a +10V signal is normalized here\"; src/btfld.cpp line 185 calls getVoltage() with no isConnected test, so an unpatched IN reads 0V and the module is silent. (2) The manual's own normalling claim for CV — the saw output fed back — is what the code does (line 177), so that one holds. (3) The manual describes the ±5 setting as AC coupling the outputs; in the code AC coupling is applied to the stepped and folded outputs only (lines 248 and 250), while the four bit outputs get a fixed -5V offset instead (line 224).\n\nThe STEP_INDICATOR_LIGHT is declared at line 89 and given a LightWidget at line 301, and no line of process ever writes it. It is a lamp on the panel that can never light.\n\nNo range or polarity is recorded for the jacks because both ends depend on the RANGE switch: at +10 the converter input is clamped to 0 to 11.7V and the bit outputs run 0 to 10V, at ±5 a 5V offset is added first and the bit outputs run -5V to +5V.\n\nThe bit outputs are not instantaneous comparators: src/btfld.cpp lines 40 to 53 hold a bit low until its value has been stable for one and a half sample periods of the eight times oversampled signal, which is what makes the converter asynchronous rather than clocked.\n\nRange, gain and step figures are all literals in src/btfld.cpp: gain 0 to 2 at line 124, the 0 to 11.7V clamp at line 167, the sixteen steps at lines 204 to 211, the 10/16 rescale at line 247."
   },
   "BTMX": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four two-input logic gates sharing one selectable function, with a switch on every input and a stepped voltage output that reads the four results as a four bit number",
+    "Passes the input of the same number into the logic while it is up; in the down position that input is held low whatever is patched to it",
+    "With the B switch this picks the logic function: both down is AND, this one down and B up is ADD, this one up and B down is OR, both up is XOR",
+    "With the A switch this picks the logic function: both down is AND, A down and this one up is ADD, A up and this one down is OR, both up is XOR",
+    "A gate into the logic pair that IN 5 also feeds; their result is the eights bit of the stepped output",
+    "A gate into the logic pair that IN 6 also feeds; their result is the fours bit of the stepped output",
+    "A gate into the logic pair that IN 7 also feeds; their result is the twos bit of the stepped output",
+    "A gate into the logic pair that IN 8 also feeds; their result is the ones bit of the stepped output",
+    "The four logic results read as a four bit number and put out as a staircase of sixteen levels from 0V to 10V",
+    "The logic function of IN 1 and IN 5 as a 0 to 10V gate, and the eights bit of the stepped output",
+    "The logic function of IN 2 and IN 6 as a 0 to 10V gate, and the fours bit of the stepped output",
+    "The logic function of IN 3 and IN 7 as a 0 to 10V gate, and the twos bit of the stepped output",
+    "The logic function of IN 4 and IN 8 as a 0 to 10V gate, and the ones bit of the stepped output",
+    "Note — Every one of the eight input switches comes up in the down position, so a newly placed BTMX holds all eight inputs low and puts out nothing until at least one switch is raised.",
+    "Note — An input whose switch is up and which has no cable is held at 10V. In OR that pins its output high; in AND it stops that pair blocking; in XOR it inverts the other input of the pair.",
+    "Note — An input counts as high above 1V and falls low below 0V, not at the 2.8V threshold the hardware manual gives.",
+    "Note — Every jack is read on one channel only, so a polyphonic cable is used at its first channel."
+   ],
+   "param": {
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "0": 2,
+    "1": 3
+   },
+   "in": {
+    "0": 4,
+    "4": 4,
+    "1": 5,
+    "5": 5,
+    "2": 6,
+    "6": 6,
+    "3": 7,
+    "7": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "10V while that input's switch is up",
+      "why": "src/btmx.cpp lines 93 to 99: getVoltage with no channel loop, 10V substituted when the jack is unconnected and the switch is up, then a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "10V while that input's switch is up",
+      "why": "src/btmx.cpp lines 93 to 99: getVoltage with no channel loop, 10V substituted when the jack is unconnected and the switch is up, then a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "10V while that input's switch is up",
+      "why": "src/btmx.cpp lines 93 to 99: getVoltage with no channel loop, 10V substituted when the jack is unconnected and the switch is up, then a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "10V while that input's switch is up",
+      "why": "src/btmx.cpp lines 93 to 99: getVoltage with no channel loop, 10V substituted when the jack is unconnected and the switch is up, then a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "10V while that input's switch is up",
+      "why": "src/btmx.cpp lines 93 to 99: getVoltage with no channel loop, 10V substituted when the jack is unconnected and the switch is up, then a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "10V while that input's switch is up",
+      "why": "src/btmx.cpp lines 93 to 99: getVoltage with no channel loop, 10V substituted when the jack is unconnected and the switch is up, then a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "10V while that input's switch is up",
+      "why": "src/btmx.cpp lines 93 to 99: getVoltage with no channel loop, 10V substituted when the jack is unconnected and the switch is up, then a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "10V while that input's switch is up",
+      "why": "src/btmx.cpp lines 93 to 99: getVoltage with no channel loop, 10V substituted when the jack is unconnected and the switch is up, then a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/btmx.cpp line 159: the four results weighted 8, 4, 2, 1 and scaled by 10/15, so a full count of 15 gives 10V; one voltage set, no setChannels in the file"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/btmx.cpp lines 88 and 155: the decimated logic result scaled so a held-high gate lands on 10V; one voltage set, no setChannels in the file"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/btmx.cpp lines 88 and 155: the decimated logic result scaled so a held-high gate lands on 10V; one voltage set, no setChannels in the file"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/btmx.cpp lines 88 and 155: the decimated logic result scaled so a held-high gate lands on 10V; one voltage set, no setChannels in the file"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/btmx.cpp lines 88 and 155: the decimated logic result scaled so a held-high gate lands on 10V; one voltage set, no setChannels in the file"
+     }
+    }
+   },
+   "notes": "Two disagreements with the hardware manual, the code winning both. (1) The manual gives a 2.8V input threshold; src/btmx.cpp line 98 uses dsp::SchmittTrigger::process at its default thresholds, which go high above 1V and low below 0V. (2) The manual gives the stepped output as 0 to 9.5V; line 159 scales a count of 0 to 15 by 10/15, which reaches a full 10V.\n\nThe panel legend beside the two mode switches prints exactly what the code does — A and B down is AND, down and up is ADD, up and down is OR, both up is XOR (src/btmx.cpp lines 104 to 143) — so panel, manual and code agree on the modes.\n\nThe ADD mode is a four bit ripple adder rather than four independent gates: src/btmx.cpp lines 118 to 126 carry from the 1 ★ 5 pair down through the others, so in that mode the four outputs are no longer independent of one another.\n\nThe outputs are named \"Mix 1 ★ 5\" and so on in the maker's configOutput calls, but the panel prints only \"1 ★ 5\"."
   },
   "Nibbler": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four bit accumulator: the ADD switches and GATE inputs form a number from 0 to 15, that number is added to the one already held, and the bits, a carry and two stepped voltages get their own jacks",
+    "Adds 8 to the number fed into the accumulator while it is up",
+    "Adds 4 to the number fed into the accumulator while it is up",
+    "Adds 2 to the number fed into the accumulator while it is up",
+    "Adds 1 to the number fed into the accumulator while it is up",
+    "Shifts the offset stepped output on by four of its sixteen steps, a quarter of a cycle, when it is the only OFFSET switch raised; with both OFFSET switches raised the shift is eight steps instead",
+    "Shifts the offset stepped output on by two of its sixteen steps, an eighth of a cycle, when it is the only OFFSET switch raised; with both OFFSET switches raised the shift is eight steps instead",
+    "Holds the register at zero for as long as it is held down, and releases it on the next count",
+    "In the SUBTRACT position the number formed by the ADD switches, the GATE inputs and CARRY IN is negated before it reaches the accumulator, so the count runs down instead of up",
+    "In the SYNC position the outputs change only on a rising edge at CLOCK; in the ASYNC position they follow the inputs as they arrive, and a rising edge at SHIFT also counts as a clock",
+    "Adds 1 to the number fed into the accumulator while it is high, the same amount as GATE 1, and is meant to take the CARRY output of a second Nibbler",
+    "Adds 8 to the number fed into the accumulator while it is high, summing with the ADD 8 switch",
+    "Adds 4 to the number fed into the accumulator while it is high, summing with the ADD 4 switch",
+    "Adds 2 to the number fed into the accumulator while it is high, summing with the ADD 2 switch",
+    "Adds 1 to the number fed into the accumulator while it is high, summing with the ADD 1 switch",
+    "A rising edge above 1V stores the new total in the register; with nothing patched here the module counts asynchronously whatever position the ASYNC/SYNC switch is in",
+    "While it is high the register's contents move up one bit at each count, with the SHIFT DATA bit entering at the bottom, rather than the new total being held as it stands",
+    "Clears the register to zero and holds it there for as long as the voltage stays high, which is a level rather than the AC coupled edge the hardware manual describes",
+    "Sets the bit that enters the bottom of the register on a shift; with nothing patched the OUT 8 voltage is fed back here, so the register rotates",
+    "While it is high the SUBTRACT/ADD switch is read the other way round",
+    "Exclusive-ORed with the shift data bit before it enters the register, but only while SHIFT DATA has a cable in it. Unpatched, a voltage meets a logic level and a high OUT 8 forces the bit high.",
+    "The register's count with the OFFSET switches added to it, put out as a staircase of sixteen evenly spaced levels starting at 0V, the top one a sixteenth short of 10V",
+    "The register's count put out as a staircase of sixteen evenly spaced levels starting at 0V, the top one a sixteenth short of 10V",
+    "Goes high for one count when the total passes 15 and wraps round, which makes it a divide-by-sixteen of whatever is counting",
+    "The eights bit of the count as a 0 to 10V gate",
+    "The fours bit of the count as a 0 to 10V gate",
+    "The twos bit of the count as a 0 to 10V gate",
+    "The ones bit of the count as a 0 to 10V gate",
+    "Note — The maker left every knob, jack and switch on this module unnamed in the build that ships, so hovering any of them shows an empty tooltip. The lines here are the only text there is.",
+    "Note — With nothing patched into CLOCK the module runs asynchronously whatever position the ASYNC/SYNC switch is in, and only counts on its own once a clock is patched.",
+    "Note — In the ASYNC position the jacks show the running total as it arrives, not what the register holds. Clearing the register leaves them high while an ADD switch is up or a GATE input is high.",
+    "Note — The lamp beside the RESET jack follows the RESET button alone. A gate into the RESET jack clears the register without lighting it, the one indicator here that does not show its jack.",
+    "Note — An input counts as high above 1V and falls low below 0.1V, not at the 2.8V threshold the hardware manual gives.",
+    "Note — Every jack is read on one channel only, so a polyphonic cable is used at its first channel."
+   ],
+   "param": {
+    "0": 1,
+    "3": 2,
+    "7": 3,
+    "8": 4,
+    "1": 5,
+    "4": 6,
+    "2": 7,
+    "5": 8,
+    "6": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "4": 12,
+    "7": 13,
+    "10": 14,
+    "2": 15,
+    "3": 16,
+    "5": 17,
+    "6": 18,
+    "8": 19,
+    "9": 20
+   },
+   "out": {
+    "0": 21,
+    "1": 22,
+    "2": 23,
+    "3": 24,
+    "4": 25,
+    "5": 26,
+    "6": 27
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/nibbler.cpp lines 200 to 204: getVoltage with no channel loop, then a SchmittTrigger at 0.1V and 1.0V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/nibbler.cpp lines 190 to 194: getVoltage with no channel loop, then a SchmittTrigger at 0.1V and 1.0V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/nibbler.cpp lines 237 and 257: getVoltage with no channel loop, then a SchmittTrigger at 0.1V and 1.0V whose rising edge is the clock"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/nibbler.cpp lines 238 and 256: getVoltage with no channel loop, then a SchmittTrigger at 0.1V and 1.0V read as a level"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/nibbler.cpp lines 190 to 194: getVoltage with no channel loop, then a SchmittTrigger at 0.1V and 1.0V"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/nibbler.cpp lines 236, 266 and 272: getVoltage with no channel loop, then a SchmittTrigger at 0.1V and 1.0V read as a level, so a held gate keeps the register cleared"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the OUT 8 voltage",
+      "why": "src/nibbler.cpp lines 239 to 242 and 261: the jack is read when connected and the OUT 8 output voltage is used when it is not"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/nibbler.cpp lines 190 to 194: getVoltage with no channel loop, then a SchmittTrigger at 0.1V and 1.0V"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/nibbler.cpp lines 220 to 227: getVoltage with no channel loop, then a SchmittTrigger at 0.1V and 1.0V exclusive-ORed with the SUBTRACT/ADD switch"
+     },
+     "9": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/nibbler.cpp lines 243, 254 and 264: getVoltage with no channel loop, then a SchmittTrigger read as a level"
+     },
+     "10": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/nibbler.cpp lines 190 to 194: getVoltage with no channel loop, then a SchmittTrigger at 0.1V and 1.0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/nibbler.cpp lines 321 and 329: the count plus the offset, masked to four bits and scaled by a sixteenth of the 10V gate level, so fifteen steps reach 9.375V; one voltage set, no setChannels in the file"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/nibbler.cpp lines 320 and 325: the count masked to four bits and scaled by a sixteenth of the 10V gate level, so fifteen steps reach 9.375V; one voltage set, no setChannels in the file"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/nibbler.cpp lines 183, 292 and 296: bit 16 of the total put out at the 10V gate level; one voltage set, no setChannels in the file"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/nibbler.cpp lines 183, 292 and 296: one bit of the count put out at the 10V gate level; one voltage set, no setChannels in the file"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/nibbler.cpp lines 183, 292 and 296: one bit of the count put out at the 10V gate level; one voltage set, no setChannels in the file"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/nibbler.cpp lines 183, 292 and 296: one bit of the count put out at the 10V gate level; one voltage set, no setChannels in the file"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/nibbler.cpp lines 183, 292 and 296: one bit of the count put out at the 10V gate level; one voltage set, no setChannels in the file"
+     }
+    }
+   },
+   "notes": "Three disagreements with the hardware manual, the code winning each time. (1) The manual says of RESET that it is \"AC coupled so it can be used as a hard sync input at audio rate\"; src/nibbler.cpp lines 266 and 272 read the jack as a level, so a held gate pins the register at zero rather than firing once. (2) The manual gives a 2.8V input threshold; lines 193, 203, 223, 256, 257 and 266 all use 0.1V and 1.0V. (3) The manual does not mention it, but line 249 forces asynchronous operation whenever the CLOCK jack is unconnected, so the SYNC position of the switch does nothing until a clock is patched.\n\nThe OFFSET switches do match the manual: the top switch alone gives four of sixteen steps (90 degrees), the lower switch alone two (45 degrees), and both together eight (180 degrees) — src/nibbler.cpp lines 305 to 316.\n\nA type fault in the shift data path. At line 261 `auto s1 = inputs[SHIFT_DATA_INPUT].isConnected() ? shiftDataUTrig.trigger.isHigh() : out8;` takes the common type of a bool and a float, so with SHIFT DATA unpatched s1 is the OUT 8 voltage, about 10V. Line 264 then computes `(s1 != s2)` against the DATA XOR logic level of 0 or 1, and 10 is unequal to both, so the bit entering the register is forced high whenever OUT 8 is high. The plain rotate the manual describes still works when DATA XOR has nothing patched, because 0 is then compared against 0; the exclusive-OR is what breaks.\n\nRESET_LIGHT is given two LightWidgets — a rectangle under the button at line 346 and a round lamp beside the RESET jack at line 399 — and line 247 sets it from the button only, with the maker's own comment saying so. The manual states that all inputs have LEDs showing their state, which is not true of the RESET jack.\n\nIn ASYNC the register is bypassed for the outputs entirely: line 291 takes the running input total rather than the stored value, so the jacks show gates plus ADD switches plus whatever the register holds.\n\nNo figure here is quoted that is not a literal in src/nibbler.cpp: the 10V gate level at line 183, the 0.1 and 1.0 thresholds throughout, the four bit mask at lines 27 and 320, the sixteen step divisor at lines 320 and 321, and the offsets 4, 2 and 8 at lines 311 to 315."
   }
  }
 }

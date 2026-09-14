@@ -2,36 +2,452 @@
  "plugin": "Tyche",
  "source": "https://github.com/denolehov/VCVTyche",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Omen": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The seed for the whole Tyche set: six buttons choose a number that every Tyche module to its right draws its randomness from",
+    "Cycles this digit of the seed through its six states, changing the seed and the button's colour",
+    "Cycles this digit of the seed through its six states, changing the seed and the button's colour",
+    "Cycles this digit of the seed through its six states, changing the seed and the button's colour",
+    "Cycles this digit of the seed through its six states, changing the seed and the button's colour",
+    "Cycles this digit of the seed through its six states, changing the seed and the button's colour",
+    "Cycles this digit of the seed through its six states, changing the seed and the button's colour",
+    "Counts the beat for every Tyche module to the right; it expects 24 pulses per quarter note, and a rising edge past 1V is one pulse",
+    "A rising edge past 1V clears the beat count here and sends a reset along the whole chain to the right",
+    "Note — the Tyche modules chain rightwards from this one, each passing the seed, the clock and the reset on to the next; a Blank passes them on too",
+    "Note — the seed is stored with the patch, so the same button colours give the same random sequences every time the patch is opened",
+    "Note — this module has no outputs; everything it does reaches the other modules through the chain rather than through cables"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Omen.cpp:84 clockTrigger.process(inputs[CLOCK_INPUT].getVoltage()) with rack's default SchmittTrigger thresholds, so a rising edge is detected past 1V and the jack is armed again below 0V; read at voltages[0] with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Omen.cpp:88 resetTrigger.process(inputs[RESET_INPUT].getVoltage()) with rack's default SchmittTrigger thresholds, so a rising edge is detected past 1V and the jack is armed again below 0V; read at voltages[0] with no channel loop"
+     }
+    }
+   },
+   "notes": "The seed is built at Omen.cpp:137-145 by exclusive-oring each button's state, one to six, shifted three bits per button, so the six buttons make the seed between them rather than each owning a part of it. The clock count is a plain counter of rising edges (line 85) and nothing in the plugin measures tempo from it, which is why the 24 pulses per quarter note matter: a Kron division is that many counts."
   },
   "Kron": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A trigger generator for one clock division, firing or staying silent at each division by chance, and taking its randomness from an Omen to its left",
+    "Sets how often a division fires, 0 to 100%; with a cable in the jack below it this becomes an attenuator on that voltage instead",
+    "Picks which of 128 fixed random patterns this module follows, so the same seed can give a different rhythm here",
+    "Sets how often a division fires, -5V for never and +5V for always, scaled down by the slider above it",
+    "While this is at 0.1V or more no triggers leave the module, though the pattern keeps running underneath",
+    "A rising edge past 2V puts the pattern back to its first step",
+    "A 10V pulse 1ms long on each division the pattern fires",
+    "Note — this module does nothing on its own; it needs an Omen to its left, directly or through a chain of Tyche modules, and a clock patched into that Omen",
+    "Note — the lamp on the slider is yellow when a division fires, red when one would have fired but the mute input stopped it, and dark otherwise",
+    "Note — a Kron muted by another Kron placed further left in the chain is one sample behind, and the mute does not take effect; the maker records this as an open problem",
+    "Menu — Division: 1/2, 1/2t, 1/2., 1/4, 1/4t, 1/4., 1/8, 1/8t, 1/8., 1/16, 1/16t, 1/16. — picks how often the module gets a chance to fire"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the slider's own full 100%",
+      "why": "Kron.cpp:104-113 rescales the jack from -5V and +5V to a ceiling of 0 to 100 and multiplies the slider into it, so the slider attenuates the jack; read at voltages[0] with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 0.1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Kron.cpp:77 getInput(MUTE_INPUT).getVoltage() >= 0.1f, a level test with no Schmitt trigger, read at voltages[0] with no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Kron.cpp:117-119 resetTrigger.process(resetIn, 0.1f, 2.f), so a rising edge is detected past 2V and the jack is armed again below 0.1V; read at voltages[0] with no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Kron.cpp:97 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "The division table at Kron.cpp:41-54 counts Omen pulses: 48 for a half note down to 4 for a sixteenth triplet, against 24 pulses per quarter note. The density test at line 80 compares the slider-and-CV figure against a noise value rescaled to 0 to 100, so at 100% every division fires. The pulse length is 1e-3 seconds (line 87). The one-sample mute problem the maker describes in the README is a consequence of the expander message flip and is visible in the code: the mute is read at line 77 before the chain message for this sample has been processed."
   },
   "Tale": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A random voltage source built on smooth noise, running anywhere from one cycle in a thousand seconds to audio rate",
+    "Sets how fast the noise moves, from 0.001Hz at the bottom to 440Hz at the top, spread evenly in octaves",
+    "Picks which of 128 fixed random patterns this module follows, so the same seed can give a different shape here",
+    "Scales the pace slider down, -5V stopping the noise altogether and +5V leaving the slider where it is",
+    "A rising edge past 1V samples the noise and holds it until the next edge; with nothing patched the output moves continuously instead",
+    "A rising edge past 1V sends the noise back to the start of its pattern",
+    "The noise, between -5V and +5V",
+    "Note — this module runs on its own; an Omen to its left only replaces the seed the noise is built from",
+    "Note — the lamp on the slider is green while the output is positive and red while it is negative, brighter the further from 0V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the slider's own position",
+      "why": "Tale.cpp:79-81 rescales the jack from -5V and +5V to 0 to 1 and multiplies the slider by it, so the jack can only scale the slider down; read at voltages[0] with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "nothing held, the noise runs on",
+      "why": "Tale.cpp:66-70 sampleAndHoldTrigger.process on the jack with rack's default SchmittTrigger thresholds, so a rising edge is detected past 1V and the jack is armed again below 0V, and isConnected() at line 65 decides whether the output is held at all; read at voltages[0] with no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tale.cpp:57 resetTrigger.process(getInput(RESET_INPUT).getVoltage()) with rack's default SchmittTrigger thresholds, so a rising edge is detected past 1V and the jack is armed again below 0V; read at voltages[0] with no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Tale.cpp:76 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "The pace law at Tale.cpp:82 is minSpeed times (maxSpeed/minSpeed) raised to the slider position, with minSpeed 0.001 and maxSpeed dsp::FREQ_A4, which is 440. The noise is OpenSimplex, evaluated at the variant number and the running phase (line 73), so it is smooth rather than white. The variant knob is only read every 16384 samples (line 47), so a sweep of it steps rather than glides."
   },
   "Fate": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A Bernoulli gate: each gate that arrives is sent to one of two outputs by chance, with the odds set by a knob",
+    "Sets how likely an arriving gate is to go to the B output, never at 0% and always at 100%; the maker's README describes it the other way round",
+    "Picks which of 128 fixed random patterns this module follows, so the same seed can give a different run of decisions here",
+    "Takes the decision over from the knob entirely, -5V sending every gate to A and +5V sending every gate to B",
+    "The gate to be routed; it counts as high past 1V and is armed again below 0.1V",
+    "A rising edge past 1V sends the decisions back to the start of the pattern",
+    "Carries 10V for as long as the incoming gate is high, whenever the decision went this way",
+    "Carries 10V for as long as the incoming gate is high, whenever the decision went this way",
+    "Note — without latch mode both outputs fall to 0V as soon as the incoming gate does, so the outputs copy the shape of what you feed in",
+    "Menu — Latch mode — holds the chosen output at 10V after the incoming gate falls, until the next gate arrives and a new decision is taken"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the knob's own position",
+      "why": "Fate.cpp:100-105 getBias returns the jack rescaled from -5V and +5V to -1 and +1 whenever it is connected, and the knob is not read at all in that case; read at voltages[0] with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Fate.cpp:68 inSchmitt.process(getInput(IN_INPUT).getVoltage(), 0.1f, 1.f), so the jack counts as high past 1V and is armed again below 0.1V; read at voltages[0] with no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Fate.cpp:60 resetTrigger.process(getInput(RESET_INPUT).getVoltage()) with rack's default SchmittTrigger thresholds, so a rising edge is detected past 1V and the jack is armed again below 0V; read at voltages[0] with no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Fate.cpp:86-96 setVoltage with no setChannels anywhere in the file"
+     },
+     "1": {
+      "poly": false,
+      "why": "Fate.cpp:86-96 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "The decision at Fate.cpp:71-73 is holdState = noiseVal >= bias ? A : B, with bias rescaled from the knob's 0 to 100 onto -1 to +1 and noiseVal the OpenSimplex value over the same -1 to +1. A knob at 0% therefore puts bias at -1 and every gate goes to A, and a knob at 100% sends every gate to B. The maker's README says the knob \"sets the likelihood of routing triggers to Output A\", which is the opposite; the panel prints only BIAS, so nothing on the module contradicts the code. The phase the noise is read at advances with real time (line 58), not with the incoming gates, so two Fates set alike do not follow the same run unless they are reset together."
   },
   "Moira": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A probabilistic voltage selector: each trigger picks one of three voltages for the main output and a second one for the auxiliary output",
+    "Sets how likely X is against the other two, 0 to 100%; with a cable in the jack below it this becomes an attenuator on that voltage instead",
+    "Sets how likely Y is against the other two, 0 to 100%; with a cable in the jack below it this becomes an attenuator on that voltage instead",
+    "Sets how likely Z is against the other two, 0 to 100%; with a cable in the jack below it this becomes an attenuator on that voltage instead",
+    "Sets the voltage X carries, -10V to +10V; with a cable in the jack below it this becomes an attenuator on that voltage instead",
+    "Sets the voltage Y carries, -10V to +10V; with a cable in the jack below it this becomes an attenuator on that voltage instead",
+    "Sets the voltage Z carries, -10V to +10V; with a cable in the jack below it this becomes an attenuator on that voltage instead",
+    "Picks which of 128 fixed random patterns this module follows, so the same seed can give a different run of choices here",
+    "Sets how long the outputs take to slide from the old voltage to the new one, 0 to 20 seconds, along an ease-in-out curve",
+    "Scales the X probability slider down, -5V taking X out of the running and +5V leaving the slider where it is",
+    "Scales the Y probability slider down, -5V taking Y out of the running and +5V leaving the slider where it is",
+    "Scales the Z probability slider down, -5V taking Z out of the running and +5V leaving the slider where it is",
+    "Takes the X voltage from here instead of the knob, with the knob left as an attenuator on it",
+    "Takes the Y voltage from here instead of the knob, with the knob left as an attenuator on it",
+    "Takes the Z voltage from here instead of the knob, with the knob left as an attenuator on it",
+    "A rising edge past 1V picks a new voltage for the main output and a new one for the auxiliary output",
+    "A rising edge past 1V sends the choices back to the start of the pattern",
+    "A 10V pulse 1ms long whenever X becomes the main output's choice",
+    "A 10V pulse 1ms long whenever Y becomes the main output's choice",
+    "A 10V pulse 1ms long whenever Z becomes the main output's choice",
+    "Carries a second choice, drawn from the two the main output did not pick, weighted by their probabilities against each other",
+    "Carries the voltage of whichever of X, Y and Z was picked",
+    "Note — the three probabilities are relative, so equal sliders give each a third of the choices and only the ratio between them matters",
+    "Note — nothing is picked until a trigger arrives; with no trigger patched the outputs stay at 0V",
+    "Note — a slider glows white at the brightness of its own probability, green while it is the main output's choice and blue while it is the auxiliary output's",
+    "Note — the main and auxiliary outputs carry as many channels as the widest of the three voltage inputs; the X, Y and Z pulse outputs are always one channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14,
+    "6": 15,
+    "7": 16
+   },
+   "out": {
+    "0": 17,
+    "1": 18,
+    "2": 19,
+    "3": 20,
+    "4": 21
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the slider's own position",
+      "why": "Moira.cpp:474-484 getProbabilityAt multiplies the slider by the jack rescaled from -5V and +5V to 0 to 1 when the jack is connected; read at voltages[0] with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the slider's own position",
+      "why": "Moira.cpp:474-484 getProbabilityAt multiplies the slider by the jack rescaled from -5V and +5V to 0 to 1 when the jack is connected; read at voltages[0] with no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the slider's own position",
+      "why": "Moira.cpp:474-484 getProbabilityAt multiplies the slider by the jack rescaled from -5V and +5V to 0 to 1 when the jack is connected; read at voltages[0] with no channel loop"
+     },
+     "3": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the knob's own voltage",
+      "why": "Moira.cpp:486-497 getVoltageAt reads getVoltage(channel) when the jack is connected and scales it by the knob rescaled from -10V and +10V to 0 to 1, and line 272 takes the channel count from getChannels()"
+     },
+     "4": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the knob's own voltage",
+      "why": "Moira.cpp:486-497 getVoltageAt reads getVoltage(channel) when the jack is connected and scales it by the knob rescaled from -10V and +10V to 0 to 1, and line 274 takes the channel count from getChannels()"
+     },
+     "5": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the knob's own voltage",
+      "why": "Moira.cpp:486-497 getVoltageAt reads getVoltage(channel) when the jack is connected and scales it by the knob rescaled from -10V and +10V to 0 to 1, and line 276 takes the channel count from getChannels()"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Moira.cpp:265 triggerInput.process(inputs[TRIGGER_INPUT].getVoltage(), 0.1f, 1.f), so a rising edge is detected past 1V and the jack is armed again below 0.1V; read at voltages[0] with no channel loop"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Moira.cpp:256 resetTrigger.process(getInput(RESET_INPUT).getVoltage()) with rack's default SchmittTrigger thresholds, so a rising edge is detected past 1V and the jack is armed again below 0V; read at voltages[0] with no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Moira.cpp:511-513 setVoltage on the chosen-trigger outputs with no setChannels for them"
+     },
+     "1": {
+      "poly": false,
+      "why": "Moira.cpp:511-513 setVoltage on the chosen-trigger outputs with no setChannels for them"
+     },
+     "2": {
+      "poly": false,
+      "why": "Moira.cpp:511-513 setVoltage on the chosen-trigger outputs with no setChannels for them"
+     },
+     "3": {
+      "poly": true,
+      "why": "Moira.cpp:279 setChannels on the AUX output, the count taken from the three voltage inputs at lines 271-276"
+     },
+     "4": {
+      "poly": true,
+      "why": "Moira.cpp:278 setChannels on the main output, the count taken from the three voltage inputs at lines 271-276"
+     }
+    }
+   },
+   "notes": "The probability sliders are normalised against their total at Moira.cpp:222-230, which is what makes them relative. The voltage knobs change job when their jack is patched: getVoltageAt at lines 486-497 then uses the knob as a gain between 0 and 1 taken from its -10V to +10V scale, so a knob left at its default 0V halves the patched voltage rather than passing it through. The auxiliary choice is drawn from a second reading of the same noise 300 units further along the phase (AUX_OFFSET, line 214), so it is not an independent random source. The crossfade curve at lines 44-49 is a cubic ease in and out."
   },
   "Blank": {
    "lines": [
-    "TODO: what this module is"
+    "A blank panel that carries the seed, the clock and the reset along the Tyche chain, so Tyche modules on either side of it stay connected",
+    "Note — it has no controls, inputs or outputs; its only job is to leave a gap in the rack without breaking the chain"
    ]
   }
  }

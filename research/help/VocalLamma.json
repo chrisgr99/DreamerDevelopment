@@ -1,13 +1,214 @@
 {
  "plugin": "VocalLamma",
- "source": "https://github.com/SantiJay7/VocalLamma",
+ "source": "https://github.com/SantiJay7/VocalLamma/blob/main/USER_MANUAL.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "VocalLamma": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A formant vocal synthesiser: a glottal source through three band-pass filters that morph across the vowels OO, OH, AH, AY and EE, followed by a stereo ping-pong delay",
+    "Sets the pitch in volts at one volt per octave, 0V to 10V, with 5V giving C4 at 261.63Hz",
+    "Sets the level of the synthesised voice going into the delay and the outputs, 0 to 100%",
+    "A latch putting the voice under gate control; unlit, the voice sounds without stopping, and lit, the voice sounds only while GATE is above 1V or a MIDI note is held",
+    "Sweeps the three formant frequencies across the five vowels in order, OO at the left through OH, AH and AY to EE at the right",
+    "Sets how long the pitch takes to slide to a new value, 0 to 5 seconds",
+    "Sets the depth of a 5.5Hz vibrato on the pitch, reaching one semitone either way at the clockwise end",
+    "Scales all three formant frequencies together, 0.85 times at the left to 1.15 times at the right, which shifts the whole vowel up or down without changing the pitch",
+    "Scales the voltage at VOWEL CV, -100% to +100%, before it is added to the VOWEL knob; at the centre that jack changes nothing",
+    "Adds to the GLIDE time, 10V adding 5 seconds, and the total is held between 0 and 5 seconds",
+    "Adds to the VIBRATO depth, 10V covering the whole depth, and the total is held between none and full",
+    "Adds to the FORMANT scaling, 10V covering the whole span between 0.85 times and 1.15 times, and the total is held inside it",
+    "Moves the vowel, scaled by VOW ATT; at a full attenuverter 10V covers the whole sweep from OO to EE, and the total with the knob is held inside it",
+    "Adds to the PITCH knob at one volt per octave",
+    "Adds to the VOICE level, 10V covering the whole range, and the total is held between silence and full",
+    "While GATE ON is lit the voice sounds whenever the voltage here is above 1V and fades out when it falls; with GATE ON unlit this jack is not read at all",
+    "Each rise above 1V flips the GATE ON latch, so a trigger here does what pressing that button does",
+    "Sets the delay time, 10ms at the left to 2 seconds at the right; with a clock at SYNC DELAY it instead picks which whole multiple of the clock period the delay takes",
+    "Sets how much of each delayed channel is fed back into the other one, 0 to 100%",
+    "Balances the dry signal against the delayed one, dry alone at the left and delay alone at the right",
+    "Sets how much of the signal at EXT IN is added to the voice before the delay, 0 to 100%",
+    "Adds to the TIME knob, 10V covering the whole sweep between 10ms and 2 seconds, and the total is held inside it",
+    "An audio signal to run through the delay alongside the voice, scaled by INPUT MIX before it is added",
+    "Adds to the MIX balance, 10V covering the whole span from dry to delay, and the total is held inside it",
+    "Adds to the INPUT MIX level, 10V covering the whole span, and the total is held between 0 and 100%",
+    "A clock here is timed from one rise above 1V to the next, and the delay time is snapped to a whole multiple of that period, with TIME choosing the multiple",
+    "The voice's pitch in volts at one volt per octave, taken after the glide and without the vibrato",
+    "The left channel of the dry signal mixed with the delay, soft-clipped through a tanh so it stops short of ±10V",
+    "The right channel of the dry signal mixed with the delay, soft-clipped through a tanh so it stops short of ±10V",
+    "Note — the voice sounds from the moment the module is placed and keeps sounding; press GATE ON to make it answer a gate instead",
+    "Note — the delay crosses over between the channels, each side fed from the other side's delayed signal, so the repeats alternate between the two outputs",
+    "Note — a MIDI note sets the pitch and restarts the glottal cycle, and while any note is held the voice counts as gated",
+    "Note — MIDI pitch bend sweeps the vowel, the mod wheel adds vibrato depth, CC12 moves the delay mix and CC13 moves the formant scaling",
+    "Note — the pitch wanders very slightly on its own, from a slow random jitter mixed in before the glide, and that jitter is carried on PITCH OUT",
+    "Menu — MIDI driver — picks which MIDI system the module takes its notes from",
+    "Menu — MIDI device — picks which attached MIDI device feeds the module",
+    "Menu — MIDI channel — picks which MIDI channel is read, or all of them"
+   ],
+   "param": {
+    "0": 1,
+    "1": 4,
+    "2": 8,
+    "3": 5,
+    "4": 6,
+    "5": 2,
+    "6": 7,
+    "7": 3,
+    "8": 17,
+    "9": 18,
+    "10": 19,
+    "11": 20
+   },
+   "in": {
+    "0": 13,
+    "1": 12,
+    "2": 10,
+    "3": 21,
+    "4": 22,
+    "5": 15,
+    "6": 24,
+    "7": 11,
+    "8": 9,
+    "9": 16,
+    "10": 25,
+    "11": 14,
+    "12": 23
+   },
+   "out": {
+    "0": 27,
+    "1": 28,
+    "2": 26
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "audio",
+     "5": "trigger",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "cv",
+     "12": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "VocalLamma.cpp:296 reads getVoltage() with no channel and adds it straight to the Pitch knob in volts"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "VocalLamma.cpp:312 reads getVoltage() with no channel, multiplies it by the Vowel CV amount knob, divides by 10 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VocalLamma.cpp:302 reads getVoltage() with no channel, divides it by 10 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VocalLamma.cpp:376 reads getVoltage() with no channel, divides it by 10 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "why": "VocalLamma.cpp:422 reads getVoltage() with no channel and multiplies it by the Input mix level before line 423 adds it to the voice"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "VocalLamma.cpp:364 compares getVoltage() with no channel against 1.0, and only while the Gate on latch is set"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VocalLamma.cpp:421 reads getVoltage() with no channel, divides it by 10 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VocalLamma.cpp:317 reads getVoltage() with no channel, divides it by 10 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VocalLamma.cpp:297 reads getVoltage() with no channel, multiplies it by 0.5 and clamps the knob-plus-jack total to 0 and 5 seconds"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "VocalLamma.cpp:355 compares getVoltage() with no channel against 1.0 and flips the Gate on parameter on each rise"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "VocalLamma.cpp:385 compares getVoltage() with no channel against 1.0 and line 387 measures the frames between one rise and the next"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VocalLamma.cpp:350 reads getVoltage() with no channel, divides it by 10 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VocalLamma.cpp:431 reads getVoltage() with no channel, divides it by 10 and clamps the knob-plus-jack total to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "VocalLamma.cpp:434 takes 10 times the tanh of a fifth of the mix and line 437 writes it with setVoltage and no setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "VocalLamma.cpp:435 takes 10 times the tanh of a fifth of the mix and line 438 writes it with setVoltage and no setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "VocalLamma.cpp:300 writes the glided pitch in volts with setVoltage and no setChannels"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 6651d58, the only commit whose plugin.json carries the installed 2.2.0, and that file is byte-identical to the installed one. Every control and jack has a widget, so all of them are covered. The manual disagrees with the code in two places. It says polyphonic cables can carry mults to LEFT and RIGHT: both outputs are written with a plain setVoltage and no setChannels, so they are mono. And it gives the delay buffer as about 22.8 seconds at 48kHz, where the buffer is 2 to the 19th samples, which is 10.9 seconds at that rate; the knob's own 10ms to 2 second range is what a reader meets either way, so no buffer figure is quoted in the lines. The manual also describes the pitch jitter as about 0.08 semitones; the code adds it in volts, so the scale factor is 0.08 of an octave, though the jitter itself is smoothed so heavily that the audible wander is far smaller than either figure, and no number for it is quoted. FEEDBACK is the one delay knob with no CV jack. The MIDI menu items are Rack's own, named from the application's English translation file."
   }
  }
 }

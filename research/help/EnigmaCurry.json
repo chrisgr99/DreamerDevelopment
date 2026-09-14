@@ -1,18 +1,224 @@
 {
  "plugin": "EnigmaCurry",
- "source": "https://github.com/EnigmaCurry/EnigmaCurry-vcv-pack",
+ "source": "https://github.com/EnigmaCurry/EnigmaCurry-vcv-pack/tree/v2#readme",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Transport": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "DAW-style transport: play and stop, arm recording and punch it in and out on the clock, with gates and triggers for a recorder and for a clock generator",
+    "Sets the recording length in counted clock cycles, 0 to 128; the upper display shows the figure, in red while the length is switched on",
+    "Switches the LENGTH counter on and off; the lamp is lit while the length is in use, and with it off recording runs for as long as it stays armed",
+    "Starts playback when pressed and stops it when pressed again, arming permitting; the lamp is lit for as long as the module is playing",
+    "Arms recording when pressed and disarms it when pressed again; the lamp blinks while an arming change is queued for the next quantised beat",
+    "Stops playback, disarms recording, clears both counters and fires a pulse from RST",
+    "A rising edge through 1V advances the counter, and only while playing; the counter steps once per several edges, according to the Incoming Clock Divider setting, which starts at 4",
+    "A rising edge through 1V starts playback and the next one stops it; if recording is armed, recording starts with it",
+    "A rising edge through 1V arms recording and the next one disarms it; while the module is playing the change is queued for the next beat the Quantize Arming setting allows",
+    "A rising edge through 1V stops playback, disarms recording, clears both counters and fires a pulse from RST",
+    "A 1ms pulse at 10V at the start of each pass through the record length, whether recording or not; a sampler clocked from this stays in step with the clock the recording was made against",
+    "10V for the whole time the module is playing and 0V while it is stopped",
+    "A 1ms pulse at 10V when playback starts, and another when it stops",
+    "10V for the whole time the module is playing with recording armed, and 0V at any other time",
+    "A 1ms pulse at 10V when recording starts, and another when it stops",
+    "A 1ms pulse at 10V on every reset, including the ones the On Start and On Stop settings send",
+    "Note — the counters, the record length and the LOOP output all depend on a clock patched into CLK. With that jack empty the module will play and record, but it counts nothing and never punches out.",
+    "Note — the upper display shows the record length and the lower one shows the elapsed count: bars played while the module is running, or bars recorded, in red, while it is armed.",
+    "Note — every jack on the module is monophonic; only the first channel of a polyphonic cable is read.",
+    "Menu — On Start: No action, Send Reset — chooses whether a reset pulse is fired when playback starts; it starts at No action",
+    "Menu — On Stop: No action, Send Reset — chooses whether a reset pulse is fired when playback stops; it starts at Send Reset",
+    "Menu — Incoming Clock Divider: 1, 2, 4 (MIDI-CV CLK/N), 8, 12, 16, 24 PPQN (MIDI-CV CLK), 48 PPQN — sets how many edges at CLK make one counted cycle; it starts at 4, for four beats in a bar",
+    "Menu — Quantize Arming: OFF, 1, 2, 4, 8, 16, 32, 64, 128 — sets how many counted cycles pass before a queued arming change takes effect while playing; OFF applies it at once",
+    "Menu — Stop after record length? — when ticked, playback stops once the record length has been counted out, rather than the length governing the recording alone",
+    "Menu — Play button is toggle? — when ticked, a second play trigger stops playback; unticked, repeated play triggers leave the module playing"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "2": 6,
+    "0": 7,
+    "1": 8,
+    "3": 9
+   },
+   "out": {
+    "5": 10,
+    "0": 11,
+    "1": 12,
+    "3": 13,
+    "4": 14,
+    "2": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/Transport.cpp:92 passes getNormalVoltage(0.0), a channel-0 read, to a dsp::SchmittTrigger with its default thresholds of 0 and 1 (Rack-SDK include/dsp/digital.hpp:107)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/Transport.cpp:108 passes getNormalVoltage(0.0), a channel-0 read, to a dsp::SchmittTrigger with its default thresholds of 0 and 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/Transport.cpp:125 passes getNormalVoltage(0.0), a channel-0 read, to a dsp::SchmittTrigger with its default thresholds of 0 and 1, and only while playing"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/Transport.cpp:85 passes getNormalVoltage(0.0), a channel-0 read, to a dsp::SchmittTrigger with its default thresholds of 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Transport.cpp:163 writes 10 times the playing flag to channel 0 only"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Transport.cpp:173 writes 10 or 0 to channel 0 only, gated by a dsp::PulseGenerator triggered with TRIGGER_DURATION, defined as 1e-3 at line 23"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Transport.cpp:175 writes 10 or 0 to channel 0 only, gated by a dsp::PulseGenerator triggered with TRIGGER_DURATION, defined as 1e-3 at line 23"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Transport.cpp:164 writes 10 times the playing-and-armed flag to channel 0 only"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Transport.cpp:174 writes 10 or 0 to channel 0 only, gated by a dsp::PulseGenerator triggered with TRIGGER_DURATION, defined as 1e-3 at line 23"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Transport.cpp:176 writes 10 or 0 to channel 0 only, gated by a dsp::PulseGenerator triggered with TRIGGER_DURATION, defined as 1e-3 at line 23"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit 0aec914, whose plugin.json is byte-for-byte the installed one: it carries version 2.0.7 and the two installed models, where the next commit adds a third model, Pulse, that this build does not have. Its subject, \"Transport: change the default On Start action to no action\", is the change the installed build carries.\n\nSOMETHING A PERSON SHOULD CHECK. With the LENGTH knob at 0 and a clock running, src/Transport.cpp:132 evaluates playCount modulo recordLength with recordLength zero. Integer division by zero is undefined in C++, and what happens depends on the processor: on arm64, which this build is, the division returns zero rather than trapping, so the LOOP output pulses when the play counter reads 1 and not afterwards. Anyone relying on LENGTH 0 should test it rather than trust it.\n\nThe README calls the context menu item \"Stop on record length\"; the menu itself prints \"Stop after record length?\" (src/Transport.cpp:559), and the lines use what the menu prints.\n\nThe \"Play button is toggle?\" item is ticked when the module's playIsIdempotent flag is FALSE (src/Transport.cpp:573). Ticked therefore means a second play trigger stops playback, which is the behaviour the module comes up with.\n\nThe two seven-segment numbers are drawn by a custom overlay widget with no ParamWidget behind them, so they cannot be clicked for help; what they show is in a Note line instead.\n\nThe record and play counters wrap at 1000 (src/Transport.cpp:131), and the display prints XXX for anything above 999."
   },
   "Latch": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two independent latches: a voltage at TRIG sets the output high and one at RESET sets it low, each side taking up to 16 polyphonic channels",
+    "1V or more sets that side's LATCH output to 10V and holds it there; while the latch is already set, further voltage here changes nothing",
+    "1V or more returns that side's LATCH output to 0V, and while the voltage is held that side's TRIG input cannot set the latch again",
+    "10V while that side's latch is set and 0V while it is clear, carrying as many channels as the busier of that side's two inputs",
+    "Note — the inputs are read as levels rather than as edges: any voltage of 1V or more counts, whether it arrives as a trigger, a gate or a slow ramp crossing 1V.",
+    "Note — the two sides share nothing. With 16 channels into each, the module holds 32 separate latches.",
+    "Note — a change of state is followed by one sample in which that channel accepts neither input, which keeps a trigger and a reset arriving together from fighting over the latch."
+   ],
+   "in": {
+    "0": 1,
+    "2": 1,
+    "1": 2,
+    "3": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/Latch.cpp:47 takes the channel count from this jack and line 55 tests getPolyVoltage(c) >= 1.f for each channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/Latch.cpp:47 takes the channel count from this jack and line 49 tests getPolyVoltage(c) >= 1.f for each channel"
+     },
+     "2": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/Latch.cpp:47 takes the channel count from this jack and line 55 tests getPolyVoltage(c) >= 1.f for each channel"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/Latch.cpp:47 takes the channel count from this jack and line 49 tests getPolyVoltage(c) >= 1.f for each channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Latch.cpp:59 writes 10 or 0 per channel and line 61 calls setChannels with the larger of the two inputs' channel counts"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Latch.cpp:59 writes 10 or 0 per channel and line 61 calls setChannels with the larger of the two inputs' channel counts"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit 0aec914, whose plugin.json is byte-for-byte the installed one at version 2.0.7.\n\nThe README describes the inputs as taking triggers. The code tests a level, not an edge: getPolyVoltage(c) >= 1.f at src/Latch.cpp:49 and 55. A gate left high therefore keeps the latch in that state, and a reset held high locks out the trigger for as long as it is held. Nothing about the behaviour contradicts the README for ordinary triggers, so the difference is recorded here rather than in a control's line.\n\nThe one-sample hold after each change comes from HYSTERISYS_SAMPLES, defined as 1 at src/Latch.cpp:24; on that sample the channel's output is not written at all and simply keeps its previous value.\n\nThe channel count is max(1, trigger channels, reset channels), so a side with nothing patched still outputs one channel at 0V.\n\nThe panel prints TRIG, RESET and LATCH twice each, once per side; the maker's tooltips add the numbers 1 and 2."
   }
  }
 }

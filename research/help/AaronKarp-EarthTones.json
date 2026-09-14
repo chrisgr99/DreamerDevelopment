@@ -1,13 +1,82 @@
 {
  "plugin": "AaronKarp-EarthTones",
- "source": "https://github.com/aaronkarp123/EarthTones",
+ "source": "https://github.com/aaronkarp123/EarthTones/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "PolarCV": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Control voltages taken from a point travelling round one of four polar equations, drawn on the screen with the point marked in red",
+    "Each press moves to the next speed multiplier and the lamp colour shows which — magenta 0.5x, cyan 1x, yellow 2x — though the rate changes by the square of that figure, so 0.5x quarters it",
+    "Moves to the previous of the four equations, wrapping from the first round to the last; the equation in force is printed across the top of the screen",
+    "Moves to the next of the four equations, wrapping from the last round to the first; the equation in force is printed across the top of the screen",
+    "Sets how fast the point travels round the equation; it is ignored entirely while anything is patched to the jack beside it",
+    "Sets the first constant of the equation, 0 to 10 in steps of 0.5; the value in force is printed into the equation across the top of the screen",
+    "Sets the second constant of the equation, 0 to 10 in steps of 0.5; the value in force is printed into the equation across the top of the screen",
+    "Takes over from the speed knob: 0V leaves the point almost stationary, and higher voltages send it backwards round the equation, fastest at 10V",
+    "The radius of the point in polar coordinates, ±10V",
+    "The horizontal position of the point, its radius times the sine of the angle, ±10V",
+    "The vertical position of the point, its radius times the cosine of the angle, ±10V",
+    "Note — patching anything into the speed jack cuts the speed knob out altogether; the knob is read only while that jack is empty.",
+    "Note — the point never comes to rest: a small fixed amount is added to the angle every sample whatever the speed setting.",
+    "Note — the screen is a display and not a control; nothing drawn on it responds to a click or a drag.",
+    "Note — there is no reset or sync input, so nothing in the patch can return the point to the start of the equation."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the speed knob",
+      "why": "src/PolarCV.cpp process(): speed_inp = clamp(inputs[SPEED_INPUT].getVoltage(), 0.f, 10.f), read only when isConnected(), one voltage per frame"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/PolarCV.cpp process(): setVoltage(current_cursor.y * 10.0f), where the radius is a sine or cosine and so lies between -1 and 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/PolarCV.cpp process(): setVoltage(carts.x * 10.0f), where carts.x is the radius times sin(theta)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/PolarCV.cpp process(): setVoltage(carts.y * 10.0f), where carts.y is the radius times cos(theta)"
+     }
+    }
+   },
+   "notes": "Three things in this module do not match what it shows or says. First, the speed CV: speed_range_slope is (0.02 - 0.0001) / (0 - 10), which is negative, so 0V gives the slowest forward rate and 10V gives a large negative rate — the CV runs the point backwards and the mapping is plainly the wrong way round. Second, the mult button: the multiplier is applied as cur_mlt * cur_mlt, so the choices printed as 0.5x, 1x and 2x change the rate by 0.25, 1 and 4. Third, the equation printed on the screen for the first of the four reads A sin(theta) + B cos(theta), while the code computes sin(A theta) * cos(B theta); the other three printed forms match their code. Two parameters, CUR_EQ_PARAM and CUR_TIME_MULT_IDX_PARAM, hold the current equation and multiplier as saved state and have no widget on the panel, so they get no line and no tag. The A and B knobs are snapped to whole numbers over 0 to 20 and both displayed and used at half that."
   }
  }
 }

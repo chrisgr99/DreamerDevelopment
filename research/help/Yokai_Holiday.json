@@ -1,18 +1,203 @@
 {
  "plugin": "Yokai_Holiday",
- "source": "https://github.com/demcanulty/Yokai_Holiday/",
+ "source": "https://github.com/demcanulty/Yokai_Holiday/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
-  "Taps_Proto": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
   "Taps": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A delay that records into a loop and reads it back at two points, one running forwards through the recording and one running backwards, with the reverse tap feeding back into the loop",
+    "Sets the length of the recording loop, 0.5 to 10 seconds; with a cable in CLOCK the whole number part instead picks a multiple of the clock interval, a sixth of it at 0, once at 5 and six times at 10",
+    "Sets how much of the reverse tap is written back into the loop along with the input, from none at 0 to all of it at 1",
+    "Sets how far back in the loop the reverse tap reads, from the write point at 0 to a whole loop behind it at 1",
+    "Sets how far back in the loop the forward tap reads, from the write point at 0 to a whole loop behind it at 1",
+    "Scales the LENGTH input, inverting it below the centre; at full travel one volt adds one second to the loop",
+    "Scales the FEEDBACK input, inverting it below the centre; at full travel 10V covers the knob's whole range",
+    "Scales the reverse tap's DISTANCE input, inverting it below the centre; at full travel 10V covers the knob's whole range",
+    "Scales the forward tap's DISTANCE input, inverting it below the centre; at full travel 10V covers the knob's whole range",
+    "The signal recorded into the loop; a polyphonic cable is summed to one channel before it is written",
+    "Times the interval between rising edges, reading high at 1.7V, and makes the loop that long; the LENGTH knob then multiplies or divides the interval",
+    "Modulates the loop length through the LENGTH trimpot, the total held between 0.5 and 10 seconds",
+    "Modulates the feedback amount through the FEEDBACK trimpot, the total held between 0 and 1",
+    "Modulates how far back the reverse tap reads, through the trimpot for that tap, the total held between 0 and 1",
+    "Modulates how far back the forward tap reads, through the trimpot for that tap, the total held between 0 and 1",
+    "The reverse tap, reading backwards through the loop, and the only signal that FEEDBACK writes back in",
+    "The forward tap, reading forwards through the loop at the distance set for it, which is an ordinary delay",
+    "Note — the module is silent for the first half second after a patch is loaded, while the buffers are cleared",
+    "Note — recording runs the whole time and there is nothing to arm, so sound reaches both outputs as soon as INPUT is patched",
+    "Note — the reverse tap crosses the write point once per loop, and a 0.2 second crossfade covers the join; one of the lights flashes each time that happens",
+    "Note — an unsteady clock drags the read and write points across older material, which clicks; once the delay time is right, unpatch CLOCK and leave LENGTH alone to hold it",
+    "Note — turning the reverse tap's DISTANCE while sound is playing adds high-frequency noise, which the maker lists as a known bug"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Taps.cpp:549 getVoltageSum adds every channel of the cable into the one sample that is written"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1.7V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the LENGTH knob sets the loop instead",
+      "why": "Taps.cpp:249 compares the single voltage against 1.7; Taps.cpp:432 uses the knob's length only while this jack is unpatched"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Taps.cpp:371 multiplies the single voltage by the trimpot and adds it to the knob as seconds; Taps.cpp:375 holds the total between 0.5 and 10"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Taps.cpp:348 multiplies the single voltage by 0.1 and by the trimpot before adding it to the knob, and the total is held between 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Taps.cpp:487 multiplies the single voltage by 0.1 and by the trimpot before adding it to the knob, and the total is held between 0 and 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Taps.cpp:455 multiplies the single voltage by 0.1 and by the trimpot before adding it to the knob, and the total is held between 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Taps.cpp:721 setVoltage on one channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "Taps.cpp:722 setVoltage on one channel"
+     }
+    }
+   },
+   "notes": "The panel prints DISTANCE for the two tap position knobs while the maker's tooltip for both reads 'Location', and the two trimpots beside them share the tooltip 'Location Modulation'; the two LENGTH-row controls and the two FEEDBACK-row controls are named unambiguously. The loop buffer is fixed at 96000 samples per second times 10 seconds, so the full 10 seconds is only available up to a 96kHz sample rate. Feedback is taken from the reverse tap alone; the forward tap never returns to the loop. Taps.cpp:733 decrements the reverse light's brightness and then tests the buffer light's variable instead of its own, so the reverse brightness is never floored at zero; it is reset on each crossing, so the light still works. The LENGTH input is given no range field because the code applies no clamp to the jack itself, only to the sum, at one second per volt through the trimpot."
+  },
+  "Taps_Proto": {
+   "lines": [
+    "An earlier, smaller version of the reverse delay: it records into a loop and reads it back at a forward tap and a backward tap, with a mixed output of the two",
+    "Sets the length of the recording loop, 0.5 to 10 seconds; with a cable in the clock input nothing reads this knob, because the clock sets the length instead",
+    "Sets how much of the reverse tap is written back into the loop along with the input, from none at 0 to all of it at 1",
+    "Sets how far back in the loop the reverse tap reads, from a tenth of the loop at 0.1 to a whole loop at 1",
+    "Sets how far back in the loop the forward tap reads, from a tenth of the loop at 0.1 to a whole loop at 1",
+    "The signal recorded into the loop; a polyphonic cable is summed to one channel before it is written",
+    "Times the interval between rising edges, reading high at 1.7V, and makes the loop exactly that long",
+    "The reverse tap, reading backwards through the loop, and the only signal that feedback writes back in",
+    "The forward tap, reading forwards through the loop at the distance set for it, which is an ordinary delay",
+    "The two taps added together and halved",
+    "Note — the module is silent for the first half second after a patch is loaded, while the buffers are cleared",
+    "Note — recording runs the whole time and there is nothing to arm, so sound reaches the outputs as soon as the input is patched",
+    "Note — the reverse tap crosses the write point once per loop, and a 0.2 second crossfade covers the join"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Taps_Proto.cpp:341 getVoltageSum adds every channel of the cable into the one sample that is written"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1.7V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the length knob sets the loop instead",
+      "why": "Taps_Proto.cpp:191 compares the single voltage against 1.7; Taps_Proto.cpp:266 takes the knob's length only while this jack is unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Taps_Proto.cpp:535 setVoltage on one channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "Taps_Proto.cpp:536 setVoltage on one channel"
+     },
+     "2": {
+      "poly": false,
+      "why": "Taps_Proto.cpp:537 setVoltage on one channel, of the two taps summed and halved"
+     }
+    }
+   },
+   "notes": "This module and Taps share a name, a description and most of their code; the installed plugin.json gives both the same summary. Taps_Proto has no CV inputs, no modulation trimpots and no lights, and adds a mix output that Taps does not have. Its position knobs run from 0.1 rather than 0, and its clock handling has no multiplier: the loop is made exactly one clock interval long, where Taps scales the interval by the whole number part of its LENGTH knob. The knobs' tooltips are 'Length', 'Feedback' and two called 'Location', matching the panel's lower-case length, feedback and location lettering. The clock input has no lettering beside it on the panel; only its tooltip names it."
   }
  }
 }

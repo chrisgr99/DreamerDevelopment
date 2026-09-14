@@ -2,22 +2,184 @@
  "plugin": "Minilab3",
  "source": "https://github.com/dustinlacewell/vcv-minilab3",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "MiniLab": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns the knobs, faders, wheel and bend of an Arturia MiniLab 3 into control voltages, and hands the same surfaces over to a chain of MiniPad expanders whenever one of the controller's pads is held",
+    "Carries 5V while a MIDI device is chosen and no pad on the controller is being held, and 0V while a pad is held or no device is chosen, so it says which module in the chain the knobs are reaching",
+    "Follows the controller's pitch bend wheel, -5V fully down, 0V at rest and 5V fully up",
+    "Follows the controller's modulation wheel, 0V to 10V",
+    "The value piled up by turning that numbered knob on the controller: each click of the encoder moves it by the turn speed set on this jack's own right-click menu, and the total is scaled to 0V to 10V",
+    "Follows that numbered fader on the controller, 0V to 10V, and the faders are read whether or not a pad is being held",
+    "Note — nothing comes out until a MIDI driver, device and channel are chosen in the display at the top of the panel; with none chosen the status light is dim and every jack stays where it was",
+    "Note — channel 16 is reserved: the module uses it to talk to the MiniPad expanders, so choosing it here puts the channel back to all channels",
+    "Note — MiniPad expanders go immediately to the right, chained one after another, and each takes the driver, device and channel from here; a MiniLog goes immediately to the left",
+    "Note — while any pad on the controller is held, this module stops following the knobs, wheel, bend and aftertouch and that pad's expander follows them instead; the faders always come out here",
+    "Note — the velocity and aftertouch outputs exist in the module but have no jack on this panel; they are on the MiniPad expanders instead",
+    "Menu — Slew limit — a slider on each output jack's own right-click menu, setting how long that jack takes to reach a new value, from none up to 2 seconds",
+    "Menu — Mode: 0V:1V, 0V:5V, 0V:10V, -1V:1V, -5V:5V, -10V:10V — on each output jack's own right-click menu, setting the voltage range that jack's value is scaled into",
+    "Menu — Resolution: Two, Three, Four, Five, Eight, Twelve, Low, Medium, High — on a knob jack's own right-click menu, setting how many steps the knob's travel is divided into, two up to 8192",
+    "Menu — Turn Speed: 1, 2, 10, 1%, 2%, 5%, 10%, 25%, 50%, Toggle — on a knob jack's own right-click menu, setting how far one click of the encoder moves the value"
+   ],
+   "out": {
+    "0": 1,
+    "2": 2,
+    "3": 3,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "9": 4,
+    "10": 4,
+    "11": 4,
+    "12": 4,
+    "13": 5,
+    "14": 5,
+    "15": 5,
+    "16": 5
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BaseModule.cpp line 13, gate is built with UNIPOLAR_5 over a range of 0 to 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "BaseModule.cpp line 27, bend is built with BIPOLAR_5 over 0 to 127 and starts at 64"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "BaseModule.cpp line 33, mod is built with UNIPOLAR_10 over 0 to 127"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "BaseModule.cpp line 51, each knob is built with UNIPOLAR_10"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MiniLab.cpp line 24, each slider is built with UNIPOLAR_10 over 0 to 127"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit ce83bfe, whose plugin.json carries the installed 2.0.1; the repository's head is one commit later and changes when the output voltage is written. The MIDI input port is configured in BaseModule.cpp line 9 but the widget never places a jack for it, so it cannot be clicked and gets no line: the device is chosen in the MidiDisplay at the top of the panel instead. The velocity and aftertouch outputs are likewise configured and never placed, so they too get nothing. Every jack is single channel. The voltage ranges given are the ones the module starts with; each jack's own right-click menu can set any of six ranges, so a patch may differ. The knob outputs are relative: the controller's knobs are endless encoders sending only up or down, and the module keeps a running total, moved by the turn speed and divided into as many steps as the resolution says, then scaled into the voltage range. The channel numbered 15 in the source is MIDI channel 16 as a person counts them, and it is reserved for the MiniLab to address its pads; MiniLab.cpp line 47 puts the channel back to all channels if it is chosen here. The faders are handled before the active check at MiniLab.cpp line 108, which is why they keep working while a pad is held."
   },
   "MiniPad": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for MiniLab that follows the MiniLab 3's knobs, wheels and aftertouch while one particular pad is held, so each pad gives a whole second set of controls",
+    "Carries 5V while this expander's pad is held on the controller and 0V the rest of the time",
+    "The velocity the pad was struck with, 0V to 10V, set at the moment the pad goes down and held until the next press",
+    "Follows the controller's pitch bend wheel while this expander's pad is held, -5V fully down, 0V at rest and 5V fully up, and it holds its last value when the pad is let go",
+    "Follows the controller's modulation wheel while this expander's pad is held, 0V to 10V, and it holds its last value when the pad is let go",
+    "Follows the pressure on this expander's pad after it has been struck, 0V to 10V, and it is read whether or not the pad counts as held",
+    "The value piled up by turning that numbered knob on the controller while this expander's pad is held: each click of the encoder moves it by the turn speed set on this jack's own menu",
+    "Note — this module does nothing on its own: it belongs to the right of a MiniLab, with other MiniPads allowed between, and the MiniLab hands it the MIDI driver, device and channel",
+    "Note — the number shown on the panel is this expander's place in the chain, and it is the number of the controller pad that drives it; two dashes mean no MiniLab was found to the left",
+    "Note — while this expander's pad is held the MiniLab itself stops following the knobs and wheels, and they come out here instead; let the pad go and every jack here holds its last value",
+    "Menu — Slew limit — a slider on each output jack's own right-click menu, setting how long that jack takes to reach a new value, from none up to 2 seconds",
+    "Menu — Mode: 0V:1V, 0V:5V, 0V:10V, -1V:1V, -5V:5V, -10V:10V — on each output jack's own right-click menu, setting the voltage range that jack's value is scaled into",
+    "Menu — Resolution: Two, Three, Four, Five, Eight, Twelve, Low, Medium, High — on a knob jack's own right-click menu, setting how many steps the knob's travel is divided into, two up to 8192",
+    "Menu — Turn Speed: 1, 2, 10, 1%, 2%, 5%, 10%, 25%, 50%, Toggle — on a knob jack's own right-click menu, setting how far one click of the encoder moves the value"
+   ],
+   "out": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BaseModule.cpp line 13, gate is built with UNIPOLAR_5 over a range of 0 to 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "BaseModule.cpp line 20, velocity is built with UNIPOLAR_10 over 0 to 127"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "BaseModule.cpp line 27, bend is built with BIPOLAR_5 over 0 to 127 and starts at 64"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "BaseModule.cpp line 33, mod is built with UNIPOLAR_10 over 0 to 127"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "BaseModule.cpp line 39, touch is built with UNIPOLAR_10 over 0 to 127"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "BaseModule.cpp line 51, each knob is built with UNIPOLAR_10"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit ce83bfe, whose plugin.json carries the installed 2.0.1. Four slider outputs and the MIDI input are inherited from the shared base module and are never placed on this panel, so they cannot be clicked and get no line; the sliders are on the MiniLab. The expander's place in the chain is worked out at MiniPad.cpp line 20 by walking left until a MiniLab is found, counting MiniPads on the way, and that number is both the panel's index display and the controller pad it answers to. Pad presses reach the expander on MIDI channel 16, which the MiniLab reserves for the purpose, while everything else arrives on the channel the MiniLab is set to. Aftertouch is the one signal read outside the active check, at MiniPad.cpp line 133, so pressure on the pad is followed even as the pad is being released. Every jack is single channel, and the voltage ranges given are the ones the module starts with."
   },
   "MiniLog": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A scrolling log of the MIDI messages a MiniLab is receiving, for working out what a controller is actually sending",
+    "Note — this module does nothing on its own: it belongs immediately to the left of a MiniLab, which passes its incoming messages across; the light at the top is on while that connection is there",
+    "Note — the log has no jacks and no controls, and the text cannot be clicked; the first line shows the engine's sample rate, and resetting the module clears it"
+   ],
+   "notes": "Read from the repository at commit ce83bfe, whose plugin.json carries the installed 2.0.1. The module declares no parameters, no inputs and no outputs, so there is nothing on it to click apart from the panel itself; the two Note lines are all the entry can carry. MiniLab.cpp line 75 casts its left neighbour to a MiniLog and hands it each message before processing it, which is the whole of the connection: with anything else to the left, or nothing, the log stays empty and its light is off. The message buffer holds 512 entries and stops accepting when full, so a flood of messages is truncated rather than dropped from the front."
   }
  }
 }

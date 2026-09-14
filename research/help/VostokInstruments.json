@@ -1,53 +1,1410 @@
 {
  "plugin": "VostokInstruments",
- "source": "https://github.com/Vostok-Instruments/Vostok_VCVRack",
+ "source": "https://github.com/Vostok-Instruments/Vostok_VCVRack/tree/fd2d76a",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Path": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A one-in four-out router: a single signal is crossfaded around four outputs by a slider, so that neighbouring outputs overlap as it passes between them",
+    "Moves the signal around the four outputs; at each end only one output carries it, and between two positions both of the outputs it lies between carry part of it",
+    "Switched to + the ROUTE CV knob adds the CV input to the slider, switched to - it subtracts it",
+    "Attenuates the ROUTE CV input before it is added to the ROUTE slider, 0% to 100%",
+    "The signal that is routed to the outputs; unpatched it reads 10V, which turns the module into a four-output voltage source",
+    "Moves the routing, 5V peak to peak for the full sweep, added to the ROUTE slider through the ROUTE CV knob",
+    "One of the four outputs; it carries the input at whatever share of it the routing gives this output, and silence when the routing is away from it",
+    "Note — the input jack is normalled to 10V, so with nothing patched the module puts a moving DC voltage out of its four jacks.",
+    "Note — the crossfade never quite reaches unity: each output peaks at about 0.89 of the input, which matches the hardware's crossfader."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6
+   },
+   "family": {
+    "in": {
+     "1": "cv"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "10V",
+      "why": "src/Path.cpp:58 reads this input with getNormalVoltage(10.f)"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "range": "±5V",
+      "sumRange": "0 to 1V",
+      "why": "src/Path.cpp:52-54 reads this input with getVoltage, divides by 5, scales by the ROUTE CV knob, applies the +/- switch and clamps the sum with the slider to 0-1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Path.cpp:59-62 writes each output with setVoltage, the input times a gain from gainsForChannels at src/plugin.cpp:20-27"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/Path.cpp:59-62 writes each output with setVoltage, the input times a gain from gainsForChannels at src/plugin.cpp:20-27"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/Path.cpp:59-62 writes each output with setVoltage, the input times a gain from gainsForChannels at src/plugin.cpp:20-27"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/Path.cpp:59-62 writes each output with setVoltage, the input times a gain from gainsForChannels at src/plugin.cpp:20-27"
+     }
+    }
+   },
+   "notes": "The signal input and the four outputs carry whatever you patch in, so they are given no family. sumRange for the ROUTE CV input is written as a voltage range because the field takes only those four spellings; the quantity it clamps is the 0-to-1 routing position, not a voltage. The crossfade law is a cubic in gainsForChannels (src/plugin.cpp:20-27) with per-channel gains of 0.89, 0.865, 0.865 and 0.89; outputs 1 and 4 are clamped at their outer ends so the routing does not wrap. The maker's own second-line descriptions on the two inputs read 'Normalized to 10V' and 'Expects 5V peak-to-peak, combines with ROUTE slider', and both are borne out by the code."
   },
   "Trace": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-in one-out scanner: four signals are crossfaded onto one output by a slider, so that neighbouring inputs overlap as it passes between them",
+    "Moves the scan across the four inputs; at each end only one input reaches the output, and between two positions both of the inputs it lies between reach it",
+    "Switched to + the SCAN CV knob adds the CV input to the slider, switched to - it subtracts it",
+    "Attenuates the SCAN CV input before it is added to the SCAN slider, 0% to 100%",
+    "Moves the scan, 5V peak to peak for the full sweep, added to the SCAN slider through the SCAN CV knob",
+    "One of the four signals being scanned; it reaches the output at whatever share the scan position gives it, and not at all when the scan is away from it",
+    "The four inputs added together at the shares the scan gives them, clipped at ±10V unless the menu turns that off",
+    "Note — the scan never quite reaches unity: each input peaks at about 0.89 of its voltage, which matches the hardware's crossfader.",
+    "Menu — Clip Output ±10V — holds the output inside ±10V; on by default, and turning it off lets the sum run past the rails"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "range": "±5V",
+      "sumRange": "0 to 1V",
+      "why": "src/Trace.cpp:55-57 reads this input with getVoltage, divides by 5, scales by the SCAN CV knob, applies the +/- switch and clamps the sum with the slider to 0-1"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Trace.cpp:69-70 reads each of the four inputs with getVoltage and multiplies by a gain from gainsForChannels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Trace.cpp:69-70 reads each of the four inputs with getVoltage and multiplies by a gain from gainsForChannels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Trace.cpp:69-70 reads each of the four inputs with getVoltage and multiplies by a gain from gainsForChannels"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Trace.cpp:69-70 reads each of the four inputs with getVoltage and multiplies by a gain from gainsForChannels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Trace.cpp:72-76 clamps the sum to ±10V when the Clip Output menu item is on and writes it with setVoltage"
+     }
+    }
+   },
+   "notes": "The four signal inputs and the output carry whatever you patch in, so they are given no family. sumRange on the scan input is written as a voltage range because the field takes only those four spellings; the quantity clamped is the 0-to-1 scan position. The maker's second line on the scan input reads 'Expects 5V peak-to-peak, combines with SCAN slider', which the code bears out. The crossfade law is the same cubic Path uses."
   },
   "Asset": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Six channels that each attenuate an input, optionally invert it, and add a DC offset of either sign; with nothing patched a channel is a bare voltage source",
+    "Attenuates that channel's input, from silence at fully counter-clockwise to unchanged at fully clockwise",
+    "Sets the DC voltage added to that channel after the level control, 0V to 10V",
+    "Switched to - that channel's input is inverted before the level control",
+    "Switched to - that channel's DC offset is subtracted instead of added, giving 0V down to -10V",
+    "The signal that channel attenuates; leave it unpatched and the channel takes whatever reached the input above it",
+    "That channel's input scaled by its LEVEL knob with its OFFSET added, clipped at ±10V unless the menu turns that off",
+    "Note — the six inputs cascade: a channel with nothing patched reads the channel above it, and channel 1 with nothing patched reads 0V. Patch one input and every channel below it follows.",
+    "Note — with no input patched anywhere, each channel is a DC source putting out its OFFSET knob alone.",
+    "Menu — Clip Output ±10V — holds every output inside ±10V; on by default, and turning it off lets a channel run past the rails"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 3,
+    "13": 3,
+    "14": 3,
+    "15": 3,
+    "16": 3,
+    "17": 3,
+    "18": 4,
+    "19": 4,
+    "20": 4,
+    "21": 4,
+    "22": 4,
+    "23": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6
+   },
+   "family": {
+    "in": {},
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Asset.cpp:62-63 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Asset.cpp:62-63 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Asset.cpp:62-63 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Asset.cpp:62-63 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Asset.cpp:62-63 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Asset.cpp:62-63 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Asset.cpp:65-69 writes each output with setVoltage, the input times the level knob plus the offset knob, clamped to ±10V when the Clip Output menu item is on"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Asset.cpp:65-69 writes each output with setVoltage, the input times the level knob plus the offset knob, clamped to ±10V when the Clip Output menu item is on"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Asset.cpp:65-69 writes each output with setVoltage, the input times the level knob plus the offset knob, clamped to ±10V when the Clip Output menu item is on"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Asset.cpp:65-69 writes each output with setVoltage, the input times the level knob plus the offset knob, clamped to ±10V when the Clip Output menu item is on"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Asset.cpp:65-69 writes each output with setVoltage, the input times the level knob plus the offset knob, clamped to ±10V when the Clip Output menu item is on"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Asset.cpp:65-69 writes each output with setVoltage, the input times the level knob plus the offset knob, clamped to ±10V when the Clip Output menu item is on"
+     }
+    }
+   },
+   "notes": "The inputs and outputs carry whatever you patch in, audio or control voltage, so they are given no family. The panel marks the input column with the maker's normalling arrow, and the code cascades: normalVoltage carries the previous channel's value forward each iteration, starting at 0V. The two switches on each channel are polarity switches printed +|- on the panel; the white one inverts the input and the orange one inverts the offset. The level knob's tooltip flips sign with the input polarity switch (displayMultiplier at src/Asset.cpp:57-58), as does the offset knob's."
   },
   "Atlas": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four filter cores, each switchable between low pass, high pass and band pass, with a crossfading scanner that sweeps one output across the four",
+    "Sets that channel's cutoff frequency, 20Hz to 20kHz",
+    "Sets that channel's resonance, from none at fully counter-clockwise to the edge of self-oscillation at fully clockwise",
+    "Switched to RES that channel's FM2/RES input reaches the resonance; switched to FM2 it reaches the cutoff instead",
+    "Sets that channel's response: LP is a 4-pole low pass, HP a 2-pole high pass, BP a 4-pole band pass",
+    "Moves the SCAN output across the four filter outputs; at each end only one channel reaches it, and between two positions both of the channels it lies between reach it",
+    "The signal that channel filters; leave it unpatched and the channel takes whatever reached the input above it",
+    "Modulates that channel's cutoff, one octave per volt; leave it unpatched and the channel takes whatever reached the frequency input above it",
+    "Reaches that channel's resonance or its cutoff, according to that channel's CV destination switch; as a resonance CV it is clamped to ±5V",
+    "Moves the scan, a tenth of a volt for each hundredth of the sweep, added to the SCAN slider",
+    "That channel's filtered signal in whichever of the three responses its mode switch has chosen",
+    "The four filter outputs added at the shares the scan gives them",
+    "Note — the four signal inputs cascade: a channel with nothing patched reads the channel above it, and channel 1 with nothing patched reads 0V. The four FREQ inputs cascade the same way.",
+    "Menu — Clip Output ±10V — holds the filter outputs inside ±10V; on by default, and found on the Hardware compatibility submenu"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 4,
+    "13": 4,
+    "14": 4,
+    "15": 4,
+    "16": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 7,
+    "5": 7,
+    "6": 7,
+    "7": 7,
+    "8": 8,
+    "9": 8,
+    "10": 8,
+    "11": 8,
+    "12": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 10,
+    "2": 10,
+    "3": 10,
+    "4": 11
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Atlas.cpp:132-133 reads a connected input with getVoltageSum and otherwise falls back to the previous channel's value"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Atlas.cpp:132-133 reads a connected input with getVoltageSum and otherwise falls back to the previous channel's value"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Atlas.cpp:132-133 reads a connected input with getVoltageSum and otherwise falls back to the previous channel's value"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Atlas.cpp:132-133 reads a connected input with getVoltageSum and otherwise falls back to the previous channel's value"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "normal": "0V",
+      "why": "src/Atlas.cpp:130-131 reads each frequency input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "normal": "the jack above it",
+      "why": "src/Atlas.cpp:130-131 reads each frequency input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "normal": "the jack above it",
+      "why": "src/Atlas.cpp:130-131 reads each frequency input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "normal": "the jack above it",
+      "why": "src/Atlas.cpp:130-131 reads each frequency input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/Atlas.cpp:103-106 reads each FM2/RES input with getVoltage and clamps it to ±5V for the resonance path; src/Atlas.cpp:129 passes the raw voltage to the filter's FM input instead when the switch is on FM2"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/Atlas.cpp:103-106 reads each FM2/RES input with getVoltage and clamps it to ±5V for the resonance path; src/Atlas.cpp:129 passes the raw voltage to the filter's FM input instead when the switch is on FM2"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/Atlas.cpp:103-106 reads each FM2/RES input with getVoltage and clamps it to ±5V for the resonance path; src/Atlas.cpp:129 passes the raw voltage to the filter's FM input instead when the switch is on FM2"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/Atlas.cpp:103-106 reads each FM2/RES input with getVoltage and clamps it to ±5V for the resonance path; src/Atlas.cpp:129 passes the raw voltage to the filter's FM input instead when the switch is on FM2"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 10V",
+      "why": "src/Atlas.cpp:149 reads this input with getVoltage, divides by 10 and clamps the sum with the slider to 0-1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Atlas.cpp:137-139 writes each output with setVoltage from the chosen filter tap, sign-corrected"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/Atlas.cpp:137-139 writes each output with setVoltage from the chosen filter tap, sign-corrected"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/Atlas.cpp:137-139 writes each output with setVoltage from the chosen filter tap, sign-corrected"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/Atlas.cpp:137-139 writes each output with setVoltage from the chosen filter tap, sign-corrected"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/Atlas.cpp:137-139 writes each output with setVoltage from the chosen filter tap, sign-corrected"
+     }
+    }
+   },
+   "notes": "The four signal inputs are read with getVoltageSum, which loops over the polyphonic channels and adds them, so a polyphonic cable is summed to one mono signal rather than filtered per voice; poly is recorded true on that basis. Resonance is capped at 0.8 of the knob plus 0.9 of the CV and clamped to 0.9, which the maker's comment calls about 80% of the Ripples model it is built on. The frequency knobs run from 20Hz to 20kHz, the Ripples constants kFreqKnobMin and kFreqKnobMax. The HP tap is a 2-pole and is halved in level before the output; LP and BP are 4-pole. Three debug menu items — gain compensation, add lowend to HP, and a circuit-based filter simulation — are commented out in the widget and are not reachable."
   },
   "Ceres": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Six linear voltage-controlled amplifiers that also work as a six-into-one mixer, each channel's level set by a knob and a CV input",
+    "Sets that channel's gain, from silence at fully counter-clockwise to unchanged at fully clockwise; the CV input multiplies this setting rather than replacing it",
+    "The signal that channel amplifies; leave it unpatched and the channel takes whatever reached the input above it",
+    "Multiplies that channel's LEVEL knob; it is clamped to 0V-5V and the channel is fully open at 5V, and with nothing patched it reads 5V so the knob works on its own",
+    "That channel's input at the gain its knob and CV set",
+    "Channels 1 to 6 added together at their own gains and soft-clipped at ±10V, and also channel 6's own output",
+    "Note — a channel drops out of the mix as soon as its own output jack is patched, which turns it from a mixer input into a separate VCA. Channel 6 stays in, since its jack is the mix output.",
+    "Note — the six inputs cascade: a channel with nothing patched reads the channel above it, and channel 1 with nothing patched reads 0V. Patch one input and every channel below it follows.",
+    "Menu — Clip Output ±10V — soft-clips the mix output at ±10V; on by default, and found on the Hardware compatibility submenu"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Ceres.cpp:49-50 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Ceres.cpp:49-50 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Ceres.cpp:49-50 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Ceres.cpp:49-50 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Ceres.cpp:49-50 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the jack above it",
+      "why": "src/Ceres.cpp:49-50 reads each input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 5V",
+      "normal": "5V",
+      "why": "src/Ceres.cpp:47-48 reads each CV input with getNormalVoltage(5.f), divides by 5, multiplies by the level knob and clamps the result to 0-1"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 5V",
+      "normal": "5V",
+      "why": "src/Ceres.cpp:47-48 reads each CV input with getNormalVoltage(5.f), divides by 5, multiplies by the level knob and clamps the result to 0-1"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 5V",
+      "normal": "5V",
+      "why": "src/Ceres.cpp:47-48 reads each CV input with getNormalVoltage(5.f), divides by 5, multiplies by the level knob and clamps the result to 0-1"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 5V",
+      "normal": "5V",
+      "why": "src/Ceres.cpp:47-48 reads each CV input with getNormalVoltage(5.f), divides by 5, multiplies by the level knob and clamps the result to 0-1"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 5V",
+      "normal": "5V",
+      "why": "src/Ceres.cpp:47-48 reads each CV input with getNormalVoltage(5.f), divides by 5, multiplies by the level knob and clamps the result to 0-1"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 5V",
+      "normal": "5V",
+      "why": "src/Ceres.cpp:47-48 reads each CV input with getNormalVoltage(5.f), divides by 5, multiplies by the level knob and clamps the result to 0-1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Ceres.cpp:51-59 writes each output with setVoltage as the input times the level"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/Ceres.cpp:51-59 writes each output with setVoltage as the input times the level"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/Ceres.cpp:51-59 writes each output with setVoltage as the input times the level"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/Ceres.cpp:51-59 writes each output with setVoltage as the input times the level"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/Ceres.cpp:51-59 writes each output with setVoltage as the input times the level"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Ceres.cpp:53-69 sums the unpatched channels, soft-clips with clip4 and writes channel 6's output with setVoltage"
+     }
+    }
+   },
+   "notes": "The maker's own second line on every CV input reads 'CV is clipped to the range 0-5V, fully open at 5V', and on the channel 6 output 'Mix of channels 1-6'; both hold. The level is the knob times the CV over 5, clamped to 0-1, so the CV attenuates the knob and cannot open a channel the knob has closed. The mix skips any channel whose own output is patched (src/Ceres.cpp:55-57), which is not documented anywhere in the maker's text. The inputs cascade like Asset's."
   },
   "Fuji": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Six attack-and-decay envelope generators, each able to hold at its peak while a gate is high and each able to free-run as a looping shape",
+    "Sets that channel's attack time, 1.5ms to 1.5 seconds",
+    "Sets that channel's decay time, 1.5ms to 1.5 seconds",
+    "Switched to the gate symbol that channel holds at its peak for as long as the gate stays high, then decays; switched to the pulse symbol it runs attack then decay whatever the gate does",
+    "Switched to the loop symbol that channel free-runs, rising and falling over and over without a gate; switched back it runs only on a gate",
+    "A rising edge starts that channel's envelope; leave it unpatched and the channel follows whatever reached the gate input above it",
+    "That channel's envelope, 0V to 8V when it runs once and -8V to +8V when it loops",
+    "Note — the six gate inputs cascade: a channel with nothing patched reads the channel above it, and channel 1 with nothing patched reads 0V. Patch one gate and every channel below it follows.",
+    "Note — a channel set to loop runs on its own and ignores the gate input except as a reset; a channel set to one shot does nothing until a gate arrives.",
+    "Note — a looping channel swings both sides of zero, from -8V to +8V, while a one-shot channel runs from 0V to 8V."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 3,
+    "13": 3,
+    "14": 3,
+    "15": 3,
+    "16": 3,
+    "17": 3,
+    "18": 4,
+    "19": 4,
+    "20": 4,
+    "21": 4,
+    "22": 4,
+    "23": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Fuji.cpp:89-91 reads each gate input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1, then through a Schmitt trigger"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the jack above it",
+      "why": "src/Fuji.cpp:89-91 reads each gate input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1, then through a Schmitt trigger"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the jack above it",
+      "why": "src/Fuji.cpp:89-91 reads each gate input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1, then through a Schmitt trigger"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the jack above it",
+      "why": "src/Fuji.cpp:89-91 reads each gate input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1, then through a Schmitt trigger"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the jack above it",
+      "why": "src/Fuji.cpp:89-91 reads each gate input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1, then through a Schmitt trigger"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the jack above it",
+      "why": "src/Fuji.cpp:89-91 reads each gate input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1, then through a Schmitt trigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±8V",
+      "why": "src/Fuji.cpp:128-144 writes each output with setVoltage, ten times an envelope clamped to ±0.8 in loop mode and clamped to 0-8V in one-shot mode"
+     },
+     "1": {
+      "poly": false,
+      "range": "±8V",
+      "why": "src/Fuji.cpp:128-144 writes each output with setVoltage, ten times an envelope clamped to ±0.8 in loop mode and clamped to 0-8V in one-shot mode"
+     },
+     "2": {
+      "poly": false,
+      "range": "±8V",
+      "why": "src/Fuji.cpp:128-144 writes each output with setVoltage, ten times an envelope clamped to ±0.8 in loop mode and clamped to 0-8V in one-shot mode"
+     },
+     "3": {
+      "poly": false,
+      "range": "±8V",
+      "why": "src/Fuji.cpp:128-144 writes each output with setVoltage, ten times an envelope clamped to ±0.8 in loop mode and clamped to 0-8V in one-shot mode"
+     },
+     "4": {
+      "poly": false,
+      "range": "±8V",
+      "why": "src/Fuji.cpp:128-144 writes each output with setVoltage, ten times an envelope clamped to ±0.8 in loop mode and clamped to 0-8V in one-shot mode"
+     },
+     "5": {
+      "poly": false,
+      "range": "±8V",
+      "why": "src/Fuji.cpp:128-144 writes each output with setVoltage, ten times an envelope clamped to ±0.8 in loop mode and clamped to 0-8V in one-shot mode"
+     }
+    }
+   },
+   "notes": "The maker's second line on gate inputs 2 to 6 says each is normalled to the gate input for the channel above, and the code bears it out. The maker's second line on every mode switch describes the two modes: an AD envelope on each gate or trigger in Attack Decay mode, and a peak held for the length of the gate in Hold mode. Attack and decay run 1.5ms to 1.5 seconds on a base-10 knob, with an empirical 0.5 scale factor applied before the slew limiter; the maker's comment calls the times characteristic rather than exact. The gate inputs use Rack's default Schmitt thresholds of 0.1V and 1V. A looping channel's output swings ±8V; a one-shot channel's is clamped to 0-8V."
   },
   "Sena": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four oscillators — a sine, a triangle, a saw and a square — each with its own waveshaping control and its own rate range, plus a bank of four noise colours",
+    "Sets that channel's frequency: 15Hz to 1000Hz in VCO mode with coarse tuning, 0.15Hz to 10Hz in LFO mode with coarse tuning, and a twelfth of a semitone either side of C0 in fine tuning",
+    "Folds the sine wave back on itself, adding harmonics as it is turned up",
+    "Hardens the triangle towards a squarer shape by clipping it at a rising gain",
+    "Offsets a copy of the saw and subtracts a tenth of it, which thins and phases the waveform",
+    "Sets the width of the square wave, from half at fully counter-clockwise down to a twentieth at fully clockwise",
+    "Switched to VCO that channel runs at audio rates, switched to LFO at modulation rates",
+    "Switched to V/OCT that channel's frequency input is read as a volt-per-octave pitch; switched to FM it is read as linear frequency modulation, AC coupled and scaled at 120Hz per volt",
+    "Switched to FINE that channel's frequency knob covers a twelfth of a semitone either side of C0 instead of its full range, and the knob jumps to the centre of that range as you switch",
+    "Sets that channel's pitch or modulates its frequency, according to that channel's FM type switch; leave it unpatched and the channel takes whatever reached the input above it",
+    "Modulates that channel's waveshaping control; a tenth of a volt moves it a hundredth of the way, and the result is added to the knob and held inside its range",
+    "That channel's waveform at ±5V",
+    "White noise, a flat spectrum",
+    "Pink noise, falling at -3dB per octave",
+    "Blue noise, rising at +3dB per octave",
+    "Brown noise, falling at -6dB per octave, with its very low end filtered out",
+    "Note — the four frequency inputs cascade: a channel with nothing patched reads the channel above it, and channel 1 with nothing patched reads 0V. Patch one and every channel below it follows.",
+    "Note — switching a channel to FINE moves its frequency knob to the middle of the fine range, so the pitch it had at coarse tuning is not kept.",
+    "Note — the noise outputs are only computed while something is patched to them, so an unpatched noise jack costs nothing.",
+    "Menu — Oversampling: Off, x2, x4, x8 — runs the oscillators above the sample rate to cut aliasing; x2 by default, and found on the Anti-aliasing submenu",
+    "Menu — Use ADAA — turns on antiderivative antialiasing in the waveshapers; on by default, and found on the Anti-aliasing submenu",
+    "Menu — Remove Pulse DC Offset — takes the DC offset out of the square output when its width is away from half; on by default"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 3,
+    "6": 4,
+    "7": 5,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 7,
+    "13": 7,
+    "14": 7,
+    "15": 7,
+    "16": 8,
+    "17": 8,
+    "18": 8,
+    "19": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 9,
+    "2": 9,
+    "3": 9,
+    "4": 10,
+    "5": 10,
+    "6": 10,
+    "7": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 11,
+    "2": 11,
+    "3": 11,
+    "4": 12,
+    "5": 13,
+    "6": 14,
+    "7": 15
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "normal": "0V",
+      "why": "src/Sena.cpp:560-564 reads each frequency input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "normal": "the jack above it",
+      "why": "src/Sena.cpp:560-564 reads each frequency input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "normal": "the jack above it",
+      "why": "src/Sena.cpp:560-564 reads each frequency input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "normal": "the jack above it",
+      "why": "src/Sena.cpp:560-564 reads each frequency input with getNormalVoltage, the normal being the previous channel's value and 0V for channel 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±10V",
+      "sumRange": "0 to 1V",
+      "why": "src/Sena.cpp:585-592 reads each mod input with getVoltage, divides by 10, clamps to ±1, adds the knob and clamps the result to 0-1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±10V",
+      "sumRange": "0 to 1V",
+      "why": "src/Sena.cpp:585-592 reads each mod input with getVoltage, divides by 10, clamps to ±1, adds the knob and clamps the result to 0-1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±10V",
+      "sumRange": "0 to 1V",
+      "why": "src/Sena.cpp:585-592 reads each mod input with getVoltage, divides by 10, clamps to ±1, adds the knob and clamps the result to 0-1"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±10V",
+      "sumRange": "0 to 1V",
+      "why": "src/Sena.cpp:585-592 reads each mod input with getVoltage, divides by 10, clamps to ±1, adds the knob and clamps the result to 0-1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Sena.cpp:451-461 writes each oscillator output with setVoltage, five times a waveform bounded at ±1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Sena.cpp:451-461 writes each oscillator output with setVoltage, five times a waveform bounded at ±1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Sena.cpp:451-461 writes each oscillator output with setVoltage, five times a waveform bounded at ±1"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Sena.cpp:451-461 writes each oscillator output with setVoltage, five times a waveform bounded at ±1"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/Sena.cpp:484-511 writes each noise output with setVoltage from random::normal, and only while the jack is connected"
+     },
+     "5": {
+      "poly": false,
+      "why": "src/Sena.cpp:484-511 writes each noise output with setVoltage from random::normal, and only while the jack is connected"
+     },
+     "6": {
+      "poly": false,
+      "why": "src/Sena.cpp:484-511 writes each noise output with setVoltage from random::normal, and only while the jack is connected"
+     },
+     "7": {
+      "poly": false,
+      "why": "src/Sena.cpp:484-511 writes each noise output with setVoltage from random::normal, and only while the jack is connected"
+     }
+    }
+   },
+   "notes": "The frequency ranges are literals in the source: VCO coarse 15Hz to 1000Hz, LFO coarse 0.15Hz to 10Hz, and both fine ranges a twelfth of a semitone either side of C0 at 16.352Hz (src/Sena.cpp:210-221). Linear FM adds 120 times the input voltage in hertz and is DC blocked. Switching a channel to fine tuning resets its frequency knob to the middle of that range (src/Sena.cpp:525-528), which is a real jump in pitch and is not documented by the maker. The channel 4 mod input behaves differently from the other three: the PWM knob scales the incoming CV rather than offsetting it (src/Sena.cpp:586-587). sumRange on the mod inputs is written as a voltage range because the field takes only those four spellings; the quantity clamped is the 0-to-1 shaping amount. The noise generators use random::normal rather than a bounded uniform, so their peaks are not hard limited."
   },
   "Hive": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-channel stereo mixer with a gain and a voltage-controlled pan on each channel and one master level, which chains into another Hive placed beside it",
+    "Sets that channel's gain, marked in dB",
+    "Places that channel between the two outputs, hard left at fully counter-clockwise and hard right at fully clockwise; the centre is about 1.5dB down on either extreme",
+    "Sets the level of both outputs; the knob is squared before it is applied",
+    "That channel's left input; patch only this one and the same signal feeds both sides of the channel",
+    "That channel's right input; leave it unpatched and it takes whatever is at that channel's left input",
+    "Moves that channel's pan, 5V peak to peak for the full sweep, added to the pan knob and held inside it",
+    "The left side of the mix: the four channels at their gains and pan positions, scaled by MASTER and soft-clipped at ±10V",
+    "The right side of the mix: the four channels at their gains and pan positions, scaled by MASTER and soft-clipped at ±10V",
+    "Note — the MASTER knob comes up at zero, so nothing reaches the outputs until you raise it.",
+    "Note — place a second Hive immediately to the right and this one's mix is added into that one's, but only while both of this one's output jacks are unpatched. Patch either output and the chain is cut.",
+    "Note — the inputs are AC coupled by default, so a DC offset patched in will not reach the outputs. The menu turns that off.",
+    "Menu — AC coupling — puts a 30Hz high-pass on every input, which takes DC offsets out of the mix; on by default, and found on the Hardware compatibility submenu",
+    "Menu — Clip Output ±10V — soft-clips both outputs at ±10V; on by default, and found on the Hardware compatibility submenu"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Hive.cpp:103-104 reads each left input with getVoltage"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Hive.cpp:103-104 reads each left input with getVoltage"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Hive.cpp:103-104 reads each left input with getVoltage"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Hive.cpp:103-104 reads each left input with getVoltage"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the left input beside it",
+      "why": "src/Hive.cpp:106-109 reads each right input with getNormalVoltage, the normal being that channel's left input"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the left input beside it",
+      "why": "src/Hive.cpp:106-109 reads each right input with getNormalVoltage, the normal being that channel's left input"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the left input beside it",
+      "why": "src/Hive.cpp:106-109 reads each right input with getNormalVoltage, the normal being that channel's left input"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the left input beside it",
+      "why": "src/Hive.cpp:106-109 reads each right input with getNormalVoltage, the normal being that channel's left input"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±2.5V",
+      "why": "src/Hive.cpp:111-115 reads each pan input with getVoltage, divides by 2.5, adds the pan knob and clamps the sum to ±1"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±2.5V",
+      "why": "src/Hive.cpp:111-115 reads each pan input with getVoltage, divides by 2.5, adds the pan knob and clamps the sum to ±1"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±2.5V",
+      "why": "src/Hive.cpp:111-115 reads each pan input with getVoltage, divides by 2.5, adds the pan knob and clamps the sum to ±1"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±2.5V",
+      "why": "src/Hive.cpp:111-115 reads each pan input with getVoltage, divides by 2.5, adds the pan knob and clamps the sum to ±1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Hive.cpp:136-145 writes both outputs with setVoltage, the summed channels times the squared master knob, soft-clipped with clip4"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/Hive.cpp:136-145 writes both outputs with setVoltage, the summed channels times the squared master knob, soft-clipped with clip4"
+     }
+    }
+   },
+   "notes": "The maker's second line on the four pan CV inputs reads '5Vp-p bipolar CV for panning, sums with the pan knob'; the code divides the input by 2.5, so ±2.5V is the full sweep, which is 5V peak to peak as the maker says. The pan law is the maker's own, square-root times linear, giving about 1.5dB of centre attenuation. Chaining works only in one direction: a Hive passes its mix to the Hive on its right, and only when its own two outputs are unpatched (src/Hive.cpp:164-173). The chain shows itself as a menu label reading that the module is chained to the Hive on its left, which is a label rather than an item and so is not written as a menu line."
   },
   "Halo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four low-frequency oscillators, each giving a triangle and a square, with a logic section that combines them in pairs",
+    "Sets that channel's rate",
+    "Switched to HI that channel runs 0.05Hz to 87.5Hz; switched to LO it runs 0.00875Hz to 8.75Hz",
+    "Chooses which of that channel's two waveforms is fed to the logic section: the triangle or the square",
+    "Modulates that channel's rate, a tenth of a volt for each hundredth of the knob's travel, added to the knob and held inside its range",
+    "That channel's triangle wave, ±5V",
+    "That channel's square wave, ±5V",
+    "The lower of the two waveforms that pair sends to the logic section, taken sample by sample",
+    "The higher of the two waveforms that pair sends to the logic section, taken sample by sample",
+    "The difference between the higher and the lower of the two waveforms that pair sends to the logic section",
+    "The average of the two waveforms that pair sends to the logic section",
+    "Note — the panel marks the frequency input column with the maker's normalling arrow, but nothing normals those jacks: an unpatched one reads 0V and does not follow the channel above it.",
+    "Note — which waveform a channel contributes to the logic section is set by that channel's triangle-or-square switch, and it is the same choice for the AND, OR, XOR and MIX outputs of its pair."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 7,
+    "9": 8,
+    "10": 9,
+    "11": 10,
+    "12": 7,
+    "13": 8,
+    "14": 9,
+    "15": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "0 to 10V",
+      "sumRange": "0 to 1V",
+      "why": "src/Halo.cpp:74-76 reads each frequency input with getVoltage, divides by 10, adds the knob and clamps the sum to 0-1"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "0 to 10V",
+      "sumRange": "0 to 1V",
+      "why": "src/Halo.cpp:74-76 reads each frequency input with getVoltage, divides by 10, adds the knob and clamps the sum to 0-1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "0 to 10V",
+      "sumRange": "0 to 1V",
+      "why": "src/Halo.cpp:74-76 reads each frequency input with getVoltage, divides by 10, adds the knob and clamps the sum to 0-1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "0 to 10V",
+      "sumRange": "0 to 1V",
+      "why": "src/Halo.cpp:74-76 reads each frequency input with getVoltage, divides by 10, adds the knob and clamps the sum to 0-1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:87-99 writes each triangle and square output with setVoltage at five times a waveform bounded at ±1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:87-99 writes each triangle and square output with setVoltage at five times a waveform bounded at ±1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:87-99 writes each triangle and square output with setVoltage at five times a waveform bounded at ±1"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:87-99 writes each triangle and square output with setVoltage at five times a waveform bounded at ±1"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:87-99 writes each triangle and square output with setVoltage at five times a waveform bounded at ±1"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:87-99 writes each triangle and square output with setVoltage at five times a waveform bounded at ±1"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:87-99 writes each triangle and square output with setVoltage at five times a waveform bounded at ±1"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:87-99 writes each triangle and square output with setVoltage at five times a waveform bounded at ±1"
+     },
+     "8": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:111-123 writes the logic outputs with setVoltage, as the minimum, the maximum, the maximum less the minimum, and the average of the two selected waveforms"
+     },
+     "9": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:111-123 writes the logic outputs with setVoltage, as the minimum, the maximum, the maximum less the minimum, and the average of the two selected waveforms"
+     },
+     "10": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:111-123 writes the logic outputs with setVoltage, as the minimum, the maximum, the maximum less the minimum, and the average of the two selected waveforms"
+     },
+     "11": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:111-123 writes the logic outputs with setVoltage, as the minimum, the maximum, the maximum less the minimum, and the average of the two selected waveforms"
+     },
+     "12": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:111-123 writes the logic outputs with setVoltage, as the minimum, the maximum, the maximum less the minimum, and the average of the two selected waveforms"
+     },
+     "13": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:111-123 writes the logic outputs with setVoltage, as the minimum, the maximum, the maximum less the minimum, and the average of the two selected waveforms"
+     },
+     "14": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:111-123 writes the logic outputs with setVoltage, as the minimum, the maximum, the maximum less the minimum, and the average of the two selected waveforms"
+     },
+     "15": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Halo.cpp:111-123 writes the logic outputs with setVoltage, as the minimum, the maximum, the maximum less the minimum, and the average of the two selected waveforms"
+     }
+    }
+   },
+   "notes": "The panel draws the maker's normalling arrow beside the frequency input column, as Asset, Ceres, Fuji, Atlas and Sena all do, but Halo's process reads those inputs with a plain getVoltage and never carries a value forward (src/Halo.cpp:74-75). The frequency input line names that conflict. The logic is done on the analogue waveforms rather than on gates: AND is the sample-by-sample minimum, OR the maximum, XOR the maximum less the minimum, and MIX their average, so all four outputs are continuous voltages rather than gates. sumRange on the frequency inputs is written as a voltage range because the field takes only those four spellings; the quantity clamped is the 0-to-1 knob position. The frequency ranges are literals: 0.00875Hz to 8.75Hz in LO and 0.05Hz to 87.5Hz in HI."
   }
  }
 }

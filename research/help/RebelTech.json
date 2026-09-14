@@ -2,37 +2,593 @@
  "plugin": "RebelTech",
  "source": "https://github.com/hemmer/rebel-tech-vcv",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Stoicheia": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two Euclidean sequencers sharing one clock, each spreading a chosen number of filled steps as evenly as it can over a chosen length",
+    "Rotates sequence α around its own length, moving where the filled steps fall without changing how many there are; it shifts by none up to one step short of the length",
+    "Rotates sequence β around its own length, moving where the filled steps fall without changing how many there are; it shifts by none up to one step short of the length",
+    "Sets how many steps sequence α runs before it comes round again, 1 to 16",
+    "Sets how many steps sequence β runs before it comes round again, 1 to 16",
+    "Sets how many of sequence α's steps are filled, from one of them to all of them, spread as evenly over the length as the two numbers allow",
+    "Sets how many of sequence β's steps are filled, from one of them to all of them, spread as evenly over the length as the two numbers allow",
+    "Chooses whether the two sequences both advance on every clock, or take turns: α runs its whole length, then β runs its whole length, and while one is running both outputs carry it",
+    "Sets what the α output does on a filled step: hold 10V for the whole step, put out nothing, or repeat the clock pulse; the maker's tooltip calls the holding setting Alternating, which it is not",
+    "Sets what the β output does on a filled step: hold 10V for the whole step, put out nothing, or repeat the clock pulse; the maker's tooltip calls the holding setting Alternating, which it is not",
+    "A rising edge past 2V sends both sequences back to the step their rotation knob picks",
+    "Advances both sequences on each rising edge past 2V, and its high and low state is what the repeating setting of the mode switches passes on",
+    "Carries sequence α, 10V on a filled step and 0V otherwise, shaped by the α mode switch",
+    "Carries sequence β, 10V on a filled step and 0V otherwise, shaped by the β mode switch",
+    "Carries 10V for as long as the clock input is above its threshold and 0V below it",
+    "Note — nothing moves until a clock is patched; the module has no clock of its own",
+    "Note — while the two sequences are taking turns both outputs carry whichever one is running, so α and β put out the same thing",
+    "Note — on the hardware the mode switches double as a reset; in this version they do not"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Stoicheia.cpp:193 resets both sequences on triggers[RESET_INPUT].process(rescale(voltage, 0.1f, 2.f, 0.f, 1.f)), read at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Stoicheia.cpp:224 advances both sequences on triggers[CLOCK_INPUT].process(rescale(voltage, 0.1f, 2.f, 0.f, 1.f)), read at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Stoicheia.cpp:293 setVoltage with no setChannels anywhere in the file"
+     },
+     "1": {
+      "poly": false,
+      "why": "Stoicheia.cpp:297 setVoltage with no setChannels anywhere in the file"
+     },
+     "2": {
+      "poly": false,
+      "why": "Stoicheia.cpp:302 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "Mode A and Mode B are configSwitch(MODE_x_PARAM, LATCHED, NORMAL, NORMAL, ..., {\"Alternating\", \"Mute\", \"Trigger\"}) at Stoicheia.cpp:165-166, so the tooltip for the LATCHED position reads Alternating; the code at lines 234-238 holds the output at a flat 10V for the whole filled step, which is not alternation. Klasmata's latched mode does alternate, and the label looks to have come from there. The Sequence mode switch is drawn with rack's three-frame BefacoSwitch but configured 0 to 1, and SvgSwitch picks its frame as value minus minimum, so INDEPENDENT shows the lever down and ALTERNATING shows it centred; the lever never reaches the top position. The panel prints alpha-plus-beta below that switch and nothing above it, which could be read as marking the lower position, and the lower position is the independent one. That is worth checking in the rack before anybody relies on the marking. The panel prints no words at all apart from the two Greek letters, so no line carries a panel label."
   },
   "Tonic": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Six switched intervals that add together: every gate held high, and every button held down, adds its own number of semitones to one pitch output",
+    "Sets how many semitones the top row adds, -6 to +12, rounded to a whole semitone",
+    "Held down, adds the number of semitones the knob is set to",
+    "Held down, adds 16 semitones",
+    "Held down, adds 8 semitones",
+    "Held down, adds 4 semitones",
+    "Held down, adds 2 semitones",
+    "Held down, takes away one semitone",
+    "Held above 1V, adds the number of semitones the knob is set to",
+    "Held above 1V, adds 16 semitones",
+    "Held above 1V, adds 8 semitones",
+    "Held above 1V, adds 4 semitones",
+    "Held above 1V, adds 2 semitones",
+    "Held above 1V, takes away one semitone",
+    "10V while any gate is high or any button is held, 0V when none of them is",
+    "The semitones of every row that is currently on, added up and put out at a twelfth of a volt each",
+    "Note — both outputs take their channel count from whichever gate input carries the most channels, and a button pressed on the panel applies to every one of those channels",
+    "Note — the lamps glow yellow while the module is running one channel and blue while it is running more"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tonic.cpp:53 takes the largest getChannels() of the six gate jacks as the voice count and line 66 reads each jack with getVoltageSimd<float_4>(c) across that count; the SchmittTrigger4 is left at rack's default thresholds, so the jack counts as high past 1V and is armed again below 0V"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tonic.cpp:53 takes the largest getChannels() of the six gate jacks as the voice count and line 66 reads each jack with getVoltageSimd<float_4>(c) across that count; the SchmittTrigger4 is left at rack's default thresholds, so the jack counts as high past 1V and is armed again below 0V"
+     },
+     "2": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tonic.cpp:53 takes the largest getChannels() of the six gate jacks as the voice count and line 66 reads each jack with getVoltageSimd<float_4>(c) across that count; the SchmittTrigger4 is left at rack's default thresholds, so the jack counts as high past 1V and is armed again below 0V"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tonic.cpp:53 takes the largest getChannels() of the six gate jacks as the voice count and line 66 reads each jack with getVoltageSimd<float_4>(c) across that count; the SchmittTrigger4 is left at rack's default thresholds, so the jack counts as high past 1V and is armed again below 0V"
+     },
+     "4": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tonic.cpp:53 takes the largest getChannels() of the six gate jacks as the voice count and line 66 reads each jack with getVoltageSimd<float_4>(c) across that count; the SchmittTrigger4 is left at rack's default thresholds, so the jack counts as high past 1V and is armed again below 0V"
+     },
+     "5": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tonic.cpp:53 takes the largest getChannels() of the six gate jacks as the voice count and line 66 reads each jack with getVoltageSimd<float_4>(c) across that count; the SchmittTrigger4 is left at rack's default thresholds, so the jack counts as high past 1V and is armed again below 0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Tonic.cpp:106 setChannels(numPolyphonyEngines), the count taken from the gate inputs at line 53"
+     },
+     "1": {
+      "poly": true,
+      "why": "Tonic.cpp:107 setChannels(numPolyphonyEngines), the count taken from the gate inputs at line 53"
+     }
+    }
+   },
+   "notes": "The six offsets are fixed in the source at Tonic.cpp:28 as 0, 16, 8, 4, 2 and -1 semitones, the first of those replaced by the knob at line 72. The output is a sum of semitones, not a quantiser: nothing is fed in to be quantised, and the maker's own name for the jack, Quantized CV, describes the twelfth-of-a-volt grid rather than any quantising of an input. The panel prints GT and CV under the two output jacks and nothing at all beside the buttons."
   },
   "Klasmata": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A Euclidean sequencer: it spreads a chosen number of filled steps as evenly as it can over a chosen length, and walks through them on a clock",
+    "Rotates the pattern around its length, moving where the filled steps fall without changing how many there are",
+    "Sets how many steps the sequence runs before it comes round again, 1 to 32",
+    "Sets what the output does: repeat the voltage at the clock input on a filled step, put out nothing, or flip a 10V gate over every time the pattern changes between filled and empty",
+    "Sets how many of the steps are filled, from one of them to all of them, spread as evenly over the length as the two numbers allow",
+    "Sets how much of the length CV reaches the length, none at the far left and its full 31 steps at the far right",
+    "Sets how much of the fill CV reaches the fill, none at the far left and the whole of the fill knob's travel at the far right",
+    "A rising edge past 2V sends the sequence back to the step the rotation knob picks",
+    "Shifts the length, 10V covering all 31 steps at full attenuation, added to the length knob and held between 1 and 32",
+    "Adds to the fill knob, 10V covering the whole of its travel at full attenuation, and the total is held between one filled step and all of them",
+    "Advances the sequence on each rising edge past 2V",
+    "Carries the sequence, shaped by the mode switch",
+    "Note — nothing moves until a clock is patched; the module has no clock of its own",
+    "Note — in the repeating setting the output copies the voltage present at the clock input rather than putting out a fixed 10V, so a 5V clock gives a 5V sequence",
+    "Note — on the hardware the mode switch doubles as a reset; in this version it does not"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "out": {
+    "0": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Klasmata.cpp:148 resets the sequence on resetTrigger.process(rescale(voltage, 0.1f, 2.f, 0.f, 1.f)), read at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Klasmata.cpp:155-157 clamps voltage/10 to ±1, scales it by the attenuator, multiplies by 31 and adds it to the length knob, the sum held between 1 and 32; read at voltages[0] with no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Klasmata.cpp:160-162 clamps voltage/10 to ±1, scales it by the attenuator and adds it to the fill knob, the sum held between 0 and 1; read at voltages[0] with no channel loop"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Klasmata.cpp:178-179 advances the sequence on clockTrigger.process(rescale(voltage, 0.1f, 2.f, 0.f, 1.f)) and line 178 reads its raw voltage as the output level; read at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Klasmata.cpp:198 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "Klasmata's mode enum is LATCHED, NORMAL, MUTE (Klasmata.cpp:90-94) with NORMAL the default, the opposite order to Stoicheia's, and its tooltip labels match the code. In the NORMAL setting line 192 puts out state times the clock input's own voltage, so the output level follows the clock rather than being a fixed 10V. In the LATCHED setting line 195 puts out a toggle that flips whenever the pattern changes between filled and empty, which is a divided gate rather than a step-long one. The panel prints no words, only the Greek letter gamma and a set of symbols, so no line carries a panel label."
   },
   "CLK": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A free-running clock with a main output and two more that multiply or divide it",
+    "Sets the tempo of the main clock, 40 to 200 BPM",
+    "Divides or multiplies the main clock for the first of the two scaled outputs, stepping through divide by 8, 6, 4, 3 and 2, then times 1, 2, 3, 4, 6 and 8",
+    "Divides or multiplies the main clock for the second of the two scaled outputs, stepping through divide by 24, 12, 8, 4 and 2, then times 1, 2, 4, 8, 12 and 24",
+    "Carries the main clock at the tempo the BPM knob sets, 10V high",
+    "Carries the first of the two scaled clocks, 10V high",
+    "Carries the second of the two scaled clocks, 10V high",
+    "Note — there is no clock input, so the module cannot be locked to anything else; it runs from its own BPM knob",
+    "Note — moving either scaling knob restarts that output in step with the main clock",
+    "Menu — Output multiplier: x1, x2, x4, x8, x16 — speeds up all three outputs together, so at x4 the module runs four times faster than the BPM knob reads",
+    "Menu — Trigger mode: Trigger, Gate, Original — sets the pulse length: Gate half the output's own cycle, Trigger a forty-eighth of a main-clock cycle, Original half the cycle capped at half a main one"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "CLK.cpp:219 setVoltage with no setChannels anywhere in the file"
+     },
+     "1": {
+      "poly": false,
+      "why": "CLK.cpp:220 setVoltage with no setChannels anywhere in the file"
+     },
+     "2": {
+      "poly": false,
+      "why": "CLK.cpp:221 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "The two scaling tables are literals at CLK.cpp:13-16. The master runs at 48 ticks per main-clock cycle (line 194), and the three trigger modes set the pulse length through maxDuty at lines 198-210: Gate uses INT16_MAX so duty always comes out as half the period, Original uses 24 ticks, and Trigger uses max(1, (1e-3/tickTime)/48), which only exceeds one tick above about 60000 BPM and so is always exactly one master tick in practice. The theme and default-theme menu items are cosmetic and every module in the plugin carries them, so they are not written as lines."
   },
   "Logoi": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock divider on one side, a clock counter or clock delay on the other, and a fourth output that combines the two",
+    "Sets the division: 1, then every even number up to 64",
+    "In the counting setting, sets how many clocks pass between pulses, 1 to 32; in the delay setting, sets the delay, 0 to 1000ms; in the off setting it does nothing",
+    "Sets how much of the division CV reaches the division knob, none at the far left and the whole of its travel at the far right",
+    "Sets how much of the count-or-delay CV reaches that knob, none at the far left and the whole of its travel at the far right",
+    "Chooses what the right-hand side does: count clocks, delay them, or nothing, and in the off setting the division, count and combined outputs are all held at 0V",
+    "Adds to the division knob, 10V covering the whole of its travel at full attenuation",
+    "Adds to the count-or-delay knob, 10V covering the whole of its travel at full attenuation",
+    "A rising edge past 1V restarts the divider, the counter and the delay together",
+    "Advances the divider, the counter and the delay on each rising edge past 1V",
+    "A square wave at the divided rate, flipping between 0V and 10V each time the division count comes round; set to 1 it repeats the clock instead of halving it",
+    "In the counting setting, 10V for one clock each time the count comes round; in the delay setting, the clock pulse repeated after the set delay",
+    "In the counting setting, a pulse once the counter has counted that many of the divider's changes; in the delay setting, the clock with pulses landing on a divider change pushed late, giving a swing",
+    "Carries 10V for as long as the clock input is above its threshold and 0V below it",
+    "Note — nothing moves until a clock is patched; the module has no clock of its own",
+    "Note — the delay is worked out in blocks of 64 samples rather than one sample at a time, so the delayed edge lands to the nearest block"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Logoi.cpp:424-427 clamps the attenuator times the jack voltage to ±10V, divides by ten and adds it to the knob, the sum held between 0 and 1; read at voltages[0] with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Logoi.cpp:424-427 clamps the attenuator times the jack voltage to ±10V, divides by ten and adds it to the knob, the sum held between 0 and 1; read at voltages[0] with no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Logoi.cpp:440 resetDetector.process(inputs[RESET_INPUT].getVoltage()) with rack's default SchmittTrigger thresholds, so a rising edge is detected once the jack passes 1V and is armed again below 0V; read at voltages[0] with no channel loop"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Logoi.cpp:459 clockDetector.process(inputs[CLOCK_INPUT].getVoltage()) with rack's default SchmittTrigger thresholds, so a rising edge is detected once the jack passes 1V and is armed again below 0V; read at voltages[0] with no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Logoi.cpp:84-90 setVoltage on the division output with no setChannels anywhere in the file"
+     },
+     "1": {
+      "poly": false,
+      "why": "Logoi.cpp:38-41 and 137-140 setVoltage on the count-or-delay output with no setChannels anywhere in the file"
+     },
+     "2": {
+      "poly": false,
+      "why": "Logoi.cpp:155-158, 178-182 and 474-500 setVoltage on the combined output with no setChannels anywhere in the file"
+     },
+     "3": {
+      "poly": false,
+      "why": "Logoi.cpp:463 setVoltage on the clock thru output with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "Logoi's clock and reset jacks use rack's default Schmitt thresholds of 1V and 0V, not the 2V and 0.1V that Stoicheia, Klasmata and Phoreo use. The division knob maps to 1 or any even number from 2 to 64 through divisionFromParamUser at line 367; the division output is a toggle, so a setting of 2 flips it on alternate clocks, while the setting of 1 is a special case that passes the clock gate straight through. The mode switch is configSwitch(MODE_PARAM, 0, 2, 0, \"Mode\", {\"Count\", \"Delay\", \"Off\"}), and the maker's own comments at lines 347-348 say Count is the switch down and Delay the switch middle. The panel prints no name beside that switch. The delay clocks are ticked once every 64 samples (updateClocksFrequency, line 233)."
   },
   "Phoreo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three stages on one clock: it reshapes the pulse width, multiplies the rate, and repeats each trigger a set number of times",
+    "Sets the pulse width as a share of the incoming clock's period, 0 to 100%, and the same share is applied to all three outputs",
+    "Sets how much of the pulse width CV reaches that knob, none at the far left and the whole of its travel at the far right",
+    "Sets how many pulses the multiplier puts out for each clock it receives, 1 to 16",
+    "Sets how much of the multiplier CV reaches that knob, none at the far left and its full 16 steps at the far right",
+    "Sets how many times each incoming trigger is repeated, 1 to 16, spaced at whatever rate the multiplier is running",
+    "Sets how much of the repeat CV reaches that knob, none at the far left and its full 16 steps at the far right",
+    "The clock whose pulse width is reshaped; its period is measured between rising edges past 2V",
+    "Adds to the pulse width knob, 10V covering the whole of its travel at full attenuation",
+    "The clock the multiplier subdivides, taken on rising edges past 2V; with nothing patched it uses the clock above it",
+    "Adds to the multiplier knob, 10V covering its full 16 steps at full attenuation",
+    "The trigger that fires a burst of repeats, taken on rising edges past 2V; with nothing patched it uses whichever clock the multiplier is using",
+    "Adds to the repeat knob, 10V covering its full 16 steps at full attenuation",
+    "The incoming clock with its pulse width reset by the pulse width knob, 10V high",
+    "The multiplied clock, 10V high",
+    "A burst of repeats each time a trigger arrives, 10V high",
+    "Note — the multiplier measures the period between two clock edges, so the first cycle after a clock starts is not divided up",
+    "Note — with only the top jack patched all three stages run from it, because the second input is normalled to the first and the third to the second"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "trigger",
+     "3": "cv",
+     "4": "trigger",
+     "5": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Phoreo.cpp:239-241 clockTriggers[0].process(voltage, 0.1f, 2.f) restarts the pulse width stage, read at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Phoreo.cpp:222-223 scales the clamped ±10V by the attenuator, divides by ten and adds it to the pulse width knob over 100, the sum held between 0 and 1; read at voltages[0] with no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the clock at the pulse width input",
+      "why": "Phoreo.cpp:245-247 clockTriggers[1].process(getNormalVoltage(durClock), 0.1f, 2.f) drives the multiplier, read at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Phoreo.cpp:226-229 scales the clamped ±10V by the attenuator, divides by ten, multiplies by 16 and adds it to the multiplier knob, the sum held between 1 and 16; read at voltages[0] with no channel loop"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the clock the multiplier is using",
+      "why": "Phoreo.cpp:251-253 clockTriggers[2].process(getNormalVoltage(mulClock), 0.1f, 2.f) fires the repeater, read at voltages[0] with no channel loop, so a rising edge is detected once the jack passes 2V and is armed again below 0.1V"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Phoreo.cpp:232-235 scales the clamped ±10V by the attenuator, divides by ten, multiplies by 16 and adds it to the repeat knob, the sum held between 1 and 16; read at voltages[0] with no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Phoreo.cpp:263 setVoltage with no setChannels anywhere in the file"
+     },
+     "1": {
+      "poly": false,
+      "why": "Phoreo.cpp:264 setVoltage with no setChannels anywhere in the file"
+     },
+     "2": {
+      "poly": false,
+      "why": "Phoreo.cpp:265 setVoltage with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "The pulse width set by the MOD knob is used by all three stages: ClockDuration::duration is read by ClockMultiplier::rise at Phoreo.cpp:92 and ClockRepeater::rise at line 141 as well as by the pulse width stage itself. The maker's input names carry the normalling: \"Multiplied clock (normalled to above clock)\" and \"Trigger repetitions clock (normalled to above clocks)\". The commit that raised the version to 2.0.1 is titled \"Prep for poly phoreo\", but no polyphony was added: every jack in the module is read at voltages[0]."
   }
  }
 }

@@ -1,23 +1,324 @@
 {
  "plugin": "MrLumps",
- "source": "https://github.com/djpeterso23662/MrLumps",
+ "source": "https://github.com/djpeterso23662/MrLumps/tree/4796580",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "SEQE": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Euclidean sequencer with four channels, each given a pattern length, a number of beats to spread through it and a chance of playing each beat, and each sending a gate and a trigger",
+    "Sets the tempo of the internal clock in whole beats per minute, 30 to 256, and is read only while the clock input is empty",
+    "Sends every channel back to the first step of its pattern and drops any gate that is high",
+    "Sets how long each gate lasts, from nothing to a whole beat, printed as a percentage; the beat it divides comes from the BPM knob and not from a clock patched into the clock input",
+    "The chance that a beat in that channel's pattern is played, 0 to 100%, drawn afresh at every step",
+    "Sets how many beats are spread evenly through that channel's pattern, 0 to 256; at 0 the channel plays nothing, and at the pattern length or above every step is a beat",
+    "Sets how many steps that channel's pattern runs before it repeats, 0 to 256",
+    "Moves that channel's pattern on by one step and leaves the other three where they are, which shifts it against them",
+    "A rising edge advances every channel by one step and replaces the internal clock; it reads high above 1V",
+    "A rising edge sends every channel back to the first step of its pattern and drops any gate that is high; it reads high above 1V",
+    "Carries 10V for the length set by the gate knob whenever that channel plays a beat",
+    "Carries 10V for one sample at each beat that channel plays",
+    "Carries 10V while a gate is high on any of the four channels",
+    "Carries 10V for one sample whenever any of the four channels plays a beat",
+    "Note — a channel is silent until both its fill and its length are raised; both knobs come up at 0, and a fill of 0 plays nothing whatever the length is",
+    "Note — with nothing patched into the clock input the module runs from its own clock at the tempo set by the BPM knob",
+    "Note — the beats dropped by the probability knobs come from a counter started at the same fixed value on all four channels, so channels set alike drop the same beats together",
+    "Menu — High Contrast — draws the seven-segment displays as black figures on white instead of red on dark red"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 5,
+    "8": 5,
+    "9": 5,
+    "10": 5,
+    "11": 6,
+    "12": 6,
+    "13": 6,
+    "14": 6,
+    "15": 7,
+    "16": 7,
+    "17": 7,
+    "18": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 10,
+    "3": 10,
+    "4": 10,
+    "5": 10,
+    "6": 11,
+    "7": 11,
+    "8": 11,
+    "9": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the internal clock at the BPM knob's tempo",
+      "why": "SEQEuclid.cpp:222-236 — isConnected picks between the external clock and the internal timer, and line 224 passes getVoltage to a default dsp::SchmittTrigger, whose thresholds are 0V and 1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "subtracts",
+      "why": "SEQEuclid.cpp:256 adds the reset button's value to getVoltage on this jack and passes the sum to a default dsp::SchmittTrigger, so a negative voltage here can hold the button off"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQEuclid.cpp:335 and 351 — gateOr is 10.0f or 0.0f and is written with setVoltage, one channel only"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQEuclid.cpp:336 and 352 — triggerOr is 10.0f or 0.0f and is written with setVoltage, one channel only"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQEuclid.cpp:329-332 and 341-344 — each gate is 10.0f or 0.0f and is written with setVoltage, one channel only"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQEuclid.cpp:329-332 and 341-344 — each gate is 10.0f or 0.0f and is written with setVoltage, one channel only"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQEuclid.cpp:329-332 and 341-344 — each gate is 10.0f or 0.0f and is written with setVoltage, one channel only"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQEuclid.cpp:329-332 and 341-344 — each gate is 10.0f or 0.0f and is written with setVoltage, one channel only"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQEuclid.cpp:334 and 346-349 — each trigger is 10.0f only in the sample the step advances, written with setVoltage, one channel only"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQEuclid.cpp:334 and 346-349 — each trigger is 10.0f only in the sample the step advances, written with setVoltage, one channel only"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQEuclid.cpp:334 and 346-349 — each trigger is 10.0f only in the sample the step advances, written with setVoltage, one channel only"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "SEQEuclid.cpp:334 and 346-349 — each trigger is 10.0f only in the sample the step advances, written with setVoltage, one channel only"
+     }
+    }
+   },
+   "notes": "The panel prints no words at all: every control is marked with a picture, so the lines here carry no labels. The gate length knob is scaled by timerLength (SEQEuclid.cpp:312-318), and timerLength is recomputed only in the branch taken when the clock input is EMPTY (line 230). With a cable in the clock input the gate length therefore divides the tempo the BPM knob last produced while that jack was empty, or 120 BPM if the cable was already there when the patch loaded; it does not follow the external clock. Each of the four channels has its own random generator seeded with the same constant, 738 (SEQEuclid.cpp:106 in Bank::Reset), and the generator is only drawn from when a channel's probability is below 100%, so identical channel settings drop identical beats. Fill at or above length bypasses the Euclidean table and plays every step (line 125 and its else). The trigger outputs are high for a single sample, so a downstream module that reads triggers at audio rate will see them and a display may not.",
+   "read": "2026-09-14"
   },
   "VCS1": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Routing switch that sends one input to one of eight outputs, moving on to the next output at every trigger",
+    "A rising edge moves the signal on to the next output that has a cable in it, wrapping round to the first after the last; it reads high above 1V",
+    "The signal to be routed, passed through at full level to whichever output the switch is on",
+    "Carries the input signal while the switch is on this output, and 0V once the switch moves away",
+    "Note — the switch steps only between outputs that have cables in them, so an output with nothing patched into it is skipped",
+    "Note — the switch starts on the first output, and Initialize from the module menu puts it back there"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "VCS.cpp:60 passes getVoltage to a default dsp::SchmittTrigger, whose thresholds are 0V and 1V, and line 58 gates the whole clause on isConnected"
+     },
+     "1": {
+      "poly": false,
+      "normal": "nothing; no output is written",
+      "why": "VCS.cpp:90-92 — a single getVoltage copied straight to the selected output, and nothing is written at all while this jack is empty"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "VCS.cpp:92 writes one channel with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "VCS.cpp:92 writes one channel with setVoltage"
+     },
+     "2": {
+      "poly": false,
+      "why": "VCS.cpp:92 writes one channel with setVoltage"
+     },
+     "3": {
+      "poly": false,
+      "why": "VCS.cpp:92 writes one channel with setVoltage"
+     },
+     "4": {
+      "poly": false,
+      "why": "VCS.cpp:92 writes one channel with setVoltage"
+     },
+     "5": {
+      "poly": false,
+      "why": "VCS.cpp:92 writes one channel with setVoltage"
+     },
+     "6": {
+      "poly": false,
+      "why": "VCS.cpp:92 writes one channel with setVoltage"
+     },
+     "7": {
+      "poly": false,
+      "why": "VCS.cpp:92 writes one channel with setVoltage"
+     }
+    }
+   },
+   "notes": "No family is given for the signal input or the eight outputs: the module copies one voltage without looking at it, so what they carry is whatever is patched in. The outputs are numbered left to right and then down the panel, which is also the order the switch visits them (VCS.cpp:118-124). While the signal input is empty the module writes nothing to the selected output, so it holds the last voltage it was given rather than falling to 0V; the outputs it has moved away from are explicitly zeroed (line 67).",
+   "read": "2026-09-14"
   },
   "VCS2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Routing switch with two independent sides, each sending one input to one of four outputs and moving on at every trigger",
+    "A rising edge moves both sides on to the next output that has a cable in it, each within its own four, wrapping round to the first after the last; it reads high above 1V",
+    "The signal routed to the left-hand group of four outputs, passed through at full level to whichever of them the switch is on",
+    "The signal routed to the right-hand group of four outputs, passed through at full level to whichever of them the switch is on",
+    "Carries the left input while the switch is on this output, and 0V once the switch moves away",
+    "Carries the right input while the switch is on this output, and 0V once the switch moves away",
+    "Note — each side steps only between outputs that have cables in them, so an output with nothing patched into it is skipped",
+    "Note — one trigger jack drives both sides, so they advance together and can only be offset by leaving different outputs unpatched",
+    "Note — both sides start on their first output, and Initialize from the module menu puts them back there"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "VCS.cpp:202 passes getVoltage to a default dsp::SchmittTrigger, whose thresholds are 0V and 1V, and line 200 gates the whole clause on isConnected"
+     },
+     "1": {
+      "poly": false,
+      "normal": "nothing; no left output is written",
+      "why": "VCS.cpp:260-262 — a single getVoltage copied straight to the selected left output, and nothing is written at all while this jack is empty"
+     },
+     "2": {
+      "poly": false,
+      "normal": "nothing; no right output is written",
+      "why": "VCS.cpp:266-268 — a single getVoltage copied straight to the selected right output, and nothing is written at all while this jack is empty"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "VCS.cpp:262 writes one channel with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "VCS.cpp:262 writes one channel with setVoltage"
+     },
+     "2": {
+      "poly": false,
+      "why": "VCS.cpp:262 writes one channel with setVoltage"
+     },
+     "3": {
+      "poly": false,
+      "why": "VCS.cpp:262 writes one channel with setVoltage"
+     },
+     "4": {
+      "poly": false,
+      "why": "VCS.cpp:268 writes one channel with setVoltage"
+     },
+     "5": {
+      "poly": false,
+      "why": "VCS.cpp:268 writes one channel with setVoltage"
+     },
+     "6": {
+      "poly": false,
+      "why": "VCS.cpp:268 writes one channel with setVoltage"
+     },
+     "7": {
+      "poly": false,
+      "why": "VCS.cpp:268 writes one channel with setVoltage"
+     }
+    }
+   },
+   "notes": "No family is given for the two signal inputs or the eight outputs: the module copies voltages without looking at them. Outputs 0 to 3 are the left column top to bottom, 4 to 7 the right column top to bottom (VCS.cpp:307-313). While a signal input is empty nothing is written to that side's selected output, so it holds the last voltage it was given.",
+   "read": "2026-09-14"
   }
  }
 }

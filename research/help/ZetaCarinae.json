@@ -1,48 +1,960 @@
 {
  "plugin": "ZetaCarinae",
- "source": "https://github.com/mhampton/ZetaCarinaeModules",
+ "source": "https://github.com/mhampton/ZetaCarinaeModules (README.md and the module sources read at commit 54dbe9b2)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "BrownianBridge": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A random walk that starts at one voltage and is steered so that it arrives exactly at another after a set time",
+    "Sets how far the walk ends from where it started, -10V to 10V",
+    "Sets the voltage the walk starts from, -10V to 10V",
+    "Sets how much the walk wanders on its way, 0 for a straight ramp and 1 for the widest wander",
+    "Sets how long the walk takes, two to the power of the knob setting in seconds",
+    "Adds to the range knob, one volt of range per volt",
+    "Adds to the offset knob, one volt of starting point per volt",
+    "Adds to the noise knob, a tenth of the knob's range per volt",
+    "Adds seconds to the time set by the time knob",
+    "A rising edge here starts a fresh walk from the offset voltage",
+    "Carries the walk, and holds at the far end once the walk has arrived",
+    "Note — the walk also restarts on its own whenever the total time changes, so turning the time knob or moving the time jack starts it again",
+    "Note — the far end of the walk is the range knob added to the offset knob, not the range knob on its own"
+   ],
+   "param": {
+    "1": 1,
+    "2": 2,
+    "0": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "BrownianBridge.cpp BrownianBridge::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "BrownianBridge.cpp BrownianBridge::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "BrownianBridge.cpp BrownianBridge::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "BrownianBridge.cpp BrownianBridge::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "4": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "BrownianBridge.cpp BrownianBridge::process: a Rack SchmittTrigger at its default thresholds, per channel, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "BrownianBridge.cpp BrownianBridge::process: setChannels is called with the widest input channel count, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    }
+   },
+   "notes": "None of this module's jacks carries a name in the installed build: the maker added input and output tooltips in the commit after this one, so hovering a jack here shows nothing. The walk is restarted whenever the computed total time differs from the one in use, which means any movement of the time knob or the time jack retriggers it."
   },
   "OrnsteinUhlenbeck": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A random walk pulled back towards a set voltage, so it wanders without drifting away",
+    "Sets how far the walk wanders, 0 to 5",
+    "Sets how hard the walk is pulled back towards the mean, 0 for no pull and 10 for the strongest",
+    "Sets the voltage the walk is pulled back towards, -10V to 10V",
+    "Adds to the noise knob, a tenth of a unit per volt",
+    "Adds to the spring knob, one unit per volt",
+    "Adds to the mean knob, one volt per volt",
+    "A rising edge here jumps the walk straight to the mean voltage",
+    "Carries the walk",
+    "Note — with the spring knob at zero the walk is a plain Brownian motion and will drift away without limit; raise it to keep the output near the mean"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "OrnsteinUhlenbeck.cpp OrnsteinUhlenbeck::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "OrnsteinUhlenbeck.cpp OrnsteinUhlenbeck::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "OrnsteinUhlenbeck.cpp OrnsteinUhlenbeck::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "OrnsteinUhlenbeck.cpp OrnsteinUhlenbeck::process: a Rack SchmittTrigger at its default thresholds, per channel, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "OrnsteinUhlenbeck.cpp OrnsteinUhlenbeck::process: setChannels is called with the widest input channel count, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    }
+   },
+   "notes": "None of this module's jacks carries a name in the installed build: the maker added input and output tooltips in the commit after this one, so hovering a jack here shows nothing."
   },
   "IOU": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A random walk, its integral and the raw noise that drives them, from one damped and mean-seeking system",
+    "Sets how loud the white noise driving the system is, 0 to 5",
+    "Sets how hard the walk is pulled back, 0 to 10",
+    "Sets how much the walk's speed is damped, 0 to 10",
+    "Sets the voltage the integrated walk is pulled back towards, -10V to 10V",
+    "Crossfades all three outputs from the module's own signals at 0 to the external input at 1",
+    "Adds to the noise knob, a tenth of a unit per volt",
+    "Adds to the spring knob, one unit per volt",
+    "Adds to the damping knob, one unit per volt",
+    "Adds to the mean knob, one volt per volt",
+    "The signal mixed into all three outputs by the mix knob",
+    "Carries the white noise that drives the system, scaled by the noise setting",
+    "Carries the damped, mean-seeking walk itself",
+    "Carries the running total of that walk, which moves more slowly and smoothly",
+    "Note — the mix knob is on all three outputs at once, so at its top end every jack carries the external input alone"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "2": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "IOU.cpp IOU::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "IOU.cpp IOU::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "IOU.cpp IOU::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "IOU.cpp IOU::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "IOU.cpp IOU::process: the jack is crossfaded into all three outputs by the mix knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "IOU.cpp IOU::process: setChannels is called with the widest input channel count, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "IOU.cpp IOU::process: setChannels is called with the widest input channel count, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "IOU.cpp IOU::process: setChannels is called with the widest input channel count, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    }
+   },
+   "notes": "None of this module's jacks carries a name in the installed build: the maker added input and output tooltips in the commit after this one, so hovering a jack here shows nothing. No family is set on the external input because it carries whatever is patched into it and is mixed straight through to the outputs."
   },
   "Warbler": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator built from eight coupled limit-cycle systems that can be detuned, nudged by noise and driven by an external signal",
+    "Sets how much random noise is stirred into the eight systems, 0 to 1",
+    "Spreads the eight systems apart in frequency, 0 to 2",
+    "Sets how hard the external input drives the systems, 0 to 10",
+    "Picks one of twenty-one sets of frequency multipliers for the eight systems, from spread across five octaves below the note up to a harmonic series above it",
+    "Attenuates the voltage at the stochasticity jack before it is added to that knob, 0 to 2",
+    "Attenuates the voltage at the detune jack before it is added to that knob, 0 to 2",
+    "Attenuates the voltage at the external gain jack before it is added to that knob, 0 to 2",
+    "Attenuates the voltage at the harmonics jack before it is added to that knob, 0 to 2",
+    "Adds to the stochasticity knob through the small knob beside it",
+    "Adds to the detune knob through the small knob beside it",
+    "Adds to the external gain knob through the small knob beside it",
+    "Adds to the harmonics knob through the small knob beside it",
+    "Sets the pitch of the eight systems at a volt per octave, clamped to five octaves either side of C4",
+    "The signal driven into the eight systems, divided by ten before it reaches them",
+    "Carries the sum of the eight systems' x coordinates, clipped at 5V",
+    "Carries the sum of the eight systems' y coordinates, clipped at 5V",
+    "Note — with nothing patched and the stochasticity knob near zero the two outputs are close to sine waves a quarter cycle apart; noise and an external input make the shapes interesting",
+    "Note — the four small knobs are attenuators for the jacks beside them and come up at 0.1, so a cable on its own has little effect until its small knob is raised"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Warbler.cpp WarblerModule::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Warbler.cpp WarblerModule::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Warbler.cpp WarblerModule::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Warbler.cpp WarblerModule::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "4": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "Warbler.cpp WarblerModule::process: the jack is put through FREQ_C4 times 2 to the power of the voltage, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "5": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "Warbler.cpp WarblerModule::process: the jack is divided by 10 and driven into the systems, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "Warbler.cpp WarblerModule::process: the summed coordinates are halved and clamped to ±5V, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "Warbler.cpp WarblerModule::process: the summed coordinates are halved and clamped to ±5V, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    }
+   },
+   "notes": "None of this module's jacks carries a name in the installed build: the maker added input and output tooltips in the commit after this one, so hovering a jack here shows nothing. The harmonics knob indexes a table of twenty-one rows of eight multipliers; the module's own tooltip calls it (Sub)Harmonics."
   },
   "Rosenchance": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A two state machine that steps on each trigger and puts out one of two voltages for whichever state it lands in",
+    "Sets the chance of staying in state A on the next trigger, 0 to 1",
+    "Sets the chance that state A puts out its first value rather than its second, 0 to 1",
+    "Sets the first of the two voltages state A can put out, -10V to 10V",
+    "Sets the second of the two voltages state A can put out, -10V to 10V",
+    "Sets the chance of staying in state B on the next trigger, 0 to 1",
+    "Sets the chance that state B puts out its first value rather than its second, 0 to 1",
+    "Sets the first of the two voltages state B can put out, -10V to 10V",
+    "Sets the second of the two voltages state B can put out, -10V to 10V",
+    "Attenuates the voltage at the jack on that row before it is added to the large knob beside it",
+    "Adds to the knob on that row through the small knob between them",
+    "A rising edge here steps the machine, choosing a state and then a value to put out",
+    "Holds the value chosen at the last trigger",
+    "Carries 1V while the machine is in state A and 2V while it is in state B",
+    "Goes to 5V on the triggers that land in state A",
+    "Goes to 5V on the triggers that land in state B",
+    "Note — nothing moves until a trigger reaches the trig jack; the outputs read 0V before the first one",
+    "Note — the two state outputs are held for about ten samples after each trigger and then drop back to 0V, which makes them a short pulse rather than a gate"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 9,
+    "10": 9,
+    "11": 9,
+    "12": 9,
+    "13": 9,
+    "14": 9,
+    "15": 9
+   },
+   "in": {
+    "0": 11,
+    "1": 10,
+    "2": 10,
+    "3": 10,
+    "4": 10,
+    "5": 10,
+    "6": 10,
+    "7": 10,
+    "8": 10
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "Rosenchance.cpp Rosenchance::process: a Rack SchmittTrigger at its default thresholds, per channel, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rosenchance.cpp Rosenchance::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rosenchance.cpp Rosenchance::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rosenchance.cpp Rosenchance::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rosenchance.cpp Rosenchance::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rosenchance.cpp Rosenchance::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rosenchance.cpp Rosenchance::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rosenchance.cpp Rosenchance::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Rosenchance.cpp Rosenchance::process: the jack is scaled by its attenuator knob and added to its main knob, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "step": "stepped",
+      "why": "Rosenchance.cpp Rosenchance::process: the chosen emission knob value, which runs -10V to 10V, is written per channel, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "range": "±10V",
+      "step": "stepped",
+      "why": "Rosenchance.cpp Rosenchance::process: the chosen emission knob value, which runs -10V to 10V, is written per channel, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 5V",
+      "step": "stepped",
+      "why": "Rosenchance.cpp Rosenchance::process: the two state outputs are written as 5V or 0V, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 5V",
+      "step": "stepped",
+      "why": "Rosenchance.cpp Rosenchance::process: the two state outputs are written as 5V or 0V, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    }
+   },
+   "notes": "None of this module's jacks carries a name in the installed build: the maker added input and output tooltips in the commit after this one, so hovering a jack here shows nothing. The counter that clears the two state outputs is shared across polyphonic channels rather than kept per channel, so with several channels running the pulses are shorter than with one."
   },
   "GuildensTurn": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four state router that steps between neighbouring states on each trigger and passes that state's input through to the output",
+    "Sets the chance of stepping backwards out of that state on the next trigger, 0 to 1",
+    "Sets the chance of stepping forwards out of that state on the next trigger, 0 to 1",
+    "Attenuates the voltage at the jack beside it before it is added to the large transition knob on that row, 0 to 2",
+    "A rising edge here steps the machine to another state or leaves it where it is",
+    "The signal passed to the output while the machine is in that state",
+    "Adds to the transition knob on that row through the small knob beside it",
+    "Carries whichever of the four state inputs belongs to the state the machine is in",
+    "Carries 1V, 2V, 3V or 4V for states A, B, C and D",
+    "Note — the chance of staying put is whatever is left after the two transition chances; when they add up to more than one they are scaled down and the machine never stays put",
+    "Note — nothing moves until a trigger reaches the trig jack, though the output already carries state A's input before the first one"
+   ],
+   "param": {
+    "0": 1,
+    "2": 1,
+    "4": 1,
+    "6": 1,
+    "1": 2,
+    "3": 2,
+    "5": 2,
+    "7": 2,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 3,
+    "13": 3,
+    "14": 3,
+    "15": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv"
+    },
+    "out": {
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "GuildensTurn.cpp GuildensTurn::process: a Rack SchmittTrigger at its default thresholds, per channel, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the selected state input is copied straight to the output, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the selected state input is copied straight to the output, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the selected state input is copied straight to the output, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the selected state input is copied straight to the output, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the jack is scaled by its attenuator and added to a probability knob that is clamped to 0 to 1, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the jack is scaled by its attenuator and added to a probability knob that is clamped to 0 to 1, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the jack is scaled by its attenuator and added to a probability knob that is clamped to 0 to 1, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "8": {
+      "poly": true,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the jack is scaled by its attenuator and added to a probability knob that is clamped to 0 to 1, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "9": {
+      "poly": true,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the jack is scaled by its attenuator and added to a probability knob that is clamped to 0 to 1, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "10": {
+      "poly": true,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the jack is scaled by its attenuator and added to a probability knob that is clamped to 0 to 1, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "11": {
+      "poly": true,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the jack is scaled by its attenuator and added to a probability knob that is clamped to 0 to 1, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "12": {
+      "poly": true,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the jack is scaled by its attenuator and added to a probability knob that is clamped to 0 to 1, and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the selected state input is copied straight through, setChannels with the widest input count, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "range": "1 to 4V",
+      "step": "stepped",
+      "why": "GuildensTurn.cpp GuildensTurn::process: the state number, 1 to 4, is written per channel, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    }
+   },
+   "notes": "None of this module's jacks carries a name in the installed build: the maker added input and output tooltips in the commit after this one, so hovering a jack here shows nothing. No family is set on the four state inputs or on the Out jack, because they pass whatever is patched into them straight through."
   },
   "RosslerRustler": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator and distortion built on the Rossler attractor, a three dimensional chaotic system",
+    "Sets the first coefficient of the attractor, 0 to 1; the classic shape is at 0.2",
+    "Sets the second coefficient of the attractor, 0 to 1; the classic shape is at 0.2",
+    "Sets the third coefficient of the attractor, 0 to 30; the classic shape is at 5.7, and raising it folds the orbit into more loops",
+    "Sets how hard the external input pushes the system, 0 to 10",
+    "Crossfades the output from the system's own signal at 0 to the external input at 1",
+    "Sets how fast the system runs, a volt per octave about C4",
+    "The signal pushed into the system, and the one the mix knob fades towards",
+    "Carries the system's first coordinate, divided by three, mixed with the external input by the mix knob",
+    "Note — the system runs whether or not anything is patched, so the output puts out a chaotic waveform on its own; the external input bends the orbit rather than being filtered by it",
+    "Note — the y and z coordinates of the attractor are computed but the maker commented out their output jacks, so only x can be heard",
+    "Menu — Updated processing behavior — uses the corrected two-step integration; unticked, the module reverts to an earlier version that used the second slope estimate twice and sounds different"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "RosslerRustler.cpp RosslerRustlerModule::process: the jack is put through FREQ_C4 times 2 to the power of the voltage, per channel, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "RosslerRustler.cpp RosslerRustlerModule::process: the jack is scaled by the external gain knob and pushed into the system, per channel, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "RosslerRustler.cpp RosslerRustlerModule::process: the x coordinate, clamped to ±20V and divided by 3, crossfaded with the external input, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    }
+   },
+   "notes": "None of this module's jacks carries a name in the installed build: the maker added input and output tooltips in the commit after this one, so hovering a jack here shows nothing. The polyphony channel count is taken from the pitch jack alone, so a polyphonic cable at the external input on its own still gives a monophonic output. No family is set on the external input or the output because both carry whatever the patch puts through them."
   },
   "Firefly": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Five oscillators that pull each other into and out of step, summed into one output",
+    "Sets that oscillator's frequency as a multiple of the played note, 0 to 10, rounded to a seven hundred and twentieth",
+    "Sets that oscillator's wave, 0 to 10, from a sine at the bottom through progressively richer harmonic spectra",
+    "Sets how loudly that oscillator sounds and how strongly it pulls on the others, 0 to 2",
+    "Sets how hard the five oscillators pull on each other, -0.2 to 0.2; negative settings push them apart instead",
+    "Blends the shape of the pull between a single hump at 0 and a double one at 1, which changes whether the oscillators lock in step or in opposition",
+    "Sets how much the FM jack bends the pitch, 0 to 1",
+    "Sets the output level, 0 to 10",
+    "Adds to that oscillator's frequency ratio knob, one unit per volt",
+    "Adds to that oscillator's wave knob, one unit per volt",
+    "Adds to the coupling strength knob, one unit per volt",
+    "Adds to the coupling type knob, one unit per volt",
+    "Bends the pitch of all five oscillators through the FM knob",
+    "Adds to the gain knob, one unit per volt",
+    "Sets the note all five oscillators are tuned from, a volt per octave about C4",
+    "Carries the sum of the five oscillators, clipped at 5V",
+    "Note — the charm knobs have no jack of their own: they are the only controls on this module that cannot be modulated",
+    "Note — with the coupling strength at zero the five oscillators run independently and the output is a plain additive mix; raise it and they start to fall into step",
+    "Note — the knobs and jacks other than pitch are read once every hundred and twenty samples, so they respond a little more slowly than audio rate"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 3,
+    "11": 3,
+    "12": 3,
+    "13": 3,
+    "14": 3,
+    "15": 4,
+    "16": 5,
+    "17": 6,
+    "18": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 8,
+    "2": 8,
+    "3": 8,
+    "4": 8,
+    "5": 9,
+    "6": 9,
+    "7": 9,
+    "8": 9,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14
+   },
+   "out": {
+    "0": 15
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "pitch"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "9": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "11": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "12": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "13": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Firefly.cpp FireflyModule::process: the jack is added to its knob and the module counts channels across its input ports and every read is getVoltage(c), so the port is polyphonic, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     },
+     "14": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "Firefly.cpp FireflyModule::process: the jack is put through FREQ_C4 times 2 to the power of the voltage, per channel, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "Firefly.cpp FireflyModule::process: the summed wavetable values times the gain are clamped to ±5V, commit 54dbe9b2, the commit that set the version to 2.0.4"
+     }
+    }
+   },
+   "notes": "None of this module's jacks carries a name in the installed build: the maker added input and output tooltips in the commit after this one, so hovering a jack here shows nothing. The maker's README calls this module experimental and warns that its behaviour may change. The coupling type knob picks between two fixed coupling curves and crossfades between them rather than switching."
   }
  }
 }

@@ -1,138 +1,2763 @@
 {
  "plugin": "KRTPluginA",
- "source": "https://github.com/jackokring/KRTPluginA",
+ "source": "https://github.com/jackokring/KRTPluginA/blob/master/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "A": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A resonant filter with a one pole stage, a two pole stage and a ring modulation between their low and high pass halves",
+    "Sets the corner of the two pole filter, four octaves either side of C4 at 261.63Hz",
+    "Sets how far the MOD input moves the two pole corner, -2 to 2 octaves per volt",
+    "Sets the resonance of the two pole filter, -6dB at fully counter-clockwise to 30dB fully clockwise",
+    "Sets the corner of the one pole stages, four octaves either side of C4 at 261.63Hz",
+    "Sets how far the MOD input moves the one pole corner, -2 to 2 octaves per volt",
+    "Sets the level of the ring modulation added to the main output, silent at fully counter-clockwise and one and a half times fully clockwise",
+    "A signal into both the one pole low pass and the one pole high pass",
+    "A signal added into the one pole low pass after a four sample estimate of where it is going next",
+    "Moves both filter corners together, one octave per volt",
+    "A signal added after the one pole stage, straight into the two pole filter and so past the ring modulation",
+    "Moves the two filter corners by the amounts the MOD and MAM knobs set",
+    "A signal added to the first input before the one pole high pass",
+    "The one pole low pass output",
+    "The two pole filter output with the ring modulation added, which is the module's main output",
+    "The two pole corner frequency, sent out as one volt for every hertz, so it reaches thousands of volts at ordinary settings",
+    "The one pole high pass output",
+    "The first input with the main output subtracted from it",
+    "The ring modulation on its own: the one pole low pass times the one pole high pass times the AM knob",
+    "Note — every input reads polyphonically and the outputs take the channel count of the widest input patched",
+    "Note — the maker's own advice for hearing all six knobs at once is to patch into IN1, take LP12 out and use CV for tracking; the other jacks join the chain before or after some of the controls"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "2": 8,
+    "1": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "pitch",
+     "2": "audio",
+     "3": "audio",
+     "4": "cv",
+     "5": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/A.cpp:168 and 189, maxPoly loops over getChannels and getPolyVoltage reads the channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/A.cpp:175-183, added to both frequency knobs in octaves before two is raised to that power"
+     },
+     "2": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/A.cpp:191-193, read only while a cable is patched, then put through a four tap estimator"
+     },
+     "3": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/A.cpp:195, maxPoly loops over getChannels and getPolyVoltage reads the channel"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/A.cpp:178 and 182, multiplied by the MAM and MOD knobs and added to the two frequencies in octaves"
+     },
+     "5": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/A.cpp:196, maxPoly loops over getChannels and getPolyVoltage reads the channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/A.cpp:168, maxPoly sets every output to the widest input's channel count"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/A.cpp:168, maxPoly sets every output to the widest input's channel count"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/A.cpp:168, maxPoly sets every output to the widest input's channel count"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/A.cpp:168, maxPoly sets every output to the widest input's channel count"
+     },
+     "4": {
+      "poly": true,
+      "why": "src/A.cpp:168, maxPoly sets every output to the widest input's channel count"
+     },
+     "5": {
+      "poly": true,
+      "why": "src/A.cpp:168, maxPoly sets every output to the widest input's channel count"
+     }
+    }
+   },
+   "notes": "Index order is not panel order. The panel prints FRQ, REZ, MOD on the first row and OFF, AM, MAM on the second, but the enum runs FRQ, MOD, REZ, OFF, MAM, RING, and the widget places index 1 in the third column and index 2 in the second (src/A.cpp:236-241); the jacks are ordered the same way. All the tags here are written from the widget. The tracking output is the one place the module contradicts its own naming: src/A.cpp:210 sends the corner frequency in hertz straight to setVoltage, so a corner at C4 puts 261.63V on that jack and the clamp at line 185 lets it reach half the sample rate. The maker calls it Tracking CV, and it does track, but not at any voltage a 1V per octave input will read. The resonance knob is in dBQ and is turned into a filter k by raising two to a sixth of it and inverting (src/A.cpp:87-90 and 166). The predictive input is read only while a cable is patched to it."
   },
   "Mu": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A calculus module: three gained inputs summed and slew limited, then offered as a differential and as three forms of integral",
+    "Sets the gain on the summed inputs; the knob is marked in decibels but moves three times as far, -72dB at fully counter-clockwise to 18dB fully clockwise",
+    "Sets the corner of the slew limiting low pass, four octaves either side of C4 at 261.63Hz",
+    "Sets the time step the integrals work over, a four thousandth of a sample at fully counter-clockwise up to one whole sample fully clockwise",
+    "Sets that input's level into the sum; the centre of its travel passes nothing and the two ends pass plus and minus one and a half times",
+    "Moves the gain on top of the dB knob, a tenth of a doubling per volt",
+    "Moves the slew corner one octave per volt on top of the Hz knob",
+    "Moves the integral time step on top of its knob, one doubling per volt, through the same low pass the knob goes through",
+    "One of the three signals summed, at the level its own gain knob sets",
+    "The cube root of the first differential of the summed signal",
+    "The cube root of the summed signal divided by the time step, which is the form the 1/Sigma integral works from",
+    "The cube root of the summed signal multiplied by the time step, which is the form the LN Sigma integral works from",
+    "The cube root of the plain integral of the summed signal",
+    "The cube root of the integral taken in its pole form",
+    "The cube root of the integral taken in its logarithmic form",
+    "Note — every output is a cube root, which is what holds these estimates inside a usable voltage range",
+    "Note — an output is only computed while a cable is patched to it, so an unpatched jack carries 0V rather than a held value",
+    "Note — the half-life knob is configured with a default outside its own range, so where it stands on a new module is decided by Rack rather than by the module"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 4,
+    "5": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 8,
+    "5": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "cv",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Mu.cpp:251 and 260, scaled by a tenth and added to the gain knob in the exponent"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Mu.cpp:252 and 261, added to the knob in octaves before two is raised to that power"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Mu.cpp:253 and 262, added whole to the knob, low passed twice, then used as a power of two"
+     },
+     "3": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Mu.cpp:255 and 259, multiplied by its gain knob and summed"
+     },
+     "4": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Mu.cpp:256 and 259"
+     },
+     "5": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Mu.cpp:257 and 259"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Mu.cpp:342-350, every output is a cube root written per channel"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/Mu.cpp:342-350, every output is a cube root written per channel"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/Mu.cpp:342-350, every output is a cube root written per channel"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/Mu.cpp:342-350, every output is a cube root written per channel"
+     },
+     "4": {
+      "poly": true,
+      "why": "src/Mu.cpp:342-350, every output is a cube root written per channel"
+     },
+     "5": {
+      "poly": true,
+      "why": "src/Mu.cpp:342-350, every output is a cube root written per channel"
+     }
+    }
+   },
+   "notes": "The gain knob's unit is wrong by a factor of three: src/Mu.cpp:236 halves the knob's decibels and line 260 raises two to that, which is about 3dB for every unit the knob names, so its -24 to 6 range is really -72dB to 18dB. The sister module D divides by six in the same place and is correct. The half-life knob is configured with a minimum of -36, a maximum of 0 and a default of 36 (src/Mu.cpp:68), a default outside its own range. The panel prints the last six jacks as Delta, one over Delta, LN Delta, Sigma, one over Sigma and LN Sigma; the maker's README lists them as Delta, Delta Delta, Delta Delta Delta and then the three integrals, which does not match either the panel or the code, and the panel is what a reader is looking at. The three later differential jacks are not higher differentials: they are the summed signal divided by and multiplied by the time step, which are the integrands the two singular integrals use (src/Mu.cpp:315 and 329). All the estimates are extrapolated one sample into the future through the same four tap filter (line 116-120)."
   },
   "T": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A delay that plays each stretch between triggers back an octave down and then runs it up to catch the input again",
+    "Sets the pitch the upper playback speed is tuned to, 0 to 11 semitones above the input",
+    "Adds up to 100 cents to the upper playback speed",
+    "The signal written into the delay",
+    "Starts a new recording on each rising edge above 2V, reading low again below 0.1V",
+    "10V while the delay is playing back at the upper speed and 0V while it is playing back an octave down",
+    "The recorded stretch played back, an octave down to begin with and then at the speed the two knobs set until it catches the input",
+    "Note — nothing comes out until a trigger is patched to TRIG; with no trigger the buffer fills, resets itself and the output falls quiet",
+    "Note — the delay buffer is shared out between the polyphonic channels, so the longest stretch one channel can hold falls as the channel count rises"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/T.cpp:149 and 165, maxPoly loops over getChannels and getPolyVoltage reads the channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/T.cpp:167, rescaled from 0.1 to 2 into 0 to 1 and then put through a dsp::SchmittTrigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/T.cpp:204"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/T.cpp:205, the buffer read at the current speed"
+     }
+    }
+   },
+   "notes": "The buffer is 44100 times 16 times 16 samples, about 256 seconds at 44.1kHz, divided by the channel count (src/T.cpp:58-63 and 150). The playback speed below is exactly half the speed above, so the lower half is always an octave down whatever the knobs are set to (src/T.cpp:158). The panel prints NOTE, FINE, IN, TRIG, HI and OUT."
   },
   "L": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A delay that measures the time between triggers and plays back one trigger later, with a control to take a number of samples off that delay",
+    "Takes two to this power of samples off the delay, 0 to 16, so 1 sample at fully counter-clockwise and 65536 fully clockwise",
+    "Adds up to one more to the power the Pre knob sets, so the shortening moves smoothly between that knob's steps",
+    "The signal written into the delay",
+    "Sets the delay to the time since the last rising edge here, reading high above 2V and low again below 0.1V",
+    "10V through the stretch of the cycle that the two knobs take off the delay, ending as the next trigger is due, and 0V the rest of the time",
+    "The input played back one trigger later, less the samples the two knobs take off",
+    "Note — the delay length is only measured when a trigger arrives at TRIG; before the second trigger the module uses its starting length of 4096 samples",
+    "Note — the buffer holds about 256 seconds at 44.1kHz shared out between the polyphonic channels, so sixteen channels leave about sixteen seconds each"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/L.cpp:114 and 127, maxPoly loops over getChannels and getPolyVoltage reads the channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/L.cpp:129, rescaled from 0.1 to 2 into 0 to 1 and then put through a dsp::SchmittTrigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/L.cpp:147"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/L.cpp:148, the buffer read one sample per sample"
+     }
+    }
+   },
+   "notes": "The Pre knob is configured 0 to 16 and the Fine knob 0 to 1, and the two are added before two is raised to that power, so the pair set a shortening of 1 to 131072 samples (src/L.cpp:46-47 and 119-121). The pre-trigger output is a comparison rather than a pulse: it is high for as long as the head has run past the measured length less the shortening (src/L.cpp:142). The panel prints Pre, Fine, IN, TRIG, PRE and OUT."
   },
   "D": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An exponential VCA whose output is extrapolated two samples into the future through a one pole filter",
+    "Sets the gain, -24dB at fully counter-clockwise, 0dB at a third of the way up and 6dB fully clockwise",
+    "Sets how far the CVdB input moves the gain; the centre of its travel is no effect and the two ends are equal and opposite",
+    "Sets the corner of the filter the extrapolation is taken through, four octaves either side of C4 at 261.63Hz",
+    "The signal the gain is applied to",
+    "Moves the gain on top of the gain knob at a tenth of a unit per volt, scaled by the modulation knob",
+    "The gained signal, filtered and extrapolated two samples ahead",
+    "Note — the output is not the input times the gain: it is a four term extrapolation of the filtered signal, so a sharp edge overshoots well past the level the gain would give it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/D.cpp:80 and 95, maxPoly loops over getChannels and getPolyVoltage reads the channel"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/D.cpp:93-95, scaled by a tenth and by the modulation knob, then added to the gain in the exponent"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/D.cpp:103, the extrapolated sum"
+     }
+    }
+   },
+   "notes": "The gain knob is in decibels over -24 to 6 and is applied as two raised to a sixth of it (src/D.cpp:61, 84 and 95), which is six decibels per doubling. The modulation knob is the maker's centred dB scaling shape, two to the power minus two to the minus power, which is zero at the centre of the travel and reaches plus and minus one and a half at the ends (src/D.cpp:75-77). The one pole filter is set at four times the sample rate (line 88) and the four coefficients -120, 396, -440 and 165 sum to one, so a steady signal comes through at the gain set and only changing signals are lifted. The panel prints dB, CVdB, FRQ, IN, CVdB and OUT."
   },
   "R": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A mixer insert: one signal added into another at a set level, with a scaled copy of the result on a second output",
+    "Sets how much of the ON input is added to the IN signal; the centre of its travel adds nothing and the two ends add plus and minus one and a half times",
+    "Sets the level of the AS output against the OUT signal; the centre of its travel gives silence and the two ends give plus and minus one and a half times",
+    "The signal passed straight through to OUT",
+    "The signal added to OUT at the level the ON knob sets",
+    "The OUT signal scaled by the AS knob; with a polyphonic cable each channel is also multiplied by every channel below it, so only the first channel carries the level the knob sets",
+    "The IN signal with the ON input added to it at the level the ON knob sets",
+    "Note — both knobs are centre zero: the middle of the travel passes nothing and the two halves differ in sign"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/R.cpp:62 and 71, maxPoly loops over getChannels and getPolyVoltage reads the channel"
+     },
+     "1": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/R.cpp:62 and 72, maxPoly loops over getChannels and getPolyVoltage reads the channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/R.cpp:75"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/R.cpp:76"
+     }
+    }
+   },
+   "notes": "The AS output compounds across polyphonic channels: `as` is computed once before the channel loop and then multiplied by each channel's output inside it (src/R.cpp:66 and 73), so channel 0 carries the knob level times the output, channel 1 carries that times its own output, and so on. Channel 0 is the only one that behaves as the panel implies. Both knobs use the maker's centred dB scaling, two to the power minus two to the minus power over -1 to 1, which is zero at the centre and plus and minus one and a half at the ends (src/R.cpp:46-47 and 51-53). The panel prints ON, AS, IN, ON, AS and OUT."
   },
   "Om": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock distributor that walks a 64 step sequence of letters and sends each clock pulse to whichever of thirteen outputs the current letter names",
+    "Sets how often a step rewrites the sequence around it by the rule its own letter names, 0 to 100 per cent of clocks",
+    "Sets where in the module's fixed random table the sequence is read from, 0 to 64, which changes every letter at once",
+    "Sets how often a step replaces its own letter with a fresh random one, 0 to 100 per cent of clocks",
+    "Advances the sequence one step on each rising edge above 2V, and sets how many polyphonic channels the outputs carry",
+    "Holds the sequence at its first step while it reads above 2V; every channel of a cable here is summed first, so any channel high resets",
+    "10V while the current letter is the first of the two marked on it and the clock is high, 10V while the letter is the second and the clock is low, and 0V otherwise",
+    "Note — nothing comes out until a clock is patched to CLK: the outputs take their channel count from that cable and carry none without it",
+    "Note — one of the twenty-seven letters is a blank, and on a step carrying it no output goes high at all",
+    "Note — the display shows the next eight letters and the three lamps mark a rewrite, the clock and a randomisation; both are drawn rather than built from controls, so no click reaches them",
+    "Note — on a polyphonic clock each channel hands its letter on to the next channel on that channel's own rising edge, so the channels run as an arpeggio down the cable"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Om.cpp:337-358, the channel count is taken from this jack and each channel is rescaled into a dsp::SchmittTrigger"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Om.cpp:347-348, getVoltageSum across the channels then rescaled into a dsp::SchmittTrigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "8": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "9": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "10": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "11": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     },
+     "12": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Om.cpp:87-92 and 401-408, the channel count copied from the clock and 10 or 0 written per channel"
+     }
+    }
+   },
+   "notes": "The sequence is built from a fixed table of 64 random numbers seeded with 666 at construction (src/Om.cpp:312-317), so the same seed setting always gives the same sequence; the seed knob interpolates between two entries of that table, which is why moving it changes every letter rather than shifting them. Only the offsets the module has written over that table are saved with the patch (lines 241-260). The bird rewrite is the maker's implementation of combinatory logic birds: a letter names a rewrite rule, the rule consumes a number of following symbols and writes a new expression back into the sequence (lines 96-152 and 201-230). The reset is a level rather than an edge: the pointer is held at zero for as long as it stays high, and the clock is ignored while it is. The panel prints BIRD, SEED, RAND, CLK, RST and the thirteen letter pairs AN to MZ."
   },
   "V": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three envelopes with VCAs, each with a pitch CV output, driven by pairs of trigger inputs",
+    "Sets the base voltage the three CV outputs carry, -4V at fully counter-clockwise to 4V fully clockwise",
+    "Sets the attack time of all three envelopes, about 2ms at fully counter-clockwise to 8 seconds fully clockwise",
+    "Sets the decay time of all three envelopes, about 2ms at fully counter-clockwise to 8 seconds fully clockwise",
+    "Adds to the base voltage of the three CV outputs, one volt per volt",
+    "Sets the gain of all three VCAs, doubling for every 10V, and silences them with nothing patched",
+    "Moves the attack and decay of all three envelopes together, a doubling every 2.5V",
+    "The signal that section's envelope is applied to",
+    "Starts that section's envelope and lifts its CV output by 0.5V while it stays high",
+    "Starts that section's envelope and lifts its CV output by 0.7V while it stays high",
+    "The base voltage with 0.5V added while that section's first trigger is high and 0.7V while its second is, so the four combinations give four pitches",
+    "That section's input through its envelope and the gain input",
+    "The sum of every section whose own output has no cable in it; patching a cable here does not give the middle section's own signal, because that section is then left out of the sum too",
+    "Note — the maker marks this module deprecated in the manual",
+    "Note — a section's envelope fires from the sum of its two trigger inputs, so either of them alone starts it",
+    "Note — with nothing patched to the gain input all three VCAs are silent, because that input sets the gain outright rather than modulating a knob",
+    "Note — the two trigger offsets on a CV output are 0.5V and 0.7V, which is six semitones and about eight and a half, not the five and seven semitones the manual names"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "6": 7,
+    "9": 7,
+    "4": 8,
+    "7": 8,
+    "10": 8,
+    "5": 9,
+    "8": 9,
+    "11": 9
+   },
+   "out": {
+    "0": 10,
+    "2": 10,
+    "4": 10,
+    "1": 11,
+    "5": 11,
+    "3": 12
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "audio",
+     "6": "audio",
+     "9": "audio",
+     "4": "trigger",
+     "7": "trigger",
+     "10": "trigger",
+     "5": "trigger",
+     "8": "trigger",
+     "11": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "2": "pitch",
+     "4": "pitch",
+     "1": "audio",
+     "3": "audio",
+     "5": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/V.cpp:130 and 163, added whole to the knob and sent out as the CV"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/V.cpp:129, scaled by a tenth and raised as a power of two with no knob to add to"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/V.cpp:131-133, scaled by 0.4 and added to both envelope time exponents"
+     },
+     "3": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/V.cpp:141 and 160"
+     },
+     "6": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/V.cpp:141 and 160"
+     },
+     "9": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/V.cpp:141 and 160"
+     },
+     "4": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/V.cpp:139 and 142, summed with the other trigger and rescaled into a dsp::SchmittTrigger"
+     },
+     "7": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/V.cpp:139 and 142"
+     },
+     "10": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/V.cpp:139 and 142"
+     },
+     "5": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/V.cpp:140 and 142, summed with the other trigger and rescaled into a dsp::SchmittTrigger"
+     },
+     "8": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/V.cpp:140 and 142"
+     },
+     "11": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/V.cpp:140 and 142"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/V.cpp:120, maxPoly sets every output to the widest input's channel count"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/V.cpp:120, maxPoly sets every output to the widest input's channel count"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/V.cpp:120, maxPoly sets every output to the widest input's channel count"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/V.cpp:120, maxPoly sets every output to the widest input's channel count"
+     },
+     "4": {
+      "poly": true,
+      "why": "src/V.cpp:120, maxPoly sets every output to the widest input's channel count"
+     },
+     "5": {
+      "poly": true,
+      "why": "src/V.cpp:120, maxPoly sets every output to the widest input's channel count"
+     }
+    }
+   },
+   "notes": "The middle audio output is overwritten every sample with the sum of the sections whose own outputs are unpatched (src/V.cpp:161-166). Because the middle section is excluded from that sum as soon as its own jack is connected, and that same jack is then written with the sum, patching it loses the middle section's own signal altogether; that is what the line for it says. The gain input has no knob behind it, so an unpatched jack gives an exponent of zero and a gain of one, which with the envelope still applies but with nothing patched to a signal input gives silence. The two trigger offsets applied to the CV outputs are 0.05 and 0.07 volts per volt of trigger (line 163), which at 10V gates is 0.5V and 0.7V; the maker's README calls them five and seven semitones, which would be 0.417V and 0.583V. The panel prints Hz, ATK, DCY, CVHz, CVdB, CVs, then IN, T5, T7, CV and OUT for each of the three columns."
   },
   "F": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four pole filter that morphs between four classic responses, with a low to high morph, an inverse morph and a soft clipping drive",
+    "Morphs the response between the two prototypes the skew knob has chosen, Linkwitz to Butterworth with skew fully counter-clockwise and Legendre to Bessel with it fully clockwise",
+    "Chooses which pair of prototypes the spread knob morphs between, Linkwitz and Butterworth at fully counter-clockwise and Legendre and Bessel fully clockwise",
+    "Sets the filter frequency, four octaves either side of C4 at 261.63Hz",
+    "Morphs the output between a low pass at fully counter-clockwise and a high pass fully clockwise",
+    "Morphs between the filter's own output at fully counter-clockwise and the input with that output taken back out fully clockwise",
+    "Sets the level the filter's internal states are clipped at, 2.5V at fully counter-clockwise to 10V fully clockwise",
+    "Moves the spread on top of the SPD knob, a quarter of a unit per volt",
+    "Moves the skew on top of the SKW knob, a quarter of a unit per volt",
+    "Moves the filter frequency one octave per volt on top of the FRQ knob",
+    "Moves the low to high morph on top of the LAH knob, a quarter of a unit per volt",
+    "Moves the clipping level on top of the DRV knob, a quarter of a doubling per volt",
+    "Moves the inverse morph on top of the INV knob, a quarter of a unit per volt",
+    "The signal filtered",
+    "The filtered signal",
+    "Note — the drive clamps the filter's own state variables rather than sitting in the signal path, so lowering it changes the shape of the response as well as the level"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "5": 5,
+    "4": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12,
+    "6": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "pitch",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/F.cpp:172, scaled by a quarter and added to the knob's -1 to 1"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/F.cpp:173"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/F.cpp:174, added to the knob in octaves before two is raised to that power"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/F.cpp:176"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/F.cpp:187 and 189, scaled by a quarter, added to the knob and used as a power of two times 5V"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/F.cpp:188"
+     },
+     "6": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/F.cpp:159 and 192, maxPoly then getPolyVoltage"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/F.cpp:199"
+     }
+    }
+   },
+   "notes": "Index order is not panel order in the last knob row and the last jack row: the enum runs DRV then INV while the widget places INV on the left and DRV on the right, and the same swap applies to their two jacks (src/F.cpp:223-231). The tags are written from the widget. The four prototypes in the table are commented BW2, BW4, BE4 and L4, meaning Butterworth, Bessel and Legendre (src/F.cpp:58-69); the naming in the two morph lines follows the maker's README, which is the manual, and the code comments do not name the Linkwitz pair, so that pairing is the maker's word rather than something the source states. The filter is two two pole sections in series, each morphed independently. None of the five morph controls is clamped after its CV is added, so a large voltage carries the morph past the ends of the knob's travel. The panel prints SPD, SKW, FRQ, LAH, INV, DRV, the six modulation jacks, IN and OUT."
   },
   "W": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns gates into chromatic transposition: each jack adds its own number of semitones to a pitch, with the total added on one output and taken off the other",
+    "The pitch the semitones are added to and taken from",
+    "Adds the number of semitones marked on it, a full step at 10V and less in proportion below that",
+    "Nothing in the module reads this jack: the loop that adds the semitones stops one jack short",
+    "The pitch with every jack's semitones added",
+    "The pitch with every jack's semitones taken off",
+    "Note — the jacks are not read as gates but as levels: a jack at 5V adds half its semitone count, so a slow envelope here glides the transposition rather than stepping it"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/W.cpp:69 and 74, maxPoly then getPolyVoltage, passed through unchanged"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/W.cpp:77-79, scaled by a tenth and by a twelfth of the jack's number"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/W.cpp:77-79, scaled by a tenth and by a twelfth of the jack's number"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/W.cpp:77-79, scaled by a tenth and by a twelfth of the jack's number"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/W.cpp:77-79, scaled by a tenth and by a twelfth of the jack's number"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/W.cpp:77-79, scaled by a tenth and by a twelfth of the jack's number"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/W.cpp:77-79, scaled by a tenth and by a twelfth of the jack's number"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/W.cpp:77-79, scaled by a tenth and by a twelfth of the jack's number"
+     },
+     "8": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/W.cpp:77-79, scaled by a tenth and by a twelfth of the jack's number"
+     },
+     "9": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/W.cpp:77-79, scaled by a tenth and by a twelfth of the jack's number"
+     },
+     "10": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/W.cpp:77-79, scaled by a tenth and by a twelfth of the jack's number"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/W.cpp:82"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/W.cpp:83"
+     }
+    }
+   },
+   "notes": "The eleventh semitone jack is dead: src/W.cpp:77 loops i from 0 to 9 over an eleven entry table, so order[10], the jack the panel marks 11, is never read. It is on the panel and can be clicked, so it gets a line saying so rather than falling back on the maker's tooltip; it is given no family and no props because nothing reads it. The maker's own list in the README names eleven transposing inputs. The module has no parameters. The panel prints IN, the numbers 1 to 11, and + and - on the two outputs."
   },
   "Y": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sixteen channel gate sequencer with sixteen straight steps, twelve triplet steps, sixteen stored patterns, four working modes and its own clock",
+    "Sets the tempo, 0 to 240 beats per minute",
+    "Sets the gate length as a fraction of a step, 0 to 100 per cent, which also sets the width of the run and reset outputs",
+    "Starts and stops the sequencer; its lamp blinks with the beat rather than showing whether the sequencer is running",
+    "Sets the sequencer back to the start of its 64 beat cycle; its lamp lights through the first beat of that cycle",
+    "Puts the module into pattern mode, where the step buttons set the pattern of the selected channel",
+    "Puts the module into sequence mode, where the step buttons choose which pattern number each quarter of the bar plays",
+    "Puts the module into mute mode, where each of the sixteen step buttons mutes its own output",
+    "Puts the module into now mode, where holding a step button plays its output straight away and makes it the channel being edited",
+    "In pattern mode this turns the selected channel on or off for that step; in sequence mode it sets the pattern number; in mute mode it mutes its own output; in now mode it plays its output while held",
+    "In pattern mode this turns the selected channel on or off for that triplet step; in the other three modes it chooses which of three pattern slots its quarter of the bar uses",
+    "Stores the pattern and channel playing now as the source for the paste button, and lights while that stored pattern is the one playing",
+    "Copies the stored pattern over the one playing: one channel in pattern mode and all sixteen in the other modes, lighting while the stored channel matches the one selected",
+    "Bends the timing of the triplet steps, pushing them early at fully counter-clockwise and late fully clockwise",
+    "Bends the timing of the straight steps, pushing them early at fully counter-clockwise and late fully clockwise",
+    "A pitch naming one of the module's buttons, read whenever the gate input goes high; C2 to B5 covers the whole panel",
+    "Presses the button the CV input names, on each rising edge above 2V",
+    "Scrolls the play position through the 64 beat cycle, the whole cycle over 10V",
+    "10V while that channel's step is on and the gate length has not run out, and 0V otherwise; a muted channel carries 0V",
+    "10V for the part of every beat the gate length knob sets, as a clock for other modules",
+    "10V for the part of the first beat of the 64 beat cycle the gate length knob sets, as a reset for other modules",
+    "Note — the sequencer comes up stopped: nothing moves until the run button is pressed",
+    "Note — there is no clock input; the module runs from its own tempo knob, and the position input is the only way to move it from outside",
+    "Note — every output is set to one channel whatever is patched in, so the module is monophonic",
+    "Note — which of the sixteen patterns plays is chosen a quarter of a bar at a time, through three slots per quarter that the triplet buttons switch between in sequence mode",
+    "Note — the patterns are saved with the patch, and so are the mode, the mutes, the selected channel and the run state, which are parameters with no control on the panel"
+   ],
+   "param": {
+    "30": 1,
+    "35": 2,
+    "28": 3,
+    "29": 4,
+    "31": 5,
+    "32": 6,
+    "33": 7,
+    "34": 8,
+    "0": 9,
+    "1": 9,
+    "2": 9,
+    "3": 9,
+    "4": 9,
+    "5": 9,
+    "6": 9,
+    "7": 9,
+    "8": 9,
+    "9": 9,
+    "10": 9,
+    "11": 9,
+    "12": 9,
+    "13": 9,
+    "14": 9,
+    "15": 9,
+    "16": 10,
+    "17": 10,
+    "18": 10,
+    "19": 10,
+    "20": 10,
+    "21": 10,
+    "22": 10,
+    "23": 10,
+    "24": 10,
+    "25": 10,
+    "26": 10,
+    "27": 10,
+    "54": 11,
+    "55": 12,
+    "75": 13,
+    "76": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17
+   },
+   "out": {
+    "0": 18,
+    "1": 18,
+    "2": 18,
+    "3": 18,
+    "4": 18,
+    "5": 18,
+    "6": 18,
+    "7": 18,
+    "8": 18,
+    "9": 18,
+    "10": 18,
+    "11": 18,
+    "12": 18,
+    "13": 18,
+    "14": 18,
+    "15": 18,
+    "16": 19,
+    "17": 20
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Y.cpp:407 and 410-414, multiplied by 12, offset to a MIDI note number and rounded"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Y.cpp:406 and 408, rescaled from 0.1 to 2 into a dsp::SchmittTrigger per channel"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "normal": "0V",
+      "why": "src/Y.cpp:393, getVoltage divided by 10 and multiplied by 64 beats"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:158-163 and 315, every output forced to one channel and written 10 or 0"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:500-505"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Y.cpp:507-512"
+     }
+    }
+   },
+   "notes": "Thirty-seven of the 77 parameters have no widget and cannot be clicked: the run state, the current mode, the sixteen pattern selectors, the selected channel, the two copy registers and the sixteen channel mutes (src/Y.cpp:198-215). They are parameters so that Rack saves them, and they are set from the buttons that are on the panel. The run button's lamp is driven from the beat rather than from the run state (line 502), which is why its line says so. The position input is read with getVoltage rather than per channel, and every output is forced to one channel (lines 158-163 and 393). The CV and gate inputs let a MIDI keyboard work the panel: a gate edge reads the CV as a note number and looks the action up in a 128 entry table (lines 102-116 and 405-417), in which the black keys reach the function and mode buttons and the white keys the step buttons. The extra details the maker wrote are in Y.md in the repository. The panel prints OUTPUT GATES, PAT, SEQ, MUTE, NOW, CV, GATE, RST, RUN, G.LEN, CPY, PST, 3, JAZZ, 4, TEMPO, RST, RUN and NOTES & TRIPLES; the step buttons themselves carry no lettering, and neither does the position input."
   },
   "O": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three parabolic oscillators sharing one feedback loop and mixed to a single output",
+    "Sets the pitch of all three oscillators together, four octaves either side of C4 at 261.63Hz",
+    "Offsets that oscillator from the first, two octaves either side of it",
+    "Sets how much of that oscillator goes into the shared feedback rather than to the output, 0 to 100 per cent",
+    "Moves all three oscillators one octave per volt",
+    "The three oscillators added together, each at the share its own feedback knob leaves for the output",
+    "Note — the feedback knobs trade output for feedback: at 100 per cent an oscillator adds nothing directly to the output and only drives the shared loop, which phase modulates all three"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 3,
+    "4": 3,
+    "5": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/O.cpp:85 and 90, added to the frequency knobs in octaves before two is raised to that power"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/O.cpp:103, ten times the summed shapes"
+     }
+    }
+   },
+   "notes": "Index order is not panel order: the enum runs the three frequency knobs first and the three feedback knobs after, while the panel alternates them down the column (src/O.cpp:123-128), so the tags are written from the widget. The first frequency knob is configured -4 to 4 octaves and the other two -2 to 2 relative to it (src/O.cpp:42-46), and the CV input is added to all three. The shared feedback is a single value per polyphonic channel, updated once per sample from all three oscillators (src/O.cpp:99-101). The panel prints FRQ and FBK three times over, then CV and OUT."
   },
   "S": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns a MIDI clock into a voltage that rises over 64 beats and starts again",
+    "Sets the tempo the count runs at between clock pulses, 0 to 240 beats per minute",
+    "Sets how many clock pulses make one beat, a whole number from 1 to 16",
+    "Advances the count on each rising edge above 2V, reading low again below 0.1V, and is ignored while the module is stopped",
+    "Sets the count back to the start and starts it running, on each rising edge above 2V",
+    "Stops the count on each rising edge above 2V, leaving the output where it stood",
+    "Starts the count running again from where it stopped, on each rising edge above 2V",
+    "A voltage rising from 0V to 10V over 64 beats and dropping back, moving between clock pulses at the tempo the BPM knob sets",
+    "Note — the module comes up stopped and the clock is ignored until a rising edge reaches STRT or CONT",
+    "Note — this module reads only the first channel of any cable patched to it and sends one channel out"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/S.cpp:78-79, getVoltage rescaled from 0.1 to 2 into a dsp::SchmittTrigger"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/S.cpp:80-81"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/S.cpp:82-83"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/S.cpp:84-85"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/S.cpp:117, a 0 to 63 beat count plus a fraction, scaled to 10V over 64"
+     }
+    }
+   },
+   "notes": "This is one of the few modules in the plugin that does not call maxPoly: every jack is read with getVoltage and the output is left at one channel. The tempo knob divides by 15 rather than 60 (src/S.cpp:74), so the count between clock pulses runs at four times the beats per minute the knob names; the clock pulses correct it, and the knob only governs how the voltage moves between them. A start arms a transient state by setting the divider to 17 so that the first clock after it always counts (src/S.cpp:94 and 104). The panel prints BPM, DIV, CLK, STRT, STOP, CONT and OUT."
   },
   "E": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An attack and release envelope with a VCA, and a separate scaled copy of the envelope for modulating other modules",
+    "Sets the attack time, about 2ms at fully counter-clockwise to 8 seconds fully clockwise",
+    "Sets the release time, about 2ms at fully counter-clockwise to 8 seconds fully clockwise",
+    "Sets the level of the MOD output; the centre of its travel gives silence and the two ends give plus and minus one and a half times 5V",
+    "The signal the envelope is applied to",
+    "Starts the attack on each rising edge above 2V, reading low again below 0.1V",
+    "The envelope scaled by the MOD knob, reaching 7.5V at the top of the envelope with that knob fully clockwise and -7.5V fully counter-clockwise",
+    "The input multiplied by the envelope",
+    "Note — nothing comes out until a trigger arrives at TRIG; both stages are exponential and the attack is treated as finished once it has reached 95 per cent"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/E.cpp:72 and 86, maxPoly over getChannels and getPolyVoltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/E.cpp:87, rescaled from 0.1 to 2 into 0 to 1 and put through a dsp::SchmittTrigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "-7.5 to 7.5V",
+      "why": "src/E.cpp:107, 5 times the knob's -1.5 to 1.5 times the envelope"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/E.cpp:106, the input times the envelope"
+     }
+    }
+   },
+   "notes": "The two time knobs are configured -27 to 9 in the maker's dBs and divided by three before two is raised to that power, giving a time constant of two to the power -9 to 3 seconds, about 2ms to 8 seconds; both come up at -9, about 125ms (src/E.cpp:47-48 and 74-82). The modulation knob is the maker's centred dB scaling, zero at the centre and plus and minus one and a half at the ends. The envelope state is held per channel. The panel prints ATK, REL, MOD, IN, TRIG, MOD and OUT."
   },
   "X": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An over-sampled wave folder built from Chebyshev polynomials, with a truncating bit crusher in front of it and a wet mix",
+    "Sets how hard the signal is folded, 0 to 100 per cent of the shaping depth",
+    "Blends the shape between a third order Chebyshev fold at fully counter-clockwise and a fifth order one fully clockwise",
+    "Sets the step the signal is truncated to before folding, a 23 bit step at fully counter-clockwise coarsening to a 16V step fully clockwise",
+    "Mixes between the truncated input at fully counter-clockwise and the folded signal fully clockwise",
+    "The signal folded",
+    "Adds to the fold depth at a tenth of a unit per volt, on top of the FOLD knob",
+    "The folded signal mixed with the truncated input by the WET knob",
+    "Note — the dry half of the wet mix is the input after the truncation, not the input itself, so the bit crushing is heard at every setting of the wet knob"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/X.cpp:104 and 115, maxPoly over getChannels and getPolyVoltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/X.cpp:116-117, scaled by a tenth and added to the fold knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/X.cpp:127"
+     }
+    }
+   },
+   "notes": "The mash knob is configured with its ends the wrong way round, 23 as the minimum and -4 as the maximum (src/X.cpp:78), so turning it clockwise coarsens the quantisation rather than the other way; the value is used as two to the power minus it, which is a step of two to the -23 volts at one end and 16V at the other. The truncation error is then put through the shaper three more times with the coefficients 4, -6 and 4 at four times the sample rate, which is the over-sampling (src/X.cpp:118-126). The panel prints FOLD, KIND, MASH, WET, IN, MFLD and OUT."
   },
   "M": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An emphasis and de-emphasis pair: a send filter that lifts the low end and cuts the high, and a return filter that takes that curve back out",
+    "Sets the low corner, three octaves below to four octaves above 50Hz",
+    "Sets how far the low end is lifted on the send, 0dB to 20dB, and cut by the same amount on the return",
+    "Sets the high corner, up to four octaves below 21.22kHz",
+    "Sets how far the high end is cut on the send, -20dB to 0dB, and lifted by the same amount on the return",
+    "Moves the low corner one octave per volt on top of the LOW knob",
+    "Moves the high corner one octave per volt on top of the HIGH knob",
+    "The signal into the send filter",
+    "The signal into the return filter",
+    "The IN signal with the low end lifted and the high end cut",
+    "The RTN signal with the send filter's curve taken back out",
+    "Note — the two halves are separate inside the module: IN reaches only SEND and RTN reaches only OUT, so the pair is meant to go either side of whatever is being driven",
+    "Note — the two gain knobs come up at the RIAA settings of 20dB and -20dB; the maker warns in the manual that the return filter at those settings can put damaging levels into a tweeter",
+    "Note — this module misbehaves on polyphonic cables: from the second channel on, both corner frequencies are pinned at half the sample rate"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "audio",
+     "3": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/M.cpp:116, added to the knob in octaves before two is raised to that power"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/M.cpp:118"
+     },
+     "2": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/M.cpp:110 and 113, maxPoly then getPolyVoltage"
+     },
+     "3": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/M.cpp:114"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/M.cpp:143"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/M.cpp:144"
+     }
+    }
+   },
+   "notes": "The corner frequencies compound across polyphonic channels. src/M.cpp:105 and 107 read the two knobs once per sample, and lines 116 and 118 then overwrite those same variables inside the channel loop with a frequency in hertz; on the second channel that frequency is fed back into the exponent, so the result overflows and the clamps at lines 117 and 119 hold it at half the sample rate. Only channel 0 filters as the panel implies, which is why the third note says so. The two gains are ordinary decibels, ten to the power of a twentieth (src/M.cpp:86-88). The panel prints LOW, LOdB, HIGH, HIdB, LO, HI, IN, RTN, SND and OUT."
   },
   "Q": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A physical model that treats the input as a driven radius and runs it through a gravity and uncertainty calculation against an internal oscillator",
+    "Sets the frequency of the internal mass oscillator, four octaves either side of C4 at 261.63Hz",
+    "Sets the level at which the mass oscillator is turned inside out to keep the model stable, 0.5V at fully counter-clockwise to 1V fully clockwise",
+    "Multiplies the uncertainty term, twice at fully counter-clockwise to four times fully clockwise",
+    "Multiplies the gravity term, once at fully counter-clockwise to four times fully clockwise",
+    "Multiplies the containment term, four times at fully counter-clockwise to sixteen times fully clockwise",
+    "Stretches the input radius by the mass oscillator, half at fully counter-clockwise to twice fully clockwise",
+    "The signal treated as the driven radius",
+    "Moves the mass oscillator one octave per volt on top of the OM knob",
+    "Moves the stability level on top of the SING knob, a tenth of a doubling per volt",
+    "Moves the uncertainty multiplier on top of the PLK knob, a tenth of a doubling per volt",
+    "Moves the gravity multiplier on top of the NTN knob, a tenth of a doubling per volt",
+    "Moves the containment multiplier on top of the MASS knob, a tenth of a doubling per volt",
+    "Moves the radius stretch on top of the ANG knob, a full doubling per volt",
+    "The uncertainty, gravity and containment terms added together and halved",
+    "Note — the mass oscillator runs whatever is patched, so the module makes sound on its own; the input adds the gravity and containment terms on top of it",
+    "Note — the mass knob is configured with a default outside its own range, so where it stands on a new module is decided by Rack rather than by the module"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12,
+    "6": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Q.cpp:116, scaled by a quarter and used as the radius"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Q.cpp:99-101, added to the knob in octaves before two is raised to that power"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Q.cpp:97-98, scaled by a tenth and added to the knob in the exponent"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Q.cpp:109-110"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Q.cpp:121-122"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Q.cpp:124-125"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Q.cpp:118, added whole to the knob in the exponent, so a volt is a doubling"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Q.cpp:135, the summed terms halved"
+     }
+    }
+   },
+   "notes": "The angle input is the one modulation jack added whole rather than scaled by a tenth (src/Q.cpp:118 against lines 97, 109, 121 and 124), so it is ten times as sensitive as the other five. The mass knob is configured with a minimum of 2, a maximum of 4 and a default of 0 (src/Q.cpp:74); the default lies outside the range, and what a freshly placed module reads there is Rack's clamping rather than anything the module sets. The stability step at lines 108 and 127 replaces a value with the square of the threshold divided by that value whenever it grows past the threshold, which is what keeps the divisions bounded. The maker's longer account is in Q.md in the repository, and it is a physical analogy rather than a control reference. The panel prints OM, SING, PLK, NTN, MASS, ANG, the six modulation jacks, IN and OUT."
   },
   "C": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three attenuverting channels, each with a one pole low pass and its own output, and a mix output that collects the channels nothing is patched to",
+    "Sets that channel's gain; the centre of its travel gives silence and the two ends give plus and minus one and a half times",
+    "Sets that channel's low pass corner, six octaves either side of C4 at 261.63Hz",
+    "The signal into that channel",
+    "Added straight into the mix output, for chaining another of these modules into it",
+    "That channel after its low pass and its gain; patching a cable here takes the channel out of the mix output",
+    "The sum of every channel whose own output has no cable in it, plus the LINK input",
+    "Note — patching a cable to a channel's own output removes that channel from the mix, which is what lets one channel be used as a plain attenuverter without disturbing the others"
+   ],
+   "param": {
+    "0": 1,
+    "2": 1,
+    "4": 1,
+    "1": 2,
+    "3": 2,
+    "5": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/C.cpp:103 and 106, maxPoly over getChannels and getPolyVoltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/C.cpp:107"
+     },
+     "2": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/C.cpp:108"
+     },
+     "3": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/C.cpp:110"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/C.cpp:120"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/C.cpp:121"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/C.cpp:122"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/C.cpp:130"
+     }
+    }
+   },
+   "notes": "The gain knobs use the maker's centred dB scaling, two to the power minus two to the minus power over -1 to 1, which is zero at the centre of the travel and plus and minus one and a half at the ends (src/C.cpp:56-58 and 95-97). The mix is not attenuated: three channels at full gain add straight together, and the LINK input is added on top with no scaling at all (src/C.cpp:123-129). The low pass comes before the gain. The panel prints G1, F1, G2, F2, G3, F3, IN1, OUT1, IN2, OUT2, IN3, OUT3, LINK and MIX."
   },
   "U": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three sample and hold channels, each with a second output that quantises the held value to a step in semitones",
+    "Sets the quantiser step in semitones, a whole number from 1 to 12",
+    "Nothing that can run reads this knob: it filters an internal noise source that the module's channel loop can never reach",
+    "Samples that channel's input on each rising edge above 2V, reading low again below 0.1V",
+    "The signal that channel samples, and the jack that sets how many polyphonic channels that section carries",
+    "The last value sampled on that channel",
+    "The last value sampled on that channel, cut to a whole number of quantiser steps",
+    "Note — a channel does nothing at all until a cable is patched to its IN jack: the loop that does the work is bounded by that jack's channel count, so with nothing patched the whole section is skipped",
+    "Note — the held value and the edge detector are shared by every polyphonic channel of a section, so all the channels of an output carry the same sample"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 4,
+    "4": 4,
+    "5": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 6,
+    "4": 6,
+    "5": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/U.cpp:155-156, getPolyVoltage rescaled from 0.1 to 2 and put through a dsp::SchmittTrigger"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/U.cpp:155-156"
+     },
+     "2": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/U.cpp:155-156"
+     },
+     "3": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/U.cpp:53-57 and 148, the channel count is taken from this jack and getPolyVoltage reads it"
+     },
+     "4": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/U.cpp:53-57 and 148"
+     },
+     "5": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/U.cpp:53-57 and 148"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/U.cpp:55-56, the channel count copied from that section's signal input"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/U.cpp:55-56, the channel count copied from that section's signal input"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/U.cpp:55-56, the channel count copied from that section's signal input"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/U.cpp:55-56, the channel count copied from that section's signal input"
+     },
+     "4": {
+      "poly": true,
+      "why": "src/U.cpp:55-56, the channel count copied from that section's signal input"
+     },
+     "5": {
+      "poly": true,
+      "why": "src/U.cpp:55-56, the channel count copied from that section's signal input"
+     }
+    }
+   },
+   "notes": "The noise knob is dead. src/U.cpp:145 bounds the channel loop with maxPolySpecial, which returns the signal input's channel count, and an unpatched input reports zero channels; the noise branch at lines 149-154 only runs when that same input is not connected, so it can never be reached and the filter frequency the knob sets is never used. The knob is on the panel and can be clicked, so it gets a line saying so rather than falling back on the maker's tooltip. The README describes the noise as what the module produces when no input is patched; the code does not do that, and this is the one place where the manual and the code disagree outright. The quantiser takes half a step off the held value and then truncates toward zero (src/U.cpp:92-97 and 159), so the step boundaries fall differently above and below 0V. The panel prints QUNT, NSE, CLK, IN, OUT and QOUT, the last four repeated for each of the three sections."
   },
   "B": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A six by three crossbar switch with eighteen stored routings and a set of per-output functions, all worked from one mode button",
+    "In green mode this connects its own input to its own output; in red mode it recalls the routing stored under it; in blue mode it turns on one of that output's six functions",
+    "Steps the module between green routing, red recall and blue function modes, and lights in the colour of the mode it is in",
+    "One of the six signals the crossbar can route to any output",
+    "The sum of the inputs switched to it, after any of that column's functions have been applied",
+    "Note — nothing reaches an output until buttons are pressed in green mode; a new module has every crossing and every function off",
+    "Note — the six functions on a column, in button order, are: multiply the selected inputs instead of adding them; fold anything past 5V back through 25 divided by itself; and invert",
+    "Note — the last three of a column's six functions, in button order, are: raise two to the signal; take the cube root of 25 times the signal; and block DC",
+    "Note — each button's lamp mixes three colours at once: red marks the routing that button stores, green a crossing that is on, and blue a function that is on"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 1,
+    "17": 1,
+    "18": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/B.cpp:181 and 214, maxPoly over getChannels and getPolyVoltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/B.cpp:181 and 214, maxPoly over getChannels and getPolyVoltage per channel"
+     },
+     "2": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/B.cpp:181 and 214, maxPoly over getChannels and getPolyVoltage per channel"
+     },
+     "3": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/B.cpp:181 and 214, maxPoly over getChannels and getPolyVoltage per channel"
+     },
+     "4": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/B.cpp:181 and 214, maxPoly over getChannels and getPolyVoltage per channel"
+     },
+     "5": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/B.cpp:181 and 214, maxPoly over getChannels and getPolyVoltage per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/B.cpp:181 and 241"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/B.cpp:181 and 241"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/B.cpp:181 and 241"
+     }
+    }
+   },
+   "notes": "No family is set on the jacks: a crossbar carries whatever is patched into it. Two of the module's 21 parameters, the internal mode and the current routing number, are declared with configSwitch but never given a widget (src/B.cpp:153-154), so no click can reach them and they get no line; they are how the mode and routing survive a save. The routings and the function flags are saved in the patch as two strings (src/B.cpp:70-122). The multiply function is special-cased: it starts the output at 10V and multiplies each selected input in at a fifth of its voltage (lines 210-220). The panel prints the eighteen buttons as 1A to 6C and the six inputs and three outputs as numbers and letters."
   },
   "J": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An all-pass phaser of up to eight one pole stages, with a triangle LFO sweeping their frequency and a wet mix",
+    "Sets the frequency of the all-pass stages, four octaves either side of C4 at 261.63Hz",
+    "Sets how many stages the signal passes through, 0 to 8, blending between whole numbers rather than stepping",
+    "Moves every stage between bypass at fully counter-clockwise, a high pass at the centre and an all-pass fully clockwise",
+    "Mixes between the dry input at fully counter-clockwise and the filtered signal fully clockwise",
+    "Sets the LFO rate, four octaves either side of 1Hz",
+    "Sets how far the LFO sweeps the stage frequency, up to two octaves either side at fully clockwise",
+    "Moves the stage frequency one octave per volt on top of the FRQ knob",
+    "Adds to the number of stages, one stage per volt",
+    "Moves the bypass to all-pass setting on top of the BHA knob, a tenth of its range per volt",
+    "Adds to the wet mix, ten per cent per volt",
+    "Moves the LFO rate one octave per volt on top of the LFO knob",
+    "The signal filtered, despite the maker's tooltip on this jack reading LFO gain level",
+    "The LFO triangle, -10V to 10V, running whatever the LVL knob is set to",
+    "The filtered signal mixed with the dry input by the WET knob",
+    "Note — the LFO runs at all times and its output is usable on its own; the LVL knob only sets how much of it reaches the filter"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "audio"
+    },
+    "out": {
+     "0": "cv",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/J.cpp:132, added to the knob in octaves before two is raised to that power"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/J.cpp:118, added whole to the order knob"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/J.cpp:119, scaled by a tenth and added to the knob's -1 to 1 before an offset of one"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/J.cpp:120, scaled by a tenth and added to the wet knob"
+     },
+     "4": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/J.cpp:121-122, added to the LFO knob in octaves relative to 1Hz"
+     },
+     "5": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/J.cpp:106 and 137, maxPoly then getPolyVoltage"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "-10 to 10V",
+      "why": "src/J.cpp:157, five times a triangle that runs -2 to 2"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/J.cpp:156"
+     }
+    }
+   },
+   "notes": "The maker's tooltip on the audio input is wrong: configInput is fed a table whose sixth entry reads LFO gain level while the sixth input is IN, the signal the filter processes (src/J.cpp:31-38 and 137). The line for that jack names the conflict, because Rack shows that tooltip on hover. The bypass to all-pass knob is offset by one inside the loop, so its stored -1 to 1 becomes a coefficient of 0 to 2: zero leaves each stage bypassed, one gives a high pass and two an all-pass, and the knob comes up fully clockwise at the all-pass (src/J.cpp:60 and 119-143). The order control blends between the outputs of two neighbouring stages rather than switching (lines 144-154). Neither the order nor the wet control is clamped. The panel prints FRQ, ODR, BHA, WET, LFO, LVL, then the five modulation jacks, LFO, IN and OUT."
   },
   "K": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A phase modulation oscillator: one modulator driving a second modulator driving the carrier, with a low pass on the modulation",
+    "Sets the carrier pitch, four octaves either side of C4 at 261.63Hz",
+    "Sets the low pass on the modulation before it reaches the carrier, four octaves either side of the carrier pitch",
+    "Sets the first modulator's pitch against the carrier, a whole number of semitones from -12 to 12",
+    "Sets the second modulator's pitch against the carrier, a whole number of semitones from -12 to 12",
+    "Sets how far the first modulator moves the carrier's phase, 0 to 100 per cent",
+    "Sets how far the second modulator moves the first modulator's phase, 0 to 100 per cent",
+    "Moves the carrier pitch one octave per volt on top of the FRQ knob",
+    "Moves the modulation filter one octave per volt on top of the LPF knob",
+    "Moves the first modulator's pitch one octave per volt on top of its ratio knob",
+    "Moves the second modulator's pitch one octave per volt on top of its ratio knob",
+    "Adds to the first modulator's depth, ten per cent per volt",
+    "Adds to the second modulator's depth, ten per cent per volt",
+    "The filtered modulation that drives the carrier, -5V to 5V, despite the maker's tooltip on this jack reading Audio",
+    "The carrier as a triangle bent by the modulation, -5V to 5V, despite the maker's tooltip on this jack reading Modulation",
+    "Note — the ratio knobs step in semitones while the ratio inputs are an octave per volt, so a two to one ratio is 12 on the knob and 1V at the jack"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12
+   },
+   "out": {
+    "1": 13,
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/K.cpp:117, added to the knob in octaves before two is raised to that power"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/K.cpp:118, added to the knob in octaves relative to the carrier frequency"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/K.cpp:120"
+     },
+     "3": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/K.cpp:121"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/K.cpp:122, scaled by a tenth and added to the depth knob"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/K.cpp:123"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "-5 to 5V",
+      "why": "src/K.cpp:154, ten times a triangle that runs -0.5 to 0.5"
+     },
+     "1": {
+      "poly": true,
+      "range": "-5 to 5V",
+      "why": "src/K.cpp:145, five times the filtered modulation"
+     }
+    }
+   },
+   "notes": "The two output tooltips are swapped. The enum declares OUT first and OMOD second, but the table fed to configOutput reads Modulation then Audio (src/K.cpp:22-26 and 40-43), so Rack shows Modulation when the audio jack is hovered and Audio when the modulation jack is. The widget places OMOD on the left under MOD and OUT on the right under OUT (lines 188-189), which is the right way round, and the census records the tooltips in the wrong order for the same reason. Both output lines name the conflict. The ratio knobs are configSwitch over -12 to 12 and divided by 12 before use, which is one semitone per step (src/K.cpp:60-61 and 109-110). The panel prints FRQ, LPF, RT1, RT2, MD1, MD2, the six CV jacks, then MOD and OUT."
   },
   "H": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A nine drawbar organ on the Hammond footages, with a phase modulation input weighted toward the lower drawbars",
+    "Sets the level of that footage in the mix, 0 to 100 per cent, taken as a square root so the middle of the travel is louder than half",
+    "Adds to that footage's level, ten per cent per volt",
+    "Sets the pitch of the 1 foot drawbar, one octave per volt from C4 at 261.63Hz, and is the only pitch control the module has",
+    "Bends the phase of every drawbar, weighted by its footage so the 16 foot is moved sixteen times as far as the 1 foot",
+    "The nine drawbars added together, each of them a triangle",
+    "Note — there is no pitch knob: with nothing patched to the frequency input the 1 foot drawbar sounds at C4 and the organ cannot be tuned from the panel",
+    "Note — every drawbar comes up at the level its own footage gives on a sixteen to one taper, so a new module makes sound as soon as a pitch reaches it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 3,
+    "10": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "pitch",
+     "10": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/H.cpp:104, scaled by a tenth and added to the square rooted knob value"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/H.cpp:104, scaled by a tenth and added to the square rooted knob value"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/H.cpp:104, scaled by a tenth and added to the square rooted knob value"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/H.cpp:104, scaled by a tenth and added to the square rooted knob value"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/H.cpp:104, scaled by a tenth and added to the square rooted knob value"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/H.cpp:104, scaled by a tenth and added to the square rooted knob value"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/H.cpp:104, scaled by a tenth and added to the square rooted knob value"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/H.cpp:104, scaled by a tenth and added to the square rooted knob value"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/H.cpp:104, scaled by a tenth and added to the square rooted knob value"
+     },
+     "9": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/H.cpp:95, two raised to the voltage times C4, with no knob to add to"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/H.cpp:96 and 103, scaled by a tenth and then by each drawbar's footage multiplier"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/H.cpp:111, ten thirds of the summed triangles"
+     }
+    }
+   },
+   "notes": "The nine footage ratios in the code are 1/16, 3/16, 1/8, 1/4, 3/8, 1/2, 5/8, 3/4 and 1 (src/H.cpp:58-62), which are the Hammond intervals relative to the 1 foot drawbar, and it is the 1 foot that the frequency input tunes. The phase modulation is weighted by the reciprocal set, 16 down to 1 (lines 64-68 and 103), which is why the lower drawbars move much further. Drawbar levels are square rooted before use (line 90), so the knob is a power taper rather than a linear one. The knob defaults are 100 divided by 16 times each footage multiplier, which puts the 16 foot at full and the 1 foot at 6.25 per cent (line 49). The panel prints the nine footages twice over, once for the knobs and once for their CV jacks, then FRQ, PM and OUT."
   },
   "I": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three clock dividers that keep their phase together, with the first clock after a reset split off as a separate downbeat",
+    "Sets that divider's ratio, a whole number from 1 to 16",
+    "Sets which step of that divider's count the output falls on, 0 to 100 per cent of the ratio",
+    "Advances all three dividers on each rising edge above 2V, and sets how many polyphonic channels the divided outputs carry",
+    "Holds the count at zero while it reads above 2V and marks the next clock as the downbeat; every channel of a cable here is summed first, so any channel high resets",
+    "10V for the first clock pulse after a reset and 0V for every clock pulse after that",
+    "10V for every clock pulse except the first one after a reset",
+    "10V while the clock is high and the count has reached that divider's step, and 0V the rest of the time",
+    "10V while an odd number of the three divided outputs are high, and 0V otherwise",
+    "Note — the divided outputs follow the clock's own high time: they are the clock gated by the division rather than pulses of a length the module sets",
+    "Note — nothing comes out of the divided outputs until a clock is patched to CLK; the outputs take their channel count from that cable and carry none without it",
+    "Note — on a polyphonic clock each channel hands its pattern on to the next channel on that channel's own rising edge, so the channels run as a shift register down the cable"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 2,
+    "4": 2,
+    "5": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 7,
+    "4": 7,
+    "5": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/I.cpp:50-57 and 96-97, the channel count is taken from this jack and each channel is rescaled into a dsp::SchmittTrigger"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/I.cpp:93-94, getVoltageSum across the channels then rescaled into a dsp::SchmittTrigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/I.cpp:55 and 130, forced to one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/I.cpp:56 and 131, forced to one channel"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/I.cpp:52-53 and 125"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/I.cpp:52-53 and 125"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/I.cpp:52-53 and 125"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/I.cpp:52-53 and 128"
+     }
+    }
+   },
+   "notes": "The downbeat and remainder outputs are forced to one channel whatever the clock carries (src/I.cpp:55-56). The phase knob is turned into a whole step number by multiplying the percentage by the ratio less a half and truncating (src/I.cpp:89), so a ratio of 1 always has phase 0 and the knob does nothing at that setting. The reset is a level rather than an edge: the count is held at zero for as long as it stays high (line 107). The master count wraps at 360 times 7 times 11 times 13, a number divisible by every ratio from 1 to 16, so the dividers stay in phase across the wrap (src/I.cpp:60 and 113). The panel prints D1, D2, D3, P1, P2, P3, CLK, RST, DWN, SANS, O1, O2, O3 and XOR."
   },
   "G": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A compressor with a side-chain, a resonant high pass after it, and the envelope available both as an output and as a sweep of that filter",
+    "Sets the attack time of the envelope follower, about 0.2ms at fully counter-clockwise to 0.8 seconds fully clockwise",
+    "Sets the decay time of the envelope follower, about 2ms at fully counter-clockwise to 1.3 seconds fully clockwise",
+    "Sets the level compression starts at, about 0.3V at fully counter-clockwise to 10V fully clockwise",
+    "Sets the ratio, 256 to 1 at fully counter-clockwise through 4 to 1 at its default and into expansion fully clockwise",
+    "Sets the corner of the high pass after the compressor, eight octaves below to two above C4 at 261.63Hz",
+    "Sets the resonance of the high pass, -6dB at fully counter-clockwise to 12dB fully clockwise",
+    "Blends in a make-up gain that lifts the compressed signal back toward the level it went in at, 0 to 100 per cent",
+    "Sets how far the gain reduction moves the high pass corner, two octaves either way for every 6dB of reduction",
+    "Moves the high pass corner one octave per volt on top of the CUT knob",
+    "The signal the envelope follower reads; with nothing patched here it follows the module's own input",
+    "The signal compressed",
+    "The high pass corner as a 1V per octave pitch, the CUT knob and its input with the envelope amount added",
+    "The envelope follower's output: the side-chain rectified and smoothed by the attack and decay knobs",
+    "The compressed signal after the high pass, blended with its make-up gain by the MIX knob",
+    "Note — the ratio knob is configured with its ends reversed, so turning it clockwise moves from heavy limiting through 4 to 1 and on into expansion",
+    "Note — the side-chain jack is normalled from the audio input, so the compressor works with nothing patched there"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "audio",
+     "2": "audio"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/G.cpp:141 and 168-169, added to the cut knob in octaves before two is raised to that power"
+     },
+     "1": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "the audio input",
+      "why": "src/G.cpp:143-146, isConnected chooses between this jack and IN, then the absolute value is taken"
+     },
+     "2": {
+      "poly": true,
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/G.cpp:130 and 142, maxPoly then getPolyVoltage"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/G.cpp:176, the corner in octaves relative to C4"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/G.cpp:177, the rectified and filtered side-chain"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/G.cpp:178"
+     }
+    }
+   },
+   "notes": "The ratio knob is configured 8 as its minimum and -4 as its maximum (src/G.cpp:59), which puts heavy limiting at the counter-clockwise end; the value is used as two to the power minus it, so 8 is a 256 to 1 ratio, the default of 2 is 4 to 1, and -4 is a sixteenfold expansion. The threshold is two to a sixth of the knob's decibels times 5V (line 131), giving about 0.3V to 10V. The two envelope times are two to a third of the knob's dBs in seconds (lines 128-129). The filter after the compressor is the high pass output of a state variable pair (src/G.cpp:99-106). The make-up gain is computed once from the threshold and ratio and then blended in by the mix knob, so the mix knob at zero leaves the compressed signal unlifted. The panel prints ATK, DCY, THR, RTO, CUT, Q, MIX, ENV, FRQ, SCH, IN, FRQ, ENV and OUT."
   },
   "Z": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A module the maker has not finished: the panel carries the controls for a planned elliptic curve oscillator, filter and envelope, and none of them is read yet",
+    "Nothing in the module reads this knob; the per-sample function is empty",
+    "Nothing in the module reads this jack; the per-sample function is empty",
+    "Nothing in the module writes this jack, so it carries 0V on every channel",
+    "Note — the maker's README says this module is in development and displays the interface with no processing, and the code agrees: the function that would do the work contains an empty loop",
+    "Note — the outputs take the channel count of the widest input patched, and every channel of every output carries 0V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3
+   },
+   "notes": "src/Z.cpp:118-126 is the whole of the processing: maxPoly is called, which sets the output channel counts, and the channel loop that follows has an empty body. Every one of the 17 knobs, 11 jacks and 8 outputs on the panel is therefore dead, and each gets a line saying so rather than falling back on the maker's tooltips, which describe the module the maker intends to write. No family is set anywhere, because nothing carries any meaning. The panel lettering is drawn at run time by the plugin's own label widget rather than being in the SVG, from the table at src/Z.cpp:151-165: A1M, A3M, RESM, A2M, A4M, A6M, P, Q, PLFO, QLFO, FLFO, WLFO, HP, FRQ, RES, A2, A4, A6, GATE, A, R, EMOD, A1, A3, CV, SUS, ENV1, ENV2, ENV1, ENV2, PA, QA, PB, QB, PC and QC. A second row of six labels reading TEST is in the table but is not placed, because its control entries are -1."
   }
  }
 }

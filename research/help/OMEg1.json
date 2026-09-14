@@ -2,22 +2,569 @@
  "plugin": "OMEg1",
  "source": "https://github.com/phestrada/OME",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Damonitu": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Generates a Euclidean rhythm and a melody drawn from a chosen mode and melodic pattern, with a monophonic pitch output and a polyphonic chord output",
+    "Sets the rate of the module's own clock, marked in BPM, 60 BPM in its default position and doubling for each unit of the knob's travel",
+    "Scales the voltage at the tempo input before it is added to the tempo knob, from nothing at the counter-clockwise end to the whole voltage at the clockwise end",
+    "Advances the pattern by one step each time it is pressed, whether the clock input is patched or not; the maker's manual calls this a light rather than a button",
+    "Starts and stops the pattern; the module comes up running",
+    "Returns the pattern to its first step and rebuilds the melody",
+    "Sets the root note, in semitones over one octave",
+    "Chooses the mode, drawn from the major, harmonic minor, melodic minor, harmonic major and double harmonic major scales",
+    "Chooses the melodic pattern, which sets the order the degrees of the scale are played in; 1357F walks the first, third, fifth and seventh degrees forwards, and RANDOM picks freely from the scale",
+    "Shifts the pitch outputs two octaves down to two octaves up",
+    "Scales the voltage at the root CV input before it multiplies the root knob",
+    "Scales the voltage at the scale CV input before it multiplies the scale knob",
+    "Scales the voltage at the pattern CV input before it multiplies the pattern knob, despite the maker's tooltip naming it Division CV",
+    "Scales the voltage at the octave CV input before it multiplies the octave knob",
+    "Rotates the melodic pattern, so that with the pattern 1357F and a rotation of one the cycle begins on the third degree",
+    "Sets how many notes the chord output carries, from a triad up to an eleventh chord",
+    "Sets the number of steps in the cycle, one to thirty-six; a melodic pattern longer than this is cut short",
+    "Sets how many of the steps carry a hit, which the module spreads over the cycle as a Euclidean pattern",
+    "Scales the voltage at the rotate CV input before it multiplies the rotate knob",
+    "Scales the voltage at the chord CV input before it multiplies the chord knob",
+    "Scales the voltage at the steps CV input before it multiplies the steps knob, despite the maker's tooltip naming it Size CV",
+    "Scales the voltage at the density CV input before it multiplies the density knob",
+    "Added to the tempo knob after the trimmer beside it, one volt doubling the rate; it changes nothing while a cable is in the clock input",
+    "Advances the pattern one step on each rising edge above 2V; with nothing patched here the module runs from its own clock at the rate the tempo knob sets",
+    "A rising edge above 2V starts the pattern, and the next one stops it",
+    "A rising edge above 2V returns the pattern to its first step and rebuilds the melody",
+    "Multiplies the root knob by this voltage, scaled by the trimmer beside it; with the knob at zero the voltage sets the root on its own",
+    "Multiplies the scale knob by this voltage, scaled by the trimmer beside it, so a cable resting at 0V holds the first mode",
+    "Multiplies the pattern knob by this voltage, scaled by the trimmer beside it, so a cable resting at 0V holds the first melodic pattern",
+    "Multiplies the octave knob by this voltage, scaled by the trimmer beside it; with the knob at zero the voltage sets the octave on its own",
+    "Multiplies the rotate knob by this voltage, scaled by the trimmer beside it, so a cable resting at 0V leaves the pattern unrotated",
+    "Multiplies the chord knob by this voltage, scaled by the trimmer beside it, so a cable resting at 0V leaves the chord at a triad",
+    "Multiplies the steps knob by this voltage, scaled by the trimmer beside it; the result is held at one step or more",
+    "Multiplies the density knob by this voltage, scaled by the trimmer beside it, so a cable resting at 0V leaves no hits in the cycle",
+    "The pitch of the current step, one note at a time, at 1V per octave",
+    "10V through a step that carries a hit, and 0V through the steps that do not",
+    "A 1ms pulse at 10V on each step that carries a hit",
+    "The chord built on the current step, one note per channel, with one channel for each note the chord knob sets",
+    "A 1ms pulse at 10V when the cycle returns to its first step",
+    "Note — the eight CV inputs multiply their knobs rather than adding to them, so a cable resting at 0V pulls the control to its lowest value and the knob does nothing while that cable is in",
+    "Note — the black bar across the panel reads out the knob values rather than the notes being played",
+    "Note — a small knob is drawn over the eoc jack and takes the click, so dragging there turns the tempo CV trimmer instead of starting a cable"
+   ],
+   "param": {
+    "0": 1,
+    "4": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "14": 14,
+    "15": 15,
+    "13": 16,
+    "17": 17,
+    "18": 18,
+    "16": 19,
+    "19": 20,
+    "20": 21
+   },
+   "in": {
+    "0": 22,
+    "1": 23,
+    "2": 24,
+    "3": 25,
+    "4": 26,
+    "5": 27,
+    "6": 28,
+    "7": 29,
+    "8": 30,
+    "9": 31,
+    "10": 32,
+    "11": 33
+   },
+   "out": {
+    "2": 34,
+    "0": 35,
+    "1": 36,
+    "3": 37,
+    "4": 38
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Damonitu::process at 0x9530, fmadd of the tempo knob, the jack and the trimmer, with no clamp"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "the module's own clock at the tempo knob's rate",
+      "why": "Damonitu::process at 0x94e0 tests inputs[1].channels and falls to the internal clock at 0x9528; the Schmitt thresholds are at 0x94f0"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Damonitu::process at 0x9300, thresholds 2.0V and 0.1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Damonitu::process at 0x93d8, thresholds 2.0V and 0.1V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Damonitu::calculateTrimmedValues at 0xf5ec, clamped to 0 and the scale length"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Damonitu::calculateTrimmedValues at 0xf648, clamped to 0 and the mode count"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Damonitu::calculateTrimmedValues at 0xf6fc, clamped to 0 and the pattern count"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Damonitu::calculateTrimmedValues at 0xf7d4, clamped to -2 and +2"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Damonitu::calculateTrimmedValues at 0xf830, clamped to 0 and 3"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Damonitu::calculateTrimmedValues at 0xf520, clamped to 0 and the chord-name count"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Damonitu::calculateTrimmedValues at 0xf884, clamped to 1 and 36"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Damonitu::calculateTrimmedValues at 0xf8c0, clamped to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Damonitu::process writes 10.0f at 0x99bc and zero at 0x97b8"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Damonitu::process at 0x980c, 10.0f against zero"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "Damonitu::process at 0x994c, the note scaled by 1/12"
+     },
+     "3": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "Damonitu::process sets outputs[3].channels from the chord note count at 0x92b4"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Damonitu::process at 0x9820, a 1ms pulse of 10.0f"
+     }
+    }
+   },
+   "notes": "Read from the installed 2.3.0 binary, which carries full C++ symbols, beside the maker's README at github.com/phestrada/OME. Two faults are worth knowing. First, a second ParamWidget for the Tempo CV trimmer is built at the very end of DamonituWidget's constructor (a BefacoTinyKnob at 0x11078) and given the position of the end-of-cycle output jack, so the panel carries two widgets for parameter 4 and the eoc jack has a knob drawn on top of it; the library screenshot shows the knob there. The help click still resolves to the jack, because the port's box is the smaller of the two, but a mouse drag reaches the knob first. Second, every one of the eight CV inputs MULTIPLIES its knob by the incoming voltage rather than adding to it (calculateTrimmedValues, 0xf504 onward), so a patched cable sitting at 0V drives the parameter to its clamp floor. The root and octave CVs carry one further special case: when their knob is at zero the jack sets the value on its own. Two parameter tooltips are stale — parameter 11 is the pattern trimmer but is named Division CV, and parameter 19 is the steps trimmer but is named Size CV. Inputs 7 and 9 were never passed to configInput, so they hover with no name; they are the octave and chord CV inputs. Parameters 1, 2 and 3 were never passed to configParam either, so the clock, run and reset buttons hover with no name, but Module::config gives them a working 0-to-1 quantity, so they do work. The README calls the control under the clock jack a light; the code reads it as a manual step button at 0x94bc. The internal clock is an exponential of the tempo parameter, 60 BPM at the default, and it is used only when nothing is patched to the clock input."
   },
   "Tezca": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Generates a chord progression by walking Bartók's axis system, with a polyphonic chord, a bass note, the notes of the current mode, a gate and a trigger",
+    "Starts and stops the progression; the module comes up running",
+    "Returns the progression to the tonic and builds a fresh chord",
+    "Sets the length of the gate output as a share of the gap between clock pulses, never shorter than 1ms",
+    "Sets how many clock pulses pass before the progression moves to another chord, two to thirty-six",
+    "Sets how many notes the chord holds, three to seven, which has an effect only under the DEFAULT voicing",
+    "Chooses the voicing: DEFAULT, OPEN, ROOTLESS or THREE NOTES",
+    "Chooses which note of the chord is taken as the bass: ROOT, 1ST INV or 2ND INV",
+    "Scales the voltage at the steps CV input before it multiplies the steps knob",
+    "Scales the voltage at the chord CV input before it multiplies the chord knob",
+    "Scales the voltage at the voicing CV input before it multiplies the voicing knob",
+    "Scales the voltage at the bass CV input before it multiplies the bass knob",
+    "From the tonic, the chance of moving to the dominant; the rest of the chance goes to the subdominant",
+    "From the subdominant, the chance of moving to the tonic; the rest of the chance goes to the dominant",
+    "From the dominant, the chance of moving to the tonic; the rest of the chance goes to the subdominant",
+    "A rising edge above 2V starts the progression, and the next one stops it",
+    "A rising edge above 2V returns the progression to the tonic and builds a fresh chord",
+    "Each rising edge above 2V is one pulse of the progression; nothing moves until a clock is patched here",
+    "Sets the tonic the axis system is built on, read as a pitch; with nothing patched here the tonic is C4",
+    "Multiplies the steps knob by this voltage, scaled by the trimmer beside it; the result is held between two and thirty-six",
+    "Multiplies the chord knob by this voltage, scaled by the trimmer beside it; the result is held between three and seven notes",
+    "Multiplies the voicing knob by this voltage, scaled by the trimmer beside it, so a cable resting at 0V holds the DEFAULT voicing",
+    "Multiplies the bass knob by this voltage, scaled by the trimmer beside it",
+    "The chord, one note per channel, with the bass note left out",
+    "The lowest note of the chord, on its own, an octave below the chord output",
+    "Every note of the current mode, one per channel",
+    "10V for the share of the clock interval the gate length knob sets, restarted on each clock pulse",
+    "A 1ms pulse at 10V on each clock pulse",
+    "Note — nothing happens until a clock is patched to the clock input; the module returns early on every sample while that jack is empty",
+    "Note — the three circles across the middle of the panel light to show which of the tonic, subdominant and dominant axes the progression is on",
+    "Menu — Mode transition: Gentle, Rude — Gentle moves between modes in order of brightness, from Lydian down to Locrian, and Rude moves at random"
+   ],
+   "param": {
+    "9": 1,
+    "8": 2,
+    "13": 3,
+    "7": 4,
+    "6": 5,
+    "5": 6,
+    "4": 7,
+    "3": 8,
+    "2": 9,
+    "1": 10,
+    "0": 11,
+    "10": 12,
+    "11": 13,
+    "12": 14
+   },
+   "in": {
+    "5": 15,
+    "4": 16,
+    "6": 17,
+    "7": 18,
+    "3": 19,
+    "2": 20,
+    "1": 21,
+    "0": 22
+   },
+   "out": {
+    "2": 23,
+    "0": 24,
+    "1": 25,
+    "3": 26,
+    "4": 27
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "trigger",
+     "4": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Tezca::mutateChord at 0x1f298, clamped at 0x1f324"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Tezca::mutateChord at 0x1f284, clamped to 0 and 3 at 0x1f30c"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Tezca::mutateChord at 0x1f268, clamped to 3 and 7 at 0x1f300"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "a multiplier of 1, leaving the knob alone",
+      "why": "Tezca::process at 0x1e75c, clamped to 1 and 36 at 0x1ea88"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tezca::process at 0x1e8ec, thresholds 2.0V and 0.1V"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tezca::process at 0x1e798, thresholds 2.0V and 0.1V"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Tezca::process at 0x1e9dc returns early when this jack is unpatched; thresholds at 0x1e9ec"
+     },
+     "7": {
+      "poly": false,
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V, which is C4",
+      "why": "Tezca::mutateChord at 0x1f180, zero substituted when unpatched, then getNoteFromVoltage"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "Tezca::process at 0x1ecdc, chord element 0 scaled by 1/12; the octave drop is at BartokLab::getChordFromAxis 0x5428"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "Tezca::process sets outputs[1].channels from the scale length at 0x1e8a4 and writes one channel per note at 0x1ec94"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "Tezca::process sets outputs[2].channels at 0x1e850 and writes one channel per note at 0x1ec2c"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Tezca::process at 0x1ebe0, 10.0f while the gate timer runs"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Tezca::process at 0x1ece4, a 1ms pulse of 10.0f"
+     }
+    }
+   },
+   "notes": "Read from the installed 2.3.0 binary beside the maker's README. The four CV inputs multiply their knobs rather than adding to them, the same pattern as Damonitu: mutateChord reads inputs[0..2].channels at 0x1f268 and substitutes a factor of one when the jack is empty, so a cable resting at 0V pulls the parameter to its clamp floor. The module returns early from process while the clock input is empty (0x1e9dc), so it does nothing at all with no clock patched. The bass output really is an octave below the chord: BartokLab::getChordFromAxis stores note minus twelve as element zero of the chord vector at 0x5428, and the chord output's channel loop begins at element one, so the bass note is not repeated there. The README lists the voicings as default, rootless, open and three notes; the binary's strings are DEFAULT, OPEN, ROOTLESS and THREE NOTES, and the order of the last two could not be settled from the disassembly, so the line names them without claiming an order. The bass inversion parameter is configured 1 to 3 rather than 0 to 2, and the display names its three settings ROOT, 1ST INV and 2ND INV."
   },
   "Masino": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Arpeggiator: it plays the notes held at its polyphonic pitch input in an order and a rhythm chosen by two knobs",
+    "Chooses the rhythm: UNF spreads the hits evenly, EUC spreads them as a Euclidean pattern, PRM puts them on prime-numbered pulses, WBE on the weak beats, SBE on the strong beats and RND at random",
+    "Chooses the order the held notes are played in: UPP upwards, DWN downwards, TCE from the ends towards the centre, FCE from the centre towards the ends and RND at random",
+    "Sets how many octaves the arpeggio climbs through, one to three",
+    "Sets how many of the pulses carry a note, as a percentage; it changes nothing under the PRM rhythm",
+    "Sets the length of the gate output as a percentage of the gap between clock pulses",
+    "Each rising edge above 1V is one pulse of the arpeggio",
+    "Sets the density knob directly from 0 to 5V, in steps, and moves the knob with it; the knob cannot be turned while a cable is in",
+    "Sets the gate length knob directly from 0 to 5V, in steps, and moves the knob with it; the knob cannot be turned while a cable is in",
+    "Sets the octaves knob directly from 0 to 5V, in steps, and moves the knob with it; the knob cannot be turned while a cable is in",
+    "The notes to arpeggiate, one per channel, at 1V per octave",
+    "A rising edge above 2V returns the arpeggio to its first pulse",
+    "Sets the rhythm knob directly from 0 to 5V, in steps, and moves the knob with it; the knob cannot be turned while a cable is in",
+    "Sets the melody knob directly from 0 to 5V, in steps, and moves the knob with it; the knob cannot be turned while a cable is in",
+    "10V for the share of the clock interval the gate length knob sets",
+    "The note being played, one at a time, at 1V per octave",
+    "A 1ms pulse at 10V on each note",
+    "Note — nothing is played until a clock is patched to clck and at least one note is held at the 1v/o input; the arpeggio is built from the channels present on that input",
+    "Note — the pitch input and the clock should come through chains of the same length, or the two arrive a sample or more apart and the arpeggio picks up the wrong notes",
+    "Menu — Pulses per quarter: 2 PPQN, 3 PPQN, 4 PPQN, 5 PPQN, 6 PPQN — sets how many pulses of the incoming clock make one beat",
+    "Menu — Pulses per quarter factor: X1, X2, X3 — multiplies the pulses-per-quarter setting"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10,
+    "5": 11,
+    "6": 12,
+    "7": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15,
+    "2": 16
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "pitch",
+     "5": "trigger",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Masino::process at 0x16770, thresholds 1.0V and 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the density knob's own setting",
+      "why": "Masino::process at 0x167f0 clamps to 0 and 5, quantises in steps of 0.05 and writes params[3] at 0x16820"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the gate length knob's own setting",
+      "why": "Masino::process at 0x16830 clamps to 0 and 5, quantises in steps of 0.05 and writes params[4] at 0x16860"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the octaves knob's own setting",
+      "why": "Masino::process at 0x168e0 clamps to 0 and 5, quantises in steps of 1.667 and writes params[2] at 0x16920"
+     },
+     "4": {
+      "poly": true,
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Masino::process at 0x169c8 loops over inputs[4].channels reading voltages[i]"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Masino::process at 0x166ac, thresholds 2.0V and 0.1V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the rythm knob's own setting",
+      "why": "Masino::process at 0x16870 clamps to 0 and 5, quantises in steps of 1 and writes params[0] at 0x16898"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the melody knob's own setting",
+      "why": "Masino::process at 0x168a8 clamps to 0 and 5, quantises in steps of 1.25 and writes params[1] at 0x168d0"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Masino::process at 0x16ec4, 10.0f while the gate timer runs"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "Masino::process at 0x16cfc, the note scaled by 1/12, one channel"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Masino::process at 0x16ea0, a 1ms pulse of 10.0f"
+     }
+    }
+   },
+   "notes": "Read from the installed 2.3.0 binary beside the maker's README. Maŝino's five CV inputs do not modulate their knobs, they overwrite them: each one clamps the incoming voltage to 0 to 5V, quantises it with rmlab::RythMeloLab::quantize and stores the result straight into the Param, so the knob visibly moves to the voltage and cannot be turned while the cable is in. The clock input's rising threshold is 1V while the reset input's is 2V, so a weak clock will run the module when an equally weak reset will not. The pitch input is genuinely polyphonic, with a loop bounded by its channel count at 0x169c8; every other jack reads channel one alone. The panel prints rythm, which is the maker's spelling."
   }
  }
 }

@@ -2,12 +2,136 @@
  "plugin": "Gemini",
  "source": "https://github.com/JoBoCl/Gemini",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Gemini": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two oscillators, Castor and Pollux, each mixing a ramp, a pulse and a sub-octave square, plus a modulating oscillator routed by a four-way mode knob; after Winterbloom's Castor & Pollux",
+    "Sets Castor's pitch: three octaves either way in semitone steps while the Castor pitch input is empty, and a continuous offset of up to one octave either way added to that input once a cable is in it",
+    "Offsets Pollux's pitch by up to one octave either way; in Hard Sync mode it sets how far above the sync source Pollux runs instead, none at fully counter-clockwise up to three octaves fully clockwise",
+    "Sets the rate of the modulating oscillator, 64Hz at fully counter-clockwise rising to 2048Hz at fully clockwise; in Hard Sync mode nothing reads that oscillator, so the knob changes nothing",
+    "Sets the width of Castor's pulse wave: fully counter-clockwise holds it at its low level for the whole cycle, and turning up lengthens the high part until it fills the cycle",
+    "Sets the width of Pollux's pulse wave: fully counter-clockwise holds it at its low level for the whole cycle, and turning up lengthens the high part until it fills the cycle",
+    "Fades the Mix output between Castor at fully counter-clockwise and Pollux at fully clockwise; the two single-oscillator outputs are unaffected by it",
+    "Sets how much of Castor's ramp wave goes into Castor's mix",
+    "Sets how much of Castor's pulse wave goes into Castor's mix",
+    "Sets how much of Castor's sub-octave square goes into Castor's mix",
+    "Sets how much of Pollux's ramp wave goes into Pollux's mix",
+    "Sets how much of Pollux's pulse wave goes into Pollux's mix",
+    "Sets how much of Pollux's sub-octave square goes into Pollux's mix",
+    "Steps through four modes: Chorus adds the modulator to Pollux's pitch, LFO PWM to both pulse widths, LFO FM to Castor's pitch, and Hard Sync resets Pollux's phase whenever Castor's wraps",
+    "Switches the knobs to a second set of remembered values; only the modulator knob in Chorus mode and the two pulse width knobs in LFO PWM mode differ, so in LFO FM and Hard Sync nothing changes",
+    "Switches the oscillator modelling on and off, and comes up on: it turns the ramp from a straight sawtooth into a capacitor discharge curve and makes the sub-octave square sag across each half cycle",
+    "Added to Castor's pulse width at a fifth of the knob's travel per volt, so 5V covers the whole of it, and the total is held between the two ends of the knob",
+    "Added to Pollux's pulse width at a fifth of the knob's travel per volt; in Hard Sync mode it is read as Pollux's pitch instead, clamped to 6V either way, which is a slip in the code",
+    "Sets Castor's pitch at 1V per octave, with the Castor pitch knob added as an offset of up to one volt either way; patching anything here also stops that knob stepping in semitones",
+    "Sets Pollux's pitch at 1V per octave, and with nothing patched Pollux follows Castor's pitch; in Hard Sync mode this jack is never read",
+    "Castor's ramp, pulse and sub mixed by its three level knobs",
+    "Castor and Pollux mixed by the crossfade knob",
+    "Pollux's ramp, pulse and sub mixed by its three level knobs",
+    "Note — the oscillator the panel and the tooltips call an LFO runs from 64Hz to 2048Hz, so Chorus, LFO PWM and LFO FM are all audio-rate modulation rather than slow movement",
+    "Note — the module is monophonic: each input is read as one channel and each output carries one channel",
+    "Note — the knobs are read once every 128 samples, and changing the mode knob or the alt button snaps every other knob to the value remembered for the new setting",
+    "Note — in Chorus mode the modulator knob works the other way round from its tooltip: with the alt button off it sets the depth, and the rate comes from where it was left with the alt button on",
+    "Note — with the modelling switch on, each of the six waves also passes through a one-pole low-pass and a one-pole high-pass before it reaches the mix"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "10": 9,
+    "12": 10,
+    "8": 11,
+    "11": 12,
+    "9": 13,
+    "13": 14,
+    "14": 15
+   },
+   "in": {
+    "0": 16,
+    "1": 17,
+    "2": 18,
+    "3": 19
+   },
+   "out": {
+    "0": 20,
+    "1": 21,
+    "2": 22
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "pitch",
+     "3": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "±5V",
+      "why": "Gemini.cpp:682 adds getNormalVoltage(0.f) / 5.f to the knob value inside getDutyCycle, with no channel argument, and line 688 clamps the total to -1 and 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "±5V",
+      "why": "Gemini.cpp:696 calls getDutyCycle with this port, which at line 682 adds getNormalVoltage(0.f) / 5.f to the knob and clamps at line 688; in Hard Sync mode line 744 reads it again as a pitch through inputs[POLLUX_PITCH_PARAM] and clamps to -6 and 6"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "1V per octave",
+      "why": "Gemini.cpp:709 tests isConnected and line 711 adds getVoltage(), with no channel argument, to the knob value; OscillatorState::updatePitch at line 139 raises two to that power"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "Castor's pitch",
+      "sumRange": "1V per octave",
+      "why": "Gemini.cpp:757 falls back to getCastorPitchCv() when the port is unconnected and line 758 otherwise reads getVoltage() with no channel argument; line 741 returns before either in Hard Sync mode"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Gemini.cpp:622 calls setVoltage with no channel argument; getOutput at line 207 scales the level-weighted sum by 5 and divides by 3"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Gemini.cpp:631 calls setVoltage with no channel argument, on a crossfade of the two oscillator outputs"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Gemini.cpp:629 calls setVoltage with no channel argument; getOutput at line 207 scales the level-weighted sum by 5 and divides by 3"
+     }
+    }
+   },
+   "notes": "Read at commit 4626190 (JoBoCl/Gemini), the last commit whose plugin.json carries 2.0.1 and whose manifest still has an empty donateUrl, matching the installed one. Eight commits carry 2.0.1; the installed binary was narrowed to this end of them two ways: the per-mode tooltip strings added in 82cf668 (Mode - Chorus, Alt mode - enabled, NOOOOOO) are all present in the installed plugin.dylib, and the installed res/Gemini.svg is byte-identical to the panel as rewritten in b47b153. The two commits after b47b153 change only the Makefile's C++ standard and a constexpr initialiser. Panel lettering is symbols throughout - a title band reading Castor & Pollux, an alpha over the Castor half and a beta over the Pollux half, phi over the modulator knob, sigma over the crossfade, and waveform glyphs on the level knobs and duty jacks - so almost no control carries a name and the lines lead with what the control does. The mode knob, the alt button and the filter button have no artwork under them at all. Widget order is not enum order: the four level knobs run left to right as parameters 6, 7, 8 and 12, so the rightmost knob is index 12 and the third is index 8. Three faults found in the code. First, in Hard Sync mode getPolluxPitchCv (line 743) indexes the input array with inputs[POLLUX_PITCH_PARAM], a ParamId whose value 1 lands on POLLUX_DUTY_INPUT, so the Pollux duty jack is read as the sync pitch and the Pollux pitch jack is ignored. Second, in Chorus mode getLfoCv (line 734) passes true for altMode, so the rate comes from the value stored with the alt button on, while getLfoValue (line 726) scales the depth by the value stored with it off - the reverse of the two tooltips, LFO frequency and LFO amplitude level. Third, OscillatorState::pulse (line 178) takes an offset argument and never uses it, so the pulse width centre position that alt mode offers in LFO PWM has no separate effect; the knob still sets the pulse width through getParamRef, it is simply a second stored value rather than a centre. The modulator's rate law is getLfoCv returning 5 * (param + 1) into a base frequency of 2Hz, which is 64Hz to 2048Hz across the knob - quoted in the lines because both constants are in the source. dataToJson (line 381) formats its keys with sprintf into an empty std::string, which has no reserved space; it is left out of the lines because libc++ small-string storage makes the outcome unclear rather than plainly broken. The plugin declares a manualUrl of https://gemini.wntr.dev, which is Winterbloom's documentation for the hardware and not for this port, so nothing was taken from it."
   }
  }
 }

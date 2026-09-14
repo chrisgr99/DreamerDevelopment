@@ -1,13 +1,205 @@
 {
  "plugin": "SSE",
- "source": "https://github.com/herbert-50/SSE-One/tree/main/src",
+ "source": "https://github.com/herbert-50/SSE-One/blob/main/doc/manual.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "KeySeq": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sequencer holding twelve sequences of up to 256 steps, recorded from a MIDI keyboard through a MIDI-to-CV module, and played and controlled from that same keyboard",
+    "Sets how long the gate output stays high, 10 to 1000 in blocks of eight samples, so the default of 250 is about 45ms at 44.1kHz",
+    "Starts and stops playback; the clock advances the play sequence only while this is on",
+    "Returns the play sequence to its first step and drops the gate and end-of-sequence outputs",
+    "Moves the edit position of the record sequence back by the number of steps the keyboard last set, and by one step until it sets another; from the keyboard the octave chooses 1, 5 or 11 steps",
+    "Moves the edit position of the record sequence forward by the number of steps the keyboard last set, and by one step until it sets another; from the keyboard the octave chooses 1, 5 or 11 steps",
+    "Empties the record sequence; its light is green while that sequence holds nothing",
+    "Pressed on its own this button does nothing: the maker named it Reserved and the code marks it reserved for future expansion. While Sel or Copy is waiting for a target it chooses sequence 8.",
+    "Copies the record sequence into another of the twelve; the next key or button pressed chooses which, and every light turns yellow until one is",
+    "Copies the record sequence into the play sequence, so the sequence being played becomes the one being recorded; record sequence 11 goes to the transpose sequence instead",
+    "Writes a rest at the edit position of the record sequence and moves on a step",
+    "Writes a tied step, holding the note before it without starting a new gate, and moves on a step",
+    "Deletes the step at the edit position of the record sequence",
+    "Switches insert mode on and off: on, a new note is pushed into the sequence; off, it overwrites the step at the edit position. The light is green while insert mode is on.",
+    "Starts choosing which of the twelve record sequences is the current one; the next key or button pressed chooses it, and every light turns yellow until one is",
+    "Switches transpose mode on and off: with it on, a note from the first keyboard sets the base note the play sequence is transposed to rather than being recorded. The light is blue while it is on.",
+    "Switches recording and playback on and off: turned off, the module plays no sequence and passes the CV, gate and velocity inputs straight to the outputs. It comes up on.",
+    "The pitch from the first MIDI keyboard, one volt per octave; the note is written into the record sequence when its gate falls",
+    "A rising edge here starts playback if it is stopped and stops it if it is running, reading high above 1V",
+    "The gate from the first MIDI keyboard, reading high above 1V; a step is recorded when it falls, and holding it while a second key is pressed runs a command",
+    "A rising edge advances the play sequence one step, reading high above 1V",
+    "The velocity from the first MIDI keyboard, stored with the note; with nothing patched here every note is recorded at 10V",
+    "Holds the play sequence at its first step while the voltage here is above 0V",
+    "A change of voltage here chooses the record sequence to copy into the play sequence, read as a note within the octave, C for the first and B for the twelfth",
+    "The pitch from a second MIDI keyboard, one volt per octave, where one key on its own is one command and no key combination is needed",
+    "The gate from a second MIDI keyboard, reading high above 1V; the command on the key held is run on the rising edge",
+    "A change of voltage here sets the base note the play sequence is transposed to, read as one volt per octave",
+    "The pitch of the step being played, one volt per octave, with the current base note added; a rest sends 0V",
+    "Carries 10V for the length the gate knob sets, held on through the next step where that step is tied, and stays at 0V on a rest",
+    "The velocity stored with the step being played, and 0V on a rest",
+    "Carries 10V for 200 of the module's processing blocks, 1600 samples, each time the play sequence passes its last step",
+    "Note — Nothing plays until a clock is patched to Clk and Run is on, and the CV, Gate and Vel inputs are fed from a MIDI-to-CV module carrying a keyboard.",
+    "Note — While Sel or Copy is waiting for a target, the twelve keyboard buttons stand for the twelve sequences in keyboard order, from Play as the first to Trans as the twelfth.",
+    "Note — A command from the first MIDI keyboard is given by holding one key down and pressing a second; the keyboard drawn on the panel shows which key carries which command.",
+    "Note — Record sequence 11 is never played. The Play command copies it into the transpose sequence, which hands the play sequence a new base note at the end of each pass.",
+    "Note — The module runs its logic on every eighth sample, so the gate length and the end-of-sequence length are counted in blocks of eight samples rather than in samples.",
+    "Note — The three-line display shows the record sequence around the edit position, which stays in the middle; a rest is written as an apostrophe, a tied step as three tildes and the end as a bar.",
+    "Menu — Cmd from keyboard — allows commands from the first MIDI keyboard, given by holding one key and pressing another",
+    "Menu — Cmd from last key — takes the command from the second key pressed rather than from the first",
+    "Menu — AutoPlay — a submenu of five events, each of which copies the record sequence into the play sequence when it happens",
+    "Menu — Always — on the AutoPlay submenu; copies the record sequence into the play sequence after any of those events",
+    "Menu — When new note — on the AutoPlay submenu; copies the record sequence into the play sequence once a note is recorded",
+    "Menu — When new rest — on the AutoPlay submenu; copies the record sequence into the play sequence once a rest is recorded",
+    "Menu — When new tie — on the AutoPlay submenu; copies the record sequence into the play sequence once a tied step is recorded",
+    "Menu — When delete — on the AutoPlay submenu; copies the record sequence into the play sequence once a step is deleted",
+    "Menu — When select sequence — on the AutoPlay submenu; copies the record sequence into the play sequence once another record sequence is selected",
+    "Menu — Play Input CV 0..10V — reads the Play input as 0V to 10V spread over the twelve sequences instead of as a note within the octave",
+    "Menu — Play Input selects sequence — makes the Play input choose the current record sequence rather than copy one into the play sequence",
+    "Menu — Copy after end of sequence — holds a copy into the play sequence back until the play sequence passes its last step, rather than taking it on the next clock",
+    "Menu — Transpose after end of sequence — holds a new base note back until the play sequence passes its last step, rather than taking it on the next clock",
+    "Menu — Set sequence after copy — makes the target of a Copy command the current record sequence"
+   ],
+   "param": {
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "5": 4,
+    "4": 5,
+    "9": 6,
+    "6": 7,
+    "7": 8,
+    "10": 9,
+    "14": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "15": 14,
+    "16": 15,
+    "17": 16
+   },
+   "in": {
+    "0": 17,
+    "1": 18,
+    "2": 19,
+    "3": 20,
+    "4": 21,
+    "5": 22,
+    "6": 23,
+    "7": 24,
+    "8": 25,
+    "9": 26
+   },
+   "out": {
+    "0": 27,
+    "1": 28,
+    "2": 29,
+    "3": 30
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "trigger",
+     "6": "cv",
+     "7": "pitch",
+     "8": "trigger",
+     "9": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "KeySeq.cpp:1009 and 1065 read this jack with getVoltage() alone and KeySeq.cpp:691 splits it into octave and note"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "KeySeq.cpp:959 passes getVoltage() to a dsp::TSchmittTrigger declared at KeySeq.cpp:383; Rack's dsp::TSchmittTrigger takes high at 1V and low at 0V by default"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "KeySeq.cpp:1007 passes getVoltage() to a dsp::TSchmittTrigger declared at KeySeq.cpp:384; Rack's dsp::TSchmittTrigger takes high at 1V and low at 0V by default"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "KeySeq.cpp:854 passes getVoltage() to a dsp::TSchmittTrigger declared at KeySeq.cpp:382; Rack's dsp::TSchmittTrigger takes high at 1V and low at 0V by default"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "normal": "10V",
+      "why": "KeySeq.cpp:1066 to 1069 read this jack with getVoltage() when it is connected and record 10V when it is not"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "KeySeq.cpp:947 compares getVoltage() against 0.0f directly, with no Schmitt trigger and no edge detection, so the reset holds while the voltage is above 0V"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "KeySeq.cpp:973 reads this jack with getVoltage() alone and KeySeq.cpp:974 to 984 turn any change of more than 0.005V into a sequence number, either from the note within the octave or, with the menu option set, from 0V to 10V across the twelve"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "KeySeq.cpp:1152 reads this jack with getVoltage() alone and KeySeq.cpp:691 splits it into octave and note; KeySeq.cpp:1149 reads it only while both it and the second gate are connected"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "KeySeq.cpp:1150 passes getVoltage() to a dsp::TSchmittTrigger declared at KeySeq.cpp:385; Rack's dsp::TSchmittTrigger takes high at 1V and low at 0V by default"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "KeySeq.cpp:995 reads this jack with getVoltage() alone and KeySeq.cpp:996 acts on any change of more than 0.005V, taking the voltage as the base note"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "KeySeq.cpp:888 writes one value with setVoltage(), the step's stored CV plus the transpose voltage, and KeySeq.cpp:898 writes 0V on a rest"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "KeySeq.cpp:917 writes 10V while the gate counter runs and KeySeq.cpp:921 writes 0V otherwise, one value with setVoltage()"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "KeySeq.cpp:889 writes the step's stored velocity with setVoltage() and KeySeq.cpp:899 writes 0V on a rest"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "KeySeq.cpp:938 writes 10V while the end-of-sequence counter runs, set to 200 at KeySeq.cpp:858, and KeySeq.cpp:942 writes 0V otherwise"
+     }
+    }
+   },
+   "notes": "Source read at SSE-One commit ff3505b, the head of main; its only change over c2d3c7f, the commit that raised plugin.json to 2.0.2, is a line of changes.md, so the code is the same. Two params have no widget and no click can reach them, so both are untagged: param 0, the double-click time for smart tie, is inside an #ifdef SMART_TIE that the Makefile never defines, and param 8 is an unused enum member the maker never configured or placed. Input 9, the Tran jack, is the one input the maker never named, so its tooltip is blank in the rack. The manual has Prev and Next the wrong way round: it says Prev moves the input position forward and Next moves it backward, while KeySeq.cpp:1208 and 1216 call prev() and next() respectively, which is the other way about. The whole of process() runs only on every eighth sample (KeySeq.cpp:845 with FRAME_DIVIDER 8 in plugin.hpp), so the gate length knob and the 200-block end-of-sequence pulse are counted in blocks of eight samples. One bug worth knowing: with the Play Input CV 0..10V option set, KeySeq.cpp:978 rounds the voltage to round(v / 10 * 12), which gives 12 at 10V, and KeySeq.cpp:985 admits any value up to and including 12; the sequence array holds twelve entries numbered 0 to 11, so a full 10V on the Play input reads past the end of it. The Reserved button, param 6, does nothing when pressed on its own (KeySeq.cpp:1295 clears it with a comment saying it is reserved for future expansion), but it is the ninth entry of the button-to-sequence table at KeySeq.cpp:1185, so while Sel or Copy is waiting it selects sequence 8."
   }
  }
 }

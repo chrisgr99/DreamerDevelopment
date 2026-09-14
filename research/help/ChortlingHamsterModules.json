@@ -1,18 +1,264 @@
 {
  "plugin": "ChortlingHamsterModules",
- "source": "https://github.com/chortlinghamster/modules",
+ "source": "https://github.com/chortlinghamster/modules/blob/master/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Pop": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sample and hold: each trigger captures the voltage at the input and holds it at the output until the next trigger",
+    "The voltage captured on each trigger; whatever is present at that instant is what gets held",
+    "A rising edge through 2V captures the voltage at V.IN; the trigger re-arms once the voltage falls back to 0.1V or below",
+    "The voltage captured at the last trigger, held unchanged until the next one",
+    "Note — nothing comes out until a trigger arrives at TRIG IN; before the first one the output is 0V.",
+    "Note — the module is monophonic. Only the first channel of a polyphonic cable is read, and the output carries a single channel.",
+    "Note — with the module bypassed, V.IN is passed straight through to V.OUT."
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Pop.cpp:41 stores inputs[VOLTAGE_INPUT].getVoltage(), a single-channel read, with no clamp or scaling anywhere in process()"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "src/Pop.cpp:40 rescales the voltage from 0.1 to 2.0 into 0 to 1 before a dsp::SchmittTrigger whose default thresholds are 0 and 1 (Rack-SDK include/dsp/digital.hpp:107)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/Pop.cpp:44 writes the stored voltage to channel 0 only; it changes only on a trigger"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit ed72dd1, the tip of the default branch and the last of the four commits carrying version 2.0.0 in plugin.json (the version first appears at f0d7750).\n\nThe module declares configBypass(VOLTAGE_INPUT, VOLTAGE_OUTPUT) at src/Pop.cpp:35, so bypass is a straight pass-through rather than silence.\n\nThe README calls the trigger jack TRIG; the panel prints TRIG IN, and the panel is what a reader is looking at."
   },
   "Bitwise": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four sample and hold circuits gated by a grid of eight preset patterns: a circuit samples only when its cell in the selected row of the selected pattern is lit",
+    "Selects which of the 16 rows of the pattern grid is read, 1 to 16; the seven-segment number above it shows the row after any CV has been added",
+    "Scales the row select CV jack beside it, 0 to 1; at 1 a 10V CV shifts the row by the full 16, and at 0 the jack has no effect at all",
+    "Selects which of the eight preset patterns is in use, 1 to 8; the seven-segment number above it shows the pattern after any CV has been added",
+    "Scales the pattern select CV jack beside it, 0 to 1; at 1 a 10V CV shifts the pattern by the full eight, and at 0 the jack has no effect at all",
+    "Scales every voltage leaving the four V.OUT jacks and the POLY V.OUT jack, from 0 at the bottom of its travel to the sampled voltage unchanged at the top; the PULSE outputs are not affected",
+    "Added to the ROW SELECT knob after the CV knob beside it scales the voltage, with the total clamped to rows 1 to 16; negative voltages move the selection downwards",
+    "Added to the PATTERN SELECT knob after the CV knob beside it scales the voltage, with the total clamped to patterns 1 to 8; negative voltages move the selection downwards",
+    "The voltage this column captures when it samples; it is taken at the instant the trigger arrives",
+    "A rising edge through 0.7V makes this column sample its V.IN, and only when the column's cell in the selected row is lit; a cable patched here takes this column out of TRIG ALL's reach",
+    "A rising edge through 0.7V samples every column whose cell in the selected row is lit, apart from any column that has its own TRIG IN patched",
+    "The voltage this column captured at its last sample, scaled by ATTENUATE and held until the next one",
+    "All four columns' held voltages on one cable, as four channels in panel order from left to right, each scaled by ATTENUATE",
+    "A 1ms pulse at 10V each time this column samples, despite the maker's README describing the pulse as a hundredth of a second long",
+    "Note — nothing is sampled until a trigger arrives at a column's TRIG IN or at TRIG ALL, and the V.OUT jacks read 0V until then.",
+    "Note — a cable in a CV jack does nothing until the small CV knob next to it is turned up: both attenuator knobs come up at zero, which multiplies the incoming voltage away.",
+    "Note — the grid of 64 lamps shows the selected pattern: bright where a cell is lit and in the selected row, dim where it is lit elsewhere, dark where it is not lit. None of them can be clicked.",
+    "Note — the ACTIVE lamp above a column is lit while that column's cell in the selected row is lit, which is when a trigger will be let through.",
+    "Note — the module is monophonic on every input. Only the first channel of a polyphonic cable is read.",
+    "Note — with the module bypassed, each V.IN is passed straight through to the V.OUT below it; the trigger inputs, the PULSE outputs and POLY V.OUT are all silent while bypassed.",
+    "Note — the maker's hover tooltips name the four columns Block A to Block D, left to right; the panel prints no such letters."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "9": 6,
+    "10": 7,
+    "0": 8,
+    "1": 8,
+    "2": 8,
+    "3": 8,
+    "4": 9,
+    "5": 9,
+    "6": 9,
+    "7": 9,
+    "8": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 11,
+    "2": 11,
+    "3": 11,
+    "8": 12,
+    "4": 13,
+    "5": 13,
+    "6": 13,
+    "7": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "cv",
+     "10": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Bitwise.cpp:428 stores inputs[i].getVoltage(), a single-channel read, with no clamp"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Bitwise.cpp:428 stores inputs[i].getVoltage(), a single-channel read, with no clamp"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Bitwise.cpp:428 stores inputs[i].getVoltage(), a single-channel read, with no clamp"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Bitwise.cpp:428 stores inputs[i].getVoltage(), a single-channel read, with no clamp"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 0.7V",
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:414 divides the voltage by 0.7 before a dsp::SchmittTrigger whose default high threshold is 1 (Rack-SDK include/dsp/digital.hpp:107)"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 0.7V",
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:414 divides the voltage by 0.7 before a dsp::SchmittTrigger whose default high threshold is 1 (Rack-SDK include/dsp/digital.hpp:107)"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 0.7V",
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:414 divides the voltage by 0.7 before a dsp::SchmittTrigger whose default high threshold is 1 (Rack-SDK include/dsp/digital.hpp:107)"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 0.7V",
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:414 divides the voltage by 0.7 before a dsp::SchmittTrigger whose default high threshold is 1 (Rack-SDK include/dsp/digital.hpp:107)"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 0.7V",
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:362 divides the voltage by 0.7 before a dsp::SchmittTrigger whose default high threshold is 1 (Rack-SDK include/dsp/digital.hpp:107)"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/Bitwise.cpp:311-326 reads it with getVoltage() only when connected, then setSelection at line 4 rescales cv*attenuator*16 from 0 to 160 into 0 to 16, adds the knob and clamps the total to 1 to 16"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/Bitwise.cpp:336-351 reads it with getVoltage() only when connected, then setSelection at line 4 rescales cv*attenuator*8 from 0 to 80 into 0 to 8, adds the knob and clamps the total to 1 to 8"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:440 writes the held voltage times the attenuator to channel 0 only, and it changes only when that column samples"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:440 writes the held voltage times the attenuator to channel 0 only, and it changes only when that column samples"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:440 writes the held voltage times the attenuator to channel 0 only, and it changes only when that column samples"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:440 writes the held voltage times the attenuator to channel 0 only, and it changes only when that column samples"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:448 writes 10 or 0 to channel 0 only, gated by a dsp::PulseGenerator triggered with 1e-3 seconds at line 431"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:448 writes 10 or 0 to channel 0 only, gated by a dsp::PulseGenerator triggered with 1e-3 seconds at line 431"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:448 writes 10 or 0 to channel 0 only, gated by a dsp::PulseGenerator triggered with 1e-3 seconds at line 431"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:448 writes 10 or 0 to channel 0 only, gated by a dsp::PulseGenerator triggered with 1e-3 seconds at line 431"
+     },
+     "8": {
+      "poly": true,
+      "step": "stepped",
+      "why": "src/Bitwise.cpp:444 writes each column's held voltage to its own channel and line 457 calls setChannels(4)"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit ed72dd1, the tip of the default branch and the last of the four commits carrying version 2.0.0 in plugin.json.\n\nThe README says the pulse outputs are \"only a hundredth of a second long\". The code disagrees twice over: src/Bitwise.cpp:431 triggers the pulse feeding the PULSE jacks with 1e-3 seconds, that is 1ms, and line 434 triggers a separate generator with 1e-1 seconds, 100ms, which drives the blue lamp under each PULSE jack and nothing else. Neither figure is a hundredth of a second, so the lines carry 1ms and name the disagreement.\n\nThe row and pattern seven-segment displays and the 64-lamp pattern grid are drawn by custom widgets with no ParamWidget behind them, so none of them can be clicked for help; what they show is in Note lines instead.\n\nThe row and pattern CV jacks are read only while a cable is connected (src/Bitwise.cpp:311 and 336 test isConnected first); with no cable the knob's own value is used without passing through the clamp.\n\nThe selection arithmetic truncates rather than rounds: setSelection returns (int) of the clamped float, so a CV that lands part way between two rows takes the lower one.\n\nBoth attenuator knobs default to 0, which is why a freshly patched CV cable appears to do nothing.\n\nBypass is declared for the four voltage inputs to the four voltage outputs only (src/Bitwise.cpp:301-303); the pulse outputs and the polyphonic output carry nothing while the module is bypassed."
   }
  }
 }

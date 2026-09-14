@@ -1,18 +1,296 @@
 {
  "plugin": "minimal-friction",
- "source": "https://github.com/ab9st8/minimal-friction",
+ "source": "https://github.com/ab9st8/minimal-friction/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "kanon": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four-voice oscillator fed by one 1V/OCT jack, handing each new pitch to a different voice by one of four assignment rules",
+    "Shifts the pitch of all four voices together, ±5V read as one volt per octave with 0V giving C4; moving it never reassigns pitches between voices",
+    "Shifts the pitch of all four voices together by up to 100 cents either way; moving it never reassigns pitches between voices",
+    "Sets every voice to a sine wave",
+    "Sets every voice to a triangle wave",
+    "Sets every voice to a square wave",
+    "Sets every voice to a sawtooth wave",
+    "Each new pitch goes to voice 1 and pushes the older pitches along, voice 1 to voice 2, voice 2 to voice 3 and voice 3 to voice 4",
+    "Each new pitch goes to the next voice up, and after voice 4 back to voice 1",
+    "Each new pitch goes to the next voice up until voice 4, then to the next voice down until voice 1, and so on back and forth",
+    "Each new pitch goes to one of the four voices picked at random",
+    "The pitch handed out to the voices, one volt per octave; one voltage is read, not polyphonic channels",
+    "The chosen wave at voice 1's pitch, swinging ±5V",
+    "The chosen wave at voice 2's pitch, swinging ±5V",
+    "The chosen wave at voice 3's pitch, swinging ±5V",
+    "The chosen wave at voice 4's pitch, swinging ±5V",
+    "Note — a pitch is only handed to a voice once the voltage at 1V/OCT has held the same value for two frames in a row, so a gliding or slewed input assigns nothing while it is moving.",
+    "Note — the four output jacks are separate mono jacks, one per voice, and none of them carries a polyphonic cable despite the module being listed as polyphonic.",
+    "Note — all four voices sound all the time; with nothing patched to 1V/OCT they all play the pitch set by COARSE and FINE."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10
+   },
+   "in": {
+    "0": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/kanon.cpp process() reads inputs[VOCT_INPUT].getVoltage() only, and adds it to the knob pitch through volt2freq"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/kanon.cpp process() ends with setVoltage(5.f * waveshape(phase)) and never sets a channel count"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/kanon.cpp process() ends with setVoltage(5.f * waveshape(phase)) and never sets a channel count"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/kanon.cpp process() ends with setVoltage(5.f * waveshape(phase)) and never sets a channel count"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/kanon.cpp process() ends with setVoltage(5.f * waveshape(phase)) and never sets a channel count"
+     }
+    }
+   },
+   "notes": "A second input is declared in the source as FINE_INPUT, but it is never configured, never read and has no jack on the panel, so it gets no line and no tag. The plugin manifest tags the module Polyphonic and calls it a polyphonic oscillator; the four voices are four mono jacks and no polyphonic cable is produced or read. The assignment test in process() compares the input to the previous frame's voltage, which is why a moving input assigns nothing."
   },
   "terminal": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three stereo send-and-return loops, each adding a delayed copy of what comes back to the signal at IN",
+    "Sets how much of that channel's delayed ARRIVALS signal is added to its DEPARTURES output, silence at the left and full at the right",
+    "Sets how far back in that channel's memory the ARRIVALS signal is read from, 0 to 3 seconds",
+    "Clears that channel's delay memory and drops its DEPARTURES output to 0V; the button is momentary and acts on the frame it is pressed",
+    "The left half of the source signal, added undelayed to the left DEPARTURES output of all three channels",
+    "The right half of the source signal, added undelayed to the right DEPARTURES output of all three channels",
+    "The left return for that channel, written into its delay memory and read back after the DELAY time",
+    "The right return for that channel, written into its delay memory and read back after the DELAY time",
+    "Added to that channel's GAIN knob at 10% per volt, with the total clamped between silence and full",
+    "Added to that channel's DELAY knob at 0.3 seconds per volt; the total is clamped at 0 but not at 3 seconds, so a large CV reads a wrong place in the memory rather than stopping at the longest delay",
+    "The left IN signal plus that channel's delayed left ARRIVALS signal scaled by GAIN",
+    "The right IN signal plus that channel's delayed right ARRIVALS signal scaled by GAIN",
+    "Note — a channel does nothing on its own: patch its DEPARTURES pair out to an effect chain and that chain back into its ARRIVALS pair, or the departure output carries the IN signal alone.",
+    "Note — there is no clipper anywhere in the module, so a loop with gain added in the chain can build without limit.",
+    "Note — the delay memory is 3 seconds long, sized from the sample rate when the module is added; change the engine sample rate afterwards and the delay times are wrong until the module is replaced."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 3,
+    "7": 3,
+    "8": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 6,
+    "5": 7,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 8,
+    "10": 8,
+    "11": 9,
+    "12": 9,
+    "13": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11,
+    "2": 10,
+    "3": 11,
+    "4": 10,
+    "5": 11
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/terminal.cpp process() reads inputs[INPUT_L_INPUT].getVoltage() with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/terminal.cpp process() reads inputs[INPUT_R_INPUT].getVoltage() with no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/terminal.cpp process() writes inputs[ARRIVAL1_L_INPUT + i*2].getVoltage() into the ring buffer, one value per frame"
+     },
+     "3": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/terminal.cpp process() writes inputs[ARRIVAL1_R_INPUT + i*2].getVoltage() into the ring buffer, one value per frame"
+     },
+     "4": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/terminal.cpp process() writes inputs[ARRIVAL1_L_INPUT + i*2].getVoltage() into the ring buffer, one value per frame"
+     },
+     "5": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/terminal.cpp process() writes inputs[ARRIVAL1_R_INPUT + i*2].getVoltage() into the ring buffer, one value per frame"
+     },
+     "6": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/terminal.cpp process() writes inputs[ARRIVAL1_L_INPUT + i*2].getVoltage() into the ring buffer, one value per frame"
+     },
+     "7": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/terminal.cpp process() writes inputs[ARRIVAL1_R_INPUT + i*2].getVoltage() into the ring buffer, one value per frame"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/terminal.cpp GAIN macro: clamp(params[GAIN1_PARAM + i].getValue() + inputs[GAIN1_MOD_INPUT + i].getVoltage() / 10.f, 0.f, 1.f)"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/terminal.cpp GAIN macro: clamp(params[GAIN1_PARAM + i].getValue() + inputs[GAIN1_MOD_INPUT + i].getVoltage() / 10.f, 0.f, 1.f)"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/terminal.cpp GAIN macro: clamp(params[GAIN1_PARAM + i].getValue() + inputs[GAIN1_MOD_INPUT + i].getVoltage() / 10.f, 0.f, 1.f)"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/terminal.cpp DELAY_TIME macro: clamp(params[DELAY1_PARAM + i].getValue() + inputs[DELAY1_MOD_INPUT + i].getVoltage() * 3.f/10.f, 0.f, ...)"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/terminal.cpp DELAY_TIME macro: clamp(params[DELAY1_PARAM + i].getValue() + inputs[DELAY1_MOD_INPUT + i].getVoltage() * 3.f/10.f, 0.f, ...)"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/terminal.cpp DELAY_TIME macro: clamp(params[DELAY1_PARAM + i].getValue() + inputs[DELAY1_MOD_INPUT + i].getVoltage() * 3.f/10.f, 0.f, ...)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/terminal.cpp process() calls setVoltage once per departure jack and never sets a channel count"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/terminal.cpp process() calls setVoltage once per departure jack and never sets a channel count"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/terminal.cpp process() calls setVoltage once per departure jack and never sets a channel count"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/terminal.cpp process() calls setVoltage once per departure jack and never sets a channel count"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/terminal.cpp process() calls setVoltage once per departure jack and never sets a channel count"
+     },
+     "5": {
+      "poly": false,
+      "why": "src/terminal.cpp process() calls setVoltage once per departure jack and never sets a channel count"
+     }
+    }
+   },
+   "notes": "The upper bound of the delay clamp in process() is written as DELAY_MEMORY_SIZE*args.sampleRate — three times the sample rate rather than three seconds — so the delay total is effectively unclamped at the top. The ring buffer is only 3 seconds long, and a delay total past 3 seconds indexes it modulo its length, giving a delay of the wrong length rather than the maximum. The maker's README does not mention this. The README also notes that pressing or holding a KILL button produces a short click, which the source's own comments attribute to the signal being crushed to zero in one frame."
   }
  }
 }

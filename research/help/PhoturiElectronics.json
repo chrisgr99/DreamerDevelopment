@@ -1,23 +1,253 @@
 {
  "plugin": "PhoturiElectronics",
- "source": "https://github.com/BooleanMuse/Photuri-Electronics",
+ "source": "https://github.com/BooleanMuse/Photuri-Electronics/blob/4b93987/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Cricketter": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Oscillator that adds a sine at the pitch it is given to a second sine three hundred times higher, for a chirping tone",
+    "Sets how fast the upper tone is swept up and down, from a standstill at 0 to ten sweeps for every cycle of the pitch at 10; the sweep is one whole multiple of the pitch wide at any setting",
+    "Sets the pitch a volt per octave, with 0V giving C4 at 261.63Hz, and is clamped at four octaves either side of that",
+    "The two tones added together, reaching 10V at the peaks",
+    "Note — the module sounds as soon as it is placed, at C4, with nothing patched into V/OCT",
+    "Note — the upper tone is made at three hundred times the frequency set by V/OCT, which at ordinary pitches is above half the sample rate, so it arrives folded back into the audio range",
+    "Note — the output swings to 10V, twice the ±5V that Rack's modules take as a full audio level"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V, giving C4",
+      "why": "Cricketter.cpp:39-42 reads it with a plain getVoltage, clamps it to -4V and 4V and raises two to that power times the C4 constant"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "Cricketter.cpp:58-60 writes five times the sum of two sines, each of which reaches 1, with a plain setVoltage"
+     }
+    }
+   },
+   "notes": "The chirp is sin(2*pi*(300 + m)*phase) where phase is the running phase of the V/OCT oscillator and m is sin(2*pi*knob*phase), so the upper partial sits at three hundred times the fundamental and is swept one multiple wide at the knob's rate (Cricketter.cpp:46-49). At 0V on V/OCT that partial is at about 78kHz, so nearly all of what is heard is aliasing; this is what the module is rather than a fault to correct, and it is why the panel's own description calls it a cricket sound. There is a pitch knob in the source, commented out in both the module and the widget, so the jack is the only pitch control. No menu items beyond Rack's own.",
+   "read": "2026-09-14"
   },
   "Fairyfly": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A walk that hops between six outputs on its own clock, with the rate set by a voltage, and two further outputs built from the place it has reached",
+    "Adds to the voltage at Clock, 0 to 1, which shortens the time between hops and lowers the voltage of the six outputs together",
+    "Chooses one of six sizes that the SIZE OUT and WINGS OUT voltages are built from: the lowest setting fixes the size at 0.1 and each step above it multiplies the size by about two and a half",
+    "Sets how far the walk hops: at 0 it moves to the next output every time, and at full it can move on by anything from one place to six",
+    "Sets how often the walk hops and how high the six outputs go: 0V gives a hop every 25.6 seconds at full voltage, 10V ten hops a second near 0V; no edge is read, despite the panel printing Clock",
+    "Carries 5V while the walk stands here and 0V at all other times, the voltage falling as Clock and the knob beside it rise",
+    "Carries 7.5V while the walk stands here and 0V at all other times, the voltage falling as Clock and the knob beside it rise",
+    "Carries 10V while the walk stands here and 0V at all other times, the voltage falling as Clock and the knob beside it rise",
+    "Carries 12.5V while the walk stands here and 0V at all other times, the voltage falling as Clock and the knob beside it rise",
+    "Carries 15V while the walk stands here and 0V at all other times, the voltage falling as Clock and the knob beside it rise",
+    "Carries 17.5V while the walk stands here and 0V at all other times, the voltage falling as Clock and the knob beside it rise",
+    "Carries the chosen size divided by the number of the output the walk stands on, multiplied by a counter that moves one place up or down at every hop",
+    "Carries the chosen size divided by the number of the output the walk stands on, scaled down as Clock and the knob beside it rise",
+    "Note — with the knobs down and nothing patched, the walk hops once every 25.6 seconds, so the module can look as though it has stopped",
+    "Note — the six outputs are not at the same voltage: they rise from 5V at the first to 17.5V at the sixth, and the top three go beyond the ±10V that Rack's modules expect",
+    "Note — SIZE OUT and WINGS OUT divide by the number of the output the walk stands on, and at the first of the six that number is zero, so both carry an out-of-range value throughout that hop",
+    "Note — the counter behind SIZE OUT can fall below its first place, and while it is there SIZE OUT carries 0V whatever else is set"
+   ],
+   "param": {
+    "0": 2,
+    "1": 1,
+    "2": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "cv",
+     "7": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Fairyfly.cpp:51-53 adds this jack's plain getVoltage to the knob and clamps the total to 0 and 10 before the exponential that sets both the hop rate and the output level"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Fairyfly.cpp:74-92 gives position 0 the value 0.1, and line 120 multiplies it by 50 and by the brightness factor, which is at most 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 7.5V",
+      "why": "Fairyfly.cpp:74-92 gives position 1 the value 0.15, and line 121 multiplies it by 50 and by the brightness factor, which is at most 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Fairyfly.cpp:74-92 gives position 2 the value 0.2, and line 122 multiplies it by 50 and by the brightness factor, which is at most 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 12.5V",
+      "why": "Fairyfly.cpp:74-92 gives position 3 the value 0.25, and line 123 multiplies it by 50 and by the brightness factor, which is at most 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 15V",
+      "why": "Fairyfly.cpp:74-92 gives position 4 the value 0.3, and line 124 multiplies it by 50 and by the brightness factor, which is at most 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 17.5V",
+      "why": "Fairyfly.cpp:74-92 gives position 5 the value 0.35, and line 125 multiplies it by 50 and by the brightness factor, which is at most 1"
+     },
+     "6": {
+      "poly": false,
+      "why": "Fairyfly.cpp:134 writes the size figure times a counter of 1 to 6 with a plain setVoltage; no clamp bounds it"
+     },
+     "7": {
+      "poly": false,
+      "why": "Fairyfly.cpp:135 writes the size figure times the brightness factor with a plain setVoltage; no clamp bounds it"
+     }
+    }
+   },
+   "notes": "Rate law: brightness is exp(-pitch) where pitch is the knob plus the Clock voltage clamped to 0 and 10, and the hop interval is 2 raised to eight times brightness, divided by ten (Fairyfly.cpp:51-66). That gives 25.6 seconds at 0 and 0.1 seconds at the top, and the same brightness factor scales the six outputs, so the module is loud and slow at one end and fast and nearly silent at the other. The 25.6 and the six output voltages are computed from the constants at those lines rather than being stored as literals. SIZE OUT and WINGS OUT divide by fireflyPosition (line 132), which is zero one hop in six, so both jacks carry an infinity while the walk is at the first output unless the size knob is at its lowest step; with the counter behind SIZE OUT also negative the product is undefined. The counter at line 69 is taken modulo six after a signed subtraction, so it can go negative, and the switch that turns it into 1 to 6 leaves it at 0 when it does. The maker's own summary calls the module a clock divider; the Clock jack sets a rate and no edge in it is read at all. None of the three knobs is labelled on the panel.",
+   "read": "2026-09-14"
   },
   "Mo-Th": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four-step sequencer whose step moves on at random rather than on a trigger, with a level knob and an output for each step and a further output carrying a note voltage",
+    "Sets the voltage this step sends to its own output, 0 to 10V",
+    "Sets how far the note output is moved at random, from no movement at 0 to twelve semitones either way at full",
+    "A fresh random number from 0 to 1 is compared with this voltage every sample and the step moves on when the number is larger, so 0V runs the sequence and 1V stops it; no trigger edge is read",
+    "A rising edge sets the sequence back to the first step; it reads high above 1V",
+    "Carries the voltage set by the knob for that step while the sequence stands on it, and 0V at every other step",
+    "Carries the step's place in a fixed pattern turned into a note number, converted to a frequency in hertz and divided by twelve; it lands between about 0.3V and 1.5V and is not a volt per octave",
+    "Note — the sequence runs by itself: with nothing patched into Trigger the step changes in nearly every sample, so the four step outputs carry a burst rather than a sequence",
+    "Note — the note output is worked out afresh in every sample, so with the randomness knob above 0 it carries a new random value at the sample rate rather than one value per step",
+    "Note — Reset is the only jack that reads an edge"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "Mo-Th.cpp:60 and 66-71 read it with a plain getVoltage and compare it against a fresh uniform random number between 0 and 1, so anything at or below 0V behaves alike and anything at or above 1V behaves alike"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "Mo-Th.cpp:61 and 75 pass a plain getVoltage to a default dsp::SchmittTrigger, whose thresholds are 0V and 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Mo-Th.cpp:81-82 writes the step knob's 0 to 1 value times 10 with a plain setVoltage when the sequence is on that step, and 0 otherwise"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Mo-Th.cpp:81-82 writes the step knob's 0 to 1 value times 10 with a plain setVoltage when the sequence is on that step, and 0 otherwise"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Mo-Th.cpp:81-82 writes the step knob's 0 to 1 value times 10 with a plain setVoltage when the sequence is on that step, and 0 otherwise"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Mo-Th.cpp:81-82 writes the step knob's 0 to 1 value times 10 with a plain setVoltage when the sequence is on that step, and 0 otherwise"
+     },
+     "4": {
+      "poly": false,
+      "why": "Mo-Th.cpp:86-90 rounds a frequency in hertz to a whole number, divides by twelve and writes it with a plain setVoltage; nothing bounds the result but the twelve-semitone random offset"
+     }
+    }
+   },
+   "notes": "The Trigger jack is not edge-detected. Mo-Th.cpp:66-71 draws a uniform random number between 0 and 1 in every sample and advances the step whenever that number exceeds the raw voltage on the jack, so the advance probability per sample is one minus the voltage: unpatched or at 0V the step advances at the sample rate, at 10V it never advances. A conventional gate therefore holds the sequence still while it is high and runs it flat out while it is low. This contradicts the README, which says the trigger input advances the sequencer by one step per trigger, and it is said in the Trigger line as well as here because the reader clicking that jack has to learn it there. The note output at lines 86-90 computes 440 times two to the power of (note number minus 69) over twelve — which is a frequency in hertz — then divides by twelve and writes that as a voltage, so it is not a pitch in Rack's terms; the pattern it steps through is the first four Fibonacci numbers, 1, 1, 2 and 3. The note output is also written inside the four-step output loop, so it is calculated four times per sample and the last calculation wins. The four step knobs, the randomness knob and the four step outputs carry no lettering on the panel.",
+   "read": "2026-09-14"
   }
  }
 }

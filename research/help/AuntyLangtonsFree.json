@@ -1,13 +1,149 @@
 {
  "plugin": "AuntyLangtonsFree",
- "source": "https://github.com/64MM4-KN1F3/AuntyLangtons-FREE-V2",
+ "source": "https://github.com/64MM4-KN1F3/AuntyLangtons-FREE-V2/tree/37fbae9",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "MusicalAnt": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A Langton's ant walking a square grid, flipping each cell it leaves and turning its position into two quantised pitches, with a second ant on the same clock under a rule turned a quarter turn round",
+    "Sets the rate of the internal clock, doubling with each step of the scale from 1Hz up to 256Hz; anywhere at or below zero the clock stops and nothing moves, and a cable in CLK takes over from it",
+    "Sets the width of the grid in cells, stepping through 8, 13, 21, 34, 55, 89 and 144",
+    "Sets how many steps the ant takes on each clock, 1 to 33",
+    "Turns looping on, so the ant runs forward for a set number of clocks and then walks the whole of that run backwards in a single clock before starting again",
+    "Sets how many clocks the ant runs forward before it is walked back again, 1 to 65",
+    "Runs the second ant while it is in its lower position; in its upper position that ant stops moving and the screen no longer draws it",
+    "Sets the octave the first ant's horizontal position is transposed to, 0V to 7V",
+    "Sets the root note the first ant's horizontal position is quantised to, the twelve semitones from C",
+    "Sets the scale the first ant's horizontal position is quantised to, seventeen scales and then None, which passes the pitch through unquantised",
+    "Meant to turn the horizontal pitch upside down; in that position the pitch is worked out from the resolution knob's own number instead of the grid's width, which drops it far below the octave knob",
+    "Sets the octave the first ant's vertical position is transposed to, 0V to 7V",
+    "Sets the root note the first ant's vertical position is quantised to, the twelve semitones from C",
+    "Sets the scale the first ant's vertical position is quantised to, seventeen scales and then None, which passes the pitch through unquantised",
+    "Meant to turn the vertical pitch upside down; in that position the pitch is worked out from the resolution knob's own number instead of the grid's width, which drops it far below the octave knob",
+    "Sets the octave the second ant's horizontal position is transposed to, 0V to 7V",
+    "Sets the root note the second ant's horizontal position is quantised to, the twelve semitones from C",
+    "Sets the scale the second ant's horizontal position is quantised to, seventeen scales and then None, which passes the pitch through unquantised",
+    "Sets the octave the second ant's vertical position is transposed to, 0V to 7V",
+    "Sets the root note the second ant's vertical position is quantised to, the twelve semitones from C",
+    "Sets the scale the second ant's vertical position is quantised to, seventeen scales and then None, which passes the pitch through unquantised",
+    "Nothing in the module reads this control, and it is placed past the right-hand edge of the panel, so no click reaches it either",
+    "Draws the maker's logo across the screen for as long as it is held down; the ant keeps walking underneath and none of the outputs change",
+    "Steps the ant on each rising edge, reading high above 2V and low below 0.1V, and it takes the clock away from the knob for as long as a cable is in it",
+    "10V while the clock is high and 0V while it is low, which from the internal clock is an even square wave at the clock rate",
+    "Goes to 10V on a step where the ant turned left and back to 0V on a step where it turned right, so it holds between turns rather than pulsing",
+    "Goes to 10V on a step where the ant turned right and back to 0V on a step where it turned left, so it holds between turns rather than pulsing",
+    "The first ant's horizontal position as a pitch, a semitone per cell above the octave knob, quantised to the key and scale set for it",
+    "The first ant's vertical position as a pitch, a semitone per cell above the octave knob, quantised to the key and scale set for it",
+    "The second ant's horizontal position as a pitch, a semitone per cell above its own octave knob, and it only moves while that ant is switched on",
+    "The second ant's vertical position as a pitch, a semitone per cell above its own octave knob, and it only moves while that ant is switched on",
+    "Carries the first ant's horizontal and vertical pitches on its first two channels, and the second ant's two on channels three and four, but only while the second ant's switch is in its upper position",
+    "Note — the grid on the screen can be drawn on: click or drag across it to turn cells light or dark, which changes the path the ant takes from there on",
+    "Note — the second ant's switch reads one way round for the ant and the other way round for the poly output: down, the ant walks and its own two jacks follow it",
+    "Note — with the second ant's switch up, that ant stops and the poly output instead gains two channels holding the pitch it stopped at",
+    "Note — a grid 144 cells wide puts the pitch outputs almost twelve octaves above the octave knob, so they can reach nearly 20V"
+   ],
+   "param": {
+    "0": 1,
+    "16": 2,
+    "13": 3,
+    "17": 4,
+    "18": 5,
+    "15": 6,
+    "9": 7,
+    "5": 8,
+    "1": 9,
+    "19": 10,
+    "10": 11,
+    "6": 12,
+    "2": 13,
+    "20": 14,
+    "11": 15,
+    "7": 16,
+    "3": 17,
+    "12": 18,
+    "8": 19,
+    "4": 20,
+    "14": 21,
+    "21": 22
+   },
+   "in": {
+    "0": 23
+   },
+   "out": {
+    "0": 24,
+    "1": 25,
+    "2": 26,
+    "3": 27,
+    "4": 28,
+    "5": 29,
+    "6": 30,
+    "9": 31
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "pitch",
+     "9": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the clock knob runs the ant instead",
+      "why": "MusicalAnt.cpp:334 rescales getVoltage from 0.1 and 2 into 0 and 1 before a dsp::SchmittTrigger at its default thresholds, so the jack goes high at 2V and low at 0.1V; :332 makes the internal clock the fallback"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MusicalAnt.cpp:381 and :385 write 10 while the clock is high and 0 while it is low"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MusicalAnt.cpp:599-606 writes 10 here on a left turn and 0 on a right turn, and nothing else writes it"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MusicalAnt.cpp:599-606 writes 10 here on a right turn and 0 on a left turn, and nothing else writes it"
+     },
+     "3": {
+      "poly": false,
+      "why": "MusicalAnt.cpp:595 writes closestVoltageForX, which is the octave knob plus the cell number times 0.0833, quantised"
+     },
+     "4": {
+      "poly": false,
+      "why": "MusicalAnt.cpp:596 writes closestVoltageForY, which is the octave knob plus the cell number times 0.0833, quantised"
+     },
+     "5": {
+      "poly": false,
+      "why": "MusicalAnt.cpp:590 writes closestVoltageForShadowX, inside the branch at :539 that runs only while the shadow switch reads zero"
+     },
+     "6": {
+      "poly": false,
+      "why": "MusicalAnt.cpp:591 writes closestVoltageForShadowY, inside the branch at :539 that runs only while the shadow switch reads zero"
+     },
+     "9": {
+      "poly": true,
+      "why": "MusicalAnt.cpp:387-396 writes two channels always and two more when the shadow switch reads one, calling setChannels with 4 or 2"
+     }
+    }
+   },
+   "notes": "The shadow ant switch is read with opposite senses in two places. At MusicalAnt.cpp:539 the ant itself walks only while the parameter reads zero, which is the switch's lower position, and the display at :809 draws it under the same test; but at :389 the polyphonic output adds the shadow channels only while the parameter reads one. The two can therefore never both be true, and since the parameter defaults to one, a fresh module comes up with a still shadow ant and a four channel poly output whose last two channels hold its starting pitch. The invert switches are broken: :595 and :596 subtract the ant's cell from tempSideLength, which at :594 is the raw resolution knob value of 0 to 6 rather than the grid width of 8 to 144, so the inverted branch produces a large negative cell number and a pitch far below the octave knob. The same expression is used for the poly output at :387-388. The effect knob, parameter 14, is configured at :134 and given a widget at :956 at x 253.9 on a panel 195 pixels wide, and no code reads it. Input 1 and outputs 7 and 8 are declared but never given widgets and never written. The internal clock is guarded at :353 by a test for the knob being above zero, so the lower fifth of that knob's travel is a dead zone in which the module does nothing. The clock knob, the resolution knob, the skip knob, the loop knobs and all twelve quantiser knobs are configured with an empty name, so their tooltips carry no text."
   }
  }
 }

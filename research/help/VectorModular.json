@@ -1,28 +1,516 @@
 {
  "plugin": "VectorModular",
- "source": "https://github.com/vectormodular/VectorModular",
+ "source": "https://vectormodular.com/",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
-  "baseTrigs": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
   "ThreeIx9o": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three separate one-into-three multiples in 6HP, stacked so that an unpatched input takes the signal from the group above it",
+    "The signal copied to the first group of three outputs; nothing is added to it and nothing is taken away",
+    "The signal copied to the second group of three outputs; with nothing patched here the group follows the first input instead, one sample late",
+    "The signal copied to the third group of three outputs; with nothing patched here the group follows the second input instead, one sample late",
+    "A copy of the first input, at the voltage it arrived at",
+    "A copy of the first input; this is also the voltage the second input reads when nothing is patched into it",
+    "A copy of the second input, at the voltage it arrived at",
+    "A copy of the second input; this is also the voltage the third input reads when nothing is patched into it",
+    "A copy of the third input, at the voltage it arrived at",
+    "Note — the panel prints a dotted line from the last output of a group down to the input below it. That line is the normal: pull the lower cable out and the group follows the one above.",
+    "Note — the normal is read from the output jack rather than from the input, so a group fed by the normal runs one sample behind the group above it.",
+    "Note — the lamp beside each input glows red for negative voltage and blue for positive, reaching full at 5V either way, and is smoothed so it lags a fast signal.",
+    "Note — the module is monophonic: every jack carries one channel."
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 8,
+    "8": 8
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/ThreeIx9o.cpp:84 reads one channel with getVoltage and :89-91 write it unchanged to the first three outputs; there is no clamp and no scaling anywhere in process"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the first input, one sample late",
+      "why": "src/ThreeIx9o.cpp:85 uses the jack when connected and otherwise reads outputs[OUTPUT3].getVoltage(), which :91 wrote from the first input on the previous sample"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the second input, one sample late",
+      "why": "src/ThreeIx9o.cpp:86 uses the jack when connected and otherwise reads outputs[OUTPUT6].getVoltage(), which :94 wrote from the second input on the previous sample"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/ThreeIx9o.cpp:89 writes the first input to one channel with setVoltage, unscaled and unclamped"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/ThreeIx9o.cpp:91 writes the first input to one channel with setVoltage; :85 reads this same port back as the normal for the second input"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/ThreeIx9o.cpp:94 writes the second input to one channel with setVoltage; :86 reads this same port back as the normal for the third input"
+     }
+    }
+   },
+   "notes": "No family is set on any jack. A multiple carries whatever you give it, so a colour here would be a guess, in the same way as Host's audio jacks.\n\nThe file opens with a helper called mapVoltageToBrightness that applies a logarithmic curve to a voltage. It is never called: the lamp brightness comes from the two lambdas inside process, which are linear between 0V and 5V. Dead code, no effect on anything a reader can click.\n\nAll three inputs and all nine outputs are configured with an empty name string (src/ThreeIx9o.cpp:68-79), so Rack shows a bare tooltip for every jack on this module. The census records that as three unnamed inputs; the outputs are unnamed too."
   },
   "SoloMixer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A three-channel mixer with two banks of solo settings and one attenuverter feeding two mix outputs",
+    "Each press turns solo on or off for the red channel in the bank now chosen; while any channel in that bank is soloed the others are silenced",
+    "Sets the level of the red channel: the gain is the knob position squared, from silence at the bottom of its travel to a gain of 1.5 at the top; the maker's page calls it logarithmic",
+    "Each press turns solo on or off for the green channel in the bank now chosen; while any channel in that bank is soloed the others are silenced",
+    "Sets the level of the green channel: the gain is the knob position squared, from silence at the bottom of its travel to a gain of 1.5 at the top; the maker's page calls it logarithmic",
+    "Each press turns solo on or off for the blue channel in the bank now chosen; while any channel in that bank is soloed the others are silenced",
+    "Sets the level of the blue channel: the gain is the knob position squared, from silence at the bottom of its travel to a gain of 1.5 at the top; the maker's page calls it logarithmic",
+    "Each press swaps between two banks of solo settings, each holding its own on-or-off state for all three channels; both banks are saved with the patch",
+    "Scales the sum of the three channels from -1.5 to 1.5, inverting below the centre; it comes up at the centre, where both mix outputs are silent",
+    "The red channel's signal; with nothing patched the channel reads a steady 5V, which makes the module an offset source",
+    "The green channel's signal; with nothing patched the channel takes the red channel's voltage from before the red level control",
+    "The blue channel's signal; with nothing patched the channel takes the green channel's voltage from before the green level control",
+    "The red channel after its level control, clamped to ±10V; the shaper meant to soften it turns back down above 5V, so 10V leaves as 2.5V and 15V as 0V",
+    "The green channel after its level control, clamped to ±10V; the shaper meant to soften it turns back down above 5V, so 10V leaves as 2.5V and 15V as 0V",
+    "The blue channel after its level control, clamped to ±10V; the shaper meant to soften it turns back down above 5V, so 10V leaves as 2.5V and 15V as 0V",
+    "The three channels summed and scaled by the attenuverter, so the mix inverts below its centre; the shaper turns back down above 10V, giving 5V at 20V, and the result is clamped to ±10V",
+    "The three channels summed and scaled by the size of the attenuverter setting with its sign thrown away, so this mix keeps the polarity it came in with wherever the knob is",
+    "Note — every level control comes up at silence and the attenuverter at its centre, so nothing reaches any output on arrival. Raise a level; move the attenuverter too for the two mix outputs.",
+    "Note — soloing silences the other channels at their own outputs too, not only in the mix. Solo is not a mix-bus function here.",
+    "Note — the solo states and the choice of bank are written into the patch file; the four knobs are saved by Rack as ordinary parameters.",
+    "Note — the lamp beside each output follows the size of that channel's voltage and is full at 5V. It is smoothed by a filter taking about a thousand samples to follow a change, so it drifts.",
+    "Note — the module is monophonic: every jack reads or writes one channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "src/SoloMixer.cpp:237 reads one channel with getVoltage when connected and substitutes a constant 5.0f when not; :242 multiplies by the squared knob and :244-246 shape and clamp the result"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the red channel before its level knob",
+      "why": "src/SoloMixer.cpp:238 reads one channel with getVoltage when connected and otherwise copies redSignal, which at that line has not yet had the red gain of :242 applied"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the green channel before its level knob",
+      "why": "src/SoloMixer.cpp:239 reads one channel with getVoltage when connected and otherwise copies greenSignal, which at that line has not yet had the green gain of :248 applied"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/SoloMixer.cpp:246 clamps to -10V and 10V after the shaper at :244, and :450 writes one channel with setVoltage; :404 forces it to 0V when another channel is soloed"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/SoloMixer.cpp:250 clamps to -10V and 10V after the shaper at :249, and :451 writes one channel with setVoltage; :408 forces it to 0V when another channel is soloed"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/SoloMixer.cpp:254 clamps to -10V and 10V after the shaper at :253, and :452 writes one channel with setVoltage; :412 forces it to 0V when another channel is soloed"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/SoloMixer.cpp:434 multiplies the sum of the three channels by the -1.5 to 1.5 knob; :437-438 shape it at a 10V threshold and clamp to -10V and 10V; :453 writes one channel"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/SoloMixer.cpp:435 multiplies the sum of the three channels by the absolute value of the same knob; :440-441 shape and clamp to -10V and 10V; :454 writes one channel"
+     }
+    }
+   },
+   "notes": "No family is set on any jack. The maker's own page says the head channel normals to 5V so the module can be used as a CV offset, and the plugin.json tags are Mixer, Controller and Attenuator — a channel here carries audio or CV depending on what you patch, so a colour would be a guess.\n\nThe soft clipper is not a soft clipper. softClip at src/SoloMixer.cpp:166-180 returns the signal unchanged below the threshold, and above it returns threshold * (0.5 + 0.5 * cos(pi/2 * (|x| - T) / T)). That expression equals T at |x| = T, falls to T/2 at |x| = 2T, reaches zero at |x| = 3T and turns negative beyond. For the channel outputs T is 5V, so an input at 10V with the level knob at its top (gain 1.5) produces 15V into the shaper and 0V out of the jack; for the two mix outputs T is 10V and the same collapse happens at 30V. The maker's page describes it as \"Soft-clipping overdrive on each output\". The line on each output carries the short form of this; nothing else in the module limits the level.\n\nThe maker's page calls the channel level control logarithmic. The code at :242, :248 and :252 raises the knob position to the second power, which is the opposite curve: the gain moves slowly at the bottom of the travel and fastest near the top. The knob's configured range is sqrt(1.5), so the squared gain runs 0 to 1.5 exactly.\n\nThe four solo handlers each contain a bare `return;` (lines 262, 280, 298, 316) that would abandon the rest of process. It is unreachable: a dsp::SchmittTrigger returns true only on a rising edge, so the guarded lastState flag is never true on the sample the trigger fires. No effect, but it is the kind of early return that would silence the module if the trigger behaviour ever changed.\n\nTwelve of the lights are TinyLight indicators for the solo and bank states. They are LightWidgets, not parameters, so they take no tag.\n\nRead at commit 6cda28c; see the plugin-level note under baseTrigs for how the commit was settled."
+  },
+  "baseTrigs": {
+   "lines": [
+    "A clock generator with fourteen rhythmic divisions, its tempo set by a knob, by tapping, or by measuring an incoming clock",
+    "Scales the tempo modulation jack, from no effect at the bottom of its travel to the jack's full voltage at the top; it comes up at the bottom, where that jack does nothing",
+    "Sets the tempo in beats per minute, 0 to 300, coming up at 115; at 0 every output is held at 0V and nothing else in the module runs",
+    "Each press restarts every division from the beginning and drops all fourteen outputs to 0V",
+    "Sets the tempo from the time between two presses, reading that gap as one quarter note; a gap longer than 60 seconds or shorter than 10ms is discarded instead",
+    "Shifts the tempo away from the setting: positive voltage multiplies it by one plus the attenuated voltage, negative voltage divides it by one plus the size of that voltage",
+    "Restarts every division from the beginning on a rising edge past 1.5V, and drops all fourteen outputs to 0V",
+    "Sets the tempo by timing two rising edges and reading the gap between them as one quarter note; it counts as high at 1.5V and is ready again below 0.1V",
+    "A 1ms trigger at 10V on every sixteenth note",
+    "A 1ms trigger at 10V three times in every quarter note",
+    "Goes to 10V for one whole sixteenth note starting on each eighth-note beat, then back to 0V for the next sixteenth: a gate, not a short trigger",
+    "Goes to 10V for the second sixteenth note of each eighth note and 0V for the first: a gate, not a short trigger",
+    "A 1ms trigger at 10V three times in every half note",
+    "Goes to 10V for one whole sixteenth note on each quarter-note beat and 0V for the other three sixteenths: a gate, not a short trigger",
+    "Goes to 10V for one whole sixteenth note halfway between quarter-note beats: a gate, not a short trigger",
+    "Goes to 10V for one whole sixteenth note at the start of each half note: a gate, not a short trigger",
+    "Goes to 10V for one whole sixteenth note halfway through each half note: a gate, not a short trigger",
+    "Goes to 10V for one whole sixteenth note once in every twelve sixteenths, which is every three quarter-note beats",
+    "Goes to 10V for one whole sixteenth note once in every sixteen sixteenths, which is every four quarter-note beats",
+    "Goes to 10V for one whole sixteenth note once in every twenty sixteenths, which is every five quarter-note beats",
+    "Goes to 10V for one whole sixteenth note once in every twenty-four sixteenths, which is every six quarter-note beats",
+    "Goes to 10V for one whole sixteenth note once in every twenty-eight sixteenths, which is every seven quarter-note beats",
+    "Note — eleven of the fourteen outputs give a gate one sixteenth note long rather than a short trigger, because the pulse behind each is retriggered every sample while its step is current.",
+    "Note — the clock input does not drive the divisions. It measures the gap between two rising edges and turns it into a tempo; everything else is generated from that number internally.",
+    "Note — only the 1/16, 1/8t and 1/4t outputs give the 1ms trigger. The other eleven are held high for a whole sixteenth note, which at the default 115 BPM is about 130ms.",
+    "Note — nothing locks the divisions to an incoming clock, so they drift against it until something resets them. Send a reset where they need to line up.",
+    "Note — pull the clock cable out and the tempo falls back to whatever the knob or the last tap set. That fallback number is written into the patch file.",
+    "Note — the lamp near the 1/4 output stays lit for 50ms after each quarter-note beat and goes dark on a reset.",
+    "Note — the panel prints baseTrig while the module is called baseTrigs in the browser and in the plugin manifest.",
+    "Note — the module is monophonic: every jack reads or writes one channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13,
+    "6": 14,
+    "7": 15,
+    "8": 16,
+    "9": 17,
+    "10": 18,
+    "11": 19,
+    "12": 20,
+    "13": 21
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/baseTrigs.cpp:344-370 reads one channel with getVoltage only while the jack is connected, multiplies it by the 0 to 1 attenuator, then multiplies the tempo by (1 + mod) for positive values and divides by (1 - mod) for negative ones; the resulting tempo is clamped at :369"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1.5V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/baseTrigs.cpp:333 compares one channel against 1.5V and feeds a SchmittTrigger at :339 with thresholds of 0.1V and 1.5V; the reset button is folded into the same comparison, so either one resets"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1.5V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/baseTrigs.cpp:255 feeds one channel to a SchmittTrigger with thresholds of 0.1V and 1.5V; :262-263 turns the measured gap into 60/seconds beats per minute, and :314 restores the fallback tempo whenever the jack is unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/baseTrigs.cpp:432-436 writes 10V while the 1ms pulse generator is running and 0V otherwise, one channel, with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/baseTrigs.cpp:448-452 writes 10V while the 1ms pulse generator is running and 0V otherwise, one channel, with setVoltage"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/baseTrigs.cpp:457-464 retriggers the pulse every sample that the sixteenth counter is odd, so the jack holds 10V for a whole sixteenth note before returning to 0V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/baseTrigs.cpp:488-498 retriggers the pulse every sample that the sixteenth counter is 1, 5, 9 or 13, so the jack holds 10V for a whole sixteenth note before returning to 0V"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/baseTrigs.cpp:556-563 retriggers the pulse every sample that the sixteenth counter is 1, which it is for one sixteenth in every sixteen, so the jack holds 10V for that whole sixteenth"
+     }
+    }
+   },
+   "notes": "Read at commit 6cda28c of vectormodular/VectorModular, the head of the repository. Five commits carry version 2.0.0 (a0432ef, 8dd63ca, 77ff008, 1161f47, 6cda28c) and `git diff a0432ef 6cda28c` touches only README.md and the plugin.json version line. The installed plugin.json is byte-identical to the blob at 6cda28c and all four installed res SVGs hash the same as their blobs there, so the head describes the installed build. The repository's earlier commits carry 2.1.0 — the maker dropped the version back to 2.0.0 for the library submission.\n\nThe gate length is the one real surprise on this module. Outputs 1/16, 1/8t and 1/4t are triggered once per interval crossing and give the 1ms pulse the maker's comment at :379 intends. The other eleven are driven by a test on the current sixteenth-note step, and that test is evaluated on every sample of process, so their PulseGenerator is retriggered continuously for as long as the step is current. Each of them therefore sits at 10V for a whole sixteenth note plus 1ms — at the default 115 BPM that is about 130ms. The maker's page does not state a length either way, so this contradicts the code's own comments rather than anything published.\n\nThe clock input is a tempo detector, not a sync. There is no phase lock: the module keeps its own sixteenth-note timer and only the measured beats-per-minute crosses over. A patch that needs the divisions aligned with an external clock has to send a reset.\n\nThe outputs are internally consistent about what offbeat means — 1/8off is displaced by one sixteenth from 1/8, 1/4off by two sixteenths from 1/4, and 1/2off by four — even though the naming makes the first of those look wrong at a glance.\n\nThe Reset and Tap buttons are configured with configParam over 0 to 2 rather than configButton, so their tooltips read as knobs. Both work: LEDButton is momentary and the code tests against 1.5.\n\nOne small startup artefact: resetOutputs leaves the sixteenth counter at 0, and 0 is even, so the 1/8 offbeat output is held high from a reset until the first sixteenth arrives.\n\nThere is no tap-tempo input jack, only the button, and no separate clock output — the 1/4 jack is what the maker names \"1/4t note nutput / Clock output\" in configOutput, a typo for 1/4. The panel prints 1/4 and rings that jack.\n\nprops are given for one output of each timing family rather than all fourteen, because the fourteen differ only in which step drives them; every one is 0V or 10V on a single channel."
   },
   "BaseOsc": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator built on the Braids macro-oscillator with nine outputs running at once, a quantizer on its pitch and a bit crusher on everything it renders",
+    "Chooses the scale the pitch is quantized to, Off or one of nineteen scales; the quantizing happens before any frequency modulation is added",
+    "Each press raises the pitch one octave, as far as five octaves above the tuning controls",
+    "Sets the pitch over five octaves either way, one volt to the octave",
+    "Each press lowers the pitch one octave, as far as five octaves below the tuning controls",
+    "Chooses the root note the scale is built on, C through B",
+    "Each press turns LFO mode on or off, which renders eight of the nine outputs about a hundred times more slowly and drops them below hearing; the plain noise output is untouched by it",
+    "Each press switches how the FM jack is applied: in the LIN position the jack's voltage times the amount is added to the pitch CV, in the EXP position two raised to that product, less one, is added",
+    "Trims the pitch by up to one semitone either way",
+    "Scales the FM jack from -0.5 to 0.5, inverting it below the centre; it comes up at the centre, where that jack does nothing",
+    "Scales the PWM jack from no effect at the bottom of its travel to full at the top; it comes up at the bottom, where that jack does nothing",
+    "Scales the index modulation jack from no effect at the bottom of its travel to full at the top; it comes up at the bottom, where that jack does nothing",
+    "Sets the width of the pulse wave and the cycle length of the digital noise; the sign of the setting is thrown away, so the two halves of the travel do the same thing and the centre is the narrowest",
+    "Sets the position read from the wavetable and the number of quantized steps in the digital noise, from the bottom of the range at the bottom of its travel to the top at the top",
+    "Sets the bit depth every rendered output is cut to, 1-bit through 16-bit, by masking the low bits off each sample; at 16-bit the sample is left alone",
+    "Sets the pitch at one volt per octave; it is summed with the tuning controls and the octave buttons and the total is clamped to ±5V before anything else is done with it",
+    "Modulates the pitch, scaled by the FM amount control and added after the quantizer, so quantizing does not catch it",
+    "Modulates the pulse width and the digital noise cycle length: for the pulse the size of the voltage is used and always widens, for the noise the voltage is used with its sign",
+    "Modulates the position read from the wavetable and the quantizing of the digital noise, scaled by the index modulation control: a fifteenth of the voltage for the wavetable, a tenth for the noise",
+    "A triangle wave at the set pitch, ±5V",
+    "A sawtooth wave at the set pitch, ±5V",
+    "A pulse wave at the set pitch, its width set by the PW control, ±5V",
+    "A sine wave at the set pitch, ±5V",
+    "A square wave one octave below the set pitch, ±5V",
+    "A wave read out of the Braids wavetable at the position set by the INDEX control, interpolated between neighbouring waves, ±5V",
+    "Filtered noise at a fixed pitch: V/OCT and every tuning control are ignored here, and LFO mode does not slow this jack down",
+    "Resonant filtered noise following the set pitch, ±5V",
+    "Clocked noise, its cycle length taken from the PW control and the number of levels it is quantized to taken from the INDEX control, ±5V",
+    "Note — an output is rendered only while a cable is in it. An unpatched jack costs nothing and is computed not at all, so the module's load rises with each cable you add.",
+    "Note — the pitch total is clamped to ±5V before use, so the coarse knob and the octave buttons together cannot carry the pitch more than five octaves from centre, though each alone reaches five.",
+    "Note — the row of eleven lamps above the coarse knob shows the pitch CV in volts, red below zero, green at zero, blue above. In LFO mode they follow the patched outputs instead.",
+    "Note — the keyboard of lamps shows which notes the chosen scale contains, white for white keys and yellow for black ones, the note playing at that moment green. All dark while the scale is Off.",
+    "Note — neither the LFO button nor the LIN/EXP button carries a lamp, so the panel gives no sign of which state either is in. Both states are written into the patch file, as is the octave offset.",
+    "Note — the bit crusher masks the low bits off each sample rather than rounding it, which pulls the wave towards negative as the depth falls.",
+    "Note — the module is monophonic: every jack reads or writes one channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 20,
+    "2": 21,
+    "3": 22,
+    "4": 23,
+    "5": 24,
+    "6": 25,
+    "7": 26,
+    "8": 27
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio",
+     "8": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "±5V",
+      "why": "src/BaseOsc.cpp:422 adds one channel of the jack to the coarse knob, the octave-button offset and a twelfth of the fine knob; :424 clamps that total to -5V and 5V, and :459 turns it into the Braids pitch of (V*12+60)*128"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/BaseOsc.cpp:454 adds the jack's voltage times the -0.5 to 0.5 amount knob to the pitch CV in the LIN state; :456 adds 2 raised to that product, less 1, in the EXP state. The jack is read after the quantizer at :426-442, so it is never quantized"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/BaseOsc.cpp:671 adds the absolute value of the jack divided by 5, times the amount knob, times 32000, to the pulse width, clamped to 0 and 32000 at :674; :711 instead uses the signed voltage times a tenth of the amount knob for the clocked-noise cycle length"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/BaseOsc.cpp:684 adds the jack's voltage times a fifteenth of the amount knob, times 32767, to the wavetable index, then folds it back into 0 to 32767 at :689-701; :731 does the same for the clocked-noise quantizing with a tenth rather than a fifteenth"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/BaseOsc.cpp:798 writes 5.0 times a sample that Braids renders between -1 and 1, one channel, with setVoltage; :758 renders nothing at all unless the jack is connected"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/BaseOsc.cpp:843 writes 5.0 times a sample that Braids renders between -1 and 1, one channel, with setVoltage; :805 renders nothing at all unless the jack is connected"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/BaseOsc.cpp:885 writes 5.0 times a sample that Braids renders between -1 and 1, one channel, with setVoltage; :849 renders nothing at all unless the jack is connected"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/BaseOsc.cpp:926 writes 5.0 times a sample that Braids renders between -1 and 1, one channel, with setVoltage; :891 renders nothing at all unless the jack is connected"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/BaseOsc.cpp:967 writes 5.0 times a rendered sample, one channel; :938 sets this oscillator's pitch to (V*12+48)*128 against the (V*12+60)*128 used everywhere else, which is twelve semitones lower"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/BaseOsc.cpp:1008 writes 5.0 times a rendered sample, one channel; :978 sets the Braids WAVE_LINE shape with the folded index as its first parameter and a fixed 24575 as the interpolation setting"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/BaseOsc.cpp:1150 writes 5.0 times a rendered sample, one channel; :1121 pins this oscillator's pitch to a constant 7680 and the block sits outside the LFO-mode gate that closes at :1101"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/BaseOsc.cpp:1052 writes 5.0 times a rendered sample, one channel; :1018-1023 sets the Braids FILTERED_NOISE shape with a resonance of 16385 and follows the module pitch"
+     },
+     "8": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/BaseOsc.cpp:1096 writes 5.0 times a rendered sample, one channel; :1063 passes the folded PW-derived cycle length and the folded INDEX-derived quantizing into the Braids CLOCKED_NOISE shape"
+     }
+    }
+   },
+   "notes": "The sub-square output is one octave down, not two. src/BaseOsc.cpp:938 sets its Braids pitch to (sumPitchCV * 12 + 48) * 128 while every other oscillator uses + 60, a difference of twelve semitones; the comment on that same line reads \"just adjusting down two octaves\". The panel prints only SUB, and the maker's page says nothing about it, so the line states the octave without naming a conflict.\n\nThe PW control's sign is discarded. :666 and :706 both take std::abs of the -1 to 1 knob, so its two halves are duplicates of each other and the centre of its travel is the narrowest pulse width. Half the knob's travel is therefore redundant. The panel prints no scale on it.\n\nThe same two modulation jacks reach two destinations each, with different depths and different treatment of sign. The PWM jack is rectified for the pulse width (:671, absolute value, always adding) and signed for the clocked-noise cycle length (:711). The index modulation jack is divided by 15 for the wavetable (:684) and by 10 for the clocked noise (:731). A patch that modulates one of those outputs is modulating the other more, or less, at the same time.\n\nBoth modulation jacks are also ignored when their voltage is exactly zero (:668, :680, :708, :728), which is harmless but means a cable sitting at 0V behaves as if it were unplugged.\n\nLFO mode gates the render block that runs from :755 to :1101. That covers eight outputs: triangle, sawtooth, pulse, sine, sub square, wavetable, pitched noise and clocked noise. The plain noise block at :1112 is outside it and runs at full rate whatever the button says. The skip threshold is sampleRate/48000*100, so the ratio holds across sample rates.\n\nThe quantizer runs before FM is added, which is deliberate — the comment at :418 says so — and means the FM jack can carry the pitch off the scale.\n\nThe maker's page says the octave lamps \"show the current octave range\". They show the whole summed pitch CV in volts, coarse knob and fine trim included, one lamp per volt.\n\nNeither the LFO button nor the LIN/EXP button has a light registered for it in the widget constructor (:1200-1222 register only the pitch row and the note keyboard), so their state is invisible on the panel. Both are LEDButtons, which draw a hole for a lamp that is never filled.\n\nRead at commit 6cda28c; see the note under baseTrigs for how the commit was settled."
   }
  }
 }

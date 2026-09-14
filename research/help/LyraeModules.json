@@ -1,48 +1,944 @@
 {
  "plugin": "LyraeModules",
- "source": "https://github.com/VegaDeftwing/LyraeModules",
+ "source": "https://github.com/VegaDeftwing/LyraeModules/blob/b6dde88/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Sulafat": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A two-channel wavefolder with eight processing modes, two internal LFOs mixed into the folding, and a mode that turns it into an LFO source",
+    "Picks the processing: Bypass, Fold, Quant Fold, Tangent, Half Quant, Ring, S&H-Ish or Wut?, shown as a binary number on the three lamps above it",
+    "The signal to be folded, and the source for both channels when the jack below is empty",
+    "The signal folded into the second channel; leaving it empty sends the first input through both channels with different internal modulation",
+    "The processed first channel",
+    "The processed second channel, which differs from the first in how much of each internal LFO is mixed into it",
+    "Note — with the top input empty the module ignores the mode knob and works as an LFO, the top output carrying one internal sine at ±5V and the bottom output the two sines multiplied together",
+    "Note — in Ring mode with both inputs patched, each output is its own input multiplied by the other input shifted down by 5V, clamped to ±5V",
+    "Note — the S&H-Ish and Wut? modes are deliberately left un-antialiased, so they alias and glitch",
+    "Menu — LFO 1 SPEED — sets the rate of the first internal LFO, which is mixed into the folding in every mode",
+    "Menu — LFO 2 SPEED — sets the rate of the second internal LFO, which is mixed into the folding in every mode",
+    "Menu — Fold Left — sets the fold threshold used by the positive half of the first channel in Half Quant mode, and nothing else reads it",
+    "Menu — Fold Right — sets the fold threshold for both channels in the Fold, Quant Fold and Half Quant modes"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Sulafat.cpp:100-330 reads this jack with getVoltage on one channel in every mode"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the jack above it",
+      "why": "Sulafat.cpp:101-107 and the isConnected branches through to line 300 fall back to the left input when this jack is empty"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Sulafat.cpp:99-333 writes one channel with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "Sulafat.cpp:102-334 writes one channel with setVoltage"
+     }
+    }
+   },
+   "notes": "The four menu sliders are parameters with no widget on the panel, reachable only from the right-click menu (Sulafat.cpp:360-405). Fold Left is read at Sulafat.cpp:205 and 219 only, inside the Half Quant branch, and even there only for the positive half of channel one; Fold Right is used for the rest, including both channels of the plain Fold and Quant Fold modes. Mode 8, the LFO mode, cannot be selected with the knob: Sulafat.cpp:341-342 sets it whenever the left input is unpatched."
   },
   "Gamma": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Adds a direct voltage to one signal and subtracts the same voltage from another, so a pair of signals comes out with opposite offsets",
+    "Sets the offset added to the first channel and subtracted from the second, from -10V to 10V; with a cable in the offset jack it attenuates and inverts that voltage instead",
+    "Inverts the second channel's signal before the offset is subtracted from it",
+    "The voltage that becomes the offset, scaled by a tenth of the knob setting",
+    "The signal the offset is added to, and the source for the second channel when the jack below is empty",
+    "The signal the offset is subtracted from",
+    "The first input with the offset added",
+    "The second input with the offset subtracted, inverted first when the switch is set to inverted",
+    "Note — the offsets are made for driving the wavefolding modes of Sulafat, where a signal sitting off zero folds very differently"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "audio",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Gamma.cpp:50-52 reads this jack with getVoltage and multiplies it by a tenth of the knob"
+     },
+     "1": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Gamma.cpp:62 reads this jack with getVoltage on one channel"
+     },
+     "2": {
+      "poly": false,
+      "normal": "the jack above it",
+      "why": "Gamma.cpp:64-84 falls back to the left input when this jack is empty"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Gamma.cpp:62 writes one channel with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "Gamma.cpp:66-84 writes one channel with setVoltage"
+     }
+    }
+   }
   },
   "Delta": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three ring modulators in series, then a voltage-selected ring modulator, then a pair of switchable cross-modulators, ending in a soft clipper",
+    "Attenuates the ring input on that row before the offset knob beside it is added",
+    "Adds a direct voltage to that row's attenuated ring input; with the offset at maximum and nothing patched, that row passes the signal through",
+    "Steps the selector on to the next of the three voltage inputs below it",
+    "While held, flips the cross-modulation of the first output by the second",
+    "Flips the cross-modulation of the first output by the second on and off, one press at a time",
+    "While held, flips the cross-modulation of the second output by the first",
+    "Flips the cross-modulation of the second output by the first on and off, one press at a time",
+    "One of the two signals to be modulated, which comes out inverted by the first block",
+    "One of the two signals to be modulated",
+    "The signal for that row of the three cascaded ring modulators; an empty jack makes that row pass the signal through unchanged",
+    "A rising edge steps the selector on to the next of the three voltage inputs below it",
+    "One of three signals the selector picks between to ring-modulate both channels; the lamp beside the selector is red, green or blue for the one in use",
+    "A rising edge flips the cross-modulation of the first output by the second",
+    "A rising edge flips the cross-modulation of the second output by the first",
+    "The first channel after all three blocks, soft-clipped by a double arctangent",
+    "The second channel after all three blocks, soft-clipped by a double arctangent",
+    "Note — nothing comes out unless each of the three cascaded stages has a patched ring input or its offset turned up, because an empty stage with a closed offset multiplies by zero",
+    "Note — the selector block is skipped entirely, and its button, its clock and its lamp do nothing, until at least one of its three voltage inputs is patched",
+    "Note — output levels climb fast here, so watch the level and feed it material that is harmonically related, such as octaves"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 1,
+    "3": 2,
+    "4": 1,
+    "5": 2,
+    "6": 3,
+    "7": 4,
+    "8": 5,
+    "9": 6,
+    "10": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 10,
+    "4": 10,
+    "5": 11,
+    "6": 12,
+    "7": 12,
+    "8": 12,
+    "9": 13,
+    "10": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "audio",
+     "7": "audio",
+     "8": "audio",
+     "9": "trigger",
+     "10": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Delta.cpp:141 reads this jack with getVoltage on one channel"
+     },
+     "1": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Delta.cpp:142 reads this jack with getVoltage on one channel"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "a fixed 1 that passes the signal through",
+      "why": "Delta.cpp:110-119 reads this jack with getVoltage, or uses 1 when it is empty"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "a fixed 1 that passes the signal through",
+      "why": "Delta.cpp:120-129 reads this jack with getVoltage, or uses 1 when it is empty"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "a fixed 1 that passes the signal through",
+      "why": "Delta.cpp:130-139 reads this jack with getVoltage, or uses 1 when it is empty"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Delta.cpp:157 reads this jack with getVoltage into a Schmitt trigger at its default 0.1V and 1V thresholds"
+     },
+     "6": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Delta.cpp:165 reads this jack with getVoltage on one channel"
+     },
+     "7": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Delta.cpp:171 reads this jack with getVoltage on one channel"
+     },
+     "8": {
+      "poly": false,
+      "normal": "0V",
+      "why": "Delta.cpp:177 reads this jack with getVoltage on one channel"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Delta.cpp:229 reads this jack with getVoltage into a Schmitt trigger at its default 0.1V and 1V thresholds"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Delta.cpp:233 reads this jack with getVoltage into a Schmitt trigger at its default 0.1V and 1V thresholds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Delta.cpp:262-263 writes one channel with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "why": "Delta.cpp:264-265 writes one channel with setVoltage"
+     }
+    }
+   },
+   "notes": "Three parameters hold the selector position and the two cross-modulation states across a save and have no widget on the panel, so they can never be clicked."
   },
   "Vega": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An ADSR envelope with a modulation input for each stage in four modulation modes, per-stage level and gate outputs, force-advance triggers and a sample-and-hold on the output",
+    "Sets the length of the attack, the phasor step being 0.000315 raised to this power, so turning it up makes the stage longer",
+    "Sets the length of the decay, the phasor step being 0.000315 raised to this power, so turning it up makes the stage longer",
+    "Sets the level the envelope holds at while the gate stays high, 0 to 1",
+    "Sets the length of the release, the phasor step being 0.000315 raised to this power, so turning it up makes the stage longer",
+    "Bends the attack, the linear ramp being raised to this power, from 0.2 for a fast rise to 3 for a slow one",
+    "Bends the decay by moving the control point of a quadratic curve between the peak and the sustain level",
+    "Bends the release, the ramp being raised to this power, from 0.2 for a fast fall to 7.4 for a slow one",
+    "Attenuates and inverts that stage's modulation input, from -0.2 to 0.2, before the modulation mode applies it",
+    "Steps that stage's modulation mode on: Ring, Add, Add With Fade, or Inverse Envelope Addition, shown as red, green, blue and white on the lamp beside it",
+    "Steps the sustain stage's modulation mode between Ring and Add, shown as red and green on the lamp beside it",
+    "Steps that stage's level output between the plain envelope and the envelope with its modulation, shown by a blue lamp for the modulated one",
+    "Steps the decay level output through the plain envelope, the envelope with its modulation, and the envelope with the sustain level subtracted, shown by a blue and then a green lamp",
+    "Forces the envelope on to the next stage while it is held",
+    "Attenuates the global ring input, from 0 to 0.2, before it is added to the offset knob around it",
+    "Scales both main outputs, from silence to full; with the global ring jack patched it becomes the offset added to the attenuated ring signal",
+    "Sets the rate of the internal sample-and-hold clock on the main outputs; at the fully clockwise setting of 40 the outputs update every sample and no holding happens",
+    "Slews the main outputs towards the held value instead of stepping to it, which turns the sample-and-hold into a track-and-hold",
+    "Sets how much of each stage's modulation is crossfaded into the next, to keep the modulation from clicking at a stage boundary",
+    "A rising edge starts the envelope at the attack; the envelope falls into release when this goes low during sustain, and it reads high above 1V",
+    "A rising edge restarts the envelope at the attack without waiting for the gate to fall",
+    "The modulation signal for that stage, which the stage's attenuator and mode apply to the envelope; an empty jack falls back to the nearest patched stage above it",
+    "A voltage of 5V or more forces the envelope on to the next stage",
+    "Multiplies both main outputs after every other modulation, scaled by the small attenuator knob and added to the offset around it",
+    "Slows the internal sample-and-hold clock as its voltage rises, the rate being the knob setting times one minus a tenth of this voltage",
+    "Lowers the crossfade setting as its voltage rises, a tenth of the voltage being subtracted from the anger figure",
+    "That stage's own envelope segment, 0-10V, plain or with its modulation according to the button beside it",
+    "Carries 10V while the envelope is in that stage and 0V otherwise",
+    "Carries 10V while the envelope is in the release, or a trigger at the moment the envelope finishes when the menu is set that way",
+    "The finished envelope, scaled by the offset knob and clipped to ±12V",
+    "The finished envelope inverted, scaled by the offset knob and clipped to ±12V, or the plain envelope when the menu is set that way",
+    "Note — with only the gate patched and only the plus output taken, it behaves as an ordinary ADSR; everything else is modulation laid on top of that",
+    "Note — going from attack to decay always starts the decay at 10V, and the release always starts from the sustain level, whether or not the sustain stage happened",
+    "Note — the modulation inputs normal downwards, so a cable in the attack modulation jack feeds every stage below it that has no cable of its own",
+    "Note — both main outputs are hard clipped at ±12V, and the offset knob is the way to pull a heavily modulated envelope back under that ceiling",
+    "Note — turning a stage's attenuator knob gives it the value of the attenuator above it as its default, so a double-click sets a row to match the row above",
+    "Menu — Negative Out Dry — makes the minus output carry the plain unmodulated envelope in place of the inverted modulated one",
+    "Menu — Release Gate → EOR Trig — makes the release gate output a single trigger when the envelope finishes, in place of a gate lasting the release",
+    "Menu — Decrease Time — takes 0.1 off the attack, decay and release time knobs together",
+    "Menu — Increase Time — adds 0.1 to the attack, decay and release time knobs together"
+   ],
+   "param": {
+    "0": 13,
+    "1": 13,
+    "2": 13,
+    "3": 11,
+    "4": 12,
+    "5": 11,
+    "6": 11,
+    "7": 8,
+    "8": 8,
+    "9": 8,
+    "10": 8,
+    "11": 1,
+    "12": 2,
+    "13": 3,
+    "14": 4,
+    "15": 9,
+    "16": 9,
+    "17": 10,
+    "18": 9,
+    "19": 5,
+    "20": 6,
+    "21": 7,
+    "22": 14,
+    "23": 15,
+    "24": 18,
+    "25": 17,
+    "26": 16
+   },
+   "in": {
+    "0": 22,
+    "1": 22,
+    "2": 22,
+    "3": 21,
+    "4": 21,
+    "5": 21,
+    "6": 21,
+    "7": 19,
+    "8": 23,
+    "9": 20,
+    "10": 24,
+    "11": 25
+   },
+   "out": {
+    "0": 26,
+    "1": 26,
+    "2": 26,
+    "3": 26,
+    "4": 27,
+    "5": 27,
+    "6": 27,
+    "7": 28,
+    "8": 29,
+    "9": 30
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger",
+     "8": "cv",
+     "9": "trigger",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "cv",
+     "9": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Vega.cpp:300-303 reads the jack with getVoltage and tests it against 5V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Vega.cpp:300-303 reads the jack with getVoltage and tests it against 5V"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Vega.cpp:300-303 reads the jack with getVoltage and tests it against 5V"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:425-447 reads the jack with getVoltage and multiplies it by the stage attenuator"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the attack modulation jack",
+      "why": "Vega.cpp:510-521 falls back to the attack modulation jack when this one is empty"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the decay modulation jack",
+      "why": "Vega.cpp:864-878 falls back to the decay and then the attack modulation jack"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the sustain modulation jack",
+      "why": "Vega.cpp:864-878 sets the destination from the first patched jack above it"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Vega.cpp:834-840 compares the jack against 1V and passes the result to a Schmitt trigger"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:770-780 reads the jack with getVoltage and multiplies the output by it"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Vega.cpp:842-847 compares the jack against 1V and passes the result to a Schmitt trigger"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:881-886 divides the jack by 10 and scales the sample-and-hold rate by one minus that"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:855-856 divides the jack by 10 and subtracts it from the crossfade figure"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "Vega.cpp:337-348 writes one channel with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "Vega.cpp:337-348 writes one channel with setVoltage"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "Vega.cpp:337-348 writes one channel with setVoltage"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "Vega.cpp:337-348 writes one channel with setVoltage"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Vega.cpp:353-369 writes 10V or 0V on one channel"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Vega.cpp:353-369 writes 10V or 0V on one channel"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Vega.cpp:353-369 writes 10V or 0V on one channel"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Vega.cpp:358-368 writes 10V or 0V on one channel"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Vega.cpp:806-814 writes one channel with setVoltage, clamped to ±12V"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Vega.cpp:816-829 writes one channel with setVoltage, clamped to ±12V"
+     }
+    }
+   },
+   "notes": "The small knob sharing a centre with the offset knob is the global ring attenuator, and the small knob sharing a centre with the sample-and-hold rate is the slew amount; both are drawn as inner knobs on top of the larger one. Ten parameters have no widget: the eight that hold the output and modulation modes across a save, the negative-output menu flag, and an end-of-release flag that the maker never named in configParam."
   },
   "BD383238": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Adds voltage control of the seven envelope knobs on Vega, and goes immediately to the left of it",
+    "Adds a tenth of its voltage to the corresponding knob on Vega",
+    "Note — unlike most Rack expanders this one goes on the LEFT of the module it expands, because it looks for a Vega on its own right",
+    "Note — each jack adds to the Vega knob rather than replacing it, so the knob sets where the control starts from"
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:1290-1360 reads each jack with getVoltage and divides it by 10 before adding it to the matching Vega parameter"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:1290-1360 reads each jack with getVoltage and divides it by 10 before adding it to the matching Vega parameter"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:1290-1360 reads each jack with getVoltage and divides it by 10 before adding it to the matching Vega parameter"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:1290-1360 reads each jack with getVoltage and divides it by 10 before adding it to the matching Vega parameter"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:1290-1360 reads each jack with getVoltage and divides it by 10 before adding it to the matching Vega parameter"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:1290-1360 reads each jack with getVoltage and divides it by 10 before adding it to the matching Vega parameter"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Vega.cpp:1290-1360 reads each jack with getVoltage and divides it by 10 before adding it to the matching Vega parameter"
+     }
+    }
+   },
+   "notes": "The expander writes into public members of the Vega module rather than using Rack's expander message passing (Vega.cpp:1270-1290)."
   },
   "Zeta": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A blank panel, drawn entirely on the light layer so the artwork glows in a darkened rack, with four pictures to choose from",
+    "Menu — Flip Panel — mirrors the artwork, giving each of the three pictures a second version",
+    "Menu — Green Echos — picks the green artwork",
+    "Menu — Blue Fish — picks the blue artwork",
+    "Menu — Purple Demons — picks the purple artwork"
+   ],
+   "notes": "Both parameters store the menu choices and have no widget on the panel. The panel is drawn in drawLayer at layer 1 (Zeta.cpp), which is the layer Rack reserves for things that stay lit when the room light is turned down."
   },
   "Sheliak": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight-stage shift register clocked at a quarter of the incoming rate, with a three-stage register clocked at a third of it, and an XOR input for making pseudo-random patterns by self-patching",
+    "A rising edge above 1V advances an internal counter; the main register shifts on every fourth edge and the triplet register on every third",
+    "A rising edge clears both registers and the counter",
+    "The bit shifted into both registers, read as a one whenever it is above 1V",
+    "Exclusive-ORed with the data bit as it enters both registers, read as a one whenever it is above 1V; patching a later stage output back here makes a linear feedback shift register",
+    "Carries 10V while that stage of the main eight-stage register holds a one, and 0V otherwise",
+    "The eleven stages as one polyphonic cable, the first eight channels carrying the main register and the last three the triplet register",
+    "Carries 10V while that stage of the three-stage triplet register holds a one, and 0V otherwise",
+    "Note — feed it a clock at four times the rate the main outputs should move at, since the register shifts once every four clock pulses",
+    "Note — nothing moves and nothing comes out until a clock is patched; the data input on its own changes nothing",
+    "Note — the counter runs to twelve and wraps, so the main and triplet registers line up again every twelve clock pulses",
+    "Note — the Beta expander goes immediately to the right of this module and turns the register into pitch voltages"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 6,
+    "9": 7,
+    "10": 7,
+    "11": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Sheliak.cpp:247 reads the jack with getVoltage into a Schmitt trigger at its default 0.1V and 1V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Sheliak.cpp:254 reads the jack with getVoltage into a Schmitt trigger at its default 0.1V and 1V thresholds"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Sheliak.cpp:261 compares the jack against 1V"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Sheliak.cpp:265 compares the jack against 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:300-307 writes 10V or 0V on one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:300-307 writes 10V or 0V on one channel"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:300-307 writes 10V or 0V on one channel"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:300-307 writes 10V or 0V on one channel"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:300-307 writes 10V or 0V on one channel"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:300-307 writes 10V or 0V on one channel"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:300-307 writes 10V or 0V on one channel"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:300-307 writes 10V or 0V on one channel"
+     },
+     "8": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:309-316 and 372 write eleven channels and call setChannels(11)"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:350-353 writes 10V or 0V on one channel"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:350-353 writes 10V or 0V on one channel"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Sheliak.cpp:350-353 writes 10V or 0V on one channel"
+     }
+    }
+   },
+   "notes": "A Delay Samples parameter delays the clock by up to ten samples before the registers see it (Sheliak.cpp:268-277). It has no widget on the panel and no menu item, so nothing in the running module can reach it and it stays at zero. The three triplet lamps are driven from the main register rather than the triplet register (Sheliak.cpp:355-361), so they do not match the triplet outputs beside them."
   },
   "Beta": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns the gates of a Sheliak shift register into eight summed pitch voltages, and goes immediately to the right of it",
+    "Scales what that register stage contributes to every sum here, from 0 to 1V, and starts at a twelfth of a volt so each stage adds a semitone",
+    "The eight main stages summed",
+    "The first four main stages summed",
+    "The last four main stages summed, with a fifth of 7/12 of a volt added",
+    "The third to sixth main stages summed, with 2V added",
+    "The first four main stages summed, wrapped into one octave and dropped by 1V; it holds its last value unless one of the first two main stages is high",
+    "The eight main stages summed, plus the value of the lowest two triplet bits read as a number from 0 to 3, less 2V",
+    "The three triplet stages and the first four main stages summed; it holds its last value unless the first main stage and the first triplet stage are both high",
+    "The three triplet stages summed",
+    "Note — nothing comes out until a Sheliak is immediately to the left of this module, because Sheliak does all the arithmetic and writes into these jacks",
+    "Note — every output changes only on a clock pulse arriving at Sheliak, so the module is silent while the clock is stopped",
+    "Note — the lamp beside each jack shows a tenth of that output's voltage, so it brightens as the sum climbs"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 9
+   },
+   "family": {
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Sheliak.cpp:390-433 writes each of these jacks from the neighbouring module with setVoltage on one channel"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Sheliak.cpp:390-433 writes each of these jacks from the neighbouring module with setVoltage on one channel"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Sheliak.cpp:390-433 writes each of these jacks from the neighbouring module with setVoltage on one channel"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Sheliak.cpp:390-433 writes each of these jacks from the neighbouring module with setVoltage on one channel"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Sheliak.cpp:390-433 writes each of these jacks from the neighbouring module with setVoltage on one channel"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Sheliak.cpp:390-433 writes each of these jacks from the neighbouring module with setVoltage on one channel"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Sheliak.cpp:390-433 writes each of these jacks from the neighbouring module with setVoltage on one channel"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Sheliak.cpp:390-433 writes each of these jacks from the neighbouring module with setVoltage on one channel"
+     }
+    }
+   },
+   "notes": "The eleven knobs are named Attenuversion in the maker's tooltips but run from 0 to 1 with no negative half (Sheliak.cpp:62-77), so they attenuate and never invert. The sixth output is documented in the README as adding an octave for each high triplet output; the code adds the low two triplet bits read as a binary number, 0 to 3 volts, then subtracts 2V (Sheliak.cpp:421). Beta's own process function is empty: every value in it is written by the Sheliak to its left."
   }
  }
 }

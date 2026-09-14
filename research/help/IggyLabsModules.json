@@ -1,23 +1,386 @@
 {
  "plugin": "IggyLabsModules",
- "source": "https://github.com/isabelgk/IggyLabsModules",
+ "source": "https://github.com/isabelgk/IggyLabsModules/tree/master/doc",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "table": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A wavetable oscillator that plays a .wav file you load, splitting it into single cycles and sweeping between them; sixteen channels of polyphony",
+    "Sweeps through the cycles of the loaded wavetable, 0 at the first cycle and 1 at the last, mixing the two nearest cycles in between",
+    "Moves the position through the wavetable, one full sweep per 10V, added to the pos knob and clamped to the ends of the table",
+    "Shifts the pitch by up to half an octave either way, added to what the V/oct knob sets",
+    "Shifts the pitch by one octave per 5V, added to what the knobs and the V/oct input set",
+    "Sets the pitch in octaves, -3 to +3 from C4 at 261.63Hz with the knob centred",
+    "Sets the pitch at 1V per octave, added to what the knobs set; the number of channels here is also the number of voices the oscillator runs",
+    "The oscillator, plus and minus 5V, with as many channels as the V/oct input carries",
+    "Note — a new module plays a single-cycle saw wave and stays on it until you load a wavetable from the right-click menu, either one of the four presets or a .wav file of your own",
+    "Note — the pitch the knobs and both pitch inputs add up to is clamped to 3.5 octaves either side of C4, about 23Hz at the bottom and about 2960Hz at the top",
+    "Note — the lamp on the panel is lit once a wavetable has been read, and stays dark while the built-in saw wave is playing",
+    "Menu — Current table — the name of the .wav file in use, with no extension, or Single Saw for the built-in wave; it cannot be clicked",
+    "Menu — Load wavetable: 256 samples/cycle, 512 samples/cycle, 1024 samples/cycle, 2048 samples/cycle — says how long one cycle of the file is, then opens a file chooser for the .wav to read",
+    "Menu — Preset wavetables: Harmonic, Chebyshev, Formant, Spectral Noise — loads one of the four wavetables that ship with the plugin, each read at 2048 samples per cycle",
+    "Note — a file is cut into at most 256 cycles; anything past that is dropped, and a file shorter than one cycle is played as a single cycle of whatever length it has"
+   ],
+   "param": {
+    "1": 1,
+    "0": 3,
+    "2": 5
+   },
+   "in": {
+    "1": 2,
+    "0": 4,
+    "2": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "pitch"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±3.5V",
+      "why": "table.cpp:98 adds getPolyVoltage(c)/5 to the pitch when the jack is connected, and line 100 clamps the knobs-plus-inputs total to -3.5 and 3.5"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "table.cpp:105 adds getPolyVoltage(c)/10 to the pos knob when connected, and line 106 clamps that total to 0 and 1"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±3.5V",
+      "why": "table.cpp:94 adds getPolyVoltage(c) to the pitch when connected; line 85 takes the voice count from getChannels() on this jack alone, and line 100 clamps the total to -3.5 and 3.5"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "table.cpp:86 calls setChannels with the channel count of the V/oct input, and line 113 writes the wavetable sample times 5 for each channel"
+     }
+    }
+   },
+   "notes": "Read from source at commit fb63bc3, the state of the tree that the installed 2.0.0 binary matches; the only later source commit, 53c691a, changes select and not this module. The maker's tooltip on the V/oct knob reads Coarse, which is what the panel calls it in the repository's own doc/table.md; the panel prints V/oct and that is the name used above. wavetable.cpp:110 writes each incoming sample to cycleBuffers[i / cycleLength][cycleLength - i % cycleLength], so every cycle is stored back to front and the sample at offset 0 lands one past the slice that is read back at line 128; the maker comments on the reversal at line 107 and treats it as a fix rather than a fault. The output is bandlimited per octave by the EarLevel WaveTableOsc code in src/dsp/osc/earlevel."
   },
   "select": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sixteen-to-one switch: a knob chooses which of sixteen input jacks reaches the output, carrying all of its polyphonic channels",
+    "One of sixteen inputs; it reaches out when the knob is set to its number, and a lamp beside it lights while it is the chosen one",
+    "Chooses which input reaches out, stepping through the numbers 0 to 15",
+    "Carries whatever is on the chosen input, with the same number of channels; it reads 0V on one channel while that input is unpatched",
+    "Note — the inputs are numbered 0 to 15, running 0 to 7 down the left column and 8 to 15 down the right, and the knob's number picks one of them",
+    "Note — nothing is mixed or summed here: the fifteen inputs that are not chosen are read nowhere, and changing the knob cuts straight from one to the other with no crossfade"
+   ],
+   "param": {
+    "0": 2
+   },
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {},
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "1": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "2": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "3": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "4": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "5": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "6": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "7": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "8": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "9": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "10": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "11": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "12": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "13": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "14": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     },
+     "15": {
+      "poly": true,
+      "why": "select.cpp:49 takes getChannels() from whichever input the knob names and line 52 copies getVoltage(c) for each of those channels; the other fifteen inputs are read nowhere"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "select.cpp:55 calls setChannels with the chosen input's channel count, and line 52 writes one value per channel"
+     }
+    }
+   },
+   "notes": "Read from source at commit fb63bc3. The installed 2.0.0 binary is that state and not the repository HEAD: the configParam in Select::Select disassembles as min 0, max 15, default 0, and Select::process converts the knob with fcvtzs and uses it as the port index with no subtraction, which is the code before commit 53c691a changed the knob to count 1 to 16 and subtract one. So the knob's tooltip in this build reads Selected: 0 to Selected: 15. The panel prints no numbers at all, on the jacks or the knob, so nothing on screen contradicts it. No family is given for any of the jacks: this is a pass-through and each carries whatever is patched into it. The sixteen inputs and the output are never named with configInput or configOutput, so Rack's own tooltips for them are empty."
   },
   "more-ideas": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight-bit elementary cellular automaton clocked one generation at a time, with a gate output for each bit and a CV output taken from the eight bits read as a number",
+    "Sets the rule number, 0 to 255, that turns each generation into the next one; it starts at 90",
+    "Adds its voltage to the rule number, one step per volt, with the total clamped to 0 and 255; polyphonic channels are summed first",
+    "Sets the eight-bit number the run starts from, 0 to 255; it starts at 30, and moving it restarts the run",
+    "Adds its voltage to the seed number, one step per volt, with the total clamped to 0 and 255; polyphonic channels are summed first",
+    "Sets one end of the range of scale steps the quantized CV output is drawn from, 0 to 28 steps up the scale",
+    "Moves that end of the range, adding nothing at -10V and all 28 steps at 10V on top of the low knob, so a cable resting at 0V adds 14 by itself",
+    "Sets the other end of the range of scale steps, 0 to 28, and may be set below the low knob without breaking the range",
+    "Moves that end of the range, adding nothing at -10V and all 28 steps at 10V on top of the high knob, so a cable resting at 0V adds 14 by itself",
+    "Chooses the scale the quantized CV is snapped to: ionian, aeolian, dorian, phrygian, lydian, mixolydian, major pent, minor pent, shang, jiao, zhi, todi, purvi, marva, bhairav, ahirbhairav, chromatic",
+    "Moves the scale choice, adding nothing at -10V and all sixteen places at 10V on top of the scale knob, so a cable resting at 0V steps it on by eight",
+    "Chooses which of the eight bits drives the clock output and gates the CV output, 0 for the least significant bit and 7 for the most",
+    "Moves the chosen bit, adding nothing at -10V and all seven places at 10V on top of the bit knob, so a cable resting at 0V adds three and a half before the total is rounded down",
+    "Steps the automaton on to the next generation on each rising edge, reading high at 1V and low again at 0.1V",
+    "Nothing in the module reads this jack; the run is restarted only by the reset button beside it",
+    "Clears the run and works out the first generation from the seed again, which is one step on from the seed itself",
+    "Chooses what the CV output carries: at qnt a pitch snapped to the scale, at raw a plain voltage scaled to the span set on the menu; it comes up at qnt",
+    "At thru the CV output takes a new value on every clock; at sel only on a clock where the chosen bit is high. The tooltip calls this Clock output mode, but the clock output is the same either way",
+    "Carries 10V while the clock input is high and its own bit of the current generation is 1, and 0V the rest of the time",
+    "The current generation read as a number and turned into a voltage: at qnt a pitch at 1V per octave with the bottom of the scale at C3, at raw the number spread across the span set on the menu",
+    "Carries 10V while the clock input is high and the bit named by the bit knob is 1, and 0V the rest of the time",
+    "Note — nothing moves until a clock is patched to clock; the automaton takes one generation per rising edge there, and every output holds 0V while that jack is low",
+    "Note — the eight gate outputs run from bit 0 at the top to bit 7 at the bottom, bit 0 being the least significant bit of the eight-bit generation",
+    "Note — a rule of 0, or a seed of 0, gives generations that are all zero, so the gate outputs and the clock output stay at 0V however fast the clock runs",
+    "Note — the picture on the panel is worked out from the rule and the seed alone and shows 64 generations of the run at once; it is redrawn when either knob moves, not on each clock",
+    "Note — the white lamp beside each gate output shows that bit of the current generation, and the green lamp shows which bit the bit knob has chosen",
+    "Menu — Raw CV output range: +/- 10V, +/- 5V, +/- 3V, +/- 1V, 0V - 10V, 0V - 5V, 0V - 3V, 0V - 1V — sets the span the CV output covers at raw, and changes nothing at qnt"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 5,
+    "3": 7,
+    "5": 9,
+    "4": 11,
+    "8": 15,
+    "7": 16,
+    "6": 17
+   },
+   "in": {
+    "2": 2,
+    "3": 4,
+    "4": 6,
+    "5": 8,
+    "6": 10,
+    "7": 12,
+    "0": 13,
+    "1": 14
+   },
+   "out": {
+    "0": 18,
+    "1": 18,
+    "2": 18,
+    "3": 18,
+    "4": 18,
+    "5": 18,
+    "6": 18,
+    "7": 18,
+    "8": 19,
+    "9": 20
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "pitch",
+     "9": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "more-ideas.cpp:205 reads getVoltage() with no channel into the Trigger at dsp/trigger.hpp:8, which goes high at 1V and returns low at 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "why": "declared at more-ideas.cpp:24 and given a jack at line 400, and inputs[RESET_INPUT] is read nowhere in process or subSampledProcess"
+     },
+     "2": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "more-ideas.cpp:136 adds getVoltageSum() to the rule knob when connected, and line 138 clamps the total to 0 and 255 before line 140 takes its floor"
+     },
+     "3": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "more-ideas.cpp:150 adds getVoltageSum() to the seed knob when connected, and line 152 clamps the total to 0 and 255 before line 154 takes its floor"
+     },
+     "4": {
+      "poly": true,
+      "range": "-10 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "more-ideas.cpp:163 rescales getVoltageSum() from -10V and 10V onto 0 and 28 and adds that to the low knob, so 0V adds 14; line 165 clamps the total to 0 and 28"
+     },
+     "5": {
+      "poly": true,
+      "range": "-10 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "more-ideas.cpp:172 rescales getVoltageSum() from -10V and 10V onto 0 and 28 and adds that to the high knob, so 0V adds 14; line 174 clamps the total to 0 and 28"
+     },
+     "6": {
+      "poly": true,
+      "range": "-10 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "more-ideas.cpp:181 rescales getVoltageSum() from -10V and 10V onto 0 and 16 and adds that to the scale knob, so 0V adds 8; line 183 clamps the total to 0 and 16"
+     },
+     "7": {
+      "poly": true,
+      "range": "-10 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "more-ideas.cpp:193 rescales getVoltageSum() from -10V and 10V onto 0 and 7 and adds that to the bit knob, so 0V adds 3.5; line 195 clamps the total to 0 and 7"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "more-ideas.cpp:109 and 116 write 10V when the clock is high and this bit of the generation is 1 and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "more-ideas.cpp:109 and 116 write 10V when the clock is high and this bit of the generation is 1 and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "more-ideas.cpp:109 and 116 write 10V when the clock is high and this bit of the generation is 1 and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "more-ideas.cpp:109 and 116 write 10V when the clock is high and this bit of the generation is 1 and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "more-ideas.cpp:109 and 116 write 10V when the clock is high and this bit of the generation is 1 and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "more-ideas.cpp:109 and 116 write 10V when the clock is high and this bit of the generation is 1 and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "more-ideas.cpp:109 and 116 write 10V when the clock is high and this bit of the generation is 1 and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "more-ideas.cpp:109 and 116 write 10V when the clock is high and this bit of the generation is 1 and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "8": {
+      "poly": false,
+      "why": "more-ideas.cpp:95 writes semitoneToCV of the quantized note and line 97 the raw voltage, both with setVoltage and no setChannels"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "more-ideas.cpp:112 and 118 write 10V when the clock is high and the chosen bit of the generation is 1 and 0V otherwise, with setVoltage and no setChannels"
+     }
+    }
+   },
+   "notes": "Read from source at commit fb63bc3, the state the installed 2.0.0 binary matches: the six configParam calls in More_ideas::More_ideas disassemble to the same ranges and defaults (rule 0 to 255 starting at 90, seed 0 to 255 starting at 30, low and high 0 to 28 starting at 0 and 14, scale 0 to 16, bit 0 to 7). THE MAKER'S OWN doc/more_ideas.md DISAGREES WITH THE CODE ABOUT THE thru / sel SWITCH. It says thru passes the input clock through to the clock output and sel pulses on any change of output CV. Neither is what happens: the clock output at lines 112 and 118 is 10V whenever the clock input is high and the chosen bit of the generation is 1, whichever way the switch is set. What the switch actually decides, at line 82, is whether the CV output is rewritten on every clock or only on a clock where the chosen bit is high. The maker's tooltip for it, Clock output mode, points at the clock output for the same reason and is wrong in the same way. The CV output is tagged pitch because the module comes up quantized; at raw it carries a plain control voltage over whatever span the menu names, so the colour is right for the default and not for both settings. The reset input is declared and drawn and read nowhere, so it gets a line saying so rather than being left to show an empty tooltip. All ten outputs and the eight lamp pairs are updated in subSampledProcess, which runs once every nine samples, so the gate edges follow the clock input to within that. None of the eight inputs is named with configInput, so Rack's own tooltips for them are empty."
   }
  }
 }

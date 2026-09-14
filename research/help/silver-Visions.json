@@ -2,37 +2,680 @@
  "plugin": "silver-Visions",
  "source": "https://github.com/silver-ag/visions",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "VideoOut": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A screen that draws one pixel per sample: the position jacks say where and the colour jacks say what colour, and the picture builds up as the position moves",
+    "Reads the three colour jacks as red, green and blue in one setting and as hue, saturation and value in the other",
+    "Sets what voltage range the colour jacks cover: -5V to +5V in one position, 0V to 10V in the other",
+    "Sets what voltage range the position jacks cover: -5V to +5V in one position, 0V to 10V in the other",
+    "Opens a separate resizable window showing the same picture, redrawn about thirty times a second",
+    "Held down, fills the whole screen with mid grey",
+    "Sets how many pixels across and down the screen has, 1 to 1000",
+    "Channel 1 is the horizontal position of the pixel and channel 2 the vertical; patching this leaves the separate X and Y jacks unread",
+    "The horizontal position of the pixel to draw; it is unread while the two-channel position jack has a cable in it",
+    "The vertical position of the pixel to draw; it is unread while the two-channel position jack has a cable in it",
+    "Channels 1, 2 and 3 carry the three colour components; patching this leaves the separate colour jacks unread",
+    "The red or hue of the pixel to draw, depending on the colour-format switch; it is unread while the three-channel colour jack has a cable in it",
+    "The green or saturation of the pixel to draw, depending on the colour-format switch; it is unread while the three-channel colour jack has a cable in it",
+    "The blue or value of the pixel to draw, depending on the colour-format switch; it is unread while the three-channel colour jack has a cable in it",
+    "Note — one pixel is drawn per audio sample, so a whole picture only appears once the position has been swept over the screen; a PathGenerator is what usually does that",
+    "Note — a position that falls outside the screen draws nothing rather than wrapping round",
+    "Note — this module has no outputs; the picture goes to the panel and to the separate window, not to a cable",
+    "Note — changing the resolution clears the picture"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 5,
+    "4": 4,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12,
+    "6": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "VideoOut.cpp:74-76 getPolyVoltage(0) and getPolyVoltage(1) on this jack when it is connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "1": {
+      "poly": false,
+      "why": "VideoOut.cpp:78 getVoltage(), reached only when the two-channel jack at index 0 is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "2": {
+      "poly": false,
+      "why": "VideoOut.cpp:79 getVoltage(), reached only when the two-channel jack at index 0 is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "3": {
+      "poly": true,
+      "why": "VideoOut.cpp:97-99 getPolyVoltage(0), (1) and (2) on this jack when it is connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "4": {
+      "poly": false,
+      "why": "VideoOut.cpp:101 getVoltage(), reached only when the three-channel jack at index 3 is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "5": {
+      "poly": false,
+      "why": "VideoOut.cpp:102 getVoltage(), reached only when the three-channel jack at index 3 is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "6": {
+      "poly": false,
+      "why": "VideoOut.cpp:103 getVoltage(), reached only when the three-channel jack at index 3 is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     }
+    }
+   },
+   "notes": "The position mapping is at VideoOut.cpp:82-89: in the bipolar setting the voltage divided by ten plus a half is multiplied by the screen size, so -5V is the left or top edge and +5V the right or bottom; in the unipolar setting 0V to 10V covers the same span. Colour is clamped between 0 and 0.999 and multiplied by 256 (lines 106-115), so voltages past the ends of the range are held at black and white rather than wrapping. The separate window is redrawn once every sampleRate/30 samples (line 152). The panel display and the pop-out window hold their own copies of the image, which is why the code keeps two 'resolution changed' flags."
   },
   "ImageIn": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Reads an image file as a source of voltages: give it a position and it puts out the colour of the pixel at that point",
+    "Formats the three colour outputs as red, green and blue in one setting and as hue, saturation and value in the other",
+    "Sets what voltage range the colour outputs cover: -5V to +5V in one position, 0V to 10V in the other",
+    "Sets what voltage range the position jacks cover: -5V to +5V in one position, 0V to 10V in the other",
+    "Held down, opens a file dialogue for choosing the image; PNG, JPEG, BMP, GIF, PSD, HDR, PIC and PNM files are offered",
+    "Channel 1 is the horizontal position to read from and channel 2 the vertical; patching this leaves the separate X and Y jacks unread",
+    "The horizontal position to read from; it is unread while the two-channel position jack has a cable in it",
+    "The vertical position to read from; it is unread while the two-channel position jack has a cable in it",
+    "Channels 1, 2 and 3 carry the three colour components of the pixel at the given point",
+    "The red or hue of the pixel at the given point, depending on the colour-format switch",
+    "The green or saturation of the pixel at the given point, depending on the colour-format switch",
+    "The blue or value of the pixel at the given point, depending on the colour-format switch",
+    "Note — nothing comes out of any output until an image has been loaded with the load button",
+    "Note — a position past the edge of the picture is folded back into range rather than clamped, so a sweep wider than the picture reads it mirrored",
+    "Note — the picture is shown on the panel at whatever size it was loaded at, and clicking the picture does nothing"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "ImageIn.cpp:66-67 getPolyVoltage(0) and getPolyVoltage(1) on this jack when it is connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "1": {
+      "poly": false,
+      "why": "ImageIn.cpp:69 getVoltage(), reached only when the two-channel jack at index 0 is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "2": {
+      "poly": false,
+      "why": "ImageIn.cpp:70 getVoltage(), reached only when the two-channel jack at index 0 is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "ImageIn.cpp:111 setChannels(3) on this output"
+     },
+     "1": {
+      "poly": false,
+      "why": "ImageIn.cpp:104 setVoltage with no setChannels for this output"
+     },
+     "2": {
+      "poly": false,
+      "why": "ImageIn.cpp:105 setVoltage with no setChannels for this output"
+     },
+     "3": {
+      "poly": false,
+      "why": "ImageIn.cpp:106 setVoltage with no setChannels for this output"
+     }
+    }
+   },
+   "notes": "Positions are folded rather than clamped at ImageIn.cpp:73-78 through fold_into_range, so a voltage outside the chosen range reads a mirrored copy of the picture. The colour comes out as ten times the byte divided by 256 (lines 92-101), with five volts taken off again in the bipolar setting, so the top of the range is just under the nominal maximum. The load button is tested with a plain equality against 1 at line 58 rather than an edge detector, so the dialogue opens while the button is held. The file filter list is in the source at line 41."
   },
   "PathGenerator": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A scanning head for the video modules: it walks a position over a square grid and puts the coordinates out as voltages",
+    "Picks the path: Scanning runs left to right and top to bottom, Boustrophedon alternates the direction of each line, Spiral works out from the centre, and Random jumps to a new point",
+    "Sets how far the head moves each sample; in the random setting it is instead the chance of jumping to a new point",
+    "Sets how many lines the grid is divided into, 1 to 1000; set it to match the resolution of the VideoOut it feeds",
+    "Sets what voltage range the position outputs cover: -5V to +5V in one position, 0V to 10V in the other",
+    "Channel 1 carries the horizontal position and channel 2 the vertical",
+    "The horizontal position of the scanning head",
+    "The vertical position of the scanning head",
+    "Note — the head moves one step per audio sample, so at a speed of 1 and a resolution of 150 the grid is covered in 22500 samples",
+    "Note — a signal fed through a VideoOut and an ImageIn arrives a frame late; the PreciseDelay module exists to line the two up again"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "PathGenerator.cpp:110 setChannels(2) on this output"
+     },
+     "1": {
+      "poly": false,
+      "why": "PathGenerator.cpp:106 setVoltage with no setChannels for this output"
+     },
+     "2": {
+      "poly": false,
+      "why": "PathGenerator.cpp:107 setVoltage with no setChannels for this output"
+     }
+    }
+   },
+   "notes": "The four paths are at PathGenerator.cpp:44-99. The spiral turns when its coordinate crosses the resolution minus the other coordinate, which makes a square spiral rather than a round one. The random setting compares a fresh uniform number against the speed knob each sample, so at a speed of 1 it picks a new pixel every sample. The output voltage is ten times the position over the resolution, with five taken off in the bipolar setting (lines 101-105), so the head never quite reaches the top of the range."
   },
   "CoordinateFolder": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Folds a position onto a small patch of the plane, either a square tile or a wedge, which repeats a picture as a grid or as a kaleidoscope",
+    "Picks the shape folded onto: Square maps every square of a grid onto the one at the origin, Radial maps every wedge onto the one starting at zero degrees",
+    "Sets how many sections the plane is cut into, 1 to 11",
+    "Blends the amount away from the knob and towards the amount jack; at the far left it is all knob, at the far right all jack",
+    "Channel 1 is the horizontal position and channel 2 the vertical; patching this leaves the separate X and Y jacks unread",
+    "The horizontal position to fold; it is unread while the two-channel position jack has a cable in it",
+    "The vertical position to fold; it is unread while the two-channel position jack has a cable in it",
+    "Sets the number of sections when the modulation knob is turned up, one volt above the voltage here being the number of sections",
+    "Channel 1 carries the folded horizontal position and channel 2 the folded vertical one",
+    "The folded horizontal position",
+    "The folded vertical position",
+    "Note — the amount is not scaled to a section count, so the jack and the knob read on different scales: the knob counts 1 to 11 and the jack counts the voltage plus one"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "CoordinateFolder.cpp:54-55 getPolyVoltage(0) and getPolyVoltage(1) on this jack when it is connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "1": {
+      "poly": false,
+      "why": "CoordinateFolder.cpp:57 getVoltage(), reached only when the two-channel jack at index 0 is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "2": {
+      "poly": false,
+      "why": "CoordinateFolder.cpp:58 getVoltage(), reached only when the two-channel jack at index 0 is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "3": {
+      "poly": false,
+      "why": "CoordinateFolder.cpp:48 lerps the amount knob towards this jack's voltage plus one by the modulation knob, then takes the absolute value; read at voltages[0] with no channel loop",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the amount knob's own setting"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "CoordinateFolder.cpp:76 setChannels(2) on this output"
+     },
+     "1": {
+      "poly": false,
+      "why": "CoordinateFolder.cpp:72 setVoltage with no setChannels for this output"
+     },
+     "2": {
+      "poly": false,
+      "why": "CoordinateFolder.cpp:73 setVoltage with no setChannels for this output"
+     }
+    }
+   },
+   "notes": "The square fold at CoordinateFolder.cpp:63-65 takes each coordinate modulo ten over the amount, and the radial fold at lines 67-71 takes the angle modulo two pi over the amount and rebuilds the point at the same distance from the origin. The modulation at line 48 is a crossfade between the knob and the jack voltage plus one, not a scaled addition, so a fully turned modulation knob discards the amount knob entirely. The result is passed through std::abs, so a negative amount gives the same fold as its positive."
   },
   "AffineTransform": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A voltage-controllable affine transform on a two-dimensional position: it translates, then scales, then skews, then rotates",
+    "Moves the position sideways, -5V at the far left and +5V at the far right",
+    "Blends the translate horizontal amount away from its knob and towards its jack; at the far left it is all knob, at the far right all jack",
+    "Moves the position up and down, -5V at the far left and +5V at the far right",
+    "Blends the translate vertical amount away from its knob and towards its jack; at the far left it is all knob, at the far right all jack",
+    "Multiplies the horizontal coordinate by 0 at the far left and by 2 at the far right",
+    "Blends the scale horizontal amount away from its knob and towards its jack; at the far left it is all knob, at the far right all jack",
+    "Multiplies the vertical coordinate by 0 at the far left and by 2 at the far right",
+    "Blends the scale vertical amount away from its knob and towards its jack; at the far left it is all knob, at the far right all jack",
+    "Adds a share of the vertical coordinate to the horizontal one, -1 at the far left and +1 at the far right",
+    "Blends the skew horizontal amount away from its knob and towards its jack; at the far left it is all knob, at the far right all jack",
+    "Adds a share of the horizontal coordinate to the vertical one, -1 at the far left and +1 at the far right",
+    "Blends the skew vertical amount away from its knob and towards its jack; at the far left it is all knob, at the far right all jack",
+    "Turns the position about the origin, nothing at the far left and a full turn at the far right",
+    "Blends the rotate amount away from its knob and towards its jack; at the far left it is all knob, at the far right all jack",
+    "Channel 1 is the horizontal position and channel 2 the vertical; patching this leaves the separate X and Y jacks unread",
+    "The horizontal position to transform; it is unread while the two-channel input at the top has a cable in it",
+    "The vertical position to transform; it is unread while the two-channel input at the top has a cable in it",
+    "Channel 1 is the horizontal translation and channel 2 the vertical; patching this leaves the separate translate jacks unread",
+    "Sets the horizontal translation directly in volts, taking over from its knob as its modulation trimmer is turned up",
+    "Sets the vertical translation directly in volts, taking over from its knob as its modulation trimmer is turned up",
+    "Channel 1 is the horizontal scaling and channel 2 the vertical; patching this leaves the separate scale jacks unread",
+    "Sets the horizontal scaling, 5V meaning a factor of one, taking over from its knob as its modulation trimmer is turned up",
+    "Sets the vertical scaling, 5V meaning a factor of one, taking over from its knob as its modulation trimmer is turned up",
+    "Channel 1 is the horizontal skew and channel 2 the vertical; patching this leaves the separate skew jacks unread",
+    "Sets the horizontal skew, 5V meaning a factor of one, taking over from its knob as its modulation trimmer is turned up",
+    "Sets the vertical skew, 5V meaning a factor of one, taking over from its knob as its modulation trimmer is turned up",
+    "Sets the rotation, 5V meaning a full turn, taking over from its knob as its modulation trimmer is turned up",
+    "Channel 1 carries the transformed horizontal position and channel 2 the transformed vertical one",
+    "The transformed horizontal position",
+    "The transformed vertical position",
+    "Note — the four steps are applied in the order printed down the panel: translate, then scale, then skew, then rotate",
+    "Note — the vertical skew is worked out from the horizontal coordinate after the horizontal skew has already changed it, so the two skews are not independent"
+   ],
+   "param": {
+    "2": 1,
+    "0": 2,
+    "6": 3,
+    "4": 4,
+    "3": 5,
+    "1": 6,
+    "7": 7,
+    "5": 8,
+    "9": 9,
+    "8": 10,
+    "12": 11,
+    "11": 12,
+    "13": 13,
+    "10": 14
+   },
+   "in": {
+    "9": 15,
+    "10": 16,
+    "11": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "0": 21,
+    "1": 22,
+    "2": 23,
+    "6": 24,
+    "7": 25,
+    "8": 26,
+    "12": 27
+   },
+   "out": {
+    "0": 28,
+    "2": 29,
+    "1": 30
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "9": {
+      "poly": true,
+      "why": "AffineTransform.cpp:89-90 getPolyVoltage(0) and getPolyVoltage(1) on this jack when it is connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "10": {
+      "poly": false,
+      "why": "AffineTransform.cpp:92 getVoltage(), reached only when the two-channel jack for that section is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "11": {
+      "poly": false,
+      "why": "AffineTransform.cpp:93 getVoltage(), reached only when the two-channel jack for that section is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "3": {
+      "poly": true,
+      "why": "AffineTransform.cpp:99-100 getPolyVoltage(0) and getPolyVoltage(1) on this jack when it is connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "4": {
+      "poly": false,
+      "why": "AffineTransform.cpp:102 getVoltage(), reached only when the two-channel jack for that section is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "5": {
+      "poly": false,
+      "why": "AffineTransform.cpp:103 getVoltage(), reached only when the two-channel jack for that section is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "0": {
+      "poly": true,
+      "why": "AffineTransform.cpp:114-115 getPolyVoltage(0) and getPolyVoltage(1) on this jack when it is connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "1": {
+      "poly": false,
+      "why": "AffineTransform.cpp:117 getVoltage(), reached only when the two-channel jack for that section is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "2": {
+      "poly": false,
+      "why": "AffineTransform.cpp:118 getVoltage(), reached only when the two-channel jack for that section is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "6": {
+      "poly": true,
+      "why": "AffineTransform.cpp:128-129 getPolyVoltage(0) and getPolyVoltage(1) on this jack when it is connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "7": {
+      "poly": false,
+      "why": "AffineTransform.cpp:131 getVoltage(), reached only when the two-channel jack for that section is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "8": {
+      "poly": false,
+      "why": "AffineTransform.cpp:132 getVoltage(), reached only when the two-channel jack for that section is not connected",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     },
+     "12": {
+      "poly": false,
+      "why": "AffineTransform.cpp:145 getVoltage() crossfaded against the rotate knob and divided by five to give turns; read at voltages[0] with no channel loop",
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "AffineTransform.cpp:156 setChannels(2) on this output"
+     },
+     "1": {
+      "poly": false,
+      "why": "AffineTransform.cpp:153 setVoltage with no setChannels for this output"
+     },
+     "2": {
+      "poly": false,
+      "why": "AffineTransform.cpp:152 setVoltage with no setChannels for this output"
+     }
+    }
+   },
+   "notes": "Each modulation trimmer is a crossfade, not an attenuator: lerp_at at AffineTransform.cpp:161 mixes the knob against the jack voltage, so a trimmer at the far right discards its knob altogether. The knob values are multiplied by five before the crossfade and the result divided by five afterwards for scale, skew and rotation, which is why 5V at a jack means a factor of one, or a whole turn for rotation. The skew at lines 141-142 updates x first and then uses the new x when working out y, so the vertical skew compounds with the horizontal one. The three output jacks run X, Y and then the two-channel one across the panel, which is not their index order: the two-channel output is index 0 and sits on the right."
   },
   "PreciseDelay": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Six independent delays of a few audio samples each, for lining signals up frame by frame rather than for anything audible",
+    "The signal to delay on row A; it takes as many channels as you give it, up to sixteen",
+    "The signal to delay on row B; it takes as many channels as you give it, up to sixteen",
+    "The signal to delay on row C; it takes as many channels as you give it, up to sixteen",
+    "The signal to delay on row D; it takes as many channels as you give it, up to sixteen",
+    "The signal to delay on row E; it takes as many channels as you give it, up to sixteen",
+    "The signal to delay on row F; it takes as many channels as you give it, up to sixteen",
+    "Sets how many samples row A is delayed by, 1 to 32",
+    "Sets how many samples row B is delayed by, 1 to 32",
+    "Sets how many samples row C is delayed by, 1 to 32",
+    "Sets how many samples row D is delayed by, 1 to 32",
+    "Sets how many samples row E is delayed by, 1 to 32",
+    "Sets how many samples row F is delayed by, 1 to 32",
+    "Row A's signal, delayed, with the same number of channels as went in",
+    "Row B's signal, delayed, with the same number of channels as went in",
+    "Row C's signal, delayed, with the same number of channels as went in",
+    "Row D's signal, delayed, with the same number of channels as went in",
+    "Row E's signal, delayed, with the same number of channels as went in",
+    "Row F's signal, delayed, with the same number of channels as went in",
+    "Note — a delay of one sample at 44.1kHz is about 0.02ms, far too short to hear; the module is for timing, not for echo",
+    "Note — every module a signal passes through delays it by at least one sample, which is what these rows are for undoing"
+   ],
+   "param": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:84-89 writes getPolyVoltage(c) for all sixteen channels of each input into its delay line, and line 102 sets the matching output's channel count from getChannels()"
+     },
+     "1": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:84-89 writes getPolyVoltage(c) for all sixteen channels of each input into its delay line, and line 103 sets the matching output's channel count from getChannels()"
+     },
+     "2": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:84-89 writes getPolyVoltage(c) for all sixteen channels of each input into its delay line, and line 104 sets the matching output's channel count from getChannels()"
+     },
+     "3": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:84-89 writes getPolyVoltage(c) for all sixteen channels of each input into its delay line, and line 105 sets the matching output's channel count from getChannels()"
+     },
+     "4": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:84-89 writes getPolyVoltage(c) for all sixteen channels of each input into its delay line, and line 106 sets the matching output's channel count from getChannels()"
+     },
+     "5": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:84-89 writes getPolyVoltage(c) for all sixteen channels of each input into its delay line, and line 107 sets the matching output's channel count from getChannels()"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:102 setChannels taken from the matching input's getChannels()"
+     },
+     "1": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:103 setChannels taken from the matching input's getChannels()"
+     },
+     "2": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:104 setChannels taken from the matching input's getChannels()"
+     },
+     "3": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:105 setChannels taken from the matching input's getChannels()"
+     },
+     "4": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:106 setChannels taken from the matching input's getChannels()"
+     },
+     "5": {
+      "poly": true,
+      "why": "PreciseDelay.cpp:107 setChannels taken from the matching input's getChannels()"
+     }
+    }
+   },
+   "notes": "The delay lines are 32 samples deep (PreciseDelay.cpp:34-39) and all sixteen channels are copied every sample whether or not the input carries them, with the output channel count taken from the input at lines 102-107. No family is given to any of these jacks: they carry whatever is patched into them, so no colour would be true of them. The read index is (write pointer + 33 - delay) modulo 32, so a setting of 1 is a one-sample delay."
   }
  }
 }

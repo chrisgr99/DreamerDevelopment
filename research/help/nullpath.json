@@ -1,33 +1,1451 @@
 {
  "plugin": "nullpath",
- "source": "https://github.com/alefnull/NullPath",
+ "source": "https://github.com/alefnull/NullPath/blob/4385a3f/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "switch18": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Routes one signal out to whichever of nine outputs the current step has landed on, the step advancing on each clock and each step carrying a weight the mode puts to a different use",
+    "The signal sent to whichever output the current step has landed on; the other eight carry 0V or their held value",
+    "A rising edge past 1V advances to the next step, chosen by the weights and the mode",
+    "A rising edge past 1V sends the step back to the first one",
+    "Chooses which of four things a step weight means: a chance of being picked, a chance of being skipped past, a number of repeats, or a share of a repeating fixed pattern",
+    "Sets all nine step weights to fresh random values between 0 and 1",
+    "A rising edge past 1V sets all nine step weights to fresh random values",
+    "Picks one of the four modes at random",
+    "A rising edge past 1V picks one of the four modes at random",
+    "Sets the weight of that step, 0 to 1, with the mode deciding what the weight is used for; a step whose output jack is empty is given a weight of zero and is never picked",
+    "Replaces that step's weight with its own voltage over ten, multiplied by the knob beside it and held between 0 and 1, so the knob becomes an attenuator while a cable is here",
+    "Turns every step weight into one minus itself, but only while it disagrees with the Invert Trigger input; with nothing patched there the switch inverts the weights on its own",
+    "A gate that inverts every step weight while it disagrees with the invert switch; with the switch off, a high voltage here inverts them",
+    "Carries the input signal while this step is the one the module has landed on, and 0V otherwise, or the last value it was given if the menu is set to hold it",
+    "Note — a step is only ever picked if its own output jack has a cable in it; an unpatched output is treated as a weight of zero.",
+    "Note — with every weight at zero the module stops advancing and stays on the step it was on.",
+    "Note — the lamp beside each output lights while that step is the one selected, or shows the crossfade level while fading is switched on.",
+    "Note — the number of channels on every output follows the channel count of the signal input.",
+    "Note — Select Chance weights a random draw and Skip Chance steps on then rolls against the new step's weight.",
+    "Note — Repeat Weight counts down from a step's weight before moving on, and Fixed Pattern adds each weight to a running total for its step and picks whichever total is highest.",
+    "Menu — Hold last value — makes an output hold the last voltage it carried instead of dropping to 0V when the step moves on",
+    "Menu — Fade while switching — crossfades between the old step and the new one instead of switching at once",
+    "Menu — Fade Time — sets how long that crossfade takes"
+   ],
+   "param": {
+    "0": 4,
+    "1": 5,
+    "2": 7,
+    "3": 9,
+    "4": 9,
+    "5": 9,
+    "6": 9,
+    "7": 9,
+    "8": 9,
+    "9": 9,
+    "10": 9,
+    "11": 9,
+    "12": 11
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 6,
+    "4": 8,
+    "5": 10,
+    "6": 10,
+    "7": 10,
+    "8": 10,
+    "9": 10,
+    "10": 10,
+    "11": 10,
+    "12": 10,
+    "13": 10,
+    "14": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 13,
+    "2": 13,
+    "3": 13,
+    "4": 13,
+    "5": 13,
+    "6": 13,
+    "7": 13,
+    "8": 13
+   },
+   "family": {
+    "in": {
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "trigger"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch18.cpp:161 takes the module's channel count from getChannels() capped at 16 and line 190 reads it with getVoltageSimd"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/switch18.cpp:173 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/switch18.cpp:235 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/switch18.cpp:238 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/switch18.cpp:241 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch18.cpp:147 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch18.cpp:147 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch18.cpp:147 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch18.cpp:147 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch18.cpp:147 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch18.cpp:147 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch18.cpp:147 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch18.cpp:147 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch18.cpp:147 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "14": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/switch18.cpp:169 holds a dsp::SchmittTrigger on this voltage and line 171 exclusive-ors its level with the invert switch"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch18.cpp:188 calls setChannels with the signal input's channel count and lines 199 to 224 write one voltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch18.cpp:188 calls setChannels with the signal input's channel count and lines 199 to 224 write one voltage per channel"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch18.cpp:188 calls setChannels with the signal input's channel count and lines 199 to 224 write one voltage per channel"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch18.cpp:188 calls setChannels with the signal input's channel count and lines 199 to 224 write one voltage per channel"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch18.cpp:188 calls setChannels with the signal input's channel count and lines 199 to 224 write one voltage per channel"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch18.cpp:188 calls setChannels with the signal input's channel count and lines 199 to 224 write one voltage per channel"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch18.cpp:188 calls setChannels with the signal input's channel count and lines 199 to 224 write one voltage per channel"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch18.cpp:188 calls setChannels with the signal input's channel count and lines 199 to 224 write one voltage per channel"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch18.cpp:188 calls setChannels with the signal input's channel count and lines 199 to 224 write one voltage per channel"
+     }
+    }
+   },
+   "notes": "The panel prints Clock over the jack that configInput calls Trigger, and M-Rnd, S-Rnd and S-Inv over the randomize-mode, randomize-steps and invert jacks; the Signal input and the Mode switch carry no lettering at all. compute_weights at src/switch18.cpp:141 zeroes the weight of any step whose output jack is unpatched, which is what makes an unconnected output unreachable. A weight CV replaces the knob's value and is then multiplied by it, so the knob works as an attenuator once a cable is present rather than adding to the CV. The invert behaviour is an exclusive-or of the invert switch and the invert jack's gate level (src/switch18.cpp:171), so either one alone inverts and both together cancel; the switch's two choice names, Invert on Low and Invert on High, are ambiguous about which of the two they describe and are not quoted for that reason. All nine weight CV jacks carry the maker's second line 'Expects a 0-10V signal' and nothing more."
   },
   "switch81": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Routes one of nine inputs to a single output, the step advancing on each clock and each step carrying a weight the mode puts to a different use",
+    "A rising edge past 1V advances to the next step, chosen by the weights and the mode",
+    "A rising edge past 1V sends the step back to the first one",
+    "Chooses which of four things a step weight means: a chance of being picked, a chance of being skipped past, a number of repeats, or a share of a repeating fixed pattern",
+    "Sets all nine step weights to fresh random values between 0 and 1",
+    "A rising edge past 1V sets all nine step weights to fresh random values",
+    "Picks one of the four modes at random",
+    "A rising edge past 1V picks one of the four modes at random",
+    "Sets the weight of that step, 0 to 1, with the mode deciding what the weight is used for; a step whose input jack is empty is given a weight of zero and is never picked",
+    "Replaces that step's weight with its own voltage over ten, multiplied by the knob beside it and held between 0 and 1, so the knob becomes an attenuator while a cable is here",
+    "Turns every step weight into one minus itself, but only while it disagrees with the Invert Trigger input; with nothing patched there the switch inverts the weights on its own",
+    "A gate that inverts every step weight while it disagrees with the invert switch; with the switch off, a high voltage here inverts them",
+    "One of the nine signals the module chooses between; it is passed to the output while its step is the one selected",
+    "Carries whichever input the current step has landed on, or a mix of all nine at their fade levels while fading is switched on",
+    "Note — a step is only ever picked if its own input jack has a cable in it; an unpatched input is treated as a weight of zero.",
+    "Note — with every weight at zero the module stops advancing and stays on the step it was on.",
+    "Note — the lamp beside each input lights while that step is the one selected, or shows the crossfade level while fading is switched on.",
+    "Note — the number of channels on the output follows the channel count of whichever input is currently selected.",
+    "Note — Select Chance weights a random draw and Skip Chance steps on then rolls against the new step's weight.",
+    "Note — Repeat Weight counts down from a step's weight before moving on, and Fixed Pattern adds each weight to a running total for its step and picks whichever total is highest.",
+    "Menu — Fade while switching — crossfades between the old input and the new one instead of switching at once",
+    "Menu — Fade Time — sets how long that crossfade takes"
+   ],
+   "param": {
+    "0": 3,
+    "1": 4,
+    "2": 6,
+    "3": 8,
+    "4": 8,
+    "5": 8,
+    "6": 8,
+    "7": 8,
+    "8": 8,
+    "9": 8,
+    "10": 8,
+    "11": 8,
+    "12": 10
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 5,
+    "3": 7,
+    "4": 9,
+    "5": 9,
+    "6": 9,
+    "7": 9,
+    "8": 9,
+    "9": 9,
+    "10": 9,
+    "11": 9,
+    "12": 9,
+    "13": 12,
+    "14": 12,
+    "15": 12,
+    "16": 12,
+    "17": 12,
+    "18": 12,
+    "19": 12,
+    "20": 12,
+    "21": 12,
+    "22": 11
+   },
+   "out": {
+    "0": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "22": "trigger"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/switch81.cpp:163 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/switch81.cpp:206 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/switch81.cpp:209 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/switch81.cpp:212 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch81.cpp:142 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch81.cpp:142 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch81.cpp:142 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch81.cpp:142 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch81.cpp:142 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch81.cpp:142 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch81.cpp:142 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch81.cpp:142 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/switch81.cpp:142 divides the voltage by ten, multiplies it by the knob and clamps the result to 0..1, so a negative voltage clamps to zero; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "13": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch81.cpp:188 reads it with getPolyVoltageSimd and line 168 takes the output's channel count from the selected input's getChannels()"
+     },
+     "14": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch81.cpp:188 reads it with getPolyVoltageSimd and line 168 takes the output's channel count from the selected input's getChannels()"
+     },
+     "15": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch81.cpp:188 reads it with getPolyVoltageSimd and line 168 takes the output's channel count from the selected input's getChannels()"
+     },
+     "16": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch81.cpp:188 reads it with getPolyVoltageSimd and line 168 takes the output's channel count from the selected input's getChannels()"
+     },
+     "17": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch81.cpp:188 reads it with getPolyVoltageSimd and line 168 takes the output's channel count from the selected input's getChannels()"
+     },
+     "18": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch81.cpp:188 reads it with getPolyVoltageSimd and line 168 takes the output's channel count from the selected input's getChannels()"
+     },
+     "19": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch81.cpp:188 reads it with getPolyVoltageSimd and line 168 takes the output's channel count from the selected input's getChannels()"
+     },
+     "20": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch81.cpp:188 reads it with getPolyVoltageSimd and line 168 takes the output's channel count from the selected input's getChannels()"
+     },
+     "21": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch81.cpp:188 reads it with getPolyVoltageSimd and line 168 takes the output's channel count from the selected input's getChannels()"
+     },
+     "22": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/switch81.cpp:159 holds a dsp::SchmittTrigger on this voltage and line 161 exclusive-ors its level with the invert switch"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/switch81.cpp:172 calls setChannels with the selected input's channel count and line 191 writes one voltage per channel"
+     }
+    }
+   },
+   "notes": "compute_weights at src/switch81.cpp:138 zeroes the weight of any step whose input jack is unpatched. A weight CV replaces the knob's value and is then multiplied by it, so the knob works as an attenuator once a cable is present. The invert behaviour is an exclusive-or of the invert switch and the invert jack's gate level. This model carries no Hold last value menu item, unlike the nine-output one, because it has only one output. All nine weight CV jacks carry the maker's second line 'Expects a 0-10V signal' and nothing more."
   },
   "funcgen": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four rise-and-fall function generators with shapeable curves, plus a cascade section that plays them one after another, and a wall of outputs comparing and combining the four",
+    "Sets how long that channel takes to rise, 0.01 to 5 seconds before the speed switch multiplies it",
+    "Sets how long that channel takes to fall, 0.01 to 5 seconds before the speed switch multiplies it",
+    "Bends that channel's rise from logarithmic through linear at the centre to exponential",
+    "Bends that channel's fall from logarithmic through linear at the centre to exponential",
+    "Multiplies that channel's rise and fall times by five for slow, one for normal or a fifth for fast",
+    "Makes that channel run its rise and fall over and over instead of stopping after one pass; flicking it also starts a fresh pass",
+    "A rising edge past 1V starts that channel's rise and fall from the beginning",
+    "Multiplies that channel's rise time by its own voltage over ten, holding the result between 0.01 and 5 seconds, so the knob becomes an attenuator while a cable is here",
+    "Multiplies that channel's fall time by its own voltage over ten, holding the result between 0.01 and 5 seconds, so the knob becomes an attenuator while a cable is here",
+    "That channel's function, at the range its own menu entry sets, either from zero up or swinging either side of zero",
+    "10V while that channel is rising and 0V otherwise",
+    "10V while that channel is falling and 0V otherwise",
+    "Chooses the order the cascade plays the four channels in: A, B, C, D in turn, or all four in a fresh random order each pass, or one at a time at random with repeats allowed",
+    "Starts all four channels and the cascade from the beginning of their cycles",
+    "A rising edge past 1V starts all four channels and the cascade from the beginning of their cycles",
+    "A rising edge past 1V starts the cascade again from the beginning of its cycle, leaving the four channels where they are",
+    "Makes the cascade start a new pass as soon as it finishes one instead of stopping; flicking it also starts a fresh pass",
+    "Multiplies the cascade's rise and fall times by five for slow, one for normal or a fifth for fast, using the times of whichever channel it is playing",
+    "The cascade's function, one channel's rise and fall at a time, at the range its own menu entry sets",
+    "10V while the cascade is rising and 0V otherwise",
+    "10V while the cascade is falling and 0V otherwise",
+    "The lowest of the four channel functions, each scaled by its own range",
+    "The highest of the four channel functions, each scaled by its own range",
+    "The four channel functions added together and divided by four, each scaled by its own range",
+    "The two highest of the four functions averaged, on a fixed 0V to 10V scale whatever the channel ranges are",
+    "The two lowest of the four functions averaged, on a fixed 0V to 10V scale whatever the channel ranges are",
+    "10V while the first of the two channels named on it is above the second, and 0V otherwise, comparing the raw functions before any range is applied",
+    "The distance between the two channels named on it, subtracted from the range that pair is set to, so it is largest when the two are together",
+    "The distance between the two channels named on it, so it is zero when the two are together and largest when they are furthest apart",
+    "Note — the four channels come up with Loop switched on and a one second rise and fall, so the module runs as soon as it is added to a patch.",
+    "Note — a cable in a rise or fall CV jack multiplies the knob rather than adding to it, so 0V there stops that stage at its shortest and 10V leaves the knob alone.",
+    "Note — each channel, each pair section and the cascade has its own output range on the right-click menu, chosen from 1V, 2V, 3V, 5V and 10V, each either unipolar or swinging both ways.",
+    "Note — the All Ranges submenu can override every one of those at once; switching the override off again puts back the settings each section had before.",
+    "Note — the cascade plays only one channel at a time and takes its rise and fall times from that channel, so the cascade output is not a copy of any channel output.",
+    "Note — the four lamps in the middle show which channel the cascade is playing and how far through it is.",
+    "Note — this module is monophonic: every jack reads or writes one channel only.",
+    "Menu — All Ranges: Override individual range settings, +/- 1v, +/- 2v, +/- 3v, +/- 5v, +/- 10v, Unipolar — one output range for every section, applied while the override item is ticked",
+    "Menu — Channel A Range: +/- 1v, +/- 2v, +/- 3v, +/- 5v, +/- 10v, Unipolar — sets the output range of channel A",
+    "Menu — Channel B Range: +/- 1v, +/- 2v, +/- 3v, +/- 5v, +/- 10v, Unipolar — sets the output range of channel B",
+    "Menu — Channel C Range: +/- 1v, +/- 2v, +/- 3v, +/- 5v, +/- 10v, Unipolar — sets the output range of channel C",
+    "Menu — Channel D Range: +/- 1v, +/- 2v, +/- 3v, +/- 5v, +/- 10v, Unipolar — sets the output range of channel D",
+    "Menu — A <-> B Range: +/- 1v, +/- 2v, +/- 3v, +/- 5v, +/- 10v, Unipolar — sets the output range of the section between channels A and B",
+    "Menu — B <-> C Range: +/- 1v, +/- 2v, +/- 3v, +/- 5v, +/- 10v, Unipolar — sets the output range of the section between channels B and C",
+    "Menu — C <-> D Range: +/- 1v, +/- 2v, +/- 3v, +/- 5v, +/- 10v, Unipolar — sets the output range of the section between channels C and D",
+    "Menu — D <-> A Range: +/- 1v, +/- 2v, +/- 3v, +/- 5v, +/- 10v, Unipolar — sets the output range of the section between channels D and A",
+    "Menu — Cascade Range: +/- 1v, +/- 2v, +/- 3v, +/- 5v, +/- 10v, Unipolar — sets the output range of the cascade section"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "16": 13,
+    "17": 14,
+    "20": 3,
+    "21": 3,
+    "22": 3,
+    "23": 3,
+    "24": 4,
+    "25": 4,
+    "26": 4,
+    "27": 4,
+    "28": 5,
+    "29": 5,
+    "30": 5,
+    "31": 5,
+    "32": 17,
+    "33": 18
+   },
+   "in": {
+    "0": 7,
+    "1": 7,
+    "2": 7,
+    "3": 7,
+    "4": 8,
+    "5": 8,
+    "6": 8,
+    "7": 8,
+    "8": 9,
+    "9": 9,
+    "10": 9,
+    "11": 9,
+    "12": 15,
+    "13": 16
+   },
+   "out": {
+    "0": 10,
+    "1": 10,
+    "2": 10,
+    "3": 10,
+    "4": 19,
+    "5": 22,
+    "6": 23,
+    "7": 24,
+    "8": 27,
+    "10": 27,
+    "11": 27,
+    "12": 27,
+    "15": 27,
+    "16": 27,
+    "17": 27,
+    "19": 27,
+    "20": 28,
+    "22": 28,
+    "23": 28,
+    "25": 28,
+    "26": 29,
+    "28": 29,
+    "29": 29,
+    "31": 29,
+    "32": 25,
+    "33": 26,
+    "34": 11,
+    "35": 11,
+    "36": 11,
+    "37": 11,
+    "38": 12,
+    "39": 12,
+    "40": 12,
+    "41": 12,
+    "42": 20,
+    "43": 21
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "trigger",
+     "13": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger",
+     "19": "trigger",
+     "20": "cv",
+     "22": "cv",
+     "23": "cv",
+     "25": "cv",
+     "26": "cv",
+     "28": "cv",
+     "29": "cv",
+     "31": "cv",
+     "32": "cv",
+     "33": "cv",
+     "34": "trigger",
+     "35": "trigger",
+     "36": "trigger",
+     "37": "trigger",
+     "38": "trigger",
+     "39": "trigger",
+     "40": "trigger",
+     "41": "trigger",
+     "42": "trigger",
+     "43": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/funcgen.cpp:324 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/funcgen.cpp:324 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/funcgen.cpp:324 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/funcgen.cpp:324 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/funcgen.cpp:306 multiplies the rise time knob by this voltage over ten and clamps the result to MIN_TIME 0.01 and MAX_TIME 5, so a negative voltage clamps to the shortest time; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/funcgen.cpp:306 multiplies the rise time knob by this voltage over ten and clamps the result to MIN_TIME 0.01 and MAX_TIME 5, so a negative voltage clamps to the shortest time; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/funcgen.cpp:306 multiplies the rise time knob by this voltage over ten and clamps the result to MIN_TIME 0.01 and MAX_TIME 5, so a negative voltage clamps to the shortest time; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/funcgen.cpp:306 multiplies the rise time knob by this voltage over ten and clamps the result to MIN_TIME 0.01 and MAX_TIME 5, so a negative voltage clamps to the shortest time; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/funcgen.cpp:312 multiplies the fall time knob by this voltage over ten and clamps the result to MIN_TIME 0.01 and MAX_TIME 5, so a negative voltage clamps to the shortest time; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/funcgen.cpp:312 multiplies the fall time knob by this voltage over ten and clamps the result to MIN_TIME 0.01 and MAX_TIME 5, so a negative voltage clamps to the shortest time; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/funcgen.cpp:312 multiplies the fall time knob by this voltage over ten and clamps the result to MIN_TIME 0.01 and MAX_TIME 5, so a negative voltage clamps to the shortest time; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/funcgen.cpp:312 multiplies the fall time knob by this voltage over ten and clamps the result to MIN_TIME 0.01 and MAX_TIME 5, so a negative voltage clamps to the shortest time; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "12": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/funcgen.cpp:352 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "13": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/funcgen.cpp:376 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:337 and 340 write the envelope scaled by that section's range, unipolar or centred on zero, with no channel index"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:337 and 340 write the envelope scaled by that section's range, unipolar or centred on zero, with no channel index"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:337 and 340 write the envelope scaled by that section's range, unipolar or centred on zero, with no channel index"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:337 and 340 write the envelope scaled by that section's range, unipolar or centred on zero, with no channel index"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:337 and 340 write the envelope scaled by that section's range, unipolar or centred on zero, with no channel index"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:384 writes the smallest of the four envelopes scaled by their own ranges, with no channel index"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:385 writes the largest of the four envelopes scaled by their own ranges, with no channel index"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:386 adds the four envelopes scaled by their own ranges and divides by four, with no channel index"
+     },
+     "32": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "src/funcgen.cpp:450 averages the two largest raw envelope values after multiplying each by ten, ignoring the range settings"
+     },
+     "33": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "src/funcgen.cpp:462 averages the two smallest raw envelope values after multiplying each by ten, ignoring the range settings"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:387 to 394 write 10 or 0 with no channel index, comparing the two raw envelope values"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:387 to 394 write 10 or 0 with no channel index, comparing the two raw envelope values"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:387 to 394 write 10 or 0 with no channel index, comparing the two raw envelope values"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:387 to 394 write 10 or 0 with no channel index, comparing the two raw envelope values"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:387 to 394 write 10 or 0 with no channel index, comparing the two raw envelope values"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:387 to 394 write 10 or 0 with no channel index, comparing the two raw envelope values"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:387 to 394 write 10 or 0 with no channel index, comparing the two raw envelope values"
+     },
+     "19": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:387 to 394 write 10 or 0 with no channel index, comparing the two raw envelope values"
+     },
+     "20": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:396 to 436 write a distance scaled by that pair's range, unipolar or centred on zero, with no channel index"
+     },
+     "22": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:396 to 436 write a distance scaled by that pair's range, unipolar or centred on zero, with no channel index"
+     },
+     "23": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:396 to 436 write a distance scaled by that pair's range, unipolar or centred on zero, with no channel index"
+     },
+     "25": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:396 to 436 write a distance scaled by that pair's range, unipolar or centred on zero, with no channel index"
+     },
+     "26": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:396 to 436 write a distance scaled by that pair's range, unipolar or centred on zero, with no channel index"
+     },
+     "28": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:396 to 436 write a distance scaled by that pair's range, unipolar or centred on zero, with no channel index"
+     },
+     "29": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:396 to 436 write a distance scaled by that pair's range, unipolar or centred on zero, with no channel index"
+     },
+     "31": {
+      "poly": false,
+      "step": "continuous",
+      "why": "src/funcgen.cpp:396 to 436 write a distance scaled by that pair's range, unipolar or centred on zero, with no channel index"
+     },
+     "34": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:344 and 345 write 10 or 0 with no channel index, from the envelope's current stage"
+     },
+     "35": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:344 and 345 write 10 or 0 with no channel index, from the envelope's current stage"
+     },
+     "36": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:344 and 345 write 10 or 0 with no channel index, from the envelope's current stage"
+     },
+     "37": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:344 and 345 write 10 or 0 with no channel index, from the envelope's current stage"
+     },
+     "38": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:344 and 345 write 10 or 0 with no channel index, from the envelope's current stage"
+     },
+     "39": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:344 and 345 write 10 or 0 with no channel index, from the envelope's current stage"
+     },
+     "40": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:344 and 345 write 10 or 0 with no channel index, from the envelope's current stage"
+     },
+     "41": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:344 and 345 write 10 or 0 with no channel index, from the envelope's current stage"
+     },
+     "42": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:373 writes 10 or 0 with no channel index while the cascade envelope is in its attack stage"
+     },
+     "43": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/funcgen.cpp:374 writes 10 or 0 with no channel index while the cascade envelope is in its decay stage"
+     }
+    }
+   },
+   "notes": "Six parameters are declared and never given a widget: PUSH_PARAM for each of the four channels (indices 12 to 15), CASCADE_TRIGGER_PARAM (18) and an unnamed ENV_FUNC_PARAM (19). The push parameters are read in process() at src/funcgen.cpp:324 but no button is added for them, so no click can reach any of the six and none carries a line or a tag. Eight outputs are likewise declared with no jack: A > C, C > A, B > D, D > B and the four A-C and B-D distance outputs (indices 9, 13, 14, 18, 21, 24, 27 and 30). Four of those eight — A > C, C > A, B > D and D > B — are never written by process() either; the panel only has sections between adjacent channels. CASCADE_LOOP_PARAM is marked TODO IMPLEMENT in the enum at src/funcgen.cpp:24 but is read at lines 348, 545 and 660 and does work. The panel prints almost nothing: Trig All, Min, Max and some waveform glyphs, so nearly every control is named only by its tooltip. Top 2 Average and Bottom 2 Average ignore the range settings and are always built on a 0 to 10V scale, unlike Minimum, Maximum and Average. All eight rise and fall CV jacks carry the maker's second line 'Expects a 0-10V signal' and nothing more."
   },
   "supersaw": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three-oscillator supersaw voice with a noise source and a built-in ADSR envelope, detunable per wave and with the envelope routable to the noise and to the middle wave's shape",
+    "Shifts the pitch of all three waves in whole octaves, -2 to +2",
+    "Shifts the pitch of all three waves smoothly, one octave down to one octave up",
+    "Chooses what the middle wave is: a pulse, or a shape that runs between saw and triangle",
+    "Detunes wave A on its own, about a quarter of a semitone either way",
+    "Detunes wave B on its own, about a quarter of a semitone either way",
+    "Detunes wave C on its own, about a quarter of a semitone either way",
+    "Holds each random noise sample for up to a thousandth of a second before drawing a new one, which makes the noise coarser as it is raised",
+    "Mixes noise into the final output, from none up to half the level of the three waves",
+    "Sets the shape of the middle wave: with the pulse selected it is the pulse width, and with the other shape it runs from saw to triangle; it is held between 0.1 and 0.9",
+    "Sets how long the envelope takes to reach full, 0.001 to 5 seconds",
+    "Sets how long the envelope takes to fall from full to the sustain level, 0.01 to 5 seconds",
+    "Sets the level the envelope holds at while the gate stays high, 0 to 1",
+    "Sets how long the envelope takes to fall to silence after the gate drops, 0.01 to 5 seconds",
+    "Sets the level of that wave in the mix and at its own output, 0 to 1",
+    "Sets the level of the finished mix, 0 to 1",
+    "Switches the envelope through to the noise duration",
+    "Switches the envelope through to the noise mix",
+    "Switches the envelope through to the middle wave's shape",
+    "Sets how much of the envelope reaches the noise duration, -1 to +1, and inverts it below centre; it does nothing until the switch beside it is on",
+    "Sets how much of the envelope reaches the noise mix, 0 to 1; it does nothing until the switch beside it is on",
+    "Sets how much of the envelope reaches the middle wave's shape, -1 to +1, and inverts it below centre; it does nothing until the switch beside it is on",
+    "Sets the pitch of all three waves at a volt per octave, and its channel count sets how many voices the module runs",
+    "A rising edge past 1V starts the envelope, and dropping to 0.5V or below releases it",
+    "Multiplies the attack time by its own voltage over ten, held between a thousandth and the whole knob value, so the knob becomes an attenuator while a cable is here",
+    "Multiplies the decay time by its own voltage over ten, held between a thousandth and the whole knob value, so the knob becomes an attenuator while a cable is here",
+    "Multiplies the sustain level by its own voltage over ten, so the knob becomes an attenuator while a cable is here",
+    "Multiplies the release time by its own voltage over ten, held between a thousandth and the whole knob value, so the knob becomes an attenuator while a cable is here",
+    "Multiplies that wave's level by its own voltage over ten, so the knob becomes an attenuator while a cable is here",
+    "Multiplies the final level by its own voltage over ten, so the knob becomes an attenuator while a cable is here",
+    "Multiplies the noise duration by its own voltage over ten, so the knob becomes an attenuator while a cable is here",
+    "Adds its own voltage over ten to the middle wave's shape, and the total is held between 0.1 and 0.9; it is added whether or not the knob is turned",
+    "Multiplies the noise mix by its own voltage over ten, so the knob becomes an attenuator while a cable is here",
+    "The three waves mixed with the noise, scaled by the final level and shaped by the envelope while a cable is in the gate input",
+    "That wave on its own at ±5V, scaled by its own level knob but not by the envelope or the final level",
+    "The raw noise at ±5V, before the noise mix knob and before the envelope",
+    "The envelope on its own, 0V to 10V",
+    "Note — with a cable in the gate input the module is silent until a gate arrives; with the gate input empty the three waves run continuously and the envelope never opens.",
+    "Note — every CV jack here multiplies its knob rather than adding to it, so a jack sitting at 0V silences or shortens whatever it controls.",
+    "Note — the one jack that adds rather than multiplies is the middle wave's shape CV, and it is added whether or not a cable is in it.",
+    "Note — the envelope, the noise and the envelope and noise outputs are single-channel; the main output and the three wave outputs follow the channel count of the pitch input.",
+    "Note — each oscillator's phase is advanced twice per sample, once for the mix and once for its own output, so the sounding pitch is an octave above the 130.81Hz base in the code.",
+    "Note — 0V at the pitch input, with the octave and pitch knobs centred, gives about 261.6Hz.",
+    "Note — with nothing patched into the gate input the final level CV is applied twice over, so its effect on the output is squared.",
+    "Menu — Linear envelope — makes the envelope's attack, decay and release straight lines instead of the curved default"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 14,
+    "15": 14,
+    "16": 15,
+    "17": 16,
+    "18": 17,
+    "19": 18,
+    "20": 19,
+    "21": 20,
+    "22": 21
+   },
+   "in": {
+    "0": 22,
+    "11": 23,
+    "1": 24,
+    "2": 25,
+    "3": 26,
+    "4": 27,
+    "5": 28,
+    "6": 28,
+    "7": 28,
+    "8": 29,
+    "9": 30,
+    "10": 31,
+    "12": 32
+   },
+   "out": {
+    "0": 33,
+    "1": 34,
+    "2": 34,
+    "3": 34,
+    "4": 35,
+    "5": 36
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "11": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "12": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "src/supersaw.cpp:143 takes the module's channel count from getChannels() and line 236 reads it with getVoltageSimd; src/oscillator.hpp:19 raises two to the volts times a 130.81Hz base"
+     },
+     "11": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/supersaw.cpp:298 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V, and line 303 releases the envelope once the voltage drops to 0.5 or below"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/supersaw.cpp:182 multiplies the attack time by this voltage over ten after clamping that fraction, so a negative voltage clamps away; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/supersaw.cpp:185 multiplies the decay time by this voltage over ten after clamping that fraction, so a negative voltage clamps away; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/supersaw.cpp:188 multiplies the sustain level by this voltage over ten after clamping that fraction, so a negative voltage clamps away; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/supersaw.cpp:191 multiplies the release time by this voltage over ten after clamping that fraction, so a negative voltage clamps away; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/supersaw.cpp:242 reads it with getVoltageSimd per channel and multiplies the wave level by that voltage over ten, clamped to 0..1; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/supersaw.cpp:242 reads it with getVoltageSimd per channel and multiplies the wave level by that voltage over ten, clamped to 0..1; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/supersaw.cpp:242 reads it with getVoltageSimd per channel and multiplies the wave level by that voltage over ten, clamped to 0..1; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/supersaw.cpp:248 reads it with getVoltageSimd per channel and multiplies the final level by that voltage over ten, clamped to 0..1; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/supersaw.cpp:159 multiplies the noise duration by this voltage over ten after clamping that fraction, so a negative voltage clamps away; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "sumRange": "0.1 to 0.9V",
+      "why": "src/supersaw.cpp:166 divides the voltage by ten and adds it to the knob, clamping the total to 0.1..0.9, and does so whether or not the jack is connected; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/supersaw.cpp:172 multiplies the noise mix by this voltage over ten after clamping that fraction, so a negative voltage clamps away; the maker's own second line on this jack says it expects a 0-10V signal"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/supersaw.cpp:144 calls setChannels with the pitch input's channel count and lines 287 and 295 write it with setVoltageSimd"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/supersaw.cpp:146 calls setChannels with the pitch input's channel count and lines 263, 274 and 278 write the raw wave times five with setVoltageSimd"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/supersaw.cpp:146 calls setChannels with the pitch input's channel count and lines 263, 274 and 278 write the raw wave times five with setVoltageSimd"
+     },
+     "3": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/supersaw.cpp:146 calls setChannels with the pitch input's channel count and lines 263, 274 and 278 write the raw wave times five with setVoltageSimd"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/supersaw.cpp:310 writes the held noise sample times five with no channel index; the sample is a uniform random between -1 and 1 at src/oscillator.hpp:41"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "src/supersaw.cpp:309 writes the envelope times ten with no channel index"
+     }
+    }
+   },
+   "notes": "The panel misspells the octave knob as Ocrtave; configParam calls it Octave. The panel letters the three waves A, B and C while configParam numbers them 1, 2 and 3, and the two middle-wave controls are lettered B-Wave and B-Width. Each oscillator's saw(), pulse() or triangle() advances the phase as a side effect (src/oscillator.hpp:32 to 38) and process() calls it twice per sample for each oscillator, once into the mix and once into that wave's own output (src/supersaw.cpp:262 and 263), so the phase advances two steps per sample and the wave outputs are one step ahead of what the mix uses. FREQ_C3 is 130.81 (src/oscillator.hpp:3), so the doubled advance puts 0V at the pitch input at about 261.6Hz. In the branch taken when the gate jack is unpatched, src/supersaw.cpp:292 applies the final level CV a second time to a value that already carries it (src/supersaw.cpp:248). Noise duration is 0 to 0.001 seconds and noise mix is 0 to 0.5. Eleven CV jacks carry the maker's second line 'Expects a 0-10V signal' and nothing more."
   },
   "randrouter": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Routes nine inputs to nine outputs, rearranging the routing on each clock by a rule the mode and entropy switches pick out of eighteen",
+    "Switches between treating the nine lines one at a time and treating them as pairs, so that each pair is moved together",
+    "Picks one of six families of rearrangement: Basic, Up, Down, Broadcast, Pairs and Triplets",
+    "Picks how far each clock moves the routing from where it is: Negative pulls it back towards straight through, Low makes a small change, and High makes a large one",
+    "A rising edge past 1V rearranges the routing by the rule the mode and entropy switches name",
+    "A rising edge past 1V puts the routing back to straight through, each input to the output of the same number",
+    "One of the nine signals to be routed; where it comes out depends on the routing as it stands",
+    "Carries whichever input the routing currently sends here, or a crossfade between the old and new ones while fading is switched on",
+    "Replaces the mode switch, a voltage of 0V to 10V picking one of the six in order; with trigger mode on, a rising edge steps or jumps to another mode instead",
+    "Replaces the entropy switch, a voltage of 0V to 10V picking one of the three in order; with trigger mode on, a rising edge steps or jumps to another setting instead",
+    "Replaces the channels switch, below 5V for one line at a time and 5V or above for pairs; with trigger mode on, a rising edge flips it instead",
+    "A rising edge past 1V rearranges the routing by the negative rule of the current mode, whatever the entropy switch is set to",
+    "A rising edge past 1V rearranges the routing by the low rule of the current mode, whatever the entropy switch is set to",
+    "A rising edge past 1V rearranges the routing by the high rule of the current mode, whatever the entropy switch is set to",
+    "Note — nothing happens until a clock arrives: the routing starts straight through and only a clock, or one of the three entropy clocks, changes it.",
+    "Note — the eighteen rules are the six modes crossed with the three entropy settings: Basic gives Unwind, Swap and Randomize, and Up and Down give Sort, Shunt and Rotate in that direction.",
+    "Note — Broadcast gives Split, Double and Blast, which set two or all nine outputs to the same input; Pairs and Triplets repeat the Basic rules in sets of two and three.",
+    "Note — the three entropy clock inputs act alongside the main clock, so one patch can pull the routing about with one clock and settle it with another.",
+    "Note — every output carries as many channels as the widest cable patched into any input.",
+    "Menu — Trigger mode: Enabled, Random mode — turns the three CV jacks into trigger inputs that step through their settings, and Random mode inside it makes each trigger jump to a random setting instead",
+    "Menu — Hold last value — makes an output hold the last voltage it carried when the input the routing sends it is unpatched, instead of dropping to 0V",
+    "Menu — Fade while switching — crossfades between the old routing and the new one instead of switching at once",
+    "Menu — Fade Time — sets how long that crossfade takes"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 10,
+    "12": 8,
+    "13": 9,
+    "14": 11,
+    "15": 12,
+    "16": 13
+   },
+   "out": {
+    "0": 7,
+    "1": 7,
+    "2": 7,
+    "3": 7,
+    "4": 7,
+    "5": 7,
+    "6": 7,
+    "7": 7,
+    "8": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/randrouter.cpp:480 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/randrouter.cpp:484 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "14": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/randrouter.cpp:481 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "15": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/randrouter.cpp:482 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "16": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "src/randrouter.cpp:483 passes the voltage to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:711 takes the widest input channel count with getChannels() and line 737 reads getVoltage(ch) for each channel"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:711 takes the widest input channel count with getChannels() and line 737 reads getVoltage(ch) for each channel"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:711 takes the widest input channel count with getChannels() and line 737 reads getVoltage(ch) for each channel"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:711 takes the widest input channel count with getChannels() and line 737 reads getVoltage(ch) for each channel"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:711 takes the widest input channel count with getChannels() and line 737 reads getVoltage(ch) for each channel"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:711 takes the widest input channel count with getChannels() and line 737 reads getVoltage(ch) for each channel"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:711 takes the widest input channel count with getChannels() and line 737 reads getVoltage(ch) for each channel"
+     },
+     "9": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:711 takes the widest input channel count with getChannels() and line 737 reads getVoltage(ch) for each channel"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:711 takes the widest input channel count with getChannels() and line 737 reads getVoltage(ch) for each channel"
+     },
+     "11": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "src/randrouter.cpp:528 treats it as below or above 5V to pick mono or stereo, and line 518 instead uses it as a trigger while trigger mode is on; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "12": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/randrouter.cpp:535 multiplies it by 0.6, rounds and clamps the result to 0..5 to pick a mode, and line 496 instead uses it as a trigger while trigger mode is on; the maker's own second line on this jack says it expects a 0-10V signal"
+     },
+     "13": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/randrouter.cpp:542 multiplies it by 0.3, rounds and clamps the result to 0..2 to pick an entropy setting, and line 500 instead uses it as a trigger while trigger mode is on; the maker's own second line on this jack says it expects a 0-10V signal"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:731 calls setChannels with the widest input channel count and line 741 writes one voltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:731 calls setChannels with the widest input channel count and line 741 writes one voltage per channel"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:731 calls setChannels with the widest input channel count and line 741 writes one voltage per channel"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:731 calls setChannels with the widest input channel count and line 741 writes one voltage per channel"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:731 calls setChannels with the widest input channel count and line 741 writes one voltage per channel"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:731 calls setChannels with the widest input channel count and line 741 writes one voltage per channel"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:731 calls setChannels with the widest input channel count and line 741 writes one voltage per channel"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:731 calls setChannels with the widest input channel count and line 741 writes one voltage per channel"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/randrouter.cpp:731 calls setChannels with the widest input channel count and line 741 writes one voltage per channel"
+     }
+    }
+   },
+   "notes": "The panel prints Clock, Reset, Entropy, High-E, Low-E, Neg-E, Mode and Chan; the nine signal jacks on each side carry no lettering. The three CV jacks each carry the maker's second line 'Expects a 0-10V signal'. The mode CV maps 0V to 10V onto the six modes by multiplying by 0.6 and rounding (src/randrouter.cpp:535), and the entropy CV onto the three settings by multiplying by 0.3 (src/randrouter.cpp:542); the channels CV is a plain threshold at 5V (src/randrouter.cpp:528). With trigger mode enabled those same three jacks are read as triggers instead. No family is written for the nine signal inputs or the nine outputs: the module routes whatever it is given and gives the voltage no meaning of its own. The eighteen rule names in the lines are the maker's, from the table in README.md."
   }
  }
 }

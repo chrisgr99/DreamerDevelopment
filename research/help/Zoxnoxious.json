@@ -2,27 +2,172 @@
  "plugin": "Zoxnoxious",
  "source": "https://github.com/brer-rabbit/zoxnoxious-virtual/",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "PoleDancer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-pole ladder filter whose response is set by a five-channel signal at the FILTER TOPOLOGY jack: a dry level and a level for each pole, mixed to make any filter shape",
+    "Sets the cutoff over ten octaves with C4 at 261.63Hz in the middle, one octave to a turn of the dial, held between 1Hz and 18% of the sample rate",
+    "Sets the resonance, 0 to 1 on the dial; the figure is squared and multiplied by ten inside, so self-oscillation comes only near the top",
+    "Scales the voltage at the cutoff CV jack, -1 to +1, before it is added to the cutoff in octaves",
+    "Scales the voltage at the resonance CV jack, -1 to +1, before a tenth of it is added to the resonance",
+    "Shifts the cutoff at one octave per volt, scaled by the trimpot above it",
+    "Shifts the resonance, 10V covering the whole of the dial's travel through the trimpot above it; the total is held between 0 and 1",
+    "The signal to be filtered, with ±5V taken as full scale",
+    "A five-channel signal setting the filter response: the first channel is the dry level and the next four are the level of each pole; with nothing patched the filter is a four-pole lowpass",
+    "The filtered signal at ±5V, soft-clipped on the way out",
+    "Note — with nothing patched to FILTER TOPOLOGY this is a plain four-pole lowpass; a Personality module on that jack is what makes it anything else",
+    "Note — the topology signal is read every sample, so crossfaders, switches and slew limiters can morph the filter shape on the way in",
+    "Note — 0.3125V on a topology channel is unity for that pole, since the mix is divided by ten thirty-seconds before it is clipped",
+    "Note — the number of channels at the audio input sets the channel count of the output",
+    "Menu — Add Morphscope (right side) — places a Morphscope expander immediately to the right of this module"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "0": 9
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "audio",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "PoleDancer.cpp:214 reads it with getPolyVoltageSimd, multiplies by the trimpot and adds it to the cutoff in octaves at line 216"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "PoleDancer.cpp:209 reads it with getPolyVoltageSimd, divides by 10, multiplies by the trimpot, adds the knob and clamps the total to 0..1"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "PoleDancer.cpp:204 reads it with getVoltageSimd and divides by 5; line 202 takes the channel count from it"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "a four-pole lowpass",
+      "why": "PoleDancer.cpp:139-156 reads up to five channels as the mix weights, and sets a four-pole lowpass when the jack is unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "PoleDancer.cpp:225 writes five times the clipped mix and line 229 sets the channel count from the audio input"
+     }
+    }
+   },
+   "notes": "The filter core is Fundamental's VCF, with the four state variables mixed by the five weights instead of a fixed tap (PoleDancer.cpp:72-82). The mix is divided by POLEMIX_VOLTAGE_SCALE, 10/32, so a channel at 0.3125V is unity for that pole and anything higher drives the clipper. The cutoff dial reads out as hertz and counts one octave to a turn."
   },
   "PoleDancerPersonality": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Holds one filter shape and sends it to a Pole Dancer as a five-channel signal: a dry level and a level for each of the four poles",
+    "The five levels on one five-channel cable, written at a divided rate rather than every sample",
+    "Note — this module holds no filter until one is loaded: right-click it and choose a preset, which is also what fills in the name on the display",
+    "Note — the five levels have no controls on this panel; they come from the presets, or from an Architect expander placed immediately to the right",
+    "Note — the name on the display can be typed into, and it is saved with the preset",
+    "Note — because the five levels travel as one polyphonic cable, ordinary crossfaders, switches and slew limiters can morph between filter shapes on the way to the Pole Dancer",
+    "Menu — Add Architect (right side) — places an Architect expander immediately to the right of this module"
+   ],
+   "param": {},
+   "in": {},
+   "out": {
+    "0": 1
+   },
+   "family": {
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "PoleDancerPersonality.cpp:96-97 sets the channel count to five and writes the five level values"
+     }
+    }
+   },
+   "notes": "None of the five level parameters has a widget on this panel, so none of them can be clicked for help; they are reached through the presets or through the Architect expander. The output is written only on the expander clock divider tick rather than every sample (PoleDancerPersonality.cpp:61 and 94)."
   },
   "PoleDancerWorkbench-PoleDancer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for Pole Dancer that draws the filter response that module is working with; it goes immediately to the right of it",
+    "Sets how much of the plot is shown: narrow, mid or wide",
+    "Chooses what the screen draws: Bode, the magnitude and phase against frequency, or Pole/Zero, the roots on the s-plane",
+    "Note — with no Pole Dancer immediately to its left this module reads nothing and the screen shows an empty plot",
+    "Note — the mix and feedback figures it plots are sent over from the Pole Dancer; they have no controls on this panel and nothing here changes them",
+    "Note — the plot is refreshed on a divided clock rather than every sample, so fast movement in the topology signal is smoothed over"
+   ],
+   "param": {
+    "9": 1,
+    "10": 2
+   },
+   "in": {},
+   "out": {},
+   "notes": "Nine of this module's eleven parameters have no widget on the panel: the five mix levels and four feedback figures are written into it by the Pole Dancer to its left (PoleDancerWorkbench.cpp:166-175), so only the two switches can be clicked. The same class also builds the Architect, which does give the mix levels trimpots."
   },
   "PoleDancerWorkbench-Personality": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for Personality that draws a filter response and gives it five trimpots to build one with; it goes immediately to the right of the Personality",
+    "Sets the dry level of the filter being built, 0 to 32 as the panel marks it, and hands it back to the Personality",
+    "Sets the level of pole one, 0 to 32 as the panel marks it, and hands it back to the Personality",
+    "Sets the level of pole two, 0 to 32 as the panel marks it, and hands it back to the Personality",
+    "Sets the level of pole three, 0 to 32 as the panel marks it, and hands it back to the Personality",
+    "Sets the level of pole four, 0 to 32 as the panel marks it, and hands it back to the Personality",
+    "Sets how much of the plot is shown: narrow, mid or wide",
+    "Chooses what the screen draws: Bode, the magnitude and phase against frequency, or Pole/Zero, the roots on the s-plane",
+    "Note — with no Personality immediately to its left this module draws nothing and its trimpots reach nothing",
+    "Note — the Personality takes charge for one cycle whenever it is connected or a patch is loaded, so its own values land on these trimpots then; after that the trimpots drive the Personality",
+    "Note — 32 on a trimpot is a gain of 32 on that pole, so small settings go a long way and full ones can be very loud",
+    "Note — to build a filter, set the five trimpots here, type a name on the Personality, and save that as a preset",
+    "Note — the four pole feedback figures the plot uses have no control on this panel and are not sent over by the Personality, so they stay at zero here"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "9": 6,
+    "10": 7
+   },
+   "in": {},
+   "out": {},
+   "notes": "The trimpots are configured as a 0 to 10 parameter shown as a percentage, while the panel marks them 0 to 32: PoleDancerWorkbench.cpp:40-42 multiplies the value by 32/10 to get the coefficient, which is the figure the panel gives. The four feedback parameters have no widget and the Personality never writes them (PoleDancerPersonality.cpp:70-76 sends only the five values), so the pole-zero plot here is drawn with no feedback."
   }
  }
 }

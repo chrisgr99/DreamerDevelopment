@@ -2,17 +2,416 @@
  "plugin": "Myth",
  "source": "https://github.com/Ahineya/vcv-myth-plugin",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Mavka": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Oscillator giving sine, triangle, saw and square at once, each with its own level knob and its own level CV jack",
+    "Sets the pitch, from C4 at 261.63Hz up to one octave above it; the v/oct jack is added to this and the total clamped to four octaves either side of C4",
+    "Scales the sine output, 0 to 1, with the sine CV jack added to it before the total is clamped back to 0 and 1",
+    "Scales the triangle output, 0 to 1, with the triangle CV jack added to it before the total is clamped back to 0 and 1",
+    "Scales the saw output, 0 to 1, with the saw CV jack added to it before the total is clamped back to 0 and 1",
+    "Scales the square output, 0 to 1, with the square CV jack added to it before the total is clamped back to 0 and 1",
+    "One volt per octave added to the pitch knob, the total clamped to four octaves either side of C4",
+    "Added to the sine level knob at one unit per volt, so one volt covers the whole travel from silence to full level",
+    "Added to the triangle level knob at one unit per volt, so one volt covers the whole travel from silence to full level",
+    "Added to the saw level knob at one unit per volt, so one volt covers the whole travel from silence to full level",
+    "Added to the square level knob at one unit per volt, so one volt covers the whole travel from silence to full level",
+    "The triangle wave, -5V to 5V at full triangle level",
+    "The sine wave, -5V to 5V at full sine level",
+    "The saw ramp, -5V to 5V at full saw level",
+    "The square wave, -5V to 5V at full square level",
+    "Note — The level CV jacks are added at one unit per volt rather than one tenth, so anything from 1V upwards holds that waveform at full level and anything at or below 0V silences it.",
+    "Note — Every jack is monophonic; only the first channel of a polyphonic cable is read.",
+    "Note — None of the four waveforms is anti-aliased. All four are built from one wrapping phase counter.",
+    "Note — The module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "sumRange": "-4 to 4V",
+      "normal": "0V",
+      "why": "src/Mavka.cpp:54 adds this input's getVoltage() to the pitch knob and src/Mavka.cpp:55 clamps the sum to -4 and 4 octaves"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "src/Mavka.cpp:75 adds this input's getVoltage() to the sine level knob and src/Mavka.cpp:76 clamps the sum to 0 and 1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "src/Mavka.cpp:79 adds this input's getVoltage() to the triangle level knob and src/Mavka.cpp:80 clamps the sum to 0 and 1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "src/Mavka.cpp:83 adds this input's getVoltage() to the saw level knob and src/Mavka.cpp:84 clamps the sum to 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "src/Mavka.cpp:87 adds this input's getVoltage() to the square level knob and src/Mavka.cpp:88 clamps the sum to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Mavka.cpp:91 writes five times the waveform times its level with setVoltage(), which is channel 1 alone"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Mavka.cpp:90 writes five times the waveform times its level with setVoltage(), which is channel 1 alone"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Mavka.cpp:93 writes five times the waveform times its level with setVoltage(), which is channel 1 alone"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Mavka.cpp:92 writes five times the waveform times its level with setVoltage(), which is channel 1 alone"
+     }
+    }
+   },
+   "notes": "Read from src/Mavka.cpp at commit e511dd9, version 2.0.1; the code has not changed since the 2.0.1 bump at ed9c274. The pitch knob's own range is 0 to 1, so the knob alone covers a single octave upwards from C4 and every lower pitch has to come from the v/oct jack, which the maker's README does not mention. The level CV jacks are summed with the knob in the knob's own 0 to 1 units, at src/Mavka.cpp:75, 79, 83 and 87, so they behave as a 0 to 1V control rather than the 0 to 10V a reader would expect; the README says only that the CV value will be added to the knob value. The phase counter wraps at 0.5 and subtracts 1, so it runs from -0.5 to 0.5, and the saw, triangle and square are all built from that signed phase."
   },
   "Molphar": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three rows of eight steps sharing one probability per step: each clock advances a step, a random draw against that probability sets whether it plays, and all three rows put out a voltage",
+    "Sets the internal clock, 15 to 960 bpm, which drives the sequence whenever the clock jack is empty",
+    "Sets the voltage this step puts on the 1 output when the step plays, -10V to 10V",
+    "Sets the voltage this step puts on the 2 output when the step plays, -10V to 10V",
+    "Sets the voltage this step puts on the 3 output when the step plays, -10V to 10V",
+    "Sets the chance that this step plays, 0 to 100 per cent, and it applies to all three rows at once; a cable in the jack below replaces the knob entirely",
+    "Chooses which row reaches the out jack: below 1 the first row, from 1 up to below 2 the second, at 2 the third",
+    "A rising edge advances the sequence by one step, and the level has to reach 2V for a single step; with nothing patched the internal clock is used instead",
+    "Replaces the probability knob above it for that step, 0V to 1V, with anything outside that range clamped into it",
+    "Replaces the track knob, 0V to 2V: below 1V the first row reaches the out jack, 1V up to below 2V the second, exactly 2V the third",
+    "Any voltage above 0V restarts the sequence, so that the next clock plays the first step",
+    "10V while its own step is the current one and that step played, and 0V at all other times",
+    "10V for about a hundred samples each time a step plays, whatever the row and whatever the step",
+    "The first row's voltage from the last step that played, held until another step plays",
+    "The second row's voltage from the last step that played, held until another step plays",
+    "The third row's voltage from the last step that played, held until another step plays",
+    "The voltage of whichever row the track control selects, taken from the last step that played",
+    "Note — The internal clock runs from the moment the module is placed, so the sequence advances with nothing patched at all.",
+    "Note — An external clock must reach 2V. Between 1V and 2V the module advances a step on every sample, because it subtracts one volt from the value it compares against.",
+    "Note — A step that does not play leaves all four voltage outputs holding what the last step that played put there, and turns that step's indicator red rather than green.",
+    "Note — The trigger output is about a hundred samples long however the module is clocked, so it shortens in time as the sample rate rises.",
+    "Note — The module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 3,
+    "13": 3,
+    "14": 3,
+    "15": 3,
+    "16": 3,
+    "17": 4,
+    "18": 4,
+    "19": 4,
+    "20": 4,
+    "21": 4,
+    "22": 4,
+    "23": 4,
+    "24": 4,
+    "26": 5,
+    "27": 5,
+    "28": 5,
+    "29": 5,
+    "30": 5,
+    "31": 5,
+    "32": 5,
+    "33": 5,
+    "34": 6
+   },
+   "in": {
+    "0": 7,
+    "2": 8,
+    "3": 8,
+    "4": 8,
+    "5": 8,
+    "6": 8,
+    "7": 8,
+    "8": 8,
+    "9": 8,
+    "10": 9,
+    "11": 10
+   },
+   "out": {
+    "1": 11,
+    "2": 11,
+    "3": 11,
+    "4": 11,
+    "5": 11,
+    "6": 11,
+    "7": 11,
+    "8": 11,
+    "9": 12,
+    "10": 13,
+    "11": 14,
+    "12": 15,
+    "13": 16
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "trigger"
+    },
+    "out": {
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "the internal clock at the tempo setting",
+      "why": "src/Molphar.cpp:328 reads this input with getNormalVoltage(), normalled to the internal gate built at src/Molphar.cpp:327, and src/Molphar.cpp:330 steps on a reading of 1 or more"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "ignored",
+      "normal": "the probability knob for that step",
+      "why": "src/Molphar.cpp:251 reads this input with getNormalVoltage(), normalled to that step's probability knob divided by 100, and src/Molphar.cpp:252 clamps it to 0 and 1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "ignored",
+      "normal": "the probability knob for that step",
+      "why": "src/Molphar.cpp:251 reads this input with getNormalVoltage(), normalled to that step's probability knob divided by 100, and src/Molphar.cpp:252 clamps it to 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "ignored",
+      "normal": "the probability knob for that step",
+      "why": "src/Molphar.cpp:251 reads this input with getNormalVoltage(), normalled to that step's probability knob divided by 100, and src/Molphar.cpp:252 clamps it to 0 and 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "ignored",
+      "normal": "the probability knob for that step",
+      "why": "src/Molphar.cpp:251 reads this input with getNormalVoltage(), normalled to that step's probability knob divided by 100, and src/Molphar.cpp:252 clamps it to 0 and 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "ignored",
+      "normal": "the probability knob for that step",
+      "why": "src/Molphar.cpp:251 reads this input with getNormalVoltage(), normalled to that step's probability knob divided by 100, and src/Molphar.cpp:252 clamps it to 0 and 1"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "ignored",
+      "normal": "the probability knob for that step",
+      "why": "src/Molphar.cpp:251 reads this input with getNormalVoltage(), normalled to that step's probability knob divided by 100, and src/Molphar.cpp:252 clamps it to 0 and 1"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "ignored",
+      "normal": "the probability knob for that step",
+      "why": "src/Molphar.cpp:251 reads this input with getNormalVoltage(), normalled to that step's probability knob divided by 100, and src/Molphar.cpp:252 clamps it to 0 and 1"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 1V",
+      "negative": "ignored",
+      "normal": "the probability knob for that step",
+      "why": "src/Molphar.cpp:251 reads this input with getNormalVoltage(), normalled to that step's probability knob divided by 100, and src/Molphar.cpp:252 clamps it to 0 and 1"
+     },
+     "10": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 2V",
+      "negative": "ignored",
+      "normal": "the track knob",
+      "why": "src/Molphar.cpp:351 reads this input with getNormalVoltage(), normalled to the track knob, clamps it to 0 and 2, and src/Molphar.cpp:353 to 363 test it in three bands"
+     },
+     "11": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Molphar.cpp:228 reads this input with getNormalVoltage() and src/Molphar.cpp:229 resets on any reading above 0"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Molphar.cpp:367 and 369 write 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Molphar.cpp:367 and 369 write 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Molphar.cpp:367 and 369 write 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Molphar.cpp:367 and 369 write 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Molphar.cpp:367 and 369 write 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Molphar.cpp:367 and 369 write 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Molphar.cpp:367 and 369 write 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Molphar.cpp:367 and 369 write 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Molphar.cpp:226 and 262 write 0 or 10 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "10": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "src/Molphar.cpp:346 writes that row's step knob to this output with setVoltage(), which is channel 1 alone"
+     },
+     "11": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "src/Molphar.cpp:347 writes that row's step knob to this output with setVoltage(), which is channel 1 alone"
+     },
+     "12": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "src/Molphar.cpp:348 writes that row's step knob to this output with setVoltage(), which is channel 1 alone"
+     },
+     "13": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "src/Molphar.cpp:354, 358 and 362 write the selected row's step knob to this output with setVoltage(), which is channel 1 alone"
+     }
+    }
+   },
+   "notes": "Read from src/Molphar.cpp at commit e511dd9, version 2.0.1. Two declared ports have no widget on the panel and so can never be clicked: input 1, which the maker left unnamed, and output 0; neither is read or written anywhere in process(). Parameter 25 is likewise unreachable: src/Molphar.cpp:411 places it at minus 10.711mm, off the left edge of the panel, it has no configParam call and nothing in process() reads it. The external clock has a real fault. src/Molphar.cpp:330 steps when the reading is 1V or more and the previous reading was below 1, but src/Molphar.cpp:334 subtracts one volt from that reading before src/Molphar.cpp:342 stores it as an integer, so a clock whose high level is between 1V and 2V always stores 0 and steps the sequence on every sample. The module's own internal gate is 10V, so the fault shows only with an external clock. The trigger output's length comes from src/Molphar.cpp:263, which adds 0.01 to a timer once per sample until it passes 1, so the trigger is about a hundred samples long and its duration in time depends on the sample rate. The maker's README says probability inputs expect 0V to +1V and that he may change this to 0V to 10V later; the installed build still clamps to 0 and 1 at src/Molphar.cpp:252. Reset is not edge-detected against a threshold: src/Molphar.cpp:229 fires on any reading above 0V."
   }
  }
 }

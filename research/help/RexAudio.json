@@ -1,18 +1,111 @@
 {
  "plugin": "RexAudio",
- "source": "https://github.com/RexAudio/VCV",
+ "source": "https://github.com/RexAudio/VCV/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "FMtool": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A phase modulation effect for any two audio signals: the carrier is written into a delay line and the modulator moves the point it is read back from, which gives the harmonics of DX-style FM",
+    "Sets how far the modulator moves the read point, reaching 50 samples per volt of modulator at full travel; more of it adds higher harmonics",
+    "Attenuates and inverts the DEPTH CV input, from -1 at full counter-clockwise through 0 at noon to +1 at full clockwise, before it is added to the FM DEPTH knob",
+    "The carrier, which is the signal written into the delay line and read back modulated",
+    "The modulator, whose voltage moves the read point and so modulates the phase of the carrier",
+    "Modulates the FM depth: the voltage is divided by 5, scaled by the attenuverter and added to the FM DEPTH knob, and the total is clamped to the knob's own 0 to 1 range",
+    "The modulated carrier, at as many channels as the wider of IN and MOD IN",
+    "Note — the read point starts 5ms behind the write point, so the output lags the input by 5ms with no modulation applied",
+    "Note — depth changes are smoothed, each sample moving a thousandth of the way to the new value, so turning FM DEPTH or moving its CV arrives over a few tens of milliseconds"
+   ],
+   "param": {"0": 1, "1": 2},
+   "in": {"0": 3, "1": 4, "2": 5},
+   "out": {"0": 6},
+   "family": {
+    "in": {"0": "audio", "1": "audio", "2": "cv"},
+    "out": {"0": "audio"}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "FMtool.cpp:64 getPolyVoltage(c) inside a loop bounded by the wider of the carrier and modulator channel counts"
+     },
+     "1": {
+      "poly": true,
+      "why": "FMtool.cpp:65 getPolyVoltage(c) inside the same channel loop"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FMtool.cpp:72 divides the CV by 5, FMtool.cpp:73 scales it by the attenuverter and adds it to the knob, FMtool.cpp:76 clamps the total to 0 to 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "FMtool.cpp:51 setChannels to the wider of the carrier and modulator channel counts"
+     }
+    }
+   },
+   "notes": "The README calls the trimpot the Depth CV knob and the jack the Depth CV in port; the panel prints DEPTH CV once between them. The maker's tooltip for the trimpot is CV Depth Attenuation, and the parameter's range of -1 to +1 makes it an attenuverter rather than an attenuator. A 4096-sample buffer at FMtool.cpp:27 limits how far the modulation can push the read point before it wraps."
   },
   "PWM": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns any audio input into a pulse wave whose width you set and modulate, by comparing the input against a threshold or by subtracting a delayed copy of it from itself",
+    "Sets the pulse width, from 0.01 to 0.99 of a cycle; 0.5 gives a square wave with odd harmonics only, and moving away from it brings in even harmonics",
+    "Sets the frequency of the internal LFO that modulates the width, from 0.1Hz to 20Hz; with a cable in PWM CV the LFO is not used and this knob changes nothing you can hear",
+    "Scales how far the width is modulated, by the internal LFO when PWM CV is empty and by the PWM CV voltage when it is patched; the swing is proportional to the PULSE WIDTH setting",
+    "Crossfades between the dry input and the pulse; at 100% only the pulse is heard",
+    "The audio input that is turned into a pulse wave",
+    "Tracks the pitch of the input so the delay stays the same fraction of a cycle at every note; in comparator mode nothing in the output depends on it",
+    "Modulates the pulse width and replaces the internal LFO for as long as a cable is in it; ±5V gives the full swing set by PWM DEPTH",
+    "The pulse, crossfaded with the dry input by MIX, at as many channels as the wider of IN and V/OCT",
+    "Note — the module comes up in comparator mode, and delay mode is chosen from the panel menu",
+    "Note — in delay mode patch V/OCT, or the delay is computed as though the input were C4 at 261.63Hz and the width will be wrong at every other pitch",
+    "Note — the width is clamped to between 0.01 and 0.99 of a cycle, so neither the knob nor the modulation can close the pulse completely",
+    "Menu — Comparator Mode — the output swings to 5V whenever the input is above a threshold set by PULSE WIDTH and to -5V otherwise, which works with any input and needs no V/OCT",
+    "Menu — Delay Mode — subtracts a delayed copy of the input from itself, the delay being the pulse width as a fraction of one cycle, which suits sawtooth inputs and keeps more of the input's character"
+   ],
+   "param": {"0": 1, "1": 2, "2": 3, "3": 4},
+   "in": {"0": 5, "1": 6, "2": 7},
+   "out": {"0": 8},
+   "family": {
+    "in": {"0": "audio", "1": "pitch", "2": "cv"},
+    "out": {"0": "audio"}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "PWM.cpp:114 loads the voltages array per channel; PWM.cpp:180 sets the comparator threshold to (0.5 minus width) times 10, which spans -5V to 5V"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V, which is C4",
+      "why": "PWM.cpp:120 multiplies the voltage by the natural log of 2 and raises e to it, times FREQ_C4; PWM.cpp:118 loads the voltages array per channel"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the internal LFO",
+      "why": "PWM.cpp:126 divides the voltage by 5 and PWM.cpp:131 clamps the result to -1 and 1; PWM.cpp:124 uses the LFO instead when the jack is unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "PWM.cpp:96 setChannels to the wider of the audio and V/OCT channel counts"
+     }
+    }
+   },
+   "notes": "The mode is a parameter, MODE_PARAM, but it has no widget on the panel, so it can only be set from the panel menu and no click can reach it for help. Its default of 1 is comparator mode. Both modes pass the result through a one-pole lowpass at 19000Hz. In delay mode a pitch change of a semitone or more starts a 0.05 second crossfade onto a second delay line, and smaller changes glide the delay time instead, which is what the README describes as tracking legato and vibrato. The README says the PWM rate knob is unused when PWM CV is connected; the code still advances the LFO, it simply discards its value, so the effect is as the README says. Comparator mode also multiplies the pulse by an envelope taken from the rectified input, so silence at the input gives silence rather than a DC offset."
   }
  }
 }

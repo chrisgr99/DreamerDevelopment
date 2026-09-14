@@ -1,23 +1,254 @@
 {
  "plugin": "Mojo",
- "source": "https://github.com/tomdasilva",
+ "source": "https://github.com/tomdasilva/Mojo",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "dogs": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo drive: each channel is pushed through a saturating curve of its own, and the two are then cross-mixed into both outputs",
+    "Sets the level of both inputs before the drive, from silence at the counter-clockwise end to twice the incoming voltage at the clockwise end",
+    "Sets the cross-mix between the channels: at the counter-clockwise end each output carries twice as much of the other channel as of its own, and at the clockwise end fifty times as much",
+    "Multiplies both channels again before the saturating curve, up to four times, so it sets how hard they are driven rather than how loud the module is",
+    "The left audio input, driven through a hyperbolic tangent, which flattens it as it grows; with the right input empty both outputs carry this channel",
+    "The right audio input, driven through a sine rather than a hyperbolic tangent, so a loud signal folds back on itself instead of flattening",
+    "Carries the driven left channel, inverted, plus at least twice as much of the driven right channel",
+    "Carries the driven right channel, inverted, plus at least twice as much of the driven left channel",
+    "Note — nothing in the module limits the output level; with both trimmers turned up the two jacks reach tens of volts",
+    "Note — the maker gave no name to any knob or jack here, so hovering one of them shows nothing"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/dogs.cpp line 41, getVoltage with no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/dogs.cpp line 42, getVoltage with no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/dogs.cpp line 44, setVoltage with no setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/dogs.cpp line 45, setVoltage with no setChannels"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3bcad57, whose plugin.json is byte for byte the installed one. Three things the panel does not say. The two channels are not driven alike: the left goes through std::tanh, which flattens, and the right through std::sin, which folds back once the signal passes a quarter turn, so the same signal in both jacks comes out different. The trimmer drawn inside the Output group multiplies the signal BEFORE the saturating curve, so it is a second drive control and not an output level. And the large knob is configured from -1 to -0.52, which makes both terms of the mix negative: every output is inverted, and the cross term is the incoming signal divided by that value plus 0.5, running from twice at the counter-clockwise end to fifty times at the clockwise end. Nothing is named: configParam and the port configs were all called with an empty name, so no control in the module has a tooltip."
   },
   "pigs": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Bass oscillator: a sine with a second and a third harmonic mixed in, a wave folder, and a second voice that can be switched in",
+    "Sets the level of the mixed sines before the folder, from silence at the counter-clockwise end to twice at the clockwise end",
+    "Sets the voltage at which the wave is reflected back on itself; turned past the peak of the signal it folds nothing, and at the counter-clockwise end the wave comes out inverted and unchanged",
+    "Scales the voltage at the jack above it before that voltage is added to the fold knob; at the counter-clockwise end that jack does nothing",
+    "Sets the pitch, from three octaves below middle C at the counter-clockwise end to middle C at the clockwise end, and two octaves below middle C by default",
+    "Switches the Exciter voice on, which adds the fundamental again together with a sine at half its rate; the Exciter lamp lights while it is on",
+    "Sets the level of the second harmonic, one octave above the fundamental, from silence to twice the fundamental",
+    "Sets the level of the Exciter voice, which reaches the output only while the Exciter switch is on",
+    "Sets the level of the third harmonic, an octave and a fifth above the fundamental rather than the two octaves the panel lettering implies",
+    "Added straight to the volume knob, one volt raising the level by half that knob's whole travel, with nothing clamping the total",
+    "Added to the fold knob after the trimmer below it, one volt raising the fold point by half that knob's whole travel",
+    "Added to the pitch knob at 1V per octave; the total is held between four octaves below and four octaves above middle C",
+    "Added straight to the second harmonic knob, one volt raising its level by half that knob's whole travel",
+    "Added straight to the third harmonic knob, one volt raising its level by half that knob's whole travel",
+    "Carries the oscillator at five volts for each unit of the mixed sines, so with the harmonic and volume knobs turned up it runs well past ±10V unless the fold knob is brought down",
+    "Note — no cable is needed to start it: the oscillator runs from the moment the module is placed, two octaves below middle C",
+    "Note — the maker gave no name to any knob or jack here, so hovering one of them shows nothing"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "pitch",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/pigs.cpp line 72, added to VOLUME_PARAM with no clamp"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/pigs.cpp line 92, multiplied by TRIMPOT_PARAM then added to DRIVE_PARAM"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/pigs.cpp lines 58 to 60, added to PITCH_PARAM then clamped to -4 and 4 octaves"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/pigs.cpp line 68, added to UP_PARAM with no clamp"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/pigs.cpp line 64, added to SUB_PARAM with no clamp"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/pigs.cpp lines 103 and 106, setVoltage with no setChannels"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3bcad57. The enum calls the third partial SUB_PARAM, but it is std::sin(6*pi*phase) against the fundamental's std::sin(2*pi*phase), which is three times the frequency: an octave and a fifth ABOVE, not below. The panel prints Up 2 over it, which is nearer the truth than the enum but still wrong by a fifth. Up 1 is std::sin(4*pi*phase), a clean octave up. The folder is a single reflection, out = sign(out)*2*drive - out, applied only when the signal is outside plus or minus the drive value; the parameter runs 0 to 2 with a default of 0, so at the default the whole signal is merely inverted, and once the knob passes the peak of the signal the folder does nothing at all for the rest of its travel. The Exciter's second voice is std::sin(2*pi*phase) + std::sin(1*pi*phase); the second term runs at half the phase rate while the phase itself wraps every cycle, so it breaks at each wrap rather than sounding as a clean sub-octave. Every CV jack except the drive one is added to its knob with no attenuator and no clamp. Nothing is named: configParam and the port configs were all called with an empty name."
   },
   "sheep": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Random voltage generator: a new value on each trigger or at a rate of its own, drawn from a flat or a bell-shaped spread, with a gate output that fires on the higher draws",
+    "Switches between drawing a new value at the module's own rate and drawing one on each incoming trigger; the lamp in the Trig group lights while triggers are used",
+    "Sets how long each drawn value is held, from a new value on every sample at the counter-clockwise end to one every 2ms at the clockwise end",
+    "Switches the draw between a flat spread from zero upwards and a bell curve centred on zero, which is what puts negative voltages on the outputs",
+    "Scales the drawn voltage: on the flat setting the value reaches five volts times this, and on the bell setting it sets the width of the curve",
+    "A rising edge above 1V draws a new value; this jack is read only while the Trig switch is set to use triggers",
+    "Added to the hold time in whole samples, one volt lengthening it by one sample",
+    "Added to the range knob, one volt raising it by a twentieth of that knob's whole travel",
+    "A gate whose high level is five volts times the range setting, fired when the drawn value passes a threshold: zero on the bell setting and 2.5V on the flat one",
+    "The drawn voltage itself, held until the next value is drawn",
+    "Note — on the flat setting the gate output tests against a fixed 2.5V while the value drawn only reaches five volts times the range knob, so at or below that knob's middle it never leaves 0V",
+    "Note — the module comes up free-running with the hold time at nothing, so it draws a fresh value every sample and its output is white noise until the hold knob is turned up",
+    "Note — the maker gave no name to any knob or jack here, so hovering one of them shows nothing"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/sheep.cpp line 92, dsp::SchmittTrigger::process with its default 0V and 1V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/sheep.cpp line 53, added to an int sample count"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/sheep.cpp line 56, multiplied by 0.05 then added to RANGE_PARAM with no clamp"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/sheep.cpp line 68, setVoltage of rangeval*5 or zero, with no setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/sheep.cpp line 80, clamped to -10 and 10 on the bell setting; the flat setting never goes below zero"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3bcad57. The gate output has a real fault: on the flat distribution the drawn value is rangeval*5*random::uniform(), which reaches at most five volts times the range knob, and it is compared against a hard-coded 2.5, so the gate can only ever fire when that knob is past its own middle, and at the default of 0.5 it never fires at all. On the bell distribution the comparison is against zero, which is the middle of that spread, and the gate fires about half the time. The hold-time CV is added to an integer sample count rather than to the parameter, so one volt is one sample whatever the sample rate. The panel prints Noise Pitch over the hold-time knob and -10V/+10V over the distribution switch, which are descriptions of the effect rather than names of the control. Nothing is named: configParam and the port configs were all called with an empty name."
   }
  }
 }

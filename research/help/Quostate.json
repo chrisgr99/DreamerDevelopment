@@ -1,18 +1,223 @@
 {
  "plugin": "Quostate",
- "source": "https://github.com/HiddenSide/Quostate",
+ "source": "https://github.com/HiddenSide/Quostate/blob/main/LSystem_manual_EN.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "LSystem": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sequencer built from up to seven typed rules of scale-degree and duration pairs, where the last degree of a rule picks the rule that follows it, with every degree quantised to a scale set on the menu",
+    "Starts and stops the sequence, and the lamp in it is lit while the sequence runs",
+    "Restarts the sequence of every channel at the first rule",
+    "One pulse per beat drives everything; every duration written in a rule is counted in these pulses, and with nothing patched here the sequence never advances",
+    "A trigger restarts every channel at the first rule; with a cable in EVAL in Rule select mode it jumps straight to the first step of the rule that voltage picks",
+    "A trigger flips the sequence between running and stopped, exactly as the RUN button does",
+    "Steers which rule plays next, in whichever way the Eval input mode menu item is set to: a 0 to 10V rule number, a gate above 2V holding the current rule, or a trigger releasing the next transition",
+    "The pitch of the step playing on that channel, one volt per octave, quantised to the scale and root note set on the menu",
+    "10V while the step playing on that channel sounds, dropping briefly at each new step so that envelopes retrigger, and staying at 0V through a silence step",
+    "A 10V trigger when the rule playing on that channel finishes, with all of that rule's repetitions counting as one block",
+    "0V to 10V saying which rule that channel is playing, in steps of ten sixths of a volt, with 0V for the first rule and 10V for the seventh",
+    "Note — The module does nothing until a rule is typed into one of the seven text fields and a clock is patched.",
+    "Note — A rule is written as an initiator degree and duration, then an arrow, then the steps of the sequence, each a degree and a duration separated by a comma.",
+    "Note — The seven rule fields and the two random-pool fields below them are typed into directly, and confirmed with Enter or by clicking away.",
+    "Note — A rule field's bar is yellow while it has focus, red when what is typed will not parse, and green while the first channel plays that rule.",
+    "Note — Two clock pulses are needed before sub-beat timing is available; until then only the first step of each beat fires.",
+    "Note — If the clock stops or a pulse arrives late, the pitch and gate hold where they are rather than running on.",
+    "Note — Editing a rule that is currently playing takes effect only once that rule and all its repetitions have finished, so rules can be rewritten without stopping playback.",
+    "Menu — Polyphony channels — sets how many independent voices run, from one to six; all four outputs carry that many channels, and each voice makes its own random choices",
+    "Menu — Reset when starting playback — restarts the sequence every time playback is started from the RUN button or the run input",
+    "Menu — If a note has no rule...: Loop back to first rule, Jump to a random rule — sets what happens when the last degree of a rule matches no other rule's initiator",
+    "Menu — Eval input mode: Rule select (0-10V CV), Loop / Hold rule (Gate), Advance on trigger (Trigger) — sets how the EVAL jack steers the sequence",
+    "Menu — Autoreset after steps (each step = 1 beat): Off, 8 beats, 16 beats, 32 beats, 64 beats — restarts the sequence automatically after that many clock pulses",
+    "Menu — Scale — sets the scale the rule degrees are quantised to, natural major by default",
+    "Menu — Root note — sets the tonic of that scale, C by default",
+    "Menu — Random degree range (r) — sets the limits the random character picks between when the degree pool is empty, and the limits the plus and minus operators wrap at",
+    "Menu — Randomize rules style: Melodic, Acid / Techno, Ambient / Evolving, Complex L-System — sets the profile used when Randomize Rules writes the rules",
+    "Menu — Randomize Rules — writes a fresh set of rules and both random pools in the chosen style; leave the seed field above it empty for a random seed, or type one in to repeat a particular result"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/LSystem.cpp:703 passes this input's getVoltage() to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V, and src/LSystem.cpp:702 gates the whole clock front end on isConnected"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/LSystem.cpp:663 passes this input's getVoltage() to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/LSystem.cpp:640 passes this input's getVoltage() to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/LSystem.cpp:537 and 653 ask this input for its channel count and read channels by index; src/LSystem.cpp:543 ignores any channel reading below -1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/LSystem.cpp:766 sets this output's channel count from the polyphony menu and src/LSystem.cpp:778 writes each channel by index"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/LSystem.cpp:767 sets this output's channel count from the polyphony menu and src/LSystem.cpp:779 writes 10 or 0 per channel"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/LSystem.cpp:768 sets this output's channel count from the polyphony menu and src/LSystem.cpp:780 writes 10 or 0 per channel from a pulse generator"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/LSystem.cpp:769 sets this output's channel count and src/LSystem.cpp:578 builds the value as the rule row index times ten sixths of a volt"
+     }
+    }
+   },
+   "notes": "Read from src/LSystem.cpp, src/LSystemEngine.hpp and LSystem_manual_EN.md at commit d2a810c, the commit that carries version 2.2.2; the only later commits touch the changelog and the module's display name. The rule fields and the two random pools are custom text widgets rather than parameters, so they have no position in the census and no click on them can reach this help; they are covered by module notes instead. The RESET button and the reset input are not the same: src/LSystem.cpp:665 makes the jump-to-selected-rule behaviour conditional on the reset arriving at the jack rather than the button, so the button always performs a plain reset. The RULE output's step is the rule row index times 10 divided by 6, at src/LSystem.cpp:578, which the manual gives as about 1.667V. Two menu names differ from the manual's wording: the manual calls the autoreset item Autoreset after steps where the code prints Autoreset after steps (each step = 1 beat), and it names the randomize styles Ambient and Complex Chaos where the code prints Ambient / Evolving and Complex L-System. The names used here are the code's."
   },
   "MorphfastMini": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Generates one voltage transition from an Init voltage to a Target voltage, timed in whole clock pulses and shaped by one of four curves",
+    "Sets the voltage the transition starts from, -10V to 10V; the setting is captured at the instant the transition starts",
+    "Sets the voltage the transition runs to, -10V to 10V; the setting is captured at the instant the transition starts",
+    "Sets how many clock pulses the transition lasts, 1 to 64 in whole steps, with the delay setting taken off the top so the two together never exceed 64",
+    "Starts a transition on the next clock edge, or at once when a clock edge has passed within the chaining window; a press is ignored while a transition or its delay is already running",
+    "Exchanges the INIT and TARGET settings",
+    "Steps the curve on by one each press, cycling Ramp, Ramp Back, Step and Triangle",
+    "Steps the start delay on by one each press, cycling OFF, 1, 2, 4, 8, 16 and 32 clock pulses counted from the edge that arms the transition",
+    "Rising edges both start the transition and time it, one pulse to one step of the duration; if the clock stops the output holds where it is until the next edge",
+    "A rising edge cancels an armed, delayed or running transition and snaps the output back to the INIT voltage",
+    "A trigger starts a transition on the next clock edge, or at once when a clock edge has passed within the chaining window; it is ignored while a transition or its delay is already running",
+    "A 10V trigger 10ms long, sent when a transition finishes",
+    "The transition voltage; it holds the INIT setting until the first transition, and afterwards rests at TARGET for Ramp and Step or back at INIT for Ramp Back and Triangle",
+    "Note — Nothing happens until a clock is patched and a transition is fired, from the FIRE jack or the button. A fire before any clock edge has arrived arms the module until the first edge.",
+    "Note — Every setting is captured at the instant a transition starts, so knob, curve, delay and easing changes made during a transition or its delay apply only from the next one.",
+    "Note — The two-digit readout mirrors the DURATION setting, the DLY readout the delay setting and the icon beside them the curve; none of the three can be clicked.",
+    "Note — The yellow lamp is lit from the moment a fire is accepted until the transition ends, covering the delay as well as the transition.",
+    "Note — Only the difference between the two ease settings is used, so setting both to the same value gives the plain linear shape on every curve.",
+    "Menu — Ease in — softens the start of the motion, 0 to 100 per cent",
+    "Menu — Ease out — softens the arrival at the end of the motion, 0 to 100 per cent",
+    "Menu — Same-step chain — treats a fire arriving within half a millisecond of a clock edge, or a quarter of the last clock period where that is shorter, as falling on that edge rather than the next one"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/MorphfastMini.cpp:178 passes this input's getVoltage() to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/MorphfastMini.cpp:179 passes this input's getVoltage() to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/MorphfastMini.cpp:180 passes this input's getVoltage() to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/MorphfastMini.cpp:263 and 266 write 10 or 0 to this output with setVoltage(), for the 10e-3 second window set at src/MorphfastMini.cpp:83"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "src/MorphfastMini.cpp:260 writes the transition voltage with setVoltage(), interpolated between the Init and Target knobs, which are each configured -10 to 10"
+     }
+    }
+   },
+   "notes": "Read from src/MorphfastMini.cpp and MorphFastMini_manual_EN.md at commit d2a810c, the commit that carries version 2.2.2. The Ease in and Ease out parameters, indices 7 and 8, have no widget on the panel at all: they are reached only through the module menu, where src/MorphfastMini.cpp:446 to 453 attach their parameter quantities to two sliders. They therefore get no line and no tag, and are covered by menu lines instead. The easing is a single quadratic, at src/MorphfastMini.cpp:117 to 119, whose coefficients are one minus ease-in plus ease-out and ease-in minus ease-out, which is why equal settings cancel to the linear shape. The duration ceiling at src/MorphfastMini.cpp:138 is 64 minus the delay in pulses, so a long delay shortens the longest transition available. Everything the manual states about ranges, curve behaviour, the 10ms end-of-transition trigger and the same-step window matched the source."
   }
  }
 }

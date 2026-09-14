@@ -1,23 +1,325 @@
 {
  "plugin": "Aluminium",
- "source": "https://github.com/neilbgr/Aluminium",
+ "source": "https://github.com/neilbgr/Aluminium/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Zones": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Splits one polyphonic keyboard stream into two note ranges, each with its own five output jacks and each switchable between passing its channels through and reducing them to one monophonic voice",
+    "Sets the note at and above which an incoming note goes to Zone B, everything below it going to Zone A; -4V to 4V, so eight octaves either side of C4",
+    "Arms the module to take its split point from the next note played at the V/Oct input; that note is held back from both zones, and clicking again cancels without a note being played",
+    "Switches Zone A to a single monophonic voice whose gate stays high across overlapping notes and drops only when the zone empties; unlit, the zone's channels pass through at their own channel numbers",
+    "Switches Zone B to a single monophonic voice whose gate stays high across overlapping notes and drops only when the zone empties; unlit, the zone's channels pass through at their own channel numbers",
+    "The polyphonic pitch cable from a MIDI-CV module at 1V per octave; the number of channels on this cable is how many the module reads",
+    "The polyphonic gate cable; a channel counts as held while it is at 1V or more",
+    "The polyphonic velocity cable, copied to whichever zone each channel falls in",
+    "The polyphonic aftertouch cable, copied to whichever zone each channel falls in",
+    "The polyphonic retrigger cable; an edge here is what sorts a channel into its zone, and without one a channel is sorted the first time it is found with its gate high",
+    "Zone A's pitch at 1V per octave: one channel per input channel in polyphonic mode, or a single channel carrying the priority note in monophonic mode",
+    "Zone A's gate: the input gate for the channels in this zone and 0V for the others in polyphonic mode, or one channel at 10V while any note in the zone is held in monophonic mode",
+    "Zone A's velocity: per channel in polyphonic mode, or the priority note's velocity on one channel in monophonic mode",
+    "Zone A's aftertouch: per channel in polyphonic mode, or the priority note's aftertouch on one channel in monophonic mode",
+    "Zone A's retrigger: the input retrigger for channels in this zone in polyphonic mode, or a 1ms pulse in monophonic mode fired only for a genuinely new key press",
+    "Zone B's pitch at 1V per octave: one channel per input channel in polyphonic mode, or a single channel carrying the priority note in monophonic mode",
+    "Zone B's gate: the input gate for the channels in this zone and 0V for the others in polyphonic mode, or one channel at 10V while any note in the zone is held in monophonic mode",
+    "Zone B's velocity: per channel in polyphonic mode, or the priority note's velocity on one channel in monophonic mode",
+    "Zone B's aftertouch: per channel in polyphonic mode, or the priority note's aftertouch on one channel in monophonic mode",
+    "Zone B's retrigger: the input retrigger for channels in this zone in polyphonic mode, or a 1ms pulse in monophonic mode fired only for a genuinely new key press",
+    "Menu — Monophonic priority (Zone A): Last note, Highest note, Lowest note — chooses which of the overlapping held notes Zone A plays while it is monophonic",
+    "Menu — Monophonic priority (Zone B): Last note, Highest note, Lowest note — chooses which of the overlapping held notes Zone B plays while it is monophonic",
+    "Note — the reading at the top shows the split note and its frequency, and right-clicking it opens a field where a note name such as C4 or F#3 can be typed in place of turning the knob",
+    "Note — while Learn is armed every output is set to no channels at all, so nothing plays until the split note has been taken",
+    "Note — feeding one zone's five outputs into a second Zones module splits that range again, which is how three or more zones are built from one keyboard",
+    "Note — in polyphonic mode the pitch, velocity and aftertouch outputs hold their last value on a channel that has left the zone; only the gate and retrigger drop at once",
+    "Note — only the first sixteen channels of the input cables are read"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15,
+    "6": 16,
+    "7": 17,
+    "8": 18,
+    "9": 19
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "pitch",
+     "6": "trigger",
+     "7": "cv",
+     "8": "cv",
+     "9": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/Zones.cpp:310 getChannels() sets the loop bound, :320 getVoltage(c) per channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "continuous",
+      "why": "src/Zones.cpp:321 getVoltage(c) >= 1 per channel"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/Zones.cpp:421 and :440 getVoltage(c) per channel, copied straight to the zone output"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/Zones.cpp:422 and :441 getVoltage(c) per channel, copied straight to the zone output"
+     },
+     "4": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "continuous",
+      "why": "src/Zones.cpp:329 a SchmittTrigger per channel, Rack's default thresholds of 0V and 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/Zones.cpp:434 setChannels to the input count in polyphonic mode, :411 one channel in monophonic"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Zones.cpp:435 setChannels to the input count, :423 10V for a held zone in monophonic mode"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/Zones.cpp:436 setChannels to the input count in polyphonic mode, :413 one channel in monophonic"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/Zones.cpp:437 setChannels to the input count in polyphonic mode, :414 one channel in monophonic"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Zones.cpp:438 setChannels to the input count, :428 a 1ms 10V pulse in monophonic mode"
+     },
+     "5": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/Zones.cpp:434 setChannels to the input count in polyphonic mode, :411 one channel in monophonic"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Zones.cpp:435 setChannels to the input count, :423 10V for a held zone in monophonic mode"
+     },
+     "7": {
+      "poly": true,
+      "why": "src/Zones.cpp:436 setChannels to the input count in polyphonic mode, :413 one channel in monophonic"
+     },
+     "8": {
+      "poly": true,
+      "why": "src/Zones.cpp:437 setChannels to the input count in polyphonic mode, :414 one channel in monophonic"
+     },
+     "9": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Zones.cpp:438 setChannels to the input count, :428 a 1ms 10V pulse in monophonic mode"
+     }
+    }
+   },
+   "notes": "The maker's README names the two priority menu items 'Zone A priority (when monophonic)' and 'Zone B priority (when monophonic)'; the code creates them as 'Monophonic priority (Zone A)' and '(Zone B)' (src/Zones.cpp:602-611), which is what the menu prints. The split test is pitch greater than or equal to the threshold for Zone B, so the split note itself belongs to Zone B. The velocity and aftertouch ports are given no range because nothing in the module scales or clamps them; they are passed through as they arrive. The Aluminium theme submenu is on every module of this plugin and is left out of the lines."
   },
   "Pads": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sixteen gate outputs, one per learned note: each output goes high while the note learned into its cell is held on the incoming polyphonic pitch and gate pair",
+    "Turns that cell's output into a toggle, switching on and off on each fresh press of its note in place of following the held note; learning or clearing that cell turns this back off",
+    "The polyphonic pitch cable the cells are matched against, and the cable that notes are learned from; it usually comes from a MIDI-CV module or from a Zones output",
+    "The polyphonic gate cable; a channel counts as held at 1V or more, and a rising edge here is what an armed cell captures as its note",
+    "10V while the note learned into that cell is held on any channel of the input, or while that cell is toggled on in latch mode, and 0V otherwise, including for a cell with no note",
+    "Menu — Add an expander — places a PadX immediately to the right of this module, or to the right of the last expander already chained there",
+    "Menu — Clear unpatched cells — clears the note from every cell whose own gate output has no cable in it, leaving the patched cells alone",
+    "Menu — Invert latches — turns latch on for every cell that had it off, and off for every cell that had it on",
+    "Menu — Factory presets — on Rack's own Preset submenu: ready-made cell mappings, chromatic and white-key or black-key runs, the stock pad maps for two controllers, and Unmapped for a clean slate",
+    "Note — a cell is learned by clicking it and playing the note on the incoming cable, or by clicking it and typing a letter from A to G, a # for a sharp and a digit for the octave, then Enter",
+    "Note — control-click, or command-click on a Mac, arms a cell for sequential learning, so each note captured arms the next cell and a whole row of pads can be mapped in one pass",
+    "Note — Escape, or clicking the armed cell again, cancels a learn and leaves that cell as it was; Backspace or Delete clears the cell to two dashes and its output then stays at 0V",
+    "Note — the same note is never mapped twice: learning a note into one cell clears it from whichever other cell held it",
+    "Note — a module fresh from the browser comes up with a chromatic run, C2 in the first cell up to D sharp 3 in the sixteenth, meant as something to learn over",
+    "Note — a cell shows a short line above its note name while that note is held on the input, and a line below while its own output is high; with latch on for that cell, the two can differ",
+    "Note — the first output is the top cell of the display's left column and the sixteenth is the bottom of its right column, running down each column in turn",
+    "Note — the sixteen cells are drawn inside one display widget rather than as separate controls, so no help line can be reached by clicking a cell",
+    "Note — only the first sixteen channels of the input cables are read"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "9": 4,
+    "10": 4,
+    "11": 4,
+    "12": 4,
+    "13": 4,
+    "14": 4,
+    "15": 4
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/Pads.cpp:135 getChannels() capped at 16 sets the loop bound, :145 getVoltage(c) turned into a note number"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "continuous",
+      "why": "src/Pads.cpp:144 getVoltage(c) >= 1 per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Pads.cpp:170 setChannels(1) and 10V or 0V on every cell"
+     }
+    }
+   },
+   "notes": "Every one of the sixteen gate outputs is written by the same two lines (src/Pads.cpp:170-171), so one props entry covers them all. Where two channels carry the same note, the later channel is the one an expander follows (src/Pads.cpp:147). Latch toggles on the rising edge of the note match, not on the raw gate, so a latched cell does not retrigger while the note is held. The expander message carries the raw note match rather than the latched state, so a PadX on a velocity lane follows the physical note even where the gate output is latched on."
   },
   "PadX": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Pads expander: it splits one polyphonic lane, such as velocity or aftertouch, into sixteen mono outputs, one per note Pads has learned; it goes immediately to the right of Pads or of another PadX",
+    "The polyphonic cable to split up, usually the velocity, aftertouch or retrigger output of whatever feeds Pads its pitch and gate",
+    "Whatever this lane currently carries for the note learned into the matching cell of Pads, or 0V while that cell has no note, its note is not held, or this cable has too few channels to reach it",
+    "Note — the field on the panel is a label to click and type into; it renames the tooltips on this module's jacks and changes nothing about the signal",
+    "Note — the label fills itself in from the first cable patched in while it is empty, taking eight characters of the source jack's name, and empties again when that cable is pulled out",
+    "Note — the lamp is yellow while nothing is patched into the lane, red while this cable has a different channel count from the pitch and gate cable feeding Pads, and green when the two match",
+    "Note — with no Pads to the left, directly or through other expanders, every output stays at 0V",
+    "Note — several of these can be chained, one per lane, in any order; each passes the note mapping on to the next",
+    "Note — a label typed in by hand is never cleared automatically; only one that filled itself in from a cable is"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/PadX.cpp:130 getChannels() bounds the per-cell range test, :132 getVoltage(c) for the matched channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/PadX.cpp:131 setChannels(1) on every one of the sixteen outputs"
+     }
+    }
+   },
+   "notes": "No family is given to these ports: the module passes on whatever lane is patched into it, and the maker's own manual says the module does not care which lane that is. All sixteen outputs are written by the same three lines (src/PadX.cpp:128-132), so one props entry covers them. A channel-count mismatch is checked here rather than trusted from Pads, so an out-of-range cell reads 0V rather than a stale voltage."
   }
  }
 }

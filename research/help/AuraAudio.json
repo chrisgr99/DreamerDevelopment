@@ -1,13 +1,39 @@
 {
  "plugin": "AuraAudio",
- "source": "https://github.com/emurray2/EVMusic-Rack",
+ "source": "https://github.com/emurray2/auraaudio-vcv-rack",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "ModularForecast": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A screen of drifting snow whose speed follows the voltage patched into it; the signal itself passes straight through to the output",
+    "The voltage that drives the snow: the flakes move at a rate of one plus five times its distance from 0V, so 2V or -2V sends them eleven times as fast as 0V does",
+    "A copy of the input, channel for channel",
+    "Note — the module has no knobs, switches or menu items of its own. Everything it does follows from the voltage at the Snow jack.",
+    "Note — the snow keeps drifting at its base rate with nothing patched, so the screen never stops moving.",
+    "Note — only the first channel of a polyphonic cable steers the snow, but every channel reaches the output."
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "ModularForecast.cpp:42 calls getChannels and line 46 readVoltages into a 16-element array; line 62 takes the square root of the square of getVoltage, the first channel only, for the display"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "ModularForecast.cpp:58 calls setChannels with the input's channel count and line 59 writeVoltages copies all of them"
+     }
+    }
+   },
+   "notes": "Source read at commit 06a4fff of https://github.com/emurray2/auraaudio-vcv-rack, whose plugin.json is byte-identical to the installed one. THE SKELETON'S SOURCE URL IS THE WRONG REPOSITORY: emurray2/EVMusic-Rack still carries this plugin at version 1.0.0 and its README now points at auraaudio-vcv-rack as the replacement. The panel SVG is the same blob in both and in the installed folder. src/ has not changed since 96132d7, the commit that set the version to 2.0.0, so the four commits after it (LICENSE, Makefile, plugin.json) cannot alter the reading. NO FAMILY IS GIVEN TO EITHER JACK. The output is a straight copy of the input, so the pair carries whatever is put into it — audio, a control voltage or a gate all work and all move the snow. A NEGATIVE VOLTAGE MOVES THE SNOW EXACTLY AS ITS POSITIVE TWIN DOES: line 62 takes the square root of the square, which is the absolute value. The output passes the sign through untouched. ModularForecast.cpp:20 declares a ClockDivider set to a division of 512 at line 25 that nothing ever calls. ModularForecastDisplay declares its module pointer as a freshly constructed ModularForecast at line 113, and the widget overwrites it at line 247 with the widget's own module, which Rack passes as null in the module browser; displayParticles reads module->snowVoltage at line 124 with no null test. The panel prints Snow beside the input jack and nothing beside the output; the maker calls neither configInput nor configOutput, so Rack shows an empty tooltip on both."
   }
  }
 }

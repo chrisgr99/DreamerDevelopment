@@ -2,22 +2,401 @@
  "plugin": "NoSuchDevice",
  "source": "https://github.com/thorinside/NoSuchDevice",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "TrigGate": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Holds a gate high between two triggers, one jack raising it and the other dropping it",
+    "A rising edge here takes the gate output to 10V and leaves it there; an edge arriving while the gate is already high changes nothing. The threshold is 2V rising and 0.1V falling",
+    "A rising edge here returns the gate output to 0V; an edge arriving while the gate is already low changes nothing. The threshold is 2V rising and 0.1V falling",
+    "Carries 10V from the start trigger until the stop trigger arrives, and 0V the rest of the time; a freshly placed module starts at 0V",
+    "Note — the gate has no length of its own: with nothing patched to STOP it stays high for as long as the patch runs",
+    "Note — the three lamps follow, from the top down, the voltage at START, the voltage at STOP, and whether the gate is high"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/TrigGate.cpp:46 getVoltage(), :48 rescale(v, 0.1, 2.0, 0, 1) into a SchmittTrigger left at Rack's default 0 and 1 thresholds, so 2V rising and 0.1V falling"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/TrigGate.cpp:47 getVoltage(), :52 rescale(v, 0.1, 2.0, 0, 1) into a SchmittTrigger left at Rack's default 0 and 1 thresholds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/TrigGate.cpp:59 setVoltage(10.0f) and :64 setVoltage(0.0f); no other write to this port"
+     }
+    }
+   },
+   "notes": "Both trigger inputs are pushed through rescale(v, 0.1f, 2.0f, 0.f, 1.f) before a SchmittTrigger whose thresholds are left at Rack's defaults, so the real thresholds are 2V rising and 0.1V falling rather than the 1V/0.1V a reader would expect from a Rack module. The output is written only on a transition, so it holds its last value across a sample-rate change. No port reads getChannels or getPolyVoltage anywhere in the plugin, so nothing here is polyphonic."
   },
   "DivTrig": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Counts incoming triggers and fires a short pulse from eight outputs at eight different divisions of that count, every pulse passed or dropped by one probability setting",
+    "The chance a division fires when its turn comes round; nothing gets through at the far left, everything at the far right, and a freshly placed module is at mid travel",
+    "The triggers to be counted; every rising edge advances all eight dividers by one. The threshold is 2V rising and 0.1V falling",
+    "A rising edge here returns all eight counters to their starting positions and clears any pulse in progress; a trigger arriving at TRIG in that same sample is not counted",
+    "A 1ms pulse at 10V on every incoming trigger, or nothing, according to the probability",
+    "A 1ms pulse at 10V on every second incoming trigger, or nothing, according to the probability",
+    "A 1ms pulse at 10V on every third incoming trigger, or nothing, according to the probability",
+    "A 1ms pulse at 10V on every fourth incoming trigger, or nothing, according to the probability",
+    "A 1ms pulse at 10V on every fifth incoming trigger, or nothing, according to the probability",
+    "A 1ms pulse at 10V on every sixth incoming trigger, or nothing, according to the probability",
+    "A 1ms pulse at 10V on every seventh incoming trigger, or nothing, according to the probability",
+    "A 1ms pulse at 10V on every eighth incoming trigger, or nothing, according to the probability",
+    "Note — the probability is rolled separately for each division every time that division comes round, so the outputs drop pulses independently of one another",
+    "Note — a freshly placed module has the probability at mid travel, so half the pulses are dropped before anything is patched; turn it fully clockwise for a plain divider",
+    "Note — the lamp follows the voltage at TRIG"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "5": 9,
+    "6": 10,
+    "7": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/DivTrig.cpp:73 getVoltage(), :76 rescale(v, 0.1, 2.0, 0, 1) into a SchmittTrigger left at Rack's default 0 and 1 thresholds"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/DivTrig.cpp:63 getVoltage(), :65 rescale(v, 0.1, 2.0, 0, 1) into a SchmittTrigger left at Rack's default 0 and 1 thresholds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/DivTrig.cpp:96 setVoltage(10.0f * PulseGenerator::process()), triggered at :89 with the default 1e-3 duration"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/DivTrig.cpp:96 setVoltage(10.0f * PulseGenerator::process()), triggered at :89 with the default 1e-3 duration"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/DivTrig.cpp:96 setVoltage(10.0f * PulseGenerator::process()), triggered at :89 with the default 1e-3 duration"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/DivTrig.cpp:96 setVoltage(10.0f * PulseGenerator::process()), triggered at :89 with the default 1e-3 duration"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/DivTrig.cpp:96 setVoltage(10.0f * PulseGenerator::process()), triggered at :89 with the default 1e-3 duration"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/DivTrig.cpp:96 setVoltage(10.0f * PulseGenerator::process()), triggered at :89 with the default 1e-3 duration"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/DivTrig.cpp:96 setVoltage(10.0f * PulseGenerator::process()), triggered at :89 with the default 1e-3 duration"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/DivTrig.cpp:96 setVoltage(10.0f * PulseGenerator::process()), triggered at :89 with the default 1e-3 duration"
+     }
+    }
+   },
+   "notes": "Output index order matches panel order top to bottom, 1x through 8x, confirmed against census outputPos (y 140 to 297 in index order). The counters are free-running: counters[i] starts at i+1, is decremented on every trigger and reloaded to i+1 when it reaches zero (src/DivTrig.cpp:85-88), so the divisions are counted from the module's start or its last reset. A reset returns from process() immediately (src/DivTrig.cpp:71), so a trigger landing in the same sample as a reset is lost. Probability defaults to 0.5 (src/DivTrig.cpp:51), which is why a newly placed module already drops half its pulses. Nothing in the plugin is polyphonic."
   },
   "Corrupter": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo buffer holding the last 30 seconds of what was played into it, replaying a slice of that over and over while mangling it with rate jumps, chopping and a choice of five kinds of damage",
+    "Sets how long a slice of the buffer is replayed, 12.5ms at the far left to 16 seconds at the far right; with a cable at CLOCK it divides or multiplies that clock instead",
+    "Divides the slice into equal subsections, one at the far left rising to 32 at the far right; the chosen subsection loops until the next clock tick, so a high setting gives a short stuttering loop",
+    "Crossfades the dry input against the replayed buffer, equal power, dry at the far left and fully replayed at the far right; a freshly placed module arrives fully replayed",
+    "Sets the amount of rate mangling: in macro mode how wide the random jump taken at each clock tick is, as much as three octaves; in micro mode the rate itself, centre normal speed",
+    "Sets the amount of chopping: in macro mode how far the subsection and its subdivision are randomised at each tick and how much of each loop falls silent; in micro mode it picks the subsection",
+    "Sets how hard the chosen damage algorithm is applied to the replay, untouched at the far left and full at the far right",
+    "Scales the voltage at the BEND CV jack before it reaches the BEND setting, from none of it to all of it; a freshly placed module arrives at full",
+    "Scales the voltage at the BREAK CV jack before it reaches the BREAK setting, from none of it to all of it; a freshly placed module arrives at full",
+    "Scales the voltage at the CORRUPT CV jack before it reaches the CORRUPT setting, from none of it to all of it; a freshly placed module arrives at full",
+    "Sets the raised-cosine fade at each end of a loop, from a fiftieth of the subsection at the far left to half of it at the far right, never shorter than 16 samples",
+    "Switches the rate mangling on and off; unlit in macro mode, playback runs forwards at normal speed whatever the BEND knob is set to. A freshly placed module has it unlit",
+    "Switches the chopping on and off while MODE is macro; in micro mode the BREAK knob picks a subsection whether this is lit or not. A freshly placed module has it unlit",
+    "Stops the buffer being written, so the replay keeps circling the audio already captured; the write fades out over 128 samples rather than cutting. A freshly placed module has it unlit",
+    "Switches between macro, where every clock tick re-randomises rate, direction and chopping, and micro, where BEND and BREAK set those directly; the lamp below is green for macro and red for micro",
+    "Steps through the five damage algorithms in turn, DECIMATE, DROPOUT, DESTROY, DJ FILTER and VINYL SIM, and the display prints the name of the one in use",
+    "Switches the BREAK knob in micro mode from choosing which subsection plays to setting how much of the loop is silenced, as much as nine tenths of it; it changes nothing while MODE is macro",
+    "Gives the right channel its own random rate, direction and chopping instead of copying the left; it changes nothing while MODE is micro, and a freshly placed module has it unlit",
+    "The left audio input, scaled so that 5V is full level into the buffer",
+    "The right audio input; with nothing patched here the left input feeds both channels of the buffer",
+    "An external clock for the slice: with a cable here the internal clock is dropped, and the interval between rising edges past 0.4V becomes the period that the TIME knob then divides or multiplies",
+    "Shifts the TIME setting, 5V covering the knob's whole travel and the total clamped to that travel; no attenuator stands between this jack and the knob",
+    "Shifts the REPEATS setting, 5V covering the knob's whole travel and the total clamped to that travel; no attenuator stands between this jack and the knob",
+    "Shifts the MIX setting, 5V covering the knob's whole travel and the total clamped to that travel; no attenuator stands between this jack and the knob",
+    "Shifts the BEND setting through its own attenuator: 5V covers the knob's whole travel in macro mode, and in micro mode the voltage is read as 1V per octave of playback rate",
+    "Shifts the BREAK setting through its own attenuator, 5V covering the knob's whole travel and the total clamped to that travel",
+    "Shifts the CORRUPT setting through its own attenuator, 5V covering the knob's whole travel; any voltage other than zero here also switches the damage stage on with the knob at the far left",
+    "Switches the rate mangling from outside: by default a rising edge past 0.4V flips it on or off, and with Gate Mode set to Momentary it is on only while the gate is high",
+    "Switches the chopping from outside: by default a rising edge past 0.4V flips it on or off, and with Gate Mode set to Momentary it is on only while the gate is high",
+    "Freezes the buffer from outside: by default a rising edge past 0.4V flips the freeze at the next clock tick, and with Gate Mode set to Momentary it freezes only while the gate is high",
+    "The left audio output, 5V at full level, running 256 samples behind the input because the engine works a block at a time",
+    "The right audio output, 5V at full level; it carries its own rate and chopping only while ST MODE is lit and MODE is macro",
+    "Menu — Gate Mode: Latching, Momentary — chooses whether the three gate jacks flip their stage on and off at a rising edge, or hold it on only while the gate is high",
+    "Menu — Scale: None (free), Chromatic, Major, Minor, Pentatonic Major, Pentatonic Minor, Whole Tone, Octaves, Fifths — quantises the playback rate BEND produces to that set of intervals",
+    "Menu — Root: C, C#, D, D#, E, F, F#, G, G#, A, A#, B — sets the note the Scale quantiser is built from",
+    "Note — nothing is heard until audio is patched into IN L: the replay is assembled from what has been recorded, and the buffer starts empty",
+    "Note — a freshly placed module has BEND, BREAK and FREEZE all unlit and CORRUPT at zero, so it plays a plain repeating loop of the last slice until one of those is turned on",
+    "Note — with nothing at CLOCK the module runs its own clock; plugging a cable in switches to the external one and unplugging it switches back",
+    "Note — with nothing at CLOCK the module runs its own clock; plugging a cable in switches to the external one and unplugging it switches back, with no menu or button involved",
+    "Note — while FREEZE is on, a MIX setting at the very bottom of its travel is overridden to fully replayed, so the frozen loop is heard rather than the dry input",
+    "Note — the display draws the peak level of the left output across the buffer with a white marker at the write point, and prints BND, BRK and FRZ for the stages that are on",
+    "Note — the buffer holds 30 seconds; a TIME setting longer than that is capped to the length of the buffer"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15,
+    "16": 16,
+    "17": 17
+   },
+   "in": {
+    "0": 18,
+    "1": 19,
+    "11": 20,
+    "2": 21,
+    "3": 22,
+    "4": 23,
+    "5": 24,
+    "6": 25,
+    "7": 26,
+    "8": 27,
+    "9": 28,
+    "10": 29
+   },
+   "out": {
+    "0": 30,
+    "1": 31
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Corrupter.cpp:426 getVoltage() / 5.f into the block buffer, unclamped"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the left input",
+      "why": "src/Corrupter.cpp:427-429 isConnected() ? getVoltage()/5.f : in_l_buf[buf_pos]"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "vendor/corrupter-dsp/src/engine.cpp:822 EffectiveUnipolar(time_01, cv, 1.0f), which is :299-301 Clamp01(knob + volts/5)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "vendor/corrupter-dsp/src/engine.cpp:828-829 EffectiveUnipolar(repeats_01, cv, 1.0f)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "vendor/corrupter-dsp/src/engine.cpp:990-991 Clamp01(mix_01 + cv * 0.2f)"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "vendor/corrupter-dsp/src/engine.cpp:831-835; in macro mode Clamp01(knob + volts/5 * atten), in micro mode the volts are added straight to an octave figure, so no single range spelling is true of both modes"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "vendor/corrupter-dsp/src/engine.cpp:837-838 EffectiveUnipolar(break_01, cv, break_cv_attn_01)"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "vendor/corrupter-dsp/src/engine.cpp:840-841 EffectiveUnipolar(corrupt_01, cv, corrupt_cv_attn_01); :970-971 also treats any non-zero voltage here as switching the damage stage on"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 0.4V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "vendor/corrupter-dsp/src/internal/dsp_common.h:9 kGateThresholdV 0.4f, read at engine.cpp:783 GateHigh()"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 0.4V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "vendor/corrupter-dsp/src/internal/dsp_common.h:9 kGateThresholdV 0.4f, read at engine.cpp:784 GateHigh()"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 0.4V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "vendor/corrupter-dsp/src/internal/dsp_common.h:9 kGateThresholdV 0.4f, read at engine.cpp:786 GateHigh()"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 0.4V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "vendor/corrupter-dsp/src/internal/dsp_common.h:9 kGateThresholdV 0.4f, read at engine.cpp:787 GateHigh(); src/Corrupter.cpp:329 isConnected() alone chooses internal or external clock"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/Corrupter.cpp:447 setVoltage(out_l_buf[read_pos] * 5.f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/Corrupter.cpp:448 setVoltage(out_r_buf[read_pos] * 5.f)"
+     }
+    }
+   },
+   "notes": "Param 15, Corrupt Bank, is configured with configButton (src/Corrupter.cpp:188) and given a BooleanTrigger (:153), but no widget is ever added for it and processBlock never reads it. It has no paramPos in the census, so no click can reach it and it gets no line; the bank is instead derived from the algorithm at :308-309, algorithms 0-2 being Legacy and 3-4 Expanded. The DSP library also carries a corrupt_gate_v input (vendor/corrupter-dsp/include/corrupter_dsp/engine.h:70) that the VCV wrapper never supplies, so there is no CORRUPT gate jack on the panel. The BEND and BREAK buttons gate their stages only in macro mode: the micro branch of ApplyTickEvents (engine.cpp:440-468) applies the BREAK knob's subsection choice with no test of break_enabled at all, and applies tape wow, flutter and drive with no test of bend_enabled, so an unlit button is not the whole of 'off' in micro mode. The Bend CV jack changes meaning with the mode — divided by 5V in macro, read as 1V per octave in micro (engine.cpp:833-835) — so its range field is left blank rather than given one spelling that is wrong half the time. Panel lettering is drawn at runtime with NanoVG (CorrupterLabels, src/Corrupter.cpp:635-704), so the SVG renders blank; the label strings there are the authority for the panel names used above, including GW, SLNC and ST MODE. The three CV attenuator trimpots and the six CV jacks carry no printed label. Nothing in the plugin reads getChannels or getPolyVoltage, so no port is polyphonic. Internal clock period is 0.0125 to 16 seconds, exponential (vendor/corrupter-dsp/src/internal/clock_engine.cpp:13-14, :160-164); the external multiplier table is at :155."
   }
  }
 }

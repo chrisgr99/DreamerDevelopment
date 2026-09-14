@@ -43,6 +43,8 @@ NO_SOURCE = [
     'Blamsoft-XFXReverb', 'Blamsoft-XFXWave', 'Blamsoft-XFXF35',
     'Instruo', 'DanTModules', 'FLAG-Free',
     'VultModulesFree', 'VultModules', 'VultCompacts',
+    'factionoptions', 'Virtue-Control', 'Ambivalent-Instruments',
+    'Moffenzeef', 'SynthesizersDotCom',
 ]
 
 # SMALL WHOLE NUMBERS SAY NOTHING. A count of jacks, a two-position switch, a five-volt gate:

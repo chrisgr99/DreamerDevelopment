@@ -2,27 +2,560 @@
  "plugin": "aridacity",
  "source": "https://github.com/cubeleco/aridacityVCV",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "ClockDiv": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sixteen outputs driven by one clock, each carrying that clock on its own division of a sixteen step count, or one output at a time as a sixteen step sequence",
+    "Chooses Clock Divider, where each output carries the clock on its own division of the sixteen step count, or Sequencer, where one output at a time carries it",
+    "The clock. The count advances when the voltage here rises above 1V, and every output is held at 0V while it is below 0V",
+    "A trigger here rising above 1V makes the count return to step 1 on the next rising edge of the clock, rather than at once",
+    "With a cable here, the outputs carry this voltage instead of the clock's own voltage, at the same moments they would have carried the clock",
+    "Carries the clock voltage on every step of the count, and 0V while the clock is low; in Sequencer mode it carries it on step 1 alone.",
+    "Carries the clock voltage on every second step of the count, and 0V at every other step; in Sequencer mode it carries it on step 2 alone.",
+    "Carries the clock voltage on every third step of the count, and 0V at every other step; in Sequencer mode it carries it on step 3 alone.",
+    "Carries the clock voltage on every fourth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 4 alone.",
+    "Carries the clock voltage on every fifth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 5 alone.",
+    "Carries the clock voltage on every sixth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 6 alone.",
+    "Carries the clock voltage on every seventh step of the count, and 0V at every other step; in Sequencer mode it carries it on step 7 alone.",
+    "Carries the clock voltage on every eighth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 8 alone.",
+    "Carries the clock voltage on every ninth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 9 alone.",
+    "Carries the clock voltage on every tenth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 10 alone.",
+    "Carries the clock voltage on every eleventh step of the count, and 0V at every other step; in Sequencer mode it carries it on step 11 alone.",
+    "Carries the clock voltage on every twelfth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 12 alone.",
+    "Carries the clock voltage on every thirteenth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 13 alone.",
+    "Carries the clock voltage on every fourteenth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 14 alone.",
+    "Carries the clock voltage on every fifteenth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 15 alone.",
+    "Carries the clock voltage on the sixteenth step of the count, and 0V at every other step; in Sequencer mode it carries it on step 16 alone.",
+    "Note — the count runs from step 1 to step 16 and starts over. Every output is cleared to 0V while the clock is low, so each one carries a copy of the clock's own pulse rather than a gate of its own.",
+    "Note — none of the sixteen outputs was given a name in the code, so hovering one shows no description of what it carries.",
+    "Menu — Divisible by 1 — on step 1 of the count every output carries the clock, rather than the first output alone; it changes nothing in Sequencer mode"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12,
+    "8": 13,
+    "9": 14,
+    "10": 15,
+    "11": 16,
+    "12": 17,
+    "13": 18,
+    "14": 19,
+    "15": 20
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/ClockDiv.cpp process() passes inputs[CLOCK_INPUT].getVoltage() to a dsp::SchmittTrigger, whose default thresholds are 0V and 1V, and reads one channel only"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/ClockDiv.cpp process() passes inputs[RESET_INPUT].getVoltage() to resetTrigger, a dsp::SchmittTrigger with the default 0V and 1V thresholds"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the clock input's own voltage",
+      "why": "src/ClockDiv.cpp process(): if(inputs[SEQ_INPUT].isConnected()) clockVal = inputs[SEQ_INPUT].getVoltage(), which then becomes every output's voltage unaltered"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "5": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "6": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "7": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "8": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "9": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "10": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "11": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "12": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "13": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "14": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     },
+     "15": {
+      "poly": false,
+      "why": "src/ClockDiv.cpp process() calls outputs[d].setVoltage() on each of the sixteen and never calls setChannels"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at tag commit 7a96486 (v2.1.0), which is the installed version. Output index d is the jack the panel numbers d+1, and the panel runs the odd numbers down the left column and the even numbers down the right, so index order and panel order agree column by column. None of the sixteen outputs has a configOutput call, so Rack shows them unnamed; the three inputs and the switch are all named."
   },
   "BCrush": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A bit crusher that lowers the sample rate and the amplitude resolution of a signal, then runs bit operations on the quantised value",
+    "Sets how often a new sample is taken, as a fraction of the engine's own sample rate; the rate is held at 100Hz at the counter-clockwise end",
+    "Sets the number of steps the amplitude is quantised to, 128 steps per 5V at the clockwise end and 1 step at the counter-clockwise end",
+    "The signal to be crushed; the number of channels on the cable here sets the number of channels at the output",
+    "Adds to the rate knob, a tenth of the engine sample rate per volt, and the total is held between 100Hz and the engine sample rate",
+    "A clock here takes over the timing: a new sample is taken each time this voltage rises above 1V, and the rate knob and the rate input are read no further",
+    "Adds to the resolution knob, 12.8 quantisation steps per volt",
+    "Multiplies the signal before it is quantised, at full level for 5V. With a cable here carrying 0V the output is silent; with nothing patched the signal passes at full level",
+    "Shifts the quantised number left by a count of this voltage divided by 100 and multiplied by the resolution, so 10V against a resolution of 128 shifts by 12 places. The sign is discarded",
+    "Shifts the quantised number right by a count of this voltage divided by 100 and multiplied by the resolution, so 10V against a resolution of 128 shifts by 12 places",
+    "Bitwise AND between the quantised number and this voltage scaled by a tenth of the resolution, so 10V gives a mask of the whole resolution",
+    "Bitwise OR between the quantised number and this voltage scaled by a tenth of the resolution, so 10V gives a mask of the whole resolution",
+    "Bitwise XOR between the quantised number and this voltage scaled by a tenth of the resolution, so 10V gives a mask of the whole resolution",
+    "Inverts every bit of the quantised number while this voltage is further than 1V from 0V, in either direction",
+    "The crushed signal, carrying as many channels as the cable at the input",
+    "Note — the bit operations run in the order printed down the panel: shift left, shift right, AND, OR, XOR, then NOT, each on the result of the last. One with nothing patched into it is skipped.",
+    "Note — every bit operation is scaled by the resolution, so turning the resolution knob changes what all six of them do.",
+    "Note — the rate input and the hold input are read from their first channel only and apply to the whole module; the audio, resolution, gain and bit operation inputs are read per channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "8": 11,
+    "9": 12,
+    "10": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/BCrush.cpp process() takes const int channels = inputs[AUDIO_INPUT].getChannels() and reads getVoltage(c) in the loop; the signal is divided by 5 on the way in and multiplied by 5 on the way out"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "src/BCrush.cpp process(): clamp((params[SAMPLE_RATE_PARAM].getValue() + inputs[SAMPLE_RATE_INPUT].getVoltage()/10.f) * args.sampleRate, 100.f, args.sampleRate), read once outside the channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/BCrush.cpp process() passes inputs[CLOCK_HOLD_INPUT].getVoltage() to holdTrigger, a dsp::SchmittTrigger with the default 0V and 1V thresholds, and reads one channel only"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/BCrush.cpp process(): std::max((resParam + inputs[AMP_RES_INPUT].getVoltage(c)) * maxRes, 1.f) inside the channel loop, with maxRes 12.8"
+     },
+     "4": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/BCrush.cpp process(): if(inputs[GAIN_INPUT].isConnected()) audi *= inputs[GAIN_INPUT].getVoltage(c)/5.f, per channel"
+     },
+     "5": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/BCrush.cpp process(): quant <<= (int)(fabs(inputs[SHIFTL_INPUT].getVoltage(c)/100.f) * ampRes), per channel, with fabs discarding the sign"
+     },
+     "6": {
+      "poly": true,
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/BCrush.cpp process(): quant >>= (int)(inputs[SHIFTR_INPUT].getVoltage(c)/100.f * ampRes), per channel"
+     },
+     "7": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/BCrush.cpp process(): quant &= (int)(inputs[AND_INPUT].getVoltage(c)/10.f * ampRes), per channel"
+     },
+     "8": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/BCrush.cpp process(): quant |= (int)(inputs[OR_INPUT].getVoltage(c)/10.f * ampRes), per channel"
+     },
+     "9": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/BCrush.cpp process(): quant ^= (int)(inputs[XOR_INPUT].getVoltage(c)/10.f * ampRes), per channel"
+     },
+     "10": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/BCrush.cpp process(): if(inputs[NOT_INPUT].isConnected() && fabs(inputs[NOT_INPUT].getVoltage(c)) > 1.f) quant = ~quant, per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/BCrush.cpp process() calls outputs[AUDIO_OUTPUT].setChannels(inputs[AUDIO_INPUT].getChannels()) and writes (quant/ampRes)*5.f per channel"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at tag commit 7a96486 (v2.1.0), the installed version. The gain input multiplies rather than adds and there is no gain knob, so a cable carrying 0V into gain silences the module while an empty gain jack leaves the signal alone; that is in the entry because it looks like a broken module. The right shift takes the shift count straight from the voltage without fabs, unlike the left shift, so a negative voltage there gives a negative shift count, which C++ leaves undefined; nothing is claimed about what it does. The resolution figure of 128 is the tooltip value at the knob's maximum: configParam gives the knob a range of 0 to 10 and a display multiplier of maxRes, 12.8."
   },
   "Clip": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A hard clipper with an outer limit the signal cannot pass and an inner limit it is either pushed outside of or pulled to silence inside",
+    "Multiplies the signal before either limit is applied, from silence at the counter-clockwise end to twice at the clockwise end",
+    "Chooses what the inner limit does to a signal inside it: Pull sets that signal to 0V, and Push moves it out to the upper edge when it is positive and to the lower edge when it is negative",
+    "Switches the outer limit on and off; with it off the signal leaves at whatever level the gain and the inner limit give it, which can be larger than the signal that came in",
+    "Sets how far the inner limit reaches either side of its centre, 0V at the counter-clockwise end to 10V at the clockwise end",
+    "Sets how far the outer limit reaches either side of its centre, 0V at the counter-clockwise end to 10V at the clockwise end, with 5V at the middle of its travel",
+    "The signal to be clipped; the number of channels on the cable here sets the number of channels at the output",
+    "Adds to the gain knob, 0.1 of a multiplication per volt, so 10V here doubles what the knob gives",
+    "Widens the inner limit by 0.5V per volt, added to whatever the push knob gives",
+    "Moves the centre of the inner limit away from 0V, one volt of movement per volt",
+    "Widens the outer limit by 0.5V per volt, added to whatever the limit knob gives",
+    "Moves the centre of the outer limit away from 0V, one volt of movement per volt",
+    "The clipped signal, carrying as many channels as the cable at the input",
+    "Note — each limit is measured either side of its own centre, so a position input moves the whole window rather than one edge, and a wide offset inner limit can push a signal well away from 0V.",
+    "Note — the inner limit is applied first and the outer limit second, so the outer limit catches anything the inner one pushed out."
+   ],
+   "param": {
+    "0": 2,
+    "1": 3,
+    "2": 1,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10,
+    "5": 11
+   },
+   "out": {
+    "0": 12
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Clip.cpp process() takes channels from inputs[AUDIO_INPUT].getChannels() and reads getVoltage(c) in the loop; the signal is divided by 5 on the way in and multiplied by 5 on the way out"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Clip.cpp process(): audi *= params[GAIN_PARAM].getValue() + inputs[GAIN_INPUT].getVoltage(c)/10.f, per channel, with the knob spanning 0 to 2"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Clip.cpp process(): pushSiz = params[PUSH_PARAM].getValue() + inputs[PUSH_SIZ_INPUT].getVoltage(c)/10.f, in units of 5V"
+     },
+     "3": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Clip.cpp process(): pushCent = inputs[PUSH_POS_INPUT].getVoltage(c)/5.f, in units of 5V, which is one volt of centre per volt"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Clip.cpp process(): limit = params[LIMIT_PARAM].getValue() + inputs[LIMIT_SIZ_INPUT].getVoltage(c)/10.f, in units of 5V"
+     },
+     "5": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Clip.cpp process(): limCenter = inputs[LIMIT_POS_INPUT].getVoltage(c)/5.f, in units of 5V, which is one volt of centre per volt"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/Clip.cpp process() calls outputs[AUDIO_OUTPUT].setChannels(inputs[AUDIO_INPUT].getChannels()) and writes audi*5.f per channel"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at tag commit 7a96486 (v2.1.0), the installed version. The panel prints pull over the left switch and clip over the right one; configSwitch names them Inner limit with the choices Push and Pull, and Outer limit with the choices off and on, and in both cases the choice names are in the order the code tests for, so neither switch is reversed. The outer limit comes up on. Nothing bounds the output when that switch is off, so the gain knob at twice can put out more than 10V."
   },
   "Remainder": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A wavefolder that folds a signal by remainder division, with a feedback path around the fold and a dry against folded mix",
+    "Multiplies the signal before it is folded, 0 to 10 times, which sets how often the signal runs past the fold point",
+    "Returns the folded signal from the previous sample to the fold input, 0 to 200%",
+    "Sets the voltage at which the signal folds back, 0V to 10V. Randomising the module leaves this knob where it is",
+    "Crossfades the fold between unsigned remainder division at the counter-clockwise end and signed remainder division at the clockwise end, the signed form folding around a span twice as wide",
+    "Crossfades the output between the signal at the input and the folded signal, 0% folded at the counter-clockwise end and 100% folded at the clockwise end",
+    "Attenuverts the gain input, -100% to 100%; at 10V and fully clockwise it adds 10 to the gain, and at the centre the gain input does nothing",
+    "Attenuverts the feedback input, -100% to 100%; at 10V and fully clockwise it adds 100% to the feedback, and at the centre the feedback input does nothing",
+    "Attenuverts the shape input, -100% to 100%; at 10V and fully clockwise it moves the shape the whole way from unsigned to signed, and at the centre the shape input does nothing",
+    "Attenuverts the mix input, -100% to 100%; at 10V and fully clockwise it moves the mix the whole way to folded, and at the centre the mix input does nothing",
+    "The signal to be folded; a polyphonic cable here is summed into one channel",
+    "Modulates the gain; the gain attenuverter sets how much of this voltage is added, and with that attenuverter at the centre this jack changes nothing",
+    "Modulates the feedback amount; the feed attenuverter sets how much of this voltage is added, and with that attenuverter at the centre this jack changes nothing",
+    "Modulates the shape; the shape attenuverter sets how much of this voltage is added, and with that attenuverter at the centre this jack changes nothing",
+    "Modulates the mix; the mix attenuverter sets how much of this voltage is added, and with that attenuverter at the centre this jack changes nothing",
+    "Adds to the fold knob, one volt of fold point per volt. This jack has no attenuverter, so it moves the fold point at full scale",
+    "The mix of the input signal and the folded signal, on one channel",
+    "Note — the module is monophonic: a polyphonic cable at the input is summed into one signal and the output carries one channel.",
+    "Note — the fold is switched off and the folded signal is 0V whenever the fold point, knob plus input, is within 0.01V of 0V. With the mix fully folded the output is then silent.",
+    "Note — the feedback path returns the folded value from the previous sample, so gain and feedback together can build the signal over successive samples rather than reaching a level and holding it."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 4,
+    "3": 5,
+    "4": 3,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15
+   },
+   "out": {
+    "0": 16
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Remainder.cpp process() reads inputs[AUDIO_INPUT].getVoltageSum(), which adds every channel into one number, and the output is written with a single setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Remainder.cpp process(): gain = params[GAIN_PARAM].getValue() + params[GAIN_CV_PARAM].getValue() * inputs[GAIN_INPUT].getVoltage(), one channel, and with no divisor so a volt adds a whole unit of gain at the attenuverter's maximum"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Remainder.cpp process(): feedback = params[FEEDBACK_PARAM].getValue() + params[FEEDBACK_CV_PARAM].getValue() * inputs[FEEDBACK_INPUT].getVoltage()/10.f, one channel"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Remainder.cpp process(): shape = params[SHAPE_PARAM].getValue() + params[SHAPE_CV_PARAM].getValue() * inputs[SHAPE_INPUT].getVoltage()/10.f, then clamp(shape, 0.f, 1.f)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Remainder.cpp process(): mix = params[MIX_PARAM].getValue() + params[MIX_CV_PARAM].getValue() * inputs[MIX_INPUT].getVoltage()/10.f, then clamp(mix, 0.f, 1.f)"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Remainder.cpp process(): divisor = params[FOLD_PARAM].getValue() + inputs[FOLD_INPUT].getVoltage(), one channel and no attenuverter, and the fold is skipped when fabs(divisor) is 0.01 or less"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Remainder.cpp process() ends with outputs[AUDIO_OUTPUT].setVoltage(crossfade(dry, wet, mix)) and never calls setChannels"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at tag commit 7a96486 (v2.1.0), the installed version. The gain attenuverter multiplies the gain input without the divide by ten the feedback, shape and mix attenuverters use, so 10V at that jack with the attenuverter fully clockwise adds 10 to a gain knob whose own range is 0 to 10. The fold knob is the one parameter with randomizeEnabled set false. Panel order and index order differ among the large knobs: index 2 is the shape knob and index 3 the mix knob, while index 4 is the fold knob drawn between the gain and feedback row and the shape and mix row."
   }
  }
 }

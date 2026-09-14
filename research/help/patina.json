@@ -2,12 +2,58 @@
  "plugin": "patina",
  "source": "https://github.com/epadilla/patina",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "MemoryPad": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An X-Y pad that records a path drawn across it with the mouse and plays that path back over and over as two control voltages.",
+    "Chooses the direction the recorded path runs in: Fwd plays it start to end and round again, InOut plays it to the end and back, Rev plays it end to start.",
+    "Multiplies the rate the path is read at, 0.1 to 5; at 1 it advances sixty points a second. Moving it starts the path again from where the count lands.",
+    "Latches the X output into a swing of -5V to 5V instead of 0V to 5V; the lamp is lit while it is latched.",
+    "Latches the Y output into a swing of -5V to 5V instead of 0V to 5V; the lamp is lit while it is latched.",
+    "Scales the X output, 0 to 1. It starts fully open.",
+    "Scales the Y output, 0 to 1. It starts fully open.",
+    "How far along the horizontal the moving dot is: 0V to 5V, or -5V to 5V with the X BIPOLAR latch on, then scaled by the X ATTENUATE knob.",
+    "How far up the vertical the moving dot is: 0V to 5V, or -5V to 5V with the Y BIPOLAR latch on, then scaled by the Y ATTENUATE knob.",
+    "Note — both outputs rest at 0V until a path has been drawn. Drag across the dark square with the mouse to record one; letting go of the button ends the recording and starts the playback.",
+    "Note — drawing a new path throws the old one away: the recording is cleared the moment a drag begins.",
+    "Note — a recording stops on its own once it has taken ten thousand points.",
+    "Note — the dark square is a drawing, not a control, so it cannot be clicked for help; the two values it holds are parameters with no widget of their own.",
+    "Note — the recorded path and the colour chosen for it are both stored in the patch.",
+    "Menu — Path Color: Yellow (default), White, Red, Orange, Green, Cyan, Blue, Purple, Light Gray — sets the colour of the moving dot and the trail behind it."
+   ],
+   "param": {
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5,
+    "7": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/memorypad.cpp _setXYOutputs() ends with setVoltage(5.f * value * attenuation) and never calls setChannels; the value is 0 to 1 with the polarity latch off and -1 to 1 with it on"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/memorypad.cpp _setXYOutputs() ends with setVoltage(5.f * value * attenuation) and never calls setChannels; the value is 0 to 1 with the polarity latch off and -1 to 1 with it on"
+     }
+    }
+   },
+   "notes": "Shipped commit 34f1a17: the installed plugin.json is byte for byte the repository's, seven commits carry version 2.0.1, and the binary holds both the Path Color menu strings added at 2a74160 and a MemoryPadTrackpad::drawLayer symbol, which only exists after the dark-room change merged at 597b613; 4fc0b21 and the merge above it touch only the build workflow. TRACKPAD_X_PARAM and TRACKPAD_Y_PARAM (indices 0 and 1) are configured with an empty name and have no ParamWidget: the pad is a plain OpaqueWidget that writes to them through their ParamQuantity, so neither can be clicked and neither is tagged. The module has no inputs of any kind. process() returns early with the raw pad position whenever a recording is running or no path has been stored, so a freshly placed module holds both outputs at 0V. The maker's own module description in plugin.json says the outputs can be set to bipolar or unipolar values, which the code confirms: unipolar is 0V to 5V, not the 0V to 10V a reader might expect."
   }
  }
 }

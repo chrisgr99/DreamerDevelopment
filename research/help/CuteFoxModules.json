@@ -1,13 +1,86 @@
 {
  "plugin": "CuteFoxModules",
- "source": "https://github.com/CuteFoxModules/CuteFoxModules",
+ "source": "https://github.com/CuteFoxModules/CuteFoxModules/blob/master/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "IPQ": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chromatic quantizer that keeps its note until the incoming pitch has moved a set interval away from it, then takes the nearest semitone; two intervals are set and used in turn.",
+    "Sets the first interval, 0 to 11 semitones, snapped to whole numbers.",
+    "Sets the second interval, 0 to 11 semitones, snapped to whole numbers.",
+    "The pitch to be quantized, 1V/octave; the nearest semitone is taken whenever it has moved by the current interval or more from the note already being sent.",
+    "Sets the first interval from 0V for 0 semitones to 10V for 11 semitones, overriding the knob and turning it as it goes.",
+    "Sets the second interval from 0V for 0 semitones to 10V for 11 semitones, overriding the knob and turning it as it goes.",
+    "The quantized pitch, 1V/octave, held at the last note until the input has moved the current interval away from it.",
+    "A 10V trigger 1ms long each time a new note is quantized.",
+    "Note — Nothing comes out of either jack until a cable is in OUT. With OUT unpatched the quantizer is skipped altogether, so TRIGGER is left at whatever voltage it last held.",
+    "Note — The intervals alternate: the first note change is allowed by interval 1, the next by interval 2, then interval 1 again. Which of the two is in force is not shown on the panel.",
+    "Note — An interval of 0 semitones puts no distance between notes, so the input is requantized every sample and TRIGGER stays at 10V rather than pulsing.",
+    "Note — Each display shows its interval as a number of semitones and its name, from Unison through to Major 7th. Neither can be clicked."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "nothing; OUT falls to 0V",
+      "why": "src/IPQ.cpp:84-88 isConnected() then getVoltage(), floorf for the octave so negative volts quantize the same way; :108 voltsOut = 0 when unpatched"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/IPQ.cpp:73-75 setValue((getVoltage()/10)*11) on the knob itself, which ParamQuantity clamps to the 0 to 11 range configured at :53"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/IPQ.cpp:76-78 setValue((getVoltage()/10)*11), clamped to the 0 to 11 range configured at :54"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/IPQ.cpp:110 setVoltage(voltsOut) where voltsOut = bestNote + vOctave at :99; no setChannels in the file"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/IPQ.cpp:102 pulseGenerator.trigger(1e-3f), :105 setVoltage(pulse ? 10 : 0)"
+     }
+    }
+   },
+   "notes": "Read at commit 8a38d02 (HEAD). Two commits carry 2.0.1 — eee00ef and 8a38d02 — and the only difference between them is README.md, so src/ and res/ are identical and nothing needed settling against the binary.\n\nThe CV inputs do not add to the knobs, they write to them: src/IPQ.cpp:74 and :77 call setValue on the ParamQuantity every sample, so the knob turns under the cable and its own setting is lost. The README's 'Each interval can be changed via CV IN' does not say this.\n\nThe whole quantizer sits inside a test for both IN and OUT being connected (src/IPQ.cpp:84). The TRIGGER output is written inside that same test, so with OUT unpatched TRIGGER is never updated. The README describes TRIGGER without mentioning the dependency.\n\nThe interval test at src/IPQ.cpp:88 compares the raw input against the last quantized output, not against the last input, so the distance is measured from the note being sent.\n\nThe search loop at src/IPQ.cpp:89-98 runs i from 0 to 12 inclusive against a fractional pitch, so the octave above is a candidate as well as the twelve semitones; the result is ordinary chromatic quantization.\n\nThe README says +/-0V is unison and +/-10V is a Major 7th. Negative voltages are not symmetrical: setValue clamps at the bottom of the 0 to 11 range, so every negative voltage gives unison.\n\nThe two interval displays are LedDisplay widgets with no ParamWidget behind them, so they have no census position and no click can reach them.\n\nThe module adds nothing to its right-click menu."
   }
  }
 }

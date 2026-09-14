@@ -1,13 +1,207 @@
 {
  "plugin": "WaveOfHormuz",
- "source": "https://github.com/quaternionmedia/waveofhormuz",
+ "source": "https://quaternionmedia.github.io/waveofhormuz",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "WaveOfHormuz": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A square wave oscillator with two windows cut into the cycle, each window replaced by a ramp, a hold or a triangle, followed by a low-pass filter and a tanh drive",
+    "Sets the base pitch, four octaves below C4 at the counter-clockwise end and four octaves above it at the clockwise end, with C4 at 261.63Hz in the middle",
+    "Crossfades between a plain 50% square wave at the counter-clockwise end and the windowed wave at the clockwise end",
+    "Sets where in the cycle the first window opens, 0 to 100% of the way through",
+    "Sets how much of the cycle the first window covers, 0 to 100%; at 0 that window is switched off",
+    "Sets where in the cycle the second window opens, 0 to 100% of the way through",
+    "Sets how much of the cycle the second window covers, 0 to 100%; at 0 that window is switched off",
+    "Sweeps a one-pole low-pass down the output from about 4186Hz to 20Hz; at the counter-clockwise stop the filter is taken out of the path altogether",
+    "Drives the wave into a tanh, no drive at the counter-clockwise stop and ten times fully clockwise, with the result divided back down so the peaks stay where they were",
+    "Sets the shape inside a window: a rising ramp fully counter-clockwise, a flat hold at the bottom of the swing in the middle, and a triangle fully clockwise",
+    "Sets the output level, silent at the counter-clockwise end and ±5V peaks fully clockwise",
+    "Moves where the first window opens, 10V covering the whole cycle, and the total with the knob is held between 0 and 100%",
+    "Moves how much of the cycle the first window covers, 10V covering the whole cycle, and the total with the knob is held between 0 and 100%",
+    "Moves where the second window opens, 10V covering the whole cycle, and the total with the knob is held between 0 and 100%",
+    "Moves how much of the cycle the second window covers, 10V covering the whole cycle, and the total with the knob is held between 0 and 100%",
+    "Moves the low-pass sweep, 10V covering the whole span, and the total with the knob is held inside it",
+    "Moves the tanh drive, 10V covering the whole span, and the total with the knob is held inside it",
+    "Moves the window shape for both windows at once, 5V carrying it from the middle to one end, and the total with the knob is held inside the span",
+    "Moves the output level, 10V covering the whole range, and the total with the knob is held between silence and full",
+    "Adds to the base pitch at one volt per octave",
+    "A rise above 2V restarts the cycle from its beginning and fires the trigger output",
+    "Modulates the pitch, four volts raising it by an octave",
+    "Moves the crossfade between the plain square and the windowed wave, 10V covering the whole span, and the total with the knob is held inside it",
+    "A 10V pulse 1ms long each time the cycle wraps round, and each time a rise at the sync input restarts it",
+    "10V for as long as the cycle is inside the first window, and 0V through the rest of the cycle",
+    "10V for as long as the cycle is inside the second window, and 0V through the rest of the cycle",
+    "The shaped wave as audio, reaching ±5V with the level knob fully clockwise",
+    "Note — the four window knobs and the shape knob change nothing while gulf / dry is fully counter-clockwise, where the output is a plain square wave",
+    "Note — where the two windows overlap, the first one is used for the whole of the shared stretch and the second gate stays at 0V",
+    "Note — the four window knobs come up at the proportions of a 947-day timeline the maker built the module around, which is why the two windows start narrow and far apart",
+    "Note — there are three lamps above the output jacks: a yellow one lit while the first window is open, a red one for the second, and a green one following the output level"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 9,
+    "8": 10,
+    "9": 2
+   },
+   "in": {
+    "0": 19,
+    "1": 20,
+    "2": 21,
+    "3": 11,
+    "4": 12,
+    "5": 13,
+    "6": 14,
+    "7": 15,
+    "8": 16,
+    "9": 17,
+    "10": 18,
+    "11": 22
+   },
+   "out": {
+    "0": 23,
+    "1": 24,
+    "2": 25,
+    "3": 26
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "WaveOfHormuz.cpp:236 reads getVoltage() with no channel and adds it to the Knot Speed knob in volts before line 240 raises 2 to that power"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "WaveOfHormuz.cpp:252 passes getVoltage() with no channel to a SchmittTrigger set to 0.1 and 2, which zeroes the phase on each rise"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "WaveOfHormuz.cpp:238 reads getVoltage() with no channel, multiplies it by 0.25 and adds it to the pitch exponent, so four volts is one octave"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "WaveOfHormuz.cpp:261 reads getVoltage() with no channel, multiplies it by 0.1 and line 262 clamps the knob-plus-jack total to 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "WaveOfHormuz.cpp:266 reads getVoltage() with no channel, multiplies it by 0.1 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "WaveOfHormuz.cpp:271 reads getVoltage() with no channel, multiplies it by 0.1 and line 272 clamps the knob-plus-jack total to 0 and 1"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "WaveOfHormuz.cpp:276 reads getVoltage() with no channel, multiplies it by 0.1 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "WaveOfHormuz.cpp:307 reads getVoltage() with no channel, multiplies it by 0.1 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "WaveOfHormuz.cpp:322 reads getVoltage() with no channel, multiplies it by 0.1 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "9": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "WaveOfHormuz.cpp:281 reads getVoltage() with no channel, multiplies it by 0.2 and clamps the knob-plus-jack total to -1 and 1"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "WaveOfHormuz.cpp:332 reads getVoltage() with no channel, multiplies it by 0.1 and clamps the knob-plus-jack total to 0 and 1"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "WaveOfHormuz.cpp:286 reads getVoltage() with no channel, multiplies it by 0.1 and clamps the knob-plus-jack total to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "WaveOfHormuz.cpp:339 writes 10V for a 1ms pulse from a PulseGenerator and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "WaveOfHormuz.cpp:340 writes 10V while the phase is inside the first window and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "WaveOfHormuz.cpp:341 writes 10V while the phase is inside the second window and 0V otherwise, with setVoltage and no setChannels"
+     },
+     "3": {
+      "poly": false,
+      "range": "-5 to 5V",
+      "why": "WaveOfHormuz.cpp:334 multiplies the shaped wave by the Tanker knob and by 5, and line 342 writes it with setVoltage and no setChannels"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 83746f7, the head of main. Four commits carry the installed 2.2.0; the installed plugin.json is byte-identical to the one in e90eda5 and 83746f7 and differs from the two earlier ones, and those two later commits have identical source, so either is the build. The binary confirms it is not one of the earlier pair: the disassembly of process shows a fabs against 0x7f800000 immediately after the fmov of 5.0 that scales the output, which is the isfinite guard e90eda5 added. All twenty-six controls and jacks have widgets. Every input is read with a plain getVoltage and every output written with a plain setVoltage, so nothing here is polyphonic. The Oil Slick filter is bypassed rather than merely wide open below 0.001 on the knob, and the Choke Point drive the same, so those two knobs have a hard step at the counter-clockwise stop. The panel lettering is drawn from C++ rather than from the SVG, because the maker notes NanoSVG drops text elements; the CV jack labels open, jckt, lock, emgo, slck, chok, tilt and tnk are drawn behind their jacks and are mostly covered by them."
   }
  }
 }

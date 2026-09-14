@@ -1,113 +1,2417 @@
 {
  "plugin": "NonlinearCircuits",
- "source": "https://github.com/mhetrick/nonlinearcircuits",
+ "source": "https://github.com/mhetrick/nonlinearcircuits/blob/2865e828b66047fc3ea63b5d690262fa6f4aad3e/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "4Seq": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four-knob voltage sequencer with two outputs that walk the knobs in opposite directions, and a binary divider of the same clock",
+    "Sets the voltage one step sends, 0V to 5V; the knob serves the X count and the Y count at the two step numbers printed beside it",
+    "Moves both counts and the divider on each rise above 1V",
+    "Runs both counts the other way round the four knobs while the voltage here is above 1V",
+    "A gate that changes state on every clock, so it is at 5V for one clock and 0V for the next",
+    "A gate at 5V for two clocks and 0V for the next two",
+    "A gate at 5V for four clocks and 0V for the next four",
+    "A gate at 5V for eight clocks and 0V for the next eight",
+    "The voltage of the knob the X count has reached, 0V to 5V",
+    "The voltage of the knob the Y count has reached, 0V to 5V; Y takes whichever knob X does not, reading the four in the opposite order",
+    "Note — one clock input drives the sequence and the divider together; with nothing patched there, X gives the first knob's voltage, Y the last, and the divider outputs stay at 0V."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "5": 9
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "notes": "The four divider outputs are a ripple counter clocked from the same jack as the sequence (4Seq.cpp:75-79), so the panel's /2, /4, /8 and /16 are divisions of the clock, not of the sequence length.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "4Seq.cpp:65 reads this input with getVoltage; NLCShared.hpp:32 raises the trigger when it reaches 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "4Seq.cpp:67 reads this input with getVoltage and tests it against 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "4Seq.cpp:86 sets this output to 5V or 0V on one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "4Seq.cpp:86 sets this output to 5V or 0V on one channel"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "4Seq.cpp:86 sets this output to 5V or 0V on one channel"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "4Seq.cpp:86 sets this output to 5V or 0V on one channel"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "4Seq.cpp:90 sends a knob value, and 4Seq.cpp:39 gives every knob a 0 to 5 range"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "4Seq.cpp:91 sends a knob value, and 4Seq.cpp:39 gives every knob a 0 to 5 range"
+     }
+    }
+   }
   },
   "8BitCipher": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight-stage shift register with a gate output for every stage, a serial output and four voltages mixed from the stage pattern",
+    "Shifts the register along one stage on each rise above 1V, and works out the four CV voltages afresh",
+    "Puts a 1 into the first stage if it is above 1V at the moment of a clock",
+    "Puts a 1 into the first stage if it is above 1V at the moment of a clock; while a cable is here the register's own feedback is switched out",
+    "Freezes the eight stage outputs and the four CV outputs while the voltage here is above 1V, although the register keeps shifting underneath",
+    "5V while the first stage of the shift register holds a 1, and 0V while it holds a 0",
+    "5V while the second stage of the shift register holds a 1, and 0V while it holds a 0",
+    "5V while the third stage of the shift register holds a 1, and 0V while it holds a 0",
+    "5V while the fourth stage of the shift register holds a 1, and 0V while it holds a 0",
+    "5V while the fifth stage of the shift register holds a 1, and 0V while it holds a 0",
+    "5V while the sixth stage of the shift register holds a 1, and 0V while it holds a 0",
+    "5V while the seventh stage of the shift register holds a 1, and 0V while it holds a 0",
+    "5V while the eighth stage of the shift register holds a 1, and 0V while it holds a 0",
+    "5V while the bit leaving the end of the register is a 1; it keeps following the register while STR is high, which the eight stage outputs do not",
+    "A stepped voltage, 0V when the four stages feeding it are all low and a little under 5V when they are all high; each of those four stages adds its own fixed weight",
+    "Note — with only a clock patched the register feeds itself: a 1 goes in whenever the bit at the end differs from the bit at the start, so the pattern keeps changing and never settles.",
+    "Note — the register comes up with a 1 in the first stage and 0 in the other seven, so one stage output is already at 5V before any clock arrives.",
+    "Note — STR freezes the outputs while it is high, which is the opposite way round from a sample-and-hold trigger; leave it unpatched and the outputs follow every clock."
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12,
+    "8": 13,
+    "9": 14,
+    "10": 14,
+    "11": 14,
+    "12": 14
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv"
+    }
+   },
+   "notes": "The panel prints the eight stage outputs as binary numbers 000 to 111; those are stage numbers, not the register's contents. Each CV output is fed by four of the eight stages and each stage feeds two CV outputs (8BitCipher.cpp:118-157), so the four CV outputs move together but never alike. The maker's own summary in plugin.json calls this a dual sequencer and clock divider, which is the 4Seq text repeated; the panel subtitle, Random Voltage Source, matches what the code does.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "8BitCipher.cpp:81 reads this input with getVoltage; NLCShared.hpp:32 raises the trigger when it reaches 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "8BitCipher.cpp:93 reads this input with getVoltage and tests it against 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "8BitCipher.cpp:97 reads this input with getVoltage and tests it against 1V; 8BitCipher.cpp:95 branches on isConnected"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "8BitCipher.cpp:105 reads this input with getVoltage and tests it against 1V"
+     }
+    },
+    "out": {
+     "8": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "8BitCipher.cpp:172 sets this output to 5V or 0V"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "8BitCipher.cpp:118-162 add weights totalling under 1 and 8BitCipher.cpp:159 multiplies by 5"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "8BitCipher.cpp:118-162 add weights totalling under 1 and 8BitCipher.cpp:160 multiplies by 5"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "8BitCipher.cpp:118-162 add weights totalling under 1 and 8BitCipher.cpp:161 multiplies by 5"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "8BitCipher.cpp:118-162 add weights totalling under 1 and 8BitCipher.cpp:162 multiplies by 5"
+     }
+    }
+   }
   },
   "BeatFreqs": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sixteen-step counter pushed one way by one input and the other way by the other, with sixteen gate outputs that go high on fixed steps of the count",
+    "Moves the count on one step every time the voltage here crosses 1V, going up and coming back down alike",
+    "Moves the count back one step every time the voltage here crosses 1V, going up and coming back down alike",
+    "5V on steps 1 and 9 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 3 and 11 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 5 and 13 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 7 and 15 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 1 and 2 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 5 and 6 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 9 and 10 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 13 and 14 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 9 and 11 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 1 and 3 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 10 and 12 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 2 and 4 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 9 and 13 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 10 and 14 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 11 and 15 of the sixteen-step count, and 0V on the other fourteen",
+    "5V on steps 12 and 16 of the sixteen-step count, and 0V on the other fourteen",
+    "Note — both inputs drive one shared count, so two clocks at different rates pull it back and forth and the sixteen outputs beat against each other; with one clock patched the count runs one way only.",
+    "Note — each input counts on both edges, so a square wave moves the count twice per cycle.",
+    "Note — with nothing patched the count stands at step 1 and the three outputs belonging to that step stay at 5V."
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "8": 11,
+    "9": 12,
+    "10": 13,
+    "11": 14,
+    "12": 15,
+    "13": 16,
+    "14": 17,
+    "15": 18
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger"
+    }
+   },
+   "notes": "The sixteen patterns are literal tables in the source (BeatFreqs.cpp:64-91) and the step numbers in the lines are read off them, counting the first step as 1. The maker's commit adding this module says it still wants checking against the hardware.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "BeatFreqs.cpp:96 reads this input with getVoltage; NLCShared.hpp:19-39 with doubleTrigger set at BeatFreqs.cpp:50 fires on both crossings of 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "BeatFreqs.cpp:102 reads this input with getVoltage; NLCShared.hpp:19-39 with doubleTrigger set at BeatFreqs.cpp:51 fires on both crossings of 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BeatFreqs.cpp:61-62 define the only two output levels as 5V and 0V"
+     }
+    }
+   }
   },
   "BOOLs": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four logic gates in a ring, each combining one input with its neighbour, and a four-bit staircase built from the four results",
+    "Sets the rate limit on the SLEW output, from about 18000 volts per second fully anticlockwise down to 1 volt per second fully clockwise",
+    "Read as high above 1V and low below it, and paired with the input on each side of it, the fourth wrapping round to the first, to make two of the logic outputs",
+    "With a cable here the four logic outputs only change on a rise above 1V at this jack; with nothing here they follow the inputs at every sample",
+    "5V or 0V from the chosen logic operation applied to inputs I and II",
+    "5V or 0V from the chosen logic operation applied to inputs II and III",
+    "5V or 0V from the chosen logic operation applied to inputs III and IV",
+    "5V or 0V from the chosen logic operation applied to inputs IV and I",
+    "The STEP staircase passed through a rate limiter set by the SLEW knob",
+    "A staircase made by adding a weight for each logic output that is high, each weight double the one before, giving sixteen levels between 0V and about 8.2V",
+    "Note — the logic operation is chosen on the panel menu and the module comes up in XOR.",
+    "Menu — OR — puts an output high while either of its two inputs is above 1V",
+    "Menu — AND — puts an output high only while both of its two inputs are above 1V",
+    "Menu — XOR — puts an output high while exactly one of its two inputs is above 1V",
+    "Menu — NOR — puts an output high while neither of its two inputs is above 1V",
+    "Menu — NAND — puts an output high unless both of its two inputs are above 1V",
+    "Menu — XNOR — puts an output high while its two inputs are both above 1V or both below it"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "5": 9
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "notes": "The logic mode is one setting for all four gates; the source carries a commented-out plan for per-channel modes (BOOLs.cpp:117-121) that is not built. The SLEW rate law is BOOLs.cpp:223-225: the knob is raised to the power 0.25, then scaled to a rise and fall rate between 18001 and 1 volts per second.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "BOOLs.cpp:175 reads this input with getVoltage and tests it against 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "BOOLs.cpp:175 reads this input with getVoltage and tests it against 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "BOOLs.cpp:175 reads this input with getVoltage and tests it against 1V"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "BOOLs.cpp:175 reads this input with getVoltage and tests it against 1V"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "BOOLs.cpp:212 reads this input with getVoltage through the 1V trigger of NLCShared.hpp:32; BOOLs.cpp:210 branches on isConnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BOOLs.cpp:103 and BOOLs.cpp:191 give the only two output levels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BOOLs.cpp:103 and BOOLs.cpp:191 give the only two output levels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BOOLs.cpp:103 and BOOLs.cpp:191 give the only two output levels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "BOOLs.cpp:103 and BOOLs.cpp:191 give the only two output levels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 9V",
+      "why": "BOOLs.cpp:229 slews the STEP value, whose weights at BOOLs.cpp:105-109 total 8.199V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 9V",
+      "why": "BOOLs.cpp:194-198 add weights that total 8.199V with all four outputs at 5V"
+     }
+    }
+   }
   },
   "DeEscalate": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Seven separate attenuators, each with its own input, knob and output, and no connection between them",
+    "Scales the signal on that row, passing nothing fully anticlockwise and the whole input fully clockwise",
+    "The signal the knob on that row scales",
+    "The input on that row multiplied by the knob on that row",
+    "Note — every knob comes up fully anticlockwise, so all seven outputs are at 0V until one is raised."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3
+   },
+   "notes": "No family is set on any jack: each channel multiplies whatever is patched into it and passes it on, so the jack carries whatever you give it. The knob range is 0 to 1 with a default of 0 (DeEscalate.cpp:50).",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "DeEscalate.cpp:59 reads this input with getVoltage and DeEscalate.cpp:61 multiplies it by the knob"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "DeEscalate.cpp:59 reads this input with getVoltage and DeEscalate.cpp:61 multiplies it by the knob"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "DeEscalate.cpp:59 reads this input with getVoltage and DeEscalate.cpp:61 multiplies it by the knob"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "DeEscalate.cpp:59 reads this input with getVoltage and DeEscalate.cpp:61 multiplies it by the knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "DeEscalate.cpp:59 reads this input with getVoltage and DeEscalate.cpp:61 multiplies it by the knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "DeEscalate.cpp:59 reads this input with getVoltage and DeEscalate.cpp:61 multiplies it by the knob"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "DeEscalate.cpp:59 reads this input with getVoltage and DeEscalate.cpp:61 multiplies it by the knob"
+     }
+    }
+   }
   },
   "DivideConquer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock divider giving every power of two from 2 to 256 alongside thirds, fifths and sevenths and their halves",
+    "Drives the eight power-of-two outputs on each rise above 1V, and feeds the other three clock inputs whenever they are empty",
+    "Clocks the 3 and 3/2 outputs; with nothing patched it takes the clock from the main input at the bottom",
+    "Clocks the 5 and 5/2 outputs; with nothing patched it takes the clock from the main input at the bottom",
+    "Clocks the 7 and 7/2 outputs; with nothing patched it takes the clock from the main input at the bottom",
+    "A gate at 5V for one clock and 0V for the next",
+    "A gate at 5V for two clocks and 0V for the next two",
+    "A gate at 5V for four clocks and 0V for the next four",
+    "A gate at 5V for eight clocks and 0V for the next eight",
+    "A gate at 5V for sixteen clocks and 0V for the next sixteen",
+    "A gate at 5V for thirty-two clocks and 0V for the next thirty-two",
+    "A gate at 5V for sixty-four clocks and 0V for the next sixty-four",
+    "A gate at 5V for one hundred and twenty-eight clocks and 0V for the next hundred and twenty-eight",
+    "A square wave at one third the rate of the clock on that row",
+    "A square wave at two thirds the rate of the clock on that row, changing state on the clock's falling edge as well as its rising edge",
+    "A square wave at one fifth the rate of the clock on that row",
+    "A square wave at two fifths the rate of the clock on that row, changing state on the clock's falling edge as well as its rising edge",
+    "A square wave at one seventh the rate of the clock on that row",
+    "A square wave at two sevenths the rate of the clock on that row, changing state on the clock's falling edge as well as its rising edge",
+    "Note — the three upper clock inputs are normalled to the main input at the bottom, so one cable there runs all fourteen outputs.",
+    "Note — to reach a division the panel does not print, patch one output back into one of the clock inputs: the /2 output into the 7 row's clock input gives a division by 14 at the 7 output."
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12,
+    "8": 13,
+    "9": 14,
+    "10": 15,
+    "11": 16,
+    "12": 17,
+    "13": 18
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger"
+    }
+   },
+   "notes": "The powers of two are a ripple counter (DivideConquer.cpp:171-202). The odd divisions are modelled as flip-flop chains rather than counted (DivideConquer.cpp:99-160), which is why the half divisions change state on the clock's falling edge; the 3/2 and 7/2 outputs are taken from the inverted side of their flip-flop (DivideConquer.cpp:218, 224) while 5/2 is not.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "DivideConquer.cpp:171 puts this input through the 1V trigger of NLCShared.hpp:32"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "DivideConquer.cpp:165 reads this input with getNormalVoltage; DivideConquer.cpp:101 tests it against 1V",
+      "normal": "the main clock input"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "DivideConquer.cpp:166 reads this input with getNormalVoltage; DivideConquer.cpp:122 tests it against 1V",
+      "normal": "the main clock input"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "DivideConquer.cpp:167 reads this input with getNormalVoltage; DivideConquer.cpp:144 tests it against 1V",
+      "normal": "the main clock input"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivideConquer.cpp:92 fixes the gate level at 5V and DivideConquer.cpp:208-224 send that or 0V"
+     }
+    }
+   }
   },
   "DivineCMOS": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two binary clock dividers whose matching stages are exclusive-ORed together, the four results coming out as gates and as one mixed voltage",
+    "Sets how much that division adds into the OUT and SLEW jacks, 0V to 5V; it changes nothing at the division's own gate output",
+    "Sets the rate limit on the SLEW output, from about 18000 volts per second fully anticlockwise down to 1 volt per second fully clockwise",
+    "Steps the first divider on each rise above 1V",
+    "Steps the second divider on each rise above 1V",
+    "5V while the two dividers disagree at their first stage, which with one input patched is a plain division of that clock by two",
+    "5V while the two dividers disagree at their second stage, which with one input patched is a plain division of that clock by four",
+    "5V while the two dividers disagree at their third stage, which with one input patched is a plain division of that clock by eight",
+    "5V while the two dividers disagree at their fourth stage, which with one input patched is a plain division of that clock by sixteen",
+    "The gain knobs of whichever divisions are high at that moment, added together, so it steps between 0V and 20V and never goes negative",
+    "The OUT voltage passed through a rate limiter set by the SLEW knob",
+    "Note — with one input patched the gate outputs are a binary divider of that clock; with both patched each is the exclusive-OR of the two dividers, a one-bit ring modulator.",
+    "Note — every output is unipolar, so a patch treating OUT as audio needs a DC blocker or a high-pass filter after it.",
+    "Note — the four gain knobs come up fully anticlockwise, so OUT and SLEW stay at 0V until one of them is raised, even with a clock running."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "notes": "The knob labelled /4 on the panel is the second parameter and the one labelled /8 the third; the maker swapped them in 2.3.2 and the installed build has the fix. Each divider is its own ripple counter and the outputs are the exclusive-OR of the matching stages (DivineCMOS.cpp:93), so with both inputs patched the divisions printed on the panel no longer describe what comes out.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "DivineCMOS.cpp:71 puts this input through the 1V trigger of NLCShared.hpp:32"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "DivineCMOS.cpp:80 puts this input through the 1V trigger of NLCShared.hpp:32"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivineCMOS.cpp:97 sets this output to 5V or 0V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivineCMOS.cpp:97 sets this output to 5V or 0V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivineCMOS.cpp:97 sets this output to 5V or 0V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DivineCMOS.cpp:97 sets this output to 5V or 0V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 20V",
+      "why": "DivineCMOS.cpp:94-95 sum four knobs whose range at DivineCMOS.cpp:41-44 is 0 to 5"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 20V",
+      "why": "DivineCMOS.cpp:109 slews that same sum"
+     }
+    }
+   }
   },
   "DoubleNeuron": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two neuron circuits and two difference rectifiers on one panel, with no connection between any of the four",
+    "Adds a steady 0V to 5V into that neuron's mix before the mix is rectified",
+    "Sets the size of the comparator swing, 1V to 10V; that much is taken off the rectified mix while the mix is above 0V and added to it while it is not",
+    "One of three signals summed into that neuron; the sum plus SNS is clamped to 0V to 10V before the comparator swing is applied",
+    "Summed with the other minus jack of that rectifier, and the total taken away from the plus pair",
+    "Summed with the other plus jack of that rectifier, and the minus pair taken away from the total",
+    "That neuron's rectified mix with the comparator swing applied",
+    "The plus pair less the minus pair of that rectifier while the difference is negative, down to -10V, and 0V at any other time",
+    "The plus pair less the minus pair of that rectifier while the difference is positive, up to 10V, and 0V at any other time",
+    "Note — with nothing patched and SNS fully anticlockwise, each neuron output rests at whatever its RSPNS knob is set to: the comparator swings negative whenever the mix is not above 0V.",
+    "Note — the two neurons and the two rectifiers share nothing inside the module; the interaction the panel drawing suggests comes from patching one section's output into another's input."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 1,
+    "3": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 4,
+    "7": 4,
+    "8": 5,
+    "9": 5,
+    "10": 4,
+    "11": 4,
+    "12": 5,
+    "13": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 7,
+    "5": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "notes": "Panel names are SNS and RSPNS where the maker's tooltips read Sense and Response. The comparator has no dead band: it is above zero or it is not (NLCShared.hpp:65), so a neuron output steps by twice the RSPNS voltage as the mix crosses 0V.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DoubleNeuron.cpp:89-90 read this input with getVoltage; NLCShared.hpp:63 clamps the three inputs plus SNS to 0 to 10V"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DoubleNeuron.cpp:89-90 read this input with getVoltage; NLCShared.hpp:63 clamps the three inputs plus SNS to 0 to 10V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DoubleNeuron.cpp:89-90 read this input with getVoltage; NLCShared.hpp:63 clamps the three inputs plus SNS to 0 to 10V"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DoubleNeuron.cpp:89-90 read this input with getVoltage; NLCShared.hpp:63 clamps the three inputs plus SNS to 0 to 10V"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DoubleNeuron.cpp:89-90 read this input with getVoltage; NLCShared.hpp:63 clamps the three inputs plus SNS to 0 to 10V"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "DoubleNeuron.cpp:89-90 read this input with getVoltage; NLCShared.hpp:63 clamps the three inputs plus SNS to 0 to 10V"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DoubleNeuron.cpp:98-102 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DoubleNeuron.cpp:98-102 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DoubleNeuron.cpp:98-102 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DoubleNeuron.cpp:98-102 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DoubleNeuron.cpp:98-102 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DoubleNeuron.cpp:98-102 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DoubleNeuron.cpp:98-102 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DoubleNeuron.cpp:98-102 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "NLCShared.hpp:63-67 clamp the mix to 0 to 10V and then add or subtract a response of up to 10"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "NLCShared.hpp:63-67 clamp the mix to 0 to 10V and then add or subtract a response of up to 10"
+     },
+     "2": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 clamp the difference to -10V to 10V and pass only its negative part"
+     },
+     "4": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 clamp the difference to -10V to 10V and pass only its negative part"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 clamp the difference to -10V to 10V and pass only its positive part"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 clamp the difference to -10V to 10V and pass only its positive part"
+     }
+    }
+   }
   },
   "GENiE": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three neuron circuits with each output normalled round into the next one's input, making a feedback ring that runs with nothing patched",
+    "Adds a steady 0V to 5V into that neuron's mix before the mix is rectified",
+    "Sets the size of that neuron's comparator swing, 1V to 10V; that much is taken off the rectified mix while the mix is above 0V and added to it while it is not",
+    "Scales whatever reaches the IN jack below it, passing nothing fully anticlockwise and full level fully clockwise; with that jack empty it scales the neighbouring neuron's output instead",
+    "Feeds neuron 1 through the IN knob above it; with nothing patched that knob passes neuron 3's output instead",
+    "Feeds neuron 2 through the IN knob above it; with nothing patched that knob passes neuron 1's output instead",
+    "Feeds neuron 3 through the IN knob above it; with nothing patched that knob passes neuron 2's output instead",
+    "Added straight into neuron 1's mix at full level, with no knob in the way",
+    "Added straight into neuron 2's mix at full level, with no knob in the way",
+    "Added straight into neuron 3's mix at full level, with no knob in the way",
+    "Added into neuron 1 and neuron 2 at once, at full level and with no knob in the way",
+    "Added into neuron 2 and neuron 3 at once, at full level and with no knob in the way, despite the jack's tooltip naming neurons 3 and 4",
+    "That neuron's mix, clamped to 0V to 10V, with its comparator swing applied",
+    "Neuron 1 plus neuron 3 less neuron 2 while that difference is negative, down to -10V, and 0V at any other time",
+    "Neuron 1 plus neuron 3 less neuron 2 while that difference is positive, up to 10V, and 0V at any other time",
+    "Note — the three IN knobs come up fully anticlockwise, which breaks the feedback ring; until one is raised each neuron output rests at whatever its REACT knob is set to.",
+    "Note — raising the IN knobs is all it takes to make sound: the ring has no clock and needs nothing patched, and the loop is one sample long, so changing Rack's sample rate changes what comes out.",
+    "Note — a cable in an IN jack replaces the neighbouring neuron's output at that point rather than adding to it, which opens the ring at that neuron."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 1,
+    "4": 2,
+    "5": 3,
+    "6": 1,
+    "7": 2,
+    "8": 3
+   },
+   "in": {
+    "0": 4,
+    "2": 5,
+    "4": 6,
+    "5": 7,
+    "7": 8,
+    "9": 9,
+    "1": 10,
+    "6": 10,
+    "3": 11,
+    "8": 11
+   },
+   "out": {
+    "0": 12,
+    "2": 12,
+    "4": 12,
+    "1": 13,
+    "3": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    }
+   },
+   "notes": "The panel prints REACT where the maker's tooltip for the same knob reads Response. The two jacks the panel labels IN 2/3 carry the tooltip 'Neurons 3 & 4' (Genie.cpp:75-76); there is no fourth neuron and the code adds them into neurons 2 and 3 (Genie.cpp:132, 135-136), so the panel is right and the tooltip wrong. The small numbers printed under the top row of jacks name the neuron each is normalled from.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "neuron 3's output",
+      "why": "Genie.cpp:98-105 read this input with getVoltage or fall back to neuron 3; NLCShared.hpp:63 clamps the mix to 0 to 10V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "neuron 1's output",
+      "why": "Genie.cpp:108-115 read this input with getVoltage or fall back to neuron 1; NLCShared.hpp:63 clamps the mix to 0 to 10V"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "neuron 2's output",
+      "why": "Genie.cpp:118-125 read this input with getVoltage or fall back to neuron 2; NLCShared.hpp:63 clamps the mix to 0 to 10V"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Genie.cpp:127-132 read this input with getVoltage; NLCShared.hpp:63 clamps the mix to 0 to 10V"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Genie.cpp:127-132 read this input with getVoltage; NLCShared.hpp:63 clamps the mix to 0 to 10V"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Genie.cpp:127-132 read this input with getVoltage; NLCShared.hpp:63 clamps the mix to 0 to 10V"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Genie.cpp:127-132 read this input with getVoltage; NLCShared.hpp:63 clamps the mix to 0 to 10V"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Genie.cpp:127-132 read this input with getVoltage; NLCShared.hpp:63 clamps the mix to 0 to 10V"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Genie.cpp:127-132 read this input with getVoltage; NLCShared.hpp:63 clamps the mix to 0 to 10V"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Genie.cpp:127-132 read this input with getVoltage; NLCShared.hpp:63 clamps the mix to 0 to 10V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "NLCShared.hpp:63-67 clamp the mix to 0 to 10V and then add or subtract a response of up to 10"
+     },
+     "2": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "NLCShared.hpp:63-67 clamp the mix to 0 to 10V and then add or subtract a response of up to 10"
+     },
+     "4": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "NLCShared.hpp:63-67 clamp the mix to 0 to 10V and then add or subtract a response of up to 10"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 clamp the difference to -10V to 10V and pass only its negative part"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 clamp the difference to -10V to 10V and pass only its positive part"
+     }
+    }
+   }
   },
   "LetsSplosh": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four inputs run into eight difference rectifiers, each rectifier giving the positive half of one grouping on the left of the panel and the negative half on the right",
+    "One of the four signals mixed into the eight rectifiers; the coloured dot beside this jack is the colour that stands for it in the groupings printed by the output jacks",
+    "Inputs 1 and 2 added, less inputs 3 and 4 added, while that comes out positive, up to 10V, and 0V at any other time",
+    "Inputs 1 and 2 added, less inputs 3 and 4 added, while that comes out negative, down to -10V, and 0V at any other time",
+    "Inputs 1 and 3 added, less inputs 2 and 4 added, while that comes out positive, up to 10V, and 0V at any other time",
+    "Inputs 1 and 3 added, less inputs 2 and 4 added, while that comes out negative, down to -10V, and 0V at any other time",
+    "Inputs 1 and 4 added, less inputs 2 and 3 added, while that comes out positive, up to 10V, and 0V at any other time",
+    "Inputs 1 and 4 added, less inputs 2 and 3 added, while that comes out negative, down to -10V, and 0V at any other time",
+    "Inputs 1, 2 and 3 added, less input 4, while that comes out positive, up to 10V, and 0V at any other time",
+    "Inputs 1, 2 and 3 added, less input 4, while that comes out negative, down to -10V, and 0V at any other time",
+    "Inputs 1, 2 and 4 added, less input 3, while that comes out positive, up to 10V, and 0V at any other time",
+    "Inputs 1, 2 and 4 added, less input 3, while that comes out negative, down to -10V, and 0V at any other time",
+    "Inputs 1, 3 and 4 added, less input 2, while that comes out positive, up to 10V, and 0V at any other time",
+    "Inputs 1, 3 and 4 added, less input 2, while that comes out negative, down to -10V, and 0V at any other time",
+    "Inputs 2, 3 and 4 added, less input 1, while that comes out positive, up to 10V, and 0V at any other time",
+    "Inputs 2, 3 and 4 added, less input 1, while that comes out negative, down to -10V, and 0V at any other time",
+    "All four inputs added together, while that comes out positive, up to 10V, and 0V at any other time",
+    "All four inputs added together, while that comes out negative, down to -10V, and 0V at any other time",
+    "Note — nothing here makes a signal of its own: with no cables in the four inputs every one of the sixteen outputs is at 0V.",
+    "Note — the dots beside each output name its grouping by colour, and the slash separates the plus side from the minus side: magenta is input 1, blue input 2, yellow input 3, green input 4.",
+    "Note — the maker's tooltips name the four inputs custard, treacle, natto and batter, in that order from the top."
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 9,
+    "8": 10,
+    "9": 11,
+    "10": 12,
+    "11": 13,
+    "12": 14,
+    "13": 15,
+    "14": 16,
+    "15": 17
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv"
+    }
+   },
+   "notes": "Every grouping is worked out by the same difference rectifier class: the plus side summed, the minus side summed, the two subtracted and the result clamped to -10V to 10V before being split (LetsSplosh.cpp:69-91, NLCShared.hpp:98-104). The lights are driven from the outputs themselves, so a lit jack is a jack with voltage on it.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "LetsSplosh.cpp:63-66 read this input with getVoltage; NLCShared.hpp:100-103 clamp each difference to -10V to 10V"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "LetsSplosh.cpp:63-66 read this input with getVoltage; NLCShared.hpp:100-103 clamp each difference to -10V to 10V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "LetsSplosh.cpp:63-66 read this input with getVoltage; NLCShared.hpp:100-103 clamp each difference to -10V to 10V"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "LetsSplosh.cpp:63-66 read this input with getVoltage; NLCShared.hpp:100-103 clamp each difference to -10V to 10V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "9": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "11": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "13": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "15": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     }
+    }
+   }
   },
   "Neuron": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "One neuron circuit, three inputs summed then rectified and compared, with a two-against-two difference rectifier below it",
+    "Adds a steady 0V to 5V into the neuron's mix before the mix is rectified",
+    "Sets the size of the comparator swing, 1V to 10V; that much is taken off the rectified mix while the mix is above 0V and added to it while it is not",
+    "One of three signals summed into the neuron; the sum plus SENSE is clamped to 0V to 10V before the comparator swing is applied",
+    "Summed with the other IN+ jack, and the IN- pair taken away from that total",
+    "Summed with the other IN- jack, and that total taken away from the IN+ pair",
+    "The rectified neuron mix with the comparator swing applied",
+    "The IN+ pair less the IN- pair while that difference is positive, up to 10V, and 0V at any other time",
+    "The IN+ pair less the IN- pair while that difference is negative, down to -10V, and 0V at any other time",
+    "Note — with nothing patched and SENSE fully anticlockwise, OUT rests at whatever RESPONSE is set to, because the comparator swings negative whenever the rectified mix is not above 0V.",
+    "Note — the neuron and the difference rectifier share no connection inside the module; patch the neuron's OUT into one of the rectifier's inputs to join them."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "5": 4,
+    "6": 4,
+    "3": 5,
+    "4": 5
+   },
+   "out": {
+    "0": 6,
+    "2": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "notes": "Neuron.cpp declares a second neuron and a second rectifier and calls diffrect2.process() every sample (Neuron.cpp:57, 71), but nothing on the panel reads or writes them; the module is one neuron and one rectifier.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Neuron.cpp:62 reads this input with getVoltage; NLCShared.hpp:63 clamps the three inputs plus SENSE to 0 to 10V"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Neuron.cpp:62 reads this input with getVoltage; NLCShared.hpp:63 clamps the three inputs plus SENSE to 0 to 10V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Neuron.cpp:62 reads this input with getVoltage; NLCShared.hpp:63 clamps the three inputs plus SENSE to 0 to 10V"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Neuron.cpp:67-68 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Neuron.cpp:67-68 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Neuron.cpp:67-68 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Neuron.cpp:67-68 read this input with getVoltage; NLCShared.hpp:100-103 clamp the difference to -10V to 10V and split it"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "NLCShared.hpp:63-67 clamp the mix to 0 to 10V and then add or subtract a response of up to 10"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     }
+    }
+   }
   },
   "Numberwang": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-to-sixteen decoder: four gate inputs make a number, and the one output that matches it goes to 5V while the other fifteen stay at 0V",
+    "With a cable here the chosen output only changes on a rise above 1V at this jack; with nothing here it changes as soon as the gates do",
+    "Adds 8 to the number being decoded while it is above 1V",
+    "Adds 4 to the number being decoded while it is above 1V",
+    "Adds 2 to the number being decoded while it is above 1V",
+    "Adds 1 to the number being decoded while it is above 1V",
+    "5V while none of the four gate inputs is above 1V, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 1, which is the fourth gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 2, which is the third gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 3, which is the third gate input and the fourth gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 4, which is the second gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 5, which is the second gate input and the fourth gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 6, which is the second gate input and the third gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 7, which is the second gate input, the third gate input and the fourth gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 8, which is the leftmost gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 9, which is the leftmost gate input and the fourth gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 10, which is the leftmost gate input and the third gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 11, which is the leftmost gate input, the third gate input and the fourth gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 12, which is the leftmost gate input and the second gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 13, which is the leftmost gate input, the second gate input and the fourth gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 14, which is the leftmost gate input, the second gate input and the third gate input and no other, and 0V at any other time",
+    "5V while the gate inputs above 1V add to 15, which is the leftmost gate input, the second gate input, the third gate input and the fourth gate input and no other, and 0V at any other time",
+    "Note — the numbers printed beside the outputs are a joke from the television sketch and say nothing about which output is chosen; they decode in reading order, the top left one being zero.",
+    "Note — the input labels are part of the same joke; the four gate inputs are worth 8, 4, 2 and 1 from left to right.",
+    "Note — with nothing patched the top left output is at 5V, because no gate input is above 1V and zero is the number that decodes to."
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10,
+    "5": 11,
+    "6": 12,
+    "7": 13,
+    "8": 14,
+    "9": 15,
+    "10": 16,
+    "11": 17,
+    "12": 18,
+    "13": 19,
+    "14": 20,
+    "15": 21
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger"
+    }
+   },
+   "notes": "The maker's own summary in plugin.json calls this a logic module with sixteen gates; the panel subtitle is 4:16 Decoder, which is what the code does. Only one output is ever above 0V.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Numberwang.cpp:60 puts this input through the 1V trigger of NLCShared.hpp:32; Numberwang.cpp:58 branches on isConnected"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Numberwang.cpp:47 reads this input with getVoltage and tests it against 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Numberwang.cpp:46 reads this input with getVoltage and tests it against 1V"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Numberwang.cpp:45 reads this input with getVoltage and tests it against 1V"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Numberwang.cpp:44 reads this input with getVoltage and tests it against 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Numberwang.cpp:52 sets the chosen output to 5V and every other to 0V"
+     }
+    }
+   }
   },
   "Router": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four switches on one panel: each passes its input to its output while the CV it is compared against stays at or below the voltage its knob sets",
+    "Sets the threshold for that channel, -10V to 10V; the channel passes while its CV is at or below this and blocks while the CV is above it",
+    "Compared against the knobs of channels 1 and 2, and against the knobs of channels 3 and 4 as well whenever the other CV jack is empty",
+    "Compared against the knobs of channels 3 and 4; with nothing patched it takes the voltage at the other CV jack",
+    "The signal channel 1 passes",
+    "The signal channel 2 passes; with nothing patched it takes IN1",
+    "The signal channel 3 passes; with nothing patched it takes IN2",
+    "The signal channel 4 passes; with nothing patched it takes IN3",
+    "That channel's input while its CV is at or below its knob, and 0V while the CV is above it",
+    "The four channel outputs added together and divided by four",
+    "Note — every knob comes up at 0V and an empty CV jack reads 0V, so all four channels are passing at startup: zero is at or below zero.",
+    "Note — the four inputs are normalled down the row and the two CV jacks left to right, so one signal in IN1 and one CV in the left CV jack works all four channels."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "in": {
+    "4": 2,
+    "5": 3,
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 8,
+    "2": 8,
+    "3": 8,
+    "4": 9
+   },
+   "family": {
+    "in": {
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "notes": "No family is set on the four signal inputs, the four channel outputs or OUT ALL: each passes whatever is patched into it. The comparison is at or below, not below (Router.cpp:83-86), which is why the module comes up passing with everything at 0V; the maker's own summary says below. OUT ALL is the sum of the four channels multiplied by 0.25 (Router.cpp:97), so it is their average rather than their sum.",
+   "props": {
+    "in": {
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "-10 to 10V",
+      "why": "Router.cpp:70 reads this input with getVoltage; Router.cpp:83-84 compare it with knobs whose range at Router.cpp:45 is -10 to 10"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "-10 to 10V",
+      "normal": "the CV 1&2 input",
+      "why": "Router.cpp:71 reads this input with getNormalVoltage from the other CV jack; Router.cpp:85-86 compare it with knobs whose range at Router.cpp:47 is -10 to 10"
+     },
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Router.cpp:73 reads this input with getVoltage and Router.cpp:83 passes it through unchanged"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "IN1",
+      "why": "Router.cpp:74 reads this input with getNormalVoltage from IN1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "IN2",
+      "why": "Router.cpp:75 reads this input with getNormalVoltage from IN2"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "IN3",
+      "why": "Router.cpp:76 reads this input with getNormalVoltage from IN3"
+     }
+    }
+   }
   },
   "Segue": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo crossfader that swaps its two inputs between its two outputs, usable as a panner, a crossfader or a voltage-controlled amplifier",
+    "Sets the crossfade position reached with no CV patched, 0V to 5V; fully anticlockwise sends IN X to OUT 1 and IN Y to OUT 2, fully clockwise swaps them over",
+    "Scales the CV input before it is added to the INITIAL knob, from -1 to 1, so the CV can be turned round as well as turned down",
+    "Scales IN X before the crossfade, passing nothing fully anticlockwise and the whole input fully clockwise",
+    "Scales IN Y before the crossfade, passing nothing fully anticlockwise and the whole input fully clockwise",
+    "The signal that reaches OUT 1 with the crossfade fully anticlockwise and OUT 2 with it fully clockwise",
+    "The signal that reaches OUT 2 with the crossfade fully anticlockwise and OUT 1 with it fully clockwise",
+    "Shifts the crossfade: it is multiplied by the CV knob, added to the INITIAL knob, and the total clamped to 0V to 5V",
+    "A straight-line crossfade between the two inputs, all of IN X at one end of the control range and all of IN Y at the other",
+    "A straight-line crossfade between the two inputs, all of IN Y at one end of the control range and all of IN X at the other",
+    "Note — the INITIAL knob comes up in the middle of its range, so one signal patched to IN X arrives at half level on both outputs until the knob or the CV moves it.",
+    "Note — the crossfade is linear rather than constant power, so at the middle each output carries half of each input."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "notes": "The source says this is HetrickCV's Flip Pan with the linear and equal-power switch removed (Segue.cpp:3-4), and the crossfade is the plain linear mix of NLCShared.cpp:5. Panel names are IN X, IN Y, INITIAL, CV, OUT 1 and OUT 2, where the maker's tooltips read X, Y, Initial Pan Position, Pan CV Depth and 1 and 2.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Segue.cpp:58 reads this input with getVoltage and multiplies it by the Gain X knob"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Segue.cpp:59 reads this input with getVoltage and multiplies it by the Gain Y knob"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 5V",
+      "why": "Segue.cpp:61 reads this input with getVoltage; Segue.cpp:62 clamps the knob plus this input to 0 to 5V"
+     }
+    }
+   }
   },
   "SlothTorpor": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chaotic oscillator with no inputs at all, giving two slowly wandering voltages from a modelled analogue circuit that never repeats",
+    "Adds up to 10 kilohms to a fixed 100 kilohms in the modelled circuit, which changes how long the voltages spend around one of the two attractors rather than the other; it does not change the rate",
+    "The wider-swinging of the two voltages, the one the lamp follows: green while it is positive, red while it is negative, full brightness at 2V",
+    "The narrower-swinging of the two voltages, taken from a different node of the same circuit",
+    "Note — there is nothing to patch in and no clock to give it: the circuit runs from the moment the module is added and both outputs are moving straight away.",
+    "Note — one turn around the pair of attractors takes roughly 15 to 30 seconds, so a change at the knob takes minutes rather than seconds to show itself."
+   ],
+   "param": {
+    "0": 1
+   },
+   "out": {
+    "1": 2,
+    "0": 3
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "notes": "The circuit is Don Cross's model of the hardware, solved by iteration each sample (SlothCircuit.hpp:124-196). The knob is the variable part of one resistance, 100k in series with 0 to 10k (SlothCircuit.hpp:100). The orbit times are the maker's README rather than anything in the code; the code differs between the three modules only in a time dilation factor and a starting capacitor voltage (SlothCircuit.hpp:200-224). No voltage range is stated anywhere for the two outputs, so none is given here.",
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "SlothCommon.hpp:58-59 set both outputs to one channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "SlothCommon.hpp:58-59 set both outputs to one channel"
+     }
+    }
+   }
   },
   "SlothApathy": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chaotic oscillator with no inputs at all, giving two slowly wandering voltages from a modelled analogue circuit that never repeats",
+    "Adds up to 10 kilohms to a fixed 100 kilohms in the modelled circuit, which changes how long the voltages spend around one of the two attractors rather than the other; it does not change the rate",
+    "The wider-swinging of the two voltages, the one the lamp follows: green while it is positive, red while it is negative, full brightness at 2V",
+    "The narrower-swinging of the two voltages, taken from a different node of the same circuit",
+    "Note — there is nothing to patch in and no clock to give it: the circuit runs from the moment the module is added and both outputs are moving straight away.",
+    "Note — one turn around the pair of attractors takes roughly 60 to 90 seconds, so a change at the knob takes minutes rather than seconds to show itself."
+   ],
+   "param": {
+    "0": 1
+   },
+   "out": {
+    "1": 2,
+    "0": 3
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "notes": "The circuit is Don Cross's model of the hardware, solved by iteration each sample (SlothCircuit.hpp:124-196). The knob is the variable part of one resistance, 100k in series with 0 to 10k (SlothCircuit.hpp:100). The orbit times are the maker's README rather than anything in the code; the code differs between the three modules only in a time dilation factor and a starting capacitor voltage (SlothCircuit.hpp:200-224). No voltage range is stated anywhere for the two outputs, so none is given here.",
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "SlothCommon.hpp:58-59 set both outputs to one channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "SlothCommon.hpp:58-59 set both outputs to one channel"
+     }
+    }
+   }
   },
   "SlothInertia": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chaotic oscillator with no inputs at all, giving two slowly wandering voltages from a modelled analogue circuit that never repeats",
+    "Adds up to 10 kilohms to a fixed 100 kilohms in the modelled circuit, which changes how long the voltages spend around one of the two attractors rather than the other; it does not change the rate",
+    "The wider-swinging of the two voltages, the one the lamp follows: green while it is positive, red while it is negative, full brightness at 2V",
+    "The narrower-swinging of the two voltages, taken from a different node of the same circuit",
+    "Note — there is nothing to patch in and no clock to give it: the circuit runs from the moment the module is added and both outputs are moving straight away.",
+    "Note — one turn around the pair of attractors takes roughly 30 to 40 minutes, so a change at the knob takes minutes rather than seconds to show itself."
+   ],
+   "param": {
+    "0": 1
+   },
+   "out": {
+    "1": 2,
+    "0": 3
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "notes": "The circuit is Don Cross's model of the hardware, solved by iteration each sample (SlothCircuit.hpp:124-196). The knob is the variable part of one resistance, 100k in series with 0 to 10k (SlothCircuit.hpp:100). The orbit times are the maker's README rather than anything in the code; the code differs between the three modules only in a time dilation factor and a starting capacitor voltage (SlothCircuit.hpp:200-224). No voltage range is stated anywhere for the two outputs, so none is given here.",
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "SlothCommon.hpp:58-59 set both outputs to one channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "SlothCommon.hpp:58-59 set both outputs to one channel"
+     }
+    }
+   }
   },
   "Splish": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three inputs run into four difference rectifiers, each giving the positive half of one grouping and the negative half beside it",
+    "One of the three signals; it goes to the plus side of one of the three pairs, the minus side of the other two, and into the summing pair as well",
+    "Input 1 less inputs 2 and 3 added, while that comes out positive, up to 10V, and 0V at any other time",
+    "Input 1 less inputs 2 and 3 added, while that comes out negative, down to -10V, and 0V at any other time",
+    "Input 2 less inputs 1 and 3 added, while that comes out positive, up to 10V, and 0V at any other time",
+    "Input 2 less inputs 1 and 3 added, while that comes out negative, down to -10V, and 0V at any other time",
+    "Input 3 less inputs 1 and 2 added, while that comes out positive, up to 10V, and 0V at any other time",
+    "Input 3 less inputs 1 and 2 added, while that comes out negative, down to -10V, and 0V at any other time",
+    "All three inputs added together, while the total comes out positive, up to 10V, and 0V at any other time",
+    "All three inputs added together, while the total comes out negative, down to -10V, and 0V at any other time",
+    "Note — nothing here makes a signal of its own: with no cables in the three inputs all eight outputs are at 0V.",
+    "Note — three round lamps below the inputs show the three plus outputs, so a lit lamp means that grouping is currently positive."
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    }
+   },
+   "notes": "Panel labels are 1/23, 2/13, 3/12 and 123 with a plus or minus after each, and they match the source exactly (Splish.cpp:52-62). The maker's own summary calls this a three-input variation of Let's Splosh, which has eight groupings to this one's four.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Splish.cpp:47-49 read this input with getVoltage; NLCShared.hpp:100-103 clamp each difference to -10V to 10V"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Splish.cpp:47-49 read this input with getVoltage; NLCShared.hpp:100-103 clamp each difference to -10V to 10V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Splish.cpp:47-49 read this input with getVoltage; NLCShared.hpp:100-103 clamp each difference to -10V to 10V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NLCShared.hpp:101-102 pass only the positive part of a difference clamped to -10V to 10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "-10 to 0V",
+      "why": "NLCShared.hpp:101-103 pass only the negative part of a difference clamped to -10V to 10V"
+     }
+    }
+   }
   },
   "SquidAxon": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A three-input mixer feeding a four-stage shift register, with two feedback paths from the last stage back into the mixer",
+    "Scales OUT 4 into a modelled diode before that feedback reaches the mixer, 0 to 4; the diode squares its input, so the effect grows far faster than the knob turns",
+    "Scales whatever arrives at IN 3 into the mixer, passing nothing fully anticlockwise and full level fully clockwise; with IN 3 empty it scales OUT 4 back into the mixer instead",
+    "Moves the register on one stage at each rise above 1V",
+    "Added into the mixer at full level",
+    "Added into the mixer through the IN 3 knob; with nothing patched, that knob feeds OUT 4 back into the mixer instead",
+    "The mixer's total clamped to -10V to 10V, taken afresh on every fourth clock and held between times",
+    "The value OUT 1 took, copied here one clock later",
+    "The value OUT 1 took, copied here two clocks later",
+    "The value OUT 1 took, copied here three clocks later, and the one both feedback controls read",
+    "Note — nothing moves without a clock: patch one into CLOCK and the four outputs fill in turn, OUT 1 taking a new mixer value on every fourth clock.",
+    "Note — both feedback knobs come up fully anticlockwise, so with nothing patched all four outputs stay at 0V however fast the clock runs.",
+    "Note — the linear feedback path is the IN 3 knob and it is only there while IN 3 is empty; the nonlinear path through the diode is always in circuit and is subtracted rather than added."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "3": 3,
+    "0": 4,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9
+   },
+   "family": {
+    "in": {
+     "3": "trigger",
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "notes": "OUT 1 is the mixer, not a register stage: it is written only when the internal stage counter is at zero, which is every fourth clock (SquidAxon.cpp:72-93), and the maker's README makes the same point. The nonlinear feedback is OUT 4 times the knob, through a squared diode model, clamped to -9V to 9V and then multiplied by -0.7 before being added to the mix (SquidAxon.cpp:85-90). The three inputs are only read at a clock, so anything patched into them is sampled rather than followed.",
+   "props": {
+    "in": {
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "SquidAxon.cpp:69 puts this input through the 1V trigger of NLCShared.hpp:32"
+     },
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "sumRange": "-10 to 10V",
+      "why": "SquidAxon.cpp:74 reads this input with getVoltage only on a clock; SquidAxon.cpp:92 clamps the mixer total to -10V to 10V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "sumRange": "-10 to 10V",
+      "why": "SquidAxon.cpp:74 reads this input with getVoltage only on a clock; SquidAxon.cpp:92 clamps the mixer total to -10V to 10V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "sumRange": "-10 to 10V",
+      "normal": "the OUT 4 voltage",
+      "why": "SquidAxon.cpp:71-82 branch on isConnected and read this input with getVoltage, falling back to OUT 4; SquidAxon.cpp:92 clamps the total"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "SquidAxon.cpp:92 clamps the value every output eventually carries to -10V to 10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "SquidAxon.cpp:92 clamps the value every output eventually carries to -10V to 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "SquidAxon.cpp:92 clamps the value every output eventually carries to -10V to 10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "SquidAxon.cpp:92 clamps the value every output eventually carries to -10V to 10V"
+     }
+    }
+   }
   },
   "Statues": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A one-to-eight switch with the output chosen by three gate inputs read as a binary number, and outputs that keep their last voltage when they are not the chosen one",
+    "The signal passed to whichever of the eight outputs the three gate inputs select",
+    "Adds 4 to the output number selected while it is above 1V",
+    "Adds 2 to the output number selected while it is above 1V",
+    "Adds 1 to the output number selected while it is above 1V",
+    "Carries IN while none of the three gate inputs is above 1V, and holds its last voltage at any other time",
+    "Carries IN while the OOX input is above 1V and the others are not, and holds its last voltage at any other time",
+    "Carries IN while the OXO input is above 1V and the others are not, and holds its last voltage at any other time",
+    "Carries IN while the OXO input and the OOX input are above 1V and the others are not, and holds its last voltage at any other time",
+    "Carries IN while the XOO input is above 1V and the others are not, and holds its last voltage at any other time",
+    "Carries IN while the XOO input and the OOX input are above 1V and the others are not, and holds its last voltage at any other time",
+    "Carries IN while the XOO input and the OXO input are above 1V and the others are not, and holds its last voltage at any other time",
+    "Carries IN while the XOO input, the OXO input and the OOX input are above 1V and the others are not, and holds its last voltage at any other time",
+    "Note — an output that stops being the chosen one does not fall to 0V; it stays at the voltage it had when it was last chosen, and reads 0V only until it has been chosen once.",
+    "Note — with none of the three gate inputs patched the first output is selected, so IN goes straight through to it."
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12
+   },
+   "family": {
+    "in": {
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "notes": "No family is set on IN or on the eight outputs: the module passes whatever is patched into IN without changing it. The panel numbers the outputs 1 to 8 while the binary inputs count from 0, so the output labelled 1 is the one chosen with no gates high. Each output has a green and red lamp driven from its own voltage, so a held output stays lit.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Statues.cpp:45 reads this input with getVoltage and Statues.cpp:53 passes it through unchanged"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Statues.cpp:51 reads this input with getVoltage and tests it against 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Statues.cpp:50 reads this input with getVoltage and tests it against 1V"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Statues.cpp:49 reads this input with getVoltage and tests it against 1V"
+     }
+    }
+   }
   },
   "TripleSloth": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The three Sloth chaos circuits on one panel, apathy, inertia and torpor, with a CV input for two of them and a pair of combined outputs",
+    "Adds up to 10 kilohms to a fixed 100 kilohms in that circuit, which changes how long it spends around one of its two attractors rather than the other; it does not change the rate",
+    "Added into that circuit after being clamped to -12V to 12V; it nudges the chaotic path and also offsets that circuit's Z output",
+    "The narrower-swinging of that circuit's two chaotic voltages",
+    "The wider-swinging of that circuit's two chaotic voltages, the one the lamp above the column follows: green while it is positive, red while it is negative, full brightness at 2V",
+    "That circuit's Y voltage inverted, with a fifth of its CV input added",
+    "The inertia circuit's Y voltage inverted; inertia has no CV input, so nothing is added to it",
+    "The three Z voltages combined while that total is negative, down to the circuit's own limit, and 0V at any other time; the total is 0.7 times torpor's Z less apathy's Z and inertia's Z added together",
+    "The three Z voltages combined while that total is positive, and 0V at any other time; the total is 0.7 times torpor's Z less apathy's Z and inertia's Z added together",
+    "Note — there is nothing to patch in to make this work: all three circuits run from the moment the module is added and every output is moving straight away.",
+    "Note — inertia has neither a knob nor a CV input; one turn around its attractors takes roughly 30 to 40 minutes, against 60 to 90 seconds for apathy and 15 to 30 seconds for torpor.",
+    "Note — the Z outputs here are the inverted form of the Y output the single Sloth modules give, which is why the panel has three outputs per circuit where they have two."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "3": 3,
+    "6": 3,
+    "1": 4,
+    "4": 4,
+    "7": 4,
+    "2": 5,
+    "8": 5,
+    "5": 6,
+    "9": 7,
+    "10": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv"
+    }
+   },
+   "notes": "Z is the circuit's z node, which SlothCircuit.hpp:159 computes as minus the Y voltage minus the CV scaled by 100k over 470k, about a fifth; with no CV patched Z is simply Y inverted. The combined output pair splits the value at TripleSloth.cpp:125-127, which is the formula in the maker's README. The CV inputs take a polyphonic cable and sum its channels to one, and the maker does not tag the module polyphonic.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "-12 to 12V",
+      "why": "TripleSloth.cpp:108 reads this input with getVoltageSum; SlothCircuit.hpp:106 clamps it to the -12V to 12V supply rails"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "-12 to 12V",
+      "why": "TripleSloth.cpp:109 reads this input with getVoltageSum; SlothCircuit.hpp:106 clamps it to the -12V to 12V supply rails"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     },
+     "2": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     },
+     "3": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     },
+     "4": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     },
+     "5": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     },
+     "6": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     },
+     "7": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     },
+     "8": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     },
+     "9": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     },
+     "10": {
+      "poly": false,
+      "why": "TripleSloth.cpp:87-88 set every output to one channel"
+     }
+    }
+   }
   }
  }
 }

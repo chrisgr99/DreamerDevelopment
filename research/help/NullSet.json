@@ -1,43 +1,672 @@
 {
  "plugin": "NullSet",
- "source": "https://github.com/nicholas-j-denning/NullSet",
+ "source": "https://github.com/nicholas-j-denning/NullSet/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "QuickMelody": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Makes a melody by sampling a free-running oscillator at each clock, so the notes step through a pattern that repeats; the clock cable's channel count sets how many voices play",
+    "Draws a new random oscillator frequency, between 440Hz and three octaves above it, which is a new melody; held down it keeps drawing another every sample",
+    "Sets the voltage the melody reaches at the far end of the oscillator cycle, -10V to +10V",
+    "Sets the voltage the melody starts from at the near end of the oscillator cycle, -10V to +10V",
+    "Samples a new note on each rise past 2V; each channel of the cable reads the oscillator a fixed fraction of a cycle from the last",
+    "Draws a new random oscillator frequency on each rise past 2V, which is a new melody",
+    "Replaces the Max knob while a cable is patched, a volt of range per volt",
+    "Replaces the Min knob while a cable is patched, a volt of range per volt",
+    "The melody, one channel per clock channel, each note held until the next clock",
+    "Note — nothing comes out until a clock is patched: the output takes its channel count from the clock cable, and with no cable there it has no channels at all",
+    "Note — the two range knobs start with Max at -5V and Min at +5V, the opposite way round to their names, so a fresh module sweeps downward until one of them is moved",
+    "Note — the melody is the oscillator's frequency and it is saved with the patch, so the same one comes back when the patch is loaded"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 2V",
+      "why": "QuickMelody.cpp:74-75 sets the output channel count from this port's getChannels(), and 85 reads each channel in turn"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "QuickMelody.cpp:66-68 reads getVoltage() with no channel and rescales 0.1V to 2V into a Schmitt trigger"
+     },
+     "2": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "QuickMelody.cpp:95-100 reads getVoltage() with no channel and uses it in place of the Max knob when the port is connected"
+     },
+     "3": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "QuickMelody.cpp:88-93 reads getVoltage() with no channel and uses it in place of the Min knob when the port is connected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "QuickMelody.cpp:75 sets this port's channel count from the clock input and 104 writes one voltage per channel"
+     }
+    }
+   },
+   "notes": "Source read at commit 21bfcbf, the commit whose plugin.json carries the installed 2.0.0. The Max and Min knobs are configured with defaults of -5 and +5 (QuickMelody.cpp:29-30), so the default Max is below the default Min; the output is computed as (max - min) * phase + min at line 103, which simply runs the sweep downward. The Max and Min inputs replace their knobs rather than being added to them."
   },
   "PolyAutoPan": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Pans each channel of a polyphonic cable across a stereo pair, every channel swept by the same triangle at a different point in its cycle, and the results summed",
+    "Sets the sweep speed in beats per minute, 0.1 to 500",
+    "Scales both outputs, from silence to twice the input",
+    "The signal to be panned; each channel of a polyphonic cable takes its own place in the sweep",
+    "Replaces the Rate knob while a cable is patched: -10V gives 0.1 beats per minute, 0V gives 250, and +10V gives 500",
+    "The right side of the panned pair, one channel",
+    "The left side of the panned pair, one channel",
+    "Note — the pan law is linear rather than constant power: the two outputs sum to the input at every point in the sweep, so the middle of the sweep is quieter than the ends",
+    "Note — both outputs are monophonic; every channel of the input is summed into them"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "PolyAutoPan.cpp:57 takes this port's getChannels() as the voice count and 70 reads each channel in turn"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "PolyAutoPan.cpp:42-44 reads getVoltage() with no channel and computes 24.995 times it plus 250.05 as the tempo, in place of the knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "PolyAutoPan.cpp:80 writes one value with setVoltage and never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "PolyAutoPan.cpp:79 writes one value with setVoltage and never calls setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit 21bfcbf, the commit whose plugin.json carries the installed 2.0.0. The Rate input replaces the knob rather than being added to it, and its law (24.995 V + 250.05, PolyAutoPan.cpp:44) is not clamped, so a voltage outside ±10V runs the sweep faster than 500 beats per minute or backwards. Output index 0 is the right side and index 1 the left, which is the reverse of the usual order."
   },
   "WeightedQuantizer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer that divides each octave into bands whose widths you set, so a sweep or a random voltage lands on each note as often as its weight says",
+    "Sets how wide a slice of the octave this note takes, 0 to 10; the twelve weights are read against their total, so a weight of zero drops the note entirely",
+    "The voltage to quantize, one note per polyphonic channel",
+    "Replaces the knob for that note while a cable is patched, 0 to 10V, and moves the knob to match",
+    "The quantized voltage, with as many channels as the input",
+    "Note — with every weight at zero, which is how a fresh module starts, the input is passed through untouched; turn at least one note up before it quantizes anything",
+    "Note — this is not a nearest-note quantizer: each volt's fractional part is cut into bands from C upwards, sized by the weights, so the note follows where in the octave the input lands"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1
+   },
+   "in": {
+    "1": 2,
+    "0": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "1": "pitch",
+     "0": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "WeightedQuantizer.cpp:159-161 takes this port's getChannels() as the voice count and reads its whole voltage array"
+     },
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:81-83 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:93-95 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:99-101 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:105-107 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:111-113 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:117-119 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:123-125 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:129-131 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:135-137 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:141-143 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:147-149 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "WeightedQuantizer.cpp:87-89 reads getVoltage() with no channel, clamps it to 0 to 10 and writes it into the knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "WeightedQuantizer.cpp:160 sets this port's channel count from the In port and 166 and 174 write one voltage per channel"
+     }
+    }
+   },
+   "notes": "Source read at commit 21bfcbf, the commit whose plugin.json carries the installed 2.0.0. Input index 0 is the C weight and index 1 is the pitch In, so the index order is not the panel order; index 12 is the B weight and index 2 the C sharp weight. A weight CV does not merely override its knob, it writes the value into the knob with setValue (WeightedQuantizer.cpp:83 and the eleven like it), so the knob visibly follows the cable and keeps the last value when the cable is pulled. With every weight at zero the module short-circuits input to output (line 164)."
   },
   "PolyLFT": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A triangle low-frequency oscillator that puts out up to sixteen channels at once, their phases spread evenly around one cycle",
+    "Sets how many channels come out, 1 to 16",
+    "Sets the speed in beats per minute, 0.1 to 500",
+    "Sets the voltage at one end of the triangle, -10V to +10V",
+    "Sets the voltage at the other end of the triangle, -10V to +10V",
+    "Replaces the Rate knob while a cable is patched: -10V gives 0.1 beats per minute, 0V gives 250, and +10V gives 500",
+    "Replaces the Min knob while a cable is patched, a volt of output range per volt",
+    "Replaces the Max knob while a cable is patched, a volt of output range per volt",
+    "The triangle, with as many channels as the Poly knob is set to",
+    "Note — every control input replaces its knob outright rather than being added to it, so that knob does nothing while a cable is patched",
+    "Note — the channels are one wave at spread phases, not separate waves: useful for scanning a wavetable or driving a bank of voices out of step"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "PolyLFT.cpp:46-48 reads getVoltage() with no channel and computes 24.995 times it plus 250.05 as the tempo, in place of the knob"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "PolyLFT.cpp:80-82 reads getVoltage() with no channel and uses it in place of the Min knob"
+     },
+     "2": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "PolyLFT.cpp:87-89 reads getVoltage() with no channel and uses it in place of the Max knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "PolyLFT.cpp:68-71 sets this port's channel count from the Poly knob and writes one voltage per channel"
+     }
+    }
+   },
+   "notes": "Source read at commit 21bfcbf, the commit whose plugin.json carries the installed 2.0.0. The rate law (24.995 V + 250.05, PolyLFT.cpp:48) is not clamped, so a voltage outside ±10V runs past the knob's own 0.1 to 500 range. Min and Max are only the two ends of the wave: setting Min above Max turns the triangle upside down rather than doing nothing."
   },
   "16Squared": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sixteen-step sequencer holding sixteen polyphonic channels, with one row of knobs standing for whichever step is current",
+    "Moves to the next step, wrapping back to the first after the last",
+    "Moves to the previous step, wrapping to the last from the first",
+    "Returns to the first step",
+    "Sets how many steps are played before the sequence wraps, 1 to 16",
+    "Sets how many channels come out, 1 to 16",
+    "Sets the voltage of one output channel at the current step, -10V to +10V; it is rewritten from the store each time the step changes",
+    "Moves to the next step on each rise past 2V",
+    "Moves to the previous step on each rise past 2V",
+    "Returns to the first step on each rise past 2V",
+    "The values of the current step, with as many channels as the Poly knob is set to",
+    "Note — only the current step is on the panel: the sixteen knobs hold that step's values and jump to the next step's values as the sequence moves, so the other steps are edited by stepping to them",
+    "Note — the sixteen lights show which step is current, counted left to right along each row and then down",
+    "Note — a fresh module has every step at 0V on every channel, so the output is silent until knobs are turned"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6,
+    "13": 6,
+    "14": 6,
+    "15": 6,
+    "16": 6,
+    "17": 6,
+    "18": 6,
+    "19": 6,
+    "20": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "16Squared.cpp:115 reads getVoltage() with no channel and rescales 0.1V to 2V into a Schmitt trigger"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "16Squared.cpp:117 reads getVoltage() with no channel and rescales 0.1V to 2V into a Schmitt trigger"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "16Squared.cpp:119 reads getVoltage() with no channel and rescales 0.1V to 2V into a Schmitt trigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "-10 to 10V",
+      "why": "16Squared.cpp:111 sets this port's channel count from the Poly knob and 317 writes one voltage per channel"
+     }
+    }
+   },
+   "notes": "Source read at commit 21bfcbf, the commit whose plugin.json carries the installed 2.0.0. The knob values are copied into the store for the current step on every sample (setValues at 16Squared.cpp:112) and copied back out of it whenever the step changes, which is what makes one row of knobs serve all sixteen steps. The buttons are read through the same Schmitt trigger shape as the jacks, against the parameter value rather than a voltage."
   },
   "LabeledPatchbay": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight separate polyphonic paths, each with an attenuverter and a text box to write down what it carries",
+    "Scales the signal on its row between -1 and +1, so it can be attenuated, silenced or turned upside down",
+    "The signal for that row, which is scaled by that row's attenuverter and sent to that row's output with all its polyphonic channels",
+    "Carries that row's input after its attenuverter, with the same number of polyphonic channels; with nothing patched into the row it has no channels at all",
+    "Note — every attenuverter comes up at zero, so a fresh module passes nothing until one is turned up",
+    "Note — the text box on each row takes up to 18 characters and is saved with the patch; it is a display rather than a control, so clicking it gives no note of its own"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "LabeledPatchbay.cpp:81-88 takes this port's getChannels() and copies its whole voltage array through the attenuverter"
+     },
+     "1": {
+      "poly": true,
+      "why": "LabeledPatchbay.cpp:92-99 takes this port's getChannels() and copies its whole voltage array through the attenuverter"
+     },
+     "2": {
+      "poly": true,
+      "why": "LabeledPatchbay.cpp:103-110 takes this port's getChannels() and copies its whole voltage array through the attenuverter"
+     },
+     "3": {
+      "poly": true,
+      "why": "LabeledPatchbay.cpp:114-121 takes this port's getChannels() and copies its whole voltage array through the attenuverter"
+     },
+     "4": {
+      "poly": true,
+      "why": "LabeledPatchbay.cpp:125-132 takes this port's getChannels() and copies its whole voltage array through the attenuverter"
+     },
+     "5": {
+      "poly": true,
+      "why": "LabeledPatchbay.cpp:136-143 takes this port's getChannels() and copies its whole voltage array through the attenuverter"
+     },
+     "6": {
+      "poly": true,
+      "why": "LabeledPatchbay.cpp process copies this port's whole voltage array through its attenuverter, bounded by getChannels()"
+     },
+     "7": {
+      "poly": true,
+      "why": "LabeledPatchbay.cpp process copies this port's whole voltage array through its attenuverter, bounded by getChannels()"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "normal": "no channels",
+      "why": "LabeledPatchbay.cpp:86-91 sets this port's channel count from its input, or to zero when nothing is patched in"
+     },
+     "1": {
+      "poly": true,
+      "normal": "no channels",
+      "why": "LabeledPatchbay.cpp:97-102 sets this port's channel count from its input, or to zero when nothing is patched in"
+     },
+     "2": {
+      "poly": true,
+      "normal": "no channels",
+      "why": "LabeledPatchbay.cpp:108-113 sets this port's channel count from its input, or to zero when nothing is patched in"
+     },
+     "3": {
+      "poly": true,
+      "normal": "no channels",
+      "why": "LabeledPatchbay.cpp:119-124 sets this port's channel count from its input, or to zero when nothing is patched in"
+     },
+     "4": {
+      "poly": true,
+      "normal": "no channels",
+      "why": "LabeledPatchbay.cpp:130-135 sets this port's channel count from its input, or to zero when nothing is patched in"
+     },
+     "5": {
+      "poly": true,
+      "normal": "no channels",
+      "why": "LabeledPatchbay.cpp:141-146 sets this port's channel count from its input, or to zero when nothing is patched in"
+     },
+     "6": {
+      "poly": true,
+      "normal": "no channels",
+      "why": "LabeledPatchbay.cpp process sets this port's channel count from its input, or to zero when nothing is patched in"
+     },
+     "7": {
+      "poly": true,
+      "normal": "no channels",
+      "why": "LabeledPatchbay.cpp process sets this port's channel count from its input, or to zero when nothing is patched in"
+     }
+    }
+   },
+   "notes": "Source read at commit 21bfcbf, the commit whose plugin.json carries the installed 2.0.0. The inputs and outputs get no family: the module copies whatever is patched into it, so no colour would be true of them. The text fields are LedDisplayTextField children with no ParamWidget, so they have no census position and no note; their contents are saved in the module's own JSON."
   },
   "RomanQuantizer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Quantizes to a chord rather than a scale, stepping through a sequence of up to sixteen chords written as Roman numerals",
+    "Moves to the next chord, wrapping to the first after the last step",
+    "Sets how many chords are played before the sequence wraps, 1 to 16",
+    "Returns to the first chord",
+    "Chooses the key the Roman numerals are read in: the first setting shifts nothing and each step above it adds a semitone, up to eleven",
+    "Chooses which of the ten stored chord sequences is played, 1 to 10",
+    "The voltage to quantize, one note per polyphonic channel",
+    "Moves to the next chord on each rise past 2V",
+    "Returns to the first chord on each rise past 2V",
+    "Added to both outputs in volts before they are clamped to -10V and +10V, a volt an octave",
+    "Nothing in the module reads this jack; the sequence is chosen by the PTTERN knob alone",
+    "The root note of the current chord as a pitch, one channel",
+    "The quantized notes, with as many channels as the input",
+    "Note — each of the sixteen squares stands for one step of the sequence and shows its chord; the chords themselves are set from the panel menu, not by clicking a square",
+    "Note — the quantizing is uniform rather than nearest-note: each octave of input is cut into equal bands, one per note of the chord, so a rising ramp gives an evenly timed arpeggio",
+    "Note — a new module starts with I, IV, V and I in the first four steps of the first sequence; every other slot holds a major I",
+    "Menu — Set Step 1 Chord — chooses the Roman numeral and then the quality of the chord in the first step, and there is one of these items for each of the sixteen steps"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "RomanQuantizer.cpp:437-438 takes this port's getChannels() as the voice count and 483 reads each channel in turn"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "RomanQuantizer.cpp:441 reads getVoltage() with no channel and rescales 0.1V to 2V into a Schmitt trigger"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "why": "RomanQuantizer.cpp:443 reads getVoltage() with no channel and rescales 0.1V to 2V into a Schmitt trigger"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "RomanQuantizer.cpp:435 reads getVoltage() with no channel and 484 adds it straight to the quantized volts"
+     },
+     "4": {
+      "poly": false,
+      "why": "RomanQuantizer.cpp configures this port at line 403 and never reads it anywhere in process(); the pattern comes from params[PPATTERN_PARAM] at line 436"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "RomanQuantizer.cpp:487-488 writes one value with setVoltage and never calls setChannels"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "RomanQuantizer.cpp:438 sets this port's channel count from the In port and 485 writes one voltage per channel"
+     }
+    }
+   },
+   "notes": "Source read at commit 21bfcbf, the commit whose plugin.json carries the installed 2.0.0. THE PTTERN INPUT IS DEAD: RomanQuantizer.cpp:403 configures it and nothing in process() ever reads it, so the sequence can only be changed with the knob. The maker's README lists 'Pattrn: Switch between different sequences' without saying which control, and the jack's own tooltip reads 'Pattern', which is why it gets a line saying so rather than being left untagged. The sixteen chord squares are ChordWidget displays with no ParamWidget, so they have no census position and no note; the same is true of the key display under the KEY knob."
   }
  }
 }

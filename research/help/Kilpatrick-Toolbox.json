@@ -1,88 +1,910 @@
 {
  "plugin": "Kilpatrick-Toolbox",
- "source": "https://github.com/kilpatrickaudio/Kilpatrick-Toolbox",
+ "source": "https://github.com/kilpatrickaudio/Kilpatrick-Toolbox#readme",
  "read": "2026-09-14",
- "partial": true,
+ "notes": "Read against the maker's source at commit 96f186f, \"Code cleanup. Release 2.0.3.\", which is the last commit whose plugin.json carries the installed version 2.0.3; the next commit bumps it to 2.0.4. The README at that commit is the only manual. Eleven of the sixteen modules carry MIDI on ordinary patch cables under the maker's vMIDI scheme: a three-byte message is packed into a 24-bit integer and written to the jack as that integer negated, so the voltage is zero or large and negative and carries no signal meaning at all (utils/CVMidi.h:68-145). None of those jacks is given a family, because none of audio, cv, trigger or pitch describes what a cable into one carries, and a colour that says \"patch a gate here\" would be a lie. They are all one channel. RT_TASK_RATE is 4000 in plugin.hpp:54, so every timeout quoted in task runs has been divided by 4000 to get the seconds in the lines; two of the maker's own comments give the wrong figure and are listed on the modules concerned.",
  "modules": {
   "MIDI_Channel": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Filters a vMIDI stream by channel, restamps it onto one channel, splits it at a note and transposes it",
+    "Takes the vMIDI stream to be processed; a message on a channel the IN CHAN setting rejects goes no further",
+    "Carries notes below the KEY SPLIT note while key split is on, and nothing at all while it is off",
+    "Carries every message that gets through, apart from notes below the KEY SPLIT note while key split is on",
+    "Note — the four black displays are the controls, and none of them can be clicked for help",
+    "Note — hover over the IN CHAN display and scroll to choose the channel accepted; ALL takes every channel, CH 01 to CH 16 take only that one",
+    "Note — hover over the OUT CHAN display and scroll to choose the channel every outgoing message is restamped with, CH 01 to CH 16",
+    "Note — hover over the KEY SPLIT display and scroll to set the split note, 36 to 84; double-click the display to switch key split off and on without losing the note, and it reads OFF while off",
+    "Note — hover over the TRANS display and scroll to transpose the output, -24 to +24 semitones; transposing happens after the split, so it never moves a note to the other output",
+    "Note — changing any of the four settings sends a note off for every note this module has already sent, so a held note does not hang",
+    "Note — system messages are not filtered by channel and are not transposed; they go out of the R jack whatever key split is doing"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 3
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Channel.cpp:79 wraps this input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Channel.cpp:80 wraps this output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "MIDI_Channel.cpp:81 wraps this output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     }
+    }
+   },
+   "notes": "Five parameters are declared and configured but none is given a ParamWidget: MIDI_Channel.cpp:264-314 builds four KilpatrickLabel displays that drive them by hover-scroll and double-click instead. The census confirms an empty paramPos, so no click can reach any of them and none gets a line; the four Note lines carry them instead. Key split routing is at MIDI_Channel.cpp:134-139, the output channel restamp at :129, transpose at :141 and the note-off flush at :106-116."
   },
   "MIDI_CV": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Converts a vMIDI stream to three control voltages, either as one voice of note pitch, gate and velocity or as three chosen controller numbers",
+    "Starts learning; in the note modes the next channel message to arrive sets the receive channel, and in CC mode each press steps to the next output, whose lamp flashes until a controller moves",
+    "Chooses which of the three voices this module converts when MODE is at PLY, 1 being the first voice; it does nothing at MNO or CC",
+    "Chooses what the three outputs carry: MNO converts notes one at a time with last-note priority, PLY converts one voice of a three-voice chord, CC converts three chosen controller numbers",
+    "Takes the vMIDI stream converted to voltages here",
+    "The pitch of the note, one volt per octave with note 60 at 0V and pitch bend added; in CC mode the first learned controller instead, -5V at 0 to 5V at 127",
+    "10V while a note is held and 0V once it is released, with the damper pedal holding it up; in CC mode the second learned controller instead, -5V at 0 to 5V at 127",
+    "The velocity of the note, -5V at 0 rising to 5V at 127; in CC mode the third learned controller instead, over the same range",
+    "Note — notes below 12 or above 115 are thrown away before anything is converted",
+    "Note — for three-voice polyphony put three of these side by side, set MODE to PLY on all of them, feed them the same vMIDI stream and give each a different VOICE setting",
+    "Note — learning gives up 4 seconds after the button is pressed if nothing arrives; the maker's comment beside that timeout says 2 seconds and is wrong",
+    "Note — pitch and gate are smoothed with a 0.1ms time constant and the CC outputs with a 10ms one, so a CC output slews to each new value",
+    "Menu — Pitch Bend Range — sets how far a full pitch bend moves the pitch output, the choices reading 1 semitones through 12 semitones; a new module comes up at 2"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "family": {
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_CV.cpp:114 wraps this input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_CV.cpp:259 writes this output with setVoltage and never calls setChannels, so it stays at one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MIDI_CV.cpp:259 writes this output with setVoltage and never calls setChannels; Midi2Note/Midi2Note.cpp:134 returns the gate as the held flag times 10"
+     },
+     "2": {
+      "poly": false,
+      "why": "MIDI_CV.cpp:259 writes this output with setVoltage and never calls setChannels, so it stays at one channel"
+     }
+    }
+   },
+   "notes": "Pitch is note times one twelfth minus 5V plus the bend, at Midi2Note/Midi2Note.cpp:291, so note 60 sits at 0V. Velocity and the CC outputs are the MIDI value times 0.007874016 times ten, minus five (Midi2Note.cpp:294 and MIDI_CV.cpp:166). Note limits 12 and 115 are NOTE_MIN and NOTE_MAX at Midi2Note.h:31-32. The families given to the three outputs describe the two note modes, which is how the module comes up; in CC mode all three carry controller values and the colours are then wrong, which is why each line says so. LEARN_TIMEOUT at MIDI_CV.cpp:80 is RT_TASK_RATE times 4 task runs at 4000 runs per second, which is 4 seconds, and the comment on that line says 2 seconds. The smoothing constants are PITCH_GATE_SMOOTHING and CC_CV_SMOOTHING at plugin.hpp:52-53. BEND_RANGE is a tenth parameter with no configParam and no widget; it exists only to save the menu choice into the patch."
   },
   "MIDI_Input": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Brings MIDI in from a hardware device on the computer and puts it onto vMIDI cables",
+    "Carries the channel messages arriving from the device: notes, controllers, program changes, pressure and pitch bend",
+    "Carries the system messages arriving from the device: timing clock, start, continue, stop, song position and the rest",
+    "Carries every message arriving from the device, channel and system alike",
+    "Note — nothing comes out of this module until a device is chosen from its right-click menu; the black strip at the top reads No Device until one is",
+    "Menu — MIDI Driver - MIDI Input Device — chooses which of the computer's MIDI systems the device list below is drawn from",
+    "Menu — MIDI Inputs - Slot 1 — chooses the hardware MIDI input this module reads; None disconnects it again"
+   ],
+   "out": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Input.cpp:63 wraps each output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "MIDI_Input.cpp:63 wraps each output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     },
+     "2": {
+      "poly": false,
+      "why": "MIDI_Input.cpp:63 wraps each output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     }
+    }
+   },
+   "notes": "The split is at MIDI_Input.cpp:95-104: channel messages go to CHN and ALL, system common and system realtime go to SYS and ALL. The device gate is isAssigned at :93, so with no device chosen nothing is read at all. Menu item names come from MidiHelper::populateDriverMenu at utils/MidiHelper.cpp:206 and populateInputMenu at :226, with the module passing \"MIDI Input Device\" as the driver-menu suffix and combined mode off, so the second heading reads MIDI Inputs rather than MIDI Devices. System exclusive is not handled."
   },
   "MIDI_Mapper": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Renumbers up to six controller numbers as a vMIDI stream passes through",
+    "Takes the vMIDI stream whose controller numbers are to be renumbered",
+    "Carries the stream with any mapped controller renumbered; everything else passes through untouched",
+    "Note — each of the six black displays is one mapping, reads --- --- while unset, and cannot be clicked for help",
+    "Note — click a mapping display and it reads MAP>MAP; the number of the next controller to move goes into both halves of it, and the capture gives up after 4 seconds",
+    "Note — scroll over a mapping display to move the outgoing controller number, from -1 up to 127; at -1 the mapping is cleared and the display goes back to --- ---",
+    "Note — channel numbers are ignored, so a mapping catches its controller on every channel and does not change which channel the message goes out on",
+    "Note — the first mapping that matches wins; giving two mappings the same input number leaves the lower-numbered one in charge",
+    "Note — a controller that repeats a value it sent less than 2 seconds ago is not offered to the learn, although it passes through and is mapped as usual"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Mapper.cpp:96 wraps this input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Mapper.cpp:97 wraps this output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     }
+    }
+   },
+   "notes": "Twelve parameters are configured and none is given a ParamWidget; the census paramPos is empty. MIDI_Mapper.cpp:234 onwards builds six KilpatrickLabel displays that drive them by click and hover-scroll, so no mapping can be clicked for help and the Note lines carry them. The match loop with its break is at :133-138, so the lowest-numbered matching mapping is the one applied. MAP_TIMEOUT at :60 is RT_TASK_RATE times 4 task runs at 4000 runs per second, which is 4 seconds and matches the maker's comment. The repeat filter is a MidiCCMem with a 2-second timeout set at :98."
   },
   "MIDI_Merger": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Merges four vMIDI streams into one and splits the result by message type",
+    "One of the four vMIDI streams merged into the outputs",
+    "Carries the channel messages from all four inputs: notes, controllers, program changes, pressure and pitch bend",
+    "Carries the system messages from all four inputs: timing clock, start, continue, stop, song position and the rest",
+    "Carries every message from all four inputs, channel and system alike",
+    "Note — system exclusive is not passed at all; the maker's code leaves it unwritten",
+    "Note — the inputs are read in numerical order within each pass, so when messages arrive together the one on the lowest-numbered input goes out first"
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 3,
+    "2": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Merger.cpp:75 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "MIDI_Merger.cpp:75 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     },
+     "2": {
+      "poly": false,
+      "why": "MIDI_Merger.cpp:75 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     },
+     "3": {
+      "poly": false,
+      "why": "MIDI_Merger.cpp:75 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Merger.cpp:78 wraps each output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "MIDI_Merger.cpp:78 wraps each output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     },
+     "2": {
+      "poly": false,
+      "why": "MIDI_Merger.cpp:78 wraps each output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     }
+    }
+   },
+   "notes": "The README says this module merges three streams; the code declares four inputs, the panel prints INS 1 to 4 and the merge loop at MIDI_Merger.cpp:104-124 walks all four. The code is right and the manual is out of date. The SYSEX gap is an XXX comment the maker left at :123. The four inputs are genuinely identical in function, so one line covers them and all four tags point at it."
   },
   "MIDI_Monitor": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Shows the raw bytes of up to four vMIDI streams as they arrive",
+    "Switches its input into the display; the lamp beside it is lit while that input is being shown",
+    "One of the four vMIDI streams that can be shown on the display",
+    "Note — the display holds the last seven messages; each line reads a running count, then the input number, then the message bytes in hexadecimal, with dashes for bytes a short message does not have",
+    "Note — all four inputs come up switched on when the module is added, and a stream stops appearing the moment its button is switched off",
+    "Note — the buttons latch, so one press switches an input off and the next switches it back on"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Monitor.cpp:81 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "MIDI_Monitor.cpp:81 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     },
+     "2": {
+      "poly": false,
+      "why": "MIDI_Monitor.cpp:81 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     },
+     "3": {
+      "poly": false,
+      "why": "MIDI_Monitor.cpp:81 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     }
+    }
+   },
+   "notes": "The four switches are configured with a default of 0 at MIDI_Monitor.cpp:72-75, but onReset at :160 sets every one to 1 and the constructor calls onReset, so a new module comes up with all four inputs showing. The buttons are made non-momentary at :226, :231, :236 and :241. The line format is at :114-130, seven lines are held (DISPLAY_LINES at :60) and the running count wraps at 8192 (:180)."
   },
   "MIDI_Output": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sends a vMIDI stream out to a hardware MIDI device on the computer",
+    "Takes the vMIDI stream passed on to the chosen hardware device",
+    "Note — nothing leaves this module until a device is chosen from its right-click menu; the black strip at the top reads No Device until one is",
+    "Menu — MIDI Driver - MIDI Output Device — chooses which of the computer's MIDI systems the device list below is drawn from",
+    "Menu — MIDI Outputs - Slot 1 — chooses the hardware MIDI output this module sends to; None disconnects it again"
+   ],
+   "in": {
+    "0": 1
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Output.cpp:54 wraps this input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     }
+    }
+   },
+   "notes": "The device gate is isAssigned at MIDI_Output.cpp:77; with no device chosen the incoming messages are read and dropped. Menu item names come from MidiHelper::populateDriverMenu at utils/MidiHelper.cpp:206 and populateOutputMenu at :253, with the module passing \"MIDI Output Device\" as the driver-menu suffix. Nothing is filtered: whatever arrives is passed to the device."
   },
   "MIDI_Repeater": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Blocks, passes or manufactures repeated controller messages on three vMIDI streams at once",
+    "Sets what happens to a controller that repeats a value it has already sent: OFF drops it, ON lets it through, GEN passes it and then resends the last value of every controller twice a second",
+    "One of the three vMIDI streams; only its controller messages reach the output of the same number",
+    "Carries the controller messages from the input of the same number, after the MODE setting has been applied",
+    "Note — only controller messages pass; notes, clock and everything else arriving are dropped",
+    "Note — channel numbers are ignored, so controller 7 on channel 1 and controller 7 on channel 10 count as the same controller",
+    "Note — at OFF the block on a repeated value lapses 2 seconds after the last message carrying it, so a control left alone and then nudged sends again",
+    "Note — the three streams are processed separately but share one MODE setting"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3,
+    "2": 3
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Repeater.cpp:76 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "MIDI_Repeater.cpp:76 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     },
+     "2": {
+      "poly": false,
+      "why": "MIDI_Repeater.cpp:76 wraps each input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Repeater.cpp:77 wraps each output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "MIDI_Repeater.cpp:77 wraps each output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     },
+     "2": {
+      "poly": false,
+      "why": "MIDI_Repeater.cpp:77 wraps each output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     }
+    }
+   },
+   "notes": "The README lists the three modes as OFF, ON and OFF, which is a typing slip: the third is GEN, as the panel prints and as utils/MidiRepeater.h:52-54 declares. The switch reading is at MIDI_Repeater.cpp:119-127, with the toggle at its top giving GEN. REPEAT_SEND_INTERVAL at MidiRepeater.h:45 is RT_TASK_RATE times 0.5 task runs at 4000 runs per second, so the GEN resend is every 0.5 seconds; REPEAT_HIST_TIMEOUT at :46 is 2 seconds. Non-controller messages are returned unhandled at utils/MidiRepeater.cpp:73-75, so they never reach an output."
   },
   "Quad_Decoder": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns a matrix-encoded stereo pair back into four quadraphonic channels, with a mono subwoofer output alongside",
+    "Sets the level of every output; the middle of its travel is unity gain and full clockwise is 6dB above that",
+    "Trades level between the two front outputs and the two surround outputs; the middle gives both the same level, full anticlockwise leaves only the fronts and full clockwise only the surrounds",
+    "The left half of the matrix-encoded pair",
+    "The right half of the matrix-encoded pair",
+    "The front left channel recovered from the matrix",
+    "The front right channel recovered from the matrix",
+    "The surround left channel recovered from the matrix",
+    "The surround right channel recovered from the matrix",
+    "The average of the four recovered channels put through a pair of two-pole lowpass filters, at the corner chosen on the menu and after the level and balance controls",
+    "A five-channel polyphonic copy of the outputs, in the order front left, front right, surround left, surround right, subwoofer",
+    "Note — decoding runs on blocks of 64 samples, so the outputs lag the inputs by that much",
+    "Menu — Decoding Mode: QS / Quark Matrix Decode, QS / Quark Logic Decode (Experimental), SQ Matrix Decode (Experimental) — chooses the matrix the two inputs are decoded with",
+    "Menu — Sub Cutoff: Bypass, 60Hz, 70Hz, 80Hz, 90Hz, 100Hz, 110Hz, 120Hz — sets the corner of the filter on the subwoofer output; Bypass moves the corner to 20000Hz rather than removing the filter",
+    "Note — the logic decoding mode adds level-dependent steering between opposite corners to widen the separation, and the maker marks it experimental"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Quad_Decoder.cpp:284 reads this input with getVoltage, which is channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "Quad_Decoder.cpp:286 reads this input with getVoltage, which is channel 1 only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Quad_Decoder.cpp:295 writes this output with setVoltage and setChannels is never called on it"
+     },
+     "1": {
+      "poly": false,
+      "why": "Quad_Decoder.cpp:296 writes this output with setVoltage and setChannels is never called on it"
+     },
+     "2": {
+      "poly": false,
+      "why": "Quad_Decoder.cpp:297 writes this output with setVoltage and setChannels is never called on it"
+     },
+     "3": {
+      "poly": false,
+      "why": "Quad_Decoder.cpp:298 writes this output with setVoltage and setChannels is never called on it"
+     },
+     "4": {
+      "poly": false,
+      "why": "Quad_Decoder.cpp:299 writes this output with setVoltage and setChannels is never called on it"
+     },
+     "5": {
+      "poly": true,
+      "why": "Quad_Decoder.cpp:150 sets this output to five channels and Quad_Decoder.cpp:300 writes five voltages to it with writeVoltages"
+     }
+    }
+   },
+   "notes": "Two of the four parameters, MODE and SUB_CUTOFF, have no ParamWidget and are set only from the menu; the census paramPos holds just the two knobs. The output gain chain is AUDIO_IN_GAIN 0.1 at :66, AUDIO_OUT_GAIN 10 at :67 and outLevel as the knob doubled at :161, so the knob at its default of 1.0 with the balance at 0.5 gives unity, the knob at halfway gives -6dB and full clockwise gives +6dB. The block length is AUDIO_BUFLEN 64 at :62. Quad_Decoder.cpp:255 writes the logic steering coefficient to the SUB output inside the QS_LOGIC_DECODE branch, which looks like leftover debugging; it is overwritten every sample at :299 and has no audible effect. The Bypass choice sets the sub filter corner to 20000Hz at :386 rather than switching the filter out. A fourth decoding mode, SQ Logic Decode, is present in the source but commented out of both the mode list and the menu."
   },
   "Quad_Encoder": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Folds four quadraphonic channels into a matrix-encoded stereo pair",
+    "Sets the level of both outputs; full clockwise is unity gain and the middle, where it starts, is 6dB below that",
+    "The front left channel going into the matrix",
+    "The front right channel going into the matrix",
+    "The surround left channel going into the matrix",
+    "The surround right channel going into the matrix",
+    "A polyphonic input whose first four channels are added to the four separate inputs, in the order front left, front right, surround left, surround right",
+    "The left half of the matrix-encoded pair",
+    "The right half of the matrix-encoded pair",
+    "Note — every input passes through a two-pole highpass filter at 10Hz before the matrix, so direct current never reaches the outputs",
+    "Note — encoding runs on blocks of 64 samples, so the outputs lag the inputs by that much",
+    "Note — the two polyphonic inputs are summed with each other and with the separate jacks, so four encoders can be chained without a mixer",
+    "Menu — Encoding Mode: QS / Quark Encode, SQ Encode — chooses which matrix the four channels are folded into"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Quad_Encoder.cpp:200 reads this input with getVoltage, which is channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "Quad_Encoder.cpp:211 reads this input with getVoltage, which is channel 1 only"
+     },
+     "2": {
+      "poly": false,
+      "why": "Quad_Encoder.cpp:222 reads this input with getVoltage, which is channel 1 only"
+     },
+     "3": {
+      "poly": false,
+      "why": "Quad_Encoder.cpp:233 reads this input with getVoltage, which is channel 1 only"
+     },
+     "4": {
+      "poly": true,
+      "why": "Quad_Encoder.cpp:201, :212, :223 and :234 read channels 0 to 3 of this input with getPolyVoltage"
+     },
+     "5": {
+      "poly": true,
+      "why": "Quad_Encoder.cpp:204, :215, :226 and :237 read channels 0 to 3 of this input with getPolyVoltage"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Quad_Encoder.cpp:255 writes this output with setVoltage and setChannels is never called on it"
+     },
+     "1": {
+      "poly": false,
+      "why": "Quad_Encoder.cpp:258 writes this output with setVoltage and setChannels is never called on it"
+     }
+    }
+   },
+   "notes": "The MODE parameter has no ParamWidget and is set only from the menu. The gain chain is AUDIO_IN_GAIN 0.1 at :64, AUDIO_OUT_GAIN 10 at :65 and outLevel as the knob itself at :132, so full clockwise is unity and the default of 0.5 is 6dB below it. The 10Hz two-pole highpass filters are set at :265-270. The two polyphonic inputs are genuinely identical in function, so one line covers them and both tags point at it; the README calls them MULTI INS and describes one, but there are two, A and B, and they sum with each other and with the four separate jacks."
   },
   "Quad_Panner": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Pans one signal around four quadraphonic outputs from an on-screen joystick, a pair of control voltages, or both together",
+    "Re-centres the joystick for as long as it is held down",
+    "The signal panned to the four outputs; it is read as one channel, so a polyphonic cable into it is reduced to its first channel",
+    "Moves the pan left and right, added to the joystick position; 5V reaches the right edge from the centre and -5V the left",
+    "Moves the pan front and back, added to the joystick position; 5V reaches the front from the centre and -5V the rear",
+    "The input at the level the pan position gives the front left corner",
+    "The input at the level the pan position gives the front right corner",
+    "The input at the level the pan position gives the surround left corner",
+    "The input at the level the pan position gives the surround right corner",
+    "A four-channel polyphonic copy of the outputs, in the order front left, front right, surround left, surround right",
+    "Note — the pan law is close to constant power rather than the usual pan pot: halfway in one direction is about 3dB down, and the centre of the circle is about 6dB down in all four outputs",
+    "Note — the joystick is one custom widget rather than a parameter, so it cannot be clicked for help; drag inside the circle to pan",
+    "Note — hold P and click near the rim of the joystick circle to snap the position to the blue arrow nearest the click",
+    "Note — the joystick position and the two control voltages are added and then clamped, so a voltage can push a centred stick fully to one side and a deflected stick no further"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Quad_Panner.cpp:138-141 read this input with getVoltage, which is channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Quad_Panner.cpp:105 reads this input with getVoltage, scales it by CV_IN_SCALE 0.2 declared at :60, adds the joystick position and clamps the total to -1 to +1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Quad_Panner.cpp:106 reads this input with getVoltage, scales it by CV_IN_SCALE 0.2 declared at :60, adds the joystick position and clamps the total to -1 to +1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Quad_Panner.cpp:142 writes this output with setVoltage and setChannels is never called on it"
+     },
+     "1": {
+      "poly": false,
+      "why": "Quad_Panner.cpp:143 writes this output with setVoltage and setChannels is never called on it"
+     },
+     "2": {
+      "poly": false,
+      "why": "Quad_Panner.cpp:144 writes this output with setVoltage and setChannels is never called on it"
+     },
+     "3": {
+      "poly": false,
+      "why": "Quad_Panner.cpp:145 writes this output with setVoltage and setChannels is never called on it"
+     },
+     "4": {
+      "poly": true,
+      "why": "Quad_Panner.cpp:102 sets this output to four channels and Quad_Panner.cpp:146 writes four voltages to it with writeVoltages"
+     }
+    }
+   },
+   "notes": "The pan law is at Quad_Panner.cpp:108-115: the axis position is mapped to 0 to 1 and each side takes the arc tangent of that times 1.7, clamped to positive. At the centre that gives the arc tangent of 0.85, about 0.7045, which is 3.05dB down per axis and 6.1dB down where the two multiply; the 3dB and 6dB in the line are that arithmetic, not stored constants. The 1.7 at :110 and the CV_IN_SCALE 0.2 at :60 are literals in the source. The joystick is a KilpatrickJoystick widget added at :195 with no ParamWidget behind it, so only RESET appears in the census paramPos. The menu holds two plain labels, \"Quad Panner Shortcuts\" and \"Hold P and click joy edge to snap.\", and no selectable item, so the snap gesture is written as a Note rather than a Menu line."
   },
   "Stereo_Meter": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A peak-reading level meter for two channels, with the level printed in decibels under each bar",
+    "The signal shown on the left meter",
+    "The signal shown on the right meter",
+    "Note — 0dB on the meters is 10V peak, a 20V peak-to-peak signal, and the scale bottoms out at -96dB",
+    "Note — each channel goes through a two-pole highpass filter at 10Hz before the meter, so direct current does not lift the reading on a small signal",
+    "Note — scroll over either meter to move its own reference level, -60dB to 24dB in 1dB steps; the printed number shifts by that much and turns red while the reference is not 0dB",
+    "Note — the peak marker is held for one second after the peak that set it"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Stereo_Meter.cpp:79 reads this input with getVoltage, which is channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "Stereo_Meter.cpp:80 reads this input with getVoltage, which is channel 1 only"
+     }
+    }
+   },
+   "notes": "Both reference-level parameters are configured at Stereo_Meter.cpp:67-68 with no ParamWidget; the census paramPos is empty, so neither can be clicked and the scroll gesture is carried by a Note. The gesture picks the meter from the horizontal position of the pointer at :209-214. AUDIO_IN_GAIN 0.1 at :60 puts 10V at full scale, and the scale minimum is setMinLevel(-96.0f) at :152 and :162. The 10Hz highpass is switched on at :73-74; its cutoff and the one-second PEAK_METER_PEAK_HOLD_TIME are in utils/DspUtils2.h:420 and :455."
   },
   "Test_Osc": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Generates sine tones, sine sweeps and noise for testing and alignment, with the output level printed in decibels",
+    "Turns the output level up and down in 0.1dB steps, from 0dB, which is 10V peak, down to -96dB",
+    "Moves the sine frequency, by whatever interval STEP is set to",
+    "Sets how long one sweep takes, 0.1 seconds to 60 seconds, in steps of 0.1 seconds below 10 seconds and 1 second above",
+    "Chooses what comes out while SWEEP is at OFF: SINE a sine at the set frequency, WH white noise, PK pink noise",
+    "OFF leaves the tone to TONE; LOG sweeps a sine from 20Hz to 20000Hz at a constant number of octaves per second, LIN sweeps it over the same span at a constant number of hertz per second",
+    "Sets how far one detent of FREQ moves the sine: 3RD one third of an octave, OCT one octave, LOG one semitone",
+    "Starts a sweep, and while ON is at MOM produces the tone for as long as it is held down",
+    "ON leaves the output running all the time; MOM gives output only while TRIG is held or the TRIG jack is high, and makes each sweep a single pass rather than a loop",
+    "A rising edge above 1V starts a sweep, and while the voltage stays above 1V and ON is at MOM the tone is produced",
+    "The tone or sweep at the level LEVEL sets, and 0V whenever nothing is being produced",
+    "Note — changing TONE, SWEEP, STEP or ON resets the sine frequency to 1000Hz, or to 1046.5Hz when STEP is at LOG, and stops any sweep in progress",
+    "Note — at 3RD and OCT the frequency comes from the standard third-octave series; 3RD covers 20Hz to 20000Hz a step at a time and OCT covers 31.5Hz to 16000Hz three steps at a time",
+    "Note — at LOG the frequency is free between 20.6Hz and 19912Hz",
+    "Note — scroll over the display to move the REF reading up and down in 0.1dB steps; that changes only what the display prints, not the output",
+    "Note — pink noise is approximated with three one-pole filters on white noise, so check the spectrum before using it for precise measurement",
+    "Note — there is no menu of this module's own beyond Rack's; every setting is on the panel or the display"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "Test_Osc.cpp:236 casts this input's getVoltage to an int and takes a rising edge from it; Test_Osc.cpp:254 gates the momentary tone on the same voltage being greater than 1.0"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Test_Osc.cpp:276, :299, :325, :334 and :338 all write this output with setVoltage and setChannels is never called on it"
+     }
+    }
+   },
+   "notes": "LEVEL, FREQ and SPEED are endless encoders, configured with infinite limits at Test_Osc.cpp:139-141; the value each one moves is kept in a separate parameter with no widget of its own (FREQ INDEX, ABS LEVEL, REF LEVEL and SPEED at :148-151), which is why the census lists twelve parameters and only eight positions. ABS LEVEL runs from 0.000015848931924611107 to 1.0, which is -96dB to 0dB, and moves 0.1dB a detent through adjustFactorByDb at :198. The sweep span is SWEEP_START_FREQ 20 and SWEEP_END_FREQ 20000 at :106-107, and the free range is LOG_START_FREQ 20.6 and LOG_END_FREQ 19912 at :108-109. The third-octave table is at :49-54; OCT steps the index by three and clamps it to 2 to 29, which is 31.5Hz to 16000Hz, while 3RD uses the whole table, 20Hz to 20000Hz. The reset to index 17, or to 1046.5Hz at LOG, is settingChange at :374-382. White noise is doubled before the output at :325 while the sine is not, so the two peak at the same voltage for a given LEVEL. The pink filter coefficients are at :329-331. The module has no appendContextMenu at all."
   },
   "Multi_Meter": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A peak-reading level meter for up to sixteen channels, with an X/Y plot of the first two",
+    "X/Y shows the first two channels as two meters beside a plot of one against the other; MULTI shows a row of meters instead",
+    "Sets how many meters the row shows: 4CH, 8CH or 16CH",
+    "Added to the first channel of MULTI IN, shown on meter 1 and used as the horizontal axis of the X/Y plot",
+    "Added to the second channel of MULTI IN, shown on meter 2 and used as the vertical axis of the X/Y plot",
+    "A polyphonic input whose channels feed meters 1 to 16 in order, the first two of them summed with IN L and IN R",
+    "Note — 0dB on the meters is 10V peak, a 20V peak-to-peak signal, and every channel is clipped there before it is measured",
+    "Note — each channel goes through a two-pole highpass filter at 10Hz before the meter, so direct current does not lift the reading on a small signal",
+    "Note — a meter above the number of channels MULTI IN carries reads silence rather than holding its last value",
+    "Note — sixteen per-channel reference levels are stored in the patch, but nothing changes them: the scroll handler that once set them is commented out in the source, so they stay at 0dB"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "Multi_Meter.cpp:129 reads this input with getVoltage, which is channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "why": "Multi_Meter.cpp:130 reads this input with getVoltage, which is channel 1 only"
+     },
+     "2": {
+      "poly": true,
+      "why": "Multi_Meter.cpp:136 loops to this input's getChannels and reads each channel with getPolyVoltage at :137"
+     }
+    }
+   },
+   "notes": "Eighteen parameters are configured and only the two switches have widgets; the census paramPos holds those two. The sixteen REF LEVEL parameters at Multi_Meter.cpp:116 are read by the display, but the only code that would change them, inside Multi_MeterDisplay::onHoverScroll at :374-393, is commented out, so they are dead as shipped. AUDIO_IN_GAIN 0.1 at :90 puts 10V at full scale, and dsp2::clamp at :129, :130 and :137 holds each channel at that before metering. Channels above the cable's channel count are fed zero at :139-141. The highpass is switched on for all sixteen meters at :148."
   },
   "MIDI_Clock": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A MIDI clock running at 24 pulses per quarter note, generating its own tempo or following an analogue or MIDI clock, with analogue and vMIDI outputs",
+    "Sends the clock back to the start of the count, pulses RESET OUT, and sends a song position of zero out of MIDI OUT",
+    "Starts the clock if it is stopped and stops it if it is running, sending the matching MIDI start, continue or stop message",
+    "Runs and stops the clock; how the voltage here is read is set by Run In Mode on the menu, and the lamp beside the jack tracks the voltage",
+    "A rising edge above 1V stops the clock, whatever the RUN IN jack is doing",
+    "Takes an analogue clock at 24 pulses per quarter note, counting a tick on each rising edge above 1V; for 2 seconds after each edge it overrides the clock arriving at MIDI IN",
+    "A rising edge above 1V resets the clock count and pulses RESET OUT, and for 2 seconds afterwards it overrides the clock arriving at MIDI IN",
+    "Takes a vMIDI stream and follows its timing ticks, start, continue and stop; a recent edge on CLOCK IN or RESET IN takes precedence over it",
+    "Carries timing ticks at 24 per quarter note the whole time, running or stopped, with start, continue, stop and song position sent as they happen",
+    "A 4ms pulse to 10V on every tick that survives the output divider, and only while the clock is running",
+    "A 4ms pulse to 10V whenever the clock count is reset, from the button, the RESET IN jack or a MIDI start",
+    "Note — the tempo, the run state, the clock source, the output divider and the autostart setting are all on the black display, and none of them can be clicked for help",
+    "Note — scroll over the large number on the display to change the tempo a beat per minute at a time, 30 to 300; hold shift while scrolling to move it by 0.1, and click the number to tap a tempo",
+    "Note — click the word INT or EXT on the display to switch between the module's own tempo and following an incoming clock; EXT is drawn cyan while it is locked and red while it is not",
+    "Note — click the word RUN or STOP on the display to start and stop the clock",
+    "Note — scroll over the d:1/ reading on the display to divide the CLOCK OUT jack, from 1/1, which is every tick, down to 1/24, which is one pulse per quarter note",
+    "Note — click the word MAN or AUTO on the display to switch autostart; with AUTO showing, the clock starts on its own a fraction of a second after a patch is loaded",
+    "Menu — Run In Mode: Momentary, Run, Toggle — sets how the RUN IN jack is read; Momentary runs while it is high, Run starts on a high but never stops, Toggle flips the run state on each rising edge"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "MIDI_Clock.cpp:209 reads this input with getVoltage and :213-233 compare it against 1.0 in all three Run In modes"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "MIDI_Clock.cpp:243 takes a rising edge from this input's getVoltage being greater than 1.0"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "MIDI_Clock.cpp:249 takes a rising edge from this input's getVoltage being greater than 1.0"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "MIDI_Clock.cpp:254 takes a rising edge from this input's getVoltage being greater than 1.0"
+     },
+     "4": {
+      "poly": false,
+      "why": "MIDI_Clock.cpp:162 wraps this input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_Clock.cpp:163 wraps this output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MIDI_Clock.cpp:266 writes this output as a pulse flag times 10, and setChannels is never called on it"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MIDI_Clock.cpp:267 writes this output as a pulse flag times 10, and setChannels is never called on it"
+     }
+    }
+   },
+   "notes": "Five of the seven parameters have no ParamWidget and are driven by touch zones on the display (MIDI_Clock.cpp:560-569, with the handlers at :649-694); the census paramPos holds only the two buttons. ANALOG_CLOCK_TIMEOUT at :113 is 8000 task runs, which at RT_TASK_RATE 4000 is 2 seconds; it is refreshed by every edge on CLOCK IN or RESET IN (:250 and :255) and checked before any MIDI clock byte is acted on at :309. OUT_PULSE_LEN 16 task runs at :110 is 4ms. Tempo range 30 to 300 with a default of 120 is at :149, and the output divider range 1 to 24 is OUTPUT_DIV_MIN and OUTPUT_DIV_MAX at :108-109. AUTOSTART_TIMEOUT 800 task runs at :112 is 0.2 seconds after the module is added. RUN_IN_IGNORE_TIMEOUT 200 at :114 means the RUN IN jack is examined only once every 50ms, so a pulse shorter than that there can be missed."
   },
   "MIDI_CC_Note": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns MIDI controller messages into note messages, one note per controller number, for playing from the buttons on a controller",
+    "Scales the velocity of the notes sent; the controller's own value is multiplied by this, so at full clockwise a value of 127 gives velocity 127 and at halfway it gives 63",
+    "Moves the notes up one octave for each press, as far as six octaves above normal",
+    "Puts the notes back to no octave shift",
+    "Moves the notes down one octave for each press, as far as six octaves below normal",
+    "Takes the vMIDI stream whose controller messages become notes; every controller value is converted, despite the manual saying a value below 64 is read as a release",
+    "Carries the notes made from the controllers, always on channel 1; nothing else from the input reaches it",
+    "Note — the note number is the controller number, plus the CC Base setting, plus twelve times the octave shift; a note landing outside 0 to 127 is not sent at all",
+    "Note — only controller messages are converted; notes, clock and everything else arriving at the input are dropped",
+    "Note — a controller repeating the value it last sent, within 2 seconds, is ignored, so a control that sends continuously does not flood the output",
+    "Note — every message sent is a note on, and a controller value of 0 gives velocity 0, which is how a note is released",
+    "Note — the display reads T: and the octave shift, and switches to N: and the last note number for a moment after each note",
+    "Menu — CC Base: 0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120 — added to every controller number before it becomes a note, so it sets which note controller 0 produces"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_CC_Note.cpp:80 wraps this input in a CVMidi reader, which calls Port::getVoltage at utils/CVMidi.h:71 and so reads channel 1 only"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "MIDI_CC_Note.cpp:81 wraps this output in a CVMidi writer, which calls Port::setVoltage at utils/CVMidi.h:140 and so writes channel 1 only"
+     }
+    }
+   },
+   "notes": "The README says the controller value must be 64 or more for a press and below 64 for a release. No such threshold is in the code: MIDI_CC_Note.cpp:165-176 turns every controller message that survives the repeat filter into a note on, with the velocity taken from the controller value scaled by the VELOCITY knob, so a value of 0 arrives as a note on at velocity 0, which is the MIDI convention for a release. The effect is close to what the README describes but the boundary is 0, not 64. The README also says the CC Base setting shifts events to start at note 60; that is true only of the 60 choice. The output channel is fixed: encodeNoteOnMessage is called with channel 0 at :172 and utils/MidiHelper.cpp:578 puts that in the low nibble, which is MIDI channel 1. The octave clamp is OCT_OFFSET_MIN and OCT_OFFSET_MAX, -6 to +6, at :55-56. The repeat filter is a MidiRepeater fixed at MODE_OFF at :83, with the 2-second history timeout from utils/MidiRepeater.h:46. Two parameters, OCT_OFFSET and CC_BASE, have no widget; they hold the octave shift and the menu choice. The panel prints OCT NORM where the parameter is named OCT NORMAL."
   }
  }
 }

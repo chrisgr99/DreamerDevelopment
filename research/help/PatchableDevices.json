@@ -1,38 +1,1004 @@
 {
  "plugin": "PatchableDevices",
- "source": "https://github.com/nullJaX/vcvrack-patchable-devices",
+ "source": "https://github.com/nullJaX/vcvrack-patchable-devices/blob/main/MANUAL.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "ComparingCounter": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A comparator feeding a pulse counter: A minus B is weighed against a threshold, and each time that comparison goes high the count climbs one whole-tone step until it passes its limit",
+    "Sets the threshold the difference between the two signal inputs has to beat, -5V to +5V",
+    "Sets how far the count climbs before it drops back to zero, 1 to 31 steps",
+    "Scales the A input before B is subtracted from it, from silence to the whole signal",
+    "Scales the MAX CV input, -1 to +1, before it is added to the counter limit knob",
+    "One side of the comparison, scaled by its attenuator before B is taken away from it",
+    "Moves the counter limit, added to the limit knob through its attenuverter",
+    "The other side of the comparison, subtracted from the scaled A input",
+    "5V while the scaled A input minus B is above the threshold, and 0V otherwise",
+    "5V at the moment the count drops back to zero while the comparator is high, and 0V otherwise",
+    "The count as a voltage, 0V to 5.17V in steps of 0.166V, which is a whole tone a step when it is patched as a pitch",
+    "Note — the counter limit knob starts fully down, where the count is cleared as soon as it moves, so VALUE stays at 0V and END repeats the comparator until the limit is turned up",
+    "Note — the A attenuator also starts fully down, so a fresh module ignores whatever is patched into A",
+    "Note — patching the A-B>T output back into B and setting the threshold negative makes the comparator flip every sample, which turns the module into an oscillator with the counter as its divider"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "ComparingCounter.cpp:66-68 reads getVoltage() with no channel, multiplies it by the attenuator and compares the result against the B input plus the threshold"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ComparingCounter.cpp:66-68 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the counter limit knob, the sum clamped to 0 and 5.17"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "ComparingCounter.cpp:66-68 reads getVoltage() with no channel and adds the threshold knob to it before the comparison"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "ComparingCounter.cpp:70 sets 5V when the comparison holds and 0V when it does not, one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "ComparingCounter.cpp:74 sets 5V only while the comparator is high and the count is zero, one channel"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "ComparingCounter.cpp:71 writes the running count, which climbs in steps of one sixth of a volt to at most 31 steps"
+     }
+    }
+   },
+   "notes": "Source read at commit f6cf8d6, the commit whose plugin.json carries the installed 2.0.1. The counter limit parameter is configured with a default of 0 (ComparingCounter.cpp:53) although the panel letters the knob 1 and 31, and the A attenuator's default is 0 too, so a fresh module shows nothing at VALUE and nothing at A-B>T. The whole plugin is monophonic: no module in it calls getChannels, getPolyVoltage or setChannels. The VALUE output is given the cv family rather than pitch because it is a staircase count; the maker points out that its 0.166V step is a whole tone if it is used as a pitch."
   },
   "DigitalChaoticSystem": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two oscillators driving an eight-bit shift register: each clock combines the data state with the register's oldest bit by exclusive or and pushes it in at the front",
+    "Sets the clock oscillator's frequency, twenty octaves from about 0.03Hz to about 32768Hz",
+    "Sets the data oscillator's frequency, twenty octaves from about 0.03Hz to about 32768Hz",
+    "Scales the clock oscillator's unmarked modulation input, 0 to 1, before it is added to the clock frequency",
+    "Scales the data oscillator's marked modulation input, -1 to +1, before it is added to the data frequency",
+    "Scales the clock oscillator's marked modulation input, -1 to +1, before it is added to the clock frequency",
+    "Scales the data oscillator's unmarked modulation input, 0 to 1, before it is added to the data frequency",
+    "Modulates the clock oscillator's frequency through its attenuator, a volt an octave",
+    "Modulates the data oscillator's frequency through its attenuverter, a volt an octave",
+    "Modulates the clock oscillator's frequency through its attenuverter, a volt an octave",
+    "Modulates the data oscillator's frequency through its attenuator, a volt an octave",
+    "Sets the clock oscillator's pitch with no attenuation, a volt an octave, added to everything else",
+    "The data state read on each clock pulse; above 1.8V counts as high, and with nothing patched it reads the data oscillator's square wave",
+    "Clocks the shift register on each rise past 1.8V; with nothing patched it is clocked by the clock oscillator's square wave",
+    "Sets the data oscillator's pitch with no attenuation, a volt an octave, added to everything else",
+    "The clock oscillator's triangle wave, -5V to +5V",
+    "The clock oscillator's square wave, -5V or +5V, which also clocks the shift register when its input is empty",
+    "The data oscillator's triangle wave, -5V to +5V",
+    "The data oscillator's square wave, -5V or +5V, which also feeds the register's data input when that input is empty",
+    "The last three bits of the register read as a binary number, 0V to 4.38V in eight steps",
+    "The exclusive or of the data state and the register's oldest bit, 0V or 5V, which usually runs at an eighth of the clock",
+    "The stepped output through a first-order lowpass at 20Hz, 0V to 4.38V",
+    "Note — nothing has to be patched for the register to run: with the clock and data inputs empty it is driven by the two oscillators' own square waves",
+    "Note — feeding a steady 0V into the data input makes the register cycle through a fixed eight-step pattern, because exclusive or with zero passes the bit through unchanged",
+    "Note — patching an oscillator's own square or triangle output back into one of its modulation inputs changes the shape of the wave as well as its pitch"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12,
+    "6": 13,
+    "7": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "pitch",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "cv",
+     "5": "trigger",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "DigitalChaoticSystem.cpp:83-87 reads getVoltage() with no channel, multiplies it by the attenuator, which cannot go below zero, and adds it to the clock pitch as an exponent of two"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DigitalChaoticSystem.cpp:83-88 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the data pitch as an exponent of two"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DigitalChaoticSystem.cpp:83-87 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the clock pitch as an exponent of two"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "DigitalChaoticSystem.cpp:83-88 reads getVoltage() with no channel, multiplies it by the attenuator, which cannot go below zero, and adds it to the data pitch as an exponent of two"
+     },
+     "4": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DigitalChaoticSystem.cpp:87 reads getVoltage() with no channel and adds it straight into the clock oscillator's exponent of two"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "normal": "the data oscillator's square",
+      "why": "DigitalChaoticSystem.cpp reads getVoltage() with no channel and normals it to the data square wave, the high state taken above triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "normal": "the clock oscillator's square",
+      "why": "DigitalChaoticSystem.cpp reads getVoltage() with no channel and normals it to the clock square wave, the high state taken above triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "7": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DigitalChaoticSystem.cpp:88 reads getVoltage() with no channel and adds it straight into the data oscillator's exponent of two"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "DigitalChaoticSystem.cpp writes the clock triangle with setVoltage and never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "DigitalChaoticSystem.cpp writes the clock square with setVoltage and never calls setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "DigitalChaoticSystem.cpp writes the data triangle with setVoltage and never calls setChannels"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "DigitalChaoticSystem.cpp writes the data square with setVoltage and never calls setChannels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DigitalChaoticSystem.cpp scales the three oldest register bits by 0.625, giving eight values from 0V to 4.375V, written with setVoltage"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DigitalChaoticSystem.cpp writes the exclusive-or result as 5V or 0V with setVoltage"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "DigitalChaoticSystem.cpp passes the stepped value through a TRCFilter set to 20Hz and writes it with setVoltage"
+     }
+    }
+   },
+   "notes": "Source read at commit f6cf8d6, the commit whose plugin.json carries the installed 2.0.1. The panel letters both V/Oct inputs EXP CV and gives both modulation columns to each oscillator; the maker's parameter names say which knob is an attenuator (0 to 1) and which an attenuverter (-1 to +1), and the panel marks the attenuverters with a minus and a plus. The clock and data oscillator frequency parameters are configured as 2 to the power of the value in Hertz, -5 to 15 (DigitalChaoticSystem.cpp:52). The module is monophonic throughout."
   },
   "DualIntegrator": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two slew limiters that can be driven into cycling, each with a hold input and an end comparator, and a comparator across the two of them",
+    "Chooses what that cell's hold input does: up for Sample and Hold, where one step of slew passes on each rising edge, down for Track and Hold, where the cell freezes while the gate is high",
+    "Scales that cell's attenuverted rate input, -1 to +1, before it is added to the rate",
+    "Sets that cell's slew rate, an octave a step from about 0.03Hz to about 11600Hz",
+    "The signal that cell slews",
+    "Forces 0V onto that cell's input while the voltage is above 1.8V, so the cell slews down towards zero",
+    "Freezes that cell: in Sample and Hold a rising edge past 1.8V lets one step of slew through, and in Track and Hold the cell is frozen for as long as the voltage stays above 1.8V",
+    "Added to that cell's rate through its attenuverter, a volt an octave",
+    "Added to that cell's rate with no attenuation, a volt an octave",
+    "That cell's slewed signal, following the voltage range of what is fed into it",
+    "-5V once that cell's output reaches +5V and +5V once it reaches -5V, which makes the cell cycle when it is patched back into that cell's input",
+    "5V while the left cell's output is above the right cell's, and -5V otherwise",
+    "Note — patch a cell's END output back into its own IN with the switch down, in Track and Hold, and the cell cycles: a triangle at OUT and a square at END, tuned by the RATE knob",
+    "Note — patching a cell's OUT or END back into its own CV input bends the wave, because that is self frequency modulation; the rate needs retuning afterwards",
+    "Note — every input in this module reads one channel, so polyphonic cables are cut down to their first channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 3,
+    "5": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 5,
+    "3": 5,
+    "4": 6,
+    "5": 6,
+    "6": 7,
+    "7": 7,
+    "8": 8,
+    "9": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 9,
+    "2": 10,
+    "3": 10,
+    "4": 11
+   },
+   "family": {
+    "in": {
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "pitch",
+     "7": "pitch",
+     "8": "pitch",
+     "9": "pitch"
+    },
+    "out": {
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DualIntegrator.cpp:110-118 reads getVoltage() with no channel and clamps it to -12V and 12V before slewing it"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DualIntegrator.cpp:110-118 reads getVoltage() with no channel and clamps it to -12V and 12V before slewing it"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "DualIntegrator.cpp:108-115 reads getVoltage() with no channel and compares it against triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "DualIntegrator.cpp:108-115 reads getVoltage() with no channel and compares it against triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "DualIntegrator.cpp:92 reads getVoltage() with no channel into a Schmitt trigger set to 1.8V both ways"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "DualIntegrator.cpp:92 reads getVoltage() with no channel into a Schmitt trigger set to 1.8V both ways"
+     },
+     "6": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DualIntegrator.cpp:94-97 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the rate as an exponent of two"
+     },
+     "7": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DualIntegrator.cpp:94-97 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the rate as an exponent of two"
+     },
+     "8": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DualIntegrator.cpp:96 reads getVoltage() with no channel and adds it straight into the rate exponent"
+     },
+     "9": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DualIntegrator.cpp:96 reads getVoltage() with no channel and adds it straight into the rate exponent"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "DualIntegrator.cpp:124 writes the slewed value with setVoltage and never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "DualIntegrator.cpp:124 writes the slewed value with setVoltage and never calls setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "DualIntegrator.cpp:125 writes -5V or 5V from a Schmitt trigger whose thresholds are -5V and 5V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "DualIntegrator.cpp:125 writes -5V or 5V from a Schmitt trigger whose thresholds are -5V and 5V"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "why": "DualIntegrator.cpp:121 writes 5V while the left cell's value is above the right cell's and -5V otherwise"
+     }
+    }
+   },
+   "notes": "Source read at commit f6cf8d6, the commit whose plugin.json carries the installed 2.0.1. The IN inputs and OUT outputs get no family: the maker's own manual has them carrying audio, control voltage, gates or a constant, depending on the patch. The rate parameter is configured as 2 to the power of the value in Hertz, -5 to 13.5 (DualIntegrator.cpp:74), and the result is multiplied by 20 in process() to match a 20V peak-to-peak swing, so the figures at the knob are the cycling frequency rather than volts per second. The mode switch is configured with the choices Track and Hold at 0 and Sample and Hold at 1, and the maker's panel standard puts a switch ON when it is upright."
   },
   "NonlinearIntegrator": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A state-variable filter with lowpass, bandpass, highpass and notch outputs at once, a trigger input for striking it, and enough resonance to ring on its own",
+    "Scales the signal input, from silence to the whole of it",
+    "Sets the filter frequency, an octave a step from 0.0625Hz to 8192Hz",
+    "Sets the resonance; near the top the filter rings and the outputs can reach 12V either way, so raise it a little at a time",
+    "Scales the FREQ control input, -1 to +1, before it is added to the frequency",
+    "Scales the RES control input, -2 to +2, before it is added to the resonance",
+    "Strikes the filter on each rise past 1.8V by sending a short 6V pulse through it, which rings the filter like a struck object",
+    "Added to the filter frequency with no attenuation of its own, a volt an octave",
+    "Added to the filter frequency through its attenuverter, a volt an octave",
+    "Added to the resonance through its attenuverter",
+    "The signal to be filtered, scaled by its attenuator; audio and slow control voltages both work",
+    "The lowpass output, -12V to +12V",
+    "The bandpass output, -12V to +12V",
+    "The highpass output, -12V to +12V",
+    "The notch output, -12V to +12V",
+    "Note — the input attenuator starts fully down, so a fresh module passes nothing until it is turned up",
+    "Note — patch BAND back into IN and raise the input attenuator and the resonance until it sings, and the four outputs give the same sine wave a quarter cycle apart",
+    "Note — at high resonance the outputs can reach 24V peak to peak, which is far above what most modules expect, so bring the resonance up gradually",
+    "Note — every input in this module reads one channel, so polyphonic cables are cut down to their first channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "NonlinearIntegrator.cpp:74 reads getVoltage() with no channel into a Schmitt trigger set to triggerThresholdLevel, 1.8V, and fires a PulseGenerator"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "NonlinearIntegrator.cpp:78 reads getVoltage() with no channel and adds it straight to the frequency knob, the sum clamped to -4 and 13 as an exponent of two"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "1V per octave",
+      "why": "NonlinearIntegrator.cpp:76-78 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the frequency knob, the sum clamped to -4 and 13 as an exponent of two"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "NonlinearIntegrator.cpp:76-78 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the resonance knob, the sum clamped to 0 and 12"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "NonlinearIntegrator.cpp:76-80 reads getVoltage() with no channel, multiplies it by the input attenuator and clamps it to -12V and 12V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-12 to 12V",
+      "why": "NonlinearIntegrator.cpp writes the lowpass state with setVoltage and never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "-12 to 12V",
+      "why": "NonlinearIntegrator.cpp writes the bandpass state with setVoltage and never calls setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "-12 to 12V",
+      "why": "NonlinearIntegrator.cpp writes the highpass state with setVoltage and never calls setChannels"
+     },
+     "3": {
+      "poly": false,
+      "range": "-12 to 12V",
+      "why": "NonlinearIntegrator.cpp writes the notch state with setVoltage and never calls setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit f6cf8d6, the commit whose plugin.json carries the installed 2.0.1. The frequency parameter is configured as 2 to the power of the value in Hertz, -4 to 13 (NonlinearIntegrator.cpp:58). A very small random offset is added to the filter input on every sample (line 79) so that a bandpass-to-input patch can start oscillating from silence. The resonance CV attenuverter runs -2 to +2 and is displayed at half that, so its printed range matches the other attenuverters."
   },
   "VoltageSequencer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight-stage sequencer with two knobs a stage, a gate output and a select input for each stage, and outputs for either row, their difference, the smaller, the larger and the stage as a pitch",
+    "Sets the voltage row A gives at that stage, 0V to 5V",
+    "Sets the voltage row B gives at that stage, 0V to 5V",
+    "Jumps to that stage and holds it while it is pressed, and makes it the stage the PRESET input recalls",
+    "Switches the CLOCK input on and off; with it down the clock input does nothing",
+    "Switches the V.CLOCK input on and off; with it down the vertical clock does nothing",
+    "Jumps to that stage and holds it while the voltage is above 1.8V, and makes it the stage the PRESET input recalls",
+    "Jumps to the first stage on each rise past 1.8V, ahead of every other way of choosing a stage",
+    "Jumps to the stage last chosen by a select button or select input, on each rise past 1.8V",
+    "Holds the current stage while the voltage is above 1.8V, so the clock is ignored",
+    "Reverses the direction the sequence steps in, on each rise past 1.8V",
+    "Advances one stage on each rise past 1.8V, while its enable switch is on",
+    "Moves the A or B output between the two rows on each rise past 1.8V, while its enable switch is on",
+    "5V while that stage is the current one, and 0V otherwise",
+    "5V while any stage is being held by a select button or select input, and 0V otherwise",
+    "Row A's knob for the current stage, 0V to 5V",
+    "Row B's knob for the current stage, 0V to 5V",
+    "Row A's voltage less row B's for the current stage, -5V to +5V",
+    "Whichever of the two rows is lower at the current stage, 0V to 5V",
+    "Whichever of the two rows is higher at the current stage, 0V to 5V",
+    "The stage number as a voltage, 0V to 1.34V in whole-tone steps, made to be patched as a pitch",
+    "Row A or row B for the current stage, whichever the vertical clock last chose",
+    "Note — both enable switches come up off, so a fresh module ignores CLOCK and V.CLOCK until they are switched on",
+    "Note — when more than one thing calls for a stage at once, RESET wins, then the select buttons, select inputs and PRESET together, then HOLD, and CLOCK last",
+    "Note — with two select inputs high at the same time the lower-numbered stage wins",
+    "Note — patch a stage gate output into RESET, PRESET, a select input, DIRECTION or V.CLOCK to make the eight stages into a shorter, longer or swinging sequence"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "16": 3,
+    "17": 3,
+    "18": 3,
+    "19": 3,
+    "20": 3,
+    "21": 3,
+    "22": 3,
+    "23": 3,
+    "24": 4,
+    "25": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 7,
+    "9": 8,
+    "10": 9,
+    "11": 10,
+    "12": 11,
+    "13": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 13,
+    "2": 13,
+    "3": 13,
+    "4": 13,
+    "5": 13,
+    "6": 13,
+    "7": 13,
+    "8": 14,
+    "9": 15,
+    "10": 16,
+    "11": 17,
+    "12": 18,
+    "13": 19,
+    "14": 20,
+    "15": 21
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "pitch",
+     "15": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process compares this port's getVoltage() against triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process compares this port's getVoltage() against triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process compares this port's getVoltage() against triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process compares this port's getVoltage() against triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process compares this port's getVoltage() against triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process compares this port's getVoltage() against triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process compares this port's getVoltage() against triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process compares this port's getVoltage() against triggerThresholdLevel, which is 1.8 in voltage_helpers.cpp"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process reads this port's getVoltage() into a Schmitt trigger set to 1.8V and jumps to stage one on a rising edge"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process reads this port's getVoltage() into a Schmitt trigger set to 1.8V and recalls the stored stage on a rising edge"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process compares this port's getVoltage() against 1.8V as a level rather than an edge, holding the stage while it is high"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process reads this port's getVoltage() into a Schmitt trigger set to 1.8V and flips the step direction on a rising edge"
+     },
+     "12": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process reads this port's getVoltage() into a Schmitt trigger set to 1.8V and advances a stage on a rising edge, gated by the enable switch"
+     },
+     "13": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "VoltageSequencer.cpp process reads this port's getVoltage() into a Schmitt trigger set to 1.8V and swaps the row on a rising edge, gated by the enable switch"
+     }
+    },
+    "out": {
+     "8": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "VoltageSequencer.cpp process writes 5V while any stage is being held and 0V otherwise, one channel"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "VoltageSequencer.cpp process writes the row A knob of the current stage, configured 0V to 5V at line 33"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "VoltageSequencer.cpp process writes the row B knob of the current stage, configured 0V to 5V at line 34"
+     },
+     "11": {
+      "poly": false,
+      "range": "±5V",
+      "why": "VoltageSequencer.cpp process writes row A less row B, each of them 0V to 5V"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "VoltageSequencer.cpp process writes the smaller of the two row voltages, each 0V to 5V"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "VoltageSequencer.cpp process writes the larger of the two row voltages, each 0V to 5V"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "VoltageSequencer.cpp process writes the stage index in whole-tone steps, reaching 1.34V at the eighth stage"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "VoltageSequencer.cpp process writes row A or row B of the current stage, whichever the vertical clock selected"
+     }
+    }
+   },
+   "notes": "Source read at commit f6cf8d6, the commit whose plugin.json carries the installed 2.0.1. The output the panel letters STAGE SELECTED is named 'All Gates' in the source (VoltageSequencer.cpp:46), so its tooltip does not match the panel; the line follows the panel and the manual, which both describe it as high while a stage is being held. The two clock enable switches are configured with defaults of 0, which is OFF. The whole plugin is monophonic. The eight stage gate outputs and eight stage select inputs get one line each because they differ only by stage number."
   },
   "WindowGenerators": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "One envelope generator giving four differently shaped envelopes at once out of four stage times and a sustain level, with a gate output for every stage",
+    "Sets the length of the first stage, from about 2ms to 32 seconds; turning it up shortens the stage",
+    "Sets the length of the second stage, from about 2ms to 32 seconds; turning it up shortens the stage",
+    "Sets the length of the third stage, from about 2ms to 32 seconds; turning it up shortens the stage",
+    "Sets the voltage the envelopes hold at through their sustain phase, 0V to 10V",
+    "Sets the length of the fourth stage, from about 2ms to 32 seconds; turning it up shortens the stage",
+    "Scales the T1 control input, -1 to +1, before it is added to the first stage's time",
+    "Scales the T2 control input, -1 to +1, before it is added to the second stage's time",
+    "Scales the T3 control input, -1 to +1, before it is added to the third stage's time",
+    "Scales the SUSTAIN control input, -1 to +1, before it is added to the sustain level",
+    "Scales the T4 control input, -1 to +1, before it is added to the fourth stage's time",
+    "Bends the slopes between logarithmic turned down, straight in the centre and exponential turned up, which also shifts the timing",
+    "Starts the envelopes while it is held down and holds them in sustain for as long as it is held",
+    "Shortens the first stage as the voltage rises, a volt an octave, scaled by its attenuverter",
+    "Shortens the second stage as the voltage rises, a volt an octave, scaled by its attenuverter",
+    "Shortens the third stage as the voltage rises, a volt an octave, scaled by its attenuverter",
+    "Moves the sustain level, scaled by its attenuverter",
+    "Shortens the fourth stage as the voltage rises, a volt an octave, scaled by its attenuverter",
+    "Starts the envelopes on a rise past 1.8V and holds them in sustain for as long as it stays high",
+    "Starts the envelopes on each rise past 1.8V; with no gate held high alongside it, they run straight through to the end",
+    "Shortens all four stage times together as the voltage rises, with no attenuation of its own",
+    "5V while the ADASR envelope is in its first stage, and 0V otherwise",
+    "5V while the ADASR envelope is in its second stage, and 0V otherwise",
+    "5V while the ADASR envelope is in its third stage, and 0V otherwise",
+    "5V while the ADASR envelope is in its sustain phase, and 0V otherwise",
+    "5V while the ADASR envelope is in its fourth stage, and 0V otherwise",
+    "A delay, attack, decay, sustain and release envelope, 0V to 10V",
+    "An attack, hold, decay, sustain and release envelope, 0V to 10V",
+    "A delay, attack, hold and release envelope, 0V to 10V; this is the one shape that never sustains",
+    "An attack, decay, attack, sustain and release envelope, 0V to 10V, and the one whose timing the stage gates follow",
+    "5V when the ADASR envelope ends; patch it back into TRIGGER and the module cycles",
+    "Note — the module cannot be started again until the third stage has finished, so a trigger arriving before then is ignored, which is what makes it usable as a frequency divider",
+    "Note — patch END back into TRIGGER and the module cycles as an oscillator, the stage times setting its frequency a volt an octave",
+    "Note — the DAHR shape is the exception to the sustain rule: it goes to its release when the third stage ends, whatever the gate is doing",
+    "Note — every input in this module reads one channel, so polyphonic cables are cut down to their first channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18,
+    "6": 19,
+    "7": 20
+   },
+   "out": {
+    "0": 21,
+    "1": 22,
+    "2": 23,
+    "3": 24,
+    "4": 25,
+    "5": 26,
+    "6": 27,
+    "7": 28,
+    "8": 29,
+    "9": 30
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "WindowGenerators.cpp:133 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the T1 time parameter, which is 0.5 times 0.5 to the power of the value in seconds"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "WindowGenerators.cpp:133 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the T2 time parameter"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "WindowGenerators.cpp:133 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the T3 time parameter"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "WindowGenerators.cpp:137-139 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the sustain level parameter, which is configured 0V to 10V"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "WindowGenerators.cpp:133 reads getVoltage() with no channel, multiplies it by the attenuverter and adds it to the T4 time parameter"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "WindowGenerators.cpp:127 reads getVoltage() with no channel, adds the manual gate button and compares the result against triggerThresholdLevel, 1.8V"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1.8V",
+      "negative": "ignored",
+      "why": "WindowGenerators.cpp:126 reads getVoltage() with no channel and compares it against triggerThresholdLevel, 1.8V, on a rising edge"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "WindowGenerators.cpp:139 reads getVoltage() with no channel and adds it to all four stage-time parameters with no attenuation"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "WindowGenerators.cpp writes 5V while the ADASR envelope is in that stage and 0V otherwise, one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "WindowGenerators.cpp writes 5V while the ADASR envelope is in that stage and 0V otherwise, one channel"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "WindowGenerators.cpp writes 5V while the ADASR envelope is in that stage and 0V otherwise, one channel"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "WindowGenerators.cpp writes 5V while the ADASR envelope is in its sustain phase and 0V otherwise, one channel"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "WindowGenerators.cpp writes 5V while the ADASR envelope is in that stage and 0V otherwise, one channel"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "WindowGenerators.cpp:49 sets the envelope peak to 10V and the shape is written with setVoltage, one channel"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "WindowGenerators.cpp:49 sets the envelope peak to 10V and the shape is written with setVoltage, one channel"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "WindowGenerators.cpp:49 sets the envelope peak to 10V and the shape is written with setVoltage, one channel"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "WindowGenerators.cpp:49 sets the envelope peak to 10V and the shape is written with setVoltage, one channel"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "WindowGenerators.cpp writes 5V when the ADASR envelope ends and 0V otherwise, one channel"
+     }
+    }
+   },
+   "notes": "Source read at commit f6cf8d6, the commit whose plugin.json carries the installed 2.0.1. The four time parameters are configured as 0.5 times 0.5 to the power of the value in seconds, -6 to 8 (WindowGenerators.cpp:75), so the knob runs from 32 seconds at the bottom to about 1.95ms at the top and a rising control voltage shortens the stage, which is what makes the time inputs track a volt an octave when the module is cycling. The SHAPE knob feeds each envelope back into its own time parameters, so it changes the timing as well as the curve. The whole plugin is monophonic."
   }
  }
 }

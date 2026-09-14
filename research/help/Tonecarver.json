@@ -1,23 +1,585 @@
 {
  "plugin": "Tonecarver",
- "source": "https://github.com/Tonecarver/tcRackModules/tree/v2",
+ "source": "https://github.com/Tonecarver/tcRackModules/blob/v2/README.md (source at commit 0bc4bd1 on the v2 branch, whose plugin.json matches the installed 2.0.0 byte for byte)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Blur": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A spectral effect: the audio is cut into overlapping FFT frames, held in a buffer several seconds long, and replayed from a movable position with the frames smeared, pitch shifted and gain shaped",
+    "Sets how many seconds of audio the frame buffer holds, from the shortest the FFT settings allow to 20 seconds; the tooltip reads the figure in seconds",
+    "Sets how much of the voltage at the jack for the Length control reaches it, and in which direction",
+    "Voltage over the length of the frame buffer, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Sets where in the frame buffer playback is read from, at the left the oldest frame held and at the right the newest",
+    "Sets how much of the voltage at the jack for the Position control reaches it, and in which direction",
+    "Voltage over the read position in the frame buffer, at 0 to 10V for the full sweep; modulating it plays the buffer forwards, backwards, slower or faster than it was recorded",
+    "Sets the chance that an incoming frame is thrown away instead of entering the buffer; fully clockwise nothing new gets in and the buffer holds whatever it had",
+    "Sets how much of the voltage at the jack for the Frame Drop control reaches it, and in which direction",
+    "Voltage over the frame drop chance, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Each press toggles the buffer between taking new audio and holding what it has; while it is frozen the Frame Drop control has no effect",
+    "A voltage above 1V toggles the frozen state the same way a press of the Freeze button does",
+    "Sets how far either side of the read position the frames are picked from, one bin at a time; fully anticlockwise every bin comes from the read position, fully clockwise from anywhere in the buffer",
+    "Sets how much of the voltage at the jack for the Blur control reaches it, and in which direction",
+    "Voltage over the blur reach, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Each press toggles the phase of every bin being forced to zero, which is the classic robot voice; the level can move by a few decibels when it is on",
+    "A voltage above 1V toggles the robot effect the same way a press of the Robot button does",
+    "Crossfades each bin between the smeared frame and the frame at the read position, fully anticlockwise unsmeared and fully clockwise smeared",
+    "Sets how much of the voltage at the jack for the Blur Mix control reaches it, and in which direction",
+    "Voltage over the blur mix, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Sets the centre frequency of the band that the Blur, Pitch and Gain selectors work within, spaced logarithmically; the tooltip reads it in hertz",
+    "Sets how much of the voltage at the jack for the Center control reaches it, and in which direction",
+    "Voltage over the band centre frequency, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Sets the width of the band that the Blur, Pitch and Gain selectors work within; the tooltip reads the lower and upper edges in hertz",
+    "Sets how much of the voltage at the jack for the Span control reaches it, and in which direction",
+    "Voltage over the band width, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Each press steps the blurring through Inside the band, Outside it, and All frequencies, and the lamp in that row shows which is chosen",
+    "Each press steps the pitch shifting through five settings: inside the band alone, inside with the rest passed through, outside alone, outside with the rest passed through, and all frequencies",
+    "Each press steps the gain through Inside the band, Outside it, and All frequencies, and the lamp in that row shows which is chosen",
+    "Sets the pitch shift. With Quant set to the asterisk the centre is unity and the right-hand end doubles the frequency; with Quant on any other setting the sweep is 36 semitones down to 36 semitones up",
+    "Sets how much of the voltage at the jack for the Pitch control reaches it, and in which direction",
+    "Voltage over the pitch shift, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Each press steps the pitch quantising through the four printed settings: the asterisk for no quantising, 1 for semitones, 5 for fifths and octaves, 8 for octaves alone",
+    "Sets the output gain of the processed signal, from silence at the left through unity at the centre to about four times at the right; the tooltip reads that as -60dB to +6dB",
+    "Sets how much of the voltage at the jack for the Gain control reaches it, and in which direction",
+    "Voltage over the output gain, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Crossfades the output between the untouched input at the left and the processed signal at the right, on an equal power law",
+    "Sets how much of the voltage at the jack for the Mix control reaches it, and in which direction",
+    "Voltage over the wet and dry balance, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Each press clears the running phase totals the pitch shifter keeps, which removes the drift that builds up over long runs; the press is read once per FFT frame rather than at once",
+    "The audio to be processed; a polyphonic cable has its channels summed into one signal",
+    "The dry input and the processed signal blended by the Mix control",
+    "Menu — FFT Size — sets the number of samples in one analysis frame, from 32 to 16384; small sizes distort, large ones give cleaner results at the cost of latency",
+    "Menu — Oversample — sets how many analysis frames overlap on one frame length, from 1 to 16; low values add noise and artefacts",
+    "Note — The processed path is delayed by one FFT frame, so raising the FFT Size on the menu raises the latency through the module.",
+    "Note — With Frame Drop fully clockwise, or Freeze on, no new audio enters the buffer. A patch saved in that state comes back making no sound until the control is backed off.",
+    "Note — Each control with an attenuverter reads its own input over 0 to 10V, adds it to the knob through that attenuverter, then clamps the total to the knob's range. An unpatched input adds nothing."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "5": 4,
+    "4": 5,
+    "9": 7,
+    "8": 8,
+    "10": 10,
+    "15": 12,
+    "14": 13,
+    "18": 15,
+    "21": 17,
+    "20": 18,
+    "2": 20,
+    "3": 21,
+    "6": 23,
+    "7": 24,
+    "11": 26,
+    "12": 27,
+    "13": 28,
+    "16": 29,
+    "17": 30,
+    "19": 32,
+    "23": 33,
+    "22": 34,
+    "25": 36,
+    "26": 37,
+    "24": 39
+   },
+   "in": {
+    "0": 3,
+    "2": 6,
+    "4": 9,
+    "5": 11,
+    "6": 14,
+    "8": 16,
+    "9": 19,
+    "1": 22,
+    "3": 25,
+    "7": 31,
+    "10": 35,
+    "12": 38,
+    "11": 40
+   },
+   "out": {
+    "0": 41
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "cv",
+     "7": "cv",
+     "8": "trigger",
+     "9": "cv",
+     "10": "cv",
+     "11": "audio",
+     "12": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Blur.cpp lines 826 to 833 (getCvInput) divide the single getVoltage by 10 and return 0 when unconnected; line 909 adds attenuverter times that to the knob and clamps the total to 0 to 1"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Blur.cpp getCvInput divides one getVoltage by 10; line 905 adds attenuverter times that to the Freq Center knob and clamps to 0 to 1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Blur.cpp getCvInput divides one getVoltage by 10; line 1116 adds attenuverter times that to the Position knob and clamps to 0 to 1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Blur.cpp getCvInput divides one getVoltage by 10; line 902 adds attenuverter times that to the Freq Span knob and clamps to 0 to 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Blur.cpp getCvInput divides one getVoltage by 10; line 977 adds attenuverter times that to the Frame Drop knob and clamps to 0 to 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/Blur.cpp line 866: the raw getVoltage is added to the Freeze button value and fed to a dsp::SchmittTrigger at its default 0V and 1V thresholds, so a rising edge toggles the frozen state"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Blur.cpp getCvInput divides one getVoltage by 10; line 1121 adds attenuverter times that to the Blur Spread knob and clamps to 0 to 1"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Blur.cpp getCvInput divides one getVoltage by 10; line 1236 adds attenuverter times that to the Pitch knob and clamps to 0 to 1"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/Blur.cpp line 862: the raw getVoltage is added to the Robot button value and fed to a dsp::SchmittTrigger at its default 0V and 1V thresholds, so a rising edge toggles the robot effect"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Blur.cpp getCvInput divides one getVoltage by 10; line 1127 adds attenuverter times that to the Blur Mix knob and clamps to 0 to 1"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Blur.cpp getCvInput divides one getVoltage by 10; line 959 adds attenuverter times that to the Gain knob and clamps to 0 to 1"
+     },
+     "11": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "why": "src/Blur.cpp line 830 reads this jack with getVoltageSum(), which adds every channel of a polyphonic cable into one signal; the maker's own port name for it is \"+/- 5v Audio In\""
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Blur.cpp getCvInput divides one getVoltage by 10; line 838 adds attenuverter times that to the Mix knob and clamps to 0 to 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "polarity": "bipolar",
+      "why": "src/Blur.cpp line 843 sets one voltage with no setChannels anywhere in the file; the maker's own port name for it is \"+/- 5v Audio Out\", and the synthesis scaling at lines 138 to 158 is written to land audio in Rack's 5V range"
+     }
+    }
+   },
+   "notes": "Two disagreements with the maker's README, the code winning both. (1) The README says the pitch control's clockwise half \"raises the pitch up to 2 octaves higher\"; src/Blur.cpp line 1238 multiplies the knob by two, so the top of the smooth sweep doubles the frequency, which is one octave. (2) The README gives the Gain control's clockwise end as \"+12 dB\"; line 966 computes a factor of about 3.98, which the module's own tooltip prints as +6dB because dbForGain at line 165 uses ten times the log rather than twenty. Both are true of the same number read two ways, and the panel shows the tooltip.\n\nA third, smaller one: the README says the buffer is \"limited to 10,000 frames or 10 seconds\"; the constant at line 14 is 20 seconds, and the frame ceiling at line 11 is 10000.\n\nFive lights are declared and given no LightWidget, their addChild calls commented out at lines 1770 to 1772, 1774 and 1779: the three band selector lamps, the pitch quantise selector lamp and the residual switch lamp. None of them is written in process either, so nothing is lost, but they are dead entries in the enum.\n\nThe Robot and Freeze inputs are summed with their buttons before the trigger, so a voltage held above 1V at either jack stops that button toggling anything until the voltage falls.\n\nThe pitch band selector has five settings while the Blur and Gain selectors have three, and the panel prints three rows of labels for all of them. The pitch column carries two lamps in the Inside row and two in the Outside row to cover the extra pair, which is why the pitch selector needs five presses to come back round.\n\nEvery figure quoted in the lines is a literal in src/Blur.cpp: 20 seconds at line 14, the 36 semitone span at line 1251, the doubling at line 1238, the gain exponents 6 and 0.6 at lines 966 and 968, the FFT sizes and oversample values at lines 1567 and 1646."
   },
   "Morse": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A gate sequencer that plays Morse code: each clock pulse is one Morse time unit, dots run for one unit and dashes for three, and the gate output rises and falls through the pattern",
+    "One Morse time unit per rising edge above 1V; the module produces nothing at all until a cable is patched here",
+    "A 0 to 10V gate, high through a dot or a dash and low through the gaps",
+    "Menu — Data File — opens a file chooser and stores the path you pick, but nothing in the module ever reads that file: the characters played are drawn at random instead",
+    "Note — This module was shipped unfinished. The characters it plays are picked at random rather than read from any file, so what comes out is a Morse-shaped gate pattern rather than readable Morse.",
+    "Note — The table that turns a character into dots and dashes was filled in wrongly, so every letter plays the code for A, every digit the code for zero and every punctuation the code for ampersand.",
+    "Note — Four more inputs and one knob are configured in the module and drawn nowhere on the panel, their widgets commented out as work in progress. No cable and no click can reach them.",
+    "Note — The lamp near the bottom of the panel is drawn but never lit: nothing in the module writes it.",
+    "Note — With no cable at the clock input the module returns before it sets the output, so the output jack keeps whatever voltage it last had."
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/Morse.cpp lines 322 to 331: a single getVoltage with no channel loop, fed to a dsp::SchmittTrigger at its default 0V and 1V thresholds, and process returns early when the jack is unconnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/Morse.cpp lines 354 and 357: one voltage of 10 or 0 set with no setChannels in the file"
+     }
+    }
+   },
+   "notes": "Morse is work in progress that reached the library. src/Morse.cpp lines 306 to 318: closeFile and openFile are empty stubs marked TODO, and getNextCharacter returns `int(rand() % 127)` under the comment \"TODO: get this from a file\". The Data File menu item therefore changes nothing about what plays.\n\nA second fault in the same file makes the code itself wrong. initializeLookupTable at lines 224 to 238 calls `dotDashToGates(alpha->code_sequence)` inside a loop over k, using the first element of each table rather than `alpha[k]`. Every one of the 26 letters is given A's pattern, every digit is given zero's pattern, and every punctuation mark ampersand's. Characters with no table entry fall to the error pattern at line 347.\n\nOnly one input and one output have PortWidgets. SEMITONE_CV, LOOP_CV, BOUNCE_CV and AUDIO_IN are configured at lines 197 to 200 and their addInput calls are commented out at lines 438 to 441, and DIRECTION_KNOB_PARAM is configured at line 266 with its addParam commented out at line 434. The census has no paramPos entry for it at all, so no click can reach it and it gets no line and no tag.\n\nFILE_LOADED_LED_LIGHT is given a LightWidget at line 445 and never written anywhere in the file.\n\nThe timing figures in the lines are literals in dotDashToGates at lines 240 to 256: one time unit for a dot, three for a dash, one for the gap between symbols, with three prepended before each letter at line 345 and seven for a space at line 342."
   },
   "Traveler": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A generative sequencer on a grid: rovers travel across a matrix until they meet a wall, another rover or an obstacle, and a wall strike sounds the pitch the scale puts at that point of the wall",
+    "Sets the rate the rovers travel at when no cable is patched into the clock input, doubling every sixth of the sweep from 15 BPM at the left to 960 BPM at the right",
+    "An external clock for the rover steps, overriding the BPM knob once it has seen one edge. The edge test needs the voltage to fall to 0V and then reach a full 10V, so a 5V clock never registers.",
+    "Each press toggles between running and paused; the lamp is lit while the rovers are moving",
+    "A voltage above 1V toggles running and paused the same way a press of the Run button does",
+    "Each press reverses the direction every rover on the matrix is travelling in, and the lamp is lit while the reversal is in force",
+    "A voltage above 1V reverses every rover's direction the same way a press of the Rev button does",
+    "Sets the length of the gate a wall strike opens, one beat at the centre and two beats fully clockwise",
+    "Sets how much of the voltage at the jack for the Note Length control reaches it, and in which direction",
+    "Voltage over the gate length, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Sets how many rows of the matrix are in play, from one at the left to sixteen at the right",
+    "Sets how much of the voltage at the jack for the Rows control reaches it, and in which direction",
+    "Voltage over the number of rows, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Sets how many columns of the matrix are in play, from one at the left to sixteen at the right",
+    "Sets how much of the voltage at the jack for the Columns control reaches it, and in which direction",
+    "Voltage over the number of columns, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Each press toggles whether rovers are carried inward by a shrinking matrix. Lit, a rover the wall passes over is dragged in front of it; unlit, it keeps its cell and falls outside the active area.",
+    "Selects that scale slot as the one the four walls use, and the lamp beside it is lit for the slot in force. While a cable is patched into the scale selector input this button does nothing.",
+    "Sets the root note of that scale slot in semitones, 0 to 120, and takes effect on the walls while that slot is the one selected",
+    "Selects which of the four scale slots is in force, over 0 to 10V split into four equal bands; while a cable is here the four scale select buttons are ignored",
+    "Toggles what the alternate travel speed means for rovers set to it: half the step rate, or twice it, with the lamp beside the printed marking showing which",
+    "Sets the chance that a rover striking a wall bounces off it; fully anticlockwise none do, and a rover that does not bounce passes through and reappears at the opposite wall on the same heading",
+    "Sets how much of the voltage at the jack for the Wall? control reaches it, and in which direction",
+    "Voltage over the wall bounce chance, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Sets the chance that an obstacle acts on a rover that reaches it; fully anticlockwise the rover passes over every obstacle untouched",
+    "Sets how much of the voltage at the jack for the Obs? control reaches it, and in which direction",
+    "Voltage over the obstacle chance, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Sets the chance that a wall strike puts out a pitch and a gate; fully anticlockwise the rovers move in silence",
+    "Sets how much of the voltage at the jack for the Note? control reaches it, and in which direction",
+    "Voltage over the note chance, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Sets the chance that a rover holds its course rather than being deflected",
+    "Sets how much of the voltage at the jack for the Stdy? control reaches it, and in which direction",
+    "Voltage over the steady chance, at 0 to 10V for the full sweep, scaled by the attenuverter for this control",
+    "Each press removes every obstacle from the matrix and leaves the rovers where they are",
+    "Each press removes every rover from the matrix and leaves the obstacles where they are",
+    "Each press removes the most recently placed occupant of the matrix, rover or obstacle",
+    "Reverses the order the scale runs along that wall, so the pitches descend where they ascended; the lamp is lit while the wall is reversed",
+    "Turns the scale along that wall by up to fifteen places in either direction, moving which pitch each point of the wall carries",
+    "Turns the scale along that wall by this many places every time a rover strikes it, so the pitches drift as the patch runs",
+    "Slides a rover along that wall by this many cells after it strikes, up to fifteen in either direction",
+    "Each press silences that wall, and the lamp is lit while it is silent",
+    "Each press undoes every turn the scales have taken and puts all four walls back to the positions their Rotate knobs ask for",
+    "Each press steps the pitch jacks through three settings: the lowest pitch of the strikes in that step, the highest, or one polyphonic channel per strike; the lit lamp shows which",
+    "A 10V gate for as long as a strike on that wall is sounding",
+    "A 10V gate while a strike is sounding on any of the four walls",
+    "The pitch of a strike on that wall at a volt per octave, 0V for note 48; one channel in the lowest and highest settings, one channel per strike in the polyphonic setting",
+    "The pitch of a strike on any of the four walls at a volt per octave, 0V for note 48; one channel in the lowest and highest settings, one channel per strike in the polyphonic setting",
+    "Menu — Polyphony — sets the ceiling on channels the pitch jacks put out in the polyphonic mode, from 2 to 16",
+    "Menu — Scale 1, Scale 2, Scale 3, Scale 4 — each opens a file chooser to load a scale definition into that slot, and shows the file loaded there; the scale files are in the maker's repository",
+    "Note — The matrix starts empty and nothing sounds until you put a rover in it. Pick a rover or obstacle from the palette, then left-click a cell to place it; right-click a cell to clear it.",
+    "Note — The palette and the matrix are each one custom widget rather than a grid of controls, so no cell of either can be clicked for help.",
+    "Note — The rover icons set a starting direction and a normal or alternate speed. The obstacle icons mirror, deflect, detour, spin or teleport a rover that reaches them, or change its speed.",
+    "Note — A newly placed Traveler comes up paused with the Run lamp dark, and with herding off, because both buttons carry a value their triggers read as a press on the first sample. Click Run to start.",
+    "Note — Until a scale file is loaded each slot holds a seven note major scale and the slot's name reads blank, so the module makes pitches from the start.",
+    "Note — The maker named none of this module's knobs, jacks, buttons or outputs, so hovering any of them shows an empty tooltip. The lines here are the only text there is."
+   ],
+   "param": {
+    "0": 1,
+    "6": 3,
+    "7": 5,
+    "15": 7,
+    "14": 8,
+    "21": 10,
+    "20": 11,
+    "28": 13,
+    "27": 14,
+    "22": 16,
+    "39": 17,
+    "41": 17,
+    "47": 17,
+    "49": 17,
+    "40": 18,
+    "42": 18,
+    "48": 18,
+    "50": 18,
+    "51": 20,
+    "1": 21,
+    "8": 22,
+    "2": 24,
+    "9": 25,
+    "3": 27,
+    "10": 28,
+    "4": 30,
+    "11": 31,
+    "5": 33,
+    "12": 34,
+    "13": 35,
+    "16": 36,
+    "17": 36,
+    "18": 36,
+    "19": 36,
+    "23": 37,
+    "24": 37,
+    "25": 37,
+    "26": 37,
+    "30": 38,
+    "31": 38,
+    "32": 38,
+    "33": 38,
+    "34": 39,
+    "35": 39,
+    "36": 39,
+    "37": 39,
+    "43": 40,
+    "44": 40,
+    "45": 40,
+    "46": 40,
+    "29": 41,
+    "38": 42
+   },
+   "in": {
+    "0": 2,
+    "1": 4,
+    "2": 6,
+    "7": 9,
+    "8": 12,
+    "9": 15,
+    "10": 19,
+    "3": 23,
+    "4": 26,
+    "5": 29,
+    "6": 32
+   },
+   "out": {
+    "0": 43,
+    "1": 43,
+    "2": 43,
+    "3": 43,
+    "4": 44,
+    "5": 45,
+    "6": 45,
+    "7": 45,
+    "8": 45,
+    "9": 46
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch",
+     "8": "pitch",
+     "9": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/Traveler.cpp lines 1784 to 1812: one getVoltage with no channel loop, and an edge counted only when the previous sample was 0V or below and this one is 10V or above"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/Traveler.cpp line 2861: the raw getVoltage is added to the Run button value and fed to a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "why": "src/Traveler.cpp line 2869: the raw getVoltage is added to the Rev button value and fed to a dsp::SchmittTrigger at its default 0V and 1V thresholds"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Traveler.cpp getCvInput divides one getVoltage by 10 and returns 0 when unconnected; processProbabilityThresholds adds attenuverter times that to the Wall? knob and clamps the total to 0 to 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Traveler.cpp getCvInput divides one getVoltage by 10 and returns 0 when unconnected; processProbabilityThresholds adds attenuverter times that to the Obs? knob and clamps the total to 0 to 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Traveler.cpp getCvInput divides one getVoltage by 10 and returns 0 when unconnected; processProbabilityThresholds adds attenuverter times that to the Note? knob and clamps the total to 0 to 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Traveler.cpp getCvInput divides one getVoltage by 10 and returns 0 when unconnected; processProbabilityThresholds adds attenuverter times that to the Stdy? knob and clamps the total to 0 to 1"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Traveler.cpp processNoteLength: getCvInput divides one getVoltage by 10, attenuverter times that is added to the Note Length knob and the total clamped to 0 to 1"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Traveler.cpp processResizing: getCvInput divides one getVoltage by 10, attenuverter times that is added to the Rows knob and the total clamped to 0 to 1 before scaling to 1 to 16 rows"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/Traveler.cpp processResizing: getCvInput divides one getVoltage by 10, attenuverter times that is added to the Columns knob and the total clamped to 0 to 1 before scaling to 1 to 16 columns"
+     },
+     "10": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "src/Traveler.cpp processScaleSelect: one getVoltage multiplied by 0.1 and by the four slots, clamped to 0 to 3, and the four select buttons skipped entirely while the jack is connected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/Traveler.cpp produceOutput sets 10 or 0 on this jack with no setChannels call"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/Traveler.cpp produceOutput sets 10 or 0 on this jack with no setChannels call"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/Traveler.cpp produceOutput sets 10 or 0 on this jack with no setChannels call"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/Traveler.cpp produceOutput sets 10 or 0 on this jack with no setChannels call"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/Traveler.cpp produceOutput sets 10 or 0 on this jack from the total strike count, with no setChannels call"
+     },
+     "5": {
+      "poly": true,
+      "range": "1V per octave",
+      "polarity": "bipolar",
+      "why": "src/Traveler.cpp produceOutput calls setChannels with the number of pitches and writes a channel per pitch in the polyphonic output mode, and setChannels(1) in the other two"
+     },
+     "6": {
+      "poly": true,
+      "range": "1V per octave",
+      "polarity": "bipolar",
+      "why": "src/Traveler.cpp produceOutput calls setChannels with the number of pitches and writes a channel per pitch in the polyphonic output mode, and setChannels(1) in the other two"
+     },
+     "7": {
+      "poly": true,
+      "range": "1V per octave",
+      "polarity": "bipolar",
+      "why": "src/Traveler.cpp produceOutput calls setChannels with the number of pitches and writes a channel per pitch in the polyphonic output mode, and setChannels(1) in the other two"
+     },
+     "8": {
+      "poly": true,
+      "range": "1V per octave",
+      "polarity": "bipolar",
+      "why": "src/Traveler.cpp produceOutput calls setChannels with the number of pitches and writes a channel per pitch in the polyphonic output mode, and setChannels(1) in the other two"
+     },
+     "9": {
+      "poly": true,
+      "range": "1V per octave",
+      "polarity": "bipolar",
+      "why": "src/Traveler.cpp produceOutput calls setChannels with the number of pitches and writes a channel per pitch in the polyphonic output mode, and setChannels(1) in the other two"
+     }
+    }
+   },
+   "notes": "The clock input is the sharpest fault here. ClockWatcher::tick at src/Traveler.cpp lines 1795 to 1810 counts an external edge only when `externalClock_cv <= 0.f && clock_cv >= 10.f`. A clock that swings 0 to 5V, or one that rests above 0V, produces no edge at all, so the module keeps using the BPM knob and the panel gives no sign of it. The tempo is also taken from the gap between two such edges, so the first edge after patching sets nothing.\n\nTwo controls arrive in the opposite state to the one the constructor sets. RUN_BUTTON_PARAM and HERD_BUTTON_PARAM are configured with a default value of 1 (lines 2479 and 2495) and read through SchmittTriggers at lines 2861 and 2878, which see that standing 1 as a rising edge on the first process call and flip isPaused from false to true and isHerding from true to false. The lamps agree with the flipped state, so what a reader sees is a module that comes up paused with herding off.\n\nWhile a cable is patched into the scale selector jack, processScaleSelect never looks at the four scale select buttons: the branch is an if/else, not a sum. Same shape as a CV jack replacing its knob, but for a bank of buttons.\n\nThe pitch outputs are clamped to -5V to +5V, which is 60 semitones either side of note 48; a root note near the top of the 0 to 120 range will therefore flatten against the ceiling.\n\nIndex order is not panel order in the wall rows. The Invert row runs SCALE_INVERT_WEST, NORTH, SOUTH, EAST in the enum against a panel printed North, South, East, West, so the tags here were taken from the census positions rather than the enum.\n\nThe matrix and the rover and obstacle palette are custom widgets with no ParamWidget per cell, so they have no census positions and get Note lines rather than tags.\n\nFigures in the lines are literals in src/Traveler.cpp: 15 BPM at line 28, the sixfold doubling in processSpeed giving 960, the 16 by 16 field at line 18, the 120 semitone pitch ceiling at line 765, the 48 offset in produceOutput, and the polyphony list of 2 to 16 in PolyphonyMenu."
   }
  }
 }

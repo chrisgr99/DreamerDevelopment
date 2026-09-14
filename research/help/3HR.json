@@ -1,38 +1,849 @@
 {
  "plugin": "3HR",
- "source": "https://github.com/Geekachuqt/3HR",
+ "source": "https://github.com/Geekachuqt/3HR/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Repeat3hr": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A mono delay meant to be swept: the feedback path is bit-crushed and downsampled, the feedback fades out and back in around every wrap so the time can be moved without clicking",
+    "Sets the delay time, 0.1 to 4 seconds",
+    "Trims the delay time by up to 99 milliseconds either way, added to the TIME knob",
+    "Sets how coarsely the feedback path is quantised: fully up leaves it alone, and turning down steps the signal to fewer and fewer levels",
+    "Sets how much of the delay line is fed back into itself; the knob is squared before use and reaches a little past unity, so the repeats can build rather than only fade",
+    "Sets how much of the incoming signal is written into the delay line",
+    "Sets how much of the untouched input reaches the output",
+    "Sets how much of the delay line reaches the output",
+    "Scales the TIME control input before it is added to the TIME knob",
+    "Scales the FINE control input before it is added to the FINE knob",
+    "Scales the CRUSH control input, which is subtracted from the CRUSH knob rather than added to it",
+    "Scales the FB control input before it is added to the FB knob",
+    "Scales the INPUT control input before it is added to the INPUT knob",
+    "Scales the DRY control input before it is added to the DRY knob",
+    "Adds its own value squared to the WET knob, and only while a cable is in the WET control input; the voltage on that cable is never read",
+    "Added to the TIME knob through the TIME CV knob, 0.98 seconds per volt at full amount",
+    "Added to the FINE knob through the FINE CV knob, about 20ms per volt at full amount",
+    "Subtracted from the CRUSH knob through the CRUSH CV knob, 0.8 of a step per volt at full amount",
+    "Added to the FB knob through the FB CV knob, 0.12 per volt at full amount, before the total is squared",
+    "Added to the INPUT knob through the INPUT CV knob, a tenth per volt at full amount",
+    "Added to the DRY knob through the DRY CV knob, a tenth per volt at full amount",
+    "The voltage here is never read; patching any cable into it makes the WET CV knob add its own square to the WET knob, and that is all it does",
+    "The signal to be delayed, summed to one channel if the cable is polyphonic",
+    "The dry and delayed signals mixed by the DRY and WET knobs, one channel",
+    "A 1ms trigger each time the delay line wraps round, for firing envelopes in step with the repeats",
+    "Note — the CRUSH control input reaches only the sample-rate reduction in the feedback path; the bit-depth quantisation is taken straight from the knob, so no cable can change it",
+    "Note — the feedback is faded to nothing over the samples left before the delay line wraps and faded back in over the next 250 samples, which is what lets the TIME knob be swept without clicks",
+    "Note — the module is monophonic: a polyphonic input is summed and both outputs carry one channel"
+   ],
+   "param": {
+    "3": 1,
+    "1": 2,
+    "4": 3,
+    "7": 4,
+    "8": 5,
+    "11": 6,
+    "13": 7,
+    "0": 8,
+    "2": 9,
+    "5": 10,
+    "6": 11,
+    "9": 12,
+    "10": 13,
+    "12": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21,
+    "7": 22
+   },
+   "out": {
+    "0": 23,
+    "1": 24
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "7": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Repeat3hr.cpp:237 reads getVoltage() with no channel, scales it by 0.98 and adds it to the knob at line 246 before a clamp to 0.001 and 4.099"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Repeat3hr.cpp:236 reads getVoltage() with no channel and scales it by 0.0198 into the same time sum at line 246"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Repeat3hr.cpp:234 reads getVoltage() with no channel, scales it by 0.8 and line 251 subtracts it from the knob"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Repeat3hr.cpp:235 reads getVoltage() with no channel and scales it by 0.12 into the feedback sum at line 247"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Repeat3hr.cpp:238 reads getVoltage() with no channel and scales it by 0.1 into the input-level sum at line 248"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Repeat3hr.cpp:239 reads getVoltage() with no channel and scales it by 0.1 into the dry sum at line 249, clamped to 0 and 1"
+     },
+     "6": {
+      "poly": false,
+      "why": "Repeat3hr.cpp:240 computes WetInput from this port but line 250 writes WetCV * WetCV into the wet level, so WetInput is never used"
+     },
+     "7": {
+      "poly": true,
+      "why": "Repeat3hr.cpp:242 reads getVoltageSum(), which adds every polyphonic channel into one"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Repeat3hr.cpp:160 writes one value with setVoltage and never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Repeat3hr.cpp:159 writes 10V for a 1ms pulse from a PulseGenerator and 0V otherwise"
+     }
+    }
+   },
+   "notes": "Source read at commit 5458029, the commit whose plugin.json carries the installed 2.2.0. TWO PLACES WHERE THE CODE DOES NOT DO WHAT THE PANEL PROMISES. First, Repeat3hr.cpp:250 reads 'WetKnob + (WetCV * WetCV)' where every other parameter reads knob plus CV-amount times CV-input, so the WET control input's voltage is discarded and the WET CV knob instead adds its own square to the wet level, and only while something is plugged into that jack. Second, Bitcrush() at line 207 quantises with BitcrushKnob rather than bitcrushAmount, so the CRUSH control input changes only the downsampling in Downsample() at line 212, not the bit depth. The WET control input therefore gets a line saying it is not read, rather than being left untagged where the maker's tooltip would claim otherwise."
   },
   "Xtenuat3hr": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Crossfades two signals and then attenuates or inverts the result, with a control input for each, following the polyphony of whichever input has more channels",
+    "Mixes between the two signal inputs: all of input A at the bottom of its travel and all of input B at the top",
+    "Scales the crossfade control input before it is added to the crossfade knob; 10V at full amount covers the whole sweep",
+    "Scales the mixed signal: silence at the centre and the signal untouched at the top, and below centre the signal is replaced by its distance from 10V, so 0V comes out as 10V",
+    "Scales the attenuverter control input before it is added to the attenuverter knob; 5V at full amount moves it by a whole unit, which is half its travel",
+    "Input A of the crossfade, the one heard on its own with the crossfade knob turned down",
+    "Input B of the crossfade, the one heard on its own with the crossfade knob turned up",
+    "Moves the crossfade, scaled by the crossfade CV knob, a tenth of the sweep per volt at full amount",
+    "Moves the attenuverter, scaled by the attenuverter CV knob, a fifth of a unit per volt at full amount",
+    "The crossfaded and scaled signal, with as many channels as the wider of the two inputs",
+    "Note — the attenuverter starts at the centre, which is silence, so nothing comes out of a fresh module until it is turned",
+    "Note — the inversion below centre is not a sign flip: the output is the signal's distance from 10V, scaled, which turns a 0 to 10V envelope upside down but does something else to audio"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "0": 9
+   },
+   "family": {
+    "in": {
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "Xtenuat3hr.cpp:65 takes the larger of this port's getChannels() and the other input's, and 70 reads it with getPolyVoltageSimd"
+     },
+     "1": {
+      "poly": true,
+      "why": "Xtenuat3hr.cpp:65 takes the larger of this port's getChannels() and the other input's, and 70 reads it with getPolyVoltageSimd"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Xtenuat3hr.cpp:84 reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "3": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Xtenuat3hr.cpp:85 reads it with getPolyVoltageSimd, scales it by 0.2 times the CV knob and clamps the sum with the knob to -1 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Xtenuat3hr.cpp:67 sets this port's channel count from the wider input and 76 writes it with setVoltageSimd"
+     }
+    }
+   },
+   "notes": "Source read at commit 5458029, the commit whose plugin.json carries the installed 2.2.0. The two signal inputs and the output get no family: the module passes whatever is patched into it, and the maker names them audio while the inversion law is designed for a 0 to 10V envelope. The inversion at Xtenuat3hr.cpp:74 is abs(mix - 10) times the size of the setting, not a multiply by a negative number, which is what the README means by 'fully inverts'."
   },
   "FM3HR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator whose wave is pushed through three frequency-modulation stages in series and then a smoother, with every stage brought out on its own jack",
+    "Shifts the pitch by up to five octaves either way; with a cable in the 1V/OCT jack it moves in whole octaves only",
+    "Trims the pitch by up to a tenth of an octave either way",
+    "Scales the COARSE control input before it is added to the COARSE knob, an octave per volt at full amount",
+    "Scales the FINE control input before it is added to the FINE knob; its tooltip reads Coarse CV Amount, which is the maker's mistake",
+    "Scales the waveform control input before it is added to the waveform knob",
+    "Sweeps the wave from sine through triangle and saw to square; the last quarter of its travel gives the same square as the three-quarter point, because the pulse width it computes is discarded",
+    "Scales the FM 1 control input before it is added to the FM 1 amount, a tenth per volt at full amount",
+    "Sets how far the first stage modulates the oscillator; with nothing in its modulator jack the stage modulates itself",
+    "Scales the FM 2 control input before it is added to the FM 2 amount, a tenth per volt at full amount",
+    "Sets how far the second stage modulates the first stage's output; with nothing in its modulator jack the stage modulates itself",
+    "Scales the FM 3 control input before it is added to the FM 3 amount, a tenth per volt at full amount",
+    "Sets how far the third stage modulates the second stage's output; with nothing in its modulator jack the stage modulates itself",
+    "Scales the SMOOTH control input before it is added to the SMOOTH knob, a tenth per volt at full amount",
+    "Slews the third stage's output, taking the high frequencies off it in a way close to a lowpass filter",
+    "Added to the COARSE knob through its CV knob, an octave per volt at full amount",
+    "Added to the FINE knob through its CV knob, a fiftieth of an octave per volt at full amount",
+    "Added to the waveform knob through its CV knob, half a step along the wave sweep per volt at full amount",
+    "Added to the FM 1 amount through its CV knob, a tenth per volt at full amount",
+    "The signal that modulates the first stage; with nothing patched here the stage modulates itself with its own carrier",
+    "Added to the FM 2 amount through its CV knob, a tenth per volt at full amount",
+    "The signal that modulates the second stage; with nothing patched here the stage modulates itself with its own carrier",
+    "Added to the FM 3 amount through its CV knob, a tenth per volt at full amount",
+    "The signal that modulates the third stage; with nothing patched here the stage modulates itself with its own carrier",
+    "Added to the SMOOTH knob through its CV knob, a tenth per volt at full amount",
+    "Sets the pitch, a volt an octave with 0V giving C4 at 261.63Hz; the channel count on this cable is what sets the module's polyphony",
+    "The bare wave from the oscillator, before any of the modulation stages",
+    "The wave after the first modulation stage",
+    "The wave after the second modulation stage",
+    "The wave after the third modulation stage",
+    "The third stage's output after the smoother",
+    "Note — the 1V/OCT jack alone sets how many channels the module runs; with nothing patched there it is monophonic and the pitch comes from the COARSE and FINE knobs",
+    "Note — a stage with an empty modulator jack takes its modulator from its own carrier, which is what makes this a self-modulating oscillator rather than a pair of them",
+    "Note — pushing the waveform past its top with CV leaves the oscillator holding its last value instead of a wave, because no shape is defined past that point"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21,
+    "7": 22,
+    "8": 23,
+    "9": 24,
+    "10": 25
+   },
+   "out": {
+    "0": 26,
+    "1": 27,
+    "2": 28,
+    "3": 29,
+    "4": 30
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "audio",
+     "5": "cv",
+     "6": "audio",
+     "7": "cv",
+     "8": "audio",
+     "9": "cv",
+     "10": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "FM3HR.cpp:254 reads it with getPolyVoltageSimd and adds it to the coarse knob, the sum clamped to -5 and 5 octaves"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "FM3HR.cpp:255 reads it with getPolyVoltageSimd, scales it by 0.02 and clamps the sum with the knob to -0.1 and 0.1"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "FM3HR.cpp:256 reads it with getPolyVoltageSimd, scales it by 0.5 and clamps the sum with the knob to 0 and 5"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FM3HR.cpp:257 reads it with getPolyVoltageSimd, scales it by 0.1 and clamps the sum with the knob to 0 and 1"
+     },
+     "4": {
+      "poly": true,
+      "normal": "the stage's own carrier",
+      "why": "FM3HR.cpp:62 reads it with getPolyVoltageSimd when connected and uses the oscillator output when not"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FM3HR.cpp:258 reads it with getPolyVoltageSimd, scales it by 0.1 and clamps the sum with the knob to 0 and 1"
+     },
+     "6": {
+      "poly": true,
+      "normal": "the stage's own carrier",
+      "why": "FM3HR.cpp:67 reads it with getPolyVoltageSimd when connected and uses the first stage's output when not"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FM3HR.cpp:259 reads it with getPolyVoltageSimd, scales it by 0.1 and clamps the sum with the knob to 0 and 1"
+     },
+     "8": {
+      "poly": true,
+      "normal": "the stage's own carrier",
+      "why": "FM3HR.cpp:71 reads it with getPolyVoltageSimd when connected and uses the second stage's output when not"
+     },
+     "9": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FM3HR.cpp:260 reads it with getPolyVoltageSimd, scales it by 0.1 and clamps the sum with the knob to 0 and 1"
+     },
+     "10": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "FM3HR.cpp:219 takes this port's getChannels() as the module's channel count and 228 reads it with getPolyVoltageSimd as the exponent of two"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "FM3HR.cpp:220 sets this port's channel count from the 1V/OCT input and 231 writes it with setVoltageSimd"
+     },
+     "1": {
+      "poly": true,
+      "why": "FM3HR.cpp:221 sets this port's channel count from the 1V/OCT input and 232 writes it with setVoltageSimd"
+     },
+     "2": {
+      "poly": true,
+      "why": "FM3HR.cpp:222 sets this port's channel count from the 1V/OCT input and 233 writes it with setVoltageSimd"
+     },
+     "3": {
+      "poly": true,
+      "why": "FM3HR.cpp:223 sets this port's channel count from the 1V/OCT input and 234 writes it with setVoltageSimd"
+     },
+     "4": {
+      "poly": true,
+      "why": "FM3HR.cpp:224 sets this port's channel count from the 1V/OCT input and 235 writes it with setVoltageSimd"
+     }
+    }
+   },
+   "notes": "Source read at commit 5458029, the commit whose plugin.json carries the installed 2.2.0. THE TOP QUARTER OF THE WAVEFORM KNOB IS INERT: FM3HR.cpp:56 calls Square(Phase, 0.5 - (Wave - 3) * 0.45, sqramnt) and Square() at line 116 is 'return blep;', so the pulse-width argument it computes is discarded and every setting from three to four gives the same square. Two more maker slips found in the same file and left out of the lines: the minBLEP branch at lines 31 to 35 tests 'WaveAmount <= 2' twice, so the second branch can never run and the saw gets no band-limiting; and parameter 3 is configured with the name 'Coarse CV Amount' at line 171 when it is the fine CV amount. The COARSE knob is passed through round() only when the 1V/OCT jack is connected (line 228), so it is continuous with nothing patched there and stepped in octaves with a cable in."
   },
   "ENVELOOP3HR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two envelopes from one gate, each with its own loop switch, brought out singly, inverted, multiplied, averaged and as one raised to the power of the other",
+    "Sets the attack time of envelope A, up to a second",
+    "Sets the attack time of envelope B, up to a second",
+    "Sets the decay time of envelope A, up to a second",
+    "Sets the decay time of envelope B, up to a second",
+    "Sets the level envelope A holds at while the gate is held",
+    "Sets the level envelope B holds at while the gate is held",
+    "Sets the release time of envelope A, up to a second",
+    "Sets the release time of envelope B, up to a second",
+    "Bends both envelopes from a straight line towards an exponential shape, and it is applied to every output",
+    "Switches envelope A between holding at its sustain level and looping through attack and decay for as long as the gate is held",
+    "Switches envelope B between holding at its sustain level and looping through attack and decay for as long as the gate is held",
+    "Scales the attack A control input before it is added to the attack A knob, a tenth of a second per volt at full amount",
+    "Scales the attack B control input before it is added to the attack B knob, a tenth of a second per volt at full amount",
+    "Scales the decay A control input before it is added to the decay A knob, a tenth of a second per volt at full amount",
+    "Scales the decay B control input before it is added to the decay B knob, a tenth of a second per volt at full amount",
+    "Scales the sustain A control input before it is added to the sustain A knob, a tenth of the level per volt at full amount",
+    "Scales the sustain B control input before it is added to the sustain B knob, a tenth of the level per volt at full amount",
+    "Scales the release A control input before it is added to the release A knob, a tenth of a second per volt at full amount",
+    "Scales the release B control input before it is added to the release B knob, a tenth of a second per volt at full amount",
+    "Added to the attack A knob through its CV knob, a tenth of a second per volt at full amount",
+    "Added to the attack B knob through its CV knob, a tenth of a second per volt at full amount",
+    "Added to the decay A knob through its CV knob, a tenth of a second per volt at full amount",
+    "Added to the decay B knob through its CV knob, a tenth of a second per volt at full amount",
+    "Added to the sustain A knob through its CV knob, a tenth of the level per volt at full amount",
+    "Added to the sustain B knob through its CV knob, a tenth of the level per volt at full amount",
+    "Added to the release A knob through its CV knob, a tenth of a second per volt at full amount",
+    "Added to the release B knob through its CV knob, a tenth of a second per volt at full amount",
+    "Starts both envelopes, and has to read exactly 10V to do so; the channel count on this cable sets how many voices the module runs",
+    "Envelope A, 0 to 10V",
+    "Envelope A turned upside down, 10V at rest and 0V at its peak",
+    "Envelope A multiplied by envelope B, 0 to 10V",
+    "The two envelopes averaged, 0 to 10V",
+    "Envelope B, 0 to 10V",
+    "Envelope B turned upside down, 10V at rest and 0V at its peak",
+    "The product of the two envelopes turned upside down, 10V at rest",
+    "Envelope A raised to the power of envelope B, 0 to 10V",
+    "Note — the gate is tested for equality with 10V, so a gate of 5V or 8V never starts anything; use a source that puts out exactly 10V",
+    "Note — a looping envelope loops only while the gate is held, and drops into its release the moment the gate goes away",
+    "Note — the attack, decay and release times stop at one second: the knobs travel further than that but the total is clamped to one, so the top of their range makes no difference",
+    "Note — the panel is lettered NVLOP3HR while the module browser and the plugin manifest call it ENVELOOP3HR"
+   ],
+   "param": {
+    "2": 1,
+    "3": 2,
+    "7": 3,
+    "8": 4,
+    "11": 5,
+    "12": 6,
+    "15": 7,
+    "16": 8,
+    "4": 9,
+    "17": 10,
+    "18": 11,
+    "0": 12,
+    "1": 13,
+    "5": 14,
+    "6": 15,
+    "9": 16,
+    "10": 17,
+    "13": 18,
+    "14": 19
+   },
+   "in": {
+    "0": 20,
+    "1": 21,
+    "2": 22,
+    "3": 23,
+    "4": 24,
+    "5": 25,
+    "6": 26,
+    "7": 27,
+    "8": 28
+   },
+   "out": {
+    "0": 29,
+    "1": 30,
+    "2": 31,
+    "3": 32,
+    "4": 33,
+    "5": 34,
+    "6": 35,
+    "7": 36
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ENVELOOPER.cpp:410 reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ENVELOOPER.cpp:411 reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ENVELOOPER.cpp:412 reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ENVELOOPER.cpp:413 reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ENVELOOPER.cpp:414 reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ENVELOOPER.cpp:415 reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ENVELOOPER.cpp:416 reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "ENVELOOPER.cpp:417 reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "8": {
+      "poly": true,
+      "range": "high above 1V",
+      "why": "ENVELOOPER.cpp:383 takes this port's getChannels() as the module's channel count, 386 reads it with getPolyVoltageSimd, and every stage test in Advance compares that value for equality with 10"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ENVELOOPER.cpp:394 sets this port's channel count from the gate input and 388 writes it with setVoltageSimd"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ENVELOOPER.cpp:395 sets this port's channel count from the gate input and 389 writes it with setVoltageSimd"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ENVELOOPER.cpp:396 sets this port's channel count from the gate input and 390 writes it with setVoltageSimd"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ENVELOOPER.cpp:397 sets this port's channel count from the gate input and 391 writes it with setVoltageSimd"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ENVELOOPER.cpp:398 sets this port's channel count from the gate input and 392 writes it with setVoltageSimd"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ENVELOOPER.cpp:399 sets this port's channel count from the gate input and 393 writes it with setVoltageSimd"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ENVELOOPER.cpp:400 sets this port's channel count from the gate input and 394 writes it with setVoltageSimd"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ENVELOOPER.cpp:401 sets this port's channel count from the gate input and 395 writes it with setVoltageSimd"
+     }
+    }
+   },
+   "notes": "Source read at commit 5458029, the commit whose plugin.json carries the installed 2.2.0. TWO THINGS A READER SHOULD KNOW AND CANNOT SEE. The gate is tested with '(Triggered[c] == 10)' in every stage of Advance() and in CheckResetA/CheckResetB, so only a gate of exactly 10V starts or holds an envelope; the range field says 'high above 1V' because the field has no spelling for an equality test, and the line itself gives the real rule. And the eight stage-time parameters are configured with ranges up to 3 (attack and decay) and 5 (release) at ENVELOOPER.cpp:341-356, but CollectSignals clamps knob plus CV to 0 and 1 at lines 410-417, so everything above one second is clamped away. The panel is lettered NVLOP3HR."
   },
   "FMFILT3HR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A lowpass filter built as two resonant stages in series, with its cutoff modulated by two audio inputs, one added to the cutoff and one multiplying it",
+    "Scales the cutoff control input before it is added to the cutoff knob",
+    "Sets how far the FM A input is added to the cutoff",
+    "Sets the cutoff frequency across the whole audible range",
+    "Sets how far the FM B input multiplies the cutoff",
+    "Scales the FM A control input before it is added to the FM A amount",
+    "Scales the FM B control input before it is added to the FM B amount",
+    "Sets the resonance of both filter stages, which are given different amounts so the filter dirties rather than screams",
+    "Scales the resonance control input before it is added to the resonance knob",
+    "Sets the gain into the filter: silence at the bottom, untouched in the centre, four times at the top",
+    "Mixes some of the second stage's feedback term back into the output, which puts low end back after a steep cut",
+    "Scales the drive control input before it is added to the drive knob",
+    "Scales the bass control input before it is added to the bass knob",
+    "Added to the cutoff knob through the cutoff CV knob, a tenth of the cutoff range per volt at full amount",
+    "Modulates the cutoff by addition, scaled by the FM A amount; it does nothing until a cable is here",
+    "Modulates the cutoff by multiplication, scaled by the FM B amount; it does nothing until a cable is here",
+    "Added to the FM A amount through its CV knob, a tenth per volt at full amount",
+    "Added to the FM B amount through its CV knob, a tenth per volt at full amount",
+    "Added to the resonance knob through its CV knob, a tenth per volt at full amount",
+    "Added to the drive knob through its CV knob, a tenth per volt at full amount",
+    "Added to the bass knob through its CV knob, a tenth per volt at full amount",
+    "The signal to be filtered; the channel count on this cable sets the module's polyphony",
+    "The filtered signal, with as many channels as the input",
+    "Note — the cutoff knob starts fully down, where the filter passes almost nothing, so turn it up before expecting sound",
+    "Note — the cutoff is held between a hundredth and 0.95 of the Nyquist frequency however far the knobs and the modulation push it, so the filter cannot be driven into silence or out of range",
+    "Note — the two FM inputs are read only while something is patched into them; with both empty the cutoff is the knob and its control input alone"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18,
+    "6": 19,
+    "7": 20,
+    "8": 21
+   },
+   "out": {
+    "0": 22
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "audio",
+     "2": "audio",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FMFILT3HR.cpp reads it with getPolyVoltageSimd in ConfigCollect, scales it by 0.1 times the CV knob and adds it to the cutoff knob before a clamp to 0.014032 and 0.95"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "FMFILT3HR.cpp ConfigCollect reads it with getNormalPolyVoltageSimd, scales it by 0.2 and clamps to ±1, then adds its product with the FM A amount and the cutoff to the cutoff"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "FMFILT3HR.cpp ConfigCollect reads it with getNormalPolyVoltageSimd, scales it by 0.3 and clamps to ±1, then multiplies the cutoff by it through the FM B amount"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FMFILT3HR.cpp ConfigCollect reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FMFILT3HR.cpp ConfigCollect reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FMFILT3HR.cpp ConfigCollect reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FMFILT3HR.cpp ConfigCollect reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to -1 and 1"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "FMFILT3HR.cpp ConfigCollect reads it with getPolyVoltageSimd, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "8": {
+      "poly": true,
+      "why": "FMFILT3HR.cpp process takes this port's getChannels() as the module's channel count and reads it with getPolyVoltageSimd"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "FMFILT3HR.cpp process sets this port's channel count from the audio input and writes it with setVoltageSimd"
+     }
+    }
+   },
+   "notes": "Source read at commit 5458029, the commit whose plugin.json carries the installed 2.2.0. The panel letters the additive modulation FM A and the multiplicative one FM B, which the maker's README calls Additive and Multiplicative; the parameter and port names follow the README. The cutoff CV amount parameter is configured with the range 0.014032 to 0.95 (FMFILT3HR.cpp:149), which are the cutoff clamp limits pasted into the wrong place, so that trim knob cannot be turned fully down or fully up. The cutoff itself is squared before use, so the lower part of the knob's travel covers a small part of the range."
   },
   "GLTCH3HR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A threshold-triggered looper: a control signal above the threshold makes it record half a second of the input and then play a chosen slice of it over and over until the control signal falls again",
+    "Scales the end control input before it is added to the END knob",
+    "Scales the start control input before it is added to the START knob",
+    "Sets where in the recorded half second the loop ends, from a hundredth of the way in to the far end",
+    "Sets where in the recorded half second the loop starts, from the beginning to the far end",
+    "Sets the voltage the control signal has to pass before recording starts, 0 to 10V",
+    "Sets how long the crossfade at the loop point lasts, from one sample to about three thousand, which softens the click of the jump",
+    "The signal to be recorded and looped; it is not passed through, so the module works as a send rather than an insert",
+    "Added to the END knob through the END CV knob, a tenth of the recording per volt at full amount",
+    "Added to the START knob through the START CV knob, a tenth of the recording per volt at full amount",
+    "The signal watched against the threshold: rising past it starts the recording, and falling back below it ends the loop",
+    "The looped slice of the recording, one channel, clamped to -10V and +10V",
+    "Note — the module does nothing until the threshold jack is fed something that goes above the THRESHOLD knob; with that jack empty it reads 0V and never fires",
+    "Note — no audio passes through: the output carries the loop alone, so patch it as a send rather than in line",
+    "Note — once the loop is running the START and END controls can be moved freely, and setting the end before the start plays the slice backwards",
+    "Note — the module is monophonic and records at whatever the engine's sample rate is, always half a second's worth"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "out": {
+    "0": 11
+   },
+   "family": {
+    "in": {
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "GLTCH3HR.cpp:93 reads getVoltage() with no channel into the record buffer"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GLTCH3HR.cpp:79 reads getVoltage() with no channel, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0.01 and 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GLTCH3HR.cpp:78 reads getVoltage() with no channel, scales it by 0.1 times the CV knob and clamps the sum with the knob to 0 and 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "normal": "0V",
+      "why": "GLTCH3HR.cpp:77 reads getVoltage() with no channel and compares it against the threshold knob at lines 82 and 96"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "GLTCH3HR.cpp:208 writes one clamped value with setVoltage and never calls setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit 5458029, the commit whose plugin.json carries the installed 2.2.0. The input and output get no family: the README says the module works with both CV and audio, so no colour would be true of them. The buffer is half a second at the engine's sample rate (GLTCH3HR.cpp:71), and the START and END knobs are fractions of it rather than times, so changing the sample rate changes what a given setting means in seconds. The threshold input is not normalled to anything, so with nothing patched it reads 0V and the module stays idle whatever the threshold knob is set to, except at a knob setting of exactly 0 where 0V is not above it either."
   }
  }
 }

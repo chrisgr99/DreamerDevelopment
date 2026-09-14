@@ -2,47 +2,475 @@
  "plugin": "Virtue-Control",
  "source": "https://kilpatrickaudio.com/?p=virtue-vcv",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Twister": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four knobs that drive whatever you map them to, standing in for a Kilpatrick Twister USB controller",
+    "Turn it to move the parameter mapped to it, and hold M with the pointer over it to arm it for mapping onto a control elsewhere in the patch",
+    "Note — nothing happens until a control here is mapped: hold M with the pointer over it, then click the control in the patch it should drive",
+    "Note — the name of the mapped control is printed under the knob once the mapping is made, and the mapping is kept in the patch",
+    "Note — the hardware is chosen from the module's menu, and the choice is kept in the patch whether the hardware is plugged in or not, so a patch can be edited without it",
+    "Note — clicking the panel away from a control blinks the USB lamp on the hardware, which is how you tell which of several units this module is driving",
+    "Note — a Twister Expander placed immediately to the right turns the four knobs into CV outputs and a vMIDI output",
+    "Menu — MIDI Driver - Twister Module — a heading over the MIDI drivers on this machine",
+    "Menu — MIDI Devices - Slot 1 — a heading over the devices found on the chosen driver; only Twister hardware is offered",
+    "Menu — Subscribe to Kilpatrick-Toolbox — opens the maker's other plugin on the VCV library, which holds modules for the vMIDI cables these expanders send",
+    "Menu — www.kilpatrickaudio.com — opens the maker's page for the hardware in a browser"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.9 binary, which is not stripped, together with the maker's page at kilpatrickaudio.com/?p=virtue-vcv. Param 4 (LED BACKLIGHT) has no widget and no census position, so it gets no line: it is set by the module rather than turned. The M key is GLFW key 77 and the L key 76, both handled in KilpatrickKnob::onHoverKey and KilpatrickButton::onHoverKey at 0xc5f4; a knob takes only M. The MIDI menu headings come from MidiHelper::populateDriverMenu at 0x20468 and populateInputMenu at 0x20638, which prints MIDI Devices - Slot N for a helper with a MIDI output and MIDI Inputs - Slot N for one without."
   },
   "Twister_Expander": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns the four knobs of the Twister immediately to its left into CV outputs, with a vMIDI output beside them",
+    "Chooses the span the CV outputs cover: 0-10 gives 0V to 10V, 0-5 gives 0V to 5V, and -5-5 gives -5V to +5V",
+    "The knob of the same number on the Twister as a voltage in the span RANGE sets, slewed towards each new value in place of stepping to it",
+    "A vMIDI cable carrying the controller messages arriving from the hardware, for Kilpatrick's patchable MIDI modules rather than for a voltage input",
+    "Note — it goes immediately to the right of a Twister and puts out nothing on its own"
+   ],
+   "param": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 3
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "V405E_Twister_Expander::process at 0x7654-0x7664 and the three blocks after it write one float per output with no setChannels; the range switch indexes a pair of three-float tables holding scales 10, 5, 10 and offsets -5, 0, 0, and each output is written as value times scale plus offset"
+     },
+     "1": {
+      "poly": false,
+      "why": "V405E_Twister_Expander::process at 0x7654-0x7664 and the three blocks after it write one float per output with no setChannels; the range switch indexes a pair of three-float tables holding scales 10, 5, 10 and offsets -5, 0, 0, and each output is written as value times scale plus offset"
+     },
+     "2": {
+      "poly": false,
+      "why": "V405E_Twister_Expander::process at 0x7654-0x7664 and the three blocks after it write one float per output with no setChannels; the range switch indexes a pair of three-float tables holding scales 10, 5, 10 and offsets -5, 0, 0, and each output is written as value times scale plus offset"
+     },
+     "3": {
+      "poly": false,
+      "why": "V405E_Twister_Expander::process at 0x7654-0x7664 and the three blocks after it write one float per output with no setChannels; the range switch indexes a pair of three-float tables holding scales 10, 5, 10 and offsets -5, 0, 0, and each output is written as value times scale plus offset"
+     },
+     "4": {
+      "poly": false,
+      "why": "the jack is a CVMidi port processed at 0x750c; it carries encoded MIDI rather than a voltage, so it is given no family"
+     }
+    }
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.9 binary, which is not stripped, together with the maker's page at kilpatrickaudio.com/?p=virtue-vcv. An incoming controller value of 0 to 127 is divided by 127 (the constant 0x3c010204 at 0x7544) and then scaled by the range switch. The three range settings are the tables at 0x2a798 and 0x2a7a4: scale 10 with offset -5, scale 5 with offset 0, and scale 10 with offset 0, and the switch frames are loaded bottom, middle, top, so they line up with the -5-5, 0-5 and 0-10 markings printed beside it."
   },
   "Smasher": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sixteen buttons that drive whatever you map them to, standing in for a Kilpatrick Smasher USB controller",
+    "Press it to move the parameter mapped to it; hold M with the pointer over it to map it, and hold L to switch it between momentary and latching",
+    "Note — nothing happens until a control here is mapped: hold M with the pointer over it, then click the control in the patch it should drive",
+    "Note — a button in latching mode has a red ring round it and stays on until it is pressed again; every button starts momentary",
+    "Note — the hardware is chosen from the module's menu, and the choice is kept in the patch whether the hardware is plugged in or not, so a patch can be edited without it",
+    "Note — clicking the panel away from a control blinks the USB lamp on the hardware, which is how you tell which of several units this module is driving",
+    "Note — a Smasher Expander placed immediately to the right turns the sixteen buttons into gate outputs and a vMIDI output",
+    "Menu — MIDI Driver - Smasher Module — a heading over the MIDI drivers on this machine",
+    "Menu — MIDI Devices - Slot 1 — a heading over the devices found on the chosen driver; only Smasher hardware is offered",
+    "Menu — Subscribe to Kilpatrick-Toolbox — opens the maker's other plugin on the VCV library, which holds modules for the vMIDI cables these expanders send",
+    "Menu — www.kilpatrickaudio.com — opens the maker's page for the hardware in a browser"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.9 binary, which is not stripped, together with the maker's page at kilpatrickaudio.com/?p=virtue-vcv. The module declares 33 parameters: the sixteen buttons, and seventeen more with no name, no widget and no census position, which are the per-button latch flags and the backlight. None of those seventeen can be clicked, so none gets a line. The L and M keys are handled in KilpatrickButton::onHoverKey at 0xc5f4, keys 76 and 77."
   },
   "Smasher_Expander": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns the sixteen buttons of the Smasher immediately to its left into gate outputs, with a vMIDI output beside them",
+    "10V while the button of the same number on the Smasher is pressed or latched on, and 0V otherwise",
+    "A vMIDI cable carrying the controller messages arriving from the hardware, for Kilpatrick's patchable MIDI modules rather than for a voltage input",
+    "Note — it goes immediately to the right of a Smasher and puts out nothing on its own",
+    "Menu — MIDI Output Mode: CC, Piano Major, Piano Chroma — sets whether the vMIDI output carries the buttons as controller messages or as notes, laid out as a major scale or one semitone apart"
+   ],
+   "out": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 2
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V407E_Smasher_Expander::process writes the stored button state times 10.0 to each output, with no setChannels in the function"
+     },
+     "16": {
+      "poly": false,
+      "why": "the jack is a CVMidi port carrying encoded MIDI rather than a voltage, so it is given no family"
+     }
+    }
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.9 binary, which is not stripped, together with the maker's page at kilpatrickaudio.com/?p=virtue-vcv. The module declares one parameter with no name and no widget, so nothing there can be clicked. The three MIDI Output Mode choices are the literal strings CC, Piano Major and Piano Chroma, read from V407E_Smasher_ExpanderWidget::appendContextMenu at 0xed00."
   },
   "Slider": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four sliders and eight buttons that drive whatever you map them to, standing in for a Kilpatrick Slider USB controller",
+    "Move it to drive the parameter mapped to it, and hold M with the pointer over it to arm it for mapping onto a control elsewhere in the patch",
+    "Press it to move the parameter mapped to it; hold M with the pointer over it to map it, and hold L to switch it between momentary and latching",
+    "Note — nothing happens until a control here is mapped: hold M with the pointer over it, then click the control in the patch it should drive",
+    "Note — the eight buttons are numbered 5 to 12, carrying on from the four sliders, and the expander's outputs use the same numbers",
+    "Note — a button in latching mode has a red ring round it and stays on until it is pressed again; every button starts momentary",
+    "Note — the hardware is chosen from the module's menu, and the choice is kept in the patch whether the hardware is plugged in or not, so a patch can be edited without it",
+    "Note — clicking the panel away from a control blinks the USB lamp on the hardware, which is how you tell which of several units this module is driving",
+    "Note — a Slider Expander placed immediately to the right turns the sliders and buttons into CV outputs and a vMIDI output",
+    "Menu — MIDI Driver - Slider Module — a heading over the MIDI drivers on this machine",
+    "Menu — MIDI Devices - Slot 1 — a heading over the devices found on the chosen driver; only Slider hardware is offered",
+    "Menu — Subscribe to Kilpatrick-Toolbox — opens the maker's other plugin on the VCV library, which holds modules for the vMIDI cables these expanders send",
+    "Menu — www.kilpatrickaudio.com — opens the maker's page for the hardware in a browser"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.9 binary, which is not stripped, together with the maker's page at kilpatrickaudio.com/?p=virtue-vcv. The module declares 21 parameters: four sliders, eight buttons, and nine more with no name, no widget and no census position, which are the per-button latch flags and the backlight. None of those nine can be clicked, so none gets a line."
   },
   "Slider_Expander": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns the four sliders and eight buttons of the Slider immediately to its left into CV outputs, with a vMIDI output beside them",
+    "Chooses the span the CV outputs cover: 0-10 gives 0V to 10V, 0-5 gives 0V to 5V, and -5-5 gives -5V to +5V, and it is read by the four slider outputs alone",
+    "The slider of the same number on the Slider as a voltage in the span RANGE sets, slewed towards each new value in place of stepping to it",
+    "10V while the button of the same number on the Slider is pressed or latched on, and 0V otherwise",
+    "A vMIDI cable carrying the controller messages arriving from the hardware, for Kilpatrick's patchable MIDI modules rather than for a voltage input",
+    "Note — it goes immediately to the right of a Slider and puts out nothing on its own"
+   ],
+   "param": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 4
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "V408E_Slider_Expander::process at 0x14428-0x144ec writes value times scale plus offset to outputs 0 to 3, with no setChannels; the range switch indexes a pair of three-float tables holding scales 10, 5, 10 and offsets -5, 0, 0, and each output is written as value times scale plus offset"
+     },
+     "1": {
+      "poly": false,
+      "why": "V408E_Slider_Expander::process at 0x14428-0x144ec writes value times scale plus offset to outputs 0 to 3, with no setChannels; the range switch indexes a pair of three-float tables holding scales 10, 5, 10 and offsets -5, 0, 0, and each output is written as value times scale plus offset"
+     },
+     "2": {
+      "poly": false,
+      "why": "V408E_Slider_Expander::process at 0x14428-0x144ec writes value times scale plus offset to outputs 0 to 3, with no setChannels; the range switch indexes a pair of three-float tables holding scales 10, 5, 10 and offsets -5, 0, 0, and each output is written as value times scale plus offset"
+     },
+     "3": {
+      "poly": false,
+      "why": "V408E_Slider_Expander::process at 0x14428-0x144ec writes value times scale plus offset to outputs 0 to 3, with no setChannels; the range switch indexes a pair of three-float tables holding scales 10, 5, 10 and offsets -5, 0, 0, and each output is written as value times scale plus offset"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V408E_Slider_Expander::process at 0x1435c-0x143dc multiplies the stored button state by 10.0 into outputs 4 to 11, outside the range-switch path"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V408E_Slider_Expander::process at 0x1435c-0x143dc multiplies the stored button state by 10.0 into outputs 4 to 11, outside the range-switch path"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V408E_Slider_Expander::process at 0x1435c-0x143dc multiplies the stored button state by 10.0 into outputs 4 to 11, outside the range-switch path"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V408E_Slider_Expander::process at 0x1435c-0x143dc multiplies the stored button state by 10.0 into outputs 4 to 11, outside the range-switch path"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V408E_Slider_Expander::process at 0x1435c-0x143dc multiplies the stored button state by 10.0 into outputs 4 to 11, outside the range-switch path"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V408E_Slider_Expander::process at 0x1435c-0x143dc multiplies the stored button state by 10.0 into outputs 4 to 11, outside the range-switch path"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V408E_Slider_Expander::process at 0x1435c-0x143dc multiplies the stored button state by 10.0 into outputs 4 to 11, outside the range-switch path"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "V408E_Slider_Expander::process at 0x1435c-0x143dc multiplies the stored button state by 10.0 into outputs 4 to 11, outside the range-switch path"
+     },
+     "12": {
+      "poly": false,
+      "why": "the jack is a CVMidi port carrying encoded MIDI rather than a voltage, so it is given no family"
+     }
+    }
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.9 binary, which is not stripped, together with the maker's page at kilpatrickaudio.com/?p=virtue-vcv. The range tables are at 0x2af54 and 0x2af60, the same three settings as on the other expanders. The button outputs are written before the range switch is read and are not affected by it, which the maker's page also says."
   },
   "Spinner": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An endless encoder with four parameters and two speeds, standing in for a Kilpatrick Spinner USB controller",
+    "Turn it to move whichever of the four parameters is chosen; it has no end stops, so it goes on turning in either direction",
+    "Chooses which of the four mapped parameters the encoder moves; hold M with the pointer over it to map that one, and hold L to switch it between momentary and latching",
+    "Hold it down while turning the encoder to move the parameter in small steps",
+    "Hold it down while turning the encoder to move the parameter in large steps",
+    "Note — nothing happens until a control here is mapped: hold M with the pointer over it, then click the control in the patch it should drive",
+    "Note — the hardware is chosen from the module's menu, and the choice is kept in the patch whether the hardware is plugged in or not, so a patch can be edited without it",
+    "Note — clicking the panel away from a control blinks the USB lamp on the hardware, which is how you tell which of several units this module is driving",
+    "Note — a Spinner Expander placed immediately to the right turns the four parameters into CV outputs and a vMIDI output",
+    "Menu — MIDI Driver - Spinner Module — a heading over the MIDI drivers on this machine",
+    "Menu — MIDI Devices - Slot 1 — a heading over the devices found on the chosen driver; only Spinner hardware is offered",
+    "Menu — Subscribe to Kilpatrick-Toolbox — opens the maker's other plugin on the VCV library, which holds modules for the vMIDI cables these expanders send",
+    "Menu — www.kilpatrickaudio.com — opens the maker's page for the hardware in a browser"
+   ],
+   "param": {
+    "4": 1,
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "5": 3,
+    "6": 4
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.9 binary, which is not stripped, together with the maker's page at kilpatrickaudio.com/?p=virtue-vcv. The module declares 12 parameters: four buttons, the encoder, the two speed buttons, and five more with no name, no widget and no census position, which are the per-button latch flags and the backlight. None of those five can be clicked, so none gets a line. Index order is not panel order: the encoder is param 4 and sits above the four buttons, and the two speed buttons are params 5 and 6 between them."
   },
   "Spinner_Expander": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns the four parameters of the Spinner immediately to its left into CV outputs, with a vMIDI output beside them",
+    "Chooses the span the CV outputs cover: 0-10 gives 0V to 10V, 0-5 gives 0V to 5V, and -5-5 gives -5V to +5V",
+    "The Spinner parameter of the same number as a voltage in the span RANGE sets, slewed towards each new value in place of stepping to it",
+    "A vMIDI cable carrying the controller messages arriving from the hardware, for Kilpatrick's patchable MIDI modules rather than for a voltage input",
+    "Note — it goes immediately to the right of a Spinner and puts out nothing on its own",
+    "Note — with Up/Down Mode on the four outputs stop carrying a level and pulse instead, +5V for a click of the encoder one way and -5V for a click the other, and RANGE no longer reaches them",
+    "Menu — Settings — a heading over the two items under it",
+    "Menu — Up/Down Mode — makes the four outputs pulse to +5V or -5V on each click of the encoder in place of carrying a level",
+    "Menu — Raw MIDI Mode — sends the messages arriving from the hardware straight out of MIDI OUT in place of the repeated controller stream"
+   ],
+   "param": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 3
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "V409E_Spinner_Expander::process at 0x188b8-0x18918 writes value times scale plus offset to each output with no setChannels, and at 0x187e4 writes plus or minus one times 5.0 instead while Up/Down Mode is on"
+     },
+     "1": {
+      "poly": false,
+      "why": "V409E_Spinner_Expander::process at 0x188b8-0x18918 writes value times scale plus offset to each output with no setChannels, and at 0x187e4 writes plus or minus one times 5.0 instead while Up/Down Mode is on"
+     },
+     "2": {
+      "poly": false,
+      "why": "V409E_Spinner_Expander::process at 0x188b8-0x18918 writes value times scale plus offset to each output with no setChannels, and at 0x187e4 writes plus or minus one times 5.0 instead while Up/Down Mode is on"
+     },
+     "3": {
+      "poly": false,
+      "why": "V409E_Spinner_Expander::process at 0x188b8-0x18918 writes value times scale plus offset to each output with no setChannels, and at 0x187e4 writes plus or minus one times 5.0 instead while Up/Down Mode is on"
+     },
+     "4": {
+      "poly": false,
+      "why": "the jack is a CVMidi port carrying encoded MIDI rather than a voltage, so it is given no family"
+     }
+    }
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.9 binary, which is not stripped, together with the maker's page at kilpatrickaudio.com/?p=virtue-vcv. Params 1 and 2 are the Up/Down Mode and Raw MIDI Mode flags; neither has a widget or a census position, so neither gets a line and both are covered by Menu lines. In Up/Down Mode a controller message with bit 0x40 set gives plus one and anything else minus one (0x186ec), held for five samples and written out at five volts per unit. The Settings heading is an eight-character literal assembled inline at 0x18f54."
   }
  }
 }

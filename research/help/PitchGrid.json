@@ -1,23 +1,200 @@
 {
  "plugin": "PitchGrid",
- "source": "https://github.com/peterjungx/PitchGridRack",
+ "source": "https://github.com/peterjungx/PitchGridRack/blob/475a7b5/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "MicroExquis": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Interface to the Exquis hex keyboard by Intuitive Instruments: it draws the keyboard on screen, retunes incoming notes to the scale the Exquis is set to, and passes that tuning to other modules",
+    "Steps the writing on the on-screen keys through three states, none, the note's name in the current scale, and the note's two lattice coordinates; the lamp beside it shows which is in use",
+    "Steps the tuning table offered to MTS-ESP instruments through three mappings: one Exquis key per MIDI note, one scale degree per MIDI note, and one per white key with the black keys silent",
+    "Takes a volt per octave pitch with 0V as middle C, rounds it to the nearest semitone and finds the key of that MIDI note on the Exquis layout",
+    "The pitch of that key in the current tuning, in volts where one volt doubles the frequency; the maker's tooltip on this jack gives the module's own description rather than the jack's",
+    "Sends the current tuning and scale to the Microtonal Hammond as a stream of numbers rather than as a signal",
+    "Note — the scale, the tuning and the key layout are chosen on the Exquis itself; nothing on this panel changes them",
+    "Note — the module hunts for an Exquis over MIDI every two seconds and checks the link every five; the lamp at the top of the panel is red while none answers and pale blue once one does",
+    "Note — the module claims the MTS-ESP master place when it starts, so instruments that follow MTS-ESP take their tuning from it; the three KEYMAP lamps stay dark if another master holds that place",
+    "Note — the hexagons on screen and the tuning figures beside them are drawn rather than built from controls, so no click on them reaches this help"
+   ],
+   "param": {
+    "7": 1,
+    "8": 2
+   },
+   "in": {
+    "0": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "stepped",
+      "why": "MicroExquis.cpp:424-431 sets the channel count from getChannels and reads getPolyVoltageSimd; exquis.hpp:356-359 turns the voltage into a MIDI note number by rounding twelve times the voltage plus five octaves"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "MicroExquis.cpp:432-442 writes one voltage per channel with setVoltageSimd and sets the channel count from the V/OCT input; the voltage is the base-two logarithm of the frequency ratio"
+     },
+     "1": {
+      "poly": false,
+      "why": "MicroExquis.cpp:493 hands the jack to a DataSender, which at datalink.cpp:43-53 writes the bytes of each number as a single voltage in turn"
+     }
+    }
+   },
+   "notes": "TDAT is a data link, not a signal: datalink.cpp reinterprets the bytes of a float as a voltage and sends a marked message one sample at a time, so the jack has no family and the voltages on it mean nothing as audio or CV. The module declares eleven parameters and puts only two of them on the panel; the tuning, pitch-angle, scale-step and colouring parameters have their addParam calls commented out at MicroExquis.cpp:833-838, and the two storage parameters behind the buttons have no widget either, so none of them can be clicked and none gets a line. The output jack's own tooltip reads Microtonal Interface to the Exquis by Intuitive Instruments, which is the module's description rather than a description of the jack (MicroExquis.cpp:152). There is no context menu beyond Rack's own. The V/OCT input is quantised to MIDI note numbers and the cast is to an unsigned byte, so voltages outside roughly -5V to 5V wrap round to unrelated notes.",
+   "read": "2026-09-14"
   },
   "MicroVOctMapper": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Retunes a volt per octave pitch: it reads the incoming voltage as a key of a piano keyboard and sends out the pitch that key has in the chosen tuning",
+    "Takes a volt per octave pitch with 0V as middle C, read as a whole piano key rather than followed continuously",
+    "The pitch of that key in the chosen tuning, in volts where one volt doubles the frequency; a scale octave is only exactly 1V in the tunings whose octave is a two to one ratio",
+    "Note — the keyboard drawn on the panel shows the names the black keys take under the chosen mapping, and the strip below it names the chosen tuning; no click on either reaches this help",
+    "Note — the module does nothing on its own: it needs a pitch at the input and a VCO on the output, and it comes up in 12-TET, where the output matches the input",
+    "Menu — Black key mapping: All flat (Gb), F# (default), C#, G#, D#, All sharp (A#) — chooses whether each black key is read as a flat or as a sharp, which outside 12-TET are different pitches",
+    "Menu — Tuning: 12-TET, Pythagorean, 1/4-comma Meantone, 1/3-comma Meantone, 5-limit (Cleantone), 7-limit (m3=7/6 P5=3/2), 19-TET, 31-TET — sets the two intervals every pitch is built from"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "stepped",
+      "why": "MicroVOctMapper.cpp:164-177 sets the channel count from getChannels, reads getPolyVoltageSimd and takes a ceiling and a floor of the voltage, so it lands on whole keys"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "MicroVOctMapper.cpp:185-197 writes one voltage per channel with setVoltageSimd and sets the channel count from the input; the voltage is the base-two logarithm of the frequency ratio"
+     }
+    }
+   },
+   "notes": "The module turns the input voltage into a pair of whole numbers, a count of the tuning's two generating intervals, then gives each interval the size the chosen tuning gives it (MicroVOctMapper.cpp:29-40 and 167-190). In the two Cleantone tunings the octave is not a two to one ratio, so a scale octave is not 1V: the 5-limit setting builds the octave from a 5/4 and a 3/2, which comes to about 2.01 rather than 2. The black key mapping is part of the arithmetic, shifting the boundary between sharps and flats (the r term at line 173). Two parameters are declared, Sub Freq and Sub3 Freq, and the widget adds no control for either, so neither can be clicked and neither gets a line; nothing in process reads them. The panel's keyboard drawing and tuning name are plain widgets.",
+   "read": "2026-09-14"
   },
   "MicroHammond": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Nine sine oscillators sounding one pitch and eight partials of it, each partial with its own level and its frequency taken from a chosen tuning rather than from the harmonic series",
+    "Sets the pitch, printed in hertz, over four and a half octaves either side of middle C",
+    "Sets how much the FM input moves the pitch, none at the centre and full at either end, with the sense turned round counter-clockwise",
+    "Lit, the FM input is added to the frequency itself; dark, it is added to the pitch a volt per octave",
+    "Lit, a pulse at SYNC reverses the direction of all nine oscillators; dark, it restarts their cycles",
+    "Sets the level of the partial an octave below the pitch, 0 to 100%",
+    "Sets the level of the partial a fifth above the pitch, 0 to 100%; until a tuning has been chosen it sounds a fourth below the pitch instead",
+    "Sets the level of the partial an octave above the pitch, 0 to 100%",
+    "Sets the level of the partial an octave and a fifth above the pitch, 0 to 100%",
+    "Sets the level of the partial two octaves above the pitch, 0 to 100%",
+    "Sets the level of the partial two octaves and a third above the pitch, 0 to 100%",
+    "Sets the level of the partial two octaves and a fifth above the pitch, 0 to 100%",
+    "Sets the level of the partial three octaves above the pitch, 0 to 100%",
+    "Sets the pitch a volt per octave, added to the FREQ knob, and a polyphonic cable gives each channel its own set of nine oscillators",
+    "Moves the pitch by the amount the FM knob sets, a volt per octave while the LFM lamp is dark and added straight to the frequency while it is lit",
+    "A rising crossing of 0V restarts all nine oscillators, or reverses them while the SOFT lamp is lit",
+    "Takes the scale and tuning sent by the Microtonal Exquis and sets the eight partial frequencies from it, in place of the tuning chosen on the menu",
+    "The nine oscillators added together and divided by nine, reaching 1V with every level at full",
+    "Note — the fundamental has no level control of its own and always sounds at full",
+    "Note — the partial frequencies are only written when a tuning is chosen from the menu or a cable is in TDAT; until then the one marked 3/2' sounds a fourth below the pitch",
+    "Note — a cable in TDAT takes the tuning over from the menu, and the strip above the jacks then reads SYNC",
+    "Note — the output reaches 1V with all eight levels at full, well under the ±5V that Rack takes as a full audio level",
+    "Menu — Tuning: Original Hammond (12-TET), Pythagorean, 1/4-comma Meantone, 1/3-comma Meantone, 5-limit (Cleantone), 7-limit (m3=7/6 P5=3/2), 19-TET, 31-TET, Harmonic — sets the eight partial sizes"
+   ],
+   "param": {
+    "1": 4,
+    "2": 1,
+    "4": 2,
+    "5": 3,
+    "6": 5,
+    "7": 6,
+    "9": 7,
+    "10": 8,
+    "11": 9,
+    "12": 10,
+    "13": 11,
+    "14": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16
+   },
+   "out": {
+    "0": 17
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "MicroHammond.cpp:358 sets the channel count from getChannels on this jack and line 371 adds its getPolyVoltageSimd to the knob before raising two to that power"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "MicroHammond.cpp:374 and 379 read it with getPolyVoltageSimd and multiply it by the FM knob, adding it either to the pitch or to the frequency"
+     },
+     "2": {
+      "poly": true,
+      "why": "MicroHammond.cpp:386-388 reads it with getPolyVoltageSimd and passes it to each oscillator, which at lines 63-70 looks for an upward crossing of 0V"
+     },
+     "3": {
+      "poly": false,
+      "why": "MicroHammond.cpp:443-445 hands the jack to a DataReceiver, which at datalink.cpp:90 reads one getVoltage and reinterprets its bytes as a number"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "-1 to 1V",
+      "why": "MicroHammond.cpp:393-399 adds nine sines, each reaching 1 at a level of 100%, multiplies by 0.11111 and sets the channel count from the V/OCT input"
+     }
+    }
+   },
+   "notes": "TDAT is a data link rather than a signal, so it has no family: datalink.cpp reinterprets the bytes of a float as a voltage, and MicroHammond.cpp:420-440 reads a tuning and a scale from it once a second and writes the eight partial ratios from them. The partial ratios live in parameters with no widget (RELFREQ1 to RELFREQ9), so they cannot be clicked and get no line; they are written by the menu at lines 305-330 or by TDAT. The ninth level parameter, AMP3, also has no widget, which is why the fundamental has no drawbar — the maker says in the README that he assumes it should be at full power. At startup no tuning has been applied, so the ratios stand at their configured defaults of 0.5, 0.75, 1, 2, 3, 4, 5, 6 and 8; the 0.75 is the odd one, because every menu tuning writes about 1.5 there. Output level: nine oscillators each reaching 1 are scaled by 0.11111, so a full-level chord of partials peaks at 1V rather than the 5V a VCO usually gives. The SOFT button's parameter is 1 for hard sync and 0 for soft, while its lamp lights on soft, so the lamp is lit in the button's released state.",
+   "read": "2026-09-14"
   }
  }
 }

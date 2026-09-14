@@ -1,23 +1,355 @@
 {
  "plugin": "BlackNoiseModular",
- "source": "https://github.com/BlackNoiseModular/VCV",
+ "source": "https://github.com/BlackNoiseModular/VCV/blob/master/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Cosmos": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An analogue logic module: it takes two voltages and puts out their maximum, minimum, through-zero clip, mean and difference, each also inverted, and a gate and a trigger for each logic pair",
+    "Feeds the X side with a voltage while the pad is held, more of it nearer the middle of the pad; the maximum is the Pad max presssure slider on the context menu, 5V until changed",
+    "Feeds the Y side with a voltage while the pad is held, more of it nearer the middle of the pad; the maximum is the Pad max presssure slider on the context menu, 5V until changed",
+    "The X side of every function on the panel, and it takes over from the X pad as soon as a cable is patched",
+    "The Y side of every function on the panel, and it takes over from the Y pad as soon as a cable is patched",
+    "10V while X and Y are further apart than the gate threshold and 0V otherwise, the gate that the through-zero clipper makes",
+    "A 1ms pulse at 10V each time the XOR gate goes high",
+    "The through-zero clipper: X clipped to the size of Y, then turned upside down while Y is positive",
+    "10V while the larger of X and Y is above the gate threshold, and 0V otherwise",
+    "10V while the smaller of X and Y is above the gate threshold, and 0V otherwise",
+    "Whichever of X and Y is larger at each instant, which is the analogue OR",
+    "Whichever of X and Y is smaller at each instant, which is the analogue AND",
+    "The mean of X and Y, that is half their sum",
+    "A 1ms pulse at 10V each time the OR gate goes high",
+    "Carries X itself, whether it came from the X input or the X pad",
+    "Carries Y itself, whether it came from the Y input or the Y pad",
+    "A 1ms pulse at 10V each time the AND gate goes high",
+    "A 1ms pulse at 10V each time the NOR gate goes high, which is each time the OR gate falls",
+    "Carries X with its sign turned round",
+    "Carries Y with its sign turned round",
+    "A 1ms pulse at 10V each time the NAND gate goes high, which is each time the AND gate falls",
+    "Half the difference between X and Y, positive while X is the larger",
+    "Whichever of X and Y is larger, with its sign turned round",
+    "Whichever of X and Y is smaller, with its sign turned round",
+    "0V while the larger of X and Y is above the gate threshold, and 10V otherwise",
+    "0V while the smaller of X and Y is above the gate threshold, and 10V otherwise",
+    "The through-zero clipper with its sign turned round",
+    "0V while X and Y are further apart than the gate threshold, and 10V otherwise",
+    "A 1ms pulse at 10V each time the XNOR gate goes high, which is each time the XOR gate falls",
+    "Note — with nothing patched to X or Y those sides read 0V, so the whole panel reads 0V until a cable arrives or a pad is pressed",
+    "Note — the number of polyphonic channels comes from whichever of X and Y carries more, and every output carries that many; past one channel the panel lights turn blue instead of showing a voltage",
+    "Menu — Oversampling — a submenu holding the oversampling rate and three switches saying which groups of outputs it is applied to",
+    "Menu — Oversampling rate: Off, x2, x4, x8 — runs the logic at this multiple of the sample rate and filters the result back down, which reduces aliasing at audio rates; inside Oversampling",
+    "Menu — Oversample logic outputs — applies the oversampling to the maximum, minimum and clipper outputs and the three inverted copies of them; inside Oversampling",
+    "Menu — Oversample logic gate outputs — applies the oversampling to the six gate outputs as well, and switching it on switches the logic outputs on too; inside Oversampling",
+    "Menu — Oversample logic trigger outputs — applies the oversampling to the six trigger outputs as well, and switching it on switches the gate and logic outputs on too; inside Oversampling",
+    "Menu — Clip at ±10V — holds the maximum, minimum and clipper outputs inside the rails, which the hardware does and the software need not",
+    "Menu — Gate/trigger threshold — a slider setting the voltage the gate outputs compare against, 0V to 2V and 1V until you move it",
+    "Menu — Pad max presssure — a slider setting the voltage a pad puts out when pressed dead centre, 0V to 10V and 5V until you move it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 12,
+    "8": 13,
+    "9": 14,
+    "10": 15,
+    "11": 16,
+    "12": 17,
+    "13": 18,
+    "14": 19,
+    "15": 20,
+    "16": 21,
+    "17": 22,
+    "18": 23,
+    "19": 24,
+    "20": 25,
+    "21": 26,
+    "22": 27,
+    "23": 28
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "8": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "15": "trigger",
+     "19": "trigger",
+     "20": "trigger",
+     "22": "trigger",
+     "23": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the X pad",
+      "why": "Cosmos.cpp line 171, getNormalPolyVoltageSimd with the pad voltage as the normal"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the Y pad",
+      "why": "Cosmos.cpp line 172, getNormalPolyVoltageSimd with the pad voltage as the normal"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 242 and 260"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 296"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 239 and 248"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 240 and 254"
+     },
+     "8": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 280"
+     },
+     "11": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 288"
+     },
+     "12": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 284"
+     },
+     "15": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 292"
+     },
+     "19": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 250"
+     },
+     "20": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 256"
+     },
+     "22": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 262"
+     },
+     "23": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "Cosmos.cpp line 300"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit c3db83a, whose plugin.json carries the installed 2.0.2. Two of the four parameters, the gate threshold and the pad maximum, have no widget on the panel: they exist only as sliders on the context menu, so neither can be clicked and neither gets a line or a tag. The two inputs and the twelve analogue outputs carry no family, because what they mean is whatever you patch into X and Y: the module is used for audio and for control voltages equally, and the outputs are maxima, minima and means of the inputs rather than signals of a kind of their own. The twelve gate and trigger outputs are the exception and are tagged as triggers. Only the trigger outputs are computed lazily, and the gate outputs only when one of their pair is connected; the analogue outputs are always computed, because the panel lights read them. A pad's voltage falls off from the centre of the pad to nothing at its edge, and dragging across a pad while holding it moves that voltage — a gesture no click on a control will reveal."
   },
   "GomaII": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four channels of attenuator or attenuverter, each summing into the one below it, so any output can be taken as a mix of the channels above it",
+    "Scales the voltage on that channel, from silence to unity as an attenuator, or from fully inverted through silence at the centre to unity as an attenuverter",
+    "Scales the voltage on that channel, from silence to unity as an attenuator, or from fully inverted through silence at the centre to unity as an attenuverter",
+    "Scales the voltage on that channel, from silence to unity as an attenuator, or from fully inverted through silence at the centre to unity as an attenuverter",
+    "Scales the voltage on that channel, from silence to unity as an attenuator, or from fully inverted through silence at the centre to unity as an attenuverter",
+    "Switches that channel's knob between attenuator, marked with a plus, and attenuverter, marked with a plus over a minus",
+    "Switches that channel's knob between attenuator, marked with a plus, and attenuverter, marked with a plus over a minus",
+    "Switches that channel's knob between attenuator, marked with a plus, and attenuverter, marked with a plus over a minus",
+    "Switches that channel's knob between attenuator, marked with a plus, and attenuverter, marked with a plus over a minus",
+    "The voltage this channel scales, and with no cable patched it reads a steady 5V, so the knob alone becomes an offset generator",
+    "The voltage this channel scales, and with no cable patched it reads a steady 5V, so the knob alone becomes an offset generator",
+    "The voltage this channel scales, and with no cable patched it reads a steady 5V, so the knob alone becomes an offset generator",
+    "The voltage this channel scales, and with no cable patched it reads a steady 5V, so the knob alone becomes an offset generator",
+    "This channel after its knob, added to every channel above it that has not had its own output taken; patching a cable here stops the sum running on into the channel below",
+    "This channel after its knob, added to every channel above it that has not had its own output taken; patching a cable here stops the sum running on into the channel below",
+    "This channel after its knob, added to every channel above it that has not had its own output taken; patching a cable here stops the sum running on into the channel below",
+    "This channel after its knob, added to every channel above it that has not had its own output taken; patching a cable here stops the sum running on into the channel below",
+    "Note — take the bottom output alone and you get the mix of all four channels; take a middle output and the chain is cut there, so the channels above become one mix and the channels below another",
+    "Note — put a second GOMA II immediately to its right and this one's running sum passes into that one's top channel, chaining the two into one longer mixer; the light beside the top channel comes on",
+    "Note — the panel prints 5V beside each input because that is what an unpatched input reads; the Normalled input voltage menu can change it to 10V, and the panel does not follow",
+    "Menu — Normalled input voltage: 5V, 10V — sets the voltage an input with no cable in it reads"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "GomaII.cpp line 162, getNormalPolyVoltageSimd with normalledVoltageValue from line 135"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "GomaII.cpp line 162, getNormalPolyVoltageSimd with normalledVoltageValue from line 135"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "GomaII.cpp line 162, getNormalPolyVoltageSimd with normalledVoltageValue from line 135"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "GomaII.cpp line 162, getNormalPolyVoltageSimd with normalledVoltageValue from line 135"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "GomaII.cpp lines 164 and 170, setVoltageSimd then setChannels"
+     },
+     "1": {
+      "poly": true,
+      "why": "GomaII.cpp lines 164 and 170, setVoltageSimd then setChannels"
+     },
+     "2": {
+      "poly": true,
+      "why": "GomaII.cpp lines 164 and 170, setVoltageSimd then setChannels"
+     },
+     "3": {
+      "poly": true,
+      "why": "GomaII.cpp lines 164 and 170, setVoltageSimd then setChannels"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit c3db83a, whose plugin.json carries the installed 2.0.2. Neither the inputs nor the outputs are given a family: a channel carries whatever you patch into it, audio or control voltage alike, and the mix carries the same. The knob's default value depends on the switch beside it, reset to zero in attenuator mode and to the centre in attenuverter mode, which is updated every 128 samples at line 131. The chaining works by a running sum that is zeroed after any output that has a cable in it, at lines 162 to 167, so an unpatched output still carries the mix that would have gone into the next channel; the polyphony count is spread across the chained channels at lines 112 to 124 so that a chain all carries the same number of channels. The left expander is another GOMA II: the sum reaches this module through the expander message, so the two must be next to each other with this one on the right."
   },
   "SlewLFO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A slew limiter with separate rise and fall times that becomes a looping envelope when the mode switch is moved, after Black Noise Modular's Slew/LFO",
+    "Bends the rise and fall shapes: fully clockwise each segment is a straight line, and turning it back rounds them into an exponential curve",
+    "Sets how long the output takes to climb, slowest fully clockwise; with the rate switch slow and no capacitor chosen that runs from 8ms to reach 10V up to 8 seconds",
+    "Sets how long the output takes to fall, slowest fully clockwise; with the rate switch slow and no capacitor chosen that runs from 8ms to fall 10V up to 8 seconds",
+    "Switches between LFO, where the output cycles between 0V and 10V on its own, and Slew, where the output chases the voltage at the input jack",
+    "Switches between the slow range and the fast range; fast shortens every time by a factor of forty, reaching 200 microseconds for 10V and running the LFO up to audio rates",
+    "Stands in for a capacitor added to the hardware: none, about 10 microfarads for times of 1.2 seconds to 20 minutes, or about 100 microfarads for 2 minutes to 33 hours",
+    "Adds to the RISE knob, and a negative voltage here shortens the rise; the jack reads from -5V to 10V and anything outside that is clamped",
+    "Adds to the FALL knob, and a negative voltage here shortens the fall; the jack reads from -5V to 10V and anything outside that is clamped",
+    "The voltage the output chases while the mode switch is set to Slew; in LFO mode nothing patched here is read",
+    "The slewed or cycling voltage, 0V to 10V, except in LFO mode with the rate switch fast, where it is shifted down to -5V to 5V unless the centring menu item is switched off",
+    "Note — in LFO mode the input jack is ignored and the output runs on its own; in Slew mode the output stays where it is until a voltage arrives at the input",
+    "Note — the number of polyphonic channels is taken from whichever of the three inputs carries most, and the output carries that many",
+    "Menu — Oversampling (fast mode only): Off, x2, x4, x8, x16 — runs the shape at this multiple of the sample rate and filters the result back down, and it is applied only while the rate switch is fast",
+    "Menu — Centre waveform at audio rates — moves the LFO output down to -5V to 5V while the rate switch is fast, so an audio-rate waveform carries no direct voltage; switching it off leaves 0V to 10V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "-5 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "SlewLFO.cpp lines 220 to 227, clamp(getPolyVoltage(c), -5, 10) added to the knob"
+     },
+     "1": {
+      "poly": true,
+      "range": "-5 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "SlewLFO.cpp lines 223 to 228, clamp(getPolyVoltage(c), -5, 10) added to the knob"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SlewLFO.cpp line 210, getPolyVoltage(c) taken as the target the output chases"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "SlewLFO.cpp lines 252 and 260 hold the output between 0 and 10; line 181 shifts it down by 5 in fast LFO mode"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit c3db83a, whose plugin.json carries the installed 2.0.2. The rise and fall times come from getMinMaxSlewRates at line 105: in the slow range 8 seconds down to 8ms for a 10V move, in the fast range 200ms down to 200 microseconds, with the two capacitor settings replacing both ends. The maker's own comment on line 117 says the fast range reaches 120 microseconds where the code on line 119 sets 200e-6, so the comment is wrong and the line above follows the code. The rise and fall CVs are clamped to -5V to 10V each but their sum with the knob is not clamped again, so the knob and a large CV together can push the time past either end of the nominal range; that is why no sumRange is given. The input jack is read only in Slew mode, at line 210, and in LFO mode the shape runs from a square wave generated internally. The panel's IN light is dark in LFO mode, which the README lists as a difference from the hardware, where it shows the input voltage whatever the mode."
   }
  }
 }

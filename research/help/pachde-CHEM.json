@@ -1,88 +1,1429 @@
 {
  "plugin": "pachde-CHEM",
- "source": "https://github.com/Paul-Dempsey/pachde-CHEM",
+ "source": "https://github.com/Paul-Dempsey/pachde-CHEM/blob/64b361d/doc/index.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "chem-core": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The link between Rack and a Haken Eagan Matrix instrument: it holds the MIDI connection, scans the presets, and carries the surface out as control voltage; other CHEM modules work through one",
+    "Sets the master level on the instrument, which is attenuation on Haken instruments and post level on an Osmose",
+    "Counts up one per second to a maximum of 60 minutes and then wraps to zero; nothing in the module or in the instrument reads it",
+    "Sends a short test phrase of MIDI notes to the instrument, so you can hear whether the connection carries sound",
+    "Reflects music on MIDI channels 2 and up from that controller down to channels 15 and below, so a second Eagan Matrix surface can be played at the same time without note collisions",
+    "Passes only notes and expression from that controller to the instrument, dropping the control messages that would otherwise change the preset",
+    "Blocks everything from that controller, which mutes it without unplugging it",
+    "Slews the Y output, with no slew fully anticlockwise and the slowest movement fully clockwise",
+    "Slews the Z output, with no slew fully anticlockwise and the slowest movement fully clockwise",
+    "Lengthens the slew range of the two trim pots beside the Y and Z outputs by a factor of ten",
+    "A high gate blocks that controller's MIDI from reaching the instrument and lights the button beside it; the gate reads high at 0.8V and above",
+    "Carries 10V while the instrument is able to accept MIDI and make sound, and 0V while it is busy loading a preset, scanning presets or remaking Mahling data",
+    "Carries 10V on a channel while a note is held on that channel of the playing surface, and 0V when the note ends",
+    "The pitch of the note held on that channel, as a volt per octave with the surface's pitch bend folded in; 0V is MIDI note 60",
+    "The front-to-back position on that channel, 0-10V, taken from whichever continuous controller the instrument has assigned to Y",
+    "The pressure on that channel, 0-10V, taken from whichever continuous controller the instrument has assigned to Z",
+    "Note — a module added to a patch finds the first Eagan Matrix instrument connected to the computer and connects to it; if there is more than one, click the HAKEN button to choose",
+    "Note — MIDI usually stays silent unless the patch also holds one of the VCV Audio modules with a driver chosen, so add an Audio module before this one",
+    "Note — the Preset and Play modules show nothing until the presets have been scanned into a database, which is started from the Presets submenu of the Core actions menu on this panel",
+    "Note — the C1 and c2 buttons choose MIDI controllers whose data is passed on to the instrument; the MIDI Reset button above HAKEN restarts the connection, and control-clicking it clears every one",
+    "Note — to control a second Eagan Matrix instrument, add a second one of these to the patch",
+    "Menu — Presets — on the Core actions menu reached from the hamburger button, not the right-click menu; scans the instrument to build the preset databases Preset and Play read",
+    "Menu — Log MIDI — on the Core actions menu; writes every MIDI message sent and received into a log file in the pachde-CHEM folder under your Rack user folder",
+    "Menu — Disconnect MIDI — on the Core actions menu; drops the MIDI connection to the instrument until it is turned off again",
+    "Menu — Zero XYZ on Note off — on the Core actions menu; drops the X, Y and Z voltage for a channel to zero when the note ends, in place of holding the last value",
+    "Menu — MPE channels (2-15) only — on the Core actions menu; makes the W, X, Y and Z outputs 14 channels taken from MIDI channels 2 to 15, in place of 16 channels taken from every MIDI channel",
+    "Menu — Silence WYXZ — on the Core actions menu; clears the stored note, bend, front-to-back and pressure for every channel, so the four surface outputs fall to 0V",
+    "Menu — Haken Requests — on the Core actions menu; sends single requests from the Haken MIDI protocol to the instrument, for working out what has gone wrong"
+   ],
+   "param": {
+    "0": 5,
+    "1": 5,
+    "2": 6,
+    "3": 6,
+    "4": 2,
+    "5": 4,
+    "6": 4,
+    "7": 1,
+    "8": 7,
+    "9": 8,
+    "10": 9,
+    "11": 3
+   },
+   "in": {
+    "0": 10,
+    "1": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "pitch",
+     "3": "cv",
+     "4": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.8V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/Core/Core.cpp:1154-1156 reads the jack with getVoltage and compares it against 0.8V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 0.8V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/Core/Core.cpp:1160-1162 reads the jack with getVoltage and compares it against 0.8V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "modules/Core/Core.cpp:1166-1167 writes 10V or 0V on one channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "modules/Core/Core.cpp:1092-1097 loops 14 or 16 channels and writes 10V times the held-note flag for each"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "modules/Core/Core.cpp:1100-1107 loops the channels and writes the note number plus bend, less 60, divided by 12"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "modules/Core/Core.cpp:1110-1123 loops the channels and writes the 14-bit Y value scaled to 0-10V"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "modules/Core/Core.cpp:1126-1139 loops the channels and writes the 14-bit Z value scaled to 0-10V"
+     }
+    }
+   },
+   "notes": "The CHEM-time knob is declared as P_NOTHING in Core.hpp and is turned by the module itself in Core.cpp:1062-1068; no code reads its value. The four surface outputs take 14 channels from MIDI channels 2 to 15 by default, or 16 channels from every channel when MPE mode is turned off on the Core actions menu (Core.cpp:1091). Menu items live on the Core actions hamburger button on the panel, not in the module's right-click menu, which carries only themes, screws and theme reloading."
   },
   "chem-macro": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The six classic Eagan Matrix macros, i to vi, as knobs with a control voltage input for each; it works through a CHEM Core",
+    "Sets that macro on the instrument, 0-10V, and the preset is what gives the macro its meaning",
+    "Sets how far the voltage at the selected input moves its macro, from -100% to 100%, a negative amount inverting the voltage; the knob does nothing until a cable is patched",
+    "Moves the macro of the same number away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to the macro's 0-10V span",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — one input at a time is under the modulation amount knob; patching a cable moves the knob to that jack and lights the lamp beside it, and clicking a jack or its label moves the knob to that one",
+    "Note — when a pedal is assigned to one of these macros, a small annotation such as p2 appears beside that knob",
+    "Menu — Zero modulation — sets the modulation amount on every input of this module to zero",
+    "Menu — Center knobs — sets all six macro knobs to the middle of their range"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     }
+    }
+   }
   },
   "chem-pre": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The pre-effects section of the Eagan Matrix: input level, and either the compressor or the tanh saturator; it works through a CHEM Core",
+    "Sets the level going into the effects, 0-10V, which drives the instrument into saturation and overdrive at high settings even with no compression",
+    "Chooses whether the three knobs below act on the compressor or on the tanh saturator, and relabels them",
+    "Sets how much of the compressed or saturated signal is mixed with the straight signal",
+    "Sets the compressor threshold, and the amount of drive when the selector is on Tanh, the panel printing Threshhold or Drive to match",
+    "Sets the compressor attack time; the selector on Tanh has nothing for it to do, and the knob greys out and the panel prints an em dash",
+    "Sets the compressor ratio, and the makeup gain when the selector is on Tanh, the panel printing Ratio or Makeup to match",
+    "Sets how far the voltage at the selected input moves its control, from -100% to 100%, a negative amount inverting the voltage; the knob does nothing until a cable is patched",
+    "Moves the pre-effects level away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the compression or saturation mix away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the threshold, or the drive on Tanh, away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the compressor attack away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the ratio, or the makeup gain on Tanh, away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — one input at a time is under the modulation amount knob; patching a cable moves the knob to that jack and lights the lamp beside it, and clicking a jack or its label moves the knob to that one",
+    "Menu — Zero modulation — sets the modulation amount on every input of this module to zero",
+    "Menu — Center knobs — sets the mix, threshold, attack and ratio knobs to the middle of their range"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 2
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     }
+    }
+   }
   },
   "chem-fx": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The Eagan Matrix effects section, which Haken Audio calls the recirculator: one of seven effects with six parameters and a wet mix; it works through a CHEM Core",
+    "Chooses the effect: Short reverb, Mod delay, Swept delay, Analog echo, Delay with LPF, Delay with HPF or Long reverb, and relabels the six parameter knobs to match",
+    "Sets how much of the effect is mixed with the straight signal",
+    "Turns the whole effects section off, which matches Disable Recirculator in the Haken Editor",
+    "Sets the first parameter of the chosen effect, printed Diffuse in the two reverbs, ModDepth in the two modulated delays, Noise in the analog echo, and LPF or HPF in the two filtered delays",
+    "Sets the second parameter of the chosen effect, printed LPF in the two reverbs, ModRate in the two modulated delays, and Offset in the four echoes and delays",
+    "Sets the third parameter of the chosen effect, printed Damping in the two reverbs and Feedback in the five delays and echoes",
+    "Sets the fourth parameter of the chosen effect, printed Decay in the two reverbs and Time in the five delays and echoes",
+    "Sets the pre-delay of the two reverbs; on the other five effects the knob greys out and the panel prints an em dash",
+    "Sets the high-pass filter of the two reverbs; on the other five effects the knob greys out and the panel prints an em dash",
+    "Sets how far the voltage at the selected input moves its control, from -100% to 100%, a negative amount inverting the voltage; the knob does nothing until a cable is patched",
+    "Moves the parameter of the same number away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the effects mix away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — one input at a time is under the modulation amount knob; patching a cable moves the knob to that jack and lights the lamp beside it, and clicking a jack or its label moves the knob to that one",
+    "Menu — Zero modulation — sets the modulation amount on every input of this module to zero",
+    "Menu — Center knobs — sets the six parameter knobs to the middle of their range"
+   ],
+   "param": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "5": 9,
+    "6": 2,
+    "7": 10,
+    "8": 3,
+    "9": 1
+   },
+   "in": {
+    "0": 11,
+    "1": 11,
+    "2": 11,
+    "3": 11,
+    "4": 11,
+    "5": 11,
+    "6": 12
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     }
+    }
+   }
   },
   "chem-post": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The post-effects section of the Eagan Matrix: output level, a global mute, and the tilt equaliser; it works through a CHEM Core",
+    "Sets the output level of the instrument, 0-10V",
+    "Silences everything coming out of the instrument, and lights red while it does",
+    "Sets how much of the equalised signal is mixed with the flat signal",
+    "Tilts the equaliser, taking the low end up and the high end down to one side of centre and the other way to the other side",
+    "Sets the frequency the equaliser tilts about",
+    "Sets how far the voltage at the selected input moves its control, from -100% to 100%, a negative amount inverting the voltage; the knob does nothing until a cable is patched",
+    "A rising edge flips the mute on or off; it reads high above 5V and low below 0.1V",
+    "Moves the output level away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the equaliser mix away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the equaliser tilt away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the equaliser frequency away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — one input at a time is under the modulation amount knob; patching a cable moves the knob to that jack and lights the lamp beside it, and clicking a jack or its label moves the knob to that one",
+    "Menu — Zero modulation — sets the modulation amount on every input of this module to zero",
+    "Menu — Center knobs — sets the equaliser mix, tilt and frequency knobs to the middle of their range"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 2
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/Post/Post.cpp:176-180 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 5V"
+     }
+    }
+   }
   },
   "chem-convo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The four convolutions of the Eagan Matrix and the pre-effects and post-effects convolution sends; it works through a CHEM Core",
+    "Sets how much of the pre-effects convolution is mixed with the dry signal",
+    "Chooses which of the four impulse responses feeds the pre-effects convolution, blending between two neighbours at settings in between",
+    "Sets how much of the post-effects convolution is mixed with the dry signal",
+    "Chooses which of the four impulse responses feeds the post-effects convolution, blending between two neighbours at settings in between",
+    "Picks the impulse response for that row from nineteen datasets, from Waterphone 1 through the gongs to White and Grey noise; right-click for the list, or drag through them",
+    "Sets the length of that row's impulse response, and modulating it while the instrument is making sound produces artefacts",
+    "Sets the tuning of that row's impulse response, and modulating it while the instrument is making sound produces artefacts",
+    "Sets the width of that row's impulse response, and modulating it while the instrument is making sound produces artefacts",
+    "Sets the strength of that row's impulse response in the left channel",
+    "Sets the strength of that row's impulse response in the right channel",
+    "Sets how far the voltage at the selected input moves its control, from -100% to 100%, a negative amount inverting the voltage; the knob does nothing until a cable is patched",
+    "Turns on phase cancellation across the convolutions",
+    "Moves the pre-effects convolution mix away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the pre-effects impulse response choice away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the post-effects convolution mix away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves the post-effects impulse response choice away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves that row's impulse response length away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves that row's impulse response tuning away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves that row's impulse response width away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves that row's left-channel strength away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Moves that row's right-channel strength away from its knob setting, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — one input at a time is under the modulation amount knob; patching a cable moves the knob to that jack and lights the lamp beside it, and clicking a jack or its label moves the knob to that one",
+    "Note — length, tuning, width and the dataset choice were meant to be set once in a preset; a fixed voltage or a slow sequencer suits them, while continuous modulation gives clicks and glitches",
+    "Note — some presets drive the convolution parameters from their own macro assignments, and a knob turned here fights that",
+    "Menu — Zero modulation — sets the modulation amount on every input of this module to zero"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 7,
+    "13": 7,
+    "14": 7,
+    "15": 7,
+    "16": 8,
+    "17": 8,
+    "18": 8,
+    "19": 8,
+    "20": 9,
+    "21": 9,
+    "22": 9,
+    "23": 9,
+    "24": 10,
+    "25": 10,
+    "26": 10,
+    "27": 10,
+    "28": 11,
+    "29": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 17,
+    "6": 17,
+    "7": 17,
+    "8": 18,
+    "9": 18,
+    "10": 18,
+    "11": 18,
+    "12": 19,
+    "13": 19,
+    "14": 19,
+    "15": 19,
+    "16": 20,
+    "17": 20,
+    "18": 20,
+    "19": 20,
+    "20": 21,
+    "21": 21,
+    "22": 21,
+    "23": 21
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "cv",
+     "20": "cv",
+     "21": "cv",
+     "22": "cv",
+     "23": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "8": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "9": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "10": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "11": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "12": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "13": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "14": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "15": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "16": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "17": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "18": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "19": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "20": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "21": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "22": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     },
+     "23": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     }
+    }
+   }
   },
   "chem-jack": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Assigns the two pedal jacks on the Eagan Matrix instrument and brings the pedal positions back into the patch as control voltage; it works through a CHEM Core",
+    "Chooses what that pedal jack on the instrument is assigned to: sustain, a sostenuto, a macro, a recirculator parameter, octave switch, fine tune, audio in, pre-level, post-level, or a raw control code",
+    "Shows the lowest value the instrument takes from that pedal; turning it sends nothing and the reading comes back when a preset loads, despite the manual saying it chooses the minimum",
+    "Shows the highest value the instrument takes from that pedal; turning it sends nothing and the reading comes back when a preset loads, despite the manual saying it chooses the maximum",
+    "Sets the interval an octave-switch pedal moves by, in semitones or whole octaves either side of centre",
+    "Chooses how an octave-switch pedal behaves: Switch, Toggle or Instant",
+    "Turns on the instrument's Preserve Pedals setting, which keeps the pedal assignments made here when a preset is loaded",
+    "The position of that pedal on the instrument, 0-10V",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — to use a pedal for control voltage alone without changing the sound, assign it to Audio in on an instrument with no AES audio input, or to a macro the preset makes no use of"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 2,
+    "5": 3,
+    "6": 4,
+    "7": 5,
+    "8": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 7
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "modules/Jack/Jack.cpp:146-147 writes the 14-bit pedal value scaled to 0-10V on one channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "modules/Jack/Jack.cpp:149-150 writes the 14-bit pedal value scaled to 0-10V on one channel"
+     }
+    }
+   },
+   "notes": "The four min and max trim pots are read from the instrument in Jack.cpp:90-93 and are absent from process_params at Jack.cpp:112-128, which sends only the two assignments, the shift, the shift action and the keep flag; no other code in the plugin writes ccMin1, ccMax1, ccMin2 or ccMax2. So the four knobs are indicators in 2.0.3, not controls, and the module documentation at doc/jack.md describing them as choosing the minimum and maximum is wrong for this version. The maker also names both jack 2 knobs \"Jack 1 minimum\" and \"Jack 1 maximum\" in Jack.cpp:23-24, a copy-and-paste slip that leaves the jack 2 pots wearing the jack 1 tooltips."
   },
   "chem-play": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A playlist of presets on the Eagan Matrix instrument, saved to a file of its own, so a set of favourites can be recalled in the order you choose; it works through a CHEM Core",
+    "A rising edge loads the preset before the current one in the list; it reads high above 5V and low below 0.1V",
+    "A rising edge loads the preset after the current one in the list; it reads high above 5V and low below 0.1V",
+    "A rising edge on a channel loads the preset at that position in the list, the first channel taking the first entry and 16 channels being the most that are read; it reads high above 5V",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — a new module holds an empty list; the heart button adds the preset the instrument is playing, and the Append submenu on the hamburger menu brings in a whole scanned preset list",
+    "Note — a modified playlist is never saved for you and you are never prompted, so save from the hamburger menu before closing the patch; the yellow lamp beside the playlist name shows unsaved changes",
+    "Note — clicking an entry loads it, so to select one for moving or removing instead, hover the right edge of the entry and click the tab that appears; press and hold to drag it elsewhere",
+    "Note — Rack takes the keys you would expect to use in a list, so Delete removes the module rather than the entry, and the arrow keys and paging keys do nothing here",
+    "Menu — Track live preset — keeps the current entry in step with the preset the instrument is playing, scrolling the list to it when it is in the playlist"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/Play/Play.cpp:147-148 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 5V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/Play/Play.cpp:136-137 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 5V"
+     },
+     "2": {
+      "poly": true,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/Play/Play.cpp:123-125 loops up to 16 channels and reads each with getVoltage(i) into its own Schmitt trigger"
+     }
+    }
+   },
+   "notes": "The maker marks the poly select input experimental in its own tooltip (Play.cpp:13)."
   },
   "chem-sus": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An on-screen sustain pedal for the Eagan Matrix instrument, with a slider that follows a real pedal assigned to the same function; it works through a CHEM Core",
+    "Sets the sustain amount on the instrument; click anywhere along it to jump there, or scroll it; with the pointer over it HOME and END go to the ends, the arrow keys step, and 0 to 9 jump by tenths",
+    "Takes the sustain to its maximum in one click",
+    "Takes the sustain to zero in one click",
+    "Sets how far the voltage at the input moves the sustain, from -100% to 100%, a negative amount inverting the voltage; the knob does nothing until a cable is patched",
+    "Moves the sustain away from the slider position, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — pedal assignments made in CHEM Jack have no effect here; this module is always sustain"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 2,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     }
+    }
+   }
   },
   "chem-sos": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An on-screen sostenuto pedal for the Eagan Matrix instrument, with a slider that follows a real pedal assigned to the same function; it works through a CHEM Core",
+    "Sets the sostenuto amount on the instrument; click anywhere along it to jump there, or scroll it; with the pointer over it HOME and END go to the ends, the arrow keys step, and 0 to 9 jump by tenths",
+    "Takes the sostenuto to its maximum in one click",
+    "Takes the sostenuto to zero in one click",
+    "Sets how far the voltage at the input moves the sostenuto, from -100% to 100%, a negative amount inverting the voltage; the knob does nothing until a cable is patched",
+    "Moves the sostenuto away from the slider position, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — pedal assignments made in CHEM Jack have no effect here; this module is always sostenuto"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 2,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     }
+    }
+   }
   },
   "chem-sos2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An on-screen sostenuto 2 pedal for the Eagan Matrix instrument, with a slider that follows a real pedal assigned to the same function; it works through a CHEM Core",
+    "Sets the sostenuto 2 amount on the instrument; click anywhere along it to jump there, or scroll it; with the pointer over it HOME and END go to the ends, the arrow keys step, and 0 to 9 jump by tenths",
+    "Takes the sostenuto 2 to its maximum in one click",
+    "Takes the sostenuto 2 to zero in one click",
+    "Sets how far the voltage at the input moves the sostenuto 2, from -100% to 100%, a negative amount inverting the voltage; the knob does nothing until a cable is patched",
+    "Moves the sostenuto 2 away from the slider position, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — pedal assignments made in CHEM Jack have no effect here; this module is always sostenuto 2"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 2,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     }
+    }
+   }
   },
   "chem-settings": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The Eagan Matrix settings the other CHEM modules leave out: surface direction, transposition, the X, Y and Z assignments, polyphony, note processing, mono mode, tuning, rounding and MIDI routing",
+    "Reverses the direction of the playing surface",
+    "Sets the MIDI note number at the centre of the touch area, from 16 to 108; a setting of 16 or below means no touch area at all, and right-clicking lets you type the number",
+    "Transposes the surface by setting the MIDI note number that sounds at the frequency of middle C; right-clicking lets you type the number",
+    "Chooses the bend range for X, the last entry combining MPE at 96 on channels 2 and up with a chosen range on channel 1",
+    "Chooses the continuous controller the front-to-back axis is sent on",
+    "Chooses the continuous controller pressure is sent on",
+    "Chooses how notes are produced: Static velocity (127), Dynamic velocity, Formula velocity, No Notes, Ethervox, or Kyma",
+    "Chooses which note wins when notes collide: oldest channel, same pitch, lowest channel, highest channel, or the highest two, three or four channels",
+    "Sets the number of voices the instrument plays at once, from none to eight",
+    "Doubles the number of voices by halving the computation spent on each",
+    "Doubles the rate the matrix is computed at",
+    "Detunes the whole instrument in cents either side of centre",
+    "Sets how hard the surface has to be pressed before a note starts",
+    "Sets the level of the instrument's audio input",
+    "Turns mono mode on, so the surface plays one note at a time",
+    "Chooses how one note moves to the next in mono mode: weighted portamento, legato or retrigger on high pressure, legato or retrigger on touch or on touch and lift, and three of those at full pressure",
+    "Sets the interval from the first note beyond which mono behaviour starts, from a semitone to three octaves, or off for the whole surface",
+    "Chooses when rounding is applied: Normal, Release, Y, or Reverse Y",
+    "Rounds the first note of a phrase to the scale as well as the ones after it",
+    "Sets how fast a rounded note slides to its pitch, from none to fastest",
+    "Chooses the tuning of the surface: an equal temperament of a chosen number of steps, a whole-number-ratio tuning for a chosen scale, or a table made with the Pitch Table Editor",
+    "Turns off MIDI arriving at the instrument from reaching that destination, where the destinations across the row are the sound engine, the control voltage converter, and the instrument's MIDI output",
+    "Turns off the playing surface from reaching that destination, where the destinations across the row are the sound engine, the control voltage converter, and the instrument's MIDI output",
+    "Turns on the instrument's Preserve MIDI setting, which keeps the MIDI settings made here when a preset is loaded",
+    "Turns on the instrument's Preserve Surface setting, which keeps the surface settings made here when a preset is loaded",
+    "Sets how far the voltage at the RATE input moves the round rate, from -100% to 100%, a negative amount inverting the voltage",
+    "A high gate turns rounding of the first note on and a low gate turns it off, reading high above 9.5V and low below 0.125V; while a cable is patched the button on the panel no longer sets it",
+    "Moves the round rate away from its slider position, bipolar, scaled by the modulation amount knob and clamped to 0-10V",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — the AES3 button above the input jacks opens a menu for the instrument's digital audio input, offering 48k, 96k and Sync to incoming, and reading back the rate it detects",
+    "Note — the equivalent of the instrument's Preserve Pedals setting is on CHEM Jack, not here",
+    "Menu — Zero modulation — sets the modulation amount for the RATE input to zero"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15,
+    "15": 16,
+    "16": 17,
+    "17": 18,
+    "18": 19,
+    "19": 20,
+    "20": 21,
+    "22": 22,
+    "23": 22,
+    "24": 22,
+    "25": 23,
+    "26": 23,
+    "27": 23,
+    "28": 24,
+    "29": 25,
+    "31": 26
+   },
+   "in": {
+    "0": 27,
+    "1": 28
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 9.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/Settings/SettingsModule.cpp:405-408 reads the jack with getVoltage and tests it against 9.5V and 0.125V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "services/em-midi-port.cpp:52 reads the jack with getVoltage, and rack-em-convert.hpp:44-48 adds cv times the amount to the knob and clamps the total to 0-10V"
+     }
+    }
+   },
+   "notes": "Two parameters carry no widget and can never be clicked: P_MIDI_ROUTING, which only stores the six routing buttons as one packed value, and P_AES3, which is set from the AES3 menu widget rather than from a parameter widget."
   },
   "chem-preset": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The preset browser for the Eagan Matrix instrument: search, filter by category and attribute, and load User or System presets; it works through a CHEM Core",
+    "Scans through the preset list one entry at a time, the same movement the up and down arrow keys give; control-shift-drag moves it finely, and clicking it loads the preset at the cursor",
+    "Loads the preset at the cursor on the instrument",
+    "Stops the MIDI keyboard chosen for navigation from moving the cursor, so it can be played without changing the selection",
+    "Note — the list stays empty until the presets have been scanned into a database, which is started from the Presets submenu of the Core actions menu on CHEM Core and takes up to an hour",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core",
+    "Note — type in the search box at the top and press ENTER to narrow the list, which matches preset names and the raw metadata codes; ESC clears the text, and TAB moves between the box and the list",
+    "Note — the search options hamburger beside the box picks whether names, metadata or both are searched, whether a match must fall at a word start, and whether the list updates on ENTER",
+    "Note — metadata is searched as two-letter codes rather than words, so CL finds the Classic category and EP the electric pianos",
+    "Note — the filter buttons narrow the list by Category, Type, Character, Matrix component and Setting; control-clicking one entry chooses that one alone, and a red lamp shows a filter is active",
+    "Note — the preset actions hamburger sorts the list alphabetically, by category or by preset number, scrolls the playing preset into view or follows it, and keeps filters across sessions",
+    "Note — the MIDI navigation button beside the knob picks a MIDI keyboard or controller and opens a dialog where each action is taught by MIDI learn: click between the brackets, then press a key"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   }
   },
   "chem-overlay": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Names the overlay preset a patch is built around, and passes it to the CHEM Extended Macro modules beside it so their macros are sent only while that preset is playing",
+    "Note — it does nothing until a preset is configured, which is done from the hamburger menu on the panel",
+    "Note — with a preset configured, the chiclet button under the lamp loads it on the instrument, and the green lamp at the top lights while the playing preset matches the configured one",
+    "Menu — Use live preset — on the hamburger menu on the panel, not the right-click menu; makes the preset the instrument is playing the one this module tracks",
+    "Note — one of these belongs to one CHEM Core, and each Extended Macro module links to the Overlay on its left, or through a run of adjacent Extended Macro modules to a common one",
+    "Note — the hamburger menu on the panel also sets a title for the module and the colours of the panel and the title text",
+    "Note — extended macros are numbered 7 to 90 and exist only in overlay presets; the Eagan Matrix Overlay Developer's Guide, shipped with the Haken firmware, is what describes making them"
+   ],
+   "notes": "The module has no parameters, inputs or outputs at all. doc/overlay.md says Use live preset is in the module's right-click menu; in the code it is on the panel hamburger widget (XM-Overlay/Overlay-ui.cpp:11-59), and OverlayUi::appendContextMenu adds nothing beyond the shared theme items."
   },
   "chem-xm": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Up to eight knobs for the extended macros of an overlay preset, each one configured by hand for a macro number, a name, a range and a control mode; it works with a CHEM Overlay",
+    "Note — a new module is blank and has no controls at all until it is configured: put it beside its CHEM Overlay, then press F2 or choose Edit from the right-click menu to open the editing panel",
+    "Note — in the editing panel, click a knob number to work on that slot, then give it a name, a macro number from 7 to 90, a range and a control mode; Load preset macros fills the macro menu",
+    "Note — the three control modes are Knob only, a knob with no jack; CV-modulated, a knob with a jack and a modulation amount; and CV-driven, a jack with a moving track in place of a knob",
+    "Note — the knobs and jacks are built when the module is configured, so none of them can be clicked for help here; the maker's own tooltip on each carries the name you gave it",
+    "Note — control voltage into these jacks is read as bipolar, -5V to 5V, so an LFO feeding one should have its offset turned off",
+    "Note — to control more than eight extended macros, add another one of these",
+    "Note — MIDI to the instrument stops while the editing panel is open",
+    "Menu — Edit — opens and closes the editing panel to the right, and is greyed out until the module has found an Overlay",
+    "Menu — Center knobs — sets every configured macro knob to the middle of its range"
+   ],
+   "notes": "Every parameter and input on this module is created at run time from the user's configuration, so none of them appears in the census with a widget position and none can be reached by a click. The eight knobs, the modulation amount, the range minimum and maximum, and the eight jacks are all in that group."
   },
   "chem-midi-pad": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sixteen pads, each holding a MIDI phrase you write out yourself, for sending Eagan Matrix commands that no other CHEM module covers; it works through a CHEM Core",
+    "A rising edge sends the MIDI phrase held by the pad of the same name; it reads high above 0.5V and low below 0.1V, and an undefined pad sends nothing",
+    "Note — every pad starts empty and sends nothing until you write its MIDI: click the e button to open the editing panel, click a pad, and type its definition",
+    "Note — definitions are written in the maker's Haken Control Language, which covers channel, control code, macro, program change, data streams and the matrix, formula, graph and convolution pokes",
+    "Note — a definition that opens with a comment in double quotes uses that comment as the pad's tooltip",
+    "Note — press control-enter or click the compile button to check a definition; a pad whose definition failed shows a red lamp and carries the error in its tooltip",
+    "Note — the send button in the editing panel fires the phrase so you can hear what it does before leaving the panel",
+    "Note — values are not range-checked before they are sent, and a wrong one can leave the instrument silent or showing an internal error until the preset is reloaded or the instrument is restarted",
+    "Note — the pads are drawn as one widget rather than as sixteen parameters, so a pad cannot be clicked for help; only its trigger jack can",
+    "Note — nothing reaches the instrument until the module is linked to a CHEM Core; putting it beside a linked CHEM module links it, or click the link button at the bottom of the panel to pick a Core"
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "12": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "13": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "14": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     },
+     "15": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "modules/MidiPad/MidiPad.cpp:177-179 reads the jack with getVoltage and passes it to a Schmitt trigger with thresholds 0.1V and 0.5V"
+     }
+    }
+   },
+   "notes": "The sixteen pads are drawn by one custom widget and are not parameters, so the module has no parameters at all."
   }
  }
 }

@@ -2,12 +2,142 @@
  "plugin": "OPC-OctobIR",
  "source": "https://github.com/gianni-cappelletti/vcv-octobir",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "OPC-OctobIR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Convolution reverb with two impulse response slots, crossfading between the two convolutions either from a knob or from the level of the incoming audio",
+    "Switches IR A into the blend; with IR A off and an impulse response loaded in B the output is IR B alone, and with both slots off the audio passes through unchanged",
+    "Switches IR B into the blend; with IR B off and an impulse response loaded in A the output is IR A alone, and with both slots off the audio passes through unchanged",
+    "Sets the level of the IR A convolution in the mix, -12dB to +12dB",
+    "Sets the level of the IR B convolution in the mix, -12dB to +12dB",
+    "Turns on dynamic blending, where the input level drives the blend through the THRESHOLD, RANGE, KNEE, ATTACK and RELEASE settings and the BLEND knob is no longer read",
+    "Makes dynamic blending follow the level at the SIDECHAIN input instead of the audio input; it changes nothing unless DYNAMIC is on and a cable is patched to SIDECHAIN",
+    "Crossfades between the two impulse responses on an equal-power curve, fully counter-clockwise for IR A alone and fully clockwise for IR B alone; it is not read while dynamic blending is on",
+    "Sets the input level at which dynamic blending begins to move toward IR B, -60dB to 0dB",
+    "Sets how far above the threshold the input must rise for dynamic blending to reach IR B, 1dB to 60dB",
+    "Sets the width of the soft knee centred on the threshold, 0dB to 20dB; the blend follows a squared curve across it and is half way to IR B at the top of the knee",
+    "Sets the gain applied to both outputs, -24dB to +24dB",
+    "Sets how fast dynamic blending moves toward IR B as the level rises, 1ms to 500ms",
+    "Sets how fast dynamic blending falls back toward IR A as the level drops, 1ms to 1000ms",
+    "Chooses whether the level driving dynamic blending is measured as a peak or as an RMS average, printing PEAK or RMS",
+    "Audio into the convolution; patched on its own it is convolved and sent to both outputs",
+    "The right side of a stereo pair into the convolution; patched on its own it is convolved and sent to both outputs",
+    "Audio whose level drives dynamic blending in place of the main input; patching a cable here turns the SIDECHAIN button on",
+    "Sets the threshold, 0V for -60dB and 10V for 0dB, and replaces the THRESHOLD knob while it is patched",
+    "Sets the blend, 0V for IR A alone and 10V for IR B alone, and replaces the BLEND knob while it is patched; patching a cable here turns the DYNAMIC button off",
+    "Turns dynamic blending on while the voltage here is above 1V and off below it, in place of the DYNAMIC button",
+    "The left side of the convolved audio; with nothing patched to either audio input it carries 0V",
+    "The right side of the convolved audio; with nothing patched to either audio input it carries 0V",
+    "Note — The module passes audio through unchanged until an impulse response is loaded. Click one of the two file displays, or the folder button beside it, and choose a file.",
+    "Note — Impulse responses are read by a WAV reader, so the file has to be a WAV; the file dialog also offers AIFF and FLAC and those fail to load.",
+    "Note — An impulse response longer than 10 seconds is refused, with the reason written to Rack's log.",
+    "Note — CLR empties that impulse response slot, and the arrow buttons beside it load the previous or next audio file in the same folder in alphabetical order, wrapping round at the ends.",
+    "Note — SWAP exchanges the two impulse responses, and exchanges the two trim knob settings with them.",
+    "Menu — Dynamic Mode — turns dynamic blending on and off, the same switch the DYNAMIC button carries",
+    "Menu — Sidechain Enable — turns sidechain detection on and off, the same switch the SIDECHAIN button carries",
+    "Menu — Swap IR Order — exchanges the two impulse responses and their trim settings",
+    "Menu — Clear — on an impulse response file display's own right-click menu; empties that slot"
+   ],
+   "param": {
+    "0": 7,
+    "1": 11,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5,
+    "7": 6,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 14,
+    "12": 12,
+    "13": 13
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20
+   },
+   "out": {
+    "0": 21,
+    "1": 22
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "why": "opc-vcv-ir.hpp:317 reads this with getVoltage() alone and scales by 0.2 to the core's ±1.0 convention, and opc-vcv-ir.hpp:288 tests it only for connection"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "why": "opc-vcv-ir.hpp:319 reads this with getVoltage() alone and scales by 0.2 to the core's ±1.0 convention, and opc-vcv-ir.hpp:289 tests it only for connection"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "why": "opc-vcv-ir.hpp:312 reads this with getVoltage() alone and scales by 0.2; opc-vcv-ir.hpp:310 reads it only when dynamic mode and the sidechain switch are both on"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "the THRESHOLD knob",
+      "why": "opc-vcv-ir.hpp:277 reads it with getVoltage() alone and opc-vcv-ir.hpp:278 maps it as clamp(cv * 6 - 60, -60, 0), replacing the knob value set at opc-vcv-ir.hpp:274"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "the BLEND knob",
+      "why": "opc-vcv-ir.hpp:284 reads it with getVoltage() alone and opc-vcv-ir.hpp:285 maps it as clamp(cv * 0.2 - 1, -1, 1), replacing the knob value set at opc-vcv-ir.hpp:281"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the DYNAMIC button",
+      "why": "opc-vcv-ir.hpp:221 tests this input against 1.0V with getVoltage() alone, and opc-vcv-ir.hpp:222 uses the DYNAMIC switch when nothing is patched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "opc-vcv-ir.hpp:323 writes one value with setVoltage(), scaling the core's ±1.0 sample by 5.0; opc-vcv-ir.hpp:348 writes 0V when neither audio input is patched"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "opc-vcv-ir.hpp:324 writes one value with setVoltage(), scaling the core's ±1.0 sample by 5.0; opc-vcv-ir.hpp:349 writes 0V when neither audio input is patched"
+     }
+    }
+   },
+   "notes": "Source read at vcv-octobir commit 996088e (plugin.json version 2.2.0), whose opc submodule is pinned at October-Production-Co a0b8b68; the module is plugins/octobir/vcv-rack/src/opc-vcv-ir.hpp and the DSP is libs/octobir-core. The panel SVG is nearly empty because every control is drawn at runtime with NanoVG, so the panel names above were read from the VCV library screenshot. The load, CLR, previous, next and SWAP buttons are plain widgets rather than parameters, so no click on them can reach a help line; they are covered by Note lines instead. The file dialog filter at opc-vcv-ir.cpp:474 offers wav, aiff, aif and flac, but IRLoader::loadFromFile (IRLoader.cpp:131) opens the file with dr_wav only, and there is no AIFF or FLAC decoder anywhere in octobir-core, so only WAV files load. Sample rate conversion is done on load, and an IR longer than MaxIrLengthSeconds, 10, is refused (Types.hpp:12, IRLoader.cpp:143). A slot that is enabled but empty acts as a dry path in the crossfade (IRProcessor.cpp:388, 402), so with one IR loaded and both ENABLE buttons on the blend knob becomes a dry-to-wet control."
   }
  }
 }

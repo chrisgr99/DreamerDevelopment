@@ -1,13 +1,162 @@
 {
  "plugin": "Hora-ModulationFree",
- "source": "http://hora-music.wifeo.com/manuals.php",
+ "source": "no published source; read from the installed 2.1.4 plugin.dylib, which carries full local symbols",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "TwinQuartet-LFO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two low-frequency oscillators, each giving the same wave on four outputs spaced apart in phase, with the second running at a fixed ratio of the first",
+    "Note — Each of the eight outputs has a lamp beside it which shows green while that output is above 0V and red while it is below.",
+    "Sets the rate of the master oscillator, on a scale of 0 to 10",
+    "Sets the rate of the second oscillator against the first, in seven steps running from an eighth of it up to eight times it",
+    "Restarts both oscillators from the beginning of their cycles each time it is pressed",
+    "Switches all eight outputs between swinging either side of 0V and running upwards from 0V; the maker's tooltip for it reads RESET, which is the name of the button above",
+    "Chooses which of the four shapes drawn around the knob the master oscillator's four outputs carry",
+    "Chooses which of the four shapes drawn around the knob the second oscillator's four outputs carry",
+    "Sets the phase spacing of the master oscillator's four outputs, from 0 to 90 degrees; they come out at zero, one, two and three times this",
+    "Sets the phase spacing of the second oscillator's four outputs, from 0 to 90 degrees; they come out at zero, one, two and three times this",
+    "Adds to the master rate knob, with the total held between 0 and 10",
+    "Adds whole steps to the ratio between the two oscillators, one step per volt, counting only voltages above 0V and stopping at eight times the master rate",
+    "Adds to the phase spacing of the master oscillator, 9 degrees per volt",
+    "Adds to the phase spacing of the second oscillator, 9 degrees per volt",
+    "Restarts both oscillators from the beginning of their cycles when it rises past 5V",
+    "The master oscillator's wave with no phase offset",
+    "The master oscillator's wave shifted by one phase spacing",
+    "The master oscillator's wave shifted by two phase spacings",
+    "The master oscillator's wave shifted by three phase spacings",
+    "The second oscillator's wave with no phase offset",
+    "The second oscillator's wave shifted by one phase spacing",
+    "The second oscillator's wave shifted by two phase spacings",
+    "The second oscillator's wave shifted by three phase spacings",
+    "Menu — High Quality (use more CPU) : true, false — works both oscillators out on every sample; with it off they are worked out once every sixteen samples and the gaps interpolated"
+   ],
+   "param": {
+    "0": 2,
+    "2": 3,
+    "7": 4,
+    "1": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21,
+    "7": 22
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "quadraLFO::process +0x4444 reads inputs[0].voltages[0] and +0x4484 adds it to the FREQ knob, with the total clamped to 0 and 10 at +0x4490 and +0x4498"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "quadraLFO::process +0x4448 reads inputs[1].voltages[0], truncates it to a whole number and clamps it to 0 and 10 at +0x4454 to +0x4460, then adds it to the divider knob with the sum clamped to -3 and 3"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "quadraLFO::process +0x44ec reads inputs[2].voltages[0] and multiplies it by 0.025 of a turn per volt before adding the PHASE 1 knob divided by 360"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "quadraLFO::process +0x4518 reads inputs[3].voltages[0] and multiplies it by 0.025 of a turn per volt before adding the PHASE 2 knob divided by 360"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "quadraLFO::process +0x44a4 reads inputs[4].voltages[0] and +0x44b0 tests it against 5.0, combining the result with the same test on the RESET button"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "quadraLFO::process +0x4564 writes the first value of the master quad, scaled either to 0 to 10V or, at +0x4674, to plus and minus 5V according to the polarity switch"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "quadraLFO::process +0x46f4 and +0x48c4 write the second value of the master quad at the two polarity scalings"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "quadraLFO::process +0x4780 and +0x4940 write the third value of the master quad at the two polarity scalings"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "quadraLFO::process +0x480c and +0x49bc write the fourth value of the master quad at the two polarity scalings"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "quadraLFO::process +0x4578 and +0x4680 write the first value of the second quad at the two polarity scalings"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "quadraLFO::process +0x470c and +0x48d4 write the second value of the second quad at the two polarity scalings"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "quadraLFO::process +0x4798 and +0x4950 write the third value of the second quad at the two polarity scalings"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "quadraLFO::process +0x4824 and +0x49cc write the fourth value of the second quad at the two polarity scalings"
+     }
+    }
+   },
+   "notes": "HORA PUBLISH NO SOURCE, BUT THIS BINARY IS NOT UNREADABLE. nm on the installed 2.1.4 plugin.dylib returns 491 symbols, 116 of them exported, including quadraLFO::process, quadraLFO::quadraLFO, quadraLFOWidget::appendContextMenu and the whole Vult-generated DSP layer (VultEngine_quadraTLFO, QuadraTLFO_DualQuadraLFO, Util_cvToRate and the rest). Everything in this entry was read from that code; nothing was taken from the maker's manual page. PARAMETER 1 IS NOT A RESET. Its configParam name is the string RESET, the same name given to parameter 7, but process reads it at +0x440c and uses it only to choose between two output scalings: at zero the eight outputs are the raw value times 5, so plus and minus 5V, and at one they are the value times 5 plus 5, so 0V to 10V. Its widget sits at census position 116.9,170.4, between the two waveform knobs, where the panel art draws a sine resting on a line and a sine crossing a line. It comes up at zero, the bipolar setting. The actual reset is parameter 7, a momentary button configured 0 to 10 and tested against 5 at +0x44b8, in parallel with the reset input. INDEX ORDER IS NOT PANEL ORDER FOR THE OUTPUTS. Each quad of jacks is laid out as a square and numbered clockwise: index 0 top left, 1 top right, 2 bottom right, 3 bottom left, and the same for 4 to 7. The panel prints 0 degrees, 1X, 2X and 3X beside them, which is the phase multiple each carries, and the tags follow the positions rather than the numbering. Parameter ranges from the constructor: FREQ 0.0001 to 10 with a default of 5; FREQ DIVIDER 0 to 6 with a default of 0, offset by -3 in process to give -3 to +3; WAVEFORM 1 and 2 each 1 to 4 with a default of 1; PHASE 1 and 2 each 0 to 90 degrees with a default of 90, so a new module is already in quadrature. Sixteen lights are configured, two per output, driven as a red and green pair from the sign of that output. The menu carries one item, High Quality, saved in the patch under the key HQ; with it off the DSP runs once every sixteen samples and process interpolates between the last two results at +0x4634."
   }
  }
 }

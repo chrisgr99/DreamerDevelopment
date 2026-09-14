@@ -1,18 +1,356 @@
 {
  "plugin": "Rigatoni",
- "source": "https://github.com/ianjhoffman/RigatoniModular",
+ "source": "https://github.com/ianjhoffman/RigatoniModular/blob/main/manuals/Loom.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "RigatoniModular-ThruZero": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Emulates through-zero FM: it reverses the direction of a ramp wave fed into it whenever a modulator crosses a threshold, and reflects that modulator about the threshold to drive the carrier's FM input",
+    "Sets the modulator voltage at which the carrier reverses, from -5V to 5V; the THRESH input is added to it and the total is held inside that range",
+    "Scales the ramp input, from -2 at full counter-clockwise through 0 at noon to 2 at full clockwise, inverting the ramp below 0; the panel's arc is marked -5 and +5 but the knob reaches only -2 and 2",
+    "ON puts the ramp output through a spike remover, a lowpass dropping from 20000Hz to 500Hz whenever the input ramp's own edge is found, and puts the sine output through a second one; OFF leaves both in",
+    "ENJ reverses the ramp's direction and shifts its phase to match, the more faithful through-zero sound; XWY inverts the whole ramp while the modulator is below the threshold, and works on any waveform",
+    "Adds to the input level knob at 0.4 per volt, the total held between -2 and 2",
+    "Adds to the threshold knob volt for volt, the total held between -5V and 5V",
+    "The modulator: the carrier reverses whenever this voltage crosses the threshold, and this is the signal reflected to CV OUT",
+    "The carrier ramp wave, rising or falling; aim for 10V peak to peak after IN LVL, which is what the phase shifter is built around",
+    "10V while the modulator is at or above the threshold and 0V below it, which also makes the module a comparator; mixing it into the other outputs strengthens the fundamental",
+    "The modulator reflected about the threshold, so it turns back where it would have crossed; patch it to the carrier oscillator's FM input",
+    "The ramp output put through a quadratic sine shaper and scaled to three quarters",
+    "The phase-shifted ramp, held between -5V and 5V",
+    "Note — there is no oscillator here: patch a ramp wave to the ramp input and a modulator to CV IN, and take the ramp or sine output back out",
+    "Note — every jack on the module reads or writes one channel, so a polyphonic cable is reduced to its first channel",
+    "Note — the two lights show how far the modulator is from the threshold, the green one while it is above and the red one while it is below",
+    "Note — keep THRESHOLD at noon for the steadiest behaviour, and run the carrier above the modulator in frequency for the strongest timbral effect"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "pitch",
+     "3": "audio"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "thruzero.cpp:75 multiplies the single voltage by 0.4, adds the knob and clamps the total to -2 and 2"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "±5V",
+      "normal": "0V",
+      "why": "thruzero.cpp:74 adds the single voltage to the knob and clamps the total to -5V and 5V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "thruzero.cpp:80 subtracts the threshold from this single voltage and thruzero.cpp:82 takes the absolute value of the difference"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "thruzero.cpp:90 multiplies this single voltage by the input level; thruzero.cpp:140 clamps the phase shifter's result to -5V and 5V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "thruzero.cpp:114 setVoltage of 10 or 0 on one channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "thruzero.cpp:115 setVoltage on one channel"
+     },
+     "2": {
+      "poly": false,
+      "why": "thruzero.cpp:123 setVoltage on one channel"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "thruzero.cpp:116 setVoltage on one channel, of a value clamped to -5V and 5V at thruzero.cpp:140"
+     }
+    }
+   },
+   "notes": "The panel draws an arc marked -5 and +5 around the IN LVL knob, but configParam at thruzero.cpp:51 gives that parameter a range of -2 to 2. The THRESHOLD knob above it carries the same arc and its range really is -5 to 5, so the marking looks copied. The two switches are configured as Off and On for 'Enable spike smoothing' and 'Enable classic XWY flavor', while the panel prints ON/OFF and XWY/ENJ; the XWY switch's Off position is the ENJ flavour. The spike remover is the maker's own description of an imperfect fix: a highpass at 10000Hz drives an envelope follower, and when that follower passes 2.5 the output lowpass drops to 500Hz. CV OUT is named 1V/oct by the maker and is meant for the carrier's FM input rather than for a pitch input directly."
   },
   "RigatoniModular-Loom": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An additive oscillator choosing which of 64 partials to sound with Euclidean patterns, plus a spectral tilt filter, a drive stage, and two main outputs that split odd from even or run in quadrature",
+    "Sets the frequency before fine tuning and any CV: 1.25Hz to 10000Hz with RANGE on VCO, and one cycle in 320 seconds up to 25Hz with RANGE on LFO",
+    "Trims the frequency: 7 semitones either way with RANGE on VCO, and half to double speed with RANGE on LFO",
+    "VCO puts the frequency range at 1.25Hz to 10000Hz; LFO divides that by 400, giving one cycle in 320 seconds up to 25Hz",
+    "EXP adds the attenuverted FM voltage to the exponential pitch, so a volt doubles the frequency; LIN adds it to the frequency itself at 100Hz per volt in VCO range, and can carry it through zero",
+    "Scales the PM input, squared so that small amounts can be dialled in finely, and inverting below the centre; at full travel one volt shifts the fundamental by a tenth of a cycle",
+    "Scales the FM input, inverting it below the centre; the result is held between -5V and 5V before it reaches the oscillator",
+    "Sets how many partials the pattern spans, from 1 to 64; low settings use only the low harmonics and give a darker sound",
+    "Scales the COUNT input before it is added to the COUNT knob, inverting it below the centre; 5V at full travel moves COUNT by half the knob's range",
+    "Sets how many of the partials within COUNT are sounded, following the rules of Euclidean patterns; at its maximum the output approaches a sawtooth",
+    "Scales the DENS input before it is added to the DENSITY knob, inverting it below the centre; 5V at full travel covers the knob's whole range",
+    "Rotates the pattern up through the harmonics, which gives a rippling comb-like sweep",
+    "Scales the SHIFT input before it is added to the SHIFT knob, inverting it below the centre; 5V at full travel covers the knob's whole range",
+    "Sets the spacing of the partials from 0 to 4 times the ordinary harmonic series: at 1 each partial is a whole multiple of the fundamental, below 1 they crowd toward it and above 1 they spread apart",
+    "Scales the STRIDE input before it is added to the STRIDE knob, inverting it below the centre; 5V at full travel covers half the knob's range",
+    "OFF rounds STRIDE to whole numbers; SYNC lets it sweep on, every partial reset once per cycle of the fundamental; ON lets the partials run free against each other, for inharmonic bell-like tones",
+    "ON holds the fundamental at half amplitude even where the shaping and shift settings would silence it; OFF lets it drop out",
+    "ODD/EVEN splits the partials between the two main outputs; QUAD sends every partial to both and shifts one of them by a quarter cycle",
+    "Sets how steep the spectral filter's slope is, flat at 0 and steepest at MAX",
+    "Chooses which of the 64 partials the spectral filter's slope turns about",
+    "Scales the S PIVOT input before it is added to the PIVOT POINT knob, inverting it below the centre; 5V at full travel moves the pivot a quarter of the knob's range, despite the maker's tooltip",
+    "LP leaves the partials below the pivot alone and fades the ones above it; HP fades the ones below and leaves the ones above; BP fades them on both sides and lifts the pivot itself",
+    "Sets the gain into the soft clipper feeding the two main outputs, from 0 to 2; there is no gain compensation, so the output level follows the other settings as well",
+    "Scales the DRIVE input before it is added to the DRIVE knob, inverting it below the centre; 5V at full travel covers half the knob's range",
+    "Sets the pitch at a volt per octave, the voltage held between -2V and 8V",
+    "Modulates the phase of every partial, scaled by PM AMT; it is added to the phase rather than to the frequency, so the pitch does not drift",
+    "Modulates the frequency, scaled by FM AMT, exponentially or linearly according to FM MODE",
+    "Resets the phase of the oscillator each time this voltage rises through 0V",
+    "A trigger here makes a short plucked envelope, which appears at ENV and is fed to every attenuverted CV input that has no cable in it",
+    "Modulates how many partials the pattern spans, scaled by the COUNT attenuverter",
+    "Modulates how many of those partials are sounded, scaled by the DENSITY attenuverter",
+    "Modulates the rotation of the pattern through the harmonics, scaled by the SHIFT attenuverter",
+    "Modulates the spacing of the partials, scaled by the STRIDE attenuverter",
+    "Modulates which partial the spectral filter turns about, scaled by the PIVOT POINT attenuverter",
+    "Modulates the steepness of the spectral slope at a fifth of the knob's range per volt; this is the one CV input with no attenuverter, and the PING envelope is not fed to it",
+    "Modulates the drive gain, scaled by the DRIVE attenuverter",
+    "A sine at the fundamental frequency, left alone by the harmonic, spectral and drive settings but following every pitch control and hard sync",
+    "The first main output: the odd partials with OUTPUT MODE on ODD/EVEN, or every partial with it on QUAD",
+    "The second main output: the even partials together with the fundamental on ODD/EVEN, or the other main output shifted a quarter cycle on QUAD",
+    "A copy of the envelope made from the PING input, spanning 0V to 8V, despite the maker's tooltip calling it Square",
+    "Note — the module comes up with COUNT at 1 partial and DENSITY at minimum, so the first thing it makes is a plain sine; open COUNT before anything else",
+    "Note — every jack reads or writes one channel, so a polyphonic cable is reduced to its first channel",
+    "Note — partials that would land above the Nyquist frequency are dropped, with a fade beginning two thirds of the way up to it, so high pitches lose their upper partials",
+    "Note — the row of eight lights shows the summed amplitude of each group of eight partials, and the small light by the STRIDE knob comes on when the spacing is within 0.01 of 1",
+    "Note — the two-colour light under the title changes colour once per cycle of the fundamental, which is how the rate is read in LFO range",
+    "Menu — Oversampling: Off, 2x — calculates the synthesis at twice the sample rate, which cuts aliasing under heavy audio-rate modulation at the cost of CPU",
+    "Menu — Drive ADAA: Off, On — applies antiderivative anti-aliasing to the drive waveshaper; turning it off gives a grittier, aliased distortion",
+    "Menu — BLEP Anti-Aliasing: Off, 0th Order, 1st Order, 2nd Order, 3rd Order — sets how many orders of band-limited step correction are applied at hard sync and in synced continuous stride mode",
+    "Note — the BLEP menu starts on the item printed 2nd Order, which is the third of its five settings"
+   ],
+   "param": {
+    "2": 1,
+    "3": 2,
+    "1": 3,
+    "10": 4,
+    "21": 5,
+    "22": 6,
+    "4": 7,
+    "8": 8,
+    "5": 9,
+    "9": 10,
+    "7": 11,
+    "12": 12,
+    "6": 13,
+    "11": 14,
+    "0": 15,
+    "19": 16,
+    "20": 17,
+    "14": 18,
+    "13": 19,
+    "15": 20,
+    "16": 21,
+    "17": 22,
+    "18": 23
+   },
+   "in": {
+    "5": 24,
+    "7": 25,
+    "8": 26,
+    "9": 27,
+    "6": 28,
+    "0": 29,
+    "10": 30,
+    "11": 31,
+    "1": 32,
+    "2": 33,
+    "3": 34,
+    "4": 35
+   },
+   "out": {
+    "1": 36,
+    "2": 37,
+    "3": 38,
+    "0": 39
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "pitch",
+     "6": "trigger",
+     "7": "cv",
+     "8": "cv",
+     "9": "trigger",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the PING envelope",
+      "why": "loom.cpp:673 adds 0.4 times the attenuverter times getNormalVoltage(env) to the knob; loom.cpp:241 clamps the total to -2 and 2 before the exponential scaling"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the PING envelope",
+      "why": "loom.cpp:682 adds 0.2 times the attenuverter times getNormalVoltage(env) to the knob; loom.cpp:244 clamps the total to 0 and 2"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the PING envelope",
+      "why": "loom.cpp:705 multiplies it by 0.2 and by the pivot attenuverter before adding the PIVOT POINT knob"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "loom.cpp:708 multiplies it by 0.2 with no attenuverter and no normal voltage; loom.cpp:252 clamps the total to 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the PING envelope",
+      "why": "loom.cpp:711 multiplies it by 0.2 and by the drive attenuverter; loom.cpp:253 clamps the total to 0 and 2"
+     },
+     "5": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "loom.cpp:695 clamps it to -2V and 8V and loom.cpp:702 adds it to the exponential pitch sum"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "loom.cpp:663 clamps it to 0 and 8 before the envelope slew at loom.cpp:664"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the PING envelope",
+      "why": "loom.cpp:718 multiplies it by 0.1 and by the square of the PM attenuverter, keeping the attenuverter's sign"
+     },
+     "8": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the PING envelope",
+      "why": "loom.cpp:693 clamps the attenuverted voltage to -5V and 5V; loom.cpp:703 multiplies it by 5 for linear FM"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 0V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "loom.cpp:288 finds the zero crossing and requires the new value to be at or above 0"
+     },
+     "10": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the PING envelope",
+      "why": "loom.cpp:676 adds 0.2 times the attenuverter times getNormalVoltage(env) to the knob; loom.cpp:242 clamps the total to 0 and 1"
+     },
+     "11": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the PING envelope",
+      "why": "loom.cpp:679 adds 0.2 times the attenuverter times getNormalVoltage(env) to the knob; loom.cpp:243 clamps the total to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "loom.cpp:732 setVoltage of the envelope on one channel, the envelope's source clamped to 0 and 8 at loom.cpp:663"
+     },
+     "1": {
+      "poly": false,
+      "why": "loom.cpp:731 setVoltage on one channel"
+     },
+     "2": {
+      "poly": false,
+      "why": "loom.cpp:729 setVoltage on one channel"
+     },
+     "3": {
+      "poly": false,
+      "why": "loom.cpp:730 setVoltage on one channel"
+     }
+    }
+   },
+   "notes": "Three things the maker's own configuration gets wrong. The ENV output is configured as 'Square' at loom.cpp:620, but loom.cpp:732 writes the ping envelope to it and the manual documents it as the envelope. The pivot attenuverter is configured as 'Spectral Shaping Intensity CV Attenuverter' at loom.cpp:585, but loom.cpp:705 uses it on the S PIVOT input; the intensity input has no attenuverter at all. And the DRIVE input, index 4, was never given a configInput call, so it has no tooltip. The panel prints OFF, SYNC and ON for the continuous stride switch while the switch is configured Off, Sync and Free. The BLEP menu's names are offset from the level they set: the default is level 3, which is the item printed '2nd Order', while the manual recommends '3rd Order'. The manual says the Nyquist falloff starts at 0.75 of Nyquist; loom.cpp:294 puts the fade's lower bound at two thirds of the harmonic multiple limit. The FM input is coloured as CV rather than pitch: in EXP mode at full attenuverter it does track a volt per octave, but it passes through an attenuverter that starts at zero and a switch that makes it linear, so it is not a jack a keyboard is patched into."
   }
  }
 }

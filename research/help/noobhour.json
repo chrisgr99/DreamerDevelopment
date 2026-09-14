@@ -2,27 +2,641 @@
  "plugin": "noobhour",
  "source": "https://github.com/NicolasNeubauer/noobhour_modules",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "baseliner": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four columns, each passing a HIGH signal or a LOW signal under a gate, with a probability on the choice and an attenuverter and an offset on each of the two signals",
+    "Adds a fixed voltage to that column's HIGH signal, -5V to 5V. With nothing patched into the HIGH input this knob alone sets the HIGH voltage",
+    "Attenuverts that column's HIGH input, -1 to 1, before the HIGH offset knob is added to it",
+    "The signal that column passes while HIGH is chosen; the number of channels here sets the number of channels the column puts out while HIGH is chosen",
+    "The gate for that column. Left empty it takes the gate from the nearest patched GATE jack to its left, and with no patched GATE jack to its left it reads 0V",
+    "The signal that column passes while LOW is chosen; the number of channels here sets the number of channels the column puts out while LOW is chosen",
+    "Attenuverts that column's LOW input, -1 to 1, before the LOW offset knob is added to it",
+    "Adds a fixed voltage to that column's LOW signal, -5V to 5V. With nothing patched into the LOW input this knob alone sets the LOW voltage",
+    "The chosen signal of that column, added to every column to its left whose own output jack is empty. Each column is clamped to -10V to 10V before the addition",
+    "Chooses gate, where HIGH is passed while the gate is above 1V; latch, where each gate trigger sets the output to HIGH or to LOW; or toggle, where each gate trigger flips between them",
+    "Sets the probability of the choice coming out HIGH, 0 at the counter-clockwise end and 1 at the clockwise end; in toggle mode it is the probability of flipping at a trigger",
+    "Adds to that column's p knob, 0.1 of probability per volt, and the sum is held between 0 and 1",
+    "Note — with nothing patched into a column's HIGH and LOW inputs both read 0V, so that column puts out its two offset knobs alone, switched by the gate.",
+    "Note — every column comes up in gate mode with its p knob at 1, which passes the HIGH signal whenever the gate is above 1V and the LOW signal otherwise.",
+    "Note — a gate is counted as a trigger when it rises above 2V and is released below 0.1V, while the level test in gate mode passes HIGH whenever the gate is above 1V.",
+    "Note — each column has two lamps: the upper one lights green while that column is passing HIGH and the lower one lights green while it is passing LOW.",
+    "Note — a column carrying one channel is added to every channel of a polyphonic column beside it, and where two polyphonic columns differ in length the shorter contributes 0V to the channels it lacks.",
+    "Note — none of the sixteen inputs and none of the four outputs was given a name in the code, so hovering one of them shows no description of what it carries."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 7,
+    "9": 7,
+    "10": 7,
+    "11": 7,
+    "12": 6,
+    "13": 6,
+    "14": 6,
+    "15": 6,
+    "16": 9,
+    "17": 9,
+    "18": 9,
+    "19": 9,
+    "20": 10,
+    "21": 10,
+    "22": 10,
+    "23": 10
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 4,
+    "9": 4,
+    "10": 4,
+    "11": 4,
+    "12": 11,
+    "13": 11,
+    "14": 11,
+    "15": 11
+   },
+   "out": {
+    "0": 8,
+    "1": 8,
+    "2": 8,
+    "3": 8
+   },
+   "family": {
+    "in": {
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): channels[i] = inputs[SIGNAL1_INPUT + i].getChannels() and the loop reads getVoltage(c), then clamp(input*param + absVal, -10.f, 10.f)"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): channels[i] = inputs[SIGNAL1_INPUT + i].getChannels() and the loop reads getVoltage(c), then clamp(input*param + absVal, -10.f, 10.f)"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): channels[i] = inputs[SIGNAL1_INPUT + i].getChannels() and the loop reads getVoltage(c), then clamp(input*param + absVal, -10.f, 10.f)"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): channels[i] = inputs[SIGNAL1_INPUT + i].getChannels() and the loop reads getVoltage(c), then clamp(input*param + absVal, -10.f, 10.f)"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): channels[i] = inputs[BASE1_INPUT + i].getChannels() and the loop reads getVoltage(c), then clamp(input*param + absVal, -10.f, 10.f)"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): channels[i] = inputs[BASE1_INPUT + i].getChannels() and the loop reads getVoltage(c), then clamp(input*param + absVal, -10.f, 10.f)"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): channels[i] = inputs[BASE1_INPUT + i].getChannels() and the loop reads getVoltage(c), then clamp(input*param + absVal, -10.f, 10.f)"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): channels[i] = inputs[BASE1_INPUT + i].getChannels() and the loop reads getVoltage(c), then clamp(input*param + absVal, -10.f, 10.f)"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): the daisy-chain loop takes inputs[GATE1_INPUT + j].getVoltage() from the first connected jack at or to the left of the column, and feeds rescale(gate, 0.1f, 2.f, 0.f, 1.f) to a SchmittTrigger"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the nearest patched GATE jack to its left",
+      "why": "src/Baseliner.cpp process(): the daisy-chain loop takes inputs[GATE1_INPUT + j].getVoltage() from the first connected jack at or to the left of the column, and feeds rescale(gate, 0.1f, 2.f, 0.f, 1.f) to a SchmittTrigger"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the nearest patched GATE jack to its left",
+      "why": "src/Baseliner.cpp process(): the daisy-chain loop takes inputs[GATE1_INPUT + j].getVoltage() from the first connected jack at or to the left of the column, and feeds rescale(gate, 0.1f, 2.f, 0.f, 1.f) to a SchmittTrigger"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the nearest patched GATE jack to its left",
+      "why": "src/Baseliner.cpp process(): the daisy-chain loop takes inputs[GATE1_INPUT + j].getVoltage() from the first connected jack at or to the left of the column, and feeds rescale(gate, 0.1f, 2.f, 0.f, 1.f) to a SchmittTrigger"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): p_input = clamp(inputs[P1_INPUT + i].getVoltage()/10.f, -10.f, 10.f), then p = clamp(p_input + knob, 0.f, 1.f), one channel"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): p_input = clamp(inputs[P1_INPUT + i].getVoltage()/10.f, -10.f, 10.f), then p = clamp(p_input + knob, 0.f, 1.f), one channel"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): p_input = clamp(inputs[P1_INPUT + i].getVoltage()/10.f, -10.f, 10.f), then p = clamp(p_input + knob, 0.f, 1.f), one channel"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): p_input = clamp(inputs[P1_INPUT + i].getVoltage()/10.f, -10.f, 10.f), then p = clamp(p_input + knob, 0.f, 1.f), one channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Baseliner.cpp process() daisy-chain loop calls outputs[OUT1_OUTPUT + i].setChannels(currentChannels), taken from the selected input's channel count"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/Baseliner.cpp process() daisy-chain loop calls outputs[OUT1_OUTPUT + i].setChannels(currentChannels), taken from the selected input's channel count"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/Baseliner.cpp process() daisy-chain loop calls outputs[OUT1_OUTPUT + i].setChannels(currentChannels), taken from the selected input's channel count"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/Baseliner.cpp process() daisy-chain loop calls outputs[OUT1_OUTPUT + i].setChannels(currentChannels), taken from the selected input's channel count"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit fd172d0, the only commit whose plugin.json carries the installed 2.0.0 and the tip of the repository. The four columns are one templated block of code, so every column's line is the same line and the tags point all four at it. The HIGH and LOW inputs and the four outputs are left without a family: the module attenuverts and offsets whatever is patched in and the maker's own README uses it both as a CV shaper and as an audio mixer, so no one colour is true of them. There is no configInput or configOutput call anywhere in the file, which is why Rack shows every jack unnamed."
   },
   "bsl1r": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "One column passing a HIGH signal or a LOW signal under a gate, with a probability on the choice and an attenuverter and an offset on each of the two signals",
+    "Adds a fixed voltage to the HIGH signal, -5V to 5V. With nothing patched into the HIGH input this knob alone sets the HIGH voltage",
+    "Attenuverts the HIGH input, -1 to 1, before the HIGH offset knob is added to it",
+    "The signal passed while HIGH is chosen; the number of channels here sets the number of channels at the output while HIGH is chosen",
+    "The gate. Above 1V in gate mode the HIGH signal is passed, and in latch and toggle mode each rise above 2V is a trigger",
+    "The signal passed while LOW is chosen; the number of channels here sets the number of channels at the output while LOW is chosen",
+    "Attenuverts the LOW input, -1 to 1, before the LOW offset knob is added to it",
+    "Adds a fixed voltage to the LOW signal, -5V to 5V. With nothing patched into the LOW input this knob alone sets the LOW voltage",
+    "The chosen signal, clamped to -10V to 10V",
+    "Chooses gate, where HIGH is passed while the gate is above 1V; latch, where each gate trigger sets the output to HIGH or to LOW; or toggle, where each gate trigger flips between them",
+    "Sets the probability of the choice coming out HIGH, 0 at the counter-clockwise end and 1 at the clockwise end; in toggle mode it is the probability of flipping at a trigger",
+    "Adds to the p knob, 0.1 of probability per volt, and the sum is held between 0 and 1",
+    "Note — with nothing patched into the HIGH and LOW inputs both read 0V, so the module puts out its two offset knobs alone, switched by the gate.",
+    "Note — the module comes up in gate mode with the p knob at 1, which passes the HIGH signal whenever the gate is above 1V and the LOW signal otherwise.",
+    "Note — a gate is counted as a trigger when it rises above 2V and is released below 0.1V, while the level test in gate mode passes HIGH whenever the gate is above 1V.",
+    "Note — there are two lamps: the upper one lights green while the HIGH signal is being passed and the lower one lights green while the LOW signal is being passed.",
+    "Note — neither input nor the output was given a name in the code, so hovering one of them shows no description of what it carries."
+   ],
+   "param": {
+    "0": 1,
+    "4": 2,
+    "8": 7,
+    "12": 6,
+    "16": 9,
+    "20": 10
+   },
+   "in": {
+    "0": 3,
+    "4": 5,
+    "8": 4,
+    "12": 11
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "8": "trigger",
+     "12": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): channels[i] = inputs[SIGNAL1_INPUT + i].getChannels() and the loop reads getVoltage(c), then clamp(input*param + absVal, -10.f, 10.f)"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): channels[i] = inputs[BASE1_INPUT + i].getChannels() and the loop reads getVoltage(c), then clamp(input*param + absVal, -10.f, 10.f)"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): the daisy-chain loop takes inputs[GATE1_INPUT + j].getVoltage() from the first connected jack at or to the left of the column, and feeds rescale(gate, 0.1f, 2.f, 0.f, 1.f) to a SchmittTrigger"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Baseliner.cpp process(): p_input = clamp(inputs[P1_INPUT + i].getVoltage()/10.f, -10.f, 10.f), then p = clamp(p_input + knob, 0.f, 1.f), one channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Baseliner.cpp process() daisy-chain loop calls outputs[OUT1_OUTPUT + i].setChannels(currentChannels), taken from the selected input's channel count"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit fd172d0, the installed 2.0.0. The module is the same templated class as Baseliner with one column instead of four, so it declares 24 parameters, 16 inputs and 4 outputs of which only parameters 0, 4, 8, 12, 16 and 20, inputs 0, 4, 8 and 12 and output 0 are drawn on the panel; the rest have no widget and no click can reach them, so they are left untagged. The HIGH and LOW inputs and the output are left without a family, because the module passes whatever is patched into them. There is no configInput or configOutput call anywhere in the file."
   },
   "customscale": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer for a scale you build yourself: the input voltage is spread evenly over the tones switched on in the matrix and sent out as 1V per octave",
+    "Switches the C of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the C sharp of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the D of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the D sharp of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the E of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the F of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the F sharp of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the G of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the G sharp of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the A of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the A sharp of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the B of octave -2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the C of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the C sharp of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the D of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the D sharp of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the E of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the F of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the F sharp of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the G of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the G sharp of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the A of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the A sharp of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the B of octave -1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the C of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the C sharp of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the D of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the D sharp of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the E of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the F of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the F sharp of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the G of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the G sharp of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the A of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the A sharp of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the B of octave 0 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the C of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the C sharp of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the D of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the D sharp of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the E of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the F of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the F sharp of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the G of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the G sharp of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the A of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the A sharp of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the B of octave 1 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the C of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the C sharp of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the D of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the D sharp of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the E of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the F of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the F sharp of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the G of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the G sharp of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the A of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the A sharp of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "Switches the B of octave 2 into or out of the scale, and clears that tone's candidate mark either way.",
+    "The voltage to be quantised, spread evenly over the tones switched on in the matrix; it is read as 0V to 10V and anything outside that is clamped to it",
+    "Chooses how many octaves of the matrix are used: 5 uses all five, 3 uses the three in the middle, and 1 uses octave 0 alone",
+    "Adds to the base knob, 1.1 half tones per volt; the sum is clamped to 0 to 11 half tones and cut down to a whole one",
+    "Adds 0 to 11 half tones to the tone picked from the matrix, without changing which tone was picked",
+    "The picked tone as 1V per octave, with the base offset added; the C of octave 0 is 0V",
+    "A 10V pulse 1ms long each time the tone at the v/oct output changes",
+    "A pitch here names the matrix tone that a trigger at toggle switches, read as 1V per octave with 0V naming the C of octave 0; the base offset is not applied to it",
+    "A trigger here switches the matrix tone named by the voltage at the v/oct input; channel by channel, each trigger switches the tone named by the same channel there",
+    "Sets the probability used when random is triggered, 0 at the counter-clockwise end and 1 at the clockwise end",
+    "Adds to the p knob, 0.1 of probability per volt, and the sum is held between 0 and 1",
+    "A trigger here re-rolls every tone that is switched on or marked as a candidate, each one at the probability set by p",
+    "Chooses what a random trigger does to each tone it considers: latch switches that tone on at probability p and off otherwise, and toggle flips it at probability p",
+    "A trigger here switches every tone in the matrix off and clears every candidate mark",
+    "Switches every tone in the matrix off and clears every candidate mark",
+    "Note — nothing comes out until a cable is patched into in and at least one tone in the matrix is switched on. With no tone on, the v/oct and change outputs hold whatever they last carried.",
+    "Note — the matrix is five octaves of twelve half tones, the octaves numbered -2 to 2 across the panel and the half tones rising up each column. The C of octave 0 is 0V at the v/oct output.",
+    "Note — a matrix lamp is green for a tone switched on, blue for the tone being picked now, and yellow for a candidate. A lamp is dim where its tone falls outside the octaves oct range is using.",
+    "Note — a tone that a random trigger switches off is left marked as a candidate, so a later random trigger can bring it back. Switching a tone by hand or through the toggle input clears that mark.",
+    "Note — with no tone switched on and no candidate marked, a random trigger treats all sixty tones as candidates, and it always leaves at least one tone switched on.",
+    "Note — the in jack is polyphonic: each channel is quantised against the same scale and gets its own pulse at change. The random, reset, p and base cv inputs are read from their first channel only.",
+    "Menu — bipolar input — reads the in jack as -5V to 5V rather than 0V to 10V, by adding 5V to the voltage before it is spread over the tones"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15,
+    "15": 16,
+    "16": 17,
+    "17": 18,
+    "18": 19,
+    "19": 20,
+    "20": 21,
+    "21": 22,
+    "22": 23,
+    "23": 24,
+    "24": 25,
+    "25": 26,
+    "26": 27,
+    "27": 28,
+    "28": 29,
+    "29": 30,
+    "30": 31,
+    "31": 32,
+    "32": 33,
+    "33": 34,
+    "34": 35,
+    "35": 36,
+    "36": 37,
+    "37": 38,
+    "38": 39,
+    "39": 40,
+    "40": 41,
+    "41": 42,
+    "42": 43,
+    "43": 44,
+    "44": 45,
+    "45": 46,
+    "46": 47,
+    "47": 48,
+    "48": 49,
+    "49": 50,
+    "50": 51,
+    "51": 52,
+    "52": 53,
+    "53": 54,
+    "54": 55,
+    "55": 56,
+    "56": 57,
+    "57": 58,
+    "58": 59,
+    "59": 60,
+    "60": 62,
+    "61": 69,
+    "62": 74,
+    "63": 64,
+    "64": 72
+   },
+   "in": {
+    "0": 61,
+    "1": 67,
+    "2": 68,
+    "3": 73,
+    "4": 71,
+    "5": 70,
+    "6": 63
+   },
+   "out": {
+    "0": 65,
+    "1": 66
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Customscaler.cpp process(): channels = inputs[SIGNAL_INPUT].getChannels(), then selectedIndex from clamp(inp, 0.f, 10.f)/10.f, with 5.f added first when the bipolar input menu item is on"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Customscaler.cpp process(): the toggle block loops over inputs[TONE_INPUT].getChannels() and calls getTone(inputs[TONE_INPUT].getVoltage(c)), which is (int)(vOct*12) + 24"
+     },
+     "2": {
+      "poly": true,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Customscaler.cpp process(): gate = inputs[TOGGLE_TRIGGER_INPUT].getVoltage(c) per channel of TONE_INPUT, fed to gateTrigger[c].process(rescale(gate, 0.1f, 2.f, 0.f, 1.f))"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Customscaler.cpp process(): resetTrigger.process(rescale(inputs[RESET_TRIGGER_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f)), one channel"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Customscaler.cpp process(): randomizeTrigger.process(rescale(inputs[RANDOMIZE_TRIGGER_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f)), one channel"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Customscaler.cpp getP(): p_input = clamp(inputs[P_INPUT].getVoltage()/10.f, -10.f, 10.f), then clamp(p_input + knob, 0.f, 1.f), one channel"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Customscaler.cpp process(): baseTone += inputs[BASE_INPUT].getVoltage()/10.f*11.f, then clamp(baseTone, 0.f, 11.f) cast to int, one channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/Customscaler.cpp process(): outputs[OUT_OUTPUT].setChannels(channels) from the in jack, and setVoltage(getVOct(finalTone), c)"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Customscaler.cpp process(): outputs[CHANGEGATE_OUTPUT].setChannels(channels) and setVoltage(changePulse[c].process(...) ? 10.f : 0.f, c), the pulse triggered for 0.001f"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit fd172d0, the installed 2.0.0. Every one of the sixty matrix buttons is a real LEDBezel parameter widget with its own position, so each is clickable and each has its own line; the lamp drawn over it is a light and is not clickable. Parameter index 0 is the C of octave -2 at the bottom of the left-hand column and index 59 is the B of octave 2 at the top of the right-hand column, so index order runs up each column and then across. The oct range and latch/toggle switches both name their positions in the order the code tests for, so neither is reversed. None of the seven inputs and neither output was given a name in the code. The p knob is configured with a per cent unit and no display multiplier, so its tooltip reads 0.5% where it means a probability of 0.5."
   },
   "Normaliser": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Scales a signal to a chosen output range, taking the lowest and the highest voltages it has been given so far as the bottom and the top of the input range",
+    "The signal to be scaled; the number of channels here sets the number of channels at out",
+    "Sets the voltage that the lowest input recorded so far comes out as, -10V to 10V",
+    "Sets the voltage that the highest input recorded so far comes out as, -10V to 10V",
+    "Clears the recorded lowest and highest input voltages, so the range is learned again from whatever arrives next",
+    "Stops the recorded lowest and highest input voltages from being updated. The lamp lights while it is on, and an input beyond either recorded end comes out at the min or the max knob's voltage",
+    "Gives each channel its own pair of recorded lowest and highest voltages, rather than one pair taken from every channel together. The lamp lights while it is on, and pressing it clears the record",
+    "The lowest input voltage recorded so far",
+    "The highest input voltage recorded so far",
+    "The input scaled so that the lowest voltage recorded so far comes out at the min knob and the highest at the max knob, and clamped between those two knobs",
+    "Note — before any signal arrives the recorded lowest is 11V and the recorded highest is -11V, so the min output reads 11V and the max output reads -11V.",
+    "Note — while the recorded lowest and highest are the same voltage, which is the case until the input has moved at all, out carries the min knob's voltage.",
+    "Note — the min and max outputs carry one channel each unless poly is on, when they carry as many channels as the input.",
+    "Note — the recorded lowest and highest are saved with the patch, so a patch comes back with the range it had already learned."
+   ],
+   "param": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6
+   },
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Normaliser.cpp process(): channels = inputs[IN_INPUT].getChannels(), the min/max update and the scaling loop both read getVoltage(c), and the recorded bounds start at 11 and -11"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "why": "src/Normaliser.cpp process(): setChannels(channels) and setVoltage(minInput[c], c) per channel when poly is on, setChannels(1) otherwise"
+     },
+     "1": {
+      "poly": true,
+      "range": "±10V",
+      "why": "src/Normaliser.cpp process(): setChannels(channels) and setVoltage(maxInput[c], c) per channel when poly is on, setChannels(1) otherwise"
+     },
+     "2": {
+      "poly": true,
+      "range": "±10V",
+      "why": "src/Normaliser.cpp process(): outputs[OUT_OUTPUT].setChannels(channels) then setVoltage(clamp(scaledValue, outputMin, outputMax), c), with the knobs spanning -10V to 10V"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit fd172d0, the installed 2.0.0. The in jack and the out jack are left without a family, because the module scales whatever is patched into it; the min and max outputs carry measured voltages and are marked cv. The reset, freeze and poly buttons are configured with configParam rather than configButton, so Rack's tooltip for each shows a value rather than a state; the panel lamps are what show whether freeze and poly are on."
   }
  }
 }

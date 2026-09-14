@@ -2,12 +2,183 @@
  "plugin": "Wygonium",
  "source": "https://github.com/gwygonik/ORBsqVi",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "ORBsqVi": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Algorithmic CV sequencer: it walks a circular orbit through a field of two-dimensional noise, samples that orbit at a chosen number of points, and plays those points as steps whenever it is clocked",
+    "Sets which steps are taken off the main output and sent to the filtered one, 1 to 16 of them; the middle of its travel takes none and the two sides pick opposite sets of steps",
+    "Sets how many points the orbit is sampled at, 2 to 16; it does not shorten the sequence but samples the same circle more or less finely, so a change alters every step",
+    "Sets where in the noise field the orbit is centred, 1 to 10; moving it gives an entirely different sequence, and the module recalculates every step when it changes",
+    "Sets how wide the orbit is, 1 to 10, doubling the radius for every 1 it adds: at the bottom every step is nearly the same value, at the top they cover the field",
+    "Sets how far each step slides away from its noise value as the orbit creeps round, forward above the centre and backwards below; centred, nothing drifts",
+    "Sets the voltage the noise range is spread over, 0 to 5; it comes up at 0, which silences all three CV outputs until it is raised",
+    "Multiplies the rate at which the orbit creeps round, 1 to 10",
+    "Rotates the Euclidean filter pattern around the sequence; it is held below the step count, and it does nothing while the filter style is on ALG",
+    "Chooses how the drift is spread across the steps, printing Sphere, Hemisphere and Flat; on Flat every step moves together, and the other two add a sine offset that grows across the sequence",
+    "Chooses the range the outputs are mapped into, printing -5V to +5V, 0V to +10V and 0V to +5V",
+    "Chooses how the filter picks steps, printing Euclidean for an evenly spread pattern and Noise Algo for a pick made from each step's own value",
+    "Turns the sign of every step's noise value over, and the lamp is lit while that is on",
+    "A trigger moves the sequence on one step and it wraps round to the first after the last; it fires above 2V and rearms below 0.01V",
+    "A trigger sends the sequence back to its first step; it fires above 2V and rearms below 0.01V",
+    "Takes the BASE slider over while a cable is in it: 1V to 10V sets the value directly, the slider is dragged to match and cannot be moved by hand",
+    "Takes the RANGE slider over while a cable is in it: 1V to 10V sets the value directly, the slider is dragged to match and cannot be moved by hand",
+    "Takes the DRIFT slider over while a cable is in it: 0 to 10V is spread across the whole travel, so 5V is the centre, and the slider is dragged to match",
+    "Takes the AMP slider over while a cable is in it: 0 to 10V spans the whole travel, and the slider is dragged to match",
+    "Takes the FILTER slider over while a cable is in it: 0 to 10V is spread across the whole travel, so 5V is the centre, and the slider is dragged to match",
+    "Holds the voltage of the last step that the filter left alone, until the next such step",
+    "A 1ms 10V pulse on each step that the filter leaves alone",
+    "Holds the voltage of the last step the filter took, until the next such step",
+    "A 1ms 10V pulse on each step that the filter takes",
+    "Holds the voltage of the sequence's first step, refreshed each time the sequence comes round to it",
+    "A 1ms 10V pulse each time the sequence comes round to its first step",
+    "Note — AMP comes up at 0 and every step's voltage is multiplied by it, so a newly placed module puts out 0V on all three CV jacks until AMP is raised",
+    "Note — the module has no clock of its own: nothing moves until a trigger arrives at TRIG IN",
+    "Note — INVERT comes up on. The button rests at a value the module reads as a press on its first sample, so a newly placed module has the lamp lit and every step's sign turned over; one press clears it",
+    "Note — a cable in any of the five CV jacks takes that slider over: the voltage is written into the parameter, so the slider moves on its own and ignores the mouse until the cable comes out",
+    "Note — a step whose voltage would pass ±5V is folded back rather than clipped, so turning AMP up past the point where the noise reaches the rails bends the shape instead of flattening it",
+    "Note — the steps are only recalculated when BASE, RANGE or STEPS change, and that is the costly part of the module; driving BASE or RANGE from an LFO makes it work far harder",
+    "Note — the screen draws the whole sequence as a row of steps with the current one marked, showing the voltages after drift and AMP, so it moves as the orbit creeps even between triggers",
+    "Menu — Drift Main Steps — lets the drift move the steps the filter leaves alone; it is on",
+    "Menu — Drift Filtered Steps — lets the drift move the steps the filter takes; it is on",
+    "Menu — Drift Drone — lets the drift move the drone step; it is on",
+    "Menu — Reset also resets Drift — makes a trigger at RESET IN put the orbit's creep back to where it started as well as the step counter; it is off"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18,
+    "7": 19
+   },
+   "out": {
+    "0": 20,
+    "1": 21,
+    "2": 22,
+    "3": 23,
+    "4": 24,
+    "5": 25
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "cv",
+     "3": "trigger",
+     "4": "cv",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ORBsqVi.cpp:305 passes getVoltage() to a dsp::SchmittTrigger with thresholds of 0.01 and 2, on channel 0 only"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ORBsqVi.cpp:298 passes getVoltage() to a dsp::SchmittTrigger with thresholds of 0.01 and 2, on channel 0 only"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "ORBsqVi.cpp:178-181 clamps getVoltage() to 1 and 10 and calls setValue on the Base parameter with it, so the jack replaces the slider rather than adding to it"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "ORBsqVi.cpp:183-186 clamps getVoltage() to 1 and 10 and calls setValue on the Range parameter with it, so the jack replaces the slider rather than adding to it"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "ORBsqVi.cpp:188-191 rescales getVoltage() from 0 to 10 onto -1 to 1, clamps it, and calls setValue on the Drift parameter, so the jack replaces the slider"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "ORBsqVi.cpp:193-196 rescales getVoltage() from 0 to 10 onto 0 to 5, clamps it, and calls setValue on the Amp parameter, so the jack replaces the slider"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "ORBsqVi.cpp:198-201 rescales getVoltage() from 0 to 10 onto -1 to 1, clamps it, and calls setValue on the Filter parameter, so the jack replaces the slider"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "ORBsqVi.cpp:352 writes one value with setVoltage and never calls setChannels; the range depends on the SCALE switch, which rescales to 0 to 10V or 0 to 5V at lines 340 to 346"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "ORBsqVi.cpp:364 writes 10 or 0 from a dsp::PulseGenerator triggered for 1e-3 seconds at line 351, with no setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "ORBsqVi.cpp:355 writes one value with setVoltage and never calls setChannels; the range depends on the SCALE switch"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "ORBsqVi.cpp:367 writes 10 or 0 from a dsp::PulseGenerator triggered for 1e-3 seconds at line 354, with no setChannels"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "why": "ORBsqVi.cpp:359 writes one value with setVoltage and never calls setChannels; the range depends on the SCALE switch"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "ORBsqVi.cpp:370 writes 10 or 0 from a dsp::PulseGenerator triggered for 1e-3 seconds at line 358, with no setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit d9cf8d7, which is the last commit to touch src and whose plugin.json matches the installed 2.0.4 byte for byte; the repository head 9b2abff only edits the README. Three commits carry 2.0.4, and the installed binary settles which: ORBsqVi::process at 0x737c opens with a load of args.sampleRate and a store into the module at offset 0x678, which is the curSampleRate field d9cf8d7 added and c5eddc1 does not have. FOUR INPUTS EXIST IN THE ENUM AND HAVE NO JACK. DRIFTSPEED_INPUT, DRIFTTYPE_INPUT, VOLTSCALE_INPUT and FILTERTYPE_INPUT (indices 6, 8, 9 and 10) are declared, are never given a configInput and are never added as PortWidgets; nothing in process reads them. They get no line and no tag. THE FIVE CV JACKS REPLACE THEIR SLIDERS. Each one calls setValue on its own parameter, so the slider is dragged to the voltage and cannot be moved by hand while the cable is in; the maker's README says as much, calling it an override. INVERT IS ON WHEN THE MODULE IS ADDED. configParam gives INVERT_PARAM a default of 1 while the widget is a momentary LEDButton, and process feeds that straight to a dsp::BooleanTrigger, which sees a false-to-true edge on the first sample and sets invertVoltage. onReset clears it, but Rack does not call onReset when a module is created from the browser, so a fresh module comes up with the lamp lit and every step's sign reversed. AMP defaults to 0, and every step voltage is multiplied by it, so the module is silent on arrival as well. Small things: the Filter slider has a dead band, anything between -0.02 and 0.02 reading as zero; Filter Offset is configured 0 to 16 but clamped to the step count minus one and floored, so its top is unreachable at any step count below 17 and it is ignored entirely on the Noise Algo filter; the drift accumulator is scaled by the sample rate in onSampleRateChange with a guard against a zero rate. The panel prints BASE, RANGE, DRIFT, AMP, FILTER, TYPE, SCALE, STYLE, STEPS, SPEED, INVERT, OFFSET, TRIG IN, RESET IN, MAIN, FILTER, DRONE and TRIG; the maker's own parameter names are longer and are what the tooltips show. The switch positions run bottom to top in the order configSwitch lists them, so the SCALE switch reads ±5V at the bottom and 5V at the top, matching the panel's markings. Every input and output is read or written on channel 0 only."
   }
  }
 }

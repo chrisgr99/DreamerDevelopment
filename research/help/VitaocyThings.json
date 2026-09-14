@@ -1,23 +1,192 @@
 {
  "plugin": "VitaocyThings",
- "source": "no published source; read from the installed 2.0.0 build",
+ "source": "https://github.com/Vitaocy/VitaocyThings (README and full source at commit 6f49f84, whose plugin.json matches the installed 2.0.0 byte for byte; the installed manifest lists no sourceUrl)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "EDOQNT": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer for equal divisions of the octave: the octave is cut into 1 to 48 equal steps, any step can be switched out of the scale, and an incoming pitch is pulled to the nearest step left in",
+    "The pitch to be quantized, at a volt per octave; a polyphonic cable is quantized channel by channel",
+    "The quantized pitch at a volt per octave, with as many channels as the input carries",
+    "Menu — Enable all notes — puts every step of the division back into the scale",
+    "Menu — Disable all notes — takes every step out of the scale, which leaves the quantizer using all of them again, because a scale with nothing in it is ignored rather than obeyed",
+    "Note — The number between the two arrows is how many equal steps the octave is cut into, from 1 to 48. Click an arrow to change it by one, or hold an arrow down to run through the values.",
+    "Note — The column of strips below the number is the scale, lowest step at the bottom. Click a strip to take that step out or put it back, and drag across several to paint a run of them.",
+    "Note — In the scale strip a grey strip is a step out of the scale, amber a step in it, and yellow the step being sounded right now.",
+    "Note — The arrows, the number and the scale strips are one display rather than separate controls, so none can be clicked for help. The two jacks are the only controls that can.",
+    "Note — The division and the scale are both saved with the patch."
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "src/EDOQNT.cpp lines 69 to 71: the channel count is taken from getChannels() and each channel read with getVoltage(c); the octave is found with eucDiv, so negative voltages quantize the same way positive ones do"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/EDOQNT.cpp lines 81 and 84: a voltage per channel followed by setChannels with the input's channel count"
+     }
+    }
+   },
+   "notes": "The installed plugin.json gives no sourceUrl and no manualUrl, but the plugin is published in full at https://github.com/Vitaocy/VitaocyThings and the repository's plugin.json matches the installed file byte for byte at HEAD (6f49f84), so the lines here were written from the source rather than the binary.\n\nWith every step switched off the module does not fall silent. updateRanges at src/EDOQNT.cpp lines 89 to 100 checks whether anything is enabled first, and when nothing is it ignores the enabled state entirely, so the quantizer behaves as though all steps were in. That makes the Disable all notes menu item a way of clearing the scale to start again rather than a mute.\n\nThe module has no configParam calls at all. Every control other than the two jacks lives inside custom widgets — EDOArrowButton for the counter, EDOQuantizerButton for each tone strip — so the census has an empty paramPos and no click on any of them can reach this help.\n\nThe module declares configBypass from the pitch input to the pitch output, so bypassing it passes the pitch straight through.\n\nFigures in the lines are literals in src/EDOQNT.cpp: the 1 and 48 bounds at lines 22 and 23, the default 12 at line 25."
   },
   "SCLQNT": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer that loads Scala scale files at random from the folder bundled with the plugin: an incoming pitch is folded into one octave and pulled to the nearest interval of the loaded scale",
+    "The pitch to be quantized, at a volt per octave; a polyphonic cable is quantized channel by channel",
+    "The quantized pitch at a volt per octave, with as many channels as the input carries",
+    "Menu — Random scale — loads another scale at random and puts it into the history directly after the one in use",
+    "Menu — Choose scala file — opens a file chooser for a .scl file; a file from outside the plugin's own scl folder is copied into it first, and files with any other extension are refused",
+    "Note — The left and right arrows walk back and forth through the scales loaded so far. Pressing the right arrow when there is nothing ahead loads a fresh scale at random.",
+    "Note — The panel's three columns are the scale's name read upward, a strip per interval with the lowest at the bottom, and that interval's size in cents.",
+    "Note — Click an interval strip to take that interval out of the scale or put it back, and drag across several to paint a run. Grey is out of the scale, amber is in it, yellow is sounding.",
+    "Note — The dice between the two arrows is decoration. It is drawn with no handler for a click, so pressing it does nothing; the menu's Random scale item is what rolls a new one.",
+    "Note — Intervals you switch off are not kept. They are reset to all-on every time a scale is loaded, and only the list of scale files and the position in it are saved with the patch.",
+    "Note — A pitch is matched only against the intervals inside its own octave, so a pitch between the top interval and the octave above is pulled down to that top interval rather than to the next root.",
+    "Note — The arrows, the dice and the three display columns are all custom widgets rather than separate controls, so none can be clicked for help. Only the two jacks can.",
+    "Note — The folder that ships with the plugin holds 5401 scale files, and a scale is picked from it at random the first time the module is placed."
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "src/SCLRNG.cpp lines 295 to 298: the channel count is taken from getChannels() and each channel read with getVoltage(c); the octave is taken with a floor, so negative voltages quantize the same way positive ones do"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/SCLRNG.cpp lines 316, 320 and 323: a voltage per channel followed by setChannels with the input's channel count"
+     }
+    }
+   },
+   "notes": "Written from the maker's published source at https://github.com/Vitaocy/VitaocyThings, commit 6f49f84, which the installed plugin.json matches byte for byte. The installed manifest gives no sourceUrl.\n\nThe model slug is SCLQNT and the source file, the struct and the panel art are all named SCLRNG.\n\nThree behaviours a reader would not find by clicking anything. (1) The dice icon between the arrows is a plain Widget with only a draw method (src/SCLRNG.cpp), so it takes no mouse input at all. (2) The per-interval on and off state is written by SCLToneButton::onDragStart but never serialised: dataToJson stores only the history and the index, and loadScale reassigns enabled to all ones. (3) The nearest-interval search in process runs over the intervals of one octave only, so the top of the octave never rounds up to the next octave's root.\n\nWith every interval switched off the module passes the input through unquantized rather than falling silent — the bestIdx < 0 branch in process.\n\nThe module has no configParam calls. The census has an empty paramPos, so only the two jacks can be clicked for help.\n\nThe module declares configBypass from the pitch input to the pitch output.\n\nThe file count of 5401 was taken by counting the .scl files in the installed plugin folder, not from any figure in the source."
   },
   "VOGLI": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A pitch glider: when the voltage at the input changes, the output slides to the new pitch over a set time and along a set curve, and a chance control sets how often it slides rather than jumping",
+    "Sets the shape of the slide: a slow start that rushes at the end on the left, a straight line at the centre, a fast start that eases in on the right; the display reads LOG, LIN or EXP",
+    "Sets how far the CURVE input can move the curve, from nothing at the left to the whole sweep at the right",
+    "Voltage over the glide curve, scaled by the amount knob for this control; at full amount 10V covers the knob's whole travel",
+    "Sets how long one slide takes, from 0.01 seconds at the left to 5 seconds at the right, spaced logarithmically so the short times are the easier to set",
+    "Sets how far the TIME input can move the glide time, from nothing at the left to the whole sweep at the right",
+    "Voltage over the glide time, scaled by the amount knob for this control; at full amount 10V covers the knob's whole travel",
+    "Sets the chance that a pitch change is slid to rather than jumped to, none at the left and every one at the right, rolled afresh at each change",
+    "Sets how far the CHANCE input can move the glide chance, from nothing at the left to the whole sweep at the right",
+    "Voltage over the glide chance, scaled by the amount knob for this control; at full amount 10V covers the knob's whole travel",
+    "The pitch to be glided, at a volt per octave; a polyphonic cable is glided channel by channel, each channel with its own slide",
+    "The glided pitch at a volt per octave, with as many channels as the input carries",
+    "Note — The display above the CURVE knob draws the shape of the slide and prints LOG, LIN or EXP under it. It follows the knob and the CURVE input together, and reads the input's first channel only.",
+    "Note — Each main knob carries two arcs on its face: a grey one showing how far its input could push it at the amount knob's present setting, and a yellow one showing where the voltage has it now.",
+    "Note — A change smaller than 0.01V, about a sixth of a semitone in 12 tone tuning, is not counted as a new pitch and passes through without a slide.",
+    "Note — Bypassing the module passes the pitch input straight to the pitch output."
+   ],
+   "param": {
+    "1": 1,
+    "4": 2,
+    "0": 4,
+    "3": 5,
+    "2": 7,
+    "5": 8
+   },
+   "in": {
+    "1": 3,
+    "2": 6,
+    "3": 9,
+    "0": 10
+   },
+   "out": {
+    "0": 11
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "src/VOGLI.cpp lines 94 and 97: the channel count is taken from getChannels() and each channel read with getVoltage(c)"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/VOGLI.cpp line 101 reads it with getPolyVoltage(c), multiplies by the amount knob and by the 0.1 depth at line 49, adds that to the knob and clamps the total to 0 to 1"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/VOGLI.cpp line 100 reads it with getPolyVoltage(c), multiplies by the amount knob and by the 0.1 depth at line 49, adds that to the knob and clamps the total to 0 to 1"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "why": "src/VOGLI.cpp line 102 reads it with getPolyVoltage(c), multiplies by the amount knob and by the 0.1 depth at line 49, adds that to the knob and clamps the total to 0 to 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/VOGLI.cpp lines 126, 131 and 134: a voltage per channel followed by setChannels with the input's channel count"
+     }
+    }
+   },
+   "notes": "Written from the maker's published source at https://github.com/Vitaocy/VitaocyThings, commit 6f49f84, which the installed plugin.json matches byte for byte. The installed manifest gives no sourceUrl and no manualUrl.\n\nThe three amount knobs are plain attenuators over 0 to 1, not attenuverters, so a negative voltage at an input always lowers the control it feeds. The 0.1 depth constant at line 49 means 10V at full amount covers the whole knob range; the README's phrasing, \"a ±10 V signal sweeps the entire range\", describes a swing of twice that.\n\nThe curve exponent runs from 10 at the left of the knob to 0.1 at the right (line 106), and the display's own label calls an exponent above 1.1 LOG and one below 0.9 EXP (line 181). The maker's source comment at line 105 gives the same mapping the other way round, calling 0.1 exponential and 10 logarithmic, which agrees with the display.\n\nAll three main knobs and the display read their control input per channel except the display, which uses channel 0 (getCurve at line 80 calls getVoltage rather than getPolyVoltage).\n\nThe knob arcs and the curve preview are drawn in drawLayer on custom widgets, so they are readouts rather than controls.\n\nFigures in the lines are literals in src/VOGLI.cpp: the 0.01 and 5 second bounds at lines 46 and 47, the 0.01V detection threshold at line 45, the 0.1 CV depth at line 49."
   }
  }
 }

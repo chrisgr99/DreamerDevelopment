@@ -2,27 +2,326 @@
  "plugin": "BlushAudio",
  "source": "https://github.com/BlushAudioLab/BlushAudioVCVFreeModules",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "BuffMult": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A buffered multiple in two banks of three, where the lower bank takes the upper bank's signal until it is given one of its own",
+    "The signal copied to OUTPUT 1, OUTPUT 2 and OUTPUT 3, and to all six outputs while INPUT 2 is empty",
+    "The signal copied to OUTPUT 4, OUTPUT 5 and OUTPUT 6; while this jack is empty those three carry INPUT 1 instead",
+    "A copy of INPUT 1",
+    "A copy of INPUT 2, or of INPUT 1 while INPUT 2 is empty",
+    "Note — nothing is added to the signal: the voltages are copied straight across with no gain, offset or attenuation",
+    "Note — the copy is polyphonic, and an output carries as many channels as the input feeding it",
+    "Note — the jacks are not specific to any one signal; audio, pitch, gates and slow control voltages all pass through alike"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 4,
+    "4": 4,
+    "5": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "BuffMult.cpp:39-40 takes getChannels() and getVoltages() from this port and passes both to setChannels and writeVoltages on the first three outputs"
+     },
+     "1": {
+      "poly": true,
+      "normal": "INPUT 1",
+      "why": "BuffMult.cpp:52-55 replaces the channel count and voltage array with this port's only when isConnected, otherwise the last three outputs keep INPUT 1's"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "BuffMult.cpp:43-44 calls setChannels with the input's channel count and writeVoltages with its whole array"
+     },
+     "1": {
+      "poly": true,
+      "why": "BuffMult.cpp:45-46 calls setChannels with the input's channel count and writeVoltages with its whole array"
+     },
+     "2": {
+      "poly": true,
+      "why": "BuffMult.cpp:47-48 calls setChannels with the input's channel count and writeVoltages with its whole array"
+     },
+     "3": {
+      "poly": true,
+      "why": "BuffMult.cpp:59-60 calls setChannels and writeVoltages with INPUT 2's array, or INPUT 1's when INPUT 2 is empty"
+     },
+     "4": {
+      "poly": true,
+      "why": "BuffMult.cpp:61-62 calls setChannels and writeVoltages with INPUT 2's array, or INPUT 1's when INPUT 2 is empty"
+     },
+     "5": {
+      "poly": true,
+      "why": "BuffMult.cpp:63-64 calls setChannels and writeVoltages with INPUT 2's array, or INPUT 1's when INPUT 2 is empty"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit e5f0e3d, the only commit carrying version 2.2.0. No family is given to any jack: a mult carries whatever is patched into it, so a colour here would be a claim nobody can make. The panel draws the routing as arrows, including the line that carries INPUT 1 past INPUT 2 to the lower bank. The module has no parameters and no lights. Every configured port is used; nothing is configured twice and no jack is left unread. With INPUT 1 empty its channel count is 0, so the first three outputs are set to 0 channels."
   },
   "BuffMix": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A mixer in two banks of three whose routing changes with which outputs are patched, dividing the sum by the number of patched inputs",
+    "One of the three inputs summed into OUTPUT 1 whenever OUTPUT 1 is patched, and into OUTPUT 2 when OUTPUT 1 is empty",
+    "One of the three inputs summed into OUTPUT 2, and dropped entirely when OUTPUT 1 is patched and OUTPUT 2 is not",
+    "INPUT 1, INPUT 2 and INPUT 3 summed and divided by the number of patched inputs",
+    "INPUT 4, INPUT 5 and INPUT 6 summed while OUTPUT 1 is patched, or all six inputs summed while it is empty, divided by the number of patched inputs",
+    "Note — what is mixed depends on which outputs are patched: OUTPUT 2 alone takes all six inputs, OUTPUT 1 alone takes inputs 1 to 3 and drops the rest, and with both patched the two banks stay apart",
+    "Note — the sum is divided by the number of patched inputs, so patching another cable makes every input already there quieter",
+    "Note — with both outputs patched the divisor counts only the cables in INPUT 1 to INPUT 3 but is applied to both outputs, so INPUT 4 to INPUT 6 are scaled by a count that has nothing to do with them",
+    "Note — with both outputs patched the polyphonic channel count is read only from INPUT 4 to INPUT 6, so a polyphonic cable in INPUT 1 to INPUT 3 is cut down to however many channels the lower bank has",
+    "Note — the jacks are not specific to any one signal; audio, gates and slow control voltages all sum alike"
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 2,
+    "4": 2,
+    "5": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "BuffMix.cpp:72-74 and 104-105 read this port with getVoltageSimd<float_4>(ch) inside a loop bounded by the channel count gathered at lines 41-59"
+     },
+     "1": {
+      "poly": true,
+      "why": "BuffMix.cpp:72-74 and 104-105 read this port with getVoltageSimd<float_4>(ch) inside a loop bounded by the channel count gathered at lines 41-59"
+     },
+     "2": {
+      "poly": true,
+      "why": "BuffMix.cpp:72-74 and 104-105 read this port with getVoltageSimd<float_4>(ch) inside a loop bounded by the channel count gathered at lines 41-59"
+     },
+     "3": {
+      "poly": true,
+      "why": "BuffMix.cpp:86-88 and 105 read this port with getVoltageSimd<float_4>(ch) inside the same channel loop"
+     },
+     "4": {
+      "poly": true,
+      "why": "BuffMix.cpp:86-88 and 105 read this port with getVoltageSimd<float_4>(ch) inside the same channel loop"
+     },
+     "5": {
+      "poly": true,
+      "why": "BuffMix.cpp:86-88 and 105 read this port with getVoltageSimd<float_4>(ch) inside the same channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "BuffMix.cpp:80 and 118 write with setVoltageSimd across the channel loop and then call setChannels"
+     },
+     "1": {
+      "poly": true,
+      "why": "BuffMix.cpp:81 and 119 write with setVoltageSimd across the channel loop and then call setChannels"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit e5f0e3d, the only commit carrying version 2.2.0. No family is given to any jack: this is a plain summer and a colour would claim more than the code says. Two faults in the routing arithmetic are real and are written into the notes lines. At BuffMix.cpp:47-52, the branch taken when both outputs are patched gathers the channel count from inputs 4 to 6 (IN_INPUTS + (i + 3)) while counting connected cables from inputs 1 to 3 (IN_INPUTS + i); the loop index is the same i in both statements, so one of the two must be wrong, and the effect is a divisor that ignores the lower bank and a channel count that ignores the upper one. The gain is 1 divided by the number of connected inputs, with a floor of 1, at lines 62-63. When OUTPUT 1 is not patched the code still writes 0V into it, which no one can hear. Every configured port is read; nothing is configured twice. The module has no parameters and no lights."
   },
   "Logician": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two logic gates, each taking two inputs and giving both a result and its inverse, with the gate chosen by a button and shown on a column of lamps",
+    "Steps that gate through AND, OR and XOR and back round to AND; the button's artwork is the same in all three positions, so the lit lamp beside it is the only indication of which one is chosen",
+    "The first input to that gate; with nothing patched here the gate is switched off, both of its outputs are held at 0V and none of its lamps lights",
+    "The second input to that gate; with nothing patched here the gate becomes a NOT of the other input whatever the button says, and the NOT/THRU lamp comes on",
+    "10V while the gate is true and 0V while it is false, giving AND, OR, XOR or, with the B input empty, NOT of the A input",
+    "0V while the gate is true and 10V while it is false, giving NAND, NOR, XNOR or, with the B input empty, a buffered copy of the A input",
+    "Note — an input counts as high above 5.1V and low below 4.9V, and between those two the gate holds whatever it decided last",
+    "Note — the lamp between a gate's two output jacks shows green while that gate is true and red while it is false, and is dark while the gate is switched off",
+    "Note — the lamps are marked AND/NAND, OR/NOR, XOR/XNOR and NOT/THRU: the first word of each pair is what the plain output gives, the second what the barred output gives",
+    "Note — the button has no effect while the B input of its gate is empty; the gate is a NOT in that case and stays one",
+    "Note — one channel per jack; a polyphonic cable is reduced to its first channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 2,
+    "3": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 5,
+    "3": 5
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 5.1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Logician.cpp:62 reads getVoltage() with no channel; lines 71-77 make high true only when the value is at or above 5.1 and low true only at or below 4.9, so anything below 4.9 including negatives reads the same"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 5.1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Logician.cpp:63 reads getVoltage() with no channel and lines 73-74 apply the same 4.9 and 5.1 comparisons; line 98 also tests isConnected to pick NOT mode"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 5.1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Logician.cpp:64 reads getVoltage() with no channel and lines 75-76 apply the same 4.9 and 5.1 comparisons"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 5.1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Logician.cpp:65 reads getVoltage() with no channel and lines 77-78 apply the same 4.9 and 5.1 comparisons; line 210 also tests isConnected to pick NOT mode"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Logician.cpp writes only 0.0f or 10.0f into this port with setVoltage, at lines 90, 104, 112, 131, 139 and onwards, and never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Logician.cpp writes only 0.0f or 10.0f into this port with setVoltage, at lines 201, 216, 224 and onwards, and never calls setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Logician.cpp writes only 0.0f or 10.0f into this port with setVoltage, at lines 91, 105, 113, 132, 140 and onwards, and never calls setChannels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Logician.cpp writes only 0.0f or 10.0f into this port with setVoltage, at lines 202, 217, 225 and onwards, and never calls setChannels"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit e5f0e3d, the only commit carrying version 2.2.0. The panel prints INPUT 1A, INPUT 1B, OUTPUT 1 and OUTPUT 1 with a bar over it for the inverted one, and the same for the lower gate. The 4.9 and 5.1 thresholds come from a comparator at 5.0 and hysterisisAmount 0.1 at Logician.cpp:68-73; the maker's spelling of the variable is hysterisis, and what it actually builds is a dead band rather than hysteresis, because between 4.9 and 5.1 neither the high nor the low test passes and no branch runs, so the output keeps its previous value. Almost every comparison in this file is written with a single equals sign inside the condition, for example (input1a = low1a) and (input1a = (high1a) && (input1b = (high1b))); each of these assigns and then tests, and each was worked through by hand. In every case the value tested is the correct one, because C++ evaluates the assignment's right-hand side first and the clobbered variable is not read again, so the AND, OR, XOR and NOT results are all right despite the way they are written. The two mode buttons are SvgSwitch widgets built with three frames that all load the same file, res/modebutton.svg for the first gate and res/modebutton2.svg for the second, so the button never changes appearance. configLight is called for only two of the twelve lights, OUTPUT1HIGHGREEN and OUTPUT2HIGHRED at lines 51-52, which is the pair mismatched: for the first gate the green half is named and for the second the red half is. Lights cannot be clicked for help, so this shows only in tooltips. Every configured parameter and port is read in process(); nothing is configured twice and no jack is left unread."
   },
   "TrackAndField": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two sample and hold units, each switchable to track and hold, and each of which samples white noise made inside the module when its signal input is empty",
+    "Up is sample and hold, taking one reading on each rising trigger and holding it; down is track and hold, following the input while the trigger is above 0V and freezing when it drops back",
+    "The voltage that unit samples; with nothing patched here it samples white noise made inside the module instead",
+    "In sample and hold a rising edge here takes a reading, going high above 1V and arming again below 0V; in track and hold the unit follows its input while this is above 0V",
+    "The voltage the upper unit is holding, despite the maker's tooltip naming this jack Output B",
+    "The voltage the lower unit is holding; the maker never gave this jack a name, so Rack falls back to calling it Output 2",
+    "Note — with both the signal and the trigger input of a unit empty, that unit's output is held at 0V",
+    "Note — in track and hold with the signal input empty, the output takes a fresh noise value on every sample while the trigger is above 0V, which makes it a noise source rather than a held voltage",
+    "Note — the noise both units draw on is one value per sample shared between them, so triggering both on the same sample gives both outputs the same voltage",
+    "Note — the trigger detectors are single variables shared by every copy of this module in the patch, so a second Track and Field takes in the first one's trigger edges and both then fire wrongly",
+    "Note — the lamp beside an output brightens with the voltage being held, dark at 0V, fully lit at 1V and above, and dark again for any negative voltage",
+    "Note — one channel per jack; a polyphonic cable is reduced to its first channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 2,
+    "3": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "cv",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "white noise made inside the module",
+      "why": "TrackAndField.cpp:44 reads getVoltage() with no channel, and lines 57 and 62 branch on isConnected to substitute random::normal() scaled by 5 over the square root of 2"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TrackAndField.cpp:45 reads getVoltage() with no channel; line 57 passes it to dsp::SchmittTrigger::process, whose default thresholds are 0 and 1, and line 74 compares it against the threshold variable, which is 0"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "white noise made inside the module",
+      "why": "TrackAndField.cpp:46 reads getVoltage() with no channel, and lines 99 and 104 branch on isConnected to substitute the same noise value"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TrackAndField.cpp:47 reads getVoltage() with no channel; line 99 passes it to dsp::SchmittTrigger::process with its default thresholds of 0 and 1, and line 116 compares it against the threshold variable, which is 0"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "TrackAndField.cpp:58, 63, 68, 75, 81 and 88 each write one value with setVoltage, and setChannels is never called"
+     },
+     "1": {
+      "poly": false,
+      "why": "TrackAndField.cpp:100, 105, 110, 117, 123 and 130 each write one value with setVoltage, and setChannels is never called"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit e5f0e3d, the only commit carrying version 2.2.0. Two faults here are visible to a reader and are written into the lines. First, TrackAndField.cpp:39-40 calls configOutput(TF_OUTPUTA, \"Output A\") and then configOutput(TF_OUTPUTA, \"Output B\"): the first output is configured twice and the second is never configured at all. The second call overwrites the first, so hovering the upper output jack in Rack reads Output B, and the lower jack has no name and falls back to Rack's generic Output 2. The census carries exactly this, Output B on index 0 and an empty string on index 1. Second, TrackAndField.hpp declares schmittTriggerA, schmittTriggerB, white, the four cached input voltages, threshold and modeA/modeB at file scope rather than as members of the module, so every instance of the module in the patch shares them. The cached voltages and the mode integers are written at the top of each process() call and read within the same call, so those do no harm; the two Schmitt triggers hold state between calls and do, and a second copy of the module will corrupt the first one's edge detection. The noise is random::normal() scaled by 5 divided by the square root of 2, computed once per process() call at lines 52-53 and shared by both units. The panel prints SAMPLE, TRIGGER and OUTPUT, and marks the switch positions S AND H above and T AND H below; the two switch frames are res/NKK_2, a lever pointing up, at value 0, and res/NKK_0, a lever pointing down, at value 1, so up is sample and hold and matches the label above it. The status lamp brightness is set to the raw held voltage, so it is a crude level indicator rather than an on and off light. Every configured parameter and input is read in process()."
   }
  }
 }

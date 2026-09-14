@@ -52,7 +52,47 @@
      "1": "trigger",
      "2": "trigger"
     }
-   }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Arp31c.cpp:619 read with getVoltage() alone, with no channel loop, fed at line 633 into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Arp31c.cpp:709 takes getChannels() on this input and line 715 reads getVoltage(p) per channel as a 1V/octave pitch"
+     },
+     "2": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "Arp31c.cpp:714 reads getVoltage(p) per channel of this input and keeps the pitch of any channel whose gate is above 0V"
+     },
+     "3": {
+      "step": "stepped",
+      "range": "0 to 7V",
+      "why": "Arp31c.cpp:624 read with getVoltage() alone, with no channel loop, casts it to an unsigned int and clamps that between 0 and 7, one arpeggio pattern per whole volt",
+      "poly": false
+     },
+     "4": {
+      "step": "stepped",
+      "why": "Arp31c.cpp:630 read with getVoltage() alone, with no channel loop and takes its sign against a 0.001V dead band, so the jack holds, releases or does nothing",
+      "poly": false
+     },
+     "5": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Arp31c.cpp:621 read with getVoltage() alone, with no channel loop, fed at line 634 into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     }
+    }
+   },
+   "notes": "The pattern, arpeggio and length inputs are cast to an unsigned integer before they are clamped (Arp31c.cpp:624), so a negative voltage does not read as zero: it wraps to a very large number and the clamp then pins it to the last setting in the list. Send only positive voltages to those jacks."
   },
   "Arp32": {
    "lines": [
@@ -113,7 +153,53 @@
      "1": "trigger",
      "2": "trigger"
     }
-   }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Arp32p.cpp:519 read with getVoltage() alone, with no channel loop, fed at line 547 into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "1": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Arp32p.cpp:621 read with getVoltage() alone, with no channel loop and takes it as a 1V/octave pitch",
+      "poly": false
+     },
+     "2": {
+      "step": "stepped",
+      "range": "0 to 5V",
+      "why": "Arp32p.cpp:525 read with getVoltage() alone, with no channel loop, casts it to an unsigned int and clamps that between 0 and 5, one pattern per whole volt",
+      "poly": false
+     },
+     "3": {
+      "step": "stepped",
+      "range": "1 to 16V",
+      "why": "Arp32p.cpp:531 read with getVoltage() alone, with no channel loop, casts it to an unsigned int and clamps that between 1 and 16, one step of length per whole volt",
+      "poly": false
+     },
+     "4": {
+      "step": "stepped",
+      "range": "-24 to 24V",
+      "why": "Arp32p.cpp:537 read with getVoltage() alone, with no channel loop, casts it to an int and clamps that between -24 and 24, one semitone per whole volt",
+      "poly": false
+     },
+     "5": {
+      "step": "stepped",
+      "why": "Arp32p.cpp:544 read with getVoltage() alone, with no channel loop and takes its sign against a 0.001V dead band, so the jack holds, releases or does nothing",
+      "poly": false
+     },
+     "6": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Arp32p.cpp:521 read with getVoltage() alone, with no channel loop, fed at line 548 into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     }
+    }
+   },
+   "notes": "The pattern, arpeggio and length inputs are cast to an unsigned integer before they are clamped (Arp32p.cpp:525 and 531), so a negative voltage does not read as zero: it wraps to a very large number and the clamp then pins it to the last setting in the list. Send only positive voltages to those jacks."
   },
   "Bombe": {
    "lines": [
@@ -175,6 +261,80 @@
      "4": "pitch",
      "5": "pitch"
     }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Bombe.cpp:158 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "1": {
+      "step": "stepped",
+      "normal": "the ROOT knob's setting",
+      "why": "Bombe.cpp:169 read with getVoltage() alone, with no channel loop and turns it into a key, falling back to the ROOT knob at line 179 when nothing is patched",
+      "poly": false
+     },
+     "2": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "normal": "the MODE knob's setting",
+      "why": "Bombe.cpp:163 read with getVoltage() alone, with no channel loop and AHCommon.cpp:639 clamps its magnitude to 0-10V across the seven modes, falling back to the MODE knob when nothing is patched",
+      "poly": false
+     },
+     "3": {
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "Bombe.cpp:185 read with getVoltage() alone, with no channel loop and freezes the loop where it is above 0.000001V",
+      "poly": false
+     },
+     "4": {
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Bombe.cpp:182 read with getVoltage() alone, with no channel loop and clamps the Y knob plus a tenth of the voltage between 0 and 1",
+      "poly": false
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Bombe.cpp:273 sets this output to six channels and line 275 writes a 1V/octave pitch to each"
+     },
+     "1": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Bombe.cpp:276 sets this output to one note of the chord as a 1V/octave pitch, with setVoltage() alone",
+      "poly": false
+     },
+     "2": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Bombe.cpp:276 sets this output to one note of the chord as a 1V/octave pitch, with setVoltage() alone",
+      "poly": false
+     },
+     "3": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Bombe.cpp:276 sets this output to one note of the chord as a 1V/octave pitch, with setVoltage() alone",
+      "poly": false
+     },
+     "4": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Bombe.cpp:276 sets this output to one note of the chord as a 1V/octave pitch, with setVoltage() alone",
+      "poly": false
+     },
+     "5": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Bombe.cpp:276 sets this output to one note of the chord as a 1V/octave pitch, with setVoltage() alone",
+      "poly": false
+     }
+    }
    }
   },
   "Circle": {
@@ -215,6 +375,35 @@
     "out": {
      "0": "cv",
      "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Circle.cpp:88 read with getVoltage() alone, with no channel loop and feeds it at line 116 into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "1": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Circle.cpp:89 read with getVoltage() alone, with no channel loop and feeds it at line 117 into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "2": {
+      "step": "stepped",
+      "normal": "the ROOT knob's setting",
+      "why": "Circle.cpp:93 read with getVoltage() alone, with no channel loop and turns it into a key, falling back to the ROOT knob at line 101 when nothing is patched",
+      "poly": false
+     },
+     "3": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "normal": "the MODE knob's setting",
+      "why": "Circle.cpp:107 read with getVoltage() alone, with no channel loop and rescales its magnitude from 0-10V across the seven modes, falling back to the MODE knob at line 110 when nothing is patched",
+      "poly": false
+     }
     }
    }
   },
@@ -319,7 +508,82 @@
      "1": "audio"
     }
    },
-   "notes": "The wiki says the odd-numbered voices go to LEFT and the even-numbered ones to RIGHT when both outputs are patched; the installed code pans every voice across both sides and sends the mono sum to whichever single output is patched."
+   "notes": "The wiki says the odd-numbered voices go to LEFT and the even-numbered ones to RIGHT when both outputs are patched; the installed code pans every voice across both sides and sends the mono sum to whichever single output is patched.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Chord.cpp:136 takes getChannels() on this input and line 137 reads getVoltage(i) per channel as the 1V/octave pitch of each unpatched voice"
+     },
+     "1": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "normal": "the matching channel of the first pitch input",
+      "why": "Chord.cpp:134 read with getVoltage() alone, with no channel loop as a 1V/octave pitch, and lines 136 to 139 read the matching channel of the first pitch input when nothing is patched here",
+      "poly": false
+     },
+     "2": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "normal": "the matching channel of the first pitch input",
+      "why": "Chord.cpp:134 read with getVoltage() alone, with no channel loop as a 1V/octave pitch, and lines 136 to 139 read the matching channel of the first pitch input when nothing is patched here",
+      "poly": false
+     },
+     "3": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "normal": "the matching channel of the first pitch input",
+      "why": "Chord.cpp:134 read with getVoltage() alone, with no channel loop as a 1V/octave pitch, and lines 136 to 139 read the matching channel of the first pitch input when nothing is patched here",
+      "poly": false
+     },
+     "4": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "normal": "the matching channel of the first pitch input",
+      "why": "Chord.cpp:134 read with getVoltage() alone, with no channel loop as a 1V/octave pitch, and lines 136 to 139 read the matching channel of the first pitch input when nothing is patched here",
+      "poly": false
+     },
+     "5": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "normal": "the matching channel of the first pitch input",
+      "why": "Chord.cpp:134 read with getVoltage() alone, with no channel loop as a 1V/octave pitch, and lines 136 to 139 read the matching channel of the first pitch input when nothing is patched here",
+      "poly": false
+     },
+     "6": {
+      "step": "continuous",
+      "why": "Chord.cpp:148 read with getVoltage() alone, with no channel loop and adds a tenth of it, through that voice's PWM knob, to its pulse width",
+      "poly": false
+     },
+     "7": {
+      "step": "continuous",
+      "why": "Chord.cpp:148 read with getVoltage() alone, with no channel loop and adds a tenth of it, through that voice's PWM knob, to its pulse width",
+      "poly": false
+     },
+     "8": {
+      "step": "continuous",
+      "why": "Chord.cpp:148 read with getVoltage() alone, with no channel loop and adds a tenth of it, through that voice's PWM knob, to its pulse width",
+      "poly": false
+     },
+     "9": {
+      "step": "continuous",
+      "why": "Chord.cpp:148 read with getVoltage() alone, with no channel loop and adds a tenth of it, through that voice's PWM knob, to its pulse width",
+      "poly": false
+     },
+     "10": {
+      "step": "continuous",
+      "why": "Chord.cpp:148 read with getVoltage() alone, with no channel loop and adds a tenth of it, through that voice's PWM knob, to its pulse width",
+      "poly": false
+     },
+     "11": {
+      "step": "continuous",
+      "why": "Chord.cpp:148 read with getVoltage() alone, with no channel loop and adds a tenth of it, through that voice's PWM knob, to its pulse width",
+      "poly": false
+     }
+    }
+   }
   },
   "Galaxy": {
    "lines": [
@@ -370,6 +634,67 @@
      "3": "pitch",
      "4": "pitch",
      "5": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Galaxy.cpp:193 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "1": {
+      "step": "stepped",
+      "normal": "the ROOT knob's setting",
+      "why": "Galaxy.cpp:202 read with getVoltage() alone, with no channel loop and turns it into a key, falling back to the ROOT knob at line 212 when nothing is patched",
+      "poly": false
+     },
+     "2": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "normal": "the MODE knob's setting",
+      "why": "Galaxy.cpp:195 read with getVoltage() alone, with no channel loop and AHCommon.cpp:639 clamps its magnitude to 0-10V across the seven modes, falling back to the MODE knob when nothing is patched",
+      "poly": false
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Galaxy.cpp:319 sets this output to six channels and line 321 writes a 1V/octave pitch to each"
+     },
+     "1": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Galaxy.cpp:322 sets this output to one note of the chord as a 1V/octave pitch, with setVoltage() alone",
+      "poly": false
+     },
+     "2": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Galaxy.cpp:322 sets this output to one note of the chord as a 1V/octave pitch, with setVoltage() alone",
+      "poly": false
+     },
+     "3": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Galaxy.cpp:322 sets this output to one note of the chord as a 1V/octave pitch, with setVoltage() alone",
+      "poly": false
+     },
+     "4": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Galaxy.cpp:322 sets this output to one note of the chord as a 1V/octave pitch, with setVoltage() alone",
+      "poly": false
+     },
+     "5": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Galaxy.cpp:322 sets this output to one note of the chord as a 1V/octave pitch, with setVoltage() alone",
+      "poly": false
+     }
     }
    }
   },
@@ -459,7 +784,67 @@
      "4": "trigger"
     }
    },
-   "notes": "The wiki calls the trigger input SAMPLE; the panel prints TRIGGER. The panel draws ATTN in the row that ends at OUT, but in the installed code the level it sets is applied to the LFO before the noise mix, so it scales the LFO and MIXED outputs and the voltage that gets sampled, not the OUT jack after sampling."
+   "notes": "The wiki calls the trigger input SAMPLE; the panel prints TRIGGER. The panel draws ATTN in the row that ends at OUT, but in the installed code the level it sets is applied to the LFO before the noise mix, so it scales the LFO and MIXED outputs and the voltage that gets sampled, not the OUT jack after sampling.",
+   "props": {
+    "in": {
+     "0": {
+      "step": "continuous",
+      "why": "Generative.cpp:210 read with getVoltage() alone, with no channel loop and adds it to the WAVE knob before the result is folded into the four waves",
+      "poly": false
+     },
+     "1": {
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Generative.cpp:203 read with getVoltage() alone, with no channel loop and adds it, through the FM CV knob, to the LFO frequency in octaves with nothing bounding the total",
+      "poly": false
+     },
+     "2": {
+      "step": "continuous",
+      "why": "Generative.cpp:238 read with getVoltage() alone, with no channel loop and crossfades the LFO against it",
+      "poly": false
+     },
+     "3": {
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "why": "Generative.cpp:234 read with getVoltage() alone, with no channel loop and clamps the NOISE MIX knob plus the voltage between 0 and 1",
+      "poly": false
+     },
+     "4": {
+      "step": "continuous",
+      "why": "Generative.cpp:248 read with getVoltage() alone, with no channel loop and samples it",
+      "poly": false
+     },
+     "5": {
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "-2 to 6V",
+      "why": "Generative.cpp:207 read with getVoltage() alone, with no channel loop and clamps the CLOCK knob plus the voltage between -2 and 6 octaves of tempo",
+      "poly": false
+     },
+     "6": {
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Generative.cpp:270 read with getVoltage() alone, with no channel loop and clamps the PROB knob plus a tenth of the voltage between 0 and 1",
+      "poly": false
+     },
+     "7": {
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "Generative.cpp:249 read with getVoltage() alone, with no channel loop and holds the output where it is above 0.000001V",
+      "poly": false
+     }
+    },
+    "out": {
+     "4": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Generative.cpp:333 and 339 set this output to 10V or 0V with setVoltage() alone",
+      "poly": false
+     }
+    }
+   }
   },
   "Imp": {
    "lines": [
@@ -496,6 +881,24 @@
     },
     "out": {
      "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Imp.cpp:103 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Imp.cpp:184 sets this output to sixteen channels and lines 193 and 195 set each channel to 10V or 0V"
+     }
     }
    }
   },
@@ -595,6 +998,114 @@
      "2": "trigger",
      "3": "trigger"
     }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Imperfect2.cpp:84 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "1": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Imperfect2.cpp:84 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "2": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Imperfect2.cpp:84 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "3": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Imperfect2.cpp:84 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "4": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:113 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the delay, in place of the knob",
+      "poly": false
+     },
+     "5": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:113 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the delay, in place of the knob",
+      "poly": false
+     },
+     "6": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:113 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the delay, in place of the knob",
+      "poly": false
+     },
+     "7": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:113 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the delay, in place of the knob",
+      "poly": false
+     },
+     "8": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:119 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the delay spread, in place of the knob",
+      "poly": false
+     },
+     "9": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:119 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the delay spread, in place of the knob",
+      "poly": false
+     },
+     "10": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:119 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the delay spread, in place of the knob",
+      "poly": false
+     },
+     "11": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:119 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the delay spread, in place of the knob",
+      "poly": false
+     },
+     "12": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:125 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the gate length, in place of the knob",
+      "poly": false
+     },
+     "13": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:125 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the gate length, in place of the knob",
+      "poly": false
+     },
+     "14": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:125 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the gate length, in place of the knob",
+      "poly": false
+     },
+     "15": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:125 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the gate length, in place of the knob",
+      "poly": false
+     },
+     "16": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:131 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the gate length spread, in place of the knob",
+      "poly": false
+     },
+     "17": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:131 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the gate length spread, in place of the knob",
+      "poly": false
+     },
+     "18": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:131 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the gate length spread, in place of the knob",
+      "poly": false
+     },
+     "19": {
+      "step": "continuous",
+      "why": "Imperfect2.cpp:131 read with getVoltage() alone, with no channel loop and takes the log to base two of its magnitude plus one as the gate length spread, in place of the knob",
+      "poly": false
+     }
+    }
    }
   },
   "Progress2": {
@@ -690,6 +1201,123 @@
      "7": "trigger",
      "8": "trigger",
      "9": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "normal": "the ROOT knob's setting",
+      "why": "Progress2.cpp:218 read with getVoltage() alone, with no channel loop and turns it into a key, falling back to the ROOT knob at line 228 when nothing is patched",
+      "poly": false
+     },
+     "1": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "normal": "the MODE knob's setting",
+      "why": "Progress2.cpp:213 read with getVoltage() alone, with no channel loop and AHCommon.cpp:639 clamps its magnitude to 0-10V across the seven modes, falling back to the MODE knob when nothing is patched",
+      "poly": false
+     },
+     "2": {
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Progress2.cpp:198 read with getVoltage() alone, with no channel loop and adds it to the CLOCK knob as octaves of tempo with nothing bounding the total",
+      "poly": false
+     },
+     "3": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Progress2.cpp:192 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "4": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Progress2.cpp:208 read with getVoltage() alone, with no channel loop, added to the reset button and fed into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "5": {
+      "step": "stepped",
+      "negative": "subtracts",
+      "sumRange": "1 to 8V",
+      "why": "Progress2.cpp:183 read with getVoltage() alone, with no channel loop and rounds the STEPS knob plus the voltage, clamped between 1 and 8, one step per whole volt",
+      "poly": false
+     },
+     "6": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "the PART knob's setting",
+      "why": "Progress2.cpp:233 read with getVoltage() alone, with no channel loop, clamps it on its own between 0 and 10 and rescales that across the 32 parts, falling back to the PART knob at line 237",
+      "poly": false
+     },
+     "7": {
+      "step": "stepped",
+      "why": "Progress2.cpp:187 read with getVoltage() alone, with no channel loop, rounds its magnitude to a whole number and wraps that round the number of steps in use",
+      "poly": false
+     }
+    },
+    "out": {
+     "0": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Progress2.cpp:291 sets this output to 10V or 0V with setVoltage() alone",
+      "poly": false
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "Progress2.cpp:298 sets this output to six channels and line 301 writes a 1V/octave pitch to each"
+     },
+     "2": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Progress2.cpp:258 sets each step gate output to 10V or 0V with setVoltage() alone",
+      "poly": false
+     },
+     "3": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Progress2.cpp:258 sets each step gate output to 10V or 0V with setVoltage() alone",
+      "poly": false
+     },
+     "4": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Progress2.cpp:258 sets each step gate output to 10V or 0V with setVoltage() alone",
+      "poly": false
+     },
+     "5": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Progress2.cpp:258 sets each step gate output to 10V or 0V with setVoltage() alone",
+      "poly": false
+     },
+     "6": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Progress2.cpp:258 sets each step gate output to 10V or 0V with setVoltage() alone",
+      "poly": false
+     },
+     "7": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Progress2.cpp:258 sets each step gate output to 10V or 0V with setVoltage() alone",
+      "poly": false
+     },
+     "8": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Progress2.cpp:258 sets each step gate output to 10V or 0V with setVoltage() alone",
+      "poly": false
+     },
+     "9": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Progress2.cpp:258 sets each step gate output to 10V or 0V with setVoltage() alone",
+      "poly": false
+     }
     }
    }
   },
@@ -804,7 +1432,44 @@
      "7": "trigger"
     }
    },
-   "notes": "Parameters 52 to 63 are declared but never configured or placed on the panel, so they have no line and no tag."
+   "notes": "Parameters 52 to 63 are declared but never configured or placed on the panel, so they have no line and no tag.",
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Ruckus.cpp:171 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "1": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Ruckus.cpp:154 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "2": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Ruckus.cpp:149 reads getVoltage(i) for all sixteen channels of this input and clamps each division knob plus 6.4 times that channel between 0 and 64"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "Ruckus.cpp:150 reads getVoltage(i) for all sixteen channels of this input and clamps each probability knob plus a tenth of that channel between 0 and 1"
+     },
+     "4": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "why": "Ruckus.cpp:151 reads getVoltage(i) for all sixteen channels of this input and clamps each shift knob plus 12.8 times that channel between -64 and 64"
+     }
+    }
+   }
   },
   "ScaleQuantizer2": {
    "lines": [
@@ -915,7 +1580,125 @@
      "15": "trigger"
     }
    },
-   "notes": "The maker's tooltip on the KEY knob carries the description 'Transposition of all outputs post-quantisation'; the installed code assigns that text to KEY_PARAM while it belongs to the TRANS knob, and KEY sets the root note of the scale."
+   "notes": "The maker's tooltip on the KEY knob carries the description 'Transposition of all outputs post-quantisation'; the installed code assigns that text to KEY_PARAM while it belongs to the TRANS knob, and KEY sets the root note of the scale.",
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ScaleQuantizerMkII.cpp:125 takes getChannels() on this input and line 137 quantises getVoltage(j) per channel as a 1V/octave pitch"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ScaleQuantizerMkII.cpp:125 takes getChannels() on this input and line 137 quantises getVoltage(j) per channel as a 1V/octave pitch"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ScaleQuantizerMkII.cpp:125 takes getChannels() on this input and line 137 quantises getVoltage(j) per channel as a 1V/octave pitch"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ScaleQuantizerMkII.cpp:125 takes getChannels() on this input and line 137 quantises getVoltage(j) per channel as a 1V/octave pitch"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ScaleQuantizerMkII.cpp:125 takes getChannels() on this input and line 137 quantises getVoltage(j) per channel as a 1V/octave pitch"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ScaleQuantizerMkII.cpp:125 takes getChannels() on this input and line 137 quantises getVoltage(j) per channel as a 1V/octave pitch"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ScaleQuantizerMkII.cpp:125 takes getChannels() on this input and line 137 quantises getVoltage(j) per channel as a 1V/octave pitch"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ScaleQuantizerMkII.cpp:125 takes getChannels() on this input and line 137 quantises getVoltage(j) per channel as a 1V/octave pitch"
+     },
+     "8": {
+      "step": "stepped",
+      "normal": "the KEY knob's setting",
+      "why": "ScaleQuantizerMkII.cpp:96 read with getVoltage() alone, with no channel loop and turns it into a root note, falling back to the KEY knob at line 105 when nothing is patched",
+      "poly": false
+     },
+     "9": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "normal": "the SCALE knob's setting",
+      "why": "ScaleQuantizerMkII.cpp:108 read with getVoltage() alone, with no channel loop and AHCommon.cpp:634 clamps its magnitude to 0-10V across the twelve scales, falling back to the SCALE knob at line 111 when nothing is patched",
+      "poly": false
+     },
+     "10": {
+      "step": "continuous",
+      "why": "ScaleQuantizerMkII.cpp:113 read with getVoltage() alone, with no channel loop and adds it to the TRANS knob as semitones, a twelfth of a volt of pitch per volt here",
+      "poly": false
+     },
+     "11": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ScaleQuantizerMkII.cpp:126 takes getChannels() on this input and line 134 feeds getVoltage(j) per channel into a rack::dsp::SchmittTrigger at its 0V/1V default"
+     },
+     "12": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ScaleQuantizerMkII.cpp:126 takes getChannels() on this input and line 134 feeds getVoltage(j) per channel into a rack::dsp::SchmittTrigger at its 0V/1V default"
+     },
+     "13": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ScaleQuantizerMkII.cpp:126 takes getChannels() on this input and line 134 feeds getVoltage(j) per channel into a rack::dsp::SchmittTrigger at its 0V/1V default"
+     },
+     "14": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ScaleQuantizerMkII.cpp:126 takes getChannels() on this input and line 134 feeds getVoltage(j) per channel into a rack::dsp::SchmittTrigger at its 0V/1V default"
+     },
+     "15": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ScaleQuantizerMkII.cpp:126 takes getChannels() on this input and line 134 feeds getVoltage(j) per channel into a rack::dsp::SchmittTrigger at its 0V/1V default"
+     },
+     "16": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ScaleQuantizerMkII.cpp:126 takes getChannels() on this input and line 134 feeds getVoltage(j) per channel into a rack::dsp::SchmittTrigger at its 0V/1V default"
+     },
+     "17": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ScaleQuantizerMkII.cpp:126 takes getChannels() on this input and line 134 feeds getVoltage(j) per channel into a rack::dsp::SchmittTrigger at its 0V/1V default"
+     },
+     "18": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ScaleQuantizerMkII.cpp:126 takes getChannels() on this input and line 134 feeds getVoltage(j) per channel into a rack::dsp::SchmittTrigger at its 0V/1V default"
+     }
+    }
+   }
   },
   "SLN": {
    "lines": [
@@ -951,7 +1734,17 @@
      "1": "audio"
     }
    },
-   "notes": "The wiki names the input SAMPLE and gives the knobs as IN, SL, CL and AT; the panel prints HOLD over the input jack, and the input is a rising-edge trigger that takes a fresh sample."
+   "notes": "The wiki names the input SAMPLE and gives the knobs as IN, SL, CL and AT; the panel prints HOLD over the input jack, and the input is a rising-edge trigger that takes a fresh sample.",
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "range": "high above 0.7V",
+      "why": "SLN.cpp:106 read with getVoltage() alone, with no channel loop, divides it by 0.7 and feeds that into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     }
+    }
+   }
   },
   "MuxDeMux": {
    "lines": [
@@ -1011,6 +1804,101 @@
     "in": {
      "17": "cv"
     }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "1": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "2": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "3": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "4": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "5": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "6": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "7": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "8": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "9": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "10": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "11": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "12": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "13": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "14": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "15": {
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:77 read with getVoltage() alone, with no channel loop and writes it to that channel of the merged output",
+      "poly": false
+     },
+     "16": {
+      "poly": true,
+      "step": "continuous",
+      "why": "MuxDeMux.cpp:51 takes getChannels() on this input and line 52 reads getVoltage(i) per channel out to the matching mono output"
+     },
+     "17": {
+      "step": "continuous",
+      "normal": "the BIAS knob's setting",
+      "why": "MuxDeMux.cpp:44 read with getVoltage() alone, with no channel loop as the gate voltage, falling back to the BIAS knob at line 46 when nothing is patched",
+      "poly": false
+     }
+    }
    }
   },
   "PolyProbe": {
@@ -1026,6 +1914,20 @@
    },
    "out": {
     "0": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "PolyProbe.cpp:198 takes getChannels() on this input and line 216 reads getVoltage(i) per channel"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "PolyProbe.cpp:206 takes getChannels() on this input and line 217 reads getVoltage(i) per channel"
+     }
+    }
    }
   },
   "PolyScope": {
@@ -1049,6 +1951,15 @@
    },
    "in": {
     "0": 1
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "PolyScope.cpp:206 takes getChannels() on this input and line 212 reads getVoltage(i) per channel into the trace buffer"
+     }
+    }
    }
   },
   "PolyUtils": {
@@ -1074,6 +1985,20 @@
     "0": 3,
     "1": 6,
     "2": 7
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "PolyUtils.cpp:51 reads getVoltage(j) per channel of this input out to the masked output"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "PolyUtils.cpp:67 takes getChannels() on this input and line 71 reads getVoltage(inChan) per channel out to one of the two sides"
+     }
+    }
    }
   },
   "PolyVolt": {
@@ -1182,7 +2107,84 @@
      "2": "trigger",
      "3": "trigger"
     }
-   }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ArpeggiatorMkII.cpp:589 read with getVoltage() alone, with no channel loop, fed at line 624 into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "1": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ArpeggiatorMkII.cpp:591 read with getVoltage() alone, with no channel loop, fed at line 625 into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "2": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ArpeggiatorMkII.cpp:635 read with getVoltage() alone, with no channel loop and takes it as a 1V/octave pitch of the chord",
+      "poly": false
+     },
+     "3": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ArpeggiatorMkII.cpp:635 read with getVoltage() alone, with no channel loop and takes it as a 1V/octave pitch of the chord",
+      "poly": false
+     },
+     "4": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ArpeggiatorMkII.cpp:635 read with getVoltage() alone, with no channel loop and takes it as a 1V/octave pitch of the chord",
+      "poly": false
+     },
+     "5": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ArpeggiatorMkII.cpp:635 read with getVoltage() alone, with no channel loop and takes it as a 1V/octave pitch of the chord",
+      "poly": false
+     },
+     "6": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ArpeggiatorMkII.cpp:635 read with getVoltage() alone, with no channel loop and takes it as a 1V/octave pitch of the chord",
+      "poly": false
+     },
+     "7": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ArpeggiatorMkII.cpp:635 read with getVoltage() alone, with no channel loop and takes it as a 1V/octave pitch of the chord",
+      "poly": false
+     },
+     "8": {
+      "step": "stepped",
+      "range": "0 to 5V",
+      "why": "ArpeggiatorMkII.cpp:598 read with getVoltage() alone, with no channel loop, casts it to an unsigned int and clamps that between 0 and 5, one pattern per whole volt",
+      "poly": false
+     },
+     "9": {
+      "step": "stepped",
+      "range": "0 to 3V",
+      "why": "ArpeggiatorMkII.cpp:604 read with getVoltage() alone, with no channel loop, casts it to an unsigned int and clamps that between 0 and 3, one arpeggio per whole volt",
+      "poly": false
+     },
+     "10": {
+      "step": "stepped",
+      "range": "1 to 16V",
+      "why": "ArpeggiatorMkII.cpp:610 read with getVoltage() alone, with no channel loop, casts it to an unsigned int and clamps that between 1 and 16, one step of length per whole volt",
+      "poly": false
+     },
+     "11": {
+      "step": "stepped",
+      "range": "-24 to 24V",
+      "why": "ArpeggiatorMkII.cpp:616 read with getVoltage() alone, with no channel loop, casts it to an int and clamps that between -24 and 24, one semitone per whole volt",
+      "poly": false
+     }
+    }
+   },
+   "notes": "The pattern, arpeggio and length inputs are cast to an unsigned integer before they are clamped (ArpeggiatorMkII.cpp:598, 604 and 610), so a negative voltage does not read as zero: it wraps to a very large number and the clamp then pins it to the last setting in the list. Send only positive voltages to those jacks."
   },
   "Progress": {
    "lines": [
@@ -1296,6 +2298,48 @@
      "13": "trigger",
      "14": "trigger"
     }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "stepped",
+      "normal": "the ROOT knob's setting",
+      "why": "Progress.cpp:259 read with getVoltage() alone, with no channel loop and turns it into a key, falling back to the ROOT knob when nothing is patched",
+      "poly": false
+     },
+     "1": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "normal": "the MODE knob's setting",
+      "why": "Progress.cpp:265 read with getVoltage() alone, with no channel loop and AHCommon.cpp:639 clamps its magnitude to 0-10V across the seven modes, falling back to the MODE knob when nothing is patched",
+      "poly": false
+     },
+     "2": {
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Progress.cpp:242 read with getVoltage() alone, with no channel loop and adds it to the CLOCK knob as octaves of tempo with nothing bounding the total",
+      "poly": false
+     },
+     "3": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Progress.cpp:236 read with getVoltage() alone, with no channel loop into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "4": {
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Progress.cpp:251 read with getVoltage() alone, with no channel loop, added to the reset button and fed into a rack::dsp::SchmittTrigger at its 0V/1V default",
+      "poly": false
+     },
+     "5": {
+      "step": "stepped",
+      "negative": "subtracts",
+      "sumRange": "1 to 8V",
+      "why": "Progress.cpp:231 read with getVoltage() alone, with no channel loop and rounds the STEPS knob plus the voltage, clamped between 1 and 8, one step per whole volt",
+      "poly": false
+     }
+    }
    }
   },
   "ScaleQuantizer": {
@@ -1352,7 +2396,116 @@
      "12": "trigger",
      "13": "trigger"
     }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ScaleQuantiser.cpp:57 read with getVoltage() alone, with no channel loop and quantises it as a 1V/octave pitch",
+      "poly": false
+     },
+     "1": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:58 read with getVoltage() alone, with no channel loop and AHCommon.cpp:653 clamps its magnitude to 0-10V across the twelve root notes",
+      "poly": false
+     },
+     "2": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:59 read with getVoltage() alone, with no channel loop and AHCommon.cpp:633 clamps its magnitude to 0-10V across the twelve scales",
+      "poly": false
+     }
+    },
+    "out": {
+     "0": {
+      "step": "continuous",
+      "range": "1V per octave",
+      "why": "ScaleQuantiser.cpp:65 sets this output to the quantised 1V/octave pitch",
+      "poly": false
+     },
+     "1": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:96 and 98 set this output to 10V or 0V",
+      "poly": false
+     },
+     "2": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "3": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "4": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "5": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "6": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "7": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "8": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "9": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "10": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "11": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "12": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     },
+     "13": {
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "ScaleQuantiser.cpp:76 and 79 set each interval output to 0V or 10V",
+      "poly": false
+     }
+    }
    }
   }
- }
+ },
+ "notes": "Version 2.0.1 calls configInput and configOutput nowhere, so Rack shows no name at all when a jack is hovered and every fact in the props blocks comes from the source at that tag."
 }

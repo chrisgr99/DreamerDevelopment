@@ -1,68 +1,1085 @@
 {
  "plugin": "Sulamith",
- "source": "https://github.com/JohannAsbjoernson/Sulamith",
+ "source": "https://github.com/JohannAsbjoernson/Sulamith/blob/main/README.md (read at commit 086d8c4, the 2.3.2 upload, along with the annotated panel images in its manual/ folder and the module sources at that commit)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "GenEcho": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo looper that records a second of audio, plays it back over and over, and lets you speed it up and blend it against the incoming signal",
+    "Sets how much of the buffer is played back before it wraps, 15% to 90% of one second",
+    "Multiplies the left input on the way in and the recorded loop on the way out, 0 to 2",
+    "Blends between the incoming signal and the loop, 0 to 1, starting at half of each",
+    "Starts recording a new loop from the two inputs, wiping what was there",
+    "Wipes the loop back to silence",
+    "Multiplies the playback speed: +0 plays at speed, +1 doubles it for an octave up, +2 trebles it and +3 quadruples it for two octaves up",
+    "The left channel of the audio to be recorded and mixed against the loop",
+    "The right channel of the audio to be recorded and mixed against the loop",
+    "A rising edge starts recording a new loop, as the SAMPLE button does",
+    "A rising edge wipes the loop, as the DELETE button does",
+    "Added to the LENGTH knob at a tenth of the buffer per volt",
+    "Added to the DRY/WET knob at a tenth per volt",
+    "A voltage above 1V steps the playback speed up by one more multiple than the OCT+ switch alone gives",
+    "Carries the left channel, the loop blended against the incoming signal and clamped to ±5V",
+    "Carries the right channel, the loop blended against the incoming signal and clamped to ±5V",
+    "Note — the module does nothing until a loop has been recorded; press SAMPLE or send a pulse to the SAMPLE jack with audio at the inputs",
+    "Note — recording begins at the first moment the left input reads exactly 0V, so a loop started against silence will not begin until signal arrives",
+    "Note — the buffer is one second of audio at a 48kHz sample rate, and the LENGTH control chooses how much of it plays",
+    "Note — the recorded audio is written into the patch file sample by sample, so a patch holding this module is very large and slow to save",
+    "Note — the GAIN knob is applied to the left input and to a right channel taken from the left, but not to a right input with its own cable",
+    "Note — the OCT+ switch reads +0 to +3 but sets a playback rate of one to four times, so only +1 and +3 are whole octaves"
+   ],
+   "param": {
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5,
+    "7": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12,
+    "6": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "GenEcho.cpp GenEcho::process: inA = inputs[WAV0_INPUT].getVoltage() * volume, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the LEFT input",
+      "why": "GenEcho.cpp GenEcho::process: inB = isConnected() ? getVoltage() : inputs[WAV0_INPUT].getVoltage() * volume, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "GenEcho.cpp GenEcho::process: gTrigger.process(getVoltage() / 2.f), a Rack SchmittTrigger at its default 0.1V and 1V thresholds on half the voltage, so the real threshold is 2V, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "GenEcho.cpp GenEcho::process: delTrigger.process(getVoltage() / 2.f), a Rack SchmittTrigger at its default thresholds on half the voltage, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0.1 to 1V",
+      "why": "GenEcho.cpp GenEcho::process: clamp(knob + getVoltage() / 10.f, 0.1, 1.f) times MAX_SAMPLE_SIZE, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "why": "GenEcho.cpp GenEcho::process: clamp(knob + getVoltage() / 10, 0.f, 1.f), with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "GenEcho.cpp GenEcho::process: oct = 1 + the OC_PARAM switch + (getVoltage() > 1 ? 1 : 0), compared once per sample with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "GenEcho.cpp GenEcho::process: setVoltage(clamp(crossfade(input, loop, cross) * crossamp, -5.f, 5.f)) with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "GenEcho.cpp GenEcho::process: setVoltage(clamp(crossfade(input, loop, cross) * crossamp, -5.f, 5.f)) with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "Five of the eleven declared parameters have no widget on the panel and cannot be clicked: TRIG_PARAM, GATE_PARAM and the three STOR entries. The right input is read without the gain multiplier when it has its own cable but with it when it falls back to the left. dataToJson writes each of the 48000 samples of both buffers as a separate JSON key. Playback steps the read index by oct each sample, oct being 1 plus the switch's 0 to 3 plus 1 more while the OCT jack is above 1V, so the rate multiplier runs 1 to 5. The breakpoint machinery inherited from StochKit is multiplied by zero in this build and contributes nothing."
   },
   "ButtonA": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A trigger utility: a button and two inputs that fire a trigger and a gate, plus two outputs that either toggle between them or put out fresh random voltages",
+    "Fires the module once, as a rising edge at either input jack does",
+    "Sets the voltage the A output carries when it is the high one, or the range its random voltages cover, a whole number from 1 to 10",
+    "Sets the voltage the B output carries when it is the high one, or the range its random voltages cover, a whole number from 1 to 10",
+    "Sets the chance that an incoming trigger is acted on at all, 0 to 1",
+    "Sets a fixed gate length, 0.2 to 10 seconds; at 0 the gate follows the input instead",
+    "Chooses what the A and B outputs do: toggle between them at their voltage settings, or give each a fresh random voltage on every trigger, swinging either side of 0V or staying above it",
+    "Puts a random name from the maker's list into the label field, or clears it if one is already there",
+    "A rising edge fires the module; this jack and the one beside it are summed with the button, so any of the three will do it",
+    "A rising edge fires the module; this jack and the one beside it are summed with the button, so any of the three will do it",
+    "Carries a 1ms pulse at 10V each time a trigger is acted on",
+    "Carries a gate at 10V, either following the input or running for the fixed length set beside it",
+    "Carries the A voltage while A is the high one in toggle mode, or a fresh random voltage on every trigger in the two random modes",
+    "Carries the B voltage while A is the low one in toggle mode, or a fresh random voltage on every trigger in the two random modes",
+    "Note — the module comes up with A high and B at 0V",
+    "Note — a polyphonic cable at either input is summed to one voltage before it is read",
+    "Note — the text field at the bottom takes six characters of your own, for telling several copies of this module apart; it is not a control and clicking it gives no help",
+    "Menu — Global Retrig — when this is switched on, a trigger arriving while a fixed-length gate is running is thrown away; switched off, every trigger is acted on",
+    "Menu — Add Slew to custom Gates — rounds the fixed-length gate into a fast attack and a slightly faster release instead of a square edge",
+    "Menu — Add Slew to random CV — slides the A and B outputs to each new random voltage instead of stepping, more slowly at wider range settings",
+    "Menu — Rnd::normal (default: uniform) — draws the random voltages from a bell-shaped spread clustered near the middle instead of an even one",
+    "Note — the Global Retrig menu item blocks retriggering when it is switched on, which is the opposite way round from what its name reads",
+    "Note — the auto-name button draws from the first ten entries of a list of twenty-one, so eleven of the names can never come up"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "ButtonA.cpp ButtonA::process: getVoltageSum() on this jack, so every channel of a polyphonic cable is added together, rescaled from 0.1V and 2V onto 0 and 1 and added to the other jack's, the pair firing at a total of 1 or -1, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "ButtonA.cpp ButtonA::process: getVoltageSum() on this jack, so every channel of a polyphonic cable is added together, rescaled from 0.1V and 2V onto 0 and 1 and added to the other jack's, the pair firing at a total of 1 or -1, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "ButtonA.cpp ButtonA::process: setVoltage(TRIGR ? 10.0 : 0.0) from a PulseGenerator triggered for 1e-3f, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "ButtonA.cpp ButtonA::process: setVoltage of 10.0 or 0.0 from a PulseGenerator triggered for the gate knob's seconds, or the slewed version of that, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "stepped",
+      "why": "ButtonA.cpp ButtonA::process: setVoltage of the A knob's 1 to 10 in toggle mode, or of a random value clamped to the knob either side of 0 or above it, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "stepped",
+      "why": "ButtonA.cpp ButtonA::process: setVoltage of the B knob's 1 to 10 in toggle mode, or of a random value clamped to the knob either side of 0 or above it, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The gate knob's 0 to 10 range has a floor applied in process(): anything above 0 and below 0.2 is raised to 0.2, so custom gates run 0.2 to 10 seconds. The README gives 0.1 to 10 seconds in its body text and 0.2 to 10 in its bullet list. RTRIG blocks a retrigger when true and allows one when false, so the menu item named Global Retrig disables retriggering. The auto-name index is floor(random::uniform() * 10) into a 21-entry table. The trigger sum also fires on a large negative voltage, because the total is tested at 1 and at -1."
   },
   "BPMClk": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock with a master output and three more, each divided down from or multiplied up from the master tempo",
+    "Starts and stops the clock; it comes up running",
+    "Sets the tempo, 15 to 300 BPM, starting at 120; the display shows whatever tempo is in use",
+    "Sets this output's speed against the master, from a forty-eighth of it to forty-eight times it in 23 steps",
+    "A rising edge sets every phase back to the start",
+    "Any change from 0V starts the clock if it is stopped and stops it if it is running",
+    "Sets the tempo from outside: as a voltage doubling the tempo per volt with 0V for 120 BPM, or as a stream of clock pulses at the rate chosen on the menu",
+    "Carries a 1ms pulse at 10V at the master tempo, and 0V while the clock is stopped",
+    "Carries a 1ms pulse at 10V at its own divided or multiplied tempo, and 0V while the clock is stopped",
+    "Note — the three division settings are /48, /32, /24, /16, /12, /8, /6, /5, /4, /3, /2, x1, x2, x3, x4, x5, x6, x8, x12, x16, x24, x32 and x48, and each is shown beside its own output",
+    "Note — in any of the pulse-counting modes an incoming pulse starts the clock by itself, and the clock stops again if no pulse arrives for a second",
+    "Note — the maker's own note is that the external sync drifts at high speeds and needs a reset after a tempo change",
+    "Menu — External Clock Mode — chooses how the external clock jack is read: as an Impromptu-style tempo voltage, or as 2, 4, 8, 12 or 24 pulses to the quarter note"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 3,
+    "4": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8,
+    "2": 8,
+    "3": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "BPMClk.cpp BPMClk::process: resetTrig.process(getVoltage()), a Rack SchmittTrigger at its default 0.1V and 1V thresholds, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "why": "BPMClk.cpp BPMClk::process: boolTrig.process(getVoltage() ? true : false), a Rack BooleanTrigger on the test against exactly zero, so any non-zero voltage counts as high, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "BPMClk.cpp BPMClk::process: clockFreq = 2.0 * pow(2.0, getVoltage()) in the CV mode, and bpmInputTrig.process(getVoltage()) counting pulses in the five PPQN modes, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "BPMClk.cpp BPMClk::process: setVoltage(divGT[i] ? 10.0 : 0.0) from a PulseGenerator triggered for 1e-3f, and an explicit 0.0 when the jack is unpatched, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "BPMClk.cpp BPMClk::process: setVoltage(divGT[i] ? 10.0 : 0.0) from a PulseGenerator triggered for 1e-3f, and an explicit 0.0 when the jack is unpatched, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "BPMClk.cpp BPMClk::process: setVoltage(divGT[i] ? 10.0 : 0.0) from a PulseGenerator triggered for 1e-3f, and an explicit 0.0 when the jack is unpatched, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "BPMClk.cpp BPMClk::process: setVoltage(divGT[i] ? 10.0 : 0.0) from a PulseGenerator triggered for 1e-3f, and an explicit 0.0 when the jack is unpatched, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The external clock jack has no family set, because the menu decides whether it wants a tempo voltage or a stream of clock pulses. The tempo knob is configured -2.0 to 2.32195 with a displayBase of 2 and a multiplier of 60, which is 15 to 300 BPM. The ON/OFF jack is read through a BooleanTrigger on `getVoltage() ? true : false`, so it has no threshold at all and flips on any departure from exactly 0V. The divider table has no /1 entry: index 11 is x1. This module is the maker's rework of ShaBang's Polyrhythm Clock."
   },
   "KnobX": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight voltage knobs, put out together as one polyphonic cable and one at a time as a sequence",
+    "Sets the voltage for its own step, over whatever span the range switch is set to",
+    "Sets how many of the eight knobs are used, both as the sequence length and as the number of polyphonic channels, 1 to 8",
+    "Sets the span the eight knobs cover: ±10V, ±5V, ±3V, ±2V, ±1V, 0 to 1V, 0 to 2V, 0 to 3V, 0 to 5V or 0 to 10V",
+    "Chooses whether the sequence runs forwards, backwards or jumps to a random step",
+    "Steps the sequence once, as a rising edge at the clock jack does",
+    "Sets the chance that an incoming clock pulse is acted on at all, 0 to 1",
+    "A rising edge steps the sequence on by one",
+    "With a monophonic cable, a rising edge sends the sequence back to its first step; with a polyphonic cable, a clock pulse or a button press copies that cable's channels into the eight knobs instead",
+    "Carries a 1ms pulse at 10V each time the sequence steps",
+    "Carries all the knobs at once as a polyphonic cable, one channel each, whatever the sequence is doing",
+    "Carries the voltage of the knob the sequence is on, held until it moves",
+    "Note — the polyphonic output carries the knobs at all times and needs no clock; only the sequenced output and the trigger jack depend on one",
+    "Note — with a polyphonic cable in the reset jack the clock pulse is used for copying and the sequence does not step; a monophonic cable there leaves the clock to the sequence and resets it",
+    "Note — the range switch rewrites the eight knobs' own limits, so a knob set past the new span is pulled back to it",
+    "Note — Rack's randomise command moves only the eight voltage knobs and leaves the length, range, mode and probability alone"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2,
+    "9": 3,
+    "10": 4,
+    "11": 5,
+    "12": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "KnobX.cpp KnobX::process: clockTrigger.process(clk, 0.1, 1.0) with the thresholds given explicitly, clk being getVoltage() with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "KnobX.cpp KnobX::process: isPolyphonic() and getChannels() on this jack choose the copying branch and getVoltage(ct) reads up to eight channels into the knobs; the same jack is read as getVoltage() with no channel argument for resetTrigger, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "KnobX.cpp KnobX::process: setVoltage(outTRG ? 10.f : 0.f) from a PulseGenerator triggered for 1e-3f, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "range": "±10V",
+      "step": "stepped",
+      "why": "KnobX.cpp KnobX::process: setChannels(chan) then setVoltage(knob, c) for each of the chosen number of knobs, the knobs running to ±10V at the widest range setting, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "stepped",
+      "why": "KnobX.cpp KnobX::process: setVoltage of the current step's knob with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "clockTrigger.process is called in two places in the same sample: first in the poly-copy condition, which is only reached when the reset jack holds a polyphonic cable, and then in the sequencing condition. A Rack SchmittTrigger returns true only on the first call after an edge, so with a polyphonic cable in the reset jack the copy consumes the clock and the sequence does not advance. The range switch rewrites minValue and maxValue on the eight knob quantities and then re-sets each knob, so knobs outside the new span are pulled in. The reset jack's meaning depends on the cable, so it has no family."
   },
   "GTSeq": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Six gate lengths played one per clock pulse, so each pulse opens a gate of its own duration",
+    "Sets how long the gate for its own step stays open, 0.1 to 10 seconds on the knob",
+    "Chooses whether the sequence runs forwards, backwards or jumps to a random step",
+    "Sets the chance that an incoming clock pulse is acted on at all, 0 to 1",
+    "Sets how many of the six steps are used, 1 to 6",
+    "Steps the sequence once, as a rising edge at the clock jack does",
+    "A rising edge steps the sequence on by one and opens that step's gate",
+    "With a monophonic cable, a rising edge sends the sequence back to the start and shuts the gate; with a polyphonic cable, a button press copies that cable's channels into the six length knobs instead",
+    "Carries the gate at 10V for the length of the step the sequence is on, and 0V between steps",
+    "Note — a clock pulse arriving during an open gate is thrown away, so the sequence moves no faster than its longest gate allows",
+    "Note — the gate runs for half the time its knob reads, because the source advances the gate generator twice in each sample; a knob at 10 seconds gives a gate of five",
+    "Note — the copying from a polyphonic reset cable works from the button only; the source reads the clock jack's edge before it reaches that test, so a clock pulse steps the sequence rather than copying"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 2,
+    "7": 3,
+    "8": 4,
+    "9": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "GTSeq.cpp GTSeq::process: clockTrig.process(getVoltage()), a Rack SchmittTrigger at its default 0.1V and 1V thresholds, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "GTSeq.cpp GTSeq::process: isPolyphonic() and getChannels() on this jack choose the copying branch and getVoltage(ct) reads up to six channels into the knobs; the same jack is read as getVoltage() with no channel argument for resetTrig, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "GTSeq.cpp GTSeq::process: setVoltage(gateGenerator.process(sample_time) ? 10.0f : 0.0f), the generator having been triggered for the step's knob value in seconds, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "gateGenerator.process(sample_time) is called twice per sample, once for the gtbool test and once in the output line, and Rack's PulseGenerator subtracts deltaTime on every call that finds time remaining, so a gate lasts half its configured duration: the knobs read 0.1 to 10 seconds and deliver 0.05 to 5. clockTrig.process is likewise called twice: the result is stored in gtCLK first, so the later call inside the poly-copy condition always returns false and only the button can copy. The reset jack's meaning depends on the cable, so it has no family."
   },
   "P2Seq": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Plays the channels of a polyphonic cable one at a time, stepping on a clock, with a chance of skipping a step or of adding a random offset to the voltage",
+    "Chooses whether the sequence runs forwards, backwards or jumps to a random channel",
+    "Sets the chance that an incoming clock pulse moves the sequence at all, 0 to 1; when it does not, the previous channel keeps playing",
+    "Sets the chance that a random offset is added to the voltage on each step, 0 to 1",
+    "Sets how far that random offset can reach either side of the channel's own voltage: 0.2V, 0.3V, 0.5V, 0.8V, 1V, 1.2V, 1.3V, 1.5V, 1.8V or 2V",
+    "Steps the sequence once, as a rising edge at the clock jack does",
+    "The polyphonic cable whose channels are played one at a time; its channel count is the sequence length",
+    "A rising edge steps the sequence on by one",
+    "A rising edge sends the sequence back to its first channel, or to its last one when it is running backwards",
+    "Carries the voltage of the channel the sequence is on, with the random offset added on the steps that take one",
+    "Note — a reset is subject to the step probability in the same way a clock pulse is, so a reset that loses the roll changes nothing",
+    "Note — the clock jack has no threshold: any voltage away from exactly 0V counts as high",
+    "Note — the lamp grid shows one dim lamp per channel of the input and a bright one on the channel being played; the two lamps beside it show a skipped step and an added offset",
+    "Note — with nothing patched to the polyphonic input the output is held at 0V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8
+   },
+   "out": {
+    "0": 9
+   },
+   "family": {
+    "in": {
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "P2Seq.cpp P2Seq::process: getChannels() on this jack sets the sequence length and getVoltage(activeChannel) reads the chosen channel, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "why": "P2Seq.cpp P2Seq::process: trr = getVoltage() ? true : false, then stepTrigger.process(trr), so the Schmitt trigger sees a 0 or 1 and any non-zero voltage counts as high, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "P2Seq.cpp P2Seq::process: resetTrig.process(getVoltage()), a Rack SchmittTrigger at its default 0.1V and 1V thresholds, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "P2Seq.cpp P2Seq::process: setVoltage of the chosen channel's voltage, optionally plus the random offset, with no channel argument, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The polyphonic input and the output carry whatever is patched in, so no family is set for them. A reset enters the same block as a clock pulse and only takes effect inside the branch guarded by the step probability, so a reset can be thrown away by the probability roll. The random offset is drawn afresh on every accepted step and is added, not replaced. The RND range switch prints its first choice as 0.2 without a v where the other nine carry one."
   },
   "VoltM": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Shows the voltages of up to sixteen polyphonic channels as numbers, and stacks its three inputs into one polyphonic output",
+    "The first group of channels shown and passed on; its channels take the lowest positions in the output",
+    "The second group of channels shown and passed on; its channels follow the first group's in the output",
+    "The third group of channels shown and passed on; its channels follow the second group's in the output",
+    "Carries the three inputs stacked into one polyphonic cable, up to sixteen channels in all",
+    "Note — the three inputs are packed end to end rather than mixed, and anything past the sixteenth channel is dropped",
+    "Note — the display is refreshed a few times a second rather than every sample, so a fast signal shows only the value it happened to have at the last refresh"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "VoltM.cpp VoltM::process: getChannels() on each of the three jacks is summed and clamped to 16 to set the output's channel count, and getVoltage(i) reads each channel into the display array, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "VoltM.cpp VoltM::process: getChannels() on each of the three jacks is summed and clamped to 16 to set the output's channel count, and getVoltage(i) reads each channel into the display array, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "VoltM.cpp VoltM::process: getChannels() on each of the three jacks is summed and clamped to 16 to set the output's channel count, and getVoltage(i) reads each channel into the display array, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "VoltM.cpp VoltM::process: setChannels(chmix) then setVoltage(valLines[i], i) for each channel, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The jacks carry whatever is patched to them, so no family is set. The display string is rebuilt once every 2050 samples."
   },
   "Note": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Shows the note name, octave and cents offset of every channel of a polyphonic pitch cable, and can round those pitches to the nearest semitone",
+    "Rounds every channel to the nearest semitone, at the display and at the output alike",
+    "The pitch voltages to be read, one channel per note",
+    "Carries the input pitches, rounded to semitones while the chromatic switch is on and untouched while it is off",
+    "Note — the display shows a note name, an octave number and, where the pitch is off the note by a hundredth of a semitone or more, the cents it is out by",
+    "Note — voltages are read between -10V and 10V; anything further out is pulled back to that before the note is worked out",
+    "Note — the display is refreshed every hundredth audio frame rather than every sample"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Note.cpp Note::process: getChannels() on this jack sets the output channel count and the loop bound, and getVoltage(c) is clamped to -10.f and 10.f and converted at twelve semitones per volt, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "Note.cpp Note::process: setChannels then setVoltage of the input voltage, rounded to twelfths of a volt while the chromatic switch is on, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "Rounding uses a step of 0.083333 rather than an exact twelfth, so a quantised pitch is a fraction of a cent flat of true equal temperament at the top of the range. configBypass routes the input to the output when the module is bypassed."
   },
   "SH": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three sample and hold sections that each sample a signal on a clock, or make a fresh random voltage per channel when nothing is patched to sample",
+    "Sets one end of the range the random voltages cover, a whole number from -10V to 10V; whichever of the two knobs is lower becomes the bottom",
+    "Sets the other end of the range the random voltages cover, a whole number from -10V to 10V; whichever of the two knobs is higher becomes the top",
+    "Sets how many polyphonic channels this section puts out, 1 to 16; at 0 it follows the cable patched to the section instead",
+    "Sets the chance that a channel takes a new random voltage on each clock pulse, 0 to 1; a channel that loses the roll keeps the voltage it had",
+    "Rounds this section's output to the nearest semitone",
+    "Samples once, as a rising edge at this section's clock jack does",
+    "The signal to be sampled; leave it unpatched and this section makes random voltages instead",
+    "A rising edge samples the signal, or makes a fresh random voltage when nothing is patched to sample",
+    "Carries the held voltages, one per channel, until the next clock pulse",
+    "Note — the bottom section has no settings of its own; its range, channel count, probability and quantise all come from the middle section's controls",
+    "Note — a section with nothing patched to its signal jack is a random voltage source, and one with a signal patched is a sample and hold",
+    "Note — a clock cable's polyphony is summed to one voltage before it is read, so every channel of a section is sampled at the same moment",
+    "Note — the probability applies only when a section is making random voltages; with a signal patched every clock pulse samples it, despite the README saying otherwise",
+    "Note — the quantise switch rounds a sampled signal as well as a generated voltage, despite the README saying it applies only to generated CV",
+    "Note — a section writes nothing to its output until a clock is patched or its button is pressed"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 1,
+    "6": 2,
+    "7": 3,
+    "8": 4,
+    "9": 5,
+    "10": 6,
+    "11": 6,
+    "12": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 7,
+    "3": 8,
+    "4": 7,
+    "5": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 9,
+    "2": 9
+   },
+   "family": {
+    "in": {
+     "1": "trigger",
+     "3": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "SH.cpp SH::process: getChannels() on this jack sets the channel count while the channel knob is at 0, and getVoltage(i) is read per channel and clamped to ±10V, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "SH.cpp SH::process: getVoltageSum() on this jack, so a polyphonic cable is added to one voltage, rescaled from 0.1V and 2V onto 0 and 1 and fed to a single SchmittTrigger for the whole section, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "SH.cpp SH::process: getChannels() on this jack sets the channel count while the channel knob is at 0, and getVoltage(i) is read per channel and clamped to ±10V, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "SH.cpp SH::process: getVoltageSum() on this jack, so a polyphonic cable is added to one voltage, rescaled from 0.1V and 2V onto 0 and 1 and fed to a single SchmittTrigger for the whole section, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "SH.cpp SH::process: getChannels() on this jack sets the channel count while the channel knob is at 0, and getVoltage(i) is read per channel and clamped to ±10V, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "why": "SH.cpp SH::process: getVoltageSum() on this jack, so a polyphonic cable is added to one voltage, rescaled from 0.1V and 2V onto 0 and 1 and fed to a single SchmittTrigger for the whole section, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "step": "stepped",
+      "why": "SH.cpp SH::process: setChannels then setVoltage(noize[i], i) per channel, the value being a sampled voltage clamped to ±10V or a random one clamped to the same, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "range": "±10V",
+      "step": "stepped",
+      "why": "SH.cpp SH::process: setChannels then setVoltage(noize[i], i) per channel, the value being a sampled voltage clamped to ±10V or a random one clamped to the same, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": true,
+      "range": "±10V",
+      "step": "stepped",
+      "why": "SH.cpp SH::process: setChannels then setVoltage(noize[i], i) per channel, the value being a sampled voltage clamped to ±10V or a random one clamped to the same, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The signal jacks and the outputs carry whatever is sampled, so no family is set for them. The third section reads A2_PARAM, B2_PARAM, C2_PARAM, D2_PARAM and QU2_PARAM, which are the middle section's controls. The probability test sits inside the `if (!CVcon)` branch only, so it gates generated voltages and not sampled ones; the README says it decides whether an incoming trigger is used at all. The quantise block runs after both branches and so applies to sampled values too, against the README. Per-channel SchmittTrigger arrays are declared and never used; the source carries the comment \"NEEDS REPAIR!! Want it to be GTin polyphonic not VoltageSum\"."
   },
   "Compare": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Compares every channel of a polyphonic cable against a threshold and gives gates for above and below, plus the signal itself split the same way",
+    "Sets the voltage each channel is compared against, -10V to 10V",
+    "Scales the threshold CV before it is added to the threshold knob, 0 to 1",
+    "Added to the threshold knob after the attenuator, channel for channel, with the total held between -10V and 10V",
+    "The signal to be compared, one channel at a time; its channel count is passed to all four outputs",
+    "Carries 10V on each channel whose input is above the threshold, and 0V on the rest",
+    "Carries 10V on each channel whose input is at or below the threshold, and 0V on the rest",
+    "Carries the input on each channel that is above the threshold, and 0V on the rest",
+    "Carries the input on each channel that is at or below the threshold, and 0V on the rest",
+    "Note — the comparison is made afresh every sample with no smoothing, so this works at audio rate for hard splitting as well as at modulation rate",
+    "Note — the threshold jack is read channel by channel, so a polyphonic cable there gives each channel its own threshold",
+    "Note — the two lamps follow the last channel of the cable rather than the whole of it, so with more than one channel patched they do not show the state of the first"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "-10 to 10V",
+      "why": "Compare.cpp Compare::process: clamp(knob + getVoltage(i) * attenuator, -10.f, 10.f) inside the per-channel loop, so each channel of this jack is read against the matching channel of the signal, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Compare.cpp Compare::process: getChannels() on this jack sets all four outputs' channel counts and the loop bound, and getVoltage(i) is read per channel, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Compare.cpp Compare::process: setChannels then setVoltage(10.0 or 0.0, i) per channel, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "Compare.cpp Compare::process: setChannels then setVoltage(10.0 or 0.0, i) per channel, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Compare.cpp Compare::process: setChannels then setVoltage of the input's own voltage or 0.0, per channel, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Compare.cpp Compare::process: setChannels then setVoltage of the input's own voltage or 0.0, per channel, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The signal input and the two signal outputs carry whatever is patched in, so no family is set for them. The comparison is strictly greater-than, so a channel exactly at the threshold counts as below. Both lamps are written inside the per-channel loop without being combined, so they end each sample showing the state of the highest channel only."
   },
   "Merge": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Gathers up to sixteen separate cables into one polyphonic cable",
+    "One of the cables gathered into the output; its own channels are packed in after those of the jacks above it",
+    "Carries every patched input packed into one polyphonic cable, up to sixteen channels in all",
+    "Note — the inputs are packed end to end in jack order with no gaps, so unpatched jacks take up no channel; anything past the sixteenth channel is dropped",
+    "Note — the lamps show how many channels the output is carrying",
+    "Menu — Monophonic Inputs Only — takes only the first channel of each input and places it at that input's own position, rather than packing every channel of every input together",
+    "Note — with Monophonic Inputs Only switched on, a gap in the patched jacks puts the channel count out of step with where the voltages are written, so patch from the first jack downwards",
+    "Note — the maker's README describes a menu offering a channel count from auto to sixteen; this build's menu has the monophonic switch instead"
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "11": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "12": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "13": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "14": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "15": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: getChannels() on each jack in the default branch and getVoltage(c) for each of its channels, packed into the output at a running count, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Merge.cpp Merge::process: setVoltage(volt, ch_sum) for each gathered channel, with outputs[mOUT].channels set to the running total capped at 16, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The jacks carry whatever is patched to them, so no family is set. In the monophonic branch the voltage is written at setVoltage(volt, n) where n is the jack index, while the channel count is the number of connected jacks, so with a gap in the patching the written positions run past the reported count."
   },
   "Split": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Breaks a polyphonic cable out into sixteen separate cables, one per channel",
+    "The polyphonic cable to be broken out",
+    "Carries one channel of the polyphonic input on its own, and 0V when the input has no such channel",
+    "Note — the lamps show which channels the input is carrying"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: getChannels() on this jack lights the lamps and getVoltage(c) is read for all sixteen channel positions in the loop, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "14": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     },
+     "15": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Split.cpp Split::process: setVoltage of the input's channel c with no channel argument, so every output is monophonic; Rack returns 0V for a channel the input does not have, commit 086d8c4, whose plugin.json carries the installed 2.3.2 and whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The jacks carry whatever is patched to them, so no family is set. All sixteen outputs are written every sample whatever the input's channel count, so the unused ones read 0V rather than holding a stale value."
   }
  }
 }

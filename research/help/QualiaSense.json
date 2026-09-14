@@ -1,13 +1,66 @@
 {
  "plugin": "QualiaSense",
- "source": "https://github.com/qualiatouch/qualiasense-plugin",
+ "source": "https://github.com/qualiatouch/qualiasense-plugin/blob/master/doc/phonesensor.md (source at commit e77b428, whose plugin.json matches the installed 2.0.0 byte for byte)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "PhoneSensor": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns a smartphone's sensors into control voltage: the module polls the PhyPhox app over your local network a hundred times a second and puts what the chosen sensor reports out on three jacks",
+    "The first axis of the chosen sensor, scaled to the output range: the X axis for magnetic, acceleration and gyroscope, up and down for tilt, red for colour, and the single reading for light and sound.",
+    "The second axis of the chosen sensor. Magnetic, acceleration and gyroscope give their Y axis, tilt gives left and right, and colour gives green; with light or sound chosen this jack is held at 0V.",
+    "The third axis of the chosen sensor. Magnetic, acceleration and gyroscope give their Z axis and colour gives blue; with light, sound or tilt chosen this jack is held at 0V.",
+    "Menu — IP & port — takes the address and port PhyPhox prints when you turn its remote access on, typed as one string and entered with the return key; it starts at a placeholder, not your phone",
+    "Menu — Sensor type: Magnetic, Acceleration, Light, Tilt, Sound intensity, Color (HSV converted to RGB), Gyroscope — picks which sensor is asked for, and has to match the experiment open in the app",
+    "Menu — Minimum X value — the raw sensor reading that maps to the bottom of the output range on the X jack; readings below it are clamped",
+    "Menu — Maximum X value — the raw sensor reading that maps to the top of the output range on the X jack; readings above it are clamped",
+    "Menu — Minimum Y value — the raw sensor reading that maps to the bottom of the output range on the Y jack; readings below it are clamped",
+    "Menu — Maximum Y value — the raw sensor reading that maps to the top of the output range on the Y jack; readings above it are clamped",
+    "Menu — Minimum Z value — the raw sensor reading that maps to the bottom of the output range on the Z jack; readings below it are clamped",
+    "Menu — Maximum Z value — the raw sensor reading that maps to the top of the output range on the Z jack; readings above it are clamped",
+    "Menu — Output voltage mode: Unipolar (0V => +10V), Bipolar (-5V => +5V) — sets the range the three jacks are scaled into",
+    "Menu — Debug Mode — prints the request numbers, the URL being polled and the sensor axis count to Rack's log; it comes up off",
+    "Note — This module does nothing on its own. It needs a phone on the same network running the PhyPhox app, an experiment open in it, remote access on, and that address typed into the IP & port item.",
+    "Note — The lamp shows the connection: blue before the first reply, red when the phone cannot be reached, orange when the app answers but is not measuring, and green when readings are coming in.",
+    "Note — Switching the sensor type does not always take effect at once. The maker's own instructions say to save the patch, quit Rack and reopen it if the new sensor does not start reporting.",
+    "Note — PhyPhox serves one sensor at a time, so a second sensor means a second phone and a second copy of this module.",
+    "Note — Each sensor type brings its own default minimum and maximum. Choosing a sensor resets those six limits, so any you have edited by hand are lost when you switch.",
+    "Note — Only the three jacks on this panel can be clicked for help: the module has no knobs, no buttons and no inputs, and every setting is on the right-click menu."
+   ],
+   "out": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/PhoneSensor.cpp line 687 sets one voltage with no setChannels anywhere in the plugin; calculateOutputVoltage at lines 388 to 396 scales and clamps to 0 to 10V, or to -5V to +5V when the Output voltage mode menu is set to bipolar"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/PhoneSensor.cpp lines 688 to 692 set one voltage, or a flat 0 when the chosen sensor has no second axis; the same calculateOutputVoltage scaling applies, and the bipolar menu setting changes it to -5V to +5V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "polarity": "unipolar",
+      "why": "src/PhoneSensor.cpp lines 694 to 698 set one voltage, or a flat 0 when the chosen sensor has no third axis; the same calculateOutputVoltage scaling applies, and the bipolar menu setting changes it to -5V to +5V"
+     }
+    }
+   },
+   "notes": "The range and polarity recorded for the three outputs are the unipolar default. The Output voltage mode menu item swaps both for -5V to +5V, so a patch using the bipolar setting has jacks that do not match the recorded fields.\n\nThe default IP address in the source is the literal string \"192.168.1.25:8080\" (src/PhoneSensor.hpp line 122). It is a placeholder, and the module will sit red until the real address is typed in, so the entry says so rather than leaving a reader to work it out.\n\nThe module is tagged External in its own manifest, which is what stops WhatTheRack from ever spawning it.\n\nThe status light is a three-colour light, and only the red element carries a configLight name (\"Status\"); the green and blue elements are configured with empty names.\n\nThe module polls on a detached thread every 0.01 seconds (fetchingPeriod, src/PhoneSensor.hpp line 211) and the replies are put in order by request id before they reach the jacks, so out-of-order HTTP responses do not make the outputs jump backwards.\n\nAll the default limits are literals in src/PhoneSensor.hpp lines 143 to 189, and they differ by sensor: magnetic -500 to 1000 on X, acceleration -100 to 100 on every axis, light 0 to 500, tilt -180 to 180, sound -50 to -10, colour 0 to 255, gyroscope -20 to 20. None of these is quoted in the lines, because a reader's own phone will want different ones.\n\nThe module has no parameters and no inputs, so only the three output jacks can be clicked for help. Every setting is on the right-click menu, which is why this entry is mostly menu lines.\n\nThe maker's documentation and the code agree throughout, including the sensor-to-axis table: initSensorHasY and initSensorHasZ give tilt a second axis and no third, and light and sound neither, exactly as the doc's table says."
   }
  }
 }

@@ -1,13 +1,215 @@
 {
  "plugin": "Airwin2Rack",
- "source": "https://github.com/baconpaul/airwin2rack",
+ "source": "https://github.com/baconpaul/airwin2rack/blob/main/doc/manual.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Airwin2Rack": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "One module carrying the whole Airwindows effect collection, 456 separate stereo effects in this build, one of which runs at a time on the stereo input",
+    "Sets one parameter of the chosen effect; the name printed against it, the reading in its tooltip and the span it covers all come from that effect and change when another effect is chosen",
+    "Scales the CV input on the same row from -1 to +1 before that CV is added to the parameter knob, and at 0 the CV makes no difference",
+    "Scales what both input jacks feed into the effect, 0 to 100 percent, where 100 percent puts a 5V signal into the effect at full scale",
+    "Scales what the effect sends to both output jacks, 0 to 100 percent, where 100 percent sends the effect's full scale out as 5V",
+    "L input — the left channel into the effect, and with nothing patched to the R input it feeds the right channel too",
+    "R input — the right channel into the effect, taken from the L input instead while nothing is patched here",
+    "Adds to the parameter knob on the same row after the small knob there scales it; 5V through a fully clockwise scale knob covers that parameter's travel, and the total is clamped to its ends",
+    "L output — the left channel out of the effect, at 5V for the effect's full scale",
+    "R output — the right channel out of the effect, at 5V for the effect's full scale",
+    "Note — the effect is not chosen with a knob. Click the effect name at the top of the panel, or the category above it, for a menu with a search field, a list per category and a collection filter.",
+    "Note — the arrows step through the effects in category order and then alphabetically by name, wrapping from the last back to the first, and they ignore the Categories in 'Chris' Order setting.",
+    "Note — the question mark at the top of the panel opens Chris Johnson's own text about the chosen effect as an overlay across the module; clicking it again closes it.",
+    "Note — the number of parameter knobs follows the chosen effect, between none and ten, and the knobs for parameters that effect does not have are taken off the panel.",
+    "Note — the effect works on blocks of samples rather than one sample at a time, four samples by default. A larger block set from the panel menu costs less processor time and delays the sound more.",
+    "Note — a new module comes up on Galactic, a reverb, and the arrow on either side of the effect name steps to the next effect without opening a menu.",
+    "Note — a CV input stays on the panel, drawn dimmed, when the chosen effect has no parameter on its row, and nothing in the module reads it.",
+    "Menu — Panic Reset — builds the chosen effect again from scratch, clearing the delay lines and filter state it is holding, and leaves the knob settings alone",
+    "Menu — Monophonic (Sum Inputs) — runs one copy of the effect, adding all the channels at each input jack together into one signal",
+    "Menu — Monophonic (MixMaster Sum Input) — runs one copy of the effect, reading each input jack as MixMaster's interleaved left-right pairs and adding those pairs into one stereo signal",
+    "Menu — Polyphonic (Stereo to Stereo) — runs a separate copy of the effect on each channel of the input jacks, up to 16 of them, and puts each result on the matching channel of the output jacks",
+    "Menu — Polyphonic (MixMaster to MixMaster) — runs a separate copy of the effect on each interleaved left-right pair at the input jacks and writes the results back out as interleaved pairs",
+    "Menu — Polyphonic (MixMaster to Stereo) — reads interleaved left-right pairs at the input jacks and sends each pair's result out as its own channel of the L and R outputs",
+    "Menu — Polyphonic (Stereo to MixMaster) — reads each channel of the L and R inputs as one stereo pair and writes the results out interleaved",
+    "Menu — Block Size — a submenu offering 4, 8, 16, 32 and 64 samples, the first marked 4 (Lowest Latency) and the last 64 (Less CPU); the size in force is printed in the submenu's own name",
+    "Menu — Lock Effect Choice — stops the effect being changed, greys out the arrows and disables every effect name in the menus",
+    "Menu — Randomize Changes FX Choice — makes Rack's randomize pick a new effect as well as new knob settings, and is overruled by Lock Effect Choice",
+    "Menu — Categories in Alphabetical Order — lists the effects inside each category menu by name",
+    "Menu — Categories in 'Chris' (quality) Order — lists the effects inside each category menu in the order Chris Johnson gives them in the Airwindopedia, which he arranges by quality rather than by name",
+    "Menu — Filter by Collection: Basic, Recommended, Latest, All Effects — on the menu that opens from the effect name: narrows the category lists, the search and the arrows to that collection"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "16": 2,
+    "17": 2,
+    "18": 2,
+    "19": 2,
+    "20": 2,
+    "22": 3,
+    "23": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 7,
+    "4": 7,
+    "5": 7,
+    "6": 7,
+    "7": 7,
+    "8": 7,
+    "9": 7,
+    "10": 7,
+    "11": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src-rack/Module.cpp:426 reads it with getVoltageSum in the monophonic modes and :492 reads one channel per effect copy in the polyphonic modes, both scaled by 0.2 so 5V is the effect's full scale; :455 takes the channel count from this jack"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the L input",
+      "why": "src-rack/Module.cpp:404 and :462 pick INPUT_R only when it is connected and fall back to INPUT_L when it is not; :427 and :493 then read the chosen jack, scaled by 0.2 so 5V is the effect's full scale"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "src-rack/Module.cpp:438 reads the jack, multiplies by 0.2 and by the row's scale knob, and :439 clamps the knob-plus-CV total to the parameter's 0 to 1 range; :503-505 does the same per channel in the polyphonic modes, reusing channel 0 when the CV is monophonic. :437 and :502 skip the jack entirely when nothing is patched"
+     },
+     "3": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "src-rack/Module.cpp:438 reads the jack, multiplies by 0.2 and by the row's scale knob, and :439 clamps the knob-plus-CV total to the parameter's 0 to 1 range; :503-505 does the same per channel in the polyphonic modes"
+     },
+     "4": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "src-rack/Module.cpp:438 reads the jack, multiplies by 0.2 and by the row's scale knob, and :439 clamps the knob-plus-CV total to the parameter's 0 to 1 range; :503-505 does the same per channel in the polyphonic modes"
+     },
+     "5": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "src-rack/Module.cpp:438 reads the jack, multiplies by 0.2 and by the row's scale knob, and :439 clamps the knob-plus-CV total to the parameter's 0 to 1 range; :503-505 does the same per channel in the polyphonic modes"
+     },
+     "6": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "src-rack/Module.cpp:438 reads the jack, multiplies by 0.2 and by the row's scale knob, and :439 clamps the knob-plus-CV total to the parameter's 0 to 1 range; :503-505 does the same per channel in the polyphonic modes"
+     },
+     "7": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "src-rack/Module.cpp:432 and :498 bound the CV loop by the chosen effect's parameter count, so this jack is read only when the effect has eight or more parameters; when it is read, :438 scales it by 0.2 and by the row's scale knob and :439 clamps the total to 0 to 1"
+     },
+     "8": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "src-rack/Module.cpp:432 and :498 bound the CV loop by the chosen effect's parameter count, so this jack is read only when the effect has nine or more parameters; when it is read, :438 scales it by 0.2 and by the row's scale knob and :439 clamps the total to 0 to 1"
+     },
+     "9": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "src-rack/Module.cpp:432 and :498 bound the CV loop by the chosen effect's parameter count, so this jack is read only when the effect has ten or more parameters; when it is read, :438 scales it by 0.2 and by the row's scale knob and :439 clamps the total to 0 to 1"
+     },
+     "10": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "src-rack/Module.cpp:432 and :498 bound the CV loop by the chosen effect's parameter count, which is at most 10 (src-rack/Module.cpp:30 maxParams), so nothing in the build reads this jack; src-rack/Module.cpp:231-233 names it Unused CV"
+     },
+     "11": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, leaving the knob alone",
+      "why": "src-rack/Module.cpp:432 and :498 bound the CV loop by the chosen effect's parameter count, which is at most 10 (src-rack/Module.cpp:30 maxParams), so nothing in the build reads this jack; src-rack/Module.cpp:231-233 names it Unused CV"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src-rack/Module.cpp:448 writes it with setVoltage, multiplying the effect's output by 5 and by the output gain; :456 sets the channel count from the inputs in the polyphonic modes and :313 puts it back to one channel in the monophonic modes"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src-rack/Module.cpp:449 writes it with setVoltage, multiplying the effect's output by 5 and by the output gain; :457 sets the channel count from the inputs in the polyphonic modes and :314 puts it back to one channel in the monophonic modes"
+     }
+    }
+   },
+   "notes": "Written against commit d288900, the last commit whose plugin.json carries 2.13.0; the next commit, 03acb46, bumps the version to 2.14.0. Several dozen commits carry 2.13.0, all of them adding effects rather than changing the Rack module, so the installed binary was used to settle which one shipped: PointyDeluxe, PunchyDeluxe and kBeyond are all added in d288900 and all three names are present in plugin.dylib.\n\nEvery parameter knob, scale knob and CV jack is described by one line because the module reuses the same ten rows for whatever effect is chosen. What a given row means is set by the effect, not by the panel, which is why no range is quoted for the parameter knobs: the knob is 0 to 1 internally (src-rack/Module.cpp:153) and each effect converts that to its own units and its own printed name (src-rack/Module.cpp:218-228 via getParameterName at :221). The census names the knobs Replace, Brightness, Detune, Bigness and Dry/Wet because those are Galactic's parameter names and a fresh module comes up on Galactic (src-rack/Module.cpp:162).\n\nParameters 10 and 21 are declared, named Unused, and given no widget (src-rack/Module.cpp:83-89 and :142-143), so neither can be clicked and neither gets a line. They are placeholders kept so that older patches still load.\n\nCV inputs 10 and 11 exist as jacks but no effect has more than ten parameters, and the CV loop is bounded by that count, so the last two jacks are never read. The maker names them Unused CV.\n\nThe manual says the module holds 300 or more effects; the shipped build registers 456 of them (src/ModuleAdd.h at d288900). The manual also says the ordering setting applies to the menus, which is right for the Rack module: the arrow buttons always walk the alphabetical-within-category order (src-rack/Module.cpp:1058 calling AirwinRegistry::neighborIndexFor), and only the JUCE build's jog buttons follow the Chris order.\n\nThe effect selector, the arrow buttons and the question mark are plain widgets rather than parameters, so none of them can be clicked for help; they are covered by Note lines instead. The Light Mode and Dark Mode menu items are left out as cosmetic."
   }
  }
 }

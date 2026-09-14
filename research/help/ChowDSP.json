@@ -1,88 +1,895 @@
 {
  "plugin": "ChowDSP",
- "source": "https://github.com/jatinchowdhury18/ChowDSP-VCV",
+ "source": "https://github.com/jatinchowdhury18/ChowDSP-VCV/blob/master/doc/manual.md",
  "read": "2026-09-14",
- "partial": true,
+ "notes": "Written from the maker's own source at commit 7dc3dab, \"Update version and changelog\", which is the commit that set the installed version 2.0.1; the nine commits after it in the repository still carry 2.0.1 but post-date the library release, and one of them changes ChowChorus filter behaviour at low sample rates, so they were deliberately not read. Also read: doc/manual.md in the same tree, the maker's own ChowTape plugin manual at chowdsp.com/manuals/ChowTapeManual.pdf for the five tape modules, and a render of every panel. Every number quoted in these entries is either a literal in that source or worked out from literals in it. Five modules carry an Oversampling submenu, which changes CPU cost and aliasing rather than the controls; the defaults are 4x on ChowTape and 2x on ChowDer, Werner and Warp. Four modules carry a Publication item that opens the paper the module implements. One conflict with the maker's own manual was found: the manual says ChowDer's Bass and Treble knobs drive a Baxandall EQ circuit, and in this version they drive a first-order shelving filter at 600Hz instead; the Baxandall wave digital filter is in the tree and compiled but never instantiated.",
  "modules": {
   "ChowTape": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A physical model of magnetic tape: the audio is driven through a Jiles-Atherton model of the tape's magnetic hysteresis, which is where tape distortion comes from",
+    "Sets the width of the hysteresis loop. At the left the loop is at its widest, which gives the dead band and the coarse distortion of underbiased tape, and turning it right closes the loop up.",
+    "Sets the level at which the tape saturates; turning it up brings the saturation point down, so the sound distorts sooner",
+    "Sets how hard the audio is driven into the hysteresis model, which changes the shape of the distortion rather than only its level",
+    "The audio to be put on tape; it is divided by 5 and clamped, so anything past 5V is already at the top of the model's range",
+    "The processed audio, at 4.18 times the model's own output",
+    "Note — the model runs at four times the sample rate when the module is added; the oversampling menu changes that.",
+    "Menu — Oversampling: 1x, 2x, 4x, 8x, 16x — sets how many times the internal sample rate is raised before the nonlinearity is computed; higher settings reduce aliasing and cost more CPU",
+    "Menu — Publication — opens the 2019 DAFx paper the tape model comes from in a web browser"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowTape.cpp process(): clamp(inputs[AUDIO_INPUT].getVoltage() / 5.0f, -1.0f, 1.0f), no channel argument"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab and from doc/manual.md in the same tree, with the control descriptions checked against the maker's own ChowTape plugin manual at chowdsp.com. The three knobs are all 0 to 1 with a default of 0.5 and the maker gave them no parameter names, so the panel lettering is the only name they have. In HysteresisProcessing::cook the saturation knob sets the saturation magnetisation as 1.5 minus the knob, the drive knob divides it by six times the drive, and the bias knob reaches the loop width as one minus the knob. The module builds a 30Hz DC blocking filter in process() and never calls it, so no DC blocking is applied; the output is the hysteresis output times 4.18."
   },
   "ChowPhaserFeedback": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Half of a phaser: two allpass stages modelled on a light-dependent resistor, wrapped in a feedback loop and swept by a control voltage",
+    "Reshapes the control voltage before it drives the light-dependent resistor model, raising it to a power between a half and two so the sweep leans to one end; at the centre it passes through unshaped",
+    "Sets how much of the output is fed back into the two allpass stages, 0 to 0.95",
+    "The audio to be phased",
+    "Sweeps the phaser. Five volts is the top of the range and minus five volts the bottom, and a bipolar LFO here is what makes the usual phaser sound.",
+    "The phased audio, soft-clipped through a hyperbolic tangent so it cannot leave the range -5V to 5V",
+    "Note — the control voltage input is what sweeps this module; with nothing patched there the filter stands at one frequency and the sound does not move.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowPhaserFB.cpp process(): fbFilter.process(inputs[IN_INPUT].getVoltage()), no channel argument"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowPhaserFB.cpp divides this jack by 5 and LDR::getLDRResistance clamps the result to -1 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "setVoltage(std::tanh(y / 5.0f) * 5.0f) in ChowPhaserFB.cpp bounds the output to five volts either way"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab, the commit that set the installed version 2.0.1, and doc/manual.md in the same tree. The skew knob runs -1 to 1 and is used as two raised to that power, the exponent applied to the control voltage mapped into 0 to 1 by LDR::lightShape. The feedback knob runs 0 to 0.95 and is negated where it is used. Neither knob was given a parameter name by the maker, so the panel is the only source for what they are called. A 15 nanofarad capacitor value sets the allpass corner alongside the modelled resistance."
   },
   "ChowPhaserMod": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The other half of a phaser: a chain of up to fifty allpass stages modelled on a light-dependent resistor, swept by a control voltage and mixed against the dry signal",
+    "Reshapes the control voltage before it drives the light-dependent resistor model, raising it to a power between a half and two so the sweep leans to one end; at the centre it passes through unshaped",
+    "Mixes the allpass chain against the dry signal, from all dry at the left to all phased at the right",
+    "Sets how many allpass stages the signal goes through, 1 to 50; the setting is continuous and the last stage is faded in as the knob passes it",
+    "The audio to be phased",
+    "Sweeps the phaser. Five volts is the top of the range and minus five volts the bottom, and a bipolar LFO here is what makes the usual phaser sound.",
+    "The mix of the phased and dry signals, at the level it came in",
+    "Note — the modulation knob comes up fully anticlockwise, which is all dry, so a new module passes the audio through unchanged until it is turned up.",
+    "Note — the control voltage input is what sweeps this module; with nothing patched there the allpass chain stands at one frequency and the sound does not move.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowPhaserMod.cpp process(): const auto x = inputs[IN_INPUT].getVoltage(), no channel argument"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowPhaserMod.cpp divides this jack by 5 and LDR::getLDRResistance clamps the result to -1 and 1"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab and doc/manual.md in the same tree. The stages knob runs 1 to 50 with a default of 8, and the fractional part crossfades one more stage, which is why it can be swept without clicking; the buffer holds 52 stages. The skew and modulation knobs have no parameter names from the maker, so the panel lettering is all there is. A 25 nanofarad capacitor value sets the allpass corner alongside the modelled resistance. Unlike the feedback module there is no output clipping here."
   },
   "ChowFDN": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A reverb built from a feedback delay network: up to sixteen delay lines fed through an orthonormal mixing matrix, with separate decay times above and below 800Hz",
+    "Delays the signal before it reaches the reverb, 1ms to 500ms, despite the maker's tooltip calling it Time",
+    "Scales the length of every delay line together, a tenth of their full length to all of it, which is what sets how big the room sounds",
+    "Sets how long a sound below 800Hz takes to fall by 60dB, half a second to 10 seconds",
+    "Sets how long a sound above 800Hz takes to fall by 60dB, half a second to 10 seconds",
+    "Sets how many delay lines the network uses, 1 to 16; more lines give a denser tail and cost more CPU",
+    "Mixes the reverb against the dry signal, all dry at the left and all reverb at the right",
+    "The audio to be reverberated",
+    "The mix of the reverb and the dry signal",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "3": 3,
+    "2": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowFDN.cpp process(): const float x = inputs[AUDIO_INPUT].getVoltage(), no channel argument"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab and doc/manual.md in the same tree. The pre-delay knob runs 0 to 1 and is used as 500 raised to that power in milliseconds, so it is 1ms at the bottom, about 22ms at its default of 0.5 and 500ms at the top; the maker named the parameter Time and lettered the panel Pre-Delay. The base delay lengths come from DelayUtils::generateDelayLengths starting at 45ms with a ratio of 1.1, rounded to primes, and the size knob scales all of them. The two T60 knobs set the low and high bands of a first-order shelving filter in each delay line whose crossover is fixed at 800Hz; low defaults to 1 second and high to half a second. The delay count knob is not snapped: it is a continuous 1 to 16 cast to an integer."
   },
   "ChowRNN": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A small recurrent neural network used as a signal processor: four inputs go through a dense layer, a bank of four gated recurrent units and a single-neuron output layer, with weights you can reroll",
+    "Rerolls the weights of the network while it is held down, so the sound changes for as long as you keep pressing",
+    "One of the four signals fed into the network, at the voltage it arrives",
+    "The network's output, DC blocked below 30Hz and scaled by four divided by the number of inputs you have patched",
+    "Note — there is no fixed function here to look up: the weights start random, the randomise button gives new ones, and what the module does to a signal is whatever those weights happen to do.",
+    "Note — the weights are saved with the patch, so a sound you found by rerolling comes back when the patch is loaded.",
+    "Note — if the network runs away and produces a value that is not a number, the module silences that sample and resets itself.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowRNN.cpp process(): input[i] = inputs[i].getVoltage(), no channel argument, and the unpatched jack reads 0V into the network"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowRNN.cpp process(): input[i] = inputs[i].getVoltage(), no channel argument, and the unpatched jack reads 0V into the network"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowRNN.cpp process(): input[i] = inputs[i].getVoltage(), no channel argument, and the unpatched jack reads 0V into the network"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowRNN.cpp process(): input[i] = inputs[i].getVoltage(), no channel argument, and the unpatched jack reads 0V into the network"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "setVoltage with no channel argument in ChowRNN.cpp"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab and doc/manual.md in the same tree. The four inputs carry no family colour: the manual says almost any signal can go in, and what the network makes of it depends on the weights, so nothing about a jack says what belongs there. The output layer's bias is zeroed at construction and a 30Hz high-pass follows the network. Makeup gain is four divided by the number of connected inputs, so unpatching an input makes the rest louder. The randomise button is momentary and its parameter is read every sample, so holding it down rerolls the weights continuously."
   },
   "ChowModal": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "One resonant mode of a struck object, built on the Max Mathews phasor filter: strike it with an impulse or a pulse and it rings at one frequency for a set time",
+    "Sets the frequency of the mode, three octaves either side of C4 at 261.63Hz",
+    "Sets how long the mode takes to fall by 60dB, from silence to 7 seconds",
+    "Sets how loud the mode rings",
+    "Sets the phase the mode starts from, which changes the shape of the first few cycles rather than the pitch",
+    "The signal that excites the mode; an impulse or a short pulse is what makes it ring",
+    "Shifts the frequency of the mode, one volt per octave, multiplying whatever the knob is set to",
+    "Adds to the decay knob at a tenth of the knob's range per volt; the total is clamped at one and a half times the knob's own range, so the longest decay reachable is 10.5 seconds",
+    "Adds to the amplitude knob at a tenth of the knob's range per volt",
+    "Adds to the phase knob at a tenth of the knob's range per volt",
+    "The ringing mode, with everything below 30Hz filtered out",
+    "Note — it is a filter, not an oscillator: with nothing patched into the audio input it makes no sound at all.",
+    "Note — several of these stacked on one excitation signal, each tuned to a different partial, is how a bell or a struck bottle is built.",
+    "Menu — Publication — opens the Max Mathews phasor filter paper this module is built on in a web browser"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowModal.cpp process(): float x = inputs[AUDIO_IN].getVoltage(), no channel argument"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowModal.cpp multiplies the mode frequency by std::pow(2, inputs[FREQ_IN].getVoltage())"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1.5V",
+      "why": "ChowModal.cpp adds getVoltage() / 10 to the decay knob and clamps the total to 0 and 1.5 before multiplying by seven seconds"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "ChowModal.cpp adds 0.1 times getVoltage() to the amplitude knob with no clamp"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowModal.cpp adds 0.1 times getVoltage() to the phase knob with no clamp"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "setVoltage with no channel argument in ChowModal.cpp"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab and doc/manual.md in the same tree. The frequency knob is -36 to 36 semitones around dsp::FREQ_C4, which is 32.7Hz to 2093Hz. The decay knob is 0 to 1 multiplied by a fixed seven seconds, with a default of 0.2; its CV is the only one clamped, at 1.5, which is where the 10.5 second figure comes from. The amplitude knob is scaled by 0.01 inside the mode, and the phase is used as the argument of a complex polar amplitude. A 30Hz high-pass follows the mode."
   },
   "ChowDer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A vintage distortion: a shelving tone control into a diode clipping stage modelled as a wave digital filter, in the manner of a Klon Centaur or a Tube Screamer",
+    "Lifts or cuts everything below 600Hz by up to 9dB before the clipper, using a first-order shelving filter rather than the Baxandall circuit the maker's manual describes",
+    "Lifts or cuts everything above 600Hz by up to 9dB before the clipper, using a first-order shelving filter rather than the Baxandall circuit the maker's manual describes",
+    "Sets the level going into the clipping stage, 0dB at the left to 30dB at the right",
+    "Adds a steady offset of up to 2.5V before the clipper, which pushes the signal off centre and brings even harmonics into the distortion",
+    "The audio to be distorted",
+    "The distorted audio, with everything below 30Hz filtered out",
+    "Note — the clipper runs at twice the sample rate when the module is added; the oversampling menu changes that.",
+    "Menu — Oversampling: 1x, 2x, 4x, 8x, 16x — sets how many times the internal sample rate is raised before the nonlinearity is computed; higher settings reduce aliasing and cost more CPU"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowDer.cpp process(): float x = inputs[AUDIO_IN].getVoltage(), no channel argument"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab and doc/manual.md in the same tree. What the manual says about the Bass and Treble knobs does not match this build: it describes a Baxandall EQ circuit, and while BaxandallEQ.cpp is in the tree and is compiled, ChowDer.cpp never instantiates it. The knobs go to a ShelfFilter whose crossover is 600Hz and whose gains are the knob times 9dB with 20dB subtracted, so there is a fixed 20dB of attenuation before the drive stage. Drive is the knob times 30dB and Bias is the knob times 2.5 added as a constant. A 30Hz high-pass follows the clipper."
   },
   "Werner": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A state-variable filter from a 2020 DAFx paper by Werner and McClellan, with saturating nonlinearities added inside the loop, and an attenuverter beside every control",
+    "Sets the filter frequency, 20Hz at the left to 20000Hz at the right",
+    "Scales the frequency control voltage and inverts it below the middle; at full clockwise ten volts there moves the knob across its whole range",
+    "Sets the resonant feedback around the filter, 0 to 0.95, taking it towards self-oscillation as it is turned up",
+    "Scales the feedback control voltage and inverts it below the middle; at full clockwise ten volts there moves the knob across its whole range",
+    "Sets the damping of the passband, 0.25 to 1.25; the lower the setting the more the filter rings",
+    "Scales the damping control voltage and inverts it below the middle; at full clockwise ten volts there moves the knob across its whole range",
+    "Sets how hard the three saturating elements inside the filter loop are driven, from a tenth to ten, with makeup gain applied after them",
+    "Scales the drive control voltage and inverts it below the middle; at full clockwise ten volts there moves the knob across its whole range",
+    "The audio to be filtered",
+    "Shifts the filter frequency, scaled by the attenuverter beside it and added to the knob",
+    "Shifts the feedback, scaled by the attenuverter beside it and added to the knob",
+    "Shifts the damping, scaled by the attenuverter beside it and added to the knob",
+    "Shifts the drive, scaled by the attenuverter beside it and added to the knob",
+    "The filtered audio",
+    "Note — each control voltage jack does nothing until the small knob beside it is moved off its centre, because the voltage is multiplied by that attenuverter before it reaches the control.",
+    "Note — the filter runs at twice the sample rate when the module is added; the oversampling menu changes that.",
+    "Menu — Oversampling: 1x, 2x, 4x, 8x, 16x — sets how many times the internal sample rate is raised before the nonlinearity is computed; higher settings reduce aliasing and cost more CPU",
+    "Menu — Publication — opens the 2020 DAFx paper this filter comes from in a web browser"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Werner.cpp process(): float x = inputs[AUDIO_IN].getVoltage(), no channel argument"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "sumRange": "0 to 1V",
+      "why": "Werner.cpp cookParams(): the knob plus getVoltage() times the attenuverter over ten, clamped to 0 and 1, then used as the exponent of the 20Hz to 20000Hz sweep"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "sumRange": "0 to 1V",
+      "why": "Werner.cpp cookParams(): the feedback knob plus getVoltage() times the attenuverter over ten, clamped to 0 and 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "Werner.cpp cookParams(): the damping knob plus getVoltage() times the attenuverter over ten, clamped to 0.25 and 1.25"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "sumRange": "0 to 1V",
+      "why": "Werner.cpp cookParams(): the drive knob plus getVoltage() times the attenuverter over ten, clamped to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "setVoltage with no channel argument in Werner.cpp"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab and doc/manual.md in the same tree. Frequency is a 0 to 1 knob used as 1000 raised to that power times 20Hz, so its default of 0.5 is about 632Hz. Feedback is 0 to 0.95 and is clamped to 1 after the CV; damping is 0.25 to 1.25 and clamped there; drive is a 0 to 1 knob mapped to 0.1 to 10 by raising 100 to the power of the knob to the 0.33 and multiplying by 0.1, with a makeup gain of the drive to the power of 0.75. The nonlinearity is a hyperbolic tangent on three of the filter's four state variables."
   },
   "Credit": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Writes a text file listing every plugin and module used in the open patch, for crediting the makers",
+    "Note — nothing happens until you press the round button near the bottom and choose a file to save to. That button is not a parameter, so clicking it for help gives nothing.",
+    "Note — the file lists each plugin's brand and name and, under it, the modules from that plugin in the patch, sorted and listed once each. A file name with no extension gets .txt added.",
+    "Note — the module has no jacks at all; it reads the patch itself rather than anything patched into it.",
+    "Menu — Include plugin URLs — adds each plugin's web address after its name",
+    "Menu — Only include plugin names — leaves the module names out, so the file lists only the plugins",
+    "Menu — ALL CAPS — writes the brand and module names in capitals"
+   ],
+   "notes": "Read from the maker's source at commit 7dc3dab and doc/manual.md in the same tree. The module declares no parameters, inputs or outputs at all; the save button is a PinwheelRust widget added with addChild rather than addParam, so Rack's parameter list is empty and nothing on this panel can be clicked for help. All three menu items start unchecked, so a file written straight away carries brands, plugin names and module names in their own case and no web addresses."
   },
   "ChowPulse": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A pulse shaper modelled on the kick drum circuit of a TR-808: a trigger makes a pulse, the circuit rounds it into an envelope, and a second spike follows at the end of it",
+    "Sets how long the pulse lasts before the shaping circuit, 1ms to 300ms",
+    "Sets how long the envelope takes to fall away, 10ms to 300ms",
+    "Sets the level of the second spike at the end of the pulse. At the centre the spike is removed; clockwise it returns the other way up and twice as large, anticlockwise it keeps its sign and grows.",
+    "Adds to the pulse width knob at a tenth of the knob's range per volt",
+    "Adds to the decay knob at a tenth of the knob's range per volt",
+    "Adds to the double tap knob at a tenth of the knob's range per volt",
+    "A rising edge past 1V starts a new pulse",
+    "The shaped envelope, at ten times the circuit's own output",
+    "Note — nothing comes out until something is patched into the trigger input; the circuit is at rest otherwise.",
+    "Note — fed into ChowModal it does what the pulse does in an 808, exciting a tuned resonance rather than being heard on its own.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "ChowPulse.cpp cookParams(): the knob plus getVoltage() / 10, used as the exponent of 300 milliseconds, with no clamp"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "ChowPulse.cpp cookParams(): the knob plus getVoltage() / 10, used as the exponent of 30 times ten milliseconds, with no clamp"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowPulse.cpp cookParams(): the knob plus getVoltage() / 10, multiplied by -2 to give the tail gain, with no clamp"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "ChowPulse.cpp getPulse(): trigger.process(inputs[TRIG_IN].getVoltage()) on a bare rack dsp::SchmittTrigger, whose default thresholds are 0V and 1V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "setVoltage(env * 10.0f) with no channel argument in ChowPulse.cpp"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab and doc/manual.md in the same tree. The width knob is 0 to 1 used as 300 raised to that power in milliseconds and the decay knob as 30 raised to that power times ten milliseconds, both defaulting to 0.5, which is about 17ms and about 55ms. The decay time is turned into the two resistor values of the modelled circuit against a fixed 0.015 microfarad capacitor. The double tap knob is -1 to 1 and is used as minus twice its value, applied only where the shaped envelope is below zero, so at its centre the tail is removed entirely. None of the three CV inputs is clamped, so a large voltage can push a parameter far past what the knob can reach."
   },
   "Warp": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A distortion built from a peaking filter with a saturating feedback path, wrapped in a delay-free loop; what its four knobs mean is decided by the mode knob below them",
+    "Sets the frequency of the peaking filter, 5Hz to 1000Hz, in every mode",
+    "In mode 0 it sets the filter's Q and cuts the drive as it rises; in mode 1 it raises the drive and the feedback together; in mode 2 it raises the feedback drive and the feedback together",
+    "In mode 0 it sweeps the filter gain from -24dB to 24dB and raises the feedback; in mode 1 it sweeps the gain from -14dB to 14dB and lowers the Q; in mode 2 it only lowers the Q",
+    "In modes 0 and 1 it sets how hard the feedback path saturates; in mode 2 it sets the filter's own drive and lifts the gain from 0dB to 24dB",
+    "Chooses which of three mappings the four knobs above use, 0, 1 or 2; the number is printed under the knob, and changing it fades the output down and back so the switch is not heard as a click",
+    "The audio to be distorted",
+    "The distorted audio, at ten times the filter's own output",
+    "Note — the three mappings are the maker's own designs, the second by Isabel Kaspriskie. They are not more and less of one thing, so a setting found in one mode has no counterpart in another.",
+    "Note — the filter runs at twice the sample rate when the module is added; the oversampling menu changes that.",
+    "Menu — Oversampling: 1x, 2x, 4x, 8x, 16x — sets how many times the internal sample rate is raised before the nonlinearity is computed; higher settings reduce aliasing and cost more CPU"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Warp.cpp process(): warpFilter.inputs[0].setVoltage(inputs[AUDIO_IN].getVoltage()), no channel argument"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab, doc/manual.md and src/Warp/Mappings.hpp in the same tree, where the three mappings are written out with the maker's own comments naming who designed each. The cutoff knob is 0 to 1 used as 200 raised to that power times 5Hz. The mode knob is a ChoiceQuantity running 0 to 3 whose displayed value is the integer below it clamped to 2, so it has three positions; the label under it is drawn by the widget and cannot be clicked. The drive knob defaults to fully anticlockwise, which in modes 0 and 1 is the least feedback saturation. The underlying filter's own parameters, frequency, Q, gain, drive, feedback drive and feedback, belong to an internal module and never appear on the panel."
   },
   "ChowTapeComp": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The compression stage of the tape model on its own: a soft characteristic curve that pulls the loud parts of a signal down before they reach the tape",
+    "Sets the level at which the curve starts to act, 0dB to 9dB; at 0dB nothing is compressed, and at 9dB anything above -9dB is",
+    "Sets how quickly the gain comes down once the signal enters the compressed region, 0.1ms to 50ms",
+    "Sets how quickly the gain returns once the signal leaves the compressed region, 10ms to 1000ms",
+    "The audio to be compressed",
+    "The compressed audio",
+    "Note — the amount knob comes up fully anticlockwise, at 0dB, so a new module passes the audio through untouched until it is turned up.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowTapeCompression.cpp process(): float x = inputs[AUDIO_INPUT].getVoltage() / 5.0f, no channel argument"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab, doc/manual.md, and the maker's own ChowTape plugin manual at chowdsp.com, which is where the description of the amount control comes from. The attack and release times are exact: attack is 160000/9801 raised to the knob, times 9801/3010, minus 950/301, which is 0.1ms at the bottom and 50ms at the top; release is 100 raised to the knob times 10, which is 10ms to 1000ms. Both default to the middle of their knob, about 3.6ms and 100ms. The signal is divided by five before the level is measured and multiplied by five again on the way out, so the compression threshold is referred to a 5V peak."
   },
   "ChowTapeChew": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An emulation of tape that a machine has chewed up: the sound drops out and dulls in bursts, at a rate and a severity you set",
+    "Sets how badly the chewed sections are damaged, which is both how hard the dropout bites and how far the treble is rolled off during one",
+    "Sets how often the chewed sections come round; at the left there are none at all, and at the right the tape is chewed the whole time",
+    "Sets how much the gaps between chewed sections vary in length; at the left they are evenly spaced and at the right their lengths are scattered",
+    "The audio to be chewed",
+    "The chewed audio",
+    "Note — all three knobs come up fully anticlockwise, and with the frequency knob there nothing is chewed at all, so a new module passes the audio through unchanged.",
+    "Note — how long each burst lasts and how long the gaps are is drawn at random inside the bounds the three knobs set, so two modules on the same signal never chew it in the same places.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowTapeChew.cpp process(): float x = inputs[AUDIO_INPUT].getVoltage() / 10.0f, no channel argument"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab, doc/manual.md, and the maker's own ChowTape plugin manual at chowdsp.com. All three knobs are 0 to 1 shown as a percentage and all three default to 0. The two ends are special cases in cookParams: at frequency 0 the dropout mix is 0 and the filter is opened to 22000Hz, and at frequency 1 the dropout is on permanently. In between, the module toggles between chewed and clean stretches whose lengths come from getWetTime and getDryTime, both of which draw a random number scaled by the variance knob. The dropout power is one plus up to three times the depth knob, and the filter during a chewed stretch runs from 22000Hz down to 5000Hz as the depth knob rises."
   },
   "ChowTapeDegrade": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An emulation of tape worn out by age and use: noise, a loss of treble and a loss of level, all drifting as the tape runs",
+    "Sets how worn the tape is: it adds noise and takes up to 24dB off the level",
+    "Sets how old the tape is, sweeping the treble loss from 20000Hz down to 200Hz and bringing in more noise as it rises",
+    "Sets how much the treble loss and the level wander about their settings as the tape runs; at the left they hold to what the knobs say",
+    "Shapes the noise by the level of the signal, so the hiss follows what is playing instead of running underneath it, and lengthens the level detector's release as it rises",
+    "The audio to be degraded",
+    "The degraded audio",
+    "Note — all four knobs come up fully anticlockwise, which is no noise, no level loss and no treble loss, so a new module passes the audio through unchanged.",
+    "Note — the noise is only shaped by the signal while the envelope knob is off its lowest setting; at zero the noise runs at a steady level.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowTapeDegrade.cpp process(): float x = inputs[AUDIO_INPUT].getVoltage() / 10.0f, no channel argument"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab, doc/manual.md, and the maker's own ChowTape plugin manual at chowdsp.com. All four knobs are 0 to 1 shown as a percentage and all four default to 0. In cookParams the filter frequency is 200Hz times 100 raised to one minus the amount knob, so amount at 0 leaves it at 20000Hz; the gain is -24dB times the depth knob; the noise gain is 0.33 times depth times amount, so both knobs have to be up for any noise. Variance adds a random offset to both, up to the filter frequency over 0.6 and up to 36dB, redrawn every 64 samples, and the total gain is capped at 3dB. The envelope knob sets the level detector's release between 20ms and 5000ms."
   },
   "ChowTapeLoss": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The playhead losses of a reel-to-reel machine on their own: the treble a tape head loses to its gap, to the tape's thickness and to the space between them, plus the head bump",
+    "Sets the width of the playhead gap, 1 to 50 microns; a wider gap loses more treble",
+    "Sets the thickness of the tape, 0.1 to 50 microns; thicker tape loses more treble",
+    "Sets the space between the playhead and the tape, 0.1 to 20 microns; more space loses more treble",
+    "Sets the tape speed the losses are worked out for, 1 to 50 inches per second; a faster tape keeps more treble and moves the head bump up",
+    "The audio to be filtered",
+    "The filtered audio",
+    "Note — it only takes away, it adds no distortion of its own: the module is a 64-tap filter built from the three loss equations, followed by one peaking filter for the head bump.",
+    "Note — the four knobs all come up at the middle of their travel, which is a 10 micron gap, 15 micron tape, about 10 microns of spacing and 15 inches per second, so a new module is already filtering.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowTapeLoss.cpp process(): float x = inputs[AUDIO_INPUT].getVoltage(), no channel argument"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab, doc/manual.md, and the maker's own ChowTape plugin manual at chowdsp.com. Each knob is 0 to 1 with a default of 0.5 and an exponential display whose three constants are literals at the top of ChowTapeLoss.cpp; working the endpoints out gives gap 1 to 50, thickness 0.1 to 50, spacing 0.1 to 20, all in microns, and speed 1 to 50 inches per second. The maker's desktop manual gives spacing and thickness in centimetres and the gap in millimetres, but this module's own parameters are in microns and the code multiplies each by 1e-6 to reach metres. The filter is 64 taps at 44100Hz and longer in proportion at higher sample rates, rebuilt whenever a knob moves. The head bump is a peaking filter at the speed in metres per second divided by 500 times the gap, with a gain of at most 1.5."
   },
   "ChowChorus": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An ensemble chorus: four delay lines emulating a bucket-brigade chip, each swept by a slow and a fast sine, giving a stereo pair from a mono input",
+    "Sets how fast the sweeps run; the slow one moves between 0.005Hz and 5Hz and the fast one between 0.5Hz and 40Hz together",
+    "Sets how far the delays are swept, and so how deep the chorusing is",
+    "Sets how much of each channel's output is fed back into its delay lines, up to 0.39 of it; the feedback is high-passed at 240Hz so it cannot build up on the bass",
+    "Mixes the chorus against the dry signal, all dry at the left and all chorus at the right",
+    "The audio to be chorused; the same signal feeds both channels",
+    "One of the two channels; it carries the same input through two delay lines whose sweeps start a third of a cycle away from the other channel's",
+    "Note — the input is mono and the two outputs differ only in the starting phase of their sweeps, so one of them patched alone gives the chorus without the stereo spread.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ChowChorus.cpp process(): auto input = inputs[AUDIO_IN].getVoltage(), no channel argument, read once per output channel"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 7dc3dab and doc/manual.md in the same tree. All four knobs are 0 to 1 shown as a percentage; rate, depth and mix default to the middle and feedback to zero. The rate knob is the exponent of both LFO sweeps at once, 0.005Hz to 5Hz for the slow pair and 0.5Hz to 40Hz for the fast pair. The feedback amount is 0.39 times the square root of the knob. Each channel runs two bucket-brigade delay lines of 4096 stages with a 12000Hz anti-aliasing filter after them and a 240Hz high-pass in the feedback path, and the four sweeps start at phases of minus a third of pi, zero, zero and a third of pi. The input is summed into the feedback through a hyperbolic tangent after being scaled by 0.075."
   }
  }
 }

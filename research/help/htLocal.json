@@ -1,23 +1,1199 @@
 {
  "plugin": "htLocal",
- "source": "https://github.com/HTlocal/VCV-Modules-HTLocal",
+ "source": "https://github.com/HTlocal/VCV-Modules-HTLocal/blob/76c6d33301c8cf1141c39c171839e3c1d9a61511/README.md",
  "read": "2026-09-14",
- "partial": true,
+ "notes": "Written from the maker's source at commit 76c6d33 (\"fix tags\", 2021-12-12), the commit that carries version 2.0.0 together with the module tags the installed plugin.json has: the version was set at c043d3d but the tags there read Fader, Adder and Precision Adder, where the installed manifest reads Utility and Hardware clone. 76c6d33 is the last change to any file in the repository. The plugin ships no menu items of its own on any module, and no presets.",
  "modules": {
   "htFader": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "8 fade channels, each taking a stereo pair of signals and fading them up or down on a curve you set",
+    "The left signal of that fade channel, multiplied by the channel's fade level on its way to the L output; a polyphonic cable is summed to one channel first",
+    "The right signal of that fade channel, multiplied by the channel's fade level on its way to the R output; a polyphonic cable is summed to one channel first",
+    "A rising edge past 0.01V flips that channel's button, so a channel that was fading in starts fading out and one that was out starts fading in",
+    "Flips that channel between fading in and fading out; it latches, and the channel stays open for as long as it is on",
+    "The time a fade in takes, 0.05 to 100 seconds and 20 seconds on arrival; a higher setting gives a longer fade, despite the column being marked Speed",
+    "The time a fade out takes, 0.05 to 100 seconds and 20 seconds on arrival; a higher setting gives a longer fade, despite the column being marked Speed",
+    "Bends the fade curve, -1 to 3, with 0 a straight line; below 0 the level climbs early in a fade in, above 0 it stays low until the end. Default -0.7",
+    "The L input of that channel scaled by its fade level; with nothing patched to that input the jack carries the fade shape itself, 0V to 10V",
+    "The R input of that channel scaled by its fade level; with nothing patched to that input the jack carries the fade shape itself, 0V to 10V",
+    "Note — every channel arrives faded out and passes nothing. Press a channel's button, or send a rising edge to its trigger jack, to fade it in.",
+    "Note — the number readout shows the value of the Speed knob last turned. The Slope knobs do not write to it, so it shows a fade time and nothing else."
+   ],
+   "in": {
+    "0": 3,
+    "8": 1,
+    "16": 2,
+    "1": 3,
+    "9": 1,
+    "17": 2,
+    "2": 3,
+    "10": 1,
+    "18": 2,
+    "3": 3,
+    "11": 1,
+    "19": 2,
+    "4": 3,
+    "12": 1,
+    "20": 2,
+    "5": 3,
+    "13": 1,
+    "21": 2,
+    "6": 3,
+    "14": 1,
+    "22": 2,
+    "7": 3,
+    "15": 1,
+    "23": 2
+   },
+   "out": {
+    "0": 8,
+    "8": 9,
+    "1": 8,
+    "9": 9,
+    "2": 8,
+    "10": 9,
+    "3": 8,
+    "11": 9,
+    "4": 8,
+    "12": 9,
+    "5": 8,
+    "13": 9,
+    "6": 8,
+    "14": 9,
+    "7": 8,
+    "15": 9
+   },
+   "param": {
+    "0": 5,
+    "8": 6,
+    "16": 7,
+    "24": 4,
+    "1": 5,
+    "9": 6,
+    "17": 7,
+    "25": 4,
+    "2": 5,
+    "10": 6,
+    "18": 7,
+    "26": 4,
+    "3": 5,
+    "11": 6,
+    "19": 7,
+    "27": 4,
+    "4": 5,
+    "12": 6,
+    "20": 7,
+    "28": 4,
+    "5": 5,
+    "13": 6,
+    "21": 7,
+    "29": 4,
+    "6": 5,
+    "14": 6,
+    "22": 7,
+    "30": 4,
+    "7": 5,
+    "15": 6,
+    "23": 7,
+    "31": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "8": "audio",
+     "16": "audio",
+     "1": "trigger",
+     "9": "audio",
+     "17": "audio",
+     "2": "trigger",
+     "10": "audio",
+     "18": "audio",
+     "3": "trigger",
+     "11": "audio",
+     "19": "audio",
+     "4": "trigger",
+     "12": "audio",
+     "20": "audio",
+     "5": "trigger",
+     "13": "audio",
+     "21": "audio",
+     "6": "trigger",
+     "14": "audio",
+     "22": "audio",
+     "7": "trigger",
+     "15": "audio",
+     "23": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "8": "audio",
+     "1": "audio",
+     "9": "audio",
+     "2": "audio",
+     "10": "audio",
+     "3": "audio",
+     "11": "audio",
+     "4": "audio",
+     "12": "audio",
+     "5": "audio",
+     "13": "audio",
+     "6": "audio",
+     "14": "audio",
+     "7": "audio",
+     "15": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "16": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "17": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "18": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "19": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "20": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "21": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "14": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "22": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "15": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "23": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "8": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "9": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "10": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "11": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "12": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "5": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "13": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "6": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "14": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "7": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "15": {
+      "poly": false,
+      "why": "src/htFader.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     }
+    }
+   },
+   "notes": "The knobs are named Fade In Speed and Fade Out Speed in the maker's tooltips and marked Speed on the panel, but the value is a duration: the fade position advances by sampleTime divided by the knob, so the fade lasts the knob's value in seconds (src/htFader.cpp:176, :181). The README says \"If only one input is connected only the corresponding output will be active\"; the code does the opposite, giving the unpatched side's output a 0V to 10V fade envelope (:282, :287), which is what the same README says two paragraphs earlier. The lines follow the code. Nothing is written to an output pair while both of its jacks are unpatched (:278)."
   },
   "htFader16": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "16 fade channels, each taking a stereo pair of signals and fading them up or down on a curve you set",
+    "The left signal of that fade channel, multiplied by the channel's fade level on its way to the L output; a polyphonic cable is summed to one channel first",
+    "The right signal of that fade channel, multiplied by the channel's fade level on its way to the R output; a polyphonic cable is summed to one channel first",
+    "A rising edge past 0.01V flips that channel's button, so a channel that was fading in starts fading out and one that was out starts fading in",
+    "Flips that channel between fading in and fading out; it latches, and the channel stays open for as long as it is on",
+    "The time a fade in takes, 0.05 to 100 seconds and 20 seconds on arrival; a higher setting gives a longer fade, despite the column being marked Speed",
+    "The time a fade out takes, 0.05 to 100 seconds and 20 seconds on arrival; a higher setting gives a longer fade, despite the column being marked Speed",
+    "Bends the fade curve, -1 to 3, with 0 a straight line; below 0 the level climbs early in a fade in, above 0 it stays low until the end. Default -0.7",
+    "The L input of that channel scaled by its fade level; with nothing patched to that input the jack carries the fade shape itself, 0V to 10V",
+    "The R input of that channel scaled by its fade level; with nothing patched to that input the jack carries the fade shape itself, 0V to 10V",
+    "Note — every channel arrives faded out and passes nothing. Press a channel's button, or send a rising edge to its trigger jack, to fade it in.",
+    "Note — the number readout shows the value of the Speed knob last turned. The Slope knobs do not write to it, so it shows a fade time and nothing else."
+   ],
+   "in": {
+    "0": 3,
+    "16": 1,
+    "32": 2,
+    "1": 3,
+    "17": 1,
+    "33": 2,
+    "2": 3,
+    "18": 1,
+    "34": 2,
+    "3": 3,
+    "19": 1,
+    "35": 2,
+    "4": 3,
+    "20": 1,
+    "36": 2,
+    "5": 3,
+    "21": 1,
+    "37": 2,
+    "6": 3,
+    "22": 1,
+    "38": 2,
+    "7": 3,
+    "23": 1,
+    "39": 2,
+    "8": 3,
+    "24": 1,
+    "40": 2,
+    "9": 3,
+    "25": 1,
+    "41": 2,
+    "10": 3,
+    "26": 1,
+    "42": 2,
+    "11": 3,
+    "27": 1,
+    "43": 2,
+    "12": 3,
+    "28": 1,
+    "44": 2,
+    "13": 3,
+    "29": 1,
+    "45": 2,
+    "14": 3,
+    "30": 1,
+    "46": 2,
+    "15": 3,
+    "31": 1,
+    "47": 2
+   },
+   "out": {
+    "0": 8,
+    "16": 9,
+    "1": 8,
+    "17": 9,
+    "2": 8,
+    "18": 9,
+    "3": 8,
+    "19": 9,
+    "4": 8,
+    "20": 9,
+    "5": 8,
+    "21": 9,
+    "6": 8,
+    "22": 9,
+    "7": 8,
+    "23": 9,
+    "8": 8,
+    "24": 9,
+    "9": 8,
+    "25": 9,
+    "10": 8,
+    "26": 9,
+    "11": 8,
+    "27": 9,
+    "12": 8,
+    "28": 9,
+    "13": 8,
+    "29": 9,
+    "14": 8,
+    "30": 9,
+    "15": 8,
+    "31": 9
+   },
+   "param": {
+    "0": 5,
+    "16": 6,
+    "32": 7,
+    "48": 4,
+    "1": 5,
+    "17": 6,
+    "33": 7,
+    "49": 4,
+    "2": 5,
+    "18": 6,
+    "34": 7,
+    "50": 4,
+    "3": 5,
+    "19": 6,
+    "35": 7,
+    "51": 4,
+    "4": 5,
+    "20": 6,
+    "36": 7,
+    "52": 4,
+    "5": 5,
+    "21": 6,
+    "37": 7,
+    "53": 4,
+    "6": 5,
+    "22": 6,
+    "38": 7,
+    "54": 4,
+    "7": 5,
+    "23": 6,
+    "39": 7,
+    "55": 4,
+    "8": 5,
+    "24": 6,
+    "40": 7,
+    "56": 4,
+    "9": 5,
+    "25": 6,
+    "41": 7,
+    "57": 4,
+    "10": 5,
+    "26": 6,
+    "42": 7,
+    "58": 4,
+    "11": 5,
+    "27": 6,
+    "43": 7,
+    "59": 4,
+    "12": 5,
+    "28": 6,
+    "44": 7,
+    "60": 4,
+    "13": 5,
+    "29": 6,
+    "45": 7,
+    "61": 4,
+    "14": 5,
+    "30": 6,
+    "46": 7,
+    "62": 4,
+    "15": 5,
+    "31": 6,
+    "47": 7,
+    "63": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "16": "audio",
+     "32": "audio",
+     "1": "trigger",
+     "17": "audio",
+     "33": "audio",
+     "2": "trigger",
+     "18": "audio",
+     "34": "audio",
+     "3": "trigger",
+     "19": "audio",
+     "35": "audio",
+     "4": "trigger",
+     "20": "audio",
+     "36": "audio",
+     "5": "trigger",
+     "21": "audio",
+     "37": "audio",
+     "6": "trigger",
+     "22": "audio",
+     "38": "audio",
+     "7": "trigger",
+     "23": "audio",
+     "39": "audio",
+     "8": "trigger",
+     "24": "audio",
+     "40": "audio",
+     "9": "trigger",
+     "25": "audio",
+     "41": "audio",
+     "10": "trigger",
+     "26": "audio",
+     "42": "audio",
+     "11": "trigger",
+     "27": "audio",
+     "43": "audio",
+     "12": "trigger",
+     "28": "audio",
+     "44": "audio",
+     "13": "trigger",
+     "29": "audio",
+     "45": "audio",
+     "14": "trigger",
+     "30": "audio",
+     "46": "audio",
+     "15": "trigger",
+     "31": "audio",
+     "47": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "16": "audio",
+     "1": "audio",
+     "17": "audio",
+     "2": "audio",
+     "18": "audio",
+     "3": "audio",
+     "19": "audio",
+     "4": "audio",
+     "20": "audio",
+     "5": "audio",
+     "21": "audio",
+     "6": "audio",
+     "22": "audio",
+     "7": "audio",
+     "23": "audio",
+     "8": "audio",
+     "24": "audio",
+     "9": "audio",
+     "25": "audio",
+     "10": "audio",
+     "26": "audio",
+     "11": "audio",
+     "27": "audio",
+     "12": "audio",
+     "28": "audio",
+     "13": "audio",
+     "29": "audio",
+     "14": "audio",
+     "30": "audio",
+     "15": "audio",
+     "31": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "16": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "32": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "17": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "33": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "18": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "34": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "19": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "35": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "20": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "36": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "21": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "37": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "22": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "38": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "23": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "39": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "24": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "40": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "25": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "41": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "26": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "42": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "27": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "43": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "12": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "28": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "44": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "13": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "29": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "45": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "14": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "30": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "46": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "15": {
+      "poly": false,
+      "range": "high above 0.01V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "src/htFader16.cpp:198-202 getNormalVoltage(0.0f) compared with FADE_GATE_LVL, 0.01f at :4"
+     },
+     "31": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     },
+     "47": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "10V",
+      "why": "src/htFader16.cpp:280-287 getVoltageSum() when patched, else CV_MAX10 (10.0f, src/htLocal.hpp:5) times the fade"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "16": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "17": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "18": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "19": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "20": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "5": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "21": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "6": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "22": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "7": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "23": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "8": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "24": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "9": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "25": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "10": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "26": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "11": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "27": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "12": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "28": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "13": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "29": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "14": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "30": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "15": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     },
+     "31": {
+      "poly": false,
+      "why": "src/htFader16.cpp:280-287 one setVoltage per jack, no setChannels anywhere in the module"
+     }
+    }
+   },
+   "notes": "The knobs are named Fade In Speed and Fade Out Speed in the maker's tooltips and marked Speed on the panel, but the value is a duration: the fade position advances by sampleTime divided by the knob, so the fade lasts the knob's value in seconds (src/htFader16.cpp:176, :181). The README says \"If only one input is connected only the corresponding output will be active\"; the code does the opposite, giving the unpatched side's output a 0V to 10V fade envelope (:282, :287), which is what the same README says two paragraphs earlier. The lines follow the code. Nothing is written to an output pair while both of its jacks are unpatched (:278)."
   },
   "htAdder": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A five-row precision CV adder after the Doepfer A-185-2, each row added to, subtracted from or left out of a running total, with that total and its inverse on two jacks",
+    "The CV of the first row, which reaches the output whatever its MODE switch is set to; the switch governs only whether the V knob's voltage joins it",
+    "A CV added to or subtracted from the total according to that row's MODE switch; with nothing patched the row offers a flat 1V instead, so the switch transposes by an octave",
+    "Chooses what the V knob's voltage does to the first CV IN: + adds it, - subtracts it, 0 leaves it out",
+    "Chooses what that row does to the total: + adds its CV, - subtracts its CV, 0 leaves the row out",
+    "Scales the volt that the first row's MODE switch adds or subtracts, 0 to 1V, so the first input can be trimmed by a fraction of an octave. Default 1, a whole volt",
+    "Sets that row's MODE switch from a voltage: above 0V selects +, below 0V selects -, and only an exact 0V selects the middle position",
+    "The running total of the rows their MODE switches admit",
+    "The running total of the rows their MODE switches admit, with its sign flipped",
+    "Note — a voltage at a MODE CV jack is written straight into the switch, so the switch moves on the panel and stays wherever the CV last left it after the cable is pulled.",
+    "Note — a row with nothing patched to its CV IN contributes anyway, a whole volt in the direction its MODE switch points, except the first row, which contributes the V knob's voltage instead."
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "param": {
+    "0": 5,
+    "1": 3,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "src/htAdder.cpp:173 and :175 read .value, channel 0 only; :180 supplies nothing for the CV when the jack is empty"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "1V",
+      "why": "src/htAdder.cpp:190 reads .value, channel 0 only; :194 adds 1.0f times the switch when the jack is empty"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "1V",
+      "why": "src/htAdder.cpp:190 reads .value, channel 0 only; :194 adds 1.0f times the switch when the jack is empty"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "1V",
+      "why": "src/htAdder.cpp:190 reads .value, channel 0 only; :194 adds 1.0f times the switch when the jack is empty"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "1V",
+      "why": "src/htAdder.cpp:190 reads .value, channel 0 only; :194 adds 1.0f times the switch when the jack is empty"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "the switch keeps the position you set",
+      "why": "src/htAdder.cpp:152 isConnected() gates it; :154-159 compare .value against 0 and write the switch"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "the switch keeps the position you set",
+      "why": "src/htAdder.cpp:152 isConnected() gates it; :154-159 compare .value against 0 and write the switch"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "the switch keeps the position you set",
+      "why": "src/htAdder.cpp:152 isConnected() gates it; :154-159 compare .value against 0 and write the switch"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "the switch keeps the position you set",
+      "why": "src/htAdder.cpp:152 isConnected() gates it; :154-159 compare .value against 0 and write the switch"
+     },
+     "9": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "the switch keeps the position you set",
+      "why": "src/htAdder.cpp:152 isConnected() gates it; :154-159 compare .value against 0 and write the switch"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/htAdder.cpp:200-201 write .value, one channel, with no setChannels in the module"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/htAdder.cpp:200-201 write .value, one channel, with no setChannels in the module"
+     }
+    }
+   },
+   "notes": "The MODE CV jacks do not add to the switches, they assign to them: params[PARAM_ADDER_MODE + ch].value is set to -1, 0 or 1 at src/htAdder.cpp:154-159. The switch therefore moves on the panel and keeps the position the CV last wrote once the cable is removed. The middle position needs an exact 0.0f, which a continuous CV will rarely hit. The first row is not like the other four: at :173 its CV is assigned to the total rather than added, and it is assigned whether or not the switch is at 0, so setting that switch to 0 does not remove the row. All ten jacks are read through Port::value, which is channel 0 of a polyphonic cable."
   }
  }
 }

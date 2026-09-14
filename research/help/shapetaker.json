@@ -1,43 +1,950 @@
 {
  "plugin": "shapetaker",
- "source": "https://github.com/joshpanzarella/shapetaker-vcv",
+ "source": "https://github.com/joshpanzarella/shapetaker-vcv/blob/b42dff6/docs/manuals/",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Evocation": {
    "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "Clairaudient": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "Involution": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "Chiaroscuro": {
-   "lines": [
-    "TODO: what this module is"
-   ]
+    "An envelope generator that records a contour you draw with the mouse and plays it back down four lanes at different speeds, phases and loop settings, or works as a four-output ADSR",
+    "Fires every lane at once, and in ADSR mode fires a one-shot that reaches sustain and releases without a held gate",
+    "Cuts a quiet opening off the recorded gesture, treating anything under 1V for at least 25ms as silence and confirming 12ms of activity before the cut",
+    "Cuts the quiet stretch after the last active point off the recorded gesture and adds a return to 0V where one is needed",
+    "Steps the selected lane through Off, Forward, Reverse and Ping-Pong looping; in ADSR mode it is a plain on and off",
+    "Turns the selected lane's output upside down, so a 0-10V contour comes out running 10V to 0V and a bipolar one changes sign",
+    "Sets the playback speed of the selected lane, from 0.05 times to 8 times; in ADSR mode it sets the selected stage's time, or the sustain level",
+    "Offsets the selected lane through one whole turn of the gesture; in ADSR mode it bends the selected stage from logarithmic through linear to exponential",
+    "Selects which lane the shared speed, phase, loop and invert controls edit; in ADSR mode the four buttons select attack, decay, sustain and release instead",
+    "Switches between the recorded-gesture engine and a four-output ADSR envelope, keeping the gesture in the background while ADSR is chosen",
+    "A rising edge restarts that voice at the start of the gesture, or at the edge of its loop window; in ADSR mode it fires a one-shot that releases on its own",
+    "A rising edge starts a voice and a falling edge glides it down to 0V; in ADSR mode it runs the usual attack, sustain and release",
+    "Adds to that lane's phase offset, 10V being one whole turn of the gesture, and the result wraps round",
+    "Supplies a tempo for lanes set to a beat division, and never triggers anything; four rising edges establish the beat and only the first channel is read",
+    "That lane's envelope, 0-10V unless the menu sets it to 0-5V or bipolar",
+    "Carries 10V while that lane or ADSR voice is running",
+    "A 1ms pulse at 10V when that lane's one-shot finishes or it crosses the loop boundary its direction defines",
+    "Note — it does nothing until a gesture exists: click and hold on the touch strip and move up and down, high on the strip recording 10V and low recording 0V, up to five seconds",
+    "Note — starting a new recording stops all playback and replaces the stored gesture when it finishes; the gesture is saved with the patch",
+    "Note — with a lane looping, coloured start and end markers appear on the screen and can be dragged to narrow the part of the gesture that plays",
+    "Note — clicking the outlined capsule at the top of the screen cycles the selected lane between free running and a quarter, half, one, two or four beats of the clock input",
+    "Note — with both the trigger and the gate patched in gesture mode only the trigger is read; in ADSR mode both keep their own jobs",
+    "Note — a lane fitted to the clock ignores its speed setting until it is put back to free running",
+    "Note — putting a Recollect immediately to the right replaces the played contour with that module's two morphable memories, while recording, triggers and phase stay here",
+    "Note — the four per-lane speed CV inputs the manual describes are declared in the code but have no jack on the panel, so nothing can be patched to them",
+    "Menu — Gesture Mode — chooses the recorded-contour engine, the same choice the panel switch makes",
+    "Menu — ADSR Mode — chooses the four-output ADSR engine, the same choice the panel switch makes",
+    "Menu — Gesture trigger behavior — chooses whether a trigger restarts lanes that are already looping or leaves those loops running",
+    "Menu — Clock fit — sets each lane independently to free running or to a beat division of the clock input",
+    "Menu — Output voltage ranges — sets each lane's output independently to 0-10V, 0-5V or bipolar, and carries a normalize switch that scales the lane against the gesture's peak",
+    "Menu — Quantize ADSR Phase CV — is kept so old patches load, and changes nothing in this version because the ADSR contour has no CV path"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "7": 4,
+    "11": 5,
+    "17": 6,
+    "18": 7,
+    "19": 8,
+    "20": 8,
+    "21": 8,
+    "22": 8,
+    "23": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "6": 12,
+    "7": 12,
+    "8": 12,
+    "9": 12,
+    "10": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 14,
+    "2": 14,
+    "3": 14,
+    "4": 15,
+    "5": 15,
+    "6": 15,
+    "7": 15,
+    "8": 16,
+    "9": 16,
+    "10": 16,
+    "11": 16
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "evocation.cpp:2207 and the trigger handling set the output width from this jack's channel count and read each channel"
+     },
+     "1": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "evocation.cpp:2207 sets the output width from the wider of this jack and the trigger jack, reading each channel"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Evocation.md records 10V as one whole phase turn, and the per-lane phase CV is smoothed for every voice"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Evocation.md records 10V as one whole phase turn, and the per-lane phase CV is smoothed for every voice"
+     },
+     "8": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Evocation.md records 10V as one whole phase turn, and the per-lane phase CV is smoothed for every voice"
+     },
+     "9": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Evocation.md records 10V as one whole phase turn, and the per-lane phase CV is smoothed for every voice"
+     },
+     "10": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "docs/manuals/Evocation.md states the clock input is monophonic and only the first channel is used"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "evocation.cpp:2331 sets each output's channel count from the trigger and gate width and writes every channel"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "evocation.cpp:2331 sets each output's channel count from the trigger and gate width and writes every channel"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "evocation.cpp:2331 sets each output's channel count from the trigger and gate width and writes every channel"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "evocation.cpp:2331 sets each output's channel count from the trigger and gate width and writes every channel"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "evocation.cpp:2208 and 2278 set the channel count and write 10V or 0V per channel"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "evocation.cpp:2208 and 2278 set the channel count and write 10V or 0V per channel"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "evocation.cpp:2208 and 2278 set the channel count and write 10V or 0V per channel"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "evocation.cpp:2208 and 2278 set the channel count and write 10V or 0V per channel"
+     },
+     "8": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "evocation.cpp:2207 and 2285 set the channel count and write the 1ms pulse per channel"
+     },
+     "9": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "evocation.cpp:2207 and 2285 set the channel count and write the 1ms pulse per channel"
+     },
+     "10": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "evocation.cpp:2207 and 2285 set the channel count and write the 1ms pulse per channel"
+     },
+     "11": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "evocation.cpp:2207 and 2285 set the channel count and write the 1ms pulse per channel"
+     }
+    }
+   },
+   "notes": "Eleven parameters and four inputs are declared with no widget on the panel and can never be clicked: the four per-lane speed knobs, loop and invert for lanes two to four (the panel pair is shared and follows the selected lane), the two advance buttons, and the four speed CV inputs. The manual's Connections section lists SPEED 1-4 CV among the inputs, which is true of the code and not of the panel. The two large knobs are printed PARAM I and PARAM II on the panel; the manual calls them SPEED and PHASE."
   },
   "Recollect": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two gesture memories for Evocation with separate transforms and a morph between them, and it goes immediately to the right of the Evocation it belongs to",
+    "Moves between the two transformed memories, all of A at the bottom and all of B at the top, crossfading matching points of the two contours",
+    "Low-pass smooths the selected memory in both directions at once, so hand jitter softens without the contour shifting earlier or later",
+    "Replaces the selected memory's detail with fewer straight segments, low settings keeping the hand and high settings leaving the geometry",
+    "Chooses which memory the next finished Evocation recording lands in, and which one the transform controls edit",
+    "Flips the selected memory in time before it is morphed, which is separate from Evocation's own loop direction",
+    "Folds the selected memory into the first half of its length and plays it back out through the second, so it ends where it started",
+    "Scales the selected transformed memory so its highest point reaches full",
+    "Adds to the morph knob, 10V covering the whole span from A to B and clamping at the ends; only the first channel is read",
+    "The transformed memory A on its own, 0-10V",
+    "The transformed memory B on its own, 0-10V",
+    "The current morph between the two transformed memories, 0-10V",
+    "Note — it shows AWAITING EVOCATION and does nothing until an Evocation is the module immediately to its left; a gap or another module between them breaks the link",
+    "Note — Evocation stays the performer: it records the gesture and supplies the triggers, loop direction, loop window, phase, clock fit and polyphony that these outputs follow",
+    "Note — a memory is written when a finished Evocation recording arrives, and by default the selector then moves to the other memory ready for the next take",
+    "Note — transforms never rewrite the stored take, so any of them can be changed or reset later",
+    "Note — the three jacks here are fixed at 0-10V and ignore Evocation's per-lane voltage range, invert and peak normalization",
+    "Note — it is inactive while Evocation is in ADSR mode, and both memories survive that",
+    "Menu — Alternate A/B after each capture — moves the record target to the other memory after each successful new take",
+    "Menu — Capture Evocation gesture — copies the gesture Evocation currently holds straight into the selected memory",
+    "Menu — Write protect — locks that memory against capture, clearing, copying into it and swapping, while leaving its transforms editable",
+    "Menu — Reset transforms — returns reverse, palindrome, smooth, simplify and normalize to neutral for the selected memory",
+    "Menu — Swap A and B — exchanges the two memories, and is refused unless both are unlocked",
+    "Menu — Clear — empties that memory",
+    "Menu — Show on screen — chooses which memory's source trace the screen draws"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+   },
+   "in": {
+    "0": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "docs/manuals/Recollect.md states morph CV adds to the knob at 10V for the full range and only the first channel is read"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "docs/manuals/Recollect.md states all three outputs are 0-10V and follow Evocation Envelope 1's active voices"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "docs/manuals/Recollect.md states all three outputs are 0-10V and follow Evocation Envelope 1's active voices"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "docs/manuals/Recollect.md states all three outputs are 0-10V and follow Evocation Envelope 1's active voices"
+     }
+    }
+   },
+   "notes": "The panel and the code call the third transform PALINDROME and it folds the gesture out and back (recollect.cpp:463-476). The manual still lists a MIRROR transform that flips amplitude; the comment in the source says MIRROR was removed because it duplicated Evocation's own invert. The transforms are applied in the order reverse, palindrome, smooth, simplify, normalize."
+  },
+  "Clairaudient": {
+   "lines": [
+    "Two sigmoid oscillators with a pitch-locked formant modulator inside each waveform, crossfaded and spread across the stereo field, with cross sync and a reverse sync that can be made probabilistic",
+    "Tunes the V oscillator in whole octaves, two either way, and the menu can free it for a continuous sweep",
+    "Tunes the Z oscillator in semitones, two octaves either way, and the menu can free it for a continuous sweep",
+    "Detunes that oscillator by up to 20 cents either way",
+    "Sweeps that oscillator's sigmoid curve from a soft ramp to a sharp square-like edge, the morph finishing in roughly the first half of the travel; in PWM mode it sets the pulse width from 5% to 95%",
+    "Attenuates and inverts the shape jack for that oscillator before it moves the shape knob",
+    "Mixes the two oscillators at the output stage, all V at one end and all Z at the other",
+    "Attenuates and inverts the crossfade jack before it moves the crossfade knob",
+    "Makes the V oscillator reset the phase of the Z oscillator at each of its own cycles",
+    "Chooses the reverse sync: off, on, where each V cycle flips the direction the Z oscillator runs in, or mutual, where Z flips V in return",
+    "Sets how far the formant modulator bends the sigmoid curve inside each cycle; at zero the waveform is plain, and the character opens up from the middle of the travel upwards",
+    "Sets the formant modulator's speed as a multiple of the oscillator's own pitch, stepped through eight ratios from half up to seven",
+    "Skews the wave's symmetry, pouring even harmonics into an otherwise hollow symmetric wave; in PWM mode it skews the trajectory of the pulse-width modulation instead",
+    "Sets the stereo width from a true mono collapse at the bottom, through natural stereo at the middle, to twice that at the top, where the formant motion in the two channels runs fully out of phase",
+    "Attenuates and inverts the formant depth jack before it moves the depth knob",
+    "Attenuates and inverts the stereo width jack before it moves the width knob",
+    "Sets how often a reverse sync flip actually happens: every time at the top, and progressively at random below that",
+    "Attenuates and inverts the flip chance jack before it moves the chance knob",
+    "Sets the pitch of the V oscillator, a volt to the octave",
+    "Sets the pitch of the Z oscillator, a volt to the octave; unpatched it follows the V pitch jack, and a narrower polyphonic cable leaves the uncovered voices following their V partners",
+    "Moves the formant depth, 10V at full attenuation covering the whole range, and the total is clamped",
+    "Moves the stereo width, 10V at full attenuation sweeping the whole mono-to-wide range",
+    "Moves that oscillator's shape, and audio-rate signals are fair game here",
+    "Moves the crossfade between the two oscillators",
+    "Moves the reverse sync flip chance, 10V at full attenuation covering the whole range",
+    "The left channel of the pair",
+    "The right channel of the pair; for mono work take the left jack alone, or set the width to zero",
+    "Note — it makes sound as soon as it is added to a patch, with the formant section already at work; a pitch cable is an addition rather than a requirement",
+    "Note — the formant modulator tracks each oscillator's own pitch, so its character survives transposition; a nearly pure sawtooth gives it little to bend, so raise the shape knobs to the middle",
+    "Note — the voice count follows the widest cable patched to any input, and both outputs carry that count; each voice pairs channel n of one pitch jack with channel n of the other",
+    "Note — the screen draws either the left output against the right as a Lissajous figure or a triggered trace of the left output with the right ghosted behind it",
+    "Menu — Quantize — frees the V octave control or the Z semitone control, or both, for continuous sweeps in place of their stepped behaviour",
+    "Menu — Oscilloscope Display — chooses between the Lissajous plot of left against right and a triggered waveform trace",
+    "Menu — Waveform — chooses the morphing sigmoid sawtooth or a band-limited pulse wave, which changes what the shape, depth and asymmetry controls do",
+    "Menu — Crossfade Curve — chooses an equal-power blend or a stereo swap where the two oscillators cross the field and trade sides",
+    "Menu — Oversampling — sets the internal rate at 1, 2, 4 or 8 times, the higher settings costing processor time and cleaning up mutual reverse sync and fast shape modulation",
+    "Menu — Vintage — sets how much thermal drift, per-voice component tolerance, crosstalk and bus saturation the module shows, 50% being the calibrated amount",
+    "Menu — Oscillator Noise — adds a hardware-like noise floor and tiny phase jitter that softens the waveform edges"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 3,
+    "4": 14,
+    "5": 15,
+    "6": 4,
+    "7": 4,
+    "8": 5,
+    "9": 5,
+    "10": 6,
+    "11": 7,
+    "12": 8,
+    "13": 9,
+    "14": 10,
+    "15": 11,
+    "16": 12,
+    "17": 13,
+    "18": 17,
+    "19": 16
+   },
+   "in": {
+    "0": 18,
+    "1": 19,
+    "2": 20,
+    "3": 21,
+    "4": 22,
+    "5": 22,
+    "6": 23,
+    "7": 24
+   },
+   "out": {
+    "0": 25,
+    "1": 26
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Clairaudient.md gives this jack as 1 volt per octave, polyphonic, and a mono cable is broadcast to every voice"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the V pitch jack",
+      "why": "docs/manuals/Clairaudient.md records the per-voice normalization from the V pitch input when this jack is empty or narrower"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "docs/manuals/Clairaudient.md gives 0-10V adding 0 to 100 percentage points at full positive attenuation, clamped"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "docs/manuals/Clairaudient.md gives 0-10V sweeping the full 0 to 200 percent width range at full positive attenuation"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Clairaudient.md lists this as a polyphonic shape CV input with a bipolar attenuverter, audio rate allowed"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Clairaudient.md lists this as a polyphonic shape CV input with a bipolar attenuverter, audio rate allowed"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Clairaudient.md lists this as the CV input for the master mixing stage, with its own attenuverter"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "docs/manuals/Clairaudient.md gives 0-10V adding 0 to 100 percentage points at full positive attenuation, clamped"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "docs/manuals/Clairaudient.md states both outputs carry the voice count of the widest input cable, up to 16"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "docs/manuals/Clairaudient.md states both outputs carry the voice count of the widest input cable, up to 16"
+     }
+    }
+   },
+   "notes": "Two parameter slots keep the panel positions and saved indices of retired fine-tune attenuverters and now carry the formant depth and stereo width attenuverters, which is why those two sit out of line with the rest of the parameter order (clairaudient.cpp, ParamId enum)."
+  },
+  "Involution": {
+   "lines": [
+    "Two morphing filters that can be separated in cutoff, cross-coupled into each other, routed four ways, and stirred by an internal chaotic modulator",
+    "Sets that filter's base cutoff, from 20Hz to about 20.5kHz, with extra travel given to the midrange",
+    "Sets that filter's resonant feedback, the upper part of the range crossing into stabilized self-oscillation",
+    "Copies filter A's cutoff to filter B and then moves both together from either knob",
+    "Copies filter A's resonance to filter B and then moves both together from either knob",
+    "Attenuates and inverts the cutoff jack beside it; with 1V per octave tracking chosen in the menu it becomes the tracking amount and direction instead",
+    "Attenuates and inverts the resonance jack beside it, 10V at full attenuation adding 1.0 to the raw resonance figure",
+    "Feeds each filter's previous output into the other, saturated and bounded before it returns; low settings tie the stereo movement together and high settings set up circulating harmonics",
+    "Scales how far the chaotic modulator moves the field",
+    "Morphs both filters continuously from a 6-pole lowpass at the bottom, through resonant bandpass at the middle, to a 2-pole highpass at the top",
+    "Sets the speed of the chaotic modulator, from 0.01Hz to 10Hz",
+    "Pulls filter A's cutoff down and filter B's up by equal amounts, three octaves apart in total at the top of its travel",
+    "The signal filter A works on; with only one of the two audio jacks patched it feeds both filters",
+    "The signal filter B works on; with only one of the two audio jacks patched it feeds both filters",
+    "Moves that filter's cutoff, scaled by the trimmer beside it; with 1V per octave tracking chosen in the menu it transposes the cutoff instead",
+    "Moves that filter's resonance, scaled by the trimmer beside it",
+    "Moves the cross-coupling, 10V covering the whole range, and each voice can have a different amount",
+    "Moves the chaotic modulation depth, 10V covering the whole range",
+    "Moves the filter shape from lowpass through bandpass to highpass, 10V covering the whole range",
+    "Adds to the chaotic modulator's rate at half a hertz a volt, clamped to the knob's own range; only the first channel is read",
+    "Adds to the cutoff separation, 10V adding the full three octaves; only the first channel is read",
+    "A gate at 1V or above holds the chaotic modulator in place while it lasts, without changing the latch set by clicking the screen",
+    "Filter A's output",
+    "Filter B's output",
+    "Note — with only one audio jack patched the same signal goes to both filters, which is the fastest way to hear the pair",
+    "Note — clicking anywhere on the screen latches both chaotic sources at their present values, and clicking again releases them from exactly where they stopped",
+    "Note — the voice count comes from the audio inputs alone, up to 16; a CV cable on its own creates no voices",
+    "Note — the first voice uses the exact cutoff settings and the rest get small fixed random offsets within about a semitone and a half, so the resonant peaks of a chord do not stack",
+    "Note — the screen draws the whole field as one figure rather than two response curves: coupling twists the orbit, spread separates its bands, and the routing changes its direction",
+    "Menu — Screen particles — chooses a brighter image that flickers at its hottest points or a steadier, softer one, and changes nothing in the audio",
+    "Menu — Filter routing — chooses Parallel stereo, either serial order, or Mid / Side, where A filters the middle and B the sides",
+    "Menu — Opposed Form (reverse B) — runs filter B backwards through the shape morph, so one is lowpass while the other is highpass and they meet at bandpass",
+    "Menu — Chaos destination — chooses whether the chaotic modulator moves only the cutoffs, the cutoffs and resonance, or the whole field including shape and coupling",
+    "Menu — Filter character: Still, Liquid, Volatile — chooses whether the level-dependent movement is removed, calibrated, or exaggerated",
+    "Menu — Freeze chaos field — latches the chaotic modulator at its present values, which clicking the screen also does",
+    "Menu — Filter A 1V/oct tracking — turns filter A's cutoff jack from plain modulation into pitch tracking, with the trimmer setting how much and which way",
+    "Menu — Filter B 1V/oct tracking — turns filter B's cutoff jack from plain modulation into pitch tracking, with the trimmer setting how much and which way"
+   ],
+   "param": {
+    "0": 1,
+    "2": 1,
+    "1": 2,
+    "3": 2,
+    "8": 3,
+    "9": 4,
+    "10": 5,
+    "12": 5,
+    "11": 6,
+    "13": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "14": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "4": 14,
+    "3": 15,
+    "5": 15,
+    "6": 16,
+    "7": 17,
+    "8": 18,
+    "9": 19,
+    "10": 20,
+    "11": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "the other audio jack",
+      "why": "docs/manuals/Involution.md states either audio input is normalled to both lanes when only one is connected, and the audio inputs alone set the voice count"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "the other audio jack",
+      "why": "docs/manuals/Involution.md states either audio input is normalled to both lanes when only one is connected, and the audio inputs alone set the voice count"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Involution.md gives cutoff CV as attenuverted and polyphonic, 10V at full attenuation spanning the normalized cutoff range"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Involution.md gives cutoff CV as attenuverted and polyphonic, 10V at full attenuation spanning the normalized cutoff range"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Involution.md gives resonance CV as attenuverted and polyphonic, 10V at full attenuation adding 1.0 to the raw setting"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Involution.md gives resonance CV as attenuverted and polyphonic, 10V at full attenuation adding 1.0 to the raw setting"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "docs/manuals/Involution.md gives couple, form and depth CV as polyphonic with 10V spanning the full range"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "docs/manuals/Involution.md gives couple, form and depth CV as polyphonic with 10V spanning the full range"
+     },
+     "8": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "docs/manuals/Involution.md gives couple, form and depth CV as polyphonic with 10V spanning the full range"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "docs/manuals/Involution.md gives rate CV as shared and additive at 0.5Hz per volt from its first channel, then clamped"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "docs/manuals/Involution.md states spread CV is shared, uses its first channel, and adds the full three-octave separation at 10V"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "docs/manuals/Involution.md states the freeze gate is shared and freezes both attractors at 1V or higher"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "docs/manuals/Involution.md states the outputs are polyphonic and the wider audio input sets the channel count, up to 16"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "docs/manuals/Involution.md states the outputs are polyphonic and the wider audio input sets the channel count, up to 16"
+     }
+    }
+   }
+  },
+  "Chiaroscuro": {
+   "lines": [
+    "A polyphonic stereo amplifier in front of a five-algorithm distortion engine, with level-matching between the clean and distorted paths and a sidechain input that can open, duck or drive the dirt",
+    "Sets the clean signal level, from silence to unity, before the distortion engine",
+    "Chooses the distortion algorithm: hard clip, tube sat, wave fold, bit crush or ring mod, crossfaded over 12ms when it changes",
+    "Opens the chosen algorithm and sets how far it goes, which is the fold count, the bit depth and hold, or the ring modulator's carrier depending on the algorithm",
+    "Attenuates and inverts the jack below it before it is added to the control it belongs to",
+    "Adds gain into the distorted path alone, setting how hard the amplified signal strikes the chosen circuit",
+    "Crossfades from the clean amplified signal to the level-matched distorted one",
+    "Replaces the right input with the left, which matters when a right cable is patched and should be overridden",
+    "Chooses whether the amplifier's control is taken as it is or squared, the squared setting opening more sharply and reaching four times gain under voltage",
+    "Ties the distortion depth to how loud the signal already is: centred is off, one way dirties loud passages and leaves quiet ones clean, the other way reverses that, per voice",
+    "Splits the distortion depth between the two sides, centred being off and either direction making one side dirtier by up to half the distortion range",
+    "The left channel in, which also feeds the right when the right jack is empty",
+    "The right channel in; with this patched and the left empty, nothing comes out",
+    "Sets the amplifier gain per voice, 10V adding one whole unit of gain, so one polyphonic envelope can articulate a chord",
+    "Detects how far a signal swings from zero and drives whichever sidechain behaviour the menu has chosen; a bipolar audio signal and a 0-10V envelope both reach the top of its range",
+    "Steps the distortion algorithm on, 0-10V running through the five types from the first and pinning at the last; only the first channel is read",
+    "Moves the distortion amount, scaled by the trimmer above it; only the first channel is read",
+    "Moves the drive, scaled by the trimmer above it; only the first channel is read",
+    "Moves the wet and dry blend, scaled by the trimmer above it; only the first channel is read",
+    "Moves the contrast setting over its whole bipolar span with no trimmer, so a bipolar source sweeps it end to end from the centre; only the first channel is read",
+    "Moves the stereo tilt over its whole bipolar span with no trimmer, so a bipolar source sweeps it end to end from the centre; only the first channel is read",
+    "The left channel out",
+    "The right channel out",
+    "Note — a new module comes up with the amplifier closed, so silence is what to expect until the gain knob is raised",
+    "Note — with the distortion amount or the mix at zero the nonlinear engines are skipped entirely, which is where most of the processor cost goes at high voice counts",
+    "Note — the distorted path is level-matched against the clean one before the mix, so moving from dry to ruined is not also a move from quiet to loud",
+    "Note — the voice count is the wider of the two audio inputs, up to 16; control cables create no voices",
+    "Note — the output is linear through ordinary levels and then enters a soft knee, approaching a ceiling rather than clipping abruptly",
+    "Menu — Oversampling — sets the internal rate at 1, 2, 4 or 8 times; it is tonal as well as a processor cost, and the wave folder changes most",
+    "Menu — Enhancement (Trigger) — makes the sidechain scale the distortion and drive up from zero to their settings, holding the mix at 80% wet or above",
+    "Menu — Ducking (Inverse) — makes a hot sidechain cut the distortion and back off the drive",
+    "Menu — Direct Control — makes the sidechain replace the distortion amount and its CV, leaving drive and mix working as usual",
+    "Menu — Duck Level (classic) — makes a hot sidechain turn the amplifier down, to about a tenth at full, which also softens how hard the signal hits the distortion"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 4,
+    "6": 6,
+    "7": 4,
+    "8": 7,
+    "9": 8,
+    "10": 9,
+    "11": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17,
+    "7": 18,
+    "8": 19,
+    "9": 20
+   },
+   "out": {
+    "0": 21,
+    "1": 22
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "audio",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "docs/manuals/Chiaroscuro.md states the audio inputs are polyphonic and the wider of them sets the voice count"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "the left audio jack",
+      "why": "docs/manuals/Chiaroscuro.md states L is normalled to R when R is unpatched and the reverse is not true"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "docs/manuals/Chiaroscuro.md states VCA CV adds directly at 10V per unit of gain and each audio voice reads the matching channel"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "docs/manuals/Chiaroscuro.md describes the sidechain as a global detection input reading absolute swing, with a 10ms attack and 200ms release"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "docs/manuals/Chiaroscuro.md states type CV is added to the switch position, 0-10V traversing the selector, first channel only"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "docs/manuals/Chiaroscuro.md states 0-10V adds the full control range at full positive attenuation and only the first channel is read"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "docs/manuals/Chiaroscuro.md states 0-10V adds the full control range at full positive attenuation and only the first channel is read"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "docs/manuals/Chiaroscuro.md states 0-10V adds the full control range at full positive attenuation and only the first channel is read"
+     },
+     "8": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Chiaroscuro.md states contrast and tilt CV have no attenuverter, span twice a unipolar width, and read only the first channel"
+     },
+     "9": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "docs/manuals/Chiaroscuro.md states contrast and tilt CV have no attenuverter, span twice a unipolar width, and read only the first channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "docs/manuals/Chiaroscuro.md states the outputs carry the same channel count as the audio inputs, up to 16"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "docs/manuals/Chiaroscuro.md states the outputs carry the same channel count as the audio inputs, up to 16"
+     }
+    }
+   },
+   "notes": "Rack's bypass passes the dry audio through rather than silencing the module (chiaroscuro.cpp:326-327). The distortion, drive and mix CV jacks read only their first channel even though the audio path is polyphonic; contrast is the exception among the distortion controls in that its single setting produces a different depth for every voice."
   },
   "Specula": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two peak meters with VU-style dials and mechanical needle movement, passing every sample straight through while they watch",
+    "The signal that side meters, passed to the output beside it unchanged",
+    "An exact copy of the input for that side, with the same channel count and no gain, filtering or delay",
+    "Note — the two sides are independent and nothing is normalled between them, so patching the left alone leaves the right meter at rest and its output empty",
+    "Note — the dial runs from -20 VU to +3 VU, where 0 VU is about 7.08V peak and +3 VU is the 10V peak that is full scale in Rack, so the red half of the dial is the last 3dB of headroom",
+    "Note — the needle rises with a 15ms time constant and falls with a 450ms one, which reveals a transient without vibrating too fast to read",
+    "Note — with a polyphonic cable the dial follows the loudest channel present, so one hot voice cannot hide inside a chord",
+    "Note — the detector reads absolute magnitude, so a slow control voltage moves the needle the same way whether it goes positive or negative",
+    "Menu — Screen brightness — sets how brightly the dials are lit, which changes the artwork alone and not the needles or the signal"
+   ],
+   "in": {
+    "0": 1,
+    "1": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2
+   },
+   "family": {},
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "docs/manuals/Specula.md states each side accepts up to 16 channels and the meter reads the largest absolute voltage on any active channel"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "docs/manuals/Specula.md states each side accepts up to 16 channels and the meter reads the largest absolute voltage on any active channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "docs/manuals/Specula.md states the outputs are direct per-sample copies preserving the exact channel count, and an unpatched input gives zero channels"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "docs/manuals/Specula.md states the outputs are direct per-sample copies preserving the exact channel count, and an unpatched input gives zero channels"
+     }
+    }
+   },
+   "notes": "No family is given for the four jacks because whatever is patched in comes straight out; the module reads the signal but never changes it, so the colour would be a guess about the patch rather than a fact about the module."
   },
   "UtilityPanel": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A blank panel that can be resized from 2HP to 64HP by dragging either edge, keeping its leather grain at a fixed scale and saving its width with the patch",
+    "Note — a narrow strip along each edge is the resize handle: drag the right edge to move the right boundary and the left edge to move the left one, and the width rounds to whole HP",
+    "Note — a newly added panel arrives at 2HP and looks for the nearest modules on its row, expanding to fill a bounded gap; one loaded from a patch keeps its saved width instead",
+    "Note — double-clicking the panel or either resize edge measures the surrounding gap again, which is what to do after the neighbouring modules move",
+    "Note — Rack checks for collisions, so a width or position it cannot accept returns the panel to where it was",
+    "Menu — Fit to surrounding gap — measures from the nearest module ending on the left to the nearest beginning on the right and fills that space, capped at 64HP"
+   ],
+   "notes": "The module has no parameters, inputs or outputs. Auto-fit needs a module bounding the right side; an open-ended row leaves the panel unchanged."
   }
  }
 }

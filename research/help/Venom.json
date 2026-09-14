@@ -1,7 +1,7 @@
 {
  "plugin": "Venom",
- "source": "https://github.com/DaveBenham/VenomModules/blob/v2.15.0/README.md",
- "read": "2026-09-13",
+ "source": "https://github.com/DaveBenham/VenomModules/blob/v2.16.2/README.md",
+ "read": "2026-09-14",
  "modules": {
   "AD_ASR": {
    "lines": [
@@ -6415,6 +6415,1470 @@
      }
     }
    }
+  },
+  "BoundedVCO": {
+   "lines": [
+    "Bounded VCO: an oscillator whose triangle climbs to a ceiling voltage, turns and falls to a floor voltage, with separate control of the two slopes, after Peter Blasser's Bound/Bounce circuits",
+    "Switches the FREQ knob between audio rates of about 8Hz to 8372Hz, 261.63Hz at noon, and low frequency rates of 0.0625Hz to 64Hz, 2Hz at noon",
+    "Cycles the oversampling applied against aliasing: off, then x2, x4, x8, x16 and x32",
+    "Turned on, the floor and the ceiling are exchanged whenever the floor is the higher of the two; turned off the triangle follows the floor upward instead",
+    "Sets the rate of the triangle, marked for a 10V gap between floor and ceiling; a narrower gap raises the rate and a wider one lowers it",
+    "Sets the share of the cycle spent rising, 1% for a falling ramp, 50% for a symmetrical triangle and 99% for a rising ramp",
+    "Attenuates and inverts the FREQ CV input, and at 100% that input is scaled a volt per octave",
+    "Attenuates and inverts the SKEW CV input, and at 100% each volt moves the rising share by 10%",
+    "Sets the voltage the triangle falls to, -10V to 10V and starting at -5V, summed with the FLOOR CV input and clamped between -12V and 12V",
+    "Sets the voltage the triangle climbs to, -10V to 10V and starting at 5V, summed with the CEILING CV input and clamped between -12V and 12V",
+    "Attenuates and inverts the FLOOR CV input",
+    "Attenuates and inverts the CEILING CV input",
+    "Raises and lowers the rate, added to the FREQ knob through the attenuverter beneath that knob, and it can drive the rate past the knob's own range",
+    "Moves the rising share of the cycle, added to the SKEW knob through the attenuverter beneath that knob; the total is held between 1% and 99%",
+    "Moves the floor voltage, added to the FLOOR knob through the attenuverter beneath that knob",
+    "Moves the ceiling voltage, added to the CEILING knob through the attenuverter beneath that knob",
+    "Carries 5V while the triangle is rising and -5V while it is falling",
+    "The triangle itself, running between the floor and the ceiling, so its amplitude is the gap between them and it can be unipolar or bipolar; brief excursions past a bound do occur",
+    "Note — every input takes polyphony, and the outputs carry as many channels as the widest input; a monophonic input is copied to every channel",
+    "Note — a polyphonic input with too few channels reads 0V for the channels it lacks",
+    "Note — all four CV inputs can be driven at audio rates"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 17
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "BoundedVCO.cpp:147 adds this jack through its attenuverter straight into the exponent of two that sets the slope",
+      "negative": "swings"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "BoundedVCO.cpp:145 adds this jack through its attenuverter to the skew knob, the sum clamped to 0.01 to 0.99",
+      "negative": "subtracts"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "-12 to 12V",
+      "why": "BoundedVCO.cpp:136 adds this jack through its attenuverter to the floor knob, the sum clamped to -12 to 12V"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "-12 to 12V",
+      "why": "BoundedVCO.cpp:137 adds this jack through its attenuverter to the ceiling knob, the sum clamped to -12 to 12V"
+     }
+    }
+   }
+  },
+  "DASE": {
+   "lines": [
+    "DASE: an attack-decay envelope whose attack share is modulated by the audio fed into it, so it works as a VCA and a wave shaper, with an internal oscillator adding repeated attacks or tremolo",
+    "Sets the length of the whole envelope, 0.03125 to 32 seconds with 1 second at noon",
+    "Sets the share of the envelope given to the attack, the rest being the decay: 0% is a falling ramp, 50% a triangle and 100% a rising ramp",
+    "Attenuates the IN jack before it modulates the attack share, which sets the output volume; 0% to 100%, starting at 100%",
+    "Bends the attack and decay stages, concave down fully counter-clockwise, linear at noon and concave up fully clockwise",
+    "Attenuates and inverts the ENVELOPE LENGTH CV input, where each volt doubles or halves the length",
+    "Attenuates and inverts the ENVELOPE ATTACK CV input, scaled at 10% per volt with the attenuverter at 100%",
+    "Attenuates and inverts the INPUT LEVEL CV input, scaled at 10% per volt with the attenuverter at 100%",
+    "Attenuates and inverts the OUTPUT RESPONSE CV input, scaled at 0.1 per volt with the attenuverter at 100%",
+    "Cycles what a trigger does while an envelope is running: yellow starts the attack from the level reached, light blue restarts from 0V, and dark grey ignores triggers until the envelope has finished",
+    "Turned on, each polyphonic channel gets its own repeat oscillator that restarts when that channel is triggered; turned off one free-running oscillator drives every channel",
+    "Cycles the oversampling applied against aliasing: off, then x2, x4, x8, x16 and x32",
+    "Turned on, the output is DC coupled and unipolar; turned off it is AC coupled and bipolar",
+    "Sets the rate of the repeat oscillator, 7.5 to 1920 BPM with 120 BPM at noon",
+    "Sets the depth of the repeat modulation, -1 to 1 with no modulation at noon; the two directions invert the shape against each other",
+    "Sets the share of the repeat oscillator's cycle given to its attack: 0% is a falling ramp, 50% a triangle and 100% a rising ramp",
+    "Attenuates and inverts the REPEAT RATE CV input, which is a volt per octave with the attenuverter at 100%",
+    "Attenuates and inverts the REPEAT LEVEL CV input, scaled at 0.1 per volt with the attenuverter at 100%",
+    "Attenuates and inverts the REPEAT ATTACK CV input, scaled at 10% per volt with the attenuverter at 100%",
+    "Lengthens and shortens the envelope, added to the ENVELOPE LENGTH knob through the attenuverter beside it; the total is held between 0.03125 and 32 seconds",
+    "Moves the attack share, added to the ENVELOPE ATTACK knob through the attenuverter beside it; the total is held between 0% and 100%",
+    "Moves the input attenuation, added to the INPUT LEVEL knob through the attenuverter beside it",
+    "Bends the attack and decay curves, added to the OUTPUT RESPONSE knob through the attenuverter beside it; the total is held between -1 and 1",
+    "Changes the rate of the repeat oscillator, added to the REPEAT RATE knob through the attenuverter beside it; this jack reads channel one only",
+    "Changes the depth of the repeat modulation, added to the REPEAT LEVEL knob through the attenuverter beside it; the total is held between -1 and 1 and this jack reads channel one only",
+    "Moves the attack share of the repeat oscillator, added to the REPEAT ATTACK knob through the attenuverter beside it; the total is held between 0% and 100%, and this jack reads channel one only",
+    "A rising edge starts the envelope; it reads high above 2V and low below 0.2V",
+    "The audio put through the envelope, and the signal whose instantaneous voltage modulates the attack share, which is what shapes the output waveform",
+    "The audio after the envelope, bipolar and AC coupled, or unipolar and DC coupled with the DC button on",
+    "Note — nothing comes out until a trigger arrives at TRIG; the envelope runs once for each rising edge",
+    "Note — the three repeat oscillator CV jacks are monophonic; every other jack takes polyphony, and the output carries as many channels as the widest input"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15,
+    "15": 16,
+    "16": 17,
+    "17": 18
+   },
+   "in": {
+    "0": 19,
+    "1": 20,
+    "2": 21,
+    "3": 22,
+    "4": 23,
+    "5": 24,
+    "6": 25,
+    "7": 26,
+    "8": 27
+   },
+   "out": {
+    "0": 28
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger",
+     "8": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "DASE.cpp:191 adds this jack through its attenuverter into the exponent of two and clamps the length to 0.03125 to 32 seconds"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "DASE.cpp:189 adds this jack through its attenuverter to the attack knob and clamps the sum to 0 to 1"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "DASE.cpp:209 adds this jack through its attenuverter to the input level knob"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DASE.cpp:210 adds this jack through its attenuverter to the response knob and clamps the sum to -1 to 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DASE.cpp:168 reads the jack with getVoltage, channel one only, and adds it through its attenuverter into the exponent of two setting the repeat rate"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DASE.cpp:170 reads the jack with getVoltage, channel one only, and adds it through its attenuverter to the depth knob, clamped to -1 to 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "DASE.cpp:169 reads the jack with getVoltage, channel one only, and adds it through its attenuverter to the repeat attack knob, clamped to 0 to 1"
+     },
+     "7": {
+      "poly": true,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "DASE.cpp:188 reads it with getPolyVoltageSimd into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "why": "DASE.cpp:207 reads it per channel with getPolyVoltageSimd as the signal to be shaped"
+     }
+    }
+   },
+   "notes": "The maker's documentation gives the envelope length range as 0.01325 to 32 seconds in two places; DASE.cpp:73 configures the knob as two to the power of -5 to 5 seconds and DASE.cpp:191 clamps the result to 0.03125 to 32 seconds, so the lower figure written here is 0.03125."
+  },
+  "EnvelopeFactory": {
+   "lines": [
+    "Envelope Factory: a polyphonic envelope generator of 1 to 20 stages, each stage set to move, hold, sustain, rise or fall, with a gate output per stage and a shared trigger output",
+    "Attenuates and inverts the AMP input to set the voltage the envelope calls 100%, that input being normalled to 10V; with VCA mode on it sets the VCA level instead",
+    "Attenuates and inverts the OFF input to set a voltage added to the finished envelope, and it starts at 0% so nothing is added; with VCA mode on it sets the velocity response curve instead",
+    "Cycles the range of every stage time knob: 0.001 to 10 seconds, 0.01 to 100 seconds, 0.1 to 1000 seconds, or 1 to 10000 seconds",
+    "Turned on, a retriggered envelope starts from 0V rather than from the voltage reached",
+    "Makes the GATE button a toggle, one press taking the gate high and the next taking it low, in place of a gate that lasts while the button is held",
+    "Cycles how the RETRIG input is read: the leading edge of a gate crossing 2V, the instant the voltage starts changing, or the instant it stops changing",
+    "Adds 10V to the GATE input while it is high, starting an envelope by hand",
+    "Mutes the GATE input for one sample, which starts a new envelope while that gate is held high",
+    "Turned on, a 1ms trigger is fired at the STAGE TRIGS output each time an envelope runs to completion; an aborted envelope fires nothing",
+    "Cycles what that stage does: Move to the next target over a time, Hold a level for a time, Sustain a level while the gate is high, Rise to 100%, or Fall to 0%",
+    "Cycles how that stage ends: Full runs it to completion and refuses retriggers, RTrg lets a retrigger cut it short, and Gate moves on to the next ungated stage when the gate falls",
+    "Sets the length of that stage under a Move, Rise or Fall action, on the range the Slow button picks; under a Hold or Sustain action it sets the level instead, 0% for 0V and 100% for 10V",
+    "Attenuates and inverts the CV input for that stage's time or level, each volt doubling or halving a time",
+    "Bends that stage under a Move, Rise or Fall action, concave up counter-clockwise and concave down clockwise; under a Hold action it is the length of the hold, and under a Sustain action the drift rate",
+    "Attenuates and inverts the CV input for that stage's shape, hold time or drift rate",
+    "Turned on, the start of that stage fires a 1ms trigger at the STAGE TRIGS output",
+    "Speeds up and slows down every timed stage together, each positive volt halving the times and each negative volt doubling them, which gives a looping envelope a volt per octave over its rate",
+    "Sets the voltage the envelope reaches at full height, through the AMP knob, and is normalled to 10V; with VCA mode on this is the audio the envelope attenuates",
+    "Sets the voltage added to the finished envelope, through the OFF knob, and is normalled to 10V; with VCA mode on this is the velocity, 0V to 10V, sampled as the envelope starts",
+    "A rising edge starts an envelope, and the gate holds any sustain stage; it reads high above 2V and low below 0.2V",
+    "Starts a new envelope while the GATE input is held high, by muting that gate for one sample; the Retrig Mode button sets what counts as an event here",
+    "Shortens or lengthens that stage, each volt halving or doubling its time, or moves its level under a Hold or Sustain action, in each case through the attenuverter above this jack",
+    "Bends that stage's curve, or moves its hold time or its drift rate depending on the action, through the attenuverter above this jack",
+    "Carries a 1ms trigger at the start of every stage whose trigger switch is on, and at the end of a completed envelope when the EOC switch is on; triggers closer together than 1ms merge into one",
+    "Carries 10V while no envelope is running and 0V while one is; the lamp above it glows yellow in proportion to the channels that are idle",
+    "The finished envelope: the envelope percentage times the amplitude voltage, plus the offset, so it rests at the offset voltage",
+    "The envelope turned upside down, resting at the amplitude plus the offset and falling to the offset; with VCA mode on this carries the audio after the envelope and the VCA",
+    "Carries 10V while that stage is running and 0V otherwise; the lamp beside it glows yellow in proportion to the channels in that stage",
+    "Note — a newly placed Envelope Factory has four stages set up as an ADSR, which becomes an ADBDR once the sustain stage's drift knob is turned up",
+    "Note — patch IDLE into GATE and the envelope loops without stopping; patch IDLE into RETRIG and it loops for as long as GATE is held high",
+    "Note — every running envelope is cut off and the module returns to idle whenever a stage's action is changed, the stage count is changed, or the module is bypassed",
+    "Note — with the synced VCA mode chosen, each trigger is held back until the audio at the VCA input crosses 0V, which keeps a very fast attack from clicking",
+    "Note — there is no oversampling here, so a looping envelope run at audio rates will alias",
+    "Menu — Stage count — sets how many stages the envelope has, 1 to 20; the module grows or shrinks to match, pushing neighbours right, and cables on a removed stage are deleted",
+    "Menu — VCA mode: Off, Standard VCA, VCA with 0 crossing synced triggers — turns the AMP and OFF controls and the INV output into a VCA level, an audio input, a velocity input and a VCA output",
+    "Menu — Randomize configuration — picks which stage controls the Randomize action changes: Stage times, Stage levels, Stage shapes, Stage drifts, Stage attenuverters and Stage triggers"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "29": 11,
+    "49": 12,
+    "69": 13,
+    "89": 14,
+    "109": 15,
+    "129": 16,
+    "10": 10,
+    "30": 11,
+    "50": 12,
+    "70": 13,
+    "90": 14,
+    "110": 15,
+    "130": 16,
+    "11": 10,
+    "31": 11,
+    "51": 12,
+    "71": 13,
+    "91": 14,
+    "111": 15,
+    "131": 16,
+    "12": 10,
+    "32": 11,
+    "52": 12,
+    "72": 13,
+    "92": 14,
+    "112": 15,
+    "132": 16,
+    "13": 10,
+    "33": 11,
+    "53": 12,
+    "73": 13,
+    "93": 14,
+    "113": 15,
+    "133": 16,
+    "14": 10,
+    "34": 11,
+    "54": 12,
+    "74": 13,
+    "94": 14,
+    "114": 15,
+    "134": 16,
+    "15": 10,
+    "35": 11,
+    "55": 12,
+    "75": 13,
+    "95": 14,
+    "115": 15,
+    "135": 16,
+    "16": 10,
+    "36": 11,
+    "56": 12,
+    "76": 13,
+    "96": 14,
+    "116": 15,
+    "136": 16,
+    "17": 10,
+    "37": 11,
+    "57": 12,
+    "77": 13,
+    "97": 14,
+    "117": 15,
+    "137": 16,
+    "18": 10,
+    "38": 11,
+    "58": 12,
+    "78": 13,
+    "98": 14,
+    "118": 15,
+    "138": 16,
+    "19": 10,
+    "39": 11,
+    "59": 12,
+    "79": 13,
+    "99": 14,
+    "119": 15,
+    "139": 16,
+    "20": 10,
+    "40": 11,
+    "60": 12,
+    "80": 13,
+    "100": 14,
+    "120": 15,
+    "140": 16,
+    "21": 10,
+    "41": 11,
+    "61": 12,
+    "81": 13,
+    "101": 14,
+    "121": 15,
+    "141": 16,
+    "22": 10,
+    "42": 11,
+    "62": 12,
+    "82": 13,
+    "102": 14,
+    "122": 15,
+    "142": 16,
+    "23": 10,
+    "43": 11,
+    "63": 12,
+    "83": 13,
+    "103": 14,
+    "123": 15,
+    "143": 16,
+    "24": 10,
+    "44": 11,
+    "64": 12,
+    "84": 13,
+    "104": 14,
+    "124": 15,
+    "144": 16,
+    "25": 10,
+    "45": 11,
+    "65": 12,
+    "85": 13,
+    "105": 14,
+    "125": 15,
+    "145": 16,
+    "26": 10,
+    "46": 11,
+    "66": 12,
+    "86": 13,
+    "106": 14,
+    "126": 15,
+    "146": 16,
+    "27": 10,
+    "47": 11,
+    "67": 12,
+    "87": 13,
+    "107": 14,
+    "127": 15,
+    "147": 16,
+    "28": 10,
+    "48": 11,
+    "68": 12,
+    "88": 13,
+    "108": 14,
+    "128": 15,
+    "148": 16
+   },
+   "in": {
+    "0": 17,
+    "1": 18,
+    "2": 19,
+    "3": 20,
+    "4": 21,
+    "5": 22,
+    "25": 23,
+    "6": 22,
+    "26": 23,
+    "7": 22,
+    "27": 23,
+    "8": 22,
+    "28": 23,
+    "9": 22,
+    "29": 23,
+    "10": 22,
+    "30": 23,
+    "11": 22,
+    "31": 23,
+    "12": 22,
+    "32": 23,
+    "13": 22,
+    "33": 23,
+    "14": 22,
+    "34": 23,
+    "15": 22,
+    "35": 23,
+    "16": 22,
+    "36": 23,
+    "17": 22,
+    "37": 23,
+    "18": 22,
+    "38": 23,
+    "19": 22,
+    "39": 23,
+    "20": 22,
+    "40": 23,
+    "21": 22,
+    "41": 23,
+    "22": 22,
+    "42": 23,
+    "23": 22,
+    "43": 23,
+    "24": 22,
+    "44": 23
+   },
+   "out": {
+    "0": 24,
+    "1": 25,
+    "2": 26,
+    "3": 27,
+    "4": 28,
+    "5": 28,
+    "6": 28,
+    "7": 28,
+    "8": 28,
+    "9": 28,
+    "10": 28,
+    "11": 28,
+    "12": 28,
+    "13": 28,
+    "14": 28,
+    "15": 28,
+    "16": 28,
+    "17": 28,
+    "18": 28,
+    "19": 28,
+    "20": 28,
+    "21": 28,
+    "22": 28,
+    "23": 28
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv",
+     "25": "cv",
+     "6": "cv",
+     "26": "cv",
+     "7": "cv",
+     "27": "cv",
+     "8": "cv",
+     "28": "cv",
+     "9": "cv",
+     "29": "cv",
+     "10": "cv",
+     "30": "cv",
+     "11": "cv",
+     "31": "cv",
+     "12": "cv",
+     "32": "cv",
+     "13": "cv",
+     "33": "cv",
+     "14": "cv",
+     "34": "cv",
+     "15": "cv",
+     "35": "cv",
+     "16": "cv",
+     "36": "cv",
+     "17": "cv",
+     "37": "cv",
+     "18": "cv",
+     "38": "cv",
+     "19": "cv",
+     "39": "cv",
+     "20": "cv",
+     "40": "cv",
+     "21": "cv",
+     "41": "cv",
+     "22": "cv",
+     "42": "cv",
+     "23": "cv",
+     "43": "cv",
+     "24": "cv",
+     "44": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger",
+     "18": "trigger",
+     "19": "trigger",
+     "20": "trigger",
+     "21": "trigger",
+     "22": "trigger",
+     "23": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:335 subtracts this jack from the exponent of two that scales every stage time"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "10V",
+      "why": "EnvelopeFactory.cpp:419 reads it with getNormalPolyVoltage(10V) and multiplies it by the AMP knob to set the 100% voltage"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "10V",
+      "why": "EnvelopeFactory.cpp:420 reads it with getNormalPolyVoltage(10V) and multiplies it by the OFF knob to set the offset"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "EnvelopeFactory.cpp:252 reads it per channel into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "4": {
+      "poly": true,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "EnvelopeFactory.cpp:249 reads it per channel, either into a Schmitt trigger at 0.2V and 2V or as a change detector, by the Retrig Mode button"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "25": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "26": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "27": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "28": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "9": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "29": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "30": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "11": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "31": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "12": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "32": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "13": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "33": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "14": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "34": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "15": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "35": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "16": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "36": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "17": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "37": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "18": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "38": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "19": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "39": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "20": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "40": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "21": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "41": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "22": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "42": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "23": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "43": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     },
+     "24": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:159 reads the stage's A jack per channel and multiplies it by that stage's A attenuverter"
+     },
+     "44": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "EnvelopeFactory.cpp:167 reads the stage's B jack per channel and multiplies it by that stage's B attenuverter"
+     }
+    }
+   },
+   "notes": "The V/Oct input is given the cv family rather than pitch: it scales stage times by octaves rather than setting an audible pitch, which is the ruling in STYLE.md. The AMP and OFF inputs and the INV output change meaning when VCA mode is chosen on the module menu, becoming an audio input, a velocity input and a VCA output; their families are given for the default, non-VCA, behaviour. The census records every stage's controls at the same panel position, because a stage is one child widget with its own coordinate frame; the stage tags are therefore assigned by index rather than by position, which is safe here since all 20 stages are identical and laid out left to right in index order."
+  },
+  "LinearMerge": {
+   "lines": [
+    "Linear Merge: takes eight monophonic gate and CV pairs and gives back one gate and one CV, so several sequencers can be reduced to a single melodic line",
+    "Cycles how the CV output is refreshed: S&H samples it as the output gate goes high and holds it until the next rise, T&H follows the chosen CV for as long as that gate stays high",
+    "Cycles which of the high channels sets the CV output: First and Last by position from the top, Min and Max by voltage, Avg the mean of them and Sum their total",
+    "Restricts the gate inputs to changing on the rising edge of a clock, which is what puts the output gate on a timing grid; it reads high above 2V and low below 0.2V. Unpatched, gates pass at once",
+    "One of the eight gate inputs, reading high above 2V and low below 0.2V; while it is high the CV input beside it is eligible to be chosen",
+    "One of the eight CV inputs, taken when the gate beside it is high and the selection button picks that channel",
+    "Carries 10V while any gate input is high and 0V when none is",
+    "Carries the CV of the channel the selection button picks, refreshed as the mode button says",
+    "Note — place a Linear Merge Expander immediately to the right for another eight CV inputs and another CV output; there is no limit on how many expanders follow",
+    "Note — every jack here is monophonic",
+    "Menu — Add CV Expander — places a Linear Merge Expander immediately to the right"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 5,
+    "8": 4,
+    "1": 5,
+    "9": 4,
+    "2": 5,
+    "10": 4,
+    "3": 5,
+    "11": 4,
+    "4": 5,
+    "12": 4,
+    "5": 5,
+    "13": 4,
+    "6": 5,
+    "14": 4,
+    "7": 5,
+    "15": 4,
+    "16": 3
+   },
+   "out": {
+    "0": 7,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "8": "trigger",
+     "1": "cv",
+     "9": "trigger",
+     "2": "cv",
+     "10": "trigger",
+     "3": "cv",
+     "11": "trigger",
+     "4": "cv",
+     "12": "trigger",
+     "5": "cv",
+     "13": "trigger",
+     "6": "cv",
+     "14": "trigger",
+     "7": "cv",
+     "15": "trigger",
+     "16": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:85 reads the jack with getVoltage, channel one only, as a candidate for the CV output"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "LinearMerge.cpp:123 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:85 reads the jack with getVoltage, channel one only, as a candidate for the CV output"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "LinearMerge.cpp:123 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:85 reads the jack with getVoltage, channel one only, as a candidate for the CV output"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "LinearMerge.cpp:123 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:85 reads the jack with getVoltage, channel one only, as a candidate for the CV output"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "LinearMerge.cpp:123 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:85 reads the jack with getVoltage, channel one only, as a candidate for the CV output"
+     },
+     "12": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "LinearMerge.cpp:123 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:85 reads the jack with getVoltage, channel one only, as a candidate for the CV output"
+     },
+     "13": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "LinearMerge.cpp:123 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:85 reads the jack with getVoltage, channel one only, as a candidate for the CV output"
+     },
+     "14": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "LinearMerge.cpp:123 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:85 reads the jack with getVoltage, channel one only, as a candidate for the CV output"
+     },
+     "15": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "LinearMerge.cpp:123 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "16": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "gates pass with no clocking",
+      "why": "LinearMerge.cpp:117 reads the jack with getVoltage into a Schmitt trigger at 0.2V and 2V, and treats an unpatched jack as clocking every sample"
+     }
+    }
+   },
+   "notes": "The maker's documentation writes the menu item as \"Add CV expander\"; LinearMerge.cpp:192 creates it as \"Add CV Expander\", which is what the menu prints."
+  },
+  "LinearMergeExpander": {
+   "lines": [
+    "Linear Merge Expander: adds another eight CV inputs and another CV output to a Linear Merge, and goes immediately to the right of it or of another of these expanders",
+    "Cycles how this expander's CV output is refreshed: S&H samples it as the parent's output gate goes high and holds it, T&H follows the chosen CV while that gate stays high",
+    "Cycles which high channel sets this CV output: First and Last by position from the top, Min and Max by voltage, Avg their mean, Sum their total, and Prev the channel the selector to the left chose",
+    "One of the eight CV inputs, taken when the gate on the parent Linear Merge at the same height is high and the selection button picks that channel",
+    "Carries the CV of the channel the selection button picks, refreshed as the mode button says",
+    "Note — the gates are on the parent Linear Merge; this module has none of its own, and its output stays at 0V until a Linear Merge is found to its left",
+    "Note — a lamp at the top left glows yellow while a parent Linear Merge has been found, across any expanders in between",
+    "Note — every jack here is monophonic"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:136 has the parent read this expander's jack with getVoltage, channel one only, through LinearMerge.cpp:85"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:136 has the parent read this expander's jack with getVoltage, channel one only, through LinearMerge.cpp:85"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:136 has the parent read this expander's jack with getVoltage, channel one only, through LinearMerge.cpp:85"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:136 has the parent read this expander's jack with getVoltage, channel one only, through LinearMerge.cpp:85"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:136 has the parent read this expander's jack with getVoltage, channel one only, through LinearMerge.cpp:85"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:136 has the parent read this expander's jack with getVoltage, channel one only, through LinearMerge.cpp:85"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:136 has the parent read this expander's jack with getVoltage, channel one only, through LinearMerge.cpp:85"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LinearMerge.cpp:136 has the parent read this expander's jack with getVoltage, channel one only, through LinearMerge.cpp:85"
+     }
+    }
+   }
+  },
+  "Ratio": {
+   "lines": [
+    "Ratio: turns a whole-number ratio into the volt per octave offset for that interval, added to a root pitch, for tuning linear FM and phase modulation to harmonious intervals",
+    "Sets the numerator of the ratio, a whole number from 1 to 128; at 1 with the denominator climbing you get the subharmonic series",
+    "Attenuates and inverts the NUM CV input, which counts 1 per 0.1V at 100%",
+    "Rounds the numerator CV to whole multiples of 1 to 8, so a sweep steps through octaves, fifths or wider intervals rather than every number",
+    "Sets the denominator of the ratio, a whole number from 1 to 128; at 1 with the numerator climbing you get the harmonic series",
+    "Attenuates and inverts the DEN CV input, which counts 1 per 0.1V at 100%",
+    "Rounds the denominator CV to whole multiples of 1 to 8, so a sweep steps through octaves, fifths or wider intervals rather than every number",
+    "Moves the numerator, added to the NUM knob through the attenuverter below it; the total is held between 1 and 199",
+    "Moves the denominator, added to the DEN knob through the attenuverter below it; the total is held between 1 and 199",
+    "The pitch the ratio is measured from, added to the interval to give the output; normalled to 0V",
+    "The root pitch plus the base two logarithm of the numerator over the denominator, in volts per octave",
+    "Note — the two numeric displays show the numerator and the denominator in force once their CV has been added; neither can be clicked for help",
+    "Note — every input takes polyphony, and the output carries as many channels as the widest input; a monophonic input is copied to every channel",
+    "Note — bypassing this module passes the ROOT input straight to the output"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "Ratio.cpp:69 reads it with getPolyVoltageSimd, scales it by ten and the attenuverter, rounds it to the quantise step and clamps the total to 1 to 199"
+     },
+     "1": {
+      "poly": true,
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "Ratio.cpp:70 reads it with getPolyVoltageSimd, scales it by ten and the attenuverter, rounds it to the quantise step and clamps the total to 1 to 199"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Ratio.cpp:75 reads it with getPolyVoltageSimd and adds it to the interval in volts per octave"
+     }
+    }
+   }
+  },
+  "SpreadMerge": {
+   "lines": [
+    "Spread Merge: takes eight monophonic gate and CV pairs and deals each one round a block of polyphonic channels, so a new note lands on a free channel while the previous one finishes releasing",
+    "Cycles how the CV output is sampled: S&H takes the CV as the gate beside it goes high and holds it, T&H follows that CV for as long as the gate stays high",
+    "Sets how many output channels each patched input pair gets: Max divides 16 between the patched pairs, or 2 to 8 fixes the block size; the lamp below glows red when the blocks exceed 16 channels",
+    "One of the eight gate inputs, reading high above 2V and low below 0.2V; each rising edge moves on to the next channel of that input's block",
+    "One of the eight CV inputs, sampled onto the channel its gate is using; a CV with no gate patched beside it is left out",
+    "Carries each input's gates spread round that input's block of channels, 10V high and 0V low",
+    "Carries the sampled CV of each input on the same channel its gate went to",
+    "Note — an input pair is counted as used if any gate below it is patched, so leaving a gap in the gate column spends that pair's block of channels on nothing",
+    "Note — both outputs go to no channels at all while the blocks do not fit within 16 channels, and the red lamp is the only sign of it",
+    "Note — place a Spread Merge Expander immediately to the right for another eight CV inputs and another CV output; there is no limit on how many follow",
+    "Note — the gate and CV inputs are monophonic; the two outputs are polyphonic",
+    "Menu — Add CV Expander — places a Spread Merge Expander immediately to the right"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 4,
+    "8": 3,
+    "1": 4,
+    "9": 3,
+    "2": 4,
+    "10": 3,
+    "3": 4,
+    "11": 3,
+    "4": 4,
+    "12": 3,
+    "5": 4,
+    "13": 3,
+    "6": 4,
+    "14": 3,
+    "7": 4,
+    "15": 3
+   },
+   "out": {
+    "0": 6,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "8": "trigger",
+     "1": "cv",
+     "9": "trigger",
+     "2": "cv",
+     "10": "trigger",
+     "3": "cv",
+     "11": "trigger",
+     "4": "cv",
+     "12": "trigger",
+     "5": "cv",
+     "13": "trigger",
+     "6": "cv",
+     "14": "trigger",
+     "7": "cv",
+     "15": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:93 reads the jack with getVoltage, channel one only, and writes it to one channel of the CV output"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "SpreadMerge.cpp:87 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:93 reads the jack with getVoltage, channel one only, and writes it to one channel of the CV output"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "SpreadMerge.cpp:87 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:93 reads the jack with getVoltage, channel one only, and writes it to one channel of the CV output"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "SpreadMerge.cpp:87 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:93 reads the jack with getVoltage, channel one only, and writes it to one channel of the CV output"
+     },
+     "11": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "SpreadMerge.cpp:87 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:93 reads the jack with getVoltage, channel one only, and writes it to one channel of the CV output"
+     },
+     "12": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "SpreadMerge.cpp:87 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:93 reads the jack with getVoltage, channel one only, and writes it to one channel of the CV output"
+     },
+     "13": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "SpreadMerge.cpp:87 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:93 reads the jack with getVoltage, channel one only, and writes it to one channel of the CV output"
+     },
+     "14": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "SpreadMerge.cpp:87 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:93 reads the jack with getVoltage, channel one only, and writes it to one channel of the CV output"
+     },
+     "15": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "why": "SpreadMerge.cpp:87 reads the jack with getVoltage, channel one only, into a Schmitt trigger with thresholds 0.2V and 2V"
+     }
+    }
+   },
+   "notes": "The maker's documentation says the spread count \"can range from 2 to 16\" and writes the menu item as \"Add CV expander\". SpreadMerge.cpp:41 configures the button as Maximize plus the fixed counts 2 to 8, and SpreadMerge.cpp:154 creates the menu item as \"Add CV Expander\"; a block of more than 8 is reached only through Maximize with a single input patched. SpreadMerge.cpp:73 finds the highest patched gate and treats every pair above it as in use, so an unpatched pair below a patched one still consumes its block of channels; the documentation does not mention this."
+  },
+  "SpreadMergeExpander": {
+   "lines": [
+    "Spread Merge Expander: adds another eight CV inputs and another CV output to a Spread Merge, and goes immediately to the right of it or of another of these expanders",
+    "Cycles how this expander's CV output is sampled: S&H takes the CV as the gate on the parent goes high and holds it, T&H follows that CV while the gate stays high",
+    "One of the eight CV inputs, sampled onto the channel the parent Spread Merge's gate at the same height is using",
+    "Carries the sampled CV of each input, on the same channels the parent's gate output uses",
+    "Note — the gates and the channel spreading are on the parent Spread Merge; this module has no gates of its own and its output stays at no channels until a Spread Merge is found to its left",
+    "Note — a lamp at the top left glows yellow while a parent Spread Merge has been found, across any expanders in between",
+    "Note — the CV inputs are monophonic; the output is polyphonic"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:102 has the parent read this expander's jack with getVoltage, channel one only, and write it to one channel of this expander's output"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:102 has the parent read this expander's jack with getVoltage, channel one only, and write it to one channel of this expander's output"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:102 has the parent read this expander's jack with getVoltage, channel one only, and write it to one channel of this expander's output"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:102 has the parent read this expander's jack with getVoltage, channel one only, and write it to one channel of this expander's output"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:102 has the parent read this expander's jack with getVoltage, channel one only, and write it to one channel of this expander's output"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:102 has the parent read this expander's jack with getVoltage, channel one only, and write it to one channel of this expander's output"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:102 has the parent read this expander's jack with getVoltage, channel one only, and write it to one channel of this expander's output"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "why": "SpreadMerge.cpp:102 has the parent read this expander's jack with getVoltage, channel one only, and write it to one channel of this expander's output"
+     }
+    }
+   }
+  },
+  "StereoMergeSplit": {
+   "lines": [
+    "Stereo Merge Split: a merge section putting a left and a right signal into one polyphonic cable, and beneath it a split section taking such a cable back apart",
+    "The left side of the pair to be merged, up to 8 channels; its channels come out first on the STEREO output",
+    "The right side of the pair to be merged, up to 8 channels; its channels follow the left ones on the STEREO output, and unpatched it reads the LEFT input channel for channel",
+    "The left and right inputs one after the other in a single cable, at twice the channel count of the wider of the two; the lamp beside it glows red when either input brought more than 8 channels",
+    "The polyphonic cable to be taken apart, its first half going to the LEFT output and its second half to the RIGHT output",
+    "The first half of the SPLIT STEREO input's channels; an odd channel count gives this output the extra one",
+    "The second half of the SPLIT STEREO input's channels, padded with a 0V channel when the input's channel count is odd",
+    "Note — a signal patched to the LEFT input alone comes out of the STEREO output on both sides, so a mono source becomes a centred stereo pair",
+    "Note — the two sections are independent: the merge section does not feed the split section"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 4
+   },
+   "out": {
+    "0": 3,
+    "1": 5,
+    "2": 6
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "StereoMergeSplit.cpp:43 reads its channel count and StereoMergeSplit.cpp:53 copies each channel to the stereo output"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "the LEFT input",
+      "why": "StereoMergeSplit.cpp:54 reads each channel with getNormalVoltage, falling back to the same channel of the LEFT input"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "StereoMergeSplit.cpp:57 halves its channel count and StereoMergeSplit.cpp:59 deals the channels out to the two outputs"
+     }
+    }
+   },
+   "notes": "No family is given for any of these jacks: the module carries whatever is patched into it, and a colour would be a guess."
   }
  }
 }

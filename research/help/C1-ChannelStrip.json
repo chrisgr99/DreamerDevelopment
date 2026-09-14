@@ -2,52 +2,692 @@
  "plugin": "C1-ChannelStrip",
  "source": "https://github.com/Eurikon/C1-ChannelStrip",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "ChanIn": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo input stage for the C1 channel strip, with gain, a high cut, a low cut, phase invert and a switchable meter",
+    "Sets the gain applied to both channels, -60dB to +6dB, slewed at 25Hz so a fast change of gain does not click",
+    "Rolls the signal off above the frequency set here, 1kHz to 20kHz at 12dB per octave, and the filter is out of circuit at 20kHz; the panel prints HPF but this knob is the low-pass",
+    "Rolls the signal off below the frequency set here, 20Hz to 500Hz at 12dB per octave, and the filter is out of circuit at 20Hz; the panel prints LPF but this knob is the high-pass",
+    "Inverts both channels, and lights amber while the inversion is on",
+    "The left input, and the source for the right channel as well while the right input is unpatched",
+    "The right input; with nothing patched here the left input feeds this channel too",
+    "The left channel after the two filters, the phase invert and the gain",
+    "The right channel after the two filters, the phase invert and the gain",
+    "Note — The three small squares under the meter choose what it shows: RMS, VU with a 300ms decay, or PPM.",
+    "Note — The small square at the top right of the meter turns the meter display off; the LED bar graph beside the knobs keeps working.",
+    "Note — Each jack carries one channel, so a polyphonic cable is reduced to its first channel.",
+    "Note — CHI-X adds voltage control of the gain, both filters and the phase invert, and has to be placed immediately to the right of this module.",
+    "Note — The maker's order for the strip is CHAN-IN, SHAPE, C1-EQ, C1-COMP, CHAN-OUT, joined by patch cables rather than by touching."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "src/ChanIn.cpp:1185 getVoltage, one channel only"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the left input",
+      "why": "src/ChanIn.cpp:1186 isConnected else leftIn"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/ChanIn.cpp:1279 setVoltage, one channel only"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/ChanIn.cpp:1280 setVoltage, one channel only"
+     }
+    }
+   },
+   "notes": "The panel labels HPF and LPF are on the wrong filters: the knob printed HPF is HIGH_CUT_PARAM, 1kHz to 20kHz, set as a low-pass (src/ChanIn.cpp:1003, 1731, label at 1585, ChanInFilters::updateFiltersIfChanged AeLOWPASS), and the knob printed LPF is LOW_CUT_PARAM, 20Hz to 500Hz, set as a high-pass. The README describes the two ranges correctly and never connects them to the panel lettering. The filters are bypassed entirely while the high cut is at 20kHz and the low cut at 20Hz, which are the defaults, so the module starts as gain and phase only. DISPLAY_ENABLE_PARAM has no ParamWidget and cannot be clicked for help; it is toggled by a custom square drawn at 96,43."
   },
   "ChanInCV": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "CV expander for CHAN-IN, giving voltage control of its gain, its two filters and its phase invert",
+    "Shifts the gain on CHAN-IN, ±10V covering the whole -60dB to +6dB range with the attenuverter fully open, added to the GAIN knob and clamped to that range",
+    "Attenuverter on the gain CV, -100% to +100%, and at 0% when the module is added",
+    "Sets the high cut frequency on CHAN-IN at 1V per octave from 4472Hz, the middle of its range; it replaces the HPF knob rather than adding to it, and the result is clamped to 1kHz to 20kHz",
+    "Attenuverter on the high cut CV, -100% to +100%, and at 0% when the module is added",
+    "Sets the low cut frequency on CHAN-IN at 1V per octave from 100Hz, the middle of its range; it replaces the LPF knob rather than adding to it, and the result is clamped to 20Hz to 500Hz",
+    "Attenuverter on the low cut CV, -100% to +100%, and at 0% when the module is added",
+    "Inverts the phase on CHAN-IN whenever the voltage here is above 1V, whatever the PHASE button is set to",
+    "Note — The module does nothing unless CHAN-IN is immediately to its left.",
+    "Note — Every attenuverter is at 0% when the module is added, so the gain, HPF and LPF jacks do nothing until one is turned up.",
+    "Note — Turning an attenuverter on the HPF or LPF jack takes that filter's knob on CHAN-IN out of use, and the frequency is then set by the patched voltage alone.",
+    "Note — The dots either side of the X in the title fade from white to amber once CHAN-IN is found on the left."
+   ],
+   "param": {
+    "0": 2,
+    "1": 4,
+    "2": 6
+   },
+   "in": {
+    "0": 1,
+    "1": 3,
+    "2": 5,
+    "3": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/ChanInCV.cpp:100 getVoltage, scaled /10 then *66 dB at ChanIn.cpp:1180"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/ChanInCV.cpp:109 getVoltage, added to a log2 frequency at ChanIn.cpp:1198"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/ChanInCV.cpp:118 getVoltage, added to a log2 frequency at ChanIn.cpp:1207"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/ChanInCV.cpp:127 getVoltage, compared > 1.0f at ChanIn.cpp:1183"
+     }
+    }
+   },
+   "notes": "The filter CVs are tested with `!= 0.0f` rather than by whether the jack is patched, and when non-zero they replace the knob: the frequency becomes the geometric centre of the range multiplied by two to the power of the volts. Those centres are not stored as such; they are the log2 constants LPF_CENTER_LOG and HPF_CENTER_LOG in src/ChanIn.cpp:931-932, which are log2(4472.14) and log2(100). The expander writes its HPF jack into msg->hpfFreqCV and CHAN-IN reads that field into its low-pass CV (src/ChanIn.cpp:1181-1182, commented `Swapped`); the two swaps cancel, so the jack printed HPF really does move the knob printed HPF. The PHASE jack has no attenuverter. The expander is inert unless CHAN-IN is the module immediately to its left."
   },
   "Shape": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo noise gate for the C1 channel strip, with a hold time, a transient boost, an external key input and a waveform display",
+    "Passes the input straight to the output and takes the gate out of circuit; the lamp beside it is lit while that is on",
+    "Sets the level the signal has to reach for the gate to open, marked -60dB to 0dB, which is really a threshold of 0V to 4V, or 0V to 8V with the menu set to the 10V reference",
+    "Silences the signal completely once the gate closes; with it off the gain falls away as the square of the level over the threshold instead, so quiet material is ducked rather than cut",
+    "Sets how long the gate takes to close after the hold time runs out, 0.1 seconds to 4 seconds, with the shape of the fall chosen on the menu",
+    "Holds the gate open for this long after the signal drops below the threshold, 0ms to 300ms, and every fresh crossing of the threshold restarts it",
+    "Adds a short boost on each opening of the gate, 0% to 100%, doubling the gain at 100% and decaying away over about 15ms; the maker's README calls this an attack control, which it is not",
+    "The left input, and the source for the right channel as well while the right input is unpatched",
+    "The right input; with nothing patched here the left input feeds this channel too",
+    "Patching anything here makes it the signal the gate opens and closes on, for both channels, in place of the audio being gated; the audio itself is unaffected by what this jack carries",
+    "The left channel after gating",
+    "The right channel after gating",
+    "Menu — Attack — a slider setting how fast the gate opens, 0.1ms to 25ms, printed as Auto (0.1ms) at the bottom of its travel",
+    "Menu — Release Curves: Linear (Default), Exponential, Logarithmic, SSL G-Series, DBX 160X, Drawmer DS201 — chooses the shape of the fall that RELEASE times",
+    "Menu — Threshold Reference: 5V Reference (Subtle), 10V Reference (Prominent) — sets the voltage the GATE knob's dB scale maps onto; the 10V setting doubles the threshold at every knob position",
+    "Menu — VU Meter Mode: Dot, Bar — chooses whether the row of red lamps under the display shows one lamp or fills from the left",
+    "Note — The row of red lamps under the display shows how much gain the gate is taking away, 6dB per lamp, with all of it removed at the left and none at the right.",
+    "Note — The four small squares above the display choose how long a stretch of signal it draws: BEAT, ENV, BAR and PHRASE, shortest to longest. The name of the one in use is printed beside them.",
+    "Note — The small square at the top right of the display turns the drawing off.",
+    "Note — Each jack carries one channel, so a polyphonic cable is reduced to its first channel.",
+    "Note — SH-X adds voltage control of the threshold, the hold time, the release and the hard gate switch, and has to be placed immediately to the right of this module.",
+    "Note — With the threshold at its lowest and the hold time at zero, which is how the module is added, the gate opens on any signal at all and the module passes audio unchanged."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "src/Shape.cpp:757 getVoltage, one channel only"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the left input",
+      "why": "src/Shape.cpp:758 isConnected else leftIn"
+     },
+     "2": {
+      "poly": false,
+      "normal": "the jack being gated",
+      "why": "src/Shape.cpp:821-829, getChannels>0 selects processSampleWithKey"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Shape.cpp:864 setVoltage, one channel only"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/Shape.cpp:865 setVoltage, one channel only"
+     }
+    }
+   },
+   "notes": "PUNCH is not an attack control. The README says \"PUNCH control: 0% to 100% (attack time: 0%=5ms slow, 100%=0.1ms fast/punchy)\"; in the code the knob value is loaded into punchEnvelope on every closed-to-open transition and the gain becomes smoothedGain * (1 + punchEnvelope), decaying with a 15ms time constant (src/Shape.cpp:226-227, 240, 296). Attack time comes only from the menu slider, 0.1ms to 25ms. The GATE knob is marked in dB but the mapping is linear in voltage: (dB + 60)/60 times 80% of the reference, so -60dB is 0V and 0dB is 4V at the 5V reference (src/Shape.cpp:171-176). The sidechain is chosen by getChannels() > 0, which is the same test as isConnected() here. The gate attenuation meter is driven from the left channel only (src/Shape.cpp:835)."
   },
   "ShapeCV": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "CV expander for SHAPE, giving voltage control of its threshold, hold time, release and hard gate switch",
+    "Shifts the gate threshold on SHAPE, ±10V covering the whole 60dB range with the attenuverter fully open, added to the GATE knob and clamped to -60dB to 0dB",
+    "Attenuverter on the threshold CV, -100% to +100%, and at 0% when the module is added",
+    "Shifts the hold time on SHAPE, ±10V covering the whole 300ms range with the attenuverter fully open, added to the SUSTAIN knob and clamped to 0ms to 300ms",
+    "Attenuverter on the hold time CV, -100% to +100%, and at 0% when the module is added",
+    "Shifts the release time on SHAPE, ±10V covering the whole 0.1 to 4 second range with the attenuverter fully open, added to the RELEASE knob and clamped to that range",
+    "Attenuverter on the release CV, -100% to +100%, and at 0% when the module is added",
+    "Puts SHAPE into hard gating whenever the voltage here is above 1V, whatever the HARD GATE button is set to",
+    "Note — The module does nothing unless SHAPE is immediately to its left.",
+    "Note — Every attenuverter is at 0% when the module is added, so the three CV jacks do nothing until one is turned up.",
+    "Note — SHAPE ignores the expander entirely while its bypass button is on.",
+    "Note — The dots either side of the X in the title fade from white to amber once SHAPE is found on the left."
+   ],
+   "param": {
+    "0": 2,
+    "1": 4,
+    "2": 6
+   },
+   "in": {
+    "0": 1,
+    "1": 3,
+    "2": 5,
+    "3": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "-60 to 0V",
+      "why": "src/ShapeCV.cpp:74 getVoltage, /10 then *60 dB at Shape.cpp:790, clamped at 797"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/ShapeCV.cpp:83 getVoltage, /10 then *300 ms at Shape.cpp:791"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/ShapeCV.cpp:92 getVoltage, /10 then *3.9 s at Shape.cpp:792"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/ShapeCV.cpp:101 getVoltage, compared > 1.0f at Shape.cpp:793"
+     }
+    }
+   },
+   "notes": "These three CVs add to their knobs and the total is clamped, unlike CHI-X's filter CVs which replace the knob. The sumRange on the threshold jack is the dB scale the knob is marked in, not a voltage at the jack. SHAPE returns from process() before it reads the expander whenever its bypass button is on (src/Shape.cpp:768-778), so nothing here does anything in that state. The HARD GATE jack has no attenuverter."
   },
   "C1EQ": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four band stereo equaliser for the C1 channel strip, with switchable cut, bell and shelf on the outer bands, four degrees of analogue colouring and a spectrum display",
+    "Passes the input straight to the output and takes the whole equaliser out of circuit; the lamp beside it is lit while that is on",
+    "Sets the output level of the whole equaliser, -24dB to +24dB, smoothed so a fast change does not click",
+    "Sets the frequency of the LF band, 20Hz to 400Hz",
+    "Sets the gain of the LF band, -20dB to +20dB, and is held at 0dB and cannot be moved while that band is set to C",
+    "Steps the LF band through C, B and S: a high-pass with a Butterworth response, a bell at a fixed Q of 0.8, or a low shelf; the lit lamp beside it shows which",
+    "Sets the width of the LMF bell, 0.3 for the widest to 12 for the narrowest",
+    "Sets the frequency of the LMF band, 200Hz to 2kHz",
+    "Sets the gain of the LMF bell, -20dB to +20dB",
+    "Sets the width of the HMF bell, 0.3 for the widest to 12 for the narrowest",
+    "Sets the frequency of the HMF band, 1kHz to 8kHz",
+    "Sets the gain of the HMF bell, -20dB to +20dB",
+    "Sets the frequency of the HF band, 4kHz to 20kHz",
+    "Sets the gain of the HF band, -20dB to +20dB, and is held at 0dB and cannot be moved while that band is set to C",
+    "Steps the HF band through C, B and S: a low-pass with a Butterworth response, a bell at a fixed Q of 1, or a high shelf; the lit lamp beside it shows which",
+    "Runs the whole chain at a multiple of the sample rate with anti-aliasing filters either side, at the cost of processing time; the small amber lamp above it is lit while it is on",
+    "Chooses how much analogue colouring is added ahead of the filters, in four steps from none to full circuit modelling; the lamp above it is unlit, green, blue or red to match",
+    "The left input, and the source for the right channel as well while the right input is unpatched",
+    "The right input; with nothing patched here the left input feeds this channel too",
+    "The left channel after the four bands and the master gain, clamped to ±10.5V",
+    "The right channel after the four bands and the master gain, clamped to ±10.5V",
+    "Menu — Enable VCA Compression — adds a gentle level-dependent gain change to the analogue stage ahead of the filters; it is off when the module is added",
+    "Menu — Enable Proportional Q — widens each bell as its gain is cut back, by 2% of the Q per dB; it is on when the module is added",
+    "Note — Both LF and HF come up set to C, which forces their FREQ knobs to the far end of their travel and holds their GAIN knobs at 0dB, so those two bands do nothing until the C B S button is pressed.",
+    "Note — Pressing the C B S button into C resets that band's GAIN to 0dB and its FREQ to 20Hz on LF or 20kHz on HF, losing whatever was set there.",
+    "Note — LF and HF have no Q knob; their width is fixed at 0.8 and 1 in bell mode and at 0.707 in cut mode.",
+    "Note — The lamp to the left of the GAIN knob is green while the output is clear and reddens as it clips.",
+    "Note — The small square at the top right of the display turns the spectrum drawing off, and the analysis thread stops 8 seconds later.",
+    "Note — Each jack carries one channel, so a polyphonic cable is reduced to its first channel."
+   ],
+   "param": {
+    "14": 1,
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "11": 5,
+    "4": 6,
+    "3": 7,
+    "5": 8,
+    "7": 9,
+    "6": 10,
+    "8": 11,
+    "9": 12,
+    "10": 13,
+    "12": 14,
+    "13": 15,
+    "15": 16
+   },
+   "in": {
+    "0": 17,
+    "1": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 20
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "src/C1EQ.cpp:1591 getVoltage, one channel only"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the left input",
+      "why": "src/C1EQ.cpp:1592-1593 isConnected else inputL"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10.5 to 10.5V",
+      "why": "src/C1EQ.cpp:1683 simd::clamp before setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10.5 to 10.5V",
+      "why": "src/C1EQ.cpp:1684 simd::clamp before setVoltage"
+     }
+    }
+   },
+   "notes": "The panel prints EQUALIZER; the module browser calls it C1-EQ. Both outer bands default to Cut (B1_MODE_PARAM and B4_MODE_PARAM default 2), and the mode-change branch fires on the first process() because lastB1Mode starts at -1, so a freshly added module has its LF frequency written to 20Hz and its HF frequency to 20kHz and both those GAIN knobs pinned at 0dB by setValue every sample (src/C1EQ.cpp:1230-1233, 1556-1586). Turning either GAIN knob while C is chosen does nothing, and the knob springs back. The param values run 0 Shelf, 1 Bell, 2 Cut, and are inverted again inside updateBandCoefficients as 2 - rawMode; the C, B, S lamps are wired to match the panel. LF and HF Q are hardcoded at 0.8 and 1.0 (src/C1EQ.cpp:1400-1404) and at 0.707 in cut mode. The oversampling factor is chosen from the sample rate rather than being fixed; the README's \"typically 4x\" is not a constant in the code. ANALYSER_ENABLE_PARAM has no ParamWidget and cannot be clicked for help."
   },
   "C1COMP": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo compressor for the C1 channel strip, with four detector models, parallel mixing, an external key input and gain reduction metering",
+    "Passes the input through with only the menu's output gain applied and takes the compressor out of circuit; the lamp beside it is lit while that is on",
+    "Steps the attack through six fixed times: 0.1ms, 0.3ms, 1ms, 3ms, 10ms and 30ms",
+    "Sets the recovery time, 100ms at the bottom rising to about 1170ms; the tooltip reads AUTO over the top tenth of the travel, but automatic release is never engaged there",
+    "Sets the level above which gain reduction starts, -20dB to +10dB, measured against 5V as 0dB or 10V if the menu is set that way",
+    "Sets how hard the signal is held down above the threshold, 1:1 at the bottom to 20:1 at the top, on a squared taper that puts 4:1 near the middle",
+    "Mixes the compressed signal against the untouched one, 0% for none of the compressor and 100% for all of it",
+    "The left input, and the source for the right channel as well while the right input is unpatched",
+    "The right input; with nothing patched here the left input feeds this channel too",
+    "Patching anything here makes it the signal the detector measures, rectified, for both channels, in place of the audio being compressed; the audio itself is unaffected by what this jack carries",
+    "The left channel after the compressor, the parallel mix and the menu's output gain",
+    "The right channel after the compressor, the parallel mix and the menu's output gain",
+    "Menu — Auto Makeup Gain — adds makeup equal to half the threshold turned positive, so a -20dB threshold adds 10dB; it is off when the module is added",
+    "Menu — Input — a slider trimming the level going into the detector and the compressor, -24dB to +24dB",
+    "Menu — Output — a slider trimming the level leaving the module, -24dB to +24dB, and it applies in bypass as well",
+    "Menu — Knee — a slider setting the width of the knee, 0dB to 12dB, and printed as Auto at the bottom, which hands the choice to the chosen detector model",
+    "Menu — Compressor Type: VCA (SSL G), FET (1176), Optical (LA-2A), Vari-Mu (Fairchild) — chooses the detector and gain law",
+    "Menu — Input Reference Level: 0dBFS = 5V, 0dBFS = 10V — sets the voltage taken as full scale, which shifts what the THRESHOLD knob's dB numbers mean",
+    "Menu — VU Meter Mode: Dot Mode, Bar Mode — chooses whether the row of red lamps under the display shows one lamp or fills from the right",
+    "Note — The row of red lamps under the display shows gain reduction, 2dB per lamp, none at the right and 20dB or more at the left.",
+    "Note — The four small squares above the display choose the detector model, in the same order as the menu's Compressor Type list.",
+    "Note — The small square at the top right of the display turns the meters off.",
+    "Note — Each jack carries one channel, so a polyphonic cable is reduced to its first channel.",
+    "Note — COM-X adds voltage control of the ratio, threshold, release and dry/wet mix, and has to be placed immediately to the right of this module.",
+    "Note — Automatic release cannot be reached. The RELEASE knob is clamped to 89% of its travel before the test for the AUTO zone at 90%, so the tooltip promises a mode the module never enters."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "src/C1COMP.cpp:877 getVoltage, one channel only"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the left input",
+      "why": "src/C1COMP.cpp:878-880 isConnected else inL"
+     },
+     "2": {
+      "poly": false,
+      "normal": "the jack being compressed",
+      "why": "src/C1COMP.cpp:915-919, getChannels>0 selects processStereoWithKey"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/C1COMP.cpp:937 setVoltage, one channel only"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/C1COMP.cpp:938 setVoltage, one channel only"
+     }
+    }
+   },
+   "notes": "AUTO release is unreachable. src/C1COMP.cpp:999 clamps the knob plus any CV to a maximum of 0.89, and line 1000 then tests `releaseRaw >= 0.9f`, which can never be true; setAutoRelease(true) is called nowhere else in the file. The comment on line 998 says the clamp is there so that CV modulation preserves access to AUTO, but the clamp is applied whether or not an expander is present. The top 11% of the knob is therefore a dead zone holding the release at about 1167ms, while ReleaseParamQuantity prints AUTO there and the README lists \"plus AUTO mode\". The THRESHOLD knob is a 0 to 1 parameter displayed as -20dB to +10dB. The four squares above the display write compressorType directly and the engine is rebuilt when process() notices the change. DISPLAY_ENABLE_PARAM has no ParamWidget and cannot be clicked for help."
   },
   "C1COMPCV": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "CV expander for C1-COMP, giving voltage control of its ratio, threshold, release and dry/wet mix",
+    "Shifts the ratio on C1-COMP, ±10V covering the whole knob with the attenuverter fully open, added to the RATIO knob and clamped to its travel",
+    "Attenuverter on the ratio CV, -100% to +100%, and at 0% when the module is added",
+    "Shifts the threshold on C1-COMP, ±10V covering the whole 30dB range with the attenuverter fully open, added to the THRESHOLD knob and clamped to -20dB to +10dB",
+    "Attenuverter on the threshold CV, -100% to +100%, and at 0% when the module is added",
+    "Shifts the release time on C1-COMP, ±10V covering nearly the whole knob with the attenuverter fully open, added to the RELEASE knob and clamped to 89% of its travel",
+    "Attenuverter on the release CV, -100% to +100%, and at 0% when the module is added",
+    "Shifts the dry/wet mix on C1-COMP, ±10V covering the whole 0% to 100% range with the attenuverter fully open, added to the DRY/WET knob and clamped to that range",
+    "Attenuverter on the mix CV, -100% to +100%, and at 0% when the module is added",
+    "Note — The module does nothing unless C1-COMP is immediately to its left.",
+    "Note — Every attenuverter is at 0% when the module is added, so all four jacks do nothing until one is turned up.",
+    "Note — C1-COMP ignores the ratio, threshold and release CVs while its bypass button is on; the mix CV is read before the bypass test but has nothing to act on.",
+    "Note — The dots either side of the X in the title fade from white to amber once C1-COMP is found on the left."
+   ],
+   "param": {
+    "0": 2,
+    "1": 4,
+    "2": 6,
+    "3": 8
+   },
+   "in": {
+    "0": 1,
+    "1": 3,
+    "2": 5,
+    "3": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/C1COMPCV.cpp:81 getVoltage, /10 then added at C1COMP.cpp:1020"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "-20 to 10V",
+      "why": "src/C1COMPCV.cpp:89 getVoltage, /10 then *30 dB at C1COMP.cpp:986"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/C1COMPCV.cpp:97 getVoltage, /10 then *0.89 at C1COMP.cpp:987"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/C1COMPCV.cpp:105 getVoltage, /10 then added at C1COMP.cpp:929"
+     }
+    }
+   },
+   "notes": "The threshold sumRange is the dB scale the knob is marked in, not a voltage at the jack; the validator's spellings have no dB form. The release CV is scaled by 0.89 rather than 1.0 and the sum is then clamped to 0.89, which is the same clamp that makes C1-COMP's AUTO release unreachable. C1-COMP returns from process() while bypassed before updateCompressorParameters() runs (src/C1COMP.cpp:887-906), so the ratio, threshold and release jacks do nothing in that state."
   },
   "ChanOut": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo output stage for the C1 channel strip, with four saturation engines, pan, dim and mute, a level meter, a loudness reading and a goniometer",
+    "Sets how hard the chosen saturation engine is pushed, 0% to 100%; on the Standard engine it does nothing in Master Output mode and adds at most 0.8dB of level in Channel Output mode",
+    "Shifts the tone of the 2520, 8816 and DM2+ engines, 0% to 100%; the Standard engine never reads it",
+    "Pans between the two channels; in Master Output mode the centre position loses 3dB, and in Channel Output mode the centre is unity",
+    "Sets the output level, -60dB to 0dB in Master Output mode and -60dB to +6dB in Channel Output mode, slewed so a fast change does not click",
+    "Drops the output by the amount set on the menu, -12dB when the module is added, and lights while it is down",
+    "Silences the output over about 8ms, and lights while it is silent",
+    "The left input, and the source for the right channel as well while the right input is unpatched",
+    "The right input; with nothing patched here the left input feeds this channel too",
+    "The left channel after pan, level, the saturation engine, mute, dim and the menu’s trim; the engine clips at ±10V but the trim is applied after it",
+    "The right channel after pan, level, the saturation engine, mute, dim and the menu’s trim; the engine clips at ±10V but the trim is applied after it",
+    "Menu — Trim — a slider setting a final gain after everything else, -12dB to +12dB",
+    "Menu — Dim gain — a slider setting how far the D button drops the output, -30dB to -1dB, rounded to whole dB",
+    "Menu — Character Engine: Standard, 2520, 8816, DM2+ — chooses the saturation model; each of the last three carries its own OFF, 2×, 4× and 8× oversampling choice",
+    "Menu — Operating Mode: Master Output, Channel Output — sets the VOLUME knob's top to 0dB or +6dB and changes the pan law and the Standard engine's drive",
+    "Menu — ON — under Peak Hold, keeps the meter's brightest segment showing the loudest recent peak; it is on when the module is added",
+    "Menu — Hold Time: 0.5s, 1.0s, 1.5s, 2.0s, 3.0s, 5.0s — under Peak Hold, sets how long that peak is held before it starts falling",
+    "Menu — Fall Rate: 12 dB/s (slow), 24 dB/s (medium), 48 dB/s (fast), 96 dB/s (instant) — under Peak Hold, sets how fast the held peak falls",
+    "Note — The four small squares above the display choose the saturation engine, in the same order as the menu's Character Engine list.",
+    "Note — The small square at the top right of the display turns the goniometer drawing off.",
+    "Note — A freshly added module is on the Standard engine in Master Output mode, and in that state neither DRIVE nor CHAR changes the sound at all.",
+    "Note — Each jack carries one channel, so a polyphonic cable is reduced to its first channel.",
+    "Note — CHO-X adds voltage control of the level, pan, drive and character, and has to be placed immediately to the right of this module."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "src/ChanOut.cpp:788 getVoltage, one channel only"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the left input",
+      "why": "src/ChanOut.cpp:789 isConnected else left"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/ChanOut.cpp:911-912 setVoltage after trim; engines clamp to ±10V before it, e.g. src/ChanOutCleanEngine.hpp:113"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/ChanOut.cpp:911-912 setVoltage after trim; engines clamp to ±10V before it, e.g. src/ChanOutCleanEngine.hpp:113"
+     }
+    }
+   },
+   "notes": "DRIVE and CHAR are both inert on the default settings. ChanOutCleanEngine::process takes drive but computes driveAmount = (outputMode == 1) ? drive * 0.1f : 0.0f (src/ChanOutCleanEngine.hpp:117-125), so in Master Output mode, which is the default, the knob does nothing; in Channel Output mode full drive is a gain of 1.1, about 0.83dB. The clean engine's process() takes no character argument at all (src/ChanOut.cpp:845-847), so CHAR is read by nothing on the Standard engine. The pan law is the other way round from the README, which says Master is linear and Channel is equal power: applyPan uses cos/sin in both modes and multiplies by sqrt(2) only in Channel mode, so Master loses 3dB at centre and Channel is unity at centre (src/ChanOut.cpp, applyPan). The character engines are selected by four custom squares as well as by the menu. DISPLAY_ENABLE_PARAM has no ParamWidget and cannot be clicked for help. The mute and dim slews are both 125 units per second."
   },
   "ChanOutCV": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "CV expander for CHAN-OUT, giving voltage control of its level, pan, drive and character",
+    "Shifts the output level on CHAN-OUT, ±10V covering 66dB with the attenuverter fully open, added to the VOLUME knob and clamped to -60dB to +6dB",
+    "Attenuverter on the level CV, -100% to +100%, and at 0% when the module is added",
+    "Shifts the pan on CHAN-OUT, ±10V covering hard left to hard right with the attenuverter fully open, added to the PAN knob and clamped to that range",
+    "Attenuverter on the pan CV, -100% to +100%, and at 0% when the module is added",
+    "Shifts the drive on CHAN-OUT, ±10V covering 0% to 100% with the attenuverter fully open, added to the DRIVE knob and clamped to that range",
+    "Attenuverter on the drive CV, -100% to +100%, and at 0% when the module is added",
+    "Shifts the character on CHAN-OUT, ±10V covering 0% to 100% with the attenuverter fully open, added to the CHAR knob and clamped to that range",
+    "Attenuverter on the character CV, -100% to +100%, and at 0% when the module is added",
+    "Note — The module does nothing unless CHAN-OUT is immediately to its left.",
+    "Note — Every attenuverter is at 0% when the module is added, so all four jacks do nothing until one is turned up.",
+    "Note — The drive and character jacks change nothing while CHAN-OUT is on its Standard engine in Master Output mode, which is how it is added.",
+    "Note — The dots either side of the X in the title fade from white to amber once CHAN-OUT is found on the left."
+   ],
+   "param": {
+    "0": 2,
+    "1": 4,
+    "2": 6,
+    "3": 8
+   },
+   "in": {
+    "0": 1,
+    "1": 3,
+    "2": 5,
+    "3": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/ChanOutCV.cpp:107 getVoltage, /10 then *66 dB at ChanOut.cpp:800"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "-1 to 1V",
+      "why": "src/ChanOutCV.cpp:115 getVoltage, /10 then added at ChanOut.cpp:809"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/ChanOutCV.cpp:123 getVoltage, /10 then added at ChanOut.cpp:806"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/ChanOutCV.cpp:131 getVoltage, /10 then added at ChanOut.cpp:807"
+     }
+    }
+   },
+   "notes": "The pan sumRange is the knob's own -1 to +1 scale, not a voltage at the jack; the validator's spellings have no bare-number form. The level CV is scaled by 66dB, which spans both operating modes' ranges, and the sum is clamped to -60dB to +6dB even in Master Output mode where the knob itself stops at 0dB. CHAN-OUT reads the expander unconditionally; there is no bypass button on that module."
   }
  }
 }

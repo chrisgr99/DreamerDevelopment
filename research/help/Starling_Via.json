@@ -1,53 +1,1451 @@
 {
  "plugin": "Starling_Via",
- "source": "https://github.com/starlingcode/Via-for-Rack.git",
+ "source": "https://github.com/starlingcode/Via-for-Rack/tree/d96fbc6",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "META": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A contour generator: one shape from a wavetable played once or over and over, used as an oscillator, an envelope, a modulation sequence or a drum voice",
+    "Sets the main time: a coarse tune in Audio range, the attack time in Envelope range, the cycle time in Sequence range, and the pitch of the drum when the module is in drum mode",
+    "Sets the second time: a fine tune in Audio range, the release time in Envelope range, the skew between rise and fall in Sequence range, and the decay when the module is in drum mode",
+    "Scans across the current wavetable, morphing the contour through the shapes stored in it",
+    "Sets one of the two voltages the main output runs between, -5V to +5V; patching the A input takes this knob out of circuit",
+    "Multiplies the B input by -1 to +1 to set the other voltage the main output runs between; with nothing patched to B the input reads 5V, so the knob alone gives -5V to +5V",
+    "Attenuates the Time 2 CV input before the module adds it, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Attenuates the Wave shape CV input before the module adds it, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Steps through what happens to the A and B levels at each contour event: Off, Track and hold A, Resample B, Track and hold A resample B, Track and hold A and B, or Resample A and B",
+    "Steps forward through the eight wavetables of the current range, wrapping round at the end",
+    "Steps through the frequency range the module works in: Audio, Envelope or Sequence",
+    "Steps through what a trigger does: No Retrigger, Hard Sync, A/R Model, Gated A/R Model or Pendulum. In drum mode it picks the drum instead: 808 Kick, Tom, Pluck or Tone",
+    "Steps backward through the eight wavetables of the current range, wrapping round at the start",
+    "Turns looping on or off, so the contour either repeats until stopped or runs once per trigger",
+    "Fires a trigger by hand, exactly as a rising edge at the Trigger input does",
+    "One of the two voltages the main output runs between; patched here, it overrides the A knob",
+    "The other voltage the main output runs between, multiplied by the B knob; unpatched it reads 5V",
+    "Modulates the main time, at 384 units of the internal 12-bit control range per volt",
+    "Modulates the second time, through the Time 2 CV scale knob",
+    "Scans the wavetable, through the Wave shape CV scale knob",
+    "A rising edge starts or restarts the contour; what exactly it does is set by the TRIG response button",
+    "Holds the contour where it is for as long as this is high",
+    "The contour, scaled between the A and B levels",
+    "A 5V gate, high during the release or during the attack according to the Logic out menu setting",
+    "The contour itself as a voltage, without the A and B scaling",
+    "A 5V gate that follows which way the contour is travelling",
+    "Note — the A input is normalled to the A knob: with nothing patched the knob sets that voltage, and patching a cable into A takes the knob out of circuit entirely.",
+    "Note — the B input is normalled to 5V and the B knob multiplies whatever arrives by -1 to +1. Unpatched the knob is a -5V to +5V source; patched it attenuverts the cable.",
+    "Note — the main output is the module's own signal scaled between the A and B levels. Set both of those to 0V and the main output is silent whatever else the module is doing.",
+    "Note — each of the six buttons steps to the next mode when clicked. Hovering one names the mode and its number; right-click and you can type either to jump straight to it.",
+    "Note — the two triangle buttons either side of the word TABLE step the same wavetable setting, one forward and one back.",
+    "Menu — High during release — makes the gate output high while the contour is falling; found under the Logic out heading",
+    "Menu — High during attack — makes the gate output high while the contour is rising; found under the Logic out heading",
+    "Menu — Triangle — sends a plain triangle to the contour output instead of the shaped contour; found under Signal out, which appears when the frequency range is not Audio or looping is on",
+    "Menu — Contour — sends the shaped contour to the contour output; found under Signal out, which appears when the frequency range is not Audio or looping is on",
+    "Menu — Drum signal out: Triangle, Contour, Envelope, Noise — picks what the contour output carries while the module is in drum mode",
+    "Menu — Stock presets: Drum, Oscillator, AR Envelope, Looping AR, Modulation Sequence, Complex LFO — sets all six buttons at once to a factory combination",
+    "Menu — Select wavetable set — loads a wavetable file from disk in place of the one the module ships with"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23,
+    "2": 24,
+    "3": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "cv",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the A knob",
+      "why": "src/via-module.hpp:226 reads the A input with getVoltage and falls back to the A knob when nothing is patched"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "src/via-module.hpp:227 reads the B input with getVoltage and falls back to 5.0 when nothing is patched, then multiplies by the B knob at src/via-module.hpp:228"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:110-115 reads the CV1 input with getVoltage, scales it by 384 per volt, offsets it by 2048 and clamps the result to 0-4095"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:150 reads the CV2 input with getVoltage, clamps it to ±5V and scales it by the CV2 amount knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:151 reads the CV3 input with getVoltage, clamps it to ±5V and scales it by the CV3 amount knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:164-165 reads the main logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:183 reads the aux logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/via-module.hpp:248 writes the main output with setVoltage, as the B level times one DAC channel plus the A level times another"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:250 writes this output with setVoltage, as the logic state times 5.0"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:249 writes this output with setVoltage, as the DAC sample over 4095 less 0.5, times -10.666666666"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:251 writes this output with setVoltage, as the aux logic state times 5.0"
+     }
+    }
+   },
+   "notes": "The main output's meaning follows the frequency-range button: audio in Audio range, an envelope or a modulation sequence in the other two. The audio family is given because Audio is the range the module comes up in. BUTTON2 and BUTTON5 both carry the maker's 'Wavetable' label and the same tooltip quantity; the firmware increments the table on BUTTON2 and decrements it on BUTTON5 (Via/modules/meta/meta-ui-implementation.cpp:256 and :292). The Signal out and Drum signal out menu sections are mutually exclusive: the drum section is shown only while the frequency range is Audio and looping is off (src/meta.cpp:331-345)."
   },
   "SYNC": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator locked to an incoming clock, its frequency set as a ratio of that clock chosen from a grid of scales, with a morphing wavetable for its shape",
+    "Picks the X coordinate in the ratio grid, which is the numerator of the frequency ratio in most groups and a scan through an arpeggio in the Arppegios group",
+    "Picks the Y coordinate in the ratio grid, which is the denominator of the frequency ratio in most groups and the chord or quantization in the others",
+    "Scans across the current wavetable, morphing the shape of the oscillator",
+    "Sets one of the two voltages the main output runs between, -5V to +5V; patching the A input takes this knob out of circuit",
+    "Multiplies the B input by -1 to +1 to set the other voltage the main output runs between; with nothing patched to B the input reads 5V, so the knob alone gives -5V to +5V",
+    "Attenuates the assignable modulation input before the module adds it, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Attenuates the Wave shape CV input before the module adds it, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Steps through what happens to the A and B levels at each cycle: Off, Track and Hold, or Resample",
+    "Steps through the four scales of the current group, wrapping round at the end",
+    "Steps through what the assignable modulation input reaches: Y Ratio, Phase or Skew",
+    "Steps through how quickly the oscillator chases a new ratio: Slow, Medium, Fast or Instantaneous",
+    "Steps through the group of scales and waves the module works from: Harmonics, Arppegios, 1V/Oct or Rhythms",
+    "Steps through the four wavetables of the current group, wrapping round at the end",
+    "Tapping this sets the tempo the oscillator locks to, in place of a pulse at the Sync input",
+    "One of the two voltages the main output runs between; patched here, it overrides the manual A input knob",
+    "The other voltage the main output runs between, multiplied by the B knob; unpatched it reads 5V",
+    "Moves the X coordinate through the ratio grid, at 384 units of the internal 12-bit control range per volt",
+    "Reaches whichever of Y Ratio, Phase or Skew the MOD CV destination button has chosen, through the MOD CV amount knob",
+    "Scans the wavetable, through the Wave shape CV amount knob",
+    "The clock the oscillator locks to; each rising edge is measured to work out the tempo",
+    "A rising edge here restarts the oscillator's phase without changing the tempo it has measured",
+    "The oscillator, scaled between the A and B levels",
+    "A 5V gate, high during the attack or a delta pulse according to the Logic Out menu setting",
+    "The oscillator itself as a voltage, without the A and B scaling",
+    "A 5V gate that fires when the frequency ratio changes",
+    "Note — the A input is normalled to the A knob: with nothing patched the knob sets that voltage, and patching a cable into A takes the knob out of circuit entirely.",
+    "Note — the B input is normalled to 5V and the B knob multiplies whatever arrives by -1 to +1. Unpatched the knob is a -5V to +5V source; patched it attenuverts the cable.",
+    "Note — the main output is the module's own signal scaled between the A and B levels. Set both of those to 0V and the main output is silent whatever else the module is doing.",
+    "Note — each of the six buttons steps to the next mode when clicked. Hovering one names the mode and its number; right-click and you can type either to jump straight to it.",
+    "Menu — High during attack — makes the gate output high while the wave is rising; found under the Logic Out heading",
+    "Menu — Delta — makes the gate output a pulse at each change rather than a gate; found under the Logic Out heading",
+    "Menu — Triangle — sends a plain triangle to the contour output; found under the Signal Out heading",
+    "Menu — Contour — sends the shaped wave to the contour output; found under the Signal Out heading",
+    "Menu — Quadrature: 0 degrees, 90 degrees, 180 degrees, 270 degrees — shifts the contour output's phase against the main output",
+    "Menu — Group waves — restricts the wavetable button to the four waves belonging to the current group; found under the Wave Options heading",
+    "Menu — Global waves — lets the wavetable button reach every wave in the loaded set; found under the Wave Options heading",
+    "Menu — Stock presets: Harmonic Osc, Arpeggiated Osc, Bohlen-Pierce Modes, Modal Quantizer, Sequence, Tempo-Synced LFO — sets all six buttons at once to a factory combination",
+    "Menu — Select wavetable set — loads a wavetable file from disk in place of the one the module ships with"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23,
+    "2": 24,
+    "3": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "audio",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the A knob",
+      "why": "src/via-module.hpp:226 reads the A input with getVoltage and falls back to the A knob when nothing is patched"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "src/via-module.hpp:227 reads the B input with getVoltage and falls back to 5.0 when nothing is patched, then multiplies by the B knob at src/via-module.hpp:228"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:110-115 reads the CV1 input with getVoltage, scales it by 384 per volt, offsets it by 2048 and clamps the result to 0-4095"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:150 reads the CV2 input with getVoltage, clamps it to ±5V and scales it by the CV2 amount knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:151 reads the CV3 input with getVoltage, clamps it to ±5V and scales it by the CV3 amount knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:164-165 reads the main logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:183 reads the aux logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/via-module.hpp:248 writes the main output with setVoltage, as the B level times one DAC channel plus the A level times another"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:250 writes this output with setVoltage, as the logic state times 5.0"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:249 writes this output with setVoltage, as the DAC sample over 4095 less 0.5, times -10.666666666"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:251 writes this output with setVoltage, as the aux logic state times 5.0"
+     }
+    }
+   },
+   "notes": "The Ratio X input is scaled per volt like a pitch input but selects a grid index rather than a frequency, so it is given the cv family. In the 1V/Oct group the maker scales X for volt-per-octave response, which the tooltip description states (src/sync.cpp:660-663); the family is not changed for that one group. The Scale button's four names change with the group, and the Wavetable button's four names change with both group and the Wave Options menu setting."
   },
   "SCANNER": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A waveshaper that reads a two-dimensional surface: two input signals are the X and Y coordinates, and the height of the surface at that point is the output",
+    "Shapes the surface itself, blending the X and Y terrains together by whatever function the map button has chosen",
+    "Offsets where the X input reads on the surface, -1 to +1",
+    "Offsets where the Y input reads on the surface, -1 to +1",
+    "Sets one of the two voltages the main scan output runs between, -5V to +5V; patching the A input takes this knob out of circuit",
+    "Multiplies the B input by -1 to +1 to set the other voltage the main scan output runs between; with nothing patched to B the input reads 5V, so the knob alone gives -5V to +5V",
+    "Attenuates the X signal input, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Attenuates the Y signal input, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Steps through what a pulse at the Jump input does: Reverse, which turns the scan round, or Teleport, which jumps it elsewhere",
+    "Steps forward through the eight Y terrains: Slopes, Hills, Pyhisics World, Shapeshifting Range, Multiplier Mountains, Synthville, Steppes and Blockland",
+    "Steps through the function that combines the X and Y terrains into one surface: Add, Multiply, Difference or Lighten",
+    "Steps backward through the eight X terrains, wrapping round at the start",
+    "Steps backward through the eight Y terrains, wrapping round at the start",
+    "Steps forward through the eight X terrains: Slopes, Hills, Pyhisics World, Shapeshifting Range, Multiplier Mountains, Synthville, Steppes and Blockland",
+    "Nothing in the Rack module reads this button; on the hardware it opens the preset menu",
+    "One of the two voltages the main scan output runs between; patched here, it overrides the A knob",
+    "The other voltage the main scan output runs between, multiplied by the B knob; unpatched it reads 5V",
+    "Modulates the surface shape, at 384 units of the internal 12-bit control range per volt",
+    "The X coordinate read into the surface, through the X input attenuation knob",
+    "The Y coordinate read into the surface, through the Y input attenuation knob",
+    "A rising edge here reverses or teleports the scan, according to the JUMP input response button",
+    "While this is high the A and B levels are frozen at the values they held",
+    "The height of the surface at the scanned point, scaled between the A and B levels",
+    "A 5V square taken from one bit of the scan",
+    "The height of the surface without the A and B scaling",
+    "A 5V square taken from a second bit of the scan",
+    "Note — the A input is normalled to the A knob: with nothing patched the knob sets that voltage, and patching a cable into A takes the knob out of circuit entirely.",
+    "Note — the B input is normalled to 5V and the B knob multiplies whatever arrives by -1 to +1. Unpatched the knob is a -5V to +5V source; patched it attenuverts the cable.",
+    "Note — the main output is the module's own signal scaled between the A and B levels. Set both of those to 0V and the main output is silent whatever else the module is doing.",
+    "Note — each of the six buttons steps to the next mode when clicked. Hovering one names the mode and its number; right-click and you can type either to jump straight to it.",
+    "Note — the four arrow buttons around the diamond step the X and Y terrains: two of them step Y forward and back, and the other two step X.",
+    "Menu — Stock presets: Slopes, Physics World, Multiplier Mountains, Synthville, Steppes, Blockland — sets all six buttons at once to a factory combination",
+    "Menu — Select wavetable set — loads a surface file from disk in place of the one the module ships with"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23,
+    "2": 24,
+    "3": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "audio",
+     "4": "audio",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "audio",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the A knob",
+      "why": "src/via-module.hpp:226 reads the A input with getVoltage and falls back to the A knob when nothing is patched"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "src/via-module.hpp:227 reads the B input with getVoltage and falls back to 5.0 when nothing is patched, then multiplies by the B knob at src/via-module.hpp:228"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:110-115 reads the CV1 input with getVoltage, scales it by 384 per volt, offsets it by 2048 and clamps the result to 0-4095"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:150 reads the CV2 input with getVoltage, clamps it to ±5V and scales it by the CV2 amount knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:151 reads the CV3 input with getVoltage, clamps it to ±5V and scales it by the CV3 amount knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:164-165 reads the main logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:183 reads the aux logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/via-module.hpp:248 writes the main output with setVoltage, as the B level times one DAC channel plus the A level times another"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:250 writes this output with setVoltage, as the logic state times 5.0"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:249 writes this output with setVoltage, as the DAC sample over 4095 less 0.5, times -10.666666666"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:251 writes this output with setVoltage, as the aux logic state times 5.0"
+     }
+    }
+   },
+   "notes": "The trigger button is configured with the name 'Unused' and the description 'Enter preset menu on hardware module' (src/scanner.cpp:37 and :52); nothing in the Rack process reads it, so it gets a line saying so. The terrain names are spelled as the maker spells them, including 'Pyhisics World'. BUTTON2 and BUTTON5 both carry the label 'Y scan world' and BUTTON4 and BUTTON6 both 'X scan world'; the firmware increments on BUTTON2 and BUTTON6 and decrements on BUTTON4 and BUTTON5 (Via/modules/scanner/scanner-ui-implementation.cpp:158, 173, 180, 187)."
   },
   "GATESEQ": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two gate sequencers driven from one clock, each choosing a rhythm from a bank of patterns, with a logic output combining them",
+    "Selects the pattern sequencer I plays from its current bank",
+    "Modulates pattern I in whatever way the pattern I mode button has chosen: an offset through the bank, a shuffle-to-swing amount, or a clock multiplier",
+    "Selects the pattern sequencer II plays from its current bank",
+    "Sets the voltage sequencer I's gates reach, -5V to +5V; patching the A input takes this knob out of circuit",
+    "Multiplies the B input by -1 to +1 to set the voltage sequencer II's gates reach; with nothing patched to B the input reads 5V, so the knob alone gives -5V to +5V",
+    "Attenuates the pattern I modulation input, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Attenuates the pattern II input, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Steps through what the A channel does at each of sequencer I's steps: Off, Sample and hold during gate, or Resample on rising edge",
+    "Steps through how sequencer I's gate shapes the A channel: Open, which passes it always, Gated, or Smooth Gate",
+    "Chooses which family of patterns sequencer I plays from: Length 16 Euclidean, 3 vs 2, Shuffle-Swing or Multiplier/Divider",
+    "Steps through what the B channel does at each of sequencer II's steps: Off, Sample and hold during gate, or Resample on rising edge",
+    "Steps through how sequencer II's gate shapes the B channel: Open, which passes it always, Gated, or Smooth Gate",
+    "Chooses which family of patterns sequencer II plays from: Length 16 Euclidean, Odd vs Even, 2 or 3 Gates, or Rhythmic Clock Division",
+    "Resets both sequencers to the start of their patterns",
+    "The voltage sequencer I's gates reach; patched here, it overrides the pattern I gate level knob",
+    "The voltage sequencer II's gates reach, multiplied by the B knob; unpatched it reads 5V",
+    "Selects pattern I, at 384 units of the internal 12-bit control range per volt",
+    "Modulates pattern I, through the pattern I modulation CV amount knob",
+    "Selects pattern II, through the pattern II density CV amount knob",
+    "The clock both sequencers step on; each rising edge advances them one step",
+    "A rising edge here returns both sequencers to the start of their patterns",
+    "The two gate channels added together, each at its own level",
+    "Sequencer I's gate output, 5V while its step is on",
+    "Sequencer II's gate output",
+    "The two sequencers combined by the And, Or, Xor or Nor chosen on the menu",
+    "Note — the A input is normalled to the A knob: with nothing patched the knob sets that voltage, and patching a cable into A takes the knob out of circuit entirely.",
+    "Note — the B input is normalled to 5V and the pattern II gate level knob multiplies whatever arrives by -1 to +1. Unpatched it is a -5V to +5V source; patched it attenuverts the cable.",
+    "Note — the A + B output carries the two gate channels at the levels set by the two level controls. Set both of those to 0V and that output stays silent however the sequencers are running.",
+    "Note — each of the six buttons steps to the next mode when clicked. Hovering one names the mode and its number; right-click and you can type either to jump straight to it.",
+    "Menu — Drum signal out: And, Or, Xor, Nor — picks the logic the fourth output applies to the two sequencers",
+    "Menu — Stock presets: Euclidean, 2 vs 3, Shuffle Swing, Clock Multiplier/Divider, Logic Processing, Resample — sets all six buttons at once to a factory combination",
+    "Menu — Select Bank Set File — loads a pattern bank file from disk in place of the one the module ships with"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23,
+    "2": 24,
+    "3": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the A knob",
+      "why": "src/via-module.hpp:226 reads the A input with getVoltage and falls back to the A knob when nothing is patched"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "src/via-module.hpp:227 reads the B input with getVoltage and falls back to 5.0 when nothing is patched, then multiplies by the B knob at src/via-module.hpp:228"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:110-115 reads the CV1 input with getVoltage, scales it by 384 per volt, offsets it by 2048 and clamps the result to 0-4095"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:150 reads the CV2 input with getVoltage, clamps it to ±5V and scales it by the CV2 amount knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:151 reads the CV3 input with getVoltage, clamps it to ±5V and scales it by the CV3 amount knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:164-165 reads the main logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:183 reads the aux logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/via-module.hpp:248 writes the main output with setVoltage, as the B level times one DAC channel plus the A level times another"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:250 writes this output with setVoltage, as the logic state times 5.0"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:249 writes this output with setVoltage, as the DAC sample over 4095 less 0.5, times -10.666666666"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:251 writes this output with setVoltage, as the aux logic state times 5.0"
+     }
+    }
+   },
+   "notes": "The menu section that picks the logic for the fourth output is labelled 'Drum signal out' in the source (src/gateseq.cpp), which looks like a label copied from META; the items under it are And, Or, Xor and Nor and they set the logic output. The A and B level knobs here are the platform's A and B knobs under different names, and the normalling is the platform's."
   },
   "ATSR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-stage envelope — attack, transition, sustain, release — that crossfades between an attack level and a sustain level, with a shape control on each slope",
+    "Sets the attack time, the climb from rest to the attack level",
+    "Sets the transition time, the move from the attack level to the sustain level",
+    "Sets the release time, the fall from the sustain level back to rest",
+    "Sets the attack level the envelope climbs to, -5V to +5V; patching the attack voltage input takes this knob out of circuit",
+    "Multiplies the sustain voltage input by -1 to +1 to set the sustain level; with nothing patched to that input it reads 5V, so the knob alone gives -5V to +5V",
+    "Attenuates the transition time CV input, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Attenuates the release time CV input, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Steps through the curve of the attack slope: Expo, Linear, Sigmoid or Log",
+    "Steps through the curve of the transition slope: Expo, Linear, Sigmoid or Log",
+    "Steps through which stage the stage gate output is high during: Attack, Transition, Sustain or Release",
+    "Steps through what the attack time CV input reaches: Attack Time on its own, or All Slopes, where it scales every stage at a volt per octave",
+    "Turns sampling of the level inputs on or off: Enabled samples the attack and sustain voltages at each gate, Disabled lets them follow the cable",
+    "Steps through the curve of the release slope: Expo, Linear, Sigmoid or Log",
+    "Opens the gate by hand for as long as it is held",
+    "The level the envelope climbs to in its attack stage; patched here, it overrides the attack level knob",
+    "The level the envelope settles to in its sustain stage, multiplied by the sustain level knob; unpatched it reads 5V",
+    "Modulates the attack time, or every slope together when the A time CV destination button is set to All Slopes, at 384 units of the internal 12-bit control range per volt",
+    "Modulates the transition time, through the transition time CV amount knob",
+    "Modulates the release time, through the release time CV amount knob",
+    "Holds the envelope in its sustain stage while it is high; the release starts when it falls",
+    "A rising edge here restarts the envelope from its attack stage without waiting for the gate to fall",
+    "The envelope, running between the attack level and the sustain level",
+    "A 5V gate, high during whichever stage the SEG gate button has chosen",
+    "A gate meant to be patched back into the gate input to make the envelope cycle",
+    "A 5V gate that follows the input gate but delayed by the envelope's own timing",
+    "Note — the attack voltage input is normalled to the attack level knob: with nothing patched the knob sets that voltage, and patching a cable takes the knob out of circuit entirely.",
+    "Note — the sustain voltage input is normalled to 5V and the sustain level knob multiplies whatever arrives by -1 to +1. Unpatched it is a -5V to +5V source; patched it attenuverts the cable.",
+    "Note — the envelope output runs between the attack level and the sustain level. Set both of those to 0V and nothing comes out of it however the envelope is triggered.",
+    "Note — each of the six buttons steps to the next mode when clicked. Hovering one names the mode and its number; right-click and you can type either to jump straight to it.",
+    "Note — this module has no right-click menu of its own beyond Rack's standard one."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23,
+    "2": 24,
+    "3": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the A knob",
+      "why": "src/via-module.hpp:226 reads the A input with getVoltage and falls back to the A knob when nothing is patched"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "src/via-module.hpp:227 reads the B input with getVoltage and falls back to 5.0 when nothing is patched, then multiplies by the B knob at src/via-module.hpp:228"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:110-115 reads the CV1 input with getVoltage, scales it by 384 per volt, offsets it by 2048 and clamps the result to 0-4095"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:150 reads the CV2 input with getVoltage, clamps it to ±5V and scales it by the CV2 amount knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:151 reads the CV3 input with getVoltage, clamps it to ±5V and scales it by the CV3 amount knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:164-165 reads the main logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:183 reads the aux logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/via-module.hpp:248 writes the main output with setVoltage, as the B level times one DAC channel plus the A level times another"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:250 writes this output with setVoltage, as the logic state times 5.0"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:249 writes this output with setVoltage, as the DAC sample over 4095 less 0.5, times -10.666666666"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:251 writes this output with setVoltage, as the aux logic state times 5.0"
+     }
+    }
+   },
+   "notes": "The attack time CV input becomes a volt-per-octave control over every slope when the A time CV destination button is set to All Slopes (src/atsr.cpp:459); it keeps the cv family, following the ruling that a time control scaled per octave is still a time control. ATSR is the one module in this plugin with no appendContextMenu override."
   },
   "OSC3": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three oscillators tuned from one pitch: a fundamental and two detuned voices that can be spread apart, quantized to a scale or beaten against each other",
+    "Sets the base frequency of all three oscillators; the two frequency knobs work as a coarse and a fine tune on the same pitch",
+    "Sets the base frequency of all three oscillators; the two frequency knobs work as a coarse and a fine tune on the same pitch",
+    "Spreads oscillators 2 and 3 away from the base frequency, by an even amount, a scaled amount, a chord or a division of the unity input according to the beat mode button",
+    "Sets the level of oscillator 2 in the detuned output, -5V to +5V; patching the oscillator 2 level input takes this knob out of circuit",
+    "Multiplies the oscillator 3 level input by -1 to +1; with nothing patched to that input it reads 5V, so the knob alone sets oscillator 3's level from -5V to +5V",
+    "Attenuates the phase input that modulates oscillators 2 and 3, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Attenuates the detune input, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Shifts the whole module up an octave each time it is clicked, as far as +5 Octaves",
+    "Steps through the waveform all three oscillators use: Saw, Square, Trapezoid or Triangle",
+    "Turns sampling of the oscillator 2 and 3 levels on or off, so they either track their cables or are held at each cycle of oscillator 1",
+    "Shifts the whole module down an octave each time it is clicked, as far as +0 Octaves",
+    "Steps through the scale the detune is quantized to: Off, Semitone, Major or Minor",
+    "Steps through how the detune is spread: Even, Scaled, Chords, or Sync to Unity Input",
+    "Nothing in the Rack module reads this button; the unity input jack beside it is what drives that function",
+    "Sets the level of oscillator 2 in the detuned output; patched here, it overrides the oscillator 2 level knob",
+    "Sets the level of oscillator 3 in the detuned output, multiplied by the oscillator 3 level knob; unpatched it reads 5V",
+    "Volt-per-octave pitch for all three oscillators, read at 384 units of the internal 12-bit control range per volt",
+    "Modulates the phase of oscillators 2 and 3, through the 2 + 3 phase CV scale knob",
+    "Modulates the detune spread, through the detune CV scale knob",
+    "A rising edge here shifts the module up an octave",
+    "The signal oscillators 2 and 3 are locked against when the beat mode button is set to Sync to Unity Input",
+    "Oscillators 2 and 3 mixed at their own levels",
+    "A 5V gate that follows the beat between the detuned oscillators",
+    "Oscillator 1 on its own, the undetuned fundamental",
+    "A 5V trigger each time the pitch changes",
+    "Note — the A input is normalled to the A knob: with nothing patched the knob sets that voltage, and patching a cable into A takes the knob out of circuit entirely.",
+    "Note — the oscillator 3 level input is normalled to 5V and the 3 LVL knob multiplies whatever arrives by -1 to +1. Unpatched it is a -5V to +5V source; patched it attenuverts the cable.",
+    "Note — the detuned output is oscillators 2 and 3 at the levels set by the 2 LVL and 3 LVL controls. Set both to 0V and that output goes silent, while oscillator 1 keeps coming out of its own jack.",
+    "Note — each of the six buttons steps to the next mode when clicked. Hovering one names the mode and its number; right-click and you can type either to jump straight to it.",
+    "Menu — Optimized — runs the oscillators through the plugin's faster path, which is the setting to leave it on; found under the CPU Mode heading",
+    "Menu — Direct Port — runs the hardware firmware straight through, which costs more CPU; found under the CPU Mode heading",
+    "Menu — Select Scale Set File — loads a scale file from disk in place of the one the module ships with"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23,
+    "2": 24,
+    "3": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "pitch",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "audio",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the A knob",
+      "why": "src/via-module.hpp:226 reads the A input with getVoltage and falls back to the A knob when nothing is patched"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "src/via-module.hpp:227 reads the B input with getVoltage and falls back to 5.0 when nothing is patched, then multiplies by the B knob at src/via-module.hpp:228"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "why": "src/via-module.hpp:110-115 reads the CV1 input with getVoltage, scales it by 384 per volt, offsets it by 2048 and clamps the result to 0-4095"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:150 reads the CV2 input with getVoltage, clamps it to ±5V and scales it by the CV2 amount knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:151 reads the CV3 input with getVoltage, clamps it to ±5V and scales it by the CV3 amount knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:164-165 reads the main logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:183 reads the aux logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/via-module.hpp:248 writes the main output with setVoltage, as the B level times one DAC channel plus the A level times another"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:250 writes this output with setVoltage, as the logic state times 5.0"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:249 writes this output with setVoltage, as the DAC sample over 4095 less 0.5, times -10.666666666"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:251 writes this output with setVoltage, as the aux logic state times 5.0"
+     }
+    }
+   },
+   "notes": "KNOB1 and KNOB2 are both configured 'Base frequency' in Hz (src/osc3.cpp:26-27) and work as a coarse and a fine tune on the same pitch; the panel prints COARSE and FINE. The trigger button is configured with the name 'Unity' and nothing in the Rack process reads it, so it gets a line saying so; the unity function is driven by the aux logic input jack, which is also named Unity. The aux logic input is put through a Schmitt trigger like every other logic input, so an audio signal patched there is used for its zero crossings."
   },
   "SYNC3": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three oscillators locked to one clock, each at its own ratio chosen from a scale, with the second and third mixed to one output and the first on its own",
+    "Picks oscillator I's ratio to the incoming clock from the current scale",
+    "Picks oscillator II's ratio to the incoming clock from the current scale",
+    "Picks oscillator III's ratio to the incoming clock from the current scale",
+    "Sets oscillator II's level in the mixed output, -5V to +5V; patching the oscillator II level input takes this knob out of circuit",
+    "Multiplies the oscillator III level input by -1 to +1; with nothing patched to that input it reads 5V, so the knob alone sets oscillator III's level from -5V to +5V",
+    "Attenuates the II ratio CV input, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Attenuates the III ratio CV input, from nothing at fully counter-clockwise to all of it at fully clockwise",
+    "Steps through oscillator I's waveform: Saw, Square or Triangle",
+    "Steps forward through the eight scales: Rhythms, Integers, Open Intervals, Circle of Fifths, Major Arp, Minor Arp, Microtonal and Bohlen-Pierce (Spooky)",
+    "Steps through oscillator II's waveform: Saw, Square or Triangle",
+    "Switches between Independent Ratios, where each CV input picks its own oscillator's ratio, and II + III and Phase Modulation, where one input moves both and the other becomes a phase modulation input",
+    "Steps backward through the eight scales, wrapping round at the start",
+    "Steps through oscillator III's waveform: Saw, Square or Triangle",
+    "Tapping this sets the tempo the three oscillators lock to, in place of a pulse at the Sync input",
+    "Sets oscillator II's level in the mixed output; patched here, it overrides the oscillator II level knob",
+    "Sets oscillator III's level in the mixed output, multiplied by the oscillator III level knob; unpatched it reads 5V",
+    "Picks oscillator I's ratio, at 384 units of the internal 12-bit control range per volt",
+    "Picks oscillator II's ratio, or both II and III together when the CV mapping button is on its second setting, through the II CV scale knob",
+    "Picks oscillator III's ratio, or phase-modulates the pair when the CV mapping button is on its second setting, through the III CV scale knob",
+    "The clock all three oscillators lock to; each rising edge is measured to work out the tempo",
+    "While this is high the oscillator II and III level inputs are frozen at the values they held",
+    "Oscillators II and III mixed at their own levels",
+    "A 5V gate that fires when a frequency ratio changes",
+    "Oscillator I on its own",
+    "A 5V gate at half the rate of the incoming clock",
+    "Note — the A input is normalled to the A knob: with nothing patched the knob sets that voltage, and patching a cable into A takes the knob out of circuit entirely.",
+    "Note — the oscillator III level input is normalled to 5V and the III LVL knob multiplies it by -1 to +1. Unpatched it is a -5V to +5V source; patched it attenuverts the cable.",
+    "Note — the II + III output carries those two oscillators at the levels set by the II LVL and III LVL controls. Set both to 0V and it goes silent, while oscillator I keeps coming out of its own jack.",
+    "Note — nothing is heard until a clock reaches the Sync input or the TAP button is tapped; the three oscillators take their frequency from the measured tempo.",
+    "Note — each of the six buttons steps to the next mode when clicked. Hovering one names the mode and its number; right-click and you can type either to jump straight to it.",
+    "Menu — Optimized — runs the oscillators through the plugin's faster path, which is the setting to leave it on; found under the CPU Mode heading",
+    "Menu — Direct Port — runs the hardware firmware straight through, which costs more CPU; found under the CPU Mode heading",
+    "Menu — Select Scale Set File — loads a scale file from disk in place of the one the module ships with"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23,
+    "2": 24,
+    "3": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "audio",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the A knob",
+      "why": "src/via-module.hpp:226 reads the A input with getVoltage and falls back to the A knob when nothing is patched"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "src/via-module.hpp:227 reads the B input with getVoltage and falls back to 5.0 when nothing is patched, then multiplies by the B knob at src/via-module.hpp:228"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:110-115 reads the CV1 input with getVoltage, scales it by 384 per volt, offsets it by 2048 and clamps the result to 0-4095"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:150 reads the CV2 input with getVoltage, clamps it to ±5V and scales it by the CV2 amount knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:151 reads the CV3 input with getVoltage, clamps it to ±5V and scales it by the CV3 amount knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:164-165 reads the main logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/via-module.hpp:183 reads the aux logic input with getVoltage, rescales 0.2 to 1.2 onto 0 to 1 and puts it through a Schmitt trigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/via-module.hpp:248 writes the main output with setVoltage, as the B level times one DAC channel plus the A level times another"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:250 writes this output with setVoltage, as the logic state times 5.0"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5.33V",
+      "why": "src/via-module.hpp:249 writes this output with setVoltage, as the DAC sample over 4095 less 0.5, times -10.666666666"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/via-module.hpp:251 writes this output with setVoltage, as the aux logic state times 5.0"
+     }
+    }
+   },
+   "notes": "BUTTON2 and BUTTON5 both carry the label 'Ratio set'; the firmware increments the scale on BUTTON2 and decrements it on BUTTON5 (Via/modules/sync3/sync3-ui-implementation.cpp:86 and :166). The ratio CV inputs are scaled per volt but pick an index in a scale rather than a frequency, so they are given the cv family."
   },
   "SYNC3XL": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three clock-locked oscillators with a state-variable filter on each, their three outputs available separately and as a mix",
+    "Picks oscillator I's ratio to the incoming clock from the current scale",
+    "Picks oscillator II's ratio to the incoming clock from the current scale",
+    "Picks oscillator III's ratio to the incoming clock from the current scale",
+    "Switched to Subaudio the three filter frequencies are divided by 1000, putting their corners below the audio band; switched to Audio they run at the frequency the knobs and CV set",
+    "Attenuverts the I ratio CV input, -1 to +1",
+    "Attenuverts the II ratio CV input, -1 to +1",
+    "Attenuverts the III ratio CV input, -1 to +1",
+    "Steps through oscillator I's waveform: Saw, Square or Triangle",
+    "Steps forward through the eight scales of the loaded scale file, wrapping round at the end",
+    "Steps through oscillator II's waveform: Saw, Square or Triangle",
+    "Switches between Independent Ratios, where each CV input picks its own oscillator's ratio, and II + III and Phase Modulation, where one input moves both and the other becomes a phase modulation input",
+    "Steps backward through the eight scales of the loaded scale file, wrapping round at the start",
+    "Steps through oscillator III's waveform: Saw, Square or Triangle",
+    "Sets the resonance of that oscillator's filter, -5V to +5V worth; turning it up also quietens the signal going into the filter, which keeps the resonant peak in bounds",
+    "Sets the corner frequency of that oscillator's filter, -5V to +5V worth, one octave per volt",
+    "Morphs that oscillator's filter between low pass at fully counter-clockwise, band pass at the centre and high pass at fully clockwise",
+    "Attenuates the shared resonance CV input before it is added to all three resonance knobs",
+    "Attenuates the shared frequency CV input before it is added to all three frequency knobs",
+    "Attenuates the shared filter-type CV input before it is added to all three filter-type knobs",
+    "Pressing this sets the tempo the three oscillators lock to, in place of a pulse at the Sync input",
+    "Modulates that oscillator's filter corner, one octave per volt, added to its frequency knob and to the shared frequency CV",
+    "Picks oscillator I's ratio, through the I CV scale attenuverter",
+    "Picks oscillator II's ratio, or both II and III together when the CV mapping button is on its second setting, through the II CV scale attenuverter",
+    "Picks oscillator III's ratio, or phase-modulates the pair when the CV mapping button is on its second setting, through the III CV scale attenuverter",
+    "The clock all three oscillators lock to; each rising edge is measured to work out the tempo",
+    "Adds to all three resonance knobs at once, through the resonance CV scale trimmer",
+    "Adds to all three filter corner knobs at once, one octave per volt, through the frequency CV scale trimmer, despite the maker's tooltip naming it a resonance CV",
+    "Adds to all three filter-type knobs at once, through the filter-type CV scale trimmer, despite the maker's tooltip naming it a resonance CV",
+    "A 5V trigger when oscillator I's ratio changes",
+    "Oscillator I through its own filter",
+    "A 5V trigger when oscillator II's ratio changes",
+    "Oscillator II through its own filter",
+    "A 5V trigger when oscillator III's ratio changes",
+    "Oscillator III through its own filter",
+    "A 5V trigger when any of the three ratios changes",
+    "The three filtered oscillators added together and divided by three",
+    "Note — nothing is heard until a clock reaches the Sync input or the TAP button is tapped; the three oscillators take their frequency from the measured tempo.",
+    "Note — a SYNC3XL Levels expander placed immediately to the right multiplies all four audio outputs by its own knobs, and those knobs start at zero, so a freshly placed expander silences this module.",
+    "Note — each of the six mode buttons steps to the next mode when clicked. Hovering one names the mode and its number; right-click and you can type either to jump straight to it.",
+    "Note — the panel artwork is a wireframe outline with almost no lettering on it, so the tooltips are the only naming the controls have.",
+    "Menu — Optimized — runs the oscillators through the plugin's faster path, which is the setting to leave it on; found under the CPU Mode heading",
+    "Menu — Direct Port — runs the hardware firmware straight through, which costs more CPU; found under the CPU Mode heading",
+    "Menu — Select Scale Set File — loads a scale file from disk in place of the one the module ships with"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "14": 14,
+    "15": 15,
+    "16": 16,
+    "17": 14,
+    "18": 15,
+    "19": 16,
+    "20": 14,
+    "21": 15,
+    "22": 16,
+    "23": 17,
+    "24": 18,
+    "25": 19,
+    "26": 20
+   },
+   "in": {
+    "0": 21,
+    "1": 21,
+    "6": 21,
+    "2": 22,
+    "3": 23,
+    "4": 24,
+    "5": 25,
+    "7": 26,
+    "8": 27,
+    "9": 28
+   },
+   "out": {
+    "0": 29,
+    "1": 30,
+    "2": 31,
+    "3": 32,
+    "4": 33,
+    "5": 34,
+    "6": 35,
+    "7": 36
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "6": "pitch",
+     "8": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "7": "cv",
+     "9": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "audio",
+     "2": "trigger",
+     "3": "audio",
+     "4": "trigger",
+     "5": "audio",
+     "6": "trigger",
+     "7": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "why": "src/sync3xl.cpp:557 adds this input to the I frequency knob and the shared frequency CV, and src/sync3xl.cpp filterVoltageToCoeff turns the sum into a corner with approxExp2_taylor5, clamped to ±10V"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "why": "src/sync3xl.cpp:563 adds this input to the II frequency knob and the shared frequency CV, then through filterVoltageToCoeff"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "why": "src/sync3xl.cpp:569 adds this input to the III frequency knob and the shared frequency CV, then through filterVoltageToCoeff"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/sync3xl.cpp:225-228 reads this input with getVoltage, scales it by the I CV scale knob and by 2048/5, offsets by 2048 and clamps to 0-4095"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:150 reads the CV2 input with getVoltage, clamps it to ±5V and scales it by the CV2 amount knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/via-module.hpp:151 reads the CV3 input with getVoltage, clamps it to ±5V and scales it by the CV3 amount knob"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1.2V",
+      "negative": "ignored",
+      "why": "src/sync3xl.cpp:258 adds the tap tempo button to this input, rescales 0.2 to 1.2 onto 0 to 1 and puts the result through a Schmitt trigger"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±10V",
+      "why": "src/sync3xl.cpp:549 reads this input with getVoltage, scales it by the resonance CV scale trimmer and adds it to each resonance knob; resVoltageToCoeff clamps the sum to ±10V"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "1V per octave",
+      "why": "src/sync3xl.cpp:550 reads this input with getVoltage, scales it by the frequency CV scale trimmer and adds it to all three filter corners"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "range": "±5V",
+      "why": "src/sync3xl.cpp:551 reads this input with getVoltage, scales it by the filter-type CV scale trimmer and adds it to each filter-type knob; processFilterOuts divides the sum by 5 and clamps it to ±1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/sync3xl.cpp:608 writes this output with setVoltage, as a logic state times 5"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/sync3xl.cpp:609 writes this output with setVoltage, as a logic state times 5"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/sync3xl.cpp:610 writes this output with setVoltage, as a logic state times 5"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/sync3xl.cpp:611 writes this output with setVoltage, as the OR of the three logic states times 5"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/sync3xl.cpp:600 writes this output with setVoltage, from a DAC sample mapped to ±5V at src/sync3xl.cpp:535-543 and then filtered"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/sync3xl.cpp:601 writes this output with setVoltage, from a DAC sample mapped to ±5V and then filtered"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/sync3xl.cpp:602 writes this output with setVoltage, from a DAC sample mapped to ±5V and then filtered"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/sync3xl.cpp:603 writes this output with setVoltage, as the three filtered outputs added and divided by three"
+     }
+    }
+   },
+   "notes": "The maker names inputs 8 and 9 'I/II/III resonance CV' in configInput (src/sync3xl.cpp:61-62), which duplicates the name given to input 7. The code adds input 8 to the three filter corners and input 9 to the three filter-type knobs (src/sync3xl.cpp:550-551, 555-571), so the lines describe those and name the conflict. Parameter index 13, TRIG_BUTTON_PARAM, is declared in the enum but never given a widget, so no click can reach it and it gets no line and no tag; the tap tempo button is a separate parameter at index 26. The three resonance knobs share one line, as do the three frequency knobs and the three filter-type knobs, because the three channels are identical. The Subaudio setting divides every filter corner by 1000 (src/sync3xl.cpp filterVoltageToCoeff)."
   },
   "SYNC3XLLEVELS": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-channel VCA expander for SYNC3XL, which goes immediately to the right of it and sets the level of its three oscillator outputs and its mix output",
+    "Sets the level of SYNC3XL's oscillator I output, from silence at fully counter-clockwise to unmodified at fully clockwise",
+    "Sets the level of SYNC3XL's oscillator II output, from silence at fully counter-clockwise to unmodified at fully clockwise",
+    "Sets the level of SYNC3XL's oscillator III output, from silence at fully counter-clockwise to unmodified at fully clockwise",
+    "Sets the level of SYNC3XL's mix output, from silence at fully counter-clockwise to unmodified at fully clockwise",
+    "Adds to the oscillator I level knob at a volt per fifth of the knob's travel; the sum is clamped to 0V-10V, so 10V doubles what the knob alone would pass",
+    "Adds to the oscillator II level knob at a volt per fifth of the knob's travel; the sum is clamped to 0V-10V, so 10V doubles what the knob alone would pass",
+    "Adds to the oscillator III level knob at a volt per fifth of the knob's travel; the sum is clamped to 0V-10V, so 10V doubles what the knob alone would pass",
+    "Adds to the mix level knob at a volt per fifth of the knob's travel; the sum is clamped to 0V-10V, so 10V doubles what the knob alone would pass",
+    "Note — this module does nothing unless a SYNC3XL is placed immediately to its left. On its own it has no outputs and drives nothing.",
+    "Note — all four knobs come up at zero. Placing this expander beside a SYNC3XL therefore silences that module's four audio outputs until a knob or a CV input raises them.",
+    "Note — the four jacks are the only outputs this module has an effect through; the signal never passes through the panel, it is multiplied inside SYNC3XL."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {},
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 10V",
+      "sumRange": "0 to 10V",
+      "why": "src/sync3xllevels.cpp:59-72 adds each input with getVoltage to its knob times 5, clamps the sum to 0-10V and scales it by 0.2; src/sync3xl.cpp:580-592 multiplies SYNC3XL's outputs by the result"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 10V",
+      "sumRange": "0 to 10V",
+      "why": "src/sync3xllevels.cpp:59-72 adds each input with getVoltage to its knob times 5, clamps the sum to 0-10V and scales it by 0.2; src/sync3xl.cpp:580-592 multiplies SYNC3XL's outputs by the result"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 10V",
+      "sumRange": "0 to 10V",
+      "why": "src/sync3xllevels.cpp:59-72 adds each input with getVoltage to its knob times 5, clamps the sum to 0-10V and scales it by 0.2; src/sync3xl.cpp:580-592 multiplies SYNC3XL's outputs by the result"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "ignored",
+      "range": "0 to 10V",
+      "sumRange": "0 to 10V",
+      "why": "src/sync3xllevels.cpp:59-72 adds each input with getVoltage to its knob times 5, clamps the sum to 0-10V and scales it by 0.2; src/sync3xl.cpp:580-592 multiplies SYNC3XL's outputs by the result"
+     }
+    }
+   },
+   "notes": "The expander must be the module immediately to the right of SYNC3XL: onExpanderChange checks that its left neighbour is modelSync3XL (src/sync3xllevels.cpp:129-135). The level it computes is the knob times 5V plus the CV, clamped to 0-10V and scaled by 0.2, so the knob alone reaches a gain of 1 and the CV can take it to 2. The negative half of a CV is clamped away by the 0V floor. The panel artwork is a wireframe outline; the only lettering on it is '0 - 1'."
   }
  }
 }

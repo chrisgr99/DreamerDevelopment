@@ -1,28 +1,454 @@
 {
  "plugin": "moDllz",
- "source": "https://github.com/dllmusic/moDllz/tree/master/src",
+ "source": "https://github.com/dllmusic/moDllz/tree/7a038e02ba175a524a16ac5e2f9e3d2baac2066f/src",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "MIDIpolyMPE": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns incoming MIDI into polyphonic pitch, gate and velocity, with eight assignable controller outputs and a full MPE mode",
+    "Note — Nothing comes out until a MIDI device is chosen: click the display at the top of the panel to pick a driver, a device and a channel",
+    "Note — There is no right-click menu. Every setting is a field on the panel's displays: click one to select it, then turn the data knob or press the minus and plus buttons",
+    "Note — Those fields cover the polyphony mode and voice count, the note and velocity ranges, the two pitch bend spans, detune, transpose, and which controller each of the eight outputs follows",
+    "Note — A controller field can also learn: click it, then move a control on the MIDI device and the field takes that controller number",
+    "Note — The pitch, second pitch, aftertouch, velocity, release velocity and gate jacks are poly cables whose channel count follows the voice setting; the other jacks are single channel",
+    "Note — An Xpand module anywhere in the patch carries the voices above this module's own count, or a duplicate set of outputs, once the xpander field is set to its letter",
+    "Steps the selected display field down by one",
+    "Steps the selected display field up by one",
+    "Holds notes on for as long as the sustain pedal controller is down, instead of ending them when the key is released",
+    "Chooses when the gate is dropped briefly to retrigger an envelope: on the first note of a phrase only, on every note, or on every note including those recovered from the held stack",
+    "Changes the value of whichever field is selected on the displays",
+    "The note pitch at 1V per octave, with transpose and the master pitch bend already folded in, one poly channel per voice",
+    "In the polyphonic modes, a second copy of the pitch offset by the random detune amount; in the MPE modes it carries the MPE Y axis controller instead",
+    "The per-note aftertouch of that voice in the polyphonic modes, and the MPE pressure axis in the MPE modes, 0V to 10V",
+    "The note-on velocity of that voice, 0V to 10V",
+    "The note-off velocity of that voice, 0V to 10V; in the MPE modes it can be switched to carry that voice's own pitch bend",
+    "10V while that voice is sounding, dropping for a millisecond when a note retriggers",
+    "The pitch bend of the master channel, -5V at the bottom of the wheel and +5V at the top, on one channel; the same bend is already applied to the pitch output",
+    "Whichever MIDI controller the display above it is set to, as 0V to 10V, smoothed"
+   ],
+   "param": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16,
+    "5": 17,
+    "6": 18,
+    "7": 19,
+    "8": 19,
+    "9": 19,
+    "10": 19,
+    "11": 19,
+    "12": 19,
+    "13": 19,
+    "14": 19
+   },
+   "family": {
+    "out": {
+     "0": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/MIDIpolyMPE.cpp:1281 setChannels(outCh), 1295 and 1361 setVoltage per voice"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/MIDIpolyMPE.cpp:1282 setChannels(outCh); 1298 in MPE, 1364 outpitch + drift in poly"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1283 setChannels(outCh), 1365 naft scaled by 10/127 at 567-569"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1284 setChannels(outCh), 1297 vels scaled by 10/127 at 567-569"
+     },
+     "4": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1285 setChannels(outCh), 1366 rvels scaled by 10/127"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1286 setChannels(outCh), 1296 outgates is 10.f or 0.f"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/MIDIpolyMPE.cpp:1289 one setVoltage, scaled by 5/8192 and 5/8191 at 573-579"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1331 one setVoltage from a value scaled by 10/127"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1331 one setVoltage from a value scaled by 10/127"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1331 one setVoltage from a value scaled by 10/127"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1331 one setVoltage from a value scaled by 10/127"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1331 one setVoltage from a value scaled by 10/127"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1331 one setVoltage from a value scaled by 10/127"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1331 one setVoltage from a value scaled by 10/127"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/MIDIpolyMPE.cpp:1331 one setVoltage from a value scaled by 10/127"
+     }
+    }
+   },
+   "notes": "The three output rows are not in index order: the top row reads pitch, gate and velocity, which are indices 0, 5 and 3, and the row below reads the second pitch, aftertouch and release velocity, indices 1, 2 and 4. The second pitch jack has no family because what it carries depends on the mode: 1V per octave in the polyphonic modes and a controller CV in the MPE ones. configParam is called twice for the data knob (src/MIDIpolyMPE.cpp:190-191) with different ranges; the second call wins, so the knob runs 0 to 1. The names Rack shows on the second pitch, aftertouch, release velocity and the eight controller jacks are rewritten at run time (src/MIDIpolyMPE.cpp:342-349), so the census names are whatever was assigned when it was taken. The module runs its MIDI and output code once every half a millisecond rather than every sample (src/MIDIpolyMPE.cpp:1275)."
   },
   "PolyGlider": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A polyphonic slew limiter that glides each channel from its old value to its new one, with separate rise and fall behaviour",
+    "Note — Nothing is processed until a cable is patched into the signal input; the number of poly channels on that cable is the number everything else uses",
+    "Note — A glide is started by a change in the input value, not by a clock or a gate, and the threshold sets which size of change is glided and which is passed through",
+    "Sets how long a rising glide takes, up to 1 second, or up to 10 seconds with the rise factor switch on",
+    "Sets how long a falling glide takes, up to 1 second, or up to 10 seconds with the fall factor switch on",
+    "Attenuates and inverts the rise time CV, -1 to +1, before it is added to the rise time knob",
+    "Attenuates and inverts the fall time CV, -1 to +1, before it is added to the fall time knob",
+    "Multiplies the rise time by ten",
+    "Multiplies the fall time by ten",
+    "Chooses whether a rising glide always takes the same time whatever the distance, or runs at a constant rate so a bigger jump takes longer",
+    "Chooses whether a falling glide always takes the same time whatever the distance, or runs at a constant rate so a bigger jump takes longer",
+    "Bends the glide curve, a logarithmic sweep at one end of its travel, a straight line at the centre and an exponential one at the other end",
+    "Chooses where a glide starts from: the channel's own output, the output of the poly channel below it, or the voltage at the follow jack, despite the tooltip naming the last two ch16 and ch1",
+    "Sets the size of change that glides: turned towards Over only changes larger than it glide, turned towards Under only changes smaller than it do, and at the centre every change glides",
+    "Sets a window of up to 10 seconds that new input values are measured against, working with the mode switch beside it",
+    "Chooses whether the window is the period after a change during which further changes are ignored, or the only period in which a change is taken",
+    "Passes the input straight through to the output during the part of the window in which changes are ignored, instead of holding the last value",
+    "Added to the rise time knob through the attenuverter beside it, read one value per poly channel",
+    "Added to the fall time knob through the attenuverter beside it, read one value per poly channel",
+    "Added to the slope shape, one value per poly channel, with the total held between 0.0375 and 32; the maker left this jack unnamed, so Rack shows no tooltip for it",
+    "Scales the threshold knob: 0V takes the threshold to zero and 10V gives the knob's full setting, with anything outside that range clamped",
+    "Scales the timeframe knob: 0V takes the window to zero and 10V gives the knob's full setting, with anything outside that range clamped",
+    "A level above 5V on a poly channel snaps that channel's output straight to its input with no glide, so only a note played without a new gate glides",
+    "The voltage a glide starts from when the glide-from switch is set to it, read one value per poly channel",
+    "The signal to be glided; the number of poly channels on this cable sets how many channels the module runs",
+    "10V while that channel is gliding upwards",
+    "10V while that channel is gliding downwards",
+    "The progress of that channel's glide, -5V at the start of a rising glide and +5V at the start of a falling one, reaching 0V as it arrives",
+    "The glided signal, one poly channel for each channel of the input"
+   ],
+   "param": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "8": 11,
+    "9": 12,
+    "10": 13,
+    "11": 14,
+    "12": 15,
+    "13": 16
+   },
+   "in": {
+    "0": 17,
+    "1": 18,
+    "2": 19,
+    "3": 20,
+    "4": 21,
+    "5": 22,
+    "6": 23,
+    "7": 24
+   },
+   "out": {
+    "0": 25,
+    "1": 26,
+    "2": 27,
+    "3": 28
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/PolyGlider.cpp:247, getVoltage(voCh) times the attenuverter, added to the knob and floored at 0"
+     },
+     "1": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/PolyGlider.cpp:252, getVoltage(voCh) times the attenuverter, added to the knob and floored at 0"
+     },
+     "2": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/PolyGlider.cpp:235, clamp(cshape + getVoltage(voCh), 0.0375f, 32.f)"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the threshold knob's own setting",
+      "why": "src/PolyGlider.cpp:181, knob * 0.1f * clamp(getVoltage(), 0.f, 10.f) only when isConnected()"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the timeframe knob's own setting",
+      "why": "src/PolyGlider.cpp:178, knob * 0.1f * clamp(getVoltage(), 0.f, 10.f) only when isConnected()"
+     },
+     "5": {
+      "poly": true,
+      "range": "high above 5V",
+      "why": "src/PolyGlider.cpp:190, getVoltage(voCh) > 5.f, compared per channel"
+     },
+     "6": {
+      "poly": true,
+      "why": "src/PolyGlider.cpp:187, getVoltage(voCh) read per channel as follow[2]"
+     },
+     "7": {
+      "poly": true,
+      "why": "src/PolyGlider.cpp:171-172 getChannels() sets the channel count for the whole module, and process returns when it is zero"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/PolyGlider.cpp:174 setChannels(numCh), 289 from g_risegate, 10.f or 0.f"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/PolyGlider.cpp:176 setChannels(numCh), 290 from g_fallgate, 10.f or 0.f"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/PolyGlider.cpp:175 setChannels(numCh), 291 from 5.f * glide / abs(diff)"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/PolyGlider.cpp:173 setChannels(numCh), 288 the glided input"
+     }
+    }
+   },
+   "notes": "The signal input, the follow input and the signal output carry whatever is patched in, so they are given no family. Input 2, the slope shape CV, is the one jack the maker never named: configInput is never called for SHAPECV_INPUT, so Rack shows an empty tooltip there. The glide-from switch's three choices are configured as Self, ch16 and ch1 (src/PolyGlider.cpp:148) while the panel prints Self, Prev and Ext; the code reads follow[1] as the previous poly channel's output and follow[2] as the follow jack, so the panel is right and the tooltip is stale. With nothing in the signal input, process returns at line 172 before any output is written, so every jack holds whatever it last carried. The threshold and timeframe CVs scale their knobs rather than adding to them."
   },
   "Kn8b": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight knobs that make a poly cable of fixed voltages, or attenuate, invert and offset a poly input, with a voltage controlled amplifier mode",
+    "Note — The eight knobs cover eight channels at a time; the page button swaps them between channels 1 to 8 and channels 9 to 16",
+    "Note — Each channel's display can be clicked in three places: the top line sets the output's channel count to that channel, the middle line flips that channel between adding and multiplying",
+    "Note — The lower line of a channel's display flips that one channel between unipolar and bipolar",
+    "Note — With nothing patched into the output the displays preview the values without sending anything",
+    "Sets that channel's value, reading -5V to +5V on a bipolar channel and 0V to 10V on a unipolar one; in the amplifier mode it scales that channel's control voltage instead",
+    "Trims every channel at once: in the multiply mode it scales them from full inversion through silence to full level, and in the add mode it shifts them by up to 5V either way",
+    "Swaps the eight knobs between channels 1 to 8 and channels 9 to 16",
+    "Switches to the amplifier mode, where the output is the input multiplied by the control voltage, scaled by the knobs and the main knob and clamped to ±5V",
+    "Sets every channel on the current page to unipolar, so its knob runs from 0V to 10V",
+    "Sets every channel on the current page to bipolar, so its knob runs from -5V to +5V",
+    "Sets every channel on the current page to add its knob to the input",
+    "Sets every channel on the current page to multiply the input by its knob",
+    "Chooses whether the main knob multiplies every channel or adds a voltage to it",
+    "The signal to be attenuated, inverted or offset, one poly channel per knob; with nothing patched, the knobs give their voltages on their own",
+    "Added to the knobs a tenth of a turn per volt, one poly channel per knob; a cable with fewer channels than the output has is wrapped round and reused",
+    "Scales the main knob, a tenth per volt, on one channel only",
+    "The result, one poly channel per channel the module is set to, clamped to that channel's own range",
+    "Menu — Processing rate: sample, 1 ms — chooses whether the knobs and CV are read every sample or every millisecond; the amplifier mode always runs every sample"
+   ],
+   "param": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 6,
+    "9": 7,
+    "10": 8,
+    "11": 9,
+    "12": 10,
+    "13": 11,
+    "14": 12,
+    "15": 13
+   },
+   "in": {
+    "0": 14,
+    "1": 15,
+    "2": 16
+   },
+   "out": {
+    "0": 17
+   },
+   "family": {
+    "in": {
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "src/Kn8b.cpp:220 and 193, getChannels() bounds the per-channel loops"
+     },
+     "1": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Kn8b.cpp:313-316, getChannels() then getVoltage(i % numCvIn) * 0.1f added to the knob"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Kn8b.cpp:311, a single getVoltage() * 0.1f"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Kn8b.cpp:216 setChannels(numOutCh), with a voltage written per channel"
+     }
+    }
+   },
+   "notes": "The main input and the output carry whatever is patched in, so neither is given a family. The main knob's mode switch is configured with the choices Trim and Scale (src/Kn8b.cpp:149); in the code Trim adds five times the knob as an offset and Scale multiplies by it, which is what the times and plus signs printed beside the knob show. The channel count, the per-channel polarity and the per-channel operation are set by clicking zones of each channel's display (src/Kn8b.cpp:716-736), which are not ParamWidgets and so cannot be clicked for help. In the amplifier mode the module runs every sample; otherwise it runs at the rate chosen in the menu. configBypass wires the input straight to the output."
   },
   "Xpand": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander that carries the extra voices, or a duplicate set of outputs, from a MIDI Poly and MPE module",
+    "Note — It gives out nothing until a MIDIpolyMPE module in the patch has its xpander field set to the letter shown at the top of this panel; the two do not have to be next to one another",
+    "Note — Click the letters at the top to choose which of the four expander slots this module takes",
+    "Note — The xpander field on the MIDIpolyMPE also chooses how it is used: carrying the voices above that module's own count, or repeating every voice's outputs here",
+    "The pitch of each voice this expander carries, at 1V per octave, one poly channel per voice",
+    "10V while the voice this expander carries is sounding, one poly channel per voice",
+    "The note-on velocity of each voice this expander carries, 0V to 10V",
+    "A second copy of each voice's pitch, offset by the random detune amount set on the MIDIpolyMPE",
+    "The per-note aftertouch of each voice this expander carries, 0V to 10V",
+    "The note-off velocity of each voice this expander carries, 0V to 10V"
+   ],
+   "out": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "5": 9
+   },
+   "family": {
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv",
+     "3": "pitch",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Xpand.cpp:79-84 setChannels from the voice count the MIDIpolyMPE published, then one voltage per voice at 86-92"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/Xpand.cpp:79-84 setChannels from the voice count the MIDIpolyMPE published, then one voltage per voice at 86-92"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/Xpand.cpp:79-84 setChannels from the voice count the MIDIpolyMPE published, then one voltage per voice at 86-92"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/Xpand.cpp:79-84 setChannels from the voice count the MIDIpolyMPE published, then one voltage per voice at 86-92"
+     },
+     "4": {
+      "poly": true,
+      "why": "src/Xpand.cpp:79-84 setChannels from the voice count the MIDIpolyMPE published, then one voltage per voice at 86-92"
+     },
+     "5": {
+      "poly": true,
+      "why": "src/Xpand.cpp:79-84 setChannels from the voice count the MIDIpolyMPE published, then one voltage per voice at 86-92"
+     }
+    }
+   },
+   "notes": "Only the first output is named: configOutput is called once, for XP_OUTPUT (src/Xpand.cpp:47), so the other five jacks show an empty tooltip in Rack. The panel prints 1V/Oct, Gate, Vel, 1V/O:Det, NoteAfT and RelVel down the column, and the enum order matches that order exactly. The link to the MIDIpolyMPE is a shared static table keyed by the letter A to D (src/moDllzComp.hpp:295-306), not Rack's expander mechanism, so the two modules can be anywhere in the patch."
   }
  }
 }

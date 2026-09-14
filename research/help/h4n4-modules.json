@@ -2,12 +2,108 @@
  "plugin": "h4n4-modules",
  "source": "https://github.com/hannakoppelaar/h4n4-modules",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "xen-qnt": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A polyphonic quantizer for any tuning a Scala file can describe, with a grid of 36 buttons choosing which steps of that tuning may be played",
+    "Switches its own step of the loaded tuning on or off; a step switched off is never played, and a button past the end of the tuning does nothing",
+    "Switches steps on and off from a cable: every step is switched off, then each channel of the signal here switches on the one step its voltage maps to",
+    "The pitches to be quantised, 1V per octave, up to sixteen channels",
+    "Each channel of the pitch input moved onto a step of the tuning that is switched on, 1V per octave, by whichever of the three mapping modes is chosen",
+    "Note — the module comes up as plain twelve-note equal temperament with every note switched on. Right-click, open Change tuning and load a Scala file for anything else.",
+    "Note — the buttons run in reading order, three to a row. The first is the root of the tuning, and the rest follow in the order the Scala file lists them.",
+    "Note — a button lit bright red is a step switched on and a dim red one a step switched off. Orange marks a step being quantised to. Buttons past the end of the tuning stay dark.",
+    "Note — while a cable is in the cv jack the buttons are overridden and only the steps that cable names are on. Pulling the cable out brings back the selection that was there before it went in.",
+    "Note — 0V comes out as 0V in all three mapping modes.",
+    "Note — the tuning is built out only from -4V to 6V, about 16Hz to 17kHz with 0V at middle C. A pitch outside that is quantised to whichever end it is nearest.",
+    "Note — a failed Scala file makes the top button blink red four times, and the tuning that was loaded stays in use.",
+    "Note — bypassing the module passes the pitch input straight to the output.",
+    "Menu — Tuning: — a label naming the tuning in use, which reads 12-EDO until a Scala file is loaded",
+    "Menu — Change tuning — opens the last ten Scala files loaded by any copy of this module, plus Load scala file for picking a new one",
+    "Menu — Load scala file — inside Change tuning, opens a file chooser and makes the chosen Scala file the tuning",
+    "Menu — Disable all notes — switches every step of the tuning off",
+    "Menu — Enable all notes — switches every step of the tuning on",
+    "Menu — Mapping mode main: Proximity, Proportional, 12-EDO input — how the pitch input is mapped: to the nearest step that is on, to steps given equal slices of the range, or semitone by semitone",
+    "Menu — Mapping mode CV: Proximity, Proportional, 12-EDO input — the same three mappings, for the voltages at the cv jack that pick which steps are on"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 1,
+    "17": 1,
+    "18": 1,
+    "19": 1,
+    "20": 1,
+    "21": 1,
+    "22": 1,
+    "23": 1,
+    "24": 1,
+    "25": 1,
+    "26": 1,
+    "27": 1,
+    "28": 1,
+    "29": 1,
+    "30": 1,
+    "31": 1,
+    "32": 1,
+    "33": 1,
+    "34": 1,
+    "35": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "XenQnt.cpp:179 calls getChannels and line 182 reads getVoltage(i) for each channel; line 188 switches on the step each voltage maps to through getCvPitch"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "XenQnt.cpp:245 calls getChannels and line 251 reads getVoltage(i) for each channel; updateTuning at line 505 builds steps from -4V to 6V, so a voltage outside that is taken to the nearest end"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "XenQnt.cpp:252 writes one voltage per channel and line 257 calls setChannels with the pitch input's channel count"
+     }
+    }
+   },
+   "notes": "Source read at commit 17ed896, the merge that is the tip of the installed 2.3.0; the only other 2.3.0 commit, 039099c, has a byte-identical src/ tree, and the next commit bumps to 2.3.1. All four installed res/ SVGs hash to the blobs at that commit. The maker named the CV input CV and the output 1 V/oct but called configInput on the pitch input with an empty string, so that jack shows a blank tooltip; the panel prints cv beside the CV jack and nothing beside the other two. THE FIRST BUTTON IS THE LAST LINE OF THE SCALA FILE. scaleToLightIdx at line 268 maps scale index i to button (i + 1) modulo the scale size, because a Scala file's last value is the period rather than a step within it; for twelve-note equal temperament that puts 1200 cents on the first button and 100 cents on the second. THE CV JACK TAKES THE BUTTONS OVER WHILE IT IS PATCHED. Line 174 saves the current selection into backupScale on the sample the cable goes in, line 185 clears every step and lines 186-189 switch on only the ones the cable names, and line 197 restores the saved selection when the cable comes out. The buttons can still be clicked but the next CV scan, once a millisecond, overwrites them. The list of recent Scala files is written to H4N4.json in Rack's user directory and is shared by every instance of the module, which is what commit 5364f01 was about; at 2.3.0 the list is loaded once in the constructor. All 36 buttons have ParamWidgets at distinct positions, so all 36 can be clicked for help."
   }
  }
 }

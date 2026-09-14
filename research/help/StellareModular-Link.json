@@ -1,18 +1,114 @@
 {
  "plugin": "StellareModular-Link",
- "source": "https://github.com/stellare-modular/vcv-link",
+ "source": "https://github.com/stellare-modular/vcv-link/blob/master/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Link": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Takes its tempo and bar position from an Ableton Link session on the local network and puts out two clocks and a bar reset from it",
+    "Shifts the whole clock early or late by up to five thirty-seconds of a beat, to make up for the delay a Link connection adds; it is centred on no shift",
+    "Delays every second sixteenth of the beat by up to three thirty-seconds of a beat, which is what turns a straight clock into a shuffled one, despite the maker's README calling it swing",
+    "Hold it and all three outputs drop to 0V; they come back at the start of the next bar, in step with the session again, and the lamp beside it is lit while the module is waiting for that bar",
+    "Eighth notes: a pulse twice a beat, 10V high and half the time low",
+    "Sixteenth notes: a pulse four times a beat, 10V high and half the time low, and the one the shuffle knob acts on",
+    "A 10V pulse a sixteenth of a beat long at the start of every bar",
+    "Note — this module has no inputs; the clock comes from the network. Any Link-enabled program on the same LAN or wireless network, another copy of Rack included, joins the session and shares its tempo",
+    "Note — with no other Link peer anywhere on the network the session runs on its own at 120BPM, and the outputs follow that",
+    "Note — a bar is taken as four beats whatever the session's own time signature, so the reset fires once every four beats",
+    "Note — both modules in this plugin share one connection to the network, so a second one joins the session the first one is already in"
+   ],
+   "param": {
+    "1": 1,
+    "2": 2,
+    "0": 3
+   },
+   "out": {
+    "2": 4,
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Link.cpp:141 writes 10.0 or 0.0 with setVoltage and never calls setChannels; the high half is ticks 0 to 3 of each group of 8, and a tick is a thirty-second of a beat"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Link.cpp:150 writes 10.0 for the first 2 of the 128 ticks in a bar and 0.0 otherwise, with no setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Link.cpp:145 writes 10.0 or 0.0 with setVoltage and never calls setChannels; the high half is ticks 0 to 7 of each group of 16"
+     }
+    }
+   },
+   "notes": "Source read at commit a5a5bc2, the repository head, whose plugin.json is byte-identical to the installed one and whose res files all match byte for byte; the only commit that changed plugin.json to 2.1.0 is 18dc18c, and nothing in src or res has changed between that and the head. THE PLUGIN IS NOT ABOUT NEIGHBOURING MODULES AT ALL. Link here means Ableton Link, the network tempo protocol: LinkPeer.cpp creates a single ableton::Link at 120BPM, enables it and enables start-stop sync, shared by every Link and Link v2 module in the patch through a reference count. Nothing about the module depends on what sits beside it in the rack. The internal grid is 32 ticks to a beat and 128 to a bar, with the bar fixed at four beats regardless of what the session reports. Offset is a knob of -1 to +1 scaled to five ticks either way; shuffle is 0 to 1 scaled to three ticks and applied only while the tick is in the second half of each eight-tick group, which delays every other sixteenth. The maker's README says the swing has no effect on the /2 output; that is right about its rising edges, but the shuffle does move the falling edge of /2 because that edge sits on tick 8, where the shuffle window starts. The RESYNC button is momentary and is read as a level rather than an edge: while it is held the module reports itself out of sync, which mutes all three outputs, and it only resumes when the tick reaches 0 at the top of a bar. The lamp above RESYNC is lit while the module is NOT in sync, which is the opposite of what a lamp beside a sync button usually means. The panel prints SHUFFLE where the README says swing and the parameter is called SWING_PARAM. No parameter, input or output in this plugin is given a name, so Rack's hover tooltips are blank throughout. The widget adds no context menu of its own."
   },
   "Link2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Takes its tempo and bar position from an Ableton Link session on the local network and puts out one clock at a chosen division, a bar reset, and the session tempo as a voltage",
+    "Shifts the whole clock early or late by up to five thirty-seconds of a beat, to make up for the delay a Link connection adds; it is centred on no shift",
+    "Delays every second sixteenth of the beat by up to three thirty-seconds of a beat, which is what turns a straight clock into a shuffled one, despite the maker's README calling it swing",
+    "Steps between five clock rates, marked 4, 2, 1, 1/2 and 1/4 for the number of beats in one clock period; it snaps to those five and starts on 1, a pulse every beat",
+    "Hold it and the clock and reset outputs drop to 0V; they come back at the start of the next bar, in step with the session again, and the lamp beside it is lit while the module is waiting for that bar",
+    "The session tempo as a voltage, 0V for 120BPM and a volt for every doubling, so 60BPM is -1V and 240BPM is +1V",
+    "A 10V pulse a sixteenth of a beat long, repeating at the rate the CLOCK knob sets; the pulse stays that short whatever the rate, so a slow setting gives a short blip rather than a square wave",
+    "A 10V pulse a sixteenth of a beat long at the start of every bar",
+    "Note — this module has no inputs; the clock comes from the network. Any Link-enabled program on the same LAN or wireless network, another copy of Rack included, joins the session and shares its tempo",
+    "Note — with no other Link peer anywhere on the network the session runs on its own at 120BPM, and the outputs follow that",
+    "Note — a bar is taken as four beats whatever the session's own time signature, so the reset fires once every four beats",
+    "Note — both modules in this plugin share one connection to the network, so a second one joins the session the first one is already in",
+    "Menu — Enable Link Start/Stop — makes the clock and reset outputs stop when the Link session is stopped and rejoin at the top of a bar when it plays; it comes up off, so the module runs either way"
+   ],
+   "param": {
+    "1": 1,
+    "3": 2,
+    "2": 3,
+    "0": 4
+   },
+   "out": {
+    "3": 5,
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Link2.cpp:195 writes 10.0 for the first 2 ticks of each period and 0.0 otherwise, with no setChannels; the period comes from the switch at line 169 and is 128, 64, 32, 16 or 8 ticks"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Link2.cpp:203 writes 10.0 for the first 2 of the 128 ticks in a bar and 0.0 otherwise, with no setChannels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Link2.cpp:206 writes log2f(tempo / 120) into outputs[BPM_OUTPUT].value, one channel, with no setChannels; tempo comes from the Link session state at line 125"
+     }
+    }
+   },
+   "notes": "Source read at commit a5a5bc2, the repository head, whose plugin.json is byte-identical to the installed one and whose res files all match byte for byte. Link here means Ableton Link, the network tempo protocol, not a connection between neighbouring modules; LinkPeer.cpp holds one shared ableton::Link for the whole plugin. FOUR THINGS THE PANEL DOES NOT SHOW. First, the module declares a second clock output, CLOCK_OUTPUT_2ND, which the code writes 0V into on every tick but for which Link2Widget adds no PortWidget, so no cable and no click can reach it; it is left untagged and unwritten here. Second, the code comment at Link2.cpp:194 says the clock has 50% PWM but the expression is (tick % period) < 2, a fixed pulse of two ticks, a sixteenth of a beat, at every rate. Third, the BPM output is written only inside the branch that runs when the module is in sync and playing, so on a resync or a Link stop it holds its last value rather than falling to 0V. Fourth, the RATIO knob is snapped 0 to 4 with a default of 2, which is the 1 mark, one pulse per beat. Offset, shuffle and the tick grid are identical to the older Link module: 32 ticks to a beat, 128 to a bar, a bar fixed at four beats, offset scaled to five ticks either way and shuffle to three, applied only in the second half of each eight-tick group. The RESYNC button is momentary and read as a level: while held the module is out of sync and all its pulse outputs are muted until the tick reaches 0 at the top of a bar, and the lamp above it is lit while it is NOT in sync. The panel prints SHUFFLE where the README says swing. No parameter or output is given a name, so Rack's hover tooltips are blank throughout."
   }
  }
 }

@@ -1,73 +1,1054 @@
 {
  "plugin": "OuroborosModules",
- "source": "https://github.com/Doom2fan/OuroborosModules",
+ "source": "https://github.com/Doom2fan/OuroborosModules/wiki",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "MetaModule": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Passes stereo audio through while adding the plugin's meta features to Rack: the click of a cable being plugged in or pulled out, and a brief mute when a patch is opened",
+    "The left audio to pass through",
+    "The right audio to pass through; with no cable it takes the left input",
+    "The left audio with the cable sounds mixed into it",
+    "The right audio with the cable sounds mixed into it",
+    "Menu — Pre-muter settings — a slider setting how long the audio is held silent after a patch is opened",
+    "Note — the module has no controls on its panel at all; everything it does is set from the right-click menu or from the plugin's settings",
+    "Note — patch the signal that would have gone to an audio output module through this one, then take its outputs to that audio module; the cable sounds are mixed in on the way",
+    "Note — the cable glow and cable light options, and the sounds themselves, are in the plugin settings submenu rather than on this module's own menu",
+    "Note — both jacks are monophonic, whatever is patched in"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "Audio.cpp:42 reads this input with getVoltage(), which is channel 1 alone, and uses 0V when it is unconnected"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "Left",
+      "why": "Audio.cpp:43 reads this input with getVoltage() and falls back to the left input when it is unconnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Audio.cpp:49 writes channel 1 alone and the module never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "Audio.cpp:50 writes channel 1 alone and the module never calls setChannels"
+     }
+    }
+   },
+   "notes": "Read from src/Meta at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Meta as it stood on 2026-08-29. The wiki calls the module menu item Premuter length; the code labels the section Pre-muter settings and puts an unnamed slider under it (Widget.cpp:125). The wiki's Global settings list is the plugin settings submenu, which Widget.cpp:132 builds separately from the module's own menu."
   },
   "CableColorModule": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Cable colour manager: it holds a list of named colours with key mappings, sets the colour the next cable will be drawn in, and can replace colours across the whole patch",
+    "Note — the module has no jacks and no knobs; the whole of it is the colour list on the panel, which is a display rather than a control, so nothing on it can be clicked for a help line",
+    "Note — clicking a colour in the list selects it for the next cable; right-clicking one opens its own menu, where it can be renamed, recoloured or given a key mapping",
+    "Note — the colour list is stored with the patch, while collections of lists are stored with the plugin and can be recalled from the Collections menu",
+    "Menu — Replace patch cable colors — swaps one colour for another across every cable in the patch, or replaces them all at once, with an option to pick at random from the list",
+    "Menu — Collections — saves and recalls whole colour lists, sets which one new copies of the module start with, and resets the saved list back to the one the plugin ships",
+    "Menu — Add new color — adds a colour to the end of the list",
+    "Menu — Delete all colors — empties the list",
+    "Menu — Emblem location — overrides the plugin-wide setting for where this module's emblem is drawn",
+    "Menu — Color list glows in the dark — overrides the plugin-wide setting for whether the list stays lit when the room lights are off"
+   ],
+   "notes": "Read from src/Chroma at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Chroma. The module declares no parameters, inputs or outputs at all, so there is nothing to tag and no props to give. Its behaviour lives in a display widget and in the plugin settings menu. The wiki's Global settings section lists the key mappings, the latch-colour option and the port hover mode, which are all in the plugin settings submenu rather than on the module's own menu."
   },
   "StereoVCAModule": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo voltage-controlled amplifier built on the Fundamental VCA, with one level control and one CV jack acting on both channels",
+    "Sets the gain applied to both channels, 0 to 1",
+    "Switches the CV response between exponential and linear; on exponential the control voltage is raised to the fourth power",
+    "Scales the gain, 0V for silence and 10V for the full setting of the level slider; voltages outside that are clamped",
+    "The left audio input",
+    "The right audio input",
+    "The left audio input at the set gain",
+    "The right audio input at the set gain",
+    "Note — the channel count of every output is the largest of the two audio inputs and the CV input, so a polyphonic CV alone will make the outputs polyphonic",
+    "Note — with no cable in the CV jack the level control acts on its own; the CV only multiplies it when something is patched"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "2": 3,
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "why": "STVCA.cpp:68 takes this input's channel count and STVCA.cpp:86 reads it with getPolyVoltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "why": "STVCA.cpp:69 takes this input's channel count and STVCA.cpp:87 reads it with getPolyVoltage per channel"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "the level slider alone",
+      "why": "STVCA.cpp:70 takes this input's channel count; STVCA.cpp:77 reads it with getPolyVoltage, divides by 10 and clamps to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "STVCA.cpp:100 sets this output's channel count from the largest of the three inputs"
+     },
+     "1": {
+      "poly": true,
+      "why": "STVCA.cpp:101 sets this output's channel count from the largest of the three inputs"
+     }
+    }
+   },
+   "notes": "Read from src/STVCA at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for ST-VCA. The wiki says only that it works like the Fundamental VCA in stereo, which the code bears out. The EXP switch's hover text reads Response mode with the choices Exponential and Linear (STVCA.cpp:34) and the exponential curve is the control voltage to the fourth power (STVCA.cpp:80). The level control is a slider drawn inside the display area rather than a knob."
   },
   "BernoulliGates": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight Bernoulli gates: each takes a trigger and sends it at random to one of two outputs, with the odds set by a knob and four ways of deciding what the random choice does",
+    "Sets the odds for its row, fully counter-clockwise always choosing output A and fully clockwise always choosing output B",
+    "Attenuates and inverts its row's probability jack, -1 to 1, before that voltage is added to the probability knob",
+    "Chooses what its row does with the random choice: Normal picks an output outright, Toggle turns it into a swap or a stay, Latch holds the choice on without a gate, Toggle latch does both",
+    "A rise past 2V makes its row choose again; with no cable the row follows the nearest trigger jack above it that has one",
+    "Divided by 10, scaled by its attenuverter and added to its row's probability knob",
+    "10V while its row's choice has fallen on A, and 0V otherwise; in the two modes that are not latched it is also 0V while the trigger input is low",
+    "10V while its row's choice has fallen on B, and 0V otherwise; in the two modes that are not latched it is also 0V while the trigger input is low",
+    "Menu — Randomize probabilities — sets whether Rack's own Randomize moves the eight probability knobs",
+    "Menu — Randomize probability CV attenuators — sets whether Rack's own Randomize moves the eight attenuverters",
+    "Menu — Randomize modes — sets whether Rack's own Randomize moves the eight mode selectors",
+    "Note — on the two latch modes the chosen output stays high with no gate at the trigger input, so the module puts out a steady voltage rather than a gate",
+    "Note — the trigger jacks are normalled from the top down, so one cable in the first row drives every row below it that has no cable of its own",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "16": 3,
+    "17": 3,
+    "18": 3,
+    "19": 3,
+    "20": 3,
+    "21": 3,
+    "22": 3,
+    "23": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 5,
+    "9": 5,
+    "10": 5,
+    "11": 5,
+    "12": 5,
+    "13": 5,
+    "14": 5,
+    "15": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 7,
+    "9": 7,
+    "10": 7,
+    "11": 7,
+    "12": 7,
+    "13": 7,
+    "14": 7,
+    "15": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger"
+    }
+   },
+   "notes": "Read from src/Bernoulli at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Bernoulli. The trigger threshold is 2V rising and 0.1V falling, from Constants.hpp:147 and 148. The gate outputs are 10V, from the boolToGate macro at Utils.hpp:28. The normalling walks down from the last connected trigger jack (Bernoulli.cpp:171), so a gap in the middle of the column is filled from above rather than skipped. Every jack is read with getVoltage and written without setChannels, so the module is monophonic throughout even though its outputs could carry more."
   },
   "Median": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three-element voltage sorter: it takes three voltages and puts out the smallest, the middle one and the largest, each with its own attenuverter and offset on the way in",
+    "Attenuates and inverts its input, -1 to 1, before the offset is added",
+    "Adds a fixed voltage to its input after the attenuverter, -10V to 10V",
+    "One of the three voltages to sort; it is scaled, offset and then clamped to -10V and 10V",
+    "The largest of the three voltages at that moment",
+    "The middle one of the three voltages at that moment",
+    "The smallest of the three voltages at that moment",
+    "Menu — Oversampling: Off, 2x, 4x, 8x, 16x — runs the sorting above the sample rate to keep the corners from aliasing, which costs processor time and is only worth it on audio",
+    "Note — the three voltages cross over each other as they rise and fall, so on audio the outputs are the input waves cut into layers rather than three copies of one wave",
+    "Note — the channel count of all three outputs is the largest of the three inputs, and an input with fewer channels has its last channel used for the rest",
+    "Note — all three outputs go quiet and the lamps clear whenever none of the three has a cable, which saves the work of sorting nothing"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 2,
+    "4": 2,
+    "5": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3
+   },
+   "out": {
+    "2": 4,
+    "1": 5,
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "Median.cpp:117 takes this input's channel count and Median.cpp:60 reads it with getPolyVoltageSimd; Median.cpp:148 clamps the scaled and offset value to ±10V"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "Median.cpp:118 takes this input's channel count and Median.cpp:60 reads it with getPolyVoltageSimd; Median.cpp:149 clamps the scaled and offset value to ±10V"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "Median.cpp:118 takes this input's channel count and Median.cpp:60 reads it with getPolyVoltageSimd; Median.cpp:150 clamps the scaled and offset value to ±10V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "why": "Median.cpp:125 sets this output's channel count from the largest of the three inputs; the sorted values are clamped to ±10V at Median.cpp:148"
+     },
+     "1": {
+      "poly": true,
+      "range": "±10V",
+      "why": "Median.cpp:126 sets this output's channel count from the largest of the three inputs; the sorted values are clamped to ±10V at Median.cpp:149"
+     },
+     "2": {
+      "poly": true,
+      "range": "±10V",
+      "why": "Median.cpp:127 sets this output's channel count from the largest of the three inputs; the sorted values are clamped to ±10V at Median.cpp:150"
+     }
+    }
+   },
+   "notes": "Read from src/Median at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Median. The wiki says that used polyphonically the outputs take the polyphony of the input with the fewest channels; Median.cpp:116 to 119 take the largest of the three instead, and getPolyVoltageSimd repeats an input's last channel for the rest. The Oversample parameter is declared with no widget (Median.cpp:36), so no click can reach it; it appears on the context menu. The three values are clamped to ±10V after the attenuverter and offset and before they are sorted (Median.cpp:148 to 150)."
   },
   "Junction": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Switched multiple: eight inputs, each sent to output A, output B or nowhere by its own three-position knob, with everything routed to the same output added together",
+    "Sends its input to output A when turned left, to output B when turned right, and nowhere when centred",
+    "One of the eight signals to route; with no cable the switch beside it does nothing",
+    "The sum of every input routed to A, clamped to -10V and 10V, or 0V if nothing is routed there",
+    "The sum of every input routed to B, clamped to -10V and 10V, or 0V if nothing is routed there",
+    "Menu — Determine polyphony from selected inputs — takes each output's channel count from the inputs routed to it rather than from the largest of all eight",
+    "Menu — Clamp while summing — clamps after every input is added rather than only once at the end, which changes what a pair of large opposite voltages comes out as",
+    "Note — a channel that one input does not carry counts as 0V in the sum rather than repeating that input's last channel",
+    "Note — the eight rows have no printed labels; each knob acts on the jack beside it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Junction.cpp:80 takes this input's channel count and Junction.cpp:118 reads it with getVoltageSimd; what it carries is whatever is patched, so it is given no family"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Junction.cpp:80 takes this input's channel count and Junction.cpp:118 reads it with getVoltageSimd"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Junction.cpp:80 takes this input's channel count and Junction.cpp:118 reads it with getVoltageSimd"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Junction.cpp:80 takes this input's channel count and Junction.cpp:118 reads it with getVoltageSimd"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Junction.cpp:80 takes this input's channel count and Junction.cpp:118 reads it with getVoltageSimd"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Junction.cpp:80 takes this input's channel count and Junction.cpp:118 reads it with getVoltageSimd"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Junction.cpp:80 takes this input's channel count and Junction.cpp:118 reads it with getVoltageSimd"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Junction.cpp:80 takes this input's channel count and Junction.cpp:118 reads it with getVoltageSimd"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "why": "Junction.cpp:87 sets this output's channel count; Junction.cpp:122 clamps the running sum to ±10V"
+     },
+     "1": {
+      "poly": true,
+      "range": "±10V",
+      "why": "Junction.cpp:87 sets this output's channel count; Junction.cpp:122 clamps the running sum to ±10V"
+     }
+    }
+   },
+   "notes": "Read from src/Junction at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Junction. The wiki does not mention the Clamp while summing menu item (Widget.cpp:78), which decides whether the ±10V clamp is applied after each input is added or only once after the last; with it off, two inputs well past 5V can cancel rather than clip. Channels that an input does not carry are masked to zero (Junction.cpp:120) rather than repeating its last channel. The jacks and outputs carry whatever is patched into them, so they are given no family."
   },
   "Branch": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Switched multiple: two inputs sent out to eight destinations, each destination taking input A, input B or nothing according to its own three-position knob",
+    "Sends input A to its destination when turned left, input B when turned right, and 0V when centred",
+    "One of the two signals the eight destinations choose between",
+    "Whatever its knob has chosen, or 0V when that knob is centred",
+    "Menu — Determine polyphony from selected source — takes each destination's channel count from the input routed to it rather than from the larger of the two",
+    "Note — a destination with no cable is skipped altogether, so nothing is worked out for it",
+    "Note — the eight rows have no printed labels; each knob acts on the jack beside it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Branch.cpp:60 takes this input's channel count and Branch.cpp:72 copies its voltages out; what it carries is whatever is patched, so it is given no family"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Branch.cpp:60 takes this input's channel count and Branch.cpp:72 copies its voltages out"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Branch.cpp:79 sets this output's channel count from the larger of the two inputs, or from the routed one on the menu setting"
+     },
+     "1": {
+      "poly": true,
+      "why": "Branch.cpp:79 sets this output's channel count from the larger of the two inputs, or from the routed one on the menu setting"
+     },
+     "2": {
+      "poly": true,
+      "why": "Branch.cpp:79 sets this output's channel count from the larger of the two inputs, or from the routed one on the menu setting"
+     },
+     "3": {
+      "poly": true,
+      "why": "Branch.cpp:79 sets this output's channel count from the larger of the two inputs, or from the routed one on the menu setting"
+     },
+     "4": {
+      "poly": true,
+      "why": "Branch.cpp:79 sets this output's channel count from the larger of the two inputs, or from the routed one on the menu setting"
+     },
+     "5": {
+      "poly": true,
+      "why": "Branch.cpp:79 sets this output's channel count from the larger of the two inputs, or from the routed one on the menu setting"
+     },
+     "6": {
+      "poly": true,
+      "why": "Branch.cpp:79 sets this output's channel count from the larger of the two inputs, or from the routed one on the menu setting"
+     },
+     "7": {
+      "poly": true,
+      "why": "Branch.cpp:79 sets this output's channel count from the larger of the two inputs, or from the routed one on the menu setting"
+     }
+    }
+   },
+   "notes": "Read from src/Branch at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Branch, which matches the code. A destination with no cable is skipped before anything is worked out for it (Branch.cpp:66), and a centred knob writes zeroes across every channel (Branch.cpp:75). The jacks carry whatever is patched into them, so they are given no family."
   },
   "Automata": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sequencer built on Conway's Game of Life: a 32 by 20 wrapping board is stepped by a clock, and marked cells on it drive eight trigger outputs, with other Life-like rules available",
+    "Advances the simulation by one step",
+    "Returns the board to the seed, or randomises it if the menu says so",
+    "Sets how many steps run before the board resets itself, 1 to 64",
+    "Turns the automatic reset on and off",
+    "Randomises the board's current state without changing the seed",
+    "Sets how full a randomised board is, 0 to 1",
+    "Chooses what clicking the display does: Play ignores clicks, Edit seed draws the starting board, and the eight remaining positions each mark cells for one trigger set",
+    "Attenuates and inverts the LEN CV jack, -1 to 1, before that voltage is added to the length knob",
+    "Attenuates and inverts the RND % CV jack, -1 to 1, before that voltage is added to the density knob",
+    "A rise past 2V advances the simulation by one step",
+    "A rise past 2V returns the board to the seed, or randomises it if the menu says so",
+    "A rise past 2V turns the automatic reset on and off; the menu can make it a plain gate instead, on while the voltage is high",
+    "Divided by 10, multiplied by 64 and by its attenuverter, then added to the length knob, the total clamped to 1 and 64",
+    "Divided by 10, scaled by its attenuverter and added to the density knob",
+    "A rise past 2V randomises the board's current state without changing the seed",
+    "Its trigger set: a 10V pulse whenever any cell marked for that set becomes active, or a voltage from 0V to 10V for the share of that set's cells that are active, depending on the menu",
+    "A 10V pulse when the automatic reset length is reached",
+    "Menu — Rule options — edits the birth and survival rule the simulation runs, with a list of the common Life-like rules to pick from",
+    "Menu — Trigger set options — per set: whether a marked cell counts while alive or only on the step it is born, whether its jack sends a trigger or a percentage, and a way to clear its marks",
+    "Menu — Randomize on manual reset — makes the reset button and jack randomise the board instead of returning it to the seed",
+    "Menu — Randomize on automatic reset — makes the automatic reset randomise the board instead of returning it to the seed",
+    "Menu — Momentary length enable input — makes the LEN TGL jack a plain gate rather than a toggle",
+    "Note — the board is drawn on the display and edited by clicking it, which does nothing until the MODE knob is off Play; the display is not a control, so clicking it reaches no help line",
+    "Note — the trigger sets work by marking cells as watch points; a set with no marked cells never puts anything out",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "6": 3,
+    "5": 4,
+    "2": 5,
+    "3": 6,
+    "8": 7,
+    "7": 8,
+    "4": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "4": 12,
+    "5": 13,
+    "2": 14,
+    "3": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 16,
+    "2": 16,
+    "3": 16,
+    "4": 16,
+    "5": 16,
+    "6": 16,
+    "7": 16,
+    "8": 17
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv"
+    },
+    "out": {
+     "8": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "Automata.cpp:164 reads this input with getVoltage() into a Schmitt trigger set to 0.1V and 2V by Constants.hpp:147 and 148"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "Automata.cpp:134 reads this input with getVoltage() into a Schmitt trigger set to 0.1V and 2V"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Automata.cpp:223 reads this input with getVoltage(), divides it by 10 and scales it by the attenuverter before adding the knob"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "Automata.cpp:143 reads this input with getVoltage() into a Schmitt trigger set to 0.1V and 2V"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "Automata.cpp:152 reads this input with getVoltage() into a Schmitt trigger set to 0.1V and 2V; Automata.cpp:154 also reads its level for the momentary setting"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "sumRange": "1 to 64V",
+      "normal": "0V",
+      "why": "Automata.cpp:170 reads this input with getVoltage(), divides it by 10, multiplies by 64 and the attenuverter, and clamps the total to 1 and 64"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Automata.cpp:201 writes channel 1 alone, either the 10V of the boolToGate macro or a percentage scaled onto 0V to 10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Automata.cpp:201 writes channel 1 alone, either the 10V of the boolToGate macro or a percentage scaled onto 0V to 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Automata.cpp:201 writes channel 1 alone, either the 10V of the boolToGate macro or a percentage scaled onto 0V to 10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Automata.cpp:201 writes channel 1 alone, either the 10V of the boolToGate macro or a percentage scaled onto 0V to 10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Automata.cpp:201 writes channel 1 alone, either the 10V of the boolToGate macro or a percentage scaled onto 0V to 10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Automata.cpp:201 writes channel 1 alone, either the 10V of the boolToGate macro or a percentage scaled onto 0V to 10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Automata.cpp:201 writes channel 1 alone, either the 10V of the boolToGate macro or a percentage scaled onto 0V to 10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Automata.cpp:201 writes channel 1 alone, either the 10V of the boolToGate macro or a percentage scaled onto 0V to 10V"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Automata.cpp:204 writes channel 1 alone, at the 10V the boolToGate macro at Utils.hpp:28 gives"
+     }
+    }
+   },
+   "notes": "Read from src/Automata at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Automata, which matches the code. The eight trigger outputs are given no family because what each carries depends on its own menu setting: a trigger in one mode and a slowly moving percentage voltage in the other. The LEN CV jack is scaled by the full sequence length of 64 before the attenuverter (Automata.cpp:170 to 172), so it moves the length much further per volt than the RND % jack moves the density. The board, the rule editor and the trigger marks all live in display widgets rather than parameters, so none of them can be clicked for a help line."
   },
   "PhaseDistortion": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Phase-distortion waveshaper: instead of clipping or folding the signal it modulates the signal's own phase, which adds overtones while leaving the level largely where it was",
+    "Sets how far the phase is pushed, 0 to 1; at 0 the signal passes through untouched",
+    "Shifts the phase by a fixed amount before the modulation, -180 to 180 degrees",
+    "Attenuates and inverts the AMT jack, -1 to 1, before that voltage is added to the AMT knob",
+    "Attenuates and inverts the BIAS jack, -1 to 1, before that voltage is added to the BIAS knob",
+    "Divided by 10, scaled by its attenuverter and added to the AMT knob, the total clamped to 0 and 1",
+    "Scaled by its attenuverter and added to the BIAS knob, the total clamped to the knob's own range",
+    "The audio to be shaped; its channel count sets the polyphony of the whole module",
+    "The signal that does the modulating; with no cable it takes the signal input, which is what makes the module shape a signal with itself",
+    "The shaped audio, with the DC taken out of it",
+    "Menu — Oversampling: Off, 2x, 4x, 8x, 16x — runs the shaping above the sample rate to keep the new overtones from aliasing; it starts at 4x and adds a few dozen samples of delay",
+    "Note — with no cable in the signal input the output is a single channel at 0V; nothing else on the panel matters until something is patched there",
+    "Note — on a harmonically rich input it helps to filter the signal before sending it to the modulator jack, or the distortion turns to noise"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "2": 5,
+    "3": 6,
+    "0": 7,
+    "1": 8
+   },
+   "out": {
+    "0": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "why": "Warp.cpp:85 takes the module's channel count from this input and Warp.cpp:105 reads each channel with getPolyVoltage"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "Signal",
+      "why": "Warp.cpp:106 reads this input with getNormalPolyVoltage, falling back to the signal input when it is unconnected"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Warp.cpp:95 reads this input with getNormalPolyVoltage, divides by 10 and scales by the attenuverter; Warp.cpp:101 clamps the total to 0 and 1"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "normal": "0V",
+      "why": "Warp.cpp:98 reads this input with getNormalPolyVoltage and scales it by the attenuverter; Warp.cpp:102 clamps the total to ±5 before turning it into radians"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "why": "Warp.cpp:86 sets this output's channel count from the signal input; Warp.cpp:137 writes one channel at a time"
+     }
+    }
+   },
+   "notes": "Read from src/Warp at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Warp, which matches the code. The BIAS knob runs -5 to 5 and is shown in degrees at 36 degrees per unit (Warp.cpp:36), so its ends are -180 and 180 degrees. The BIAS jack is added at one unit per volt with no division, unlike the AMT jack, which is divided by 10. With the signal input unconnected the module writes a single channel of 0V and returns early (Warp.cpp:79 and 80). The Oversample parameter is declared with no widget, so no click can reach it; it is on the context menu."
   },
   "ResetHelper": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns gates and triggers from up to four sources into one clean reset trigger, ignoring further arrivals for a set time so that several sources cannot reset a sequencer twice over",
+    "Sets how long the output trigger lasts, 1ms to 1000ms",
+    "Sets how long after a trigger further arrivals are ignored, 0ms to 1000ms",
+    "One of the four sources; a rise past 2V calls for a reset trigger",
+    "A trigger of the set length whenever a reset is asked for and the merge window has passed",
+    "Note — the merge window is held to at least the trigger length, so it can never be shorter than the trigger it is meant to cover",
+    "Note — a further arrival while a trigger is already going out does not lengthen it, and no second trigger follows",
+    "Note — the output's channel count is the largest of the four inputs, and an input with one channel triggers every output channel",
+    "Note — the lamps beside the jacks turn blue when that jack is carrying more than one channel"
+   ],
+   "param": {
+    "1": 1,
+    "0": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "ResetHelper.cpp:59 takes this input's channel count and ResetHelper.cpp:75 reads each channel with getPolyVoltage into a Schmitt trigger set to 0.1V and 2V by Constants.hpp:147 and 148"
+     },
+     "1": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "ResetHelper.cpp:61 takes this input's channel count and ResetHelper.cpp:75 reads each channel with getPolyVoltage into a Schmitt trigger set to 0.1V and 2V"
+     },
+     "2": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "ResetHelper.cpp:61 takes this input's channel count and ResetHelper.cpp:75 reads each channel with getPolyVoltage into a Schmitt trigger set to 0.1V and 2V"
+     },
+     "3": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "ResetHelper.cpp:61 takes this input's channel count and ResetHelper.cpp:75 reads each channel with getPolyVoltage into a Schmitt trigger set to 0.1V and 2V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ResetHelper.cpp:63 sets this output's channel count from the largest of the four inputs; ResetHelper.cpp:96 writes the 10V the boolToGate macro at Utils.hpp:28 gives"
+     }
+    }
+   },
+   "notes": "Read from src/ResetHelper at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Reset Helper, which matches the code. Four more inputs are declared than the panel carries: ResetHelper.hpp:38 reserves twice the input count while only four are given jacks, so inputs 4 to 7 have no census position and no click can reach them; nothing reads them either. The line that configures the input names is written out twice in the loop (ResetHelper.cpp:36 and 37), which is harmless. The merge window is raised to the trigger length whenever it is shorter (ResetHelper.cpp:52), so the 0ms end of the knob still gives a window as long as the trigger."
   },
   "Conductor": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Performance controller that switches a sequencer's pattern on the beat: an expander queues the next pattern and this module changes to it on the next Advance trigger, putting out the pattern CV",
+    "Sets how many patterns the sequencer being driven has, 2 to 128; the pattern CV is worked out from it, so a wrong setting selects the wrong pattern",
+    "Sets the voltage the sequencer expects for its highest pattern, 0V to 10V; the pattern CV is spread across that span",
+    "Sets how many of those patterns may be switched to, which is what the expanders offer",
+    "Sets the pattern the module jumps to on a reset, when the toggle beside it is on",
+    "Turns the reset-pattern jump on and off",
+    "Sends a reset by hand: it fires the reset output, and jumps to the reset pattern if that is switched on",
+    "Advances by hand: whatever the expanders have queued is switched to at once",
+    "Chooses a pattern to switch to by hand, which the button beside it then applies",
+    "Switches to the pattern the knob beside it has chosen, without waiting for an Advance trigger",
+    "The sequencer's clock on its way through; it is held back by a couple of samples so the reset reaches the sequencer first",
+    "A rise past 2V switches to whatever pattern is queued",
+    "A rise past 2V resets the module, which sends a trigger to the reset output and, if that option is on, jumps to the reset pattern",
+    "The clock from the CLOCK input, delayed by the number of samples the menu sets, and with the first clock after a reset optionally dropped",
+    "A 10V pulse when the module is reset and again whenever the pattern changes; patch it to the sequencer so it starts its new pattern in the right place",
+    "The voltage the sequencer needs to select the current pattern, worked out from the pattern count and the CV range",
+    "Menu — Pattern output offset — a slider adding a share of one pattern step to the pattern CV, which lines the module up with sequencers that read the voltage differently",
+    "Menu — Clock delay — a slider setting how many samples the clock is held back by, 0 to 50, at 2 to begin with",
+    "Menu — Ignore first clock within 1ms after reset — drops the first clock arriving immediately after a reset, which many sequencers need to stay in step",
+    "Note — the module does nothing on its own: it needs one of its expanders placed touching it on the right, and a trigger source patched to the Advance input",
+    "Note — with a phasor-driven sequencer, send the phasor straight to it rather than through the clock jacks; the reset output can be used to restart the phasor",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "Conductor.cpp:269 reads this input with getVoltage() and hands it to the clock handler, which passes it on as the 10V of the boolToGate macro"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "Conductor.cpp:282 reads this input with getVoltage() into a Schmitt trigger set to 0.1V and 2V by Constants.hpp:147 and 148"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "Conductor.cpp:278 reads this input with getVoltage() into a Schmitt trigger set to 0.1V and 2V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Conductor.cpp:269 writes channel 1 alone, at the 10V the boolToGate macro at Utils.hpp:28 gives"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Conductor.cpp:294 writes channel 1 alone, at the 10V the boolToGate macro at Utils.hpp:28 gives"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Conductor.cpp:297 writes channel 1 alone, a voltage spread over the range the CV RANGE knob sets, at most 10V"
+     }
+    }
+   },
+   "notes": "Read from src/Conductor at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Conductor. The wiki names the menu item Ignore first clock within 10ms after reset; the item itself prints 1ms (Widget.cpp:109), and the body of the wiki page also says 1ms, so the menu list in it is the part that is wrong. Two parameters are declared with no widget, Pattern output offset and Clock delay (Conductor.cpp:105 and 107), so no click can reach them; they are sliders on the context menu. The clock delay runs 0 to 50 samples from Conductor.hpp:31. The three knobs that name patterns are configured 0 to 1 and turned into pattern numbers by their own quantities, so their hover text reads a pattern rather than a fraction."
   },
   "ConductorExternal": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Expander that drives Conductor from control voltages, offering three ways of choosing a pattern: a knob-like voltage, a pair of up and down triggers, or mapped notes",
+    "Chooses how CV 1 is read: Index takes a voltage across the whole pattern range, Scroll takes triggers that step up and down, Note Map takes volt-per-octave notes mapped by hand",
+    "Enters mapping mode, where the pattern Conductor has selected is attached to the note at CV 1 the next time a gate arrives; pressing again switches to unmapping, and again returns to playing",
+    "In Index mode a voltage from 0V to 10V picks a pattern from the first to the last; in Scroll mode a rise past 2V steps the selection up; in Note Map mode it takes the note to be mapped",
+    "In Scroll mode a rise past 2V steps the selection down; in the other two modes this jack does nothing",
+    "A rise past 2V queues the selected pattern in Conductor, or takes it out of the queue if it was already there",
+    "Menu — Clear mappings — throws away every note-to-pattern mapping made in Note Map mode",
+    "Note — the module has to be placed touching the right-hand side of Conductor or of another Conductor expander; anywhere else it does nothing",
+    "Note — the upper display reads the pattern this expander has selected and the lower one the pattern queued in Conductor",
+    "Note — in Note Map mode the incoming pitch is quantised to 24 steps per octave before it is looked up, and the MAP button lights blue while mapping and red while unmapping",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "family": {
+    "in": {
+     "1": "trigger",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "why": "ConductorExternal.cpp:255 reads this input with getVoltage(), divides by 10 and clamps to 0 and 1 in Index mode; ConductorExternal.cpp:268 reads it as a trigger at 0.1V and 2V in Scroll mode; ConductorExternal.cpp:286 reads it as a pitch in Note Map mode, so it is given no family"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "ConductorExternal.cpp:272 reads this input with getVoltage() into a Schmitt trigger set to 0.1V and 2V by Constants.hpp:147 and 148"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 2V",
+      "why": "ConductorExternal.cpp:259 reads this input with getVoltage() into a Schmitt trigger set to 0.1V and 2V"
+     }
+    }
+   },
+   "notes": "Read from src/ConductorExternal at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Conductor - External. The wiki calls the menu item Clear mapping; the item prints Clear mappings (Widget.cpp). The CV 1 jack is given no family because what it wants depends on the mode knob: a level in Index, a trigger in Scroll and a pitch in Note Map. The Note Map quantisation is 24 steps per octave (ConductorExternal.cpp:286), which is quarter-tones rather than semitones. The module's own name in the browser is External MIDI controller expander for Conductor, though nothing about it is specific to MIDI."
   },
   "ConductorGrid": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Expander that drives Conductor from a grid of eight pads, with pages so that more than eight patterns can be reached",
+    "Steps the page number down by one",
+    "Steps the page number up by one",
+    "Queues its pattern in Conductor, or takes it out of the queue if it was already queued; which pattern that is depends on the page",
+    "Note — the module has to be placed touching the right-hand side of Conductor or of another Conductor expander; anywhere else it does nothing",
+    "Note — the pad for the queued pattern blinks blue and the pad for the pattern now playing is lit red",
+    "Note — the upper display reads the page number and the lower one the pattern queued in Conductor",
+    "Note — the two page buttons have no hover text of their own; the panel marks them with a minus and a plus",
+    "Note — the module has no jacks at all; it reaches Conductor through the expander connection alone"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3
+   },
+   "notes": "Read from src/ConductorGrid at commit 37a37b0, the commit whose plugin.json carries the installed 2.2.3, alongside the plugin's wiki page for Conductor - Grid, which matches the code. The eight pads are configured as buttons named Pad 1 to Pad 8 (ConductorGrid.cpp:36); the two page buttons are added by the widget with no configButton call at all, so they have empty hover text. The module declares no inputs and no outputs, so there are no port props to give."
   }
  }
 }

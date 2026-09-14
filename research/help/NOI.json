@@ -1,38 +1,733 @@
 {
  "plugin": "NOI",
- "source": "https://github.com/LeNomDesFleurs/NOI-VCVRACK",
+ "source": "https://github.com/LeNomDesFleurs/NOI-VCVRACK/blob/master/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Hellebore": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stereo Moorer reverb built from six comb filters per channel whose delay lines can be resized while they run, which repitches whatever they already hold",
+    "Sets the delay time of the comb filters, from 10ms to 0.6 seconds; the maker's tooltip overstates this and reads up to 0.9 seconds",
+    "Spreads the six comb filters apart, over 0 to 0.2: it lengthens each successive delay line, raises each one's feedback, and bleeds more of one channel into the other",
+    "Sets how long the reverb takes to decay, from 0.1 to 20 seconds",
+    "Sets the balance between the dry input and the reverb, over 0 to 100%; it comes up fully wet",
+    "A latch that stops the comb filters taking new input, so what they hold circulates unchanged and can be resized freely",
+    "Scales the size CV before it is added, up to 0.1 seconds of delay time per volt in either direction",
+    "Scales the variation CV before it is added, up to 0.1 of variation per volt in either direction",
+    "Scales the time CV before it is added, up to 1 second of decay per volt in either direction",
+    "Takes the freeze latch over entirely: above 0V freezes the comb filters, at or below 0V lets them run, and the latch does nothing while a cable is patched here",
+    "Adds to the variation through its attenuverter, which starts at 0",
+    "Adds to the decay time through its attenuverter; the total is clamped to 0.1 and 20 seconds",
+    "Adds to the comb delay time through its attenuverter, smoothed by a 20Hz low-pass so the repitching glides; the total is clamped to 10ms and 1 second",
+    "The left channel fed into the reverb; there is no normalling from one channel to the other, so patching this alone leaves the right channel silent",
+    "The right channel fed into the reverb; there is no normalling from one channel to the other, so patching this alone leaves the left channel silent",
+    "Adds to the dry-wet balance with no attenuverter, a fifth of the range per volt, so 5V alone reaches fully wet; the total is clamped to dry and fully wet",
+    "The left channel of the reverb, hard-clipped at ±6V",
+    "The right channel of the reverb, hard-clipped at ±6V",
+    "Note — The module comes up fully wet, so none of the dry signal reaches the outputs until the dry-wet control is turned down or its input is driven negative."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14,
+    "6": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 17
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "audio",
+     "5": "audio",
+     "6": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the freeze latch",
+      "why": "Hellebore.cpp:84-86 replaces the latch with getVoltage() > 0 whenever the jack is connected"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Hellebore.cpp:94-95 multiplies getVoltage() by the attenuverter and adds it to the variation knob with no clamp"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Hellebore.cpp:97-98 multiplies getVoltage() by the attenuverter, adds it to the time knob and clamps the total to 0.1 and 20"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Hellebore.cpp:88-92 multiplies getVoltage() by the attenuverter and by 10, slews it through a 20Hz low-pass, adds it to the size curve and clamps the total to 0.010 and 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Hellebore.cpp:103 reads getVoltage() with no channel and with no fallback to the other channel"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Hellebore.cpp:104 reads getVoltage() with no channel and with no fallback to the other channel"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Hellebore.cpp:100-101 divides getVoltage() by 5, adds it to the dry-wet knob with no attenuverter and clamps the total to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±6V",
+      "step": "continuous",
+      "why": "Hellebore.cpp:109-114 clips the sample to -6 and 6 before setVoltage, and setChannels is never called"
+     },
+     "1": {
+      "poly": false,
+      "range": "±6V",
+      "step": "continuous",
+      "why": "Hellebore.cpp:109-115 clips the sample to -6 and 6 before setVoltage, and setChannels is never called"
+     }
+    }
+   },
+   "notes": "Source read at commit 2b2ad81. The size control's tooltip and its behaviour disagree: Hellebore.cpp:58 configures the display as 0.3 * 4^v - 0.3 while line 90 computes 0.3 * 3^v - 0.3, so the tooltip reads up to 0.9 seconds where the delay lines reach 0.6. A third output, TEST_OUTPUT, is declared and configured but has no PortWidget, so no cable can reach it. The time CV attenuverter is configured with a display multiplier of -100 and an offset of 100, so its tooltip reads 100% when the trimpot is centred and doing nothing."
   },
   "Wilt": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A glitch processor: a sample-rate reducer, a low-pass filter, then a Schroeder reverb whose delay lines can be read at any speed, backwards included",
+    "Sets the feedback of the reverb's comb and allpass sections, over 0.1 to 0.99; the maker's tooltip prints this figure in seconds, which it is not",
+    "Sets the balance between the filtered signal and the reverb, over dry to fully wet; it comes up fully wet",
+    "Sets how many samples are held between each new sample taken, over 0 to 100; at 0 nothing is held and the signal passes straight through",
+    "Scales the redux CV before it is added, over -1 to 1, at which a full 5V moves the hold length by 50 samples",
+    "A latch that throws away the fractional part of the redux CV, so the hold length moves in steps of ten samples",
+    "Sets the corner of the low-pass filter the signal meets before the reverb, over 20Hz to 10kHz; it comes up at 10kHz",
+    "Sets the rate at which the reverb's delay lines are read, over -2 to 2, where 1 is the writing rate, 0 holds them and negative values read backwards",
+    "The signal fed into the sample-rate reducer, and from there into the filter and the reverb",
+    "Adds to the hold length through its attenuverter; the total is clamped to 0 and 100 samples",
+    "The reverb output, with no clamp applied to it",
+    "Note — The module declares a Speed CV input and an attenuverter for it, and draws neither on the panel, so the read speed can be set only by its knob.",
+    "Note — The redux control comes up at 0, which holds nothing, so the sample-rate reduction does nothing until it is turned up."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "8": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Wilt.cpp:100 reads getVoltage() with no channel into the redux stage"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Wilt.cpp:101-108 multiplies getVoltage() by the attenuverter, optionally truncates it, maps -5V to 5V onto -50 to 50 samples, adds it to the redux knob and clamps the total to 0 and 100"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Wilt.cpp:145 writes the reverb output with setVoltage, the clamp on line 144 commented out, and setChannels never called"
+     }
+    }
+   },
+   "notes": "Source read at commit 2b2ad81. Two parameters have no ParamWidget. EXP_PARAM, index 2, is never passed to configParam either, so it has no name and no quantity. SPEED_CV_PARAM, index 7, is configured as a Speed CV attenuverter but never added to the widget, so it is pinned at its default of 0; SPEED_CV_INPUT, input index 2, likewise has no PortWidget. Together those make the ring-modulation stage at Wilt.cpp:117-122 unreachable: it runs only when the speed CV jack is connected, and no cable can reach that jack. Had the jack existed, that stage would multiply the signal by the attenuverter and silence the module. Wilt.cpp:91 gives the feedback parameter the unit 's', which the tooltip prints; the value is a feedback coefficient passed to overrideFeedback at filter.cpp:255, not a time."
   },
   "Dicotyledon": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A comparator and a two-way signal switch, with the comparator's result normalled to the switch's control",
+    "Sets the voltage a comparator input falls back to when nothing is patched into it, over -5V to 5V",
+    "One of the two voltages being compared, the one that must be the greater for the comparator to go high; unpatched it reads the voltage knob",
+    "One of the two voltages being compared, the one that must be the lower for the comparator to go high; unpatched it reads the voltage knob",
+    "Chooses which switch input reaches the output: above 0V passes switch B, at or below 0V passes switch A, which is the reverse of the maker's manual. Unpatched it reads the comparator output",
+    "One of the two signals the switch chooses between, passed while the control is at or below 0V; unpatched it reads the comparator A input",
+    "One of the two signals the switch chooses between, passed while the control is above 0V; unpatched it reads the comparator B input",
+    "Whichever of the two switch inputs the control has picked",
+    "5V while comparator A is above comparator B, and 0V otherwise",
+    "Note — The two lamps between the switch inputs and the switch control are crossed: the lamp on the A side lights while the B input is the one reaching the output.",
+    "Note — The maker's manual says a control voltage above 0V passes switch A; the module passes switch B."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the voltage knob",
+      "why": "Dicotyledon.cpp:63 uses isConnected() to choose between getVoltage() and the knob, with no clamp on either"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the voltage knob",
+      "why": "Dicotyledon.cpp:64 uses isConnected() to choose between getVoltage() and the knob, with no clamp on either"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the comparator output",
+      "why": "Dicotyledon.cpp:71 falls back to compOut when the jack is unconnected, and line 77 tests the result against 0"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the comparator A input",
+      "why": "Dicotyledon.cpp:72 falls back to compA when the jack is unconnected, and line 81 passes it through unchanged"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the comparator B input",
+      "why": "Dicotyledon.cpp:73 falls back to compB when the jack is unconnected, and line 78 passes it through unchanged"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Dicotyledon.cpp:89 passes the chosen switch input through setVoltage with no clamp and no setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "stepped",
+      "why": "Dicotyledon.cpp:67-68 sets 5 or 0, written by setVoltage at line 88 with no setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit 2b2ad81. Two faults here. Dicotyledon.cpp:77-83 sets switchOut to switchB when the control is above 0 and to switchA otherwise, which is the reverse of what the README states. In the same block the lamps are crossed with the signals: lightSwitchA is set to 1 in the branch that passes switch B. The switch inputs and the switch output carry whatever is patched into them, so they are given no family."
   },
   "Sunflower": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Twelve inputs arranged in a ring, crossfaded by one control that sweeps round it, with neighbouring inputs bleeding in by an adjustable amount",
+    "Sets the level of the input at that point of the ring, over silence to double",
+    "Sweeps the crossfade round the ring of twelve inputs, its full travel covering one complete turn; the maker set its minimum above its maximum, so it counts down as it is turned clockwise",
+    "Sets how many inputs either side of the selected point bleed in, over 1 to 4; at 1 only the selected input is heard",
+    "Scales the position CV before it is added to the selection, over -1 to 1; it starts at 0, so the position input does nothing until it is turned up",
+    "A latch that leaves unpatched inputs out of the ring, so the crossfade sweeps only the inputs with cables in them",
+    "One of the twelve signals mixed in the ring, scaled by its own trimpot and by how near the crossfade has come to it",
+    "Moves the crossfade round the ring through its attenuverter, which starts at 0",
+    "The sum of every input in the ring, each at its own trimpot level and its own crossfade weight",
+    "Note — The position input does nothing until its attenuverter is turned up, because that attenuverter starts at 0.",
+    "Note — Each input has a lamp showing its crossfade weight, and the latch has a lamp of its own showing whether unpatched inputs are being skipped."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 2,
+    "13": 3,
+    "14": 4,
+    "15": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio",
+     "8": "audio",
+     "9": "audio",
+     "10": "audio",
+     "11": "audio",
+     "12": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:150 reads inputs[...].getVoltage() with no channel and multiplies it by the matching trimpot and the crossfade weight"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sunflower.cpp:126-127 adds getVoltage() times the attenuverter to the selection, and lines 136-139 wrap the total round the ring"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Sunflower.cpp:156 writes the accumulated sum with setVoltage and never calls setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit 2b2ad81. Sunflower.cpp:88 calls configParam(PARAM_SELECTION, 6.f, -6.f, 0.f) with the minimum above the maximum, so the selection counts down across the knob's clockwise travel. The maker named none of the twelve signal inputs and called all twelve trimpots 'Amp ', so the tooltips do not distinguish them; the ring position is the only thing that does. Neither output was given a configOutput, so the mix jack's tooltip is empty. A second output, OUT_TEST, is declared with no PortWidget and cannot be reached."
   },
   "Sinensis": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A bank of six parallel band-pass filters whose frequencies are set by one control and spaced apart by a ratio, mixed down to a single output",
+    "Sets the frequency of the first band, over 54 semitones either side of C4 at 261.63Hz",
+    "Sets the resonance shared by every band, over 1 to 40; the bands ring on their own at high settings",
+    "Sets how many of the six bands are used, over 1 to 6; between whole numbers the newest band fades in rather than switching on",
+    "Multiplies each band's frequency by this amount over the band below it, over 0 to 2; at 1 every band lands on one frequency",
+    "Scales the ratio CV before it is added to the ratio, up to 1 of ratio per volt in either direction",
+    "Scales the frequency CV before it is added, up to 200Hz per volt in either direction, though the maker's tooltip prints it as a percentage",
+    "Scales the Q CV before it is added to the resonance, up to 2 of Q per volt in either direction",
+    "Scales the band-count CV before it is added, up to 2 bands per volt in either direction",
+    "The signal fed into all six band-pass filters",
+    "Shifts the frequency of the bands through its attenuverter, added in hertz rather than tracking 1V per octave",
+    "Adds to the resonance through its attenuverter; the total is floored at 0.1",
+    "Adds to the number of bands through its attenuverter; the total is clamped to 1 and 6",
+    "Adds to the ratio through its attenuverter; the total is clamped to 0 and 2",
+    "The six bands summed and divided by the number in use, clamped to ±5V",
+    "Note — Any band whose frequency lands above 15kHz or below 30Hz is folded back into that span, so a large ratio wraps the upper bands rather than losing them.",
+    "Note — The filter coefficients are recalculated one sample in four, so fast modulation of the frequency, Q, band or ratio inputs arrives in steps.",
+    "Note — Every CV attenuverter starts at 0, so none of the four CV inputs does anything until its attenuverter is turned up."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13
+   },
+   "out": {
+    "0": 14
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sinensis.cpp:104 reads getVoltage() with no channel straight into the filter bank"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Sinensis.cpp:124 multiplies getVoltage() by the attenuverter and adds the result to the frequency in hertz, with no clamp"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Sinensis.cpp:111-112 multiplies getVoltage() by the attenuverter, adds it to the Q knob and floors the total at 0.1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Sinensis.cpp:115-116 multiplies getVoltage() by the attenuverter, adds it to the band knob and clamps the total to 1 and 6"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Sinensis.cpp:119-120 multiplies getVoltage() by the attenuverter, adds it to the ratio knob and clamps the total to 0 and 2"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "Sinensis.cpp:158 calls setVoltage with the band sum clamped to -5.f and 5.f, and never calls setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit 2b2ad81, the only commit carrying version 2.0.10; its plugin.json is byte-identical to the installed one. The README says bands are folded back when they pass 15kHz or 20Hz; Sinensis.cpp:136-138 uses 15000 and 30, so the lower bound is 30Hz. Sinensis.cpp:129 holds if (ratio < 0) { ratio = 1 / -ratio; }, which can never run because line 120 has already clamped the ratio to 0 and above. The frequency CV is a linear hertz offset, not 1V per octave, which is why its family is cv. None of the controls carries a printed name on the panel; the artwork is pictograms."
   },
   "Pruners": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A ring buffer written continuously and read by four heads, each with its own output and all of them summed to a mix, with controls for buffer length, read position, speed and the ratio between heads",
+    "Sets how many of the four heads are summed into the mix output, over 1 to 4; all four head outputs sound whatever this is set to",
+    "Scales the head CV before it is added, up to 1 head per volt in either direction",
+    "Sets the length of the ring buffer the heads sweep, from a fraction of a millisecond to 3.9 seconds",
+    "Scales the size CV before it is added, up to 1.4 seconds per volt in either direction",
+    "Sets the speed of each head against the one before it, over -4 to 4; at 0 all four heads run at one speed, and either extreme makes each head five times faster or slower than the last",
+    "Scales the ratio CV before it is added, up to 2 of ratio per volt in either direction",
+    "Sets the speed of the first head, over -4 to 4, where 1 is the rate the buffer is written at, 0 leaves the head in place and negative values read backwards",
+    "Scales the speed CV before it is added, up to 2 of speed per volt in either direction",
+    "Sets how much of the mix is written back into the ring buffer, over 0 to 1; at its very top the buffer stops taking new input and freezes",
+    "Scales the feedback CV before it is added, up to 2 of feedback per volt in either direction",
+    "Offsets where in the ring buffer the heads read, over a whole buffer length in either direction; the offset is smoothed, so moving it glides rather than jumps",
+    "Scales the position CV before it is added, up to half a buffer per volt in either direction",
+    "Adds to the head count through its attenuverter; the total is clamped to 1 and 4",
+    "Adds to the buffer length through its attenuverter; the total is clamped to 0.0001 and 3.9 seconds",
+    "Adds to the ratio through its attenuverter; the total is clamped to -4 and 4",
+    "Adds to the read speed through its attenuverter; the total is clamped to -4 and 4",
+    "Adds to the feedback through its attenuverter; the total is clamped to 0 and 1, and reaching 1 freezes the buffer",
+    "Adds to the read offset through its attenuverter; the total is clamped to a whole buffer length in either direction",
+    "The signal written into the ring buffer, summed with the feedback and passed through a 20Hz high-pass before it is stored",
+    "What the first head is reading from the ring buffer, running at the speed the speed control sets; its level is corrected for how fast it runs",
+    "What that head is reading from the ring buffer, running at the speed of the head before it scaled by the ratio control; its level is corrected for how fast it runs",
+    "The heads the head count takes in, summed and divided by that count",
+    "Note — Every CV input has its own attenuverter and all six start at 0, so no CV input does anything until its attenuverter is turned up.",
+    "Note — The ring buffer is eight seconds long whatever the size control says; the size control chooses how much of it the heads sweep.",
+    "Note — The lamp lights while the feedback has reached its maximum and the buffer is frozen."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18,
+    "6": 19
+   },
+   "out": {
+    "0": 20,
+    "1": 21,
+    "2": 21,
+    "3": 21,
+    "4": 22
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Pruners.cpp:125-128 multiplies getVoltage() by the attenuverter, adds it to the head knob and clips the total to 1 and 4"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Pruners.cpp:135-138 multiplies getVoltage() by the attenuverter, adds it to the size knob and clips the total to 0.0001 and 3.9"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Pruners.cpp:120-123 multiplies getVoltage() by the attenuverter, adds it to the ratio knob and clips the total to -4 and 4"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Pruners.cpp:130-133 multiplies getVoltage() by the attenuverter, adds it to the speed knob and clips the total to -4 and 4"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Pruners.cpp:140-143 multiplies getVoltage() by the attenuverter, adds it to the feedback knob and clips the total to 0 and 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Pruners.cpp:145-148 multiplies getVoltage() by the attenuverter, adds it to the position knob and clips the total to -1 and 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Pruners.cpp:160 reads getVoltage() with no channel; Philodendron.cpp:70-73 sums it with the feedback and clips the result to -10 and 10"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Pruners.cpp:170 writes the head sample with setVoltage and never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Pruners.cpp:171 writes the head sample with setVoltage and never calls setChannels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Pruners.cpp:172 writes the head sample with setVoltage and never calls setChannels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Pruners.cpp:173 writes the head sample with setVoltage and never calls setChannels"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Pruners.cpp:169 writes the averaged head sum with setVoltage and never calls setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit 2b2ad81. Pruners.cpp:151 subtracts 1 from the speed knob before passing it on, which is what makes 1 on the panel read as the writing rate rather than as a standstill; the maker marks the line 'dirty fix'. The head count is stored into an int at RingBuffer.hpp:82, so the continuous 1 to 4 knob takes effect in whole heads. A sixth output, DEBUG_OUTPUT, is declared with no configOutput and no PortWidget, so no cable can reach it. The head outputs carry sound whether or not the head count includes them; the count only selects what the mix sums."
   }
  }
 }

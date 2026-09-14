@@ -2,12 +2,113 @@
  "plugin": "Chrysalis",
  "source": "https://github.com/celestebetancur/Chrysalis",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Chrysalis": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Runs a ChucK program inside Rack: it compiles a .ck file you choose and hands that program four inputs, four outputs and four knobs",
+    "Sets the ChucK global float named Chrysalis_1, from 0 to 1; it does nothing unless the loaded program declares that variable and reads it",
+    "Sets the ChucK global float named Chrysalis_2, from 0 to 1; it does nothing unless the loaded program declares that variable and reads it",
+    "Sets the ChucK global float named Chrysalis_3, from 0 to 1; it does nothing unless the loaded program declares that variable and reads it",
+    "Sets the ChucK global float named Chrysalis_4, from 0 to 1; it does nothing unless the loaded program declares that variable and reads it",
+    "Feeds channel 1 of the ChucK program's adc, divided by five on the way in, so 5V arrives as ChucK's full scale of 1.0",
+    "Feeds channel 2 of the ChucK program's adc, divided by five on the way in, so 5V arrives as ChucK's full scale of 1.0",
+    "Feeds channel 3 of the ChucK program's adc, divided by five on the way in, so 5V arrives as ChucK's full scale of 1.0",
+    "Feeds channel 4 of the ChucK program's adc, divided by five on the way in, so 5V arrives as ChucK's full scale of 1.0",
+    "Carries channel 1 of the ChucK program's dac, one volt per unit and clamped to ±10V, so ChucK's full scale of 1.0 leaves as 1V",
+    "Carries channel 2 of the ChucK program's dac, one volt per unit and clamped to ±10V, so ChucK's full scale of 1.0 leaves as 1V",
+    "Carries channel 3 of the ChucK program's dac, one volt per unit and clamped to ±10V, so ChucK's full scale of 1.0 leaves as 1V",
+    "Carries channel 4 of the ChucK program's dac, one volt per unit and clamped to ±10V, so ChucK's full scale of 1.0 leaves as 1V",
+    "Note — the module does nothing until a ChucK program is compiled into it. The + .ck button opens a file chooser and compiles the file you pick; the = button recompiles the one already chosen.",
+    "Note — a fresh module is not empty: it compiles test.ck from the plugin's own folder, named in autoload.txt beside it. That program runs the first input through a reverb and a feedback delay.",
+    "Note — the outputs are scaled one volt per ChucK unit, a fifth of the ±5V a Rack module normally swings, so a program meant to be heard should multiply its output by five.",
+    "Note — the small lamp shows green once a file has compiled without error and red when the last compile failed.",
+    "Note — the text under the buttons reports the ChucK virtual machine's current time, the id of the last shred it started, and the last message ChucK printed. It is refreshed once in every 60 frames.",
+    "Note — the two buttons, the file name and the status text are plain widgets rather than Rack parameters, so none of them can be clicked for help.",
+    "Note — every copy of the module builds its own ChucK virtual machine. Two of them share no globals and no shreds, and the sample rate of each follows Rack's.",
+    "Note — the path of the loaded file is saved in the patch and recompiled from that path when the patch is opened. The file itself is not saved, so moving or editing it changes what the patch does.",
+    "Note — the module is monophonic: every jack reads or writes one channel."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Chrysalis.cpp:178 reads one channel with getVoltage and divides by 5 into inBuffer[0], which :184 hands to ChucK as adc channel 1; nothing is clamped, so a larger voltage passes through scaled"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Chrysalis.cpp:179 reads one channel with getVoltage and divides by 5 into inBuffer[1], which :184 hands to ChucK as adc channel 2; nothing is clamped, so a larger voltage passes through scaled"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Chrysalis.cpp:180 reads one channel with getVoltage and divides by 5 into inBuffer[2], which :184 hands to ChucK as adc channel 3; nothing is clamped, so a larger voltage passes through scaled"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Chrysalis.cpp:181 reads one channel with getVoltage and divides by 5 into inBuffer[3], which :184 hands to ChucK as adc channel 4; nothing is clamped, so a larger voltage passes through scaled"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/Chrysalis.cpp:192 writes outBuffer[0] multiplied by 1.0 and clamped to -10V and 10V, one channel, with setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/Chrysalis.cpp:193 writes outBuffer[1] multiplied by 1.0 and clamped to -10V and 10V, one channel, with setVoltage"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/Chrysalis.cpp:194 writes outBuffer[2] multiplied by 1.0 and clamped to -10V and 10V, one channel, with setVoltage"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/Chrysalis.cpp:195 writes outBuffer[3] multiplied by 1.0 and clamped to -10V and 10V, one channel, with setVoltage"
+     }
+    }
+   },
+   "notes": "Read at commit 8f15282 of celestebetancur/Chrysalis, the head of the repository. Three commits carry version 2.0.2 — e8ec031, 5b86287 and 8f15282 — and they differ only in the Windows cross-build: git diff over src/ and res/ between the first and the last is empty, so any of them describes the installed build.\n\nThe jacks get no family. What a Chrysalis input or output carries is decided entirely by the .ck program compiled into it, exactly as Host's audio jacks are decided by the hosted plugin, so no colour is the honest answer.\n\nThe outputs and the inputs are scaled differently and the maker knows it: line 177 of src/Chrysalis.cpp carries the comment \"TODO: Check this values to make them correspond to VCV Rack\". Inputs are divided by 5, so 5V is ChucK's 1.0; outputs are multiplied by 1.0, so ChucK's 1.0 is 1V. A signal sent straight through the module comes out at a fifth of the level it went in.\n\nThe two buttons and the two text labels are built with createWidget rather than createParam, so they are Widgets with no ParamQuantity, carry no paramPos, and cannot be reached by a help click. They take Note lines. The compile lamp is a LightWidget and is likewise not one of the three lists a click walks.\n\nautoload.txt ships beside the binary with the single word test.ck, and the constructor compiles it whenever a module is created without saved state, so the module is never truly idle on arrival. test.ck is installed alongside it and is the program described in the Note.\n\nThere is no manual: manualUrl in plugin.json is empty and the README covers only building and the four global floats. The knob names Knob 1 to Knob 4 and the jack names adc 1 to adc 4 and dac 1 to dac 4 are the only labels anywhere — the panel art prints none of them, only the module name, the ChucK logo and the maker's byline.\n\nThe module registers no context menu of its own: there is no appendContextMenu anywhere in the source, so the file is loaded from the panel buttons and nowhere else."
   }
  }
 }

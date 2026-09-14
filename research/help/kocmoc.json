@@ -1,63 +1,837 @@
 {
  "plugin": "kocmoc",
- "source": "https://github.com/janne808/kocmoc-rack-modules/",
+ "source": "https://github.com/janne808/kocmoc-rack-modules/blob/4bbc6c83cd0e83e01d3bad93fe6d874c959ce0ef/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "SVF-1": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A Chamberlin state variable filter with a saturating feedback path, switchable between lowpass, bandpass and highpass, running sixteen polyphonic channels",
+    "Sets the cutoff, with the dial's travel raised to the fourth power so most of the fine control falls at the low end",
+    "Sets the resonance by reducing the damping in the bandpass feedback; about a third of the way up the dial the damping reaches zero, and beyond that the filter regenerates",
+    "Drives the signal into the filter as the fourth power of the dial; from the halfway point upward the output is scaled back to hold the level steady",
+    "Chooses which response reaches OUT: LP for lowpass, BP for bandpass, HP for highpass",
+    "Scales what the FM input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Scales what the V/OCT input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Adds a tenth of its voltage to the cutoff, scaled by its attenuverter",
+    "Multiplies the cutoff by two raised to its voltage, an octave per volt with its attenuverter fully positive",
+    "The signal into the filter; the number of channels patched here is the number of channels the module runs",
+    "The filtered signal, one channel for each channel patched into IN",
+    "Note — the internal cutoff rate is clamped at zero, so a negative voltage at FM large enough to drive it there closes the filter",
+    "Note — bypassing the module passes IN straight through to OUT",
+    "Menu — Oversampling: off — runs the filter core once per sample and skips the decimation filter",
+    "Menu — Oversampling: x2 — runs the filter core twice per sample and decimates; the setting a new module starts with",
+    "Menu — Oversampling: x4 — runs the filter core four times per sample and decimates",
+    "Menu — Oversampling: x8 — runs the filter core eight times per sample and decimates",
+    "Menu — Decimator order: 8 — gives the Butterworth decimation filter eight poles",
+    "Menu — Decimator order: 16 — gives the Butterworth decimation filter sixteen poles; the setting a new module starts with",
+    "Menu — Decimator order: 32 — gives the Butterworth decimation filter thirty-two poles",
+    "Menu — Trapezoidal — integrates the filter state with a trapezoidal step, which clamps the internal rate at a lower ceiling than the other method",
+    "Menu — Inverse Trapezoidal — integrates the filter state with an inverse trapezoidal step; the setting a new module starts with"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "SVF.cpp:106 the voltage divided by ten, times the cubed attenuverter, added to the knob; the resulting rate is clamped at zero in the filter core"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SVF.cpp:117 cutoff multiplied by pow(2, attenuverter * volts)"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "SVF.cpp:74 getChannels() here sets the loop bound; SVF.cpp:127 getVoltage(ii) per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "SVF.cpp:133 setVoltage(..., ii) per channel, SVF.cpp:137 setChannels(channels)"
+     }
+    }
+   },
+   "notes": "The panel prints SVF; the model slug is SVF-1. The plugin README says the filters use an IIR or FIR antialiasing filter, but fir.cpp is never referenced by any filter core in this version — only IIRLowpass is instantiated, so the decimation is always IIR. Cutoff is held as a normalised integration rate rather than a frequency (SVF.cpp:90 maps the knob to 0.001 to 2.251, svfilter.cpp:171 scales it by 44100 over the working rate), so no cutoff in hertz can be quoted from the source. The resonance sign flip is svfilter.cpp:223, fb = 1 - 3.5 * Resonance."
   },
   "uSVF": {
    "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "TRG": {
-   "lines": [
-    "TODO: what this module is"
-   ]
+    "A fast state variable filter with an explicit tanh-saturated integrator, switchable between lowpass, bandpass and highpass, running sixteen polyphonic channels",
+    "Sets the cutoff, with the dial's travel raised to the fourth power so most of the fine control falls at the low end",
+    "Sets the resonance by reducing the damping in the bandpass feedback; the damping only reaches zero near the very top of the dial",
+    "Drives the signal into the filter as the fourth power of the dial; from the halfway point upward the output is scaled back to hold the level steady",
+    "Chooses which response reaches OUT: LP for lowpass, BP for bandpass, HP for highpass",
+    "Scales what the FM input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Scales what the V/OCT input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Adds a fifth of its voltage to the cutoff, scaled by its attenuverter",
+    "Multiplies the cutoff by two raised to its voltage, an octave per volt with its attenuverter fully positive",
+    "The signal into the filter; the number of channels patched here is the number of channels the module runs",
+    "The filtered signal, one channel for each channel patched into IN",
+    "Note — the internal cutoff rate is clamped at zero, so a negative voltage at FM large enough to drive it there closes the filter",
+    "Note — bypassing the module passes IN straight through to OUT",
+    "Note — this module carries no oversampling, decimator or integration settings; its core runs twice per sample at a fixed rate"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "uSVF.cpp:130 the voltage divided by ten, times the cubed attenuverter, added to the knob; the resulting rate is clamped at zero in the filter core"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "uSVF.cpp:141 cutoff multiplied by pow(2, attenuverter * volts)"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "uSVF.cpp:88 getChannels() here sets the loop bound; uSVF.cpp:146 getVoltage(ii) per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "uSVF.cpp:179 setVoltage(..., ii) per channel, uSVF.cpp:183 setChannels(channels)"
+     }
+    }
+   },
+   "notes": "No appendContextMenu at all, so the only right-click entries are Rack's own. Damping is uSVF.cpp:119, fb = 1 - 1.15 * reso, clamped to a maximum of 0.9 at :122. The linear FM input is twice as sensitive as SVF-1's: uSVF.cpp:130 multiplies by 2.0f before dividing by ten."
   },
   "LADR": {
    "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "DIOD": {
-   "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-pole transistor ladder filter with lowpass, bandpass and highpass responses, running sixteen polyphonic channels",
+    "Sets the cutoff, with the dial's travel raised to the fourth power so most of the fine control falls at the low end",
+    "Sets the resonance, feeding as much as six times the last pole's output back into the filter input; the module raises the output level along with it to compensate",
+    "Drives the signal into the filter as the fourth power of the dial, reaching 3.2 times the input voltage at the top",
+    "Chooses which response reaches OUT: LP for lowpass, BP for bandpass, HP for highpass",
+    "Scales what the FM input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Scales what the V/OCT input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Adds a tenth of its voltage to the cutoff, scaled by its attenuverter",
+    "Multiplies the cutoff by two raised to its voltage, an octave per volt with its attenuverter fully positive",
+    "The signal into the filter; the number of channels patched here is the number of channels the module runs",
+    "The filtered signal, one channel for each channel patched into IN",
+    "Note — the internal cutoff rate is clamped at zero, so a negative voltage at FM large enough to drive it there closes the filter",
+    "Note — bypassing the module passes IN straight through to OUT",
+    "Menu — Oversampling: off — runs the filter core once per sample and skips the decimation filter",
+    "Menu — Oversampling: x2 — runs the filter core twice per sample and decimates; the setting a new module starts with",
+    "Menu — Oversampling: x4 — runs the filter core four times per sample and decimates",
+    "Menu — Oversampling: x8 — runs the filter core eight times per sample and decimates",
+    "Menu — Decimator order: 8 — gives the Butterworth decimation filter eight poles",
+    "Menu — Decimator order: 16 — gives the Butterworth decimation filter sixteen poles; the setting a new module starts with",
+    "Menu — Decimator order: 32 — gives the Butterworth decimation filter thirty-two poles",
+    "Menu — Semi-implicit Euler w/ Full Tanh — integrates the ladder with a single Euler step and a tanh saturation at every pole",
+    "Menu — Predictor-Corrector w/ Full Tanh — integrates the ladder with a predict-then-correct step and a tanh saturation at every pole; the setting a new module starts with",
+    "Menu — Predictor-Corrector w/ Tanh Feedback — integrates the ladder with a predict-then-correct step and a tanh saturation only in the feedback path",
+    "Menu — Trapezoidal w/ Tanh Feedback — integrates the ladder with a trapezoidal step and a tanh saturation only in the feedback path"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "LADR.cpp:106 the voltage divided by ten, times the cubed attenuverter, added to the knob; the resulting rate is clamped at zero in the filter core"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "LADR.cpp:117 cutoff multiplied by pow(2, attenuverter * volts)"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "LADR.cpp:74 getChannels() here sets the loop bound; LADR.cpp:127 getVoltage(ii) per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "LADR.cpp:133 setVoltage(..., ii) per channel, LADR.cpp:137 setChannels(channels)"
+     }
+    }
+   },
+   "notes": "Feedback amount is ladder.cpp:217, fb = 6.0f * Resonance. Output compensation is LADR.cpp:90, gainNormalization = 1 + 2 * log(1 + 0.45 * reso), applied at :133 along with a fixed factor of 3. Unlike SVF-1 and SKF there is no compensation tied to the GAIN knob."
   },
   "uLADR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A fast four-pole ladder filter with lowpass, bandpass and highpass responses, running sixteen polyphonic channels",
+    "Sets the cutoff, with the dial's travel raised to the fourth power so most of the fine control falls at the low end",
+    "Sets the resonance, feeding as much as seven times the last pole's output back into the filter input",
+    "Drives the signal into the filter as the fourth power of the dial; nothing compensates the output for it, so a hard drive gets louder",
+    "Chooses which response reaches OUT: LP for lowpass, BP for bandpass, HP for highpass",
+    "Scales what the FM input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Scales what the V/OCT input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Adds a fifth of its voltage to the cutoff, scaled by its attenuverter",
+    "Multiplies the cutoff by two raised to its voltage, an octave per volt with its attenuverter fully positive",
+    "The signal into the filter; the number of channels patched here is the number of channels the module runs",
+    "The filtered signal, one channel for each channel patched into IN",
+    "Note — the internal cutoff rate is clamped at zero, so a negative voltage at FM large enough to drive it there closes the filter",
+    "Note — bypassing the module passes IN straight through to OUT",
+    "Note — this module carries no oversampling, decimator or integration settings; its core runs at a fixed rate"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "uLADR.cpp:118 the voltage divided by ten, times the cubed attenuverter, added to the knob; the resulting rate is clamped at zero in the filter core"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "uLADR.cpp:129 cutoff multiplied by pow(2, attenuverter * volts)"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "uLADR.cpp:88 getChannels() here sets the loop bound; uLADR.cpp:134 getVoltage(ii) per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "uLADR.cpp:167 setVoltage(..., ii) per channel, uLADR.cpp:171 setChannels(channels)"
+     }
+    }
+   },
+   "notes": "No appendContextMenu. Feedback is uLADR.cpp:111, fb = 7.0f * reso. Output is a flat 12.0f times the filter state at :167, with no resonance or gain compensation. The linear FM input is twice as sensitive as LADR's: uLADR.cpp:118 multiplies by 2.0f before dividing by ten."
   },
-  "OP": {
+  "DIOD": {
    "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "PHASR": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "MUL": {
-   "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-pole diode ladder filter offering a four-pole or a two-pole lowpass, running sixteen polyphonic channels",
+    "Sets the cutoff, with the dial's travel raised to the fourth power so most of the fine control falls at the low end",
+    "Sets the resonance, feeding as much as twenty-four times the last pole's output back into the filter input; the module raises the output level along with it to compensate",
+    "Drives the signal into the filter as the fourth power of the dial, reaching 3.2 times the input voltage at the top",
+    "Chooses the lowpass slope reaching OUT: LP4 for the full four-pole ladder, LP2 for a two-pole tap taken at a quarter of the level",
+    "Scales what the FM input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Scales what the V/OCT input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Adds a fifth of its voltage to the cutoff, scaled by its attenuverter",
+    "Multiplies the cutoff by two raised to its voltage, an octave per volt with its attenuverter fully positive",
+    "The signal into the filter; the number of channels patched here is the number of channels the module runs",
+    "The filtered signal, one channel for each channel patched into IN",
+    "Note — the internal cutoff rate is clamped at zero, so a negative voltage at FM large enough to drive it there closes the filter",
+    "Note — bypassing the module passes IN straight through to OUT",
+    "Menu — Oversampling: off — runs the filter core once per sample and skips the decimation filter",
+    "Menu — Oversampling: x2 — runs the filter core twice per sample and decimates; the setting a new module starts with",
+    "Menu — Oversampling: x4 — runs the filter core four times per sample and decimates",
+    "Menu — Oversampling: x8 — runs the filter core eight times per sample and decimates",
+    "Menu — Decimator order: 8 — gives the Butterworth decimation filter eight poles",
+    "Menu — Decimator order: 16 — gives the Butterworth decimation filter sixteen poles; the setting a new module starts with",
+    "Menu — Decimator order: 32 — gives the Butterworth decimation filter thirty-two poles",
+    "Menu — Semi-implicit Euler w/ Full Tanh — integrates the ladder with a single Euler step and a tanh saturation at every pole",
+    "Menu — Predictor-Corrector w/ Full Tanh — integrates the ladder with a predict-then-correct step and a tanh saturation at every pole; the setting a new module starts with"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "DIOD.cpp:106 the voltage divided by ten, times the cubed attenuverter, added to the knob; the resulting rate is clamped at zero in the filter core"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DIOD.cpp:117 cutoff multiplied by pow(2, attenuverter * volts)"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "DIOD.cpp:74 getChannels() here sets the loop bound; DIOD.cpp:127 getVoltage(ii) per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "DIOD.cpp:133 setVoltage(..., ii) per channel, DIOD.cpp:137 setChannels(channels)"
+     }
+    }
+   },
+   "notes": "Feedback is diode.cpp:226, fb = 24.f * Resonance. Output compensation is DIOD.cpp:90, gainNormalization = 1 + 6 * log(1 + 0.75 * reso), applied at :133 with a fixed factor of 6. The two-pole tap is diode.cpp, DIODE_LOWPASS2_MODE returning 0.25f times the second decoupling state. The linear FM input is twice as sensitive as LADR's: DIOD.cpp:106 multiplies by 2.0f before dividing by ten."
   },
   "SKF": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A Sallen-Key filter with a saturating feedback path, offering a lowpass or a bandpass, running sixteen polyphonic channels",
+    "Sets the cutoff, with the dial's travel raised to the fourth power so most of the fine control falls at the low end",
+    "Sets the resonance, feeding as much as four times the second pole's output into the filter's feedback term",
+    "Drives the signal into the filter as the fourth power of the dial; from the halfway point upward the output is scaled back to hold the level steady",
+    "Chooses where the signal enters the filter: LP feeds the lowpass input, BP feeds the bandpass input",
+    "Scales what the FM input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Scales what the V/OCT input does to the cutoff, from fully inverted through nothing to fully positive; the dial's travel is cubed",
+    "Adds a tenth of its voltage to the cutoff, scaled by its attenuverter, despite the tooltip on this jack reading Filter",
+    "Multiplies the cutoff by two raised to its voltage, an octave per volt with its attenuverter fully positive",
+    "The signal into the filter; the number of channels patched here is the number of channels the module runs",
+    "The filtered signal, one channel for each channel patched into IN",
+    "Note — the internal cutoff rate is clamped at zero, so a negative voltage at FM large enough to drive it there closes the filter",
+    "Note — bypassing the module passes IN straight through to OUT",
+    "Menu — Oversampling: off — runs the filter core once per sample and skips the decimation filter",
+    "Menu — Oversampling: x2 — runs the filter core twice per sample and decimates; the setting a new module starts with",
+    "Menu — Oversampling: x4 — runs the filter core four times per sample and decimates",
+    "Menu — Oversampling: x8 — runs the filter core eight times per sample and decimates",
+    "Menu — Decimator order: 8 — gives the Butterworth decimation filter eight poles",
+    "Menu — Decimator order: 16 — gives the Butterworth decimation filter sixteen poles; the setting a new module starts with",
+    "Menu — Decimator order: 32 — gives the Butterworth decimation filter thirty-two poles",
+    "Menu — Trapezoidal — integrates the filter state with a trapezoidal step, and is the only choice offered under the Integration Method heading"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "SKF.cpp:107 the voltage divided by ten, times the cubed attenuverter, added to the knob; the resulting rate is clamped at zero in the filter core"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "SKF.cpp:118 cutoff multiplied by pow(2, attenuverter * volts)"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "SKF.cpp:74 getChannels() here sets the loop bound; SKF.cpp:128 getVoltage(ii) per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "SKF.cpp:134 setVoltage(..., ii) per channel, SKF.cpp:138 setChannels(channels)"
+     }
+    }
+   },
+   "notes": "SKF.cpp:68 calls configInput(OUTPUT_OUTPUT, \"Filter\") where configOutput was meant. OUTPUT_OUTPUT is zero, so the name lands on input 0 — the FM jack, whose own name from :65 is overwritten — and the OUT jack is left with no name at all. Rack therefore shows Filter when you hover FM and nothing when you hover OUT. Confirmed in the census: SKF is the only model in the plugin whose inputs[0] is named Filter and whose outputs[0] name is empty. Resonance is sallenkey.cpp:236, res = 4.0f * Resonance. The core also carries an SK_HIGHPASS_MODE and two further integration methods (SK_SEMI_IMPLICIT_EULER, SK_PREDICTOR_CORRECTOR) that the panel and menu never reach."
+  },
+  "OP": {
+   "lines": [
+    "A phase-modulation operator: one sine oscillator whose phase can be pushed by another signal, running sixteen polyphonic channels",
+    "Sets how many semitones of pitch one volt at V/OCT gives, 1 to 48; at 12 the oscillator tracks an octave per volt",
+    "Transposes the oscillator by a fixed amount before the scaling is applied, 0 to 128 semitones",
+    "Scales what the PM input does to the phase, from fully inverted through nothing to fully positive; the dial's travel is cubed and the result reaches 32 radians per volt",
+    "Adds a fixed offset to the oscillator's phase, from minus pi to plus pi radians",
+    "Shifts the oscillator's phase in proportion to its voltage, by the amount the modulation index sets",
+    "A rising crossing through 0V here restarts the oscillator's cycle from phase zero",
+    "Sets the pitch; the number of channels patched here is the number of channels the module runs",
+    "A sine wave taken from the oscillator's phase, swinging 10V either way",
+    "Note — the scaled pitch is clipped at zero, so once the offset and scale bring the total down to nothing the frequency stops falling however negative the voltage at V/OCT goes",
+    "Note — the lowest frequency the oscillator reaches is 440Hz divided by 128, and every volt of scaled pitch doubles it from there"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "pitch"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "OP.cpp:86 getVoltage(ii) per channel; :109 multiplied by 32 times the cubed index"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 0V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "OP.cpp:98 last_reset <= 0.0f and reset > 0.0f resets the phase"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "OP.cpp:68 getChannels() here sets the loop bound; :85 volts plus offset over twelve, :93 clipped at zero, :106 pow(2, cv)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "why": "OP.cpp:115 10.0 * sin(phase) per channel; :119 setChannels(channels)"
+     }
+    }
+   },
+   "notes": "The SCALE and OFFSET knobs are read through int(), so they step whole numbers even though neither is a snap knob. Base frequency is OP.cpp:106, (440.0/128.0) * pow(2, cv). The panel prints minus and plus marks over the left trimpot only; the right trimpot, the phase offset, carries no marking of any kind."
+  },
+  "PHASR": {
+   "lines": [
+    "A phasor oscillator giving a falling ramp of the raw phase, meant to feed the phase modulation input of OP, running sixteen polyphonic channels",
+    "Sets the frequency as two raised to twelve times the dial, giving 1Hz at the bottom and 4096Hz at the top",
+    "Trims the frequency by a tenth of an octave either way",
+    "Scales what the PM input does to the phase, from fully inverted through nothing to fully positive; the dial's travel is cubed and the result reaches 32 radians per volt",
+    "Shifts the phase in proportion to its voltage, by the amount the modulation index sets",
+    "Raises the frequency by an octave per volt above the FREQ setting; the number of channels patched here is the number of channels the module runs",
+    "A falling ramp of the oscillator's phase, running from 3.14V down to -3.14V each cycle",
+    "Note — the pitch voltage is clipped at zero, so a negative voltage at V/OCT does not lower the frequency below the FREQ setting"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "PHASR.cpp:80 getVoltage(ii) per channel; :91 multiplied by 32 times the cubed index"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "PHASR.cpp:60 getChannels() here sets the loop bound; :83 negative volts clipped to zero; :88 freq * pow(2, cv)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "PHASR.cpp:97 -(phase - M_PI) per channel, so plus or minus pi volts; :101 setChannels(channels)"
+     }
+    }
+   },
+   "notes": "The installed plugin.json tags PHASR Oscillator only, without Polyphonic, but the code runs sixteen Phasor instances and calls setChannels from the V/OCT channel count at PHASR.cpp:101, exactly as OP does. The tag is wrong. The output range is plus or minus pi volts, about 3.14; it is recorded as ±5V because that is the nearest spelling the field allows, and the true figure is in the line. The trimpot carries only minus and plus marks on the panel, with no name."
+  },
+  "MUL": {
+   "lines": [
+    "Two multiplier sections added into one output, each multiplying its own knob, its IN1 voltage and its IN2 voltage together",
+    "Scales one section of the sum, -8 to +8; that section contributes this figure times its IN1 voltage times its IN2 voltage",
+    "One of the two voltages multiplied together in that section; with nothing patched it counts as 1, leaving that section as its knob times its IN2",
+    "One of the two voltages multiplied together in that section; with nothing patched it reads 0V, which empties that section from the sum",
+    "The two sections added together",
+    "Note — the output stays at 0V until something is patched into an IN2 jack, because an unpatched IN2 reads 0V and empties its section from the sum",
+    "Note — the module is monophonic: only the first channel of a polyphonic cable is read, and the output carries one channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 3,
+    "3": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "1, a bare number rather than a voltage",
+      "why": "MUL.cpp:60 isConnected() else in1_1 stays 1.0; :68 getVoltage() reads the first channel only"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "1, a bare number rather than a voltage",
+      "why": "MUL.cpp:63 isConnected() else in1_2 stays 1.0; :69 getVoltage() reads the first channel only"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "MUL.cpp:68 getVoltage() read straight into the product with no isConnected check"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "MUL.cpp:69 getVoltage() read straight into the product with no isConnected check"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "MUL.cpp:68 setVoltage() with no channel index and no setChannels call"
+     }
+    }
+   },
+   "notes": "No family is given for any jack: the module multiplies whatever it is handed, so no one colour is true of these ports. The two IN1 jacks are the ones the maker names Multiplier and the two IN2 jacks the ones he names Multiplicant; only the IN1 pair is normalled. Index order is not panel order here — inputs 0 and 2 are the upper section, inputs 1 and 3 the lower, so the panel reads 0, 2, 1, 3 from the top."
+  },
+  "TRG": {
+   "lines": [
+    "A thirty-two step trigger sequencer: you switch steps on in the grid, and each clock pulse that lands on a step which is on produces a gate",
+    "Sets how many steps the sequence runs before it returns to the first, 1 to 32",
+    "A rising crossing of 0.5V here advances the sequence by one step",
+    "A rising crossing of 0.5V here returns the sequence to its first step",
+    "10V for as long as the clock stays high on a step that is switched on, and 0V otherwise",
+    "Note — the module produces nothing until you switch steps on: click a square in the grid to toggle it, and drag across squares to paint a run of them to the same state",
+    "Note — the grid shows sixteen of the thirty-two steps at once; the narrow strip under the grid switches between the two halves, and it only responds to a click when Follow active step is unchecked",
+    "Note — the step squares are drawn as one display rather than as separate controls, so no individual step can be clicked for help of its own",
+    "Note — bypassing the module passes CLK straight through to GATE",
+    "Menu — Follow active step — checked, the grid jumps to whichever half holds the playing step; unchecked, the strip under the grid chooses the half by hand"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "TRG.cpp:89 getVoltage() > 0.5f advances, :109 below 0.5f drops the gate"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 0.5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "TRG.cpp:115 getVoltage() > 0.5f resets the step to zero"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "TRG.cpp:138 setVoltage(gate_state * 10.f) with no channel index and no setChannels call"
+     }
+    }
+   },
+   "notes": "The LEN knob is the only parameter the installed build declares, which is how this build was placed in the maker's history: a later commit, 300e98f, replaces the hand-drawn grid with real ParamWidgets and adds thirty-two Step parameters and a Page parameter. The census shows one parameter, so the installed binary predates that change. Randomising the module fills the grid at random (TRG.cpp onRandomize), which no control or menu item announces."
   },
   "DDLY": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A digital delay of as much as 3 seconds, with a feedback path, a send and return insert point, and a crossfade that covers changes of delay time",
+    "Sets the delay time as the cube of the dial across a 3 second buffer; with a cable in CLK it picks a ratio of the clock period instead",
+    "Sets how much of the delayed signal is written back into the delay line, -1 to +1, with negative settings inverting it on the way round",
+    "Scales what the time CV input does to the delay time, from fully inverted through nothing to fully positive",
+    "Scales what the feedback CV input does to the feedback amount, from fully inverted through nothing to fully positive",
+    "Crossfades the output between the dry input and the delayed signal",
+    "Shifts the delay time by a fifth of its voltage, scaled by its attenuverter",
+    "Shifts the feedback amount by a fifth of its voltage, scaled by its attenuverter",
+    "A clock here takes the delay time away from the knob: the knob then picks a ratio of the measured clock period, from an eighth of it up to double",
+    "What gets written into the delay line, in place of the input and feedback sum; with nothing patched the delay feeds itself as usual",
+    "The signal into the delay; a polyphonic cable is summed down to one channel",
+    "The input added to the feedback signal, which is what the module would write into the delay line",
+    "The dry input and the delayed signal mixed in the proportion D/W sets",
+    "Note — the module is monophonic: the input is summed to one channel and both outputs carry one channel",
+    "Note — SEND and RET form an insert: patch SEND out to an effect and its result back into RET, and the effect is placed inside the feedback loop",
+    "Note — a clock needs two rising edges before the module can measure its period; the knob sets the delay time directly until that second edge arrives",
+    "Note — with a cable in CLK the delay time knob selects from sixteen ratios of the clock period, an eighth to double in steps of an eighth",
+    "Note — below the middle of the delay time dial the clock ratio is squared, which spreads the short divisions further apart",
+    "Note — changing the delay time crossfades between two read points in the buffer rather than sweeping one, so the pitch of the delayed signal does not slide",
+    "Note — everything written into the delay line passes through a DC blocking filter and is inverted on the way in, so a repeat comes back with its polarity flipped",
+    "Note — bypassing the module passes IN straight through to OUT"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "audio",
+     "4": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "DDLY.cpp:139 getVoltage(); :148 time += attenuverter * (cv / 5); :151 the total clipped to 0 through 0.9985",
+      "sumRange": "0 to 1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "DDLY.cpp:140 getVoltage(); :161 feedback += attenuverter * (cv / 5); :164 the total clipped to plus or minus one"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "DDLY.cpp:143 getVoltage(); :172 isConnected() gates the whole clock branch; :174 a rising crossing of 0.0f measures the period"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the input plus the feedback signal",
+      "why": "DDLY.cpp:316 isConnected() writes ret into the buffer instead of input + feedback * delay"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "why": "DDLY.cpp:145 getVoltageSum() adds every channel of the cable into one value"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "DDLY.cpp:324 setVoltage() with no channel index and no setChannels call"
+     },
+     "1": {
+      "poly": false,
+      "why": "DDLY.cpp:327 setVoltage() with no channel index and no setChannels call"
+     }
+    }
+   },
+   "notes": "The buffer is DDLY_MAX_DELAY_TIME, defined as 3, times the sample rate, reallocated in onAdd. The time knob is cubed at DDLY.cpp:250 and elsewhere and floored at 0.0004 of the buffer. The write head at DDLY.cpp:355 computes hp - hp_input, which is the negative of the high-passed signal, so the buffer holds an inverted copy; it looks like a sign slip rather than a design choice, and it is described in the lines as what it does rather than as a fault. The clock ratio table is the sixteen values 0.125 to 2.0 at DDLY.cpp:185. The two CV jacks in the left column carry no printed label on the panel; their tooltips are Time CV and Feedback CV. sumRange on the time CV is the clip at DDLY.cpp:151, a normalised 0 to 1 of the buffer rather than a voltage; it is spelled in the only form the field allows."
   }
  }
 }

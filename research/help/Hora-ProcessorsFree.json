@@ -1,28 +1,287 @@
 {
  "plugin": "Hora-ProcessorsFree",
- "source": "http://hora-music.wifeo.com/manuals.php",
+ "source": "https://library.vcvrack.com/Hora-ProcessorsFree",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "EnvelopeFollower": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Envelope follower: it amplifies an audio signal, traces its envelope on a second jack and fires a trigger whenever that envelope passes a threshold",
+    "Sets how quickly the envelope follows the signal down, fast at the bottom of its travel and slow at the top, reading out in dB",
+    "Sets the level the envelope has to pass before the gate jack fires, reading out in dB",
+    "Sets the gain applied to the input before everything else, reading out in dB up to 6dB",
+    "Nothing in the module can move this switch: the maker configured no quantity for it, so it stays where it is and the gate jack always fires brief triggers rather than a held gate",
+    "The audio fed into the module",
+    "The input multiplied by the square of the gain knob",
+    "The envelope of the input, 0-5V",
+    "A 7ms 5V trigger each time the envelope rises past the threshold"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "4": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7,
+    "2": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "cv",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "0xd1b0 in the installed 2.2.4 plugin.dylib reads the jack and 0xd1c0 multiplies it by the square of the gain knob"
+     }
+    }
+   },
+   "notes": "Closed source; read from the installed 2.2.4 plugin.dylib, which carries full local symbols including one process function per model. Follower::process is at 0xd194 and Follower::Follower at 0xe0f4. The constructor calls Module::config with five parameters but only three configParam calls, for indices 2, 0 and 1, so parameters 3 and 4 have no ParamQuantity. Parameter 4 is the GATE MODE switch and does have a ParamWidget on the panel, so it can be clicked but not turned: Rack's Switch ignores a drag when there is no quantity, and paramsToJson skips a parameter without one, so it can never leave zero. Process reads it at 0xd224 and dispatches zero to the counted-pulse branch, which is why the gate jack always gives a trigger. Parameter 3 has neither a quantity nor a widget. The panel prints DECAY on the knob whose tooltip says SLEW; the line follows the panel. The follower coefficient is 100 minus nine times that knob, so the knob's range of 0 to 10 gives 100 down to 10 per second. The threshold is squared before the comparison and the knob displays as 40 times the base-ten logarithm, which is the dB scale printed beside the meter. The trigger length is the sample rate times 0.0069999, so 7ms. The meter down the panel is drawn by a custom widget and has no clickable parameter."
   },
   "Delay": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Delay and resonator in one: a mode switch turns the delay line into a tuned resonator that a trigger plucks, and the delay side can take its time from a clock",
+    "In delay mode it sets the delay time, or the division of the clock when one is patched; in resonator mode it sets the pitch, two octaves per turn",
+    "Sets how much of the output is fed back, so how many repeats there are, or in resonator mode how long the resonance rings",
+    "Sets the level of the signal going into the delay line, reading out in dB",
+    "In delay mode it crossfades the MIX output between dry and delayed; in resonator mode it is a fine adjustment on the pitch, an octave per turn",
+    "Divides the delay time by one, two or three, and in resonator mode raises the pitch by nought, one or two octaves instead",
+    "Switches the module between the delay and the resonator, which changes how the TIME, REPEAT, MIX and 1V/OCT controls are read",
+    "Chooses which way the delay line is read, out of REV, H-REV and NORM",
+    "In resonator mode a pitch input tracking one volt per octave; in delay mode it picks the clock division, ten divisions per volt",
+    "Raises the feedback, 10V covering the whole of the repeat knob's travel",
+    "The audio fed into the delay line, ±10V taken as full scale",
+    "In resonator mode a rising edge past 1V plucks the resonator; in delay mode the same jack shifts the dry and delayed balance, 10V covering the whole of the mix knob's travel",
+    "In delay mode a rising edge past 1V sets the delay time from the gap between edges; in resonator mode the jack modulates the pitch, a fifth of a volt to the octave",
+    "The dry and delayed signals mixed according to the mix knob",
+    "The dry signal alone",
+    "The delayed signal alone",
+    "Menu — LP filter :  — switches a lowpass filter into the wet signal before it is mixed into the MIX output, and prints its own state after the colon",
+    "Note — with a cable in the trigger jack the module behaves as a resonator that only sounds when a trigger arrives; with that jack empty it is an ordinary delay."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "audio",
+     "3": "trigger",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "0xab44 in the installed 2.2.4 plugin.dylib adds the jack straight into the exponent handed to exp2; 0xae00 instead scales it by ten into a clock division when the module is in delay mode"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "0xaa3c reads the jack, multiplies by 0.1 and adds the knob"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "0xaa5c reads the jack and multiplies by 0.1 before the delay line, so 10V is full scale"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "0xaaa4 compares the jack against 1.0 in resonator mode; 0xacac instead multiplies it by 0.1 and adds the mix knob in delay mode"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "0xacb8 tests this jack's channel count and 0xace4 looks for a rise past 1.0; 0xab70 instead multiplies it by 0.2 into the pitch exponent in resonator mode"
+     }
+    }
+   },
+   "notes": "Closed source; read from the installed 2.2.4 plugin.dylib. Delay::process is at 0xa9c0 and hands its work to VultEngine_delay, a Vult-generated function whose symbol is exported. Two of the three switches wear each other's tooltips: parameter 5 is named RANGE in the maker's own configParam but sits under the panel's MODE heading and selects delay against resonator at 0xab14, and parameter 6 is named MODE but sits under DIRECTION and is passed to the engine as the direction integer at 0xaf10. Parameter 4, named RANGE, is the one that really is the OCT RANGE switch: at 0xad3c it multiplies the delay time by a half or a third, and at 0xab48 it adds nought, one or two octaves to the pitch instead. The delay buffer is two seconds of samples capped at 192000. The clock period is only used while a cable is in the clock jack, and the division runs from minus six to plus six through a lookup table at 0xae48. The trigger jack does double duty: it plucks the resonator in one mode and carries the mix CV in the other. The menu item's name, LP filter with a space, colon and space, is a literal at 0xb6d4; the module has no other menu of its own."
   },
   "Vacuum": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Tube distortion: the signal is driven into a valve model, filtered before it gets there and levelled after it",
+    "Picks one of six valve models, from symmetrical clipping at one end of the arc to asymmetrical at the other",
+    "Sets the corner of the four-pole lowpass ahead of the valve, 500Hz at one end and 44000Hz at the other",
+    "Sets how hard the signal is driven into the valve",
+    "Sets the level of the output",
+    "Raises the drive, 5V covering the whole of the gain knob's travel",
+    "Shifts the filter corner, 1V moving it by about 2944Hz, with the total held between 500Hz and 44000Hz",
+    "The audio fed into the module, ±5V taken as full scale",
+    "The distorted signal, scaled by the output knob"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "0xf554 in the installed 2.2.4 plugin.dylib reads the jack, multiplies by 0.1 and adds 0.525 times the gain knob"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "0xf598 reads the jack, multiplies by 2944, adds the tone knob and clamps the total to 500 and 44000"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "0xf530 reads the jack and multiplies by 0.2, and 0xf5d4 clamps the driven signal to -1 and 1"
+     }
+    }
+   },
+   "notes": "Closed source; read from the installed 2.2.4 plugin.dylib. Vacuum::process is at 0xf50c and calls mutiVacuum<8,16>::process, which is the valve model; the signal is then decimated through a 128-tap convolution and DC blocked. The model parameter is configured 0 to 5 with a default of 3, so six models, and the panel draws them as an arc from SYMETRICAL to ASYMETRICAL; the maker's tooltip calls the control MODEL where the panel prints MODE, and the line follows the panel. The model number also changes the output stage: at 0xf7a0 models 0 to 2 multiply by 5.6 times the output knob and models 3 to 5 by 8 times it. The tone knob is configured directly in hertz, 500 to 44000 with the default fully open at 44000. Two lights are driven from the level with different thresholds for the two groups of models; they are drawn by the plugin's own MultiLight widget and have no clickable parameter."
   },
   "Brigade": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Bucket-brigade delay: the signal is clocked through an analogue-style delay line whose clock rate you set, with feedback, a modulation oscillator and a noise floor of its own",
+    "Sets the clock rate of the delay line in hertz, up to 20000Hz; a faster clock is a shorter delay",
+    "Sets the level of the signal going into the delay line",
+    "Sets how much of the output is fed back into the delay line; the feedback is soft-limited at 0.3 so it cannot run away",
+    "Crossfades the output between the dry signal and the delayed one",
+    "Each press latches this switch on or off, choosing between two ways of clocking the bucket-brigade line",
+    "Sets how far the modulation oscillator moves the clock rate, up to 6000Hz either way",
+    "Sets the speed of the modulation oscillator, up to 15 times a second",
+    "Shifts the clock rate of the delay line, 1V moving it by 600Hz",
+    "The audio fed into the delay line, scaled by the input knob",
+    "The dry and delayed signals mixed according to the mix knob",
+    "Note — none of the controls is lettered on the panel; what each one does is in this entry and in the tooltips."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "0x62a4 in the installed 2.2.4 plugin.dylib reads the jack, multiplies by 600 and adds the frequency knob, and 0x63ac holds the result at 1Hz or above"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "0x61cc reads the jack and 0x62bc multiplies it by 0.1 and then by the input knob, so 10V is full scale"
+     }
+    }
+   },
+   "notes": "Closed source; read from the installed 2.2.4 plugin.dylib. Brigade::process is at 0x6108 and calls brigade<4,2>::interpoleInput at 0x6624. The panel is a drawing with no lettering on any control, so every name used here is the maker's own from the tooltips. The modulation oscillator is a parabolic shape built in line, running at fifteen times the modulation-rate knob, and its output is multiplied by 6000 and by the modulation-depth knob before being added to the clock rate. A Mersenne twister, recognisable from its 0x9908B0DF constant at 0x61b8, adds a noise floor of about a thousandth either way to the output, which is what gives the module its hiss. The feedback path is clamped to plus and minus 0.3 at 0x6584 and then lowpassed, so the module self-oscillates rather than running away. The switch parameter is a latch, toggled at 0x61f0, and the bool it produces selects between two branches inside interpoleInput; what the two branches do differently was not traced further, so the line says only that."
   }
  }
 }

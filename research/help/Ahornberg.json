@@ -1,88 +1,2283 @@
 {
  "plugin": "Ahornberg",
- "source": "https://github.com/Ahornberg/Ahornberg-VCV-Modules",
+ "source": "https://github.com/Ahornberg/Ahornberg-VCV-Modules/blob/master/manuals/README.md",
  "read": "2026-09-14",
- "partial": true,
+ "notes": "Written from the maker's own source at commit 3a9441f, \"v 2.3.4 buxfix mpe volume\", which is the commit whose plugin.json carries the installed 2.3.4 and is also the head of the repository, together with manuals/README.md in the same tree and a render of every panel. No module in this plugin has a plugin-wide menu; BaseModuleWidget::appendContextMenu adds only a separator and then each module's own items. Every trigger input in the plugin goes through rescaleInput in src/util/Switches.cpp, which is rescale(v, 0.1, 2, 0, 1), so a Schmitt trigger that counts high above 2V and low below 0.1V. Five controls across the plugin were proved dead by reading every use of their parameter and are given lines saying so: the Tape Recorder's Motor Power screw, and the Tape Recorder Mixer's Tape Ducking knob, Ducking input, Erase input, Solo switch and Delay in samples screw. Tracker and MIDI Controller are both unfinished, and More Fun with Frames is a line-for-line copy of Fun with Frames.",
  "modules": {
   "Tracker": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An unfinished sequencer with a tracker-style screen; nothing on it works yet",
+    "Note — this module produces no signal: its process function is empty, and the two parameters and two outputs it declares are never placed on the panel.",
+    "Note — the rows of note and hex characters on the screen are one fixed string redrawn at every frame, not a pattern that can be edited or played."
+   ],
+   "notes": "src/modules/Tracker/Tracker.cpp at commit 3a9441f has an empty process() with the intended body commented out, and TrackerWidget.cpp adds no ParamWidget or PortWidget at all, so no control on this module can be clicked. The census confirms it: two params and two outputs, none with a position."
   },
   "TapeRecorder": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An emulation of a microcassette recorder: it writes whatever arrives at the audio input onto a tape kept inside the patch, and plays it back forwards or backwards at any speed",
+    "Halts the tape while a play button stays on, so the reels can be turned by hand",
+    "Runs the tape forward",
+    "Runs the tape backwards",
+    "Winds the tape forward at the multiple of play speed set by the Fast Speed screw; Ctrl and a click jumps to the next loop point instead, and Ctrl with Shift jumps to the end of the tape",
+    "Winds the tape backwards at the multiple of play speed set by the Fast Speed screw; Ctrl and a click jumps to the previous loop point instead, and Ctrl with Shift jumps to the start",
+    "Sets how fast the two winding buttons move the tape, from a quarter of play speed to 20 times it",
+    "Nothing in the module reads this screw. It sets the rise rate of a slew limiter on the tape speed whose every use is commented out of the source, so turning it changes no sound.",
+    "Sets the tempo the tape is measured in, 1 to 360 BPM; the tempo output pulses at it and the loop points are counted in its bars",
+    "Sets how many beats make a bar, 1 to 48, which fixes how much tape one bar covers",
+    "Sets the bar the loop starts at, 0 to 99",
+    "Sets the bar the loop ends at, 0 to 99",
+    "Turn a reel to move the tape by hand, which scratches the recording while a play button and pause are both on. Dragging near the rim brakes the tape and dragging at the centre leaves it at full speed.",
+    "Sets the loop start to the bar the tape has reached, and springs back off",
+    "Sets the loop end to the bar the tape has reached, and springs back off",
+    "The audio written to the tape, one polyphonic channel per track. It is also the bus back from the Tape Recorder Mixer, whose channels 5 to 8 erase a track and whose channels 9 to 12 saturate it.",
+    "Moves the loop start, one bar per 1/12V, added to the loop start knob and never taken below bar 0",
+    "Moves the loop end, one bar per 1/12V, added to the loop end knob and never taken below bar 0",
+    "Multiplies the tape speed by two to the power of the voltage, so 1V plays the tape an octave higher and -1V an octave lower",
+    "A rising edge toggles the pause button",
+    "The tape playback, one polyphonic channel per track, at ten times the value stored on the tape; while the tape is not running this carries the audio input instead",
+    "The speed the tape is running at as a pitch, one volt per octave; the sign is dropped, so a reversed tape reads at the speed a forward one would",
+    "5V for each beat and 10V for the first beat of a bar, one millisecond long, as the tape passes them; nothing comes out unless a play button is on",
+    "5V while the tape plays forward, -5V while it plays backwards, 0V when it is stopped",
+    "Note — recording is always on. Whenever a play button is on, whatever is at the audio input is written to the tape as it passes; to play a tape back without spoiling it, unpatch the audio input.",
+    "Note — the loop is off while the loop start and loop end read the same bar.",
+    "Note — the two winding buttons are momentary while a play button is on, and latch when the tape is stopped.",
+    "Note — the Ctrl in the winding shortcuts is Cmd on a Mac, and holding Ctrl or Ctrl and Shift while turning a reel moves the tape more slowly.",
+    "Note — the tape is kept inside the patch. Saving the patch writes the recording beside it as tape.wav, and saving a module preset writes a .wav of the same name beside the preset.",
+    "Menu — the text field at the top — holds the name written on the cassette label",
+    "Menu — Cassette Label: 1970, Red, Green, Purple, Brown, Rainbow, Stars, Snowflake, Flowers, Tape, Chip, Zzz — chooses the artwork printed on the cassette",
+    "Menu — Tape Length — sets how long the tape is, from MC 1 for one minute to MC 120 for two hours, and returns the transport to the start; MC 120 is barred while the track count is 4 Tracks",
+    "Menu — Track Count: Mono, Stereo, 4 Tracks — sets how many tracks the tape carries and how many channels the audio output has; 4 Tracks is barred on an MC 120 tape",
+    "Menu — Loop Mode: Cycle, Ping-Pong — chooses what happens at a loop point, Cycle jumping to the other end and Ping-Pong reversing the play direction; a new module comes up on Ping-Pong",
+    "Menu — Erase Tape — writes silence over the whole tape"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "12": 12,
+    "13": 12,
+    "14": 13,
+    "15": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19
+   },
+   "out": {
+    "0": 20,
+    "1": 21,
+    "2": 22,
+    "3": 23
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "pitch",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "pitch",
+     "2": "trigger",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "TapeRecorder.cpp calcAudio() reads getVoltage(i), getVoltage(i + 4) and getVoltage(i + 8) for each of up to four tracks, so twelve channels are read"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "the knob alone",
+      "why": "processLoopInput() in TapeRecorder.cpp: loopStart = (int)(getVoltage() * 12 + 0.5 + knob), then clamped up to 0"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "negative": "subtracts",
+      "normal": "the knob alone",
+      "why": "processLoopInput() in TapeRecorder.cpp: loopEnd = (int)(getVoltage() * 12 + 0.5 + knob), then clamped up to 0"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "processSpeedInput() in TapeRecorder.cpp multiplies the tape speed by exp2(getVoltage()), so a negative voltage slows it rather than being dropped"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "processTransportInput() feeds rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into a SchmittTrigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "setChannels(trackCount) in TapeRecorder::process(), trackCount being 1, 2 or 4 from the Track Count menu"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f, whose plugin.json carries the installed 2.3.4, and from manuals/README.md in the same tree. Motor Power is proved dead: it is passed to speedSlewLimiter.setRiseFall in two places, and every speedSlewLimiter.process call in TapeRecorder.cpp is commented out. The Loop Mode parameter has no widget of its own and is reached only through the menu. The audio input's channel layout above channel 4 is what the Tape Recorder Mixer chain writes; the mixer sends -10V on channels 5 to 8 while recording, and never writes anything to channels 9 to 12, so the saturation those channels control can only be reached with a polyphonic cable of your own."
   },
   "TapeRecorderMixer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A channel strip for the Tape Recorder: it takes one source, offers an effects loop, and passes the whole lot along a polyphonic bus that carries up to four tape tracks",
+    "Sends this channel's signal to the tape while it is on, and tells the recorder to erase what is already on that track",
+    "Takes the effects loop out of circuit, so the signal from the input goes on without the return",
+    "Nothing in the module reads this knob. The plugin's tags promise ducking and the code for it was never written, so turning it changes no sound.",
+    "Sets how much of what comes back from the tape is mixed into this channel, squared, from silence to 6dB above unity, despite the panel printing erase and the maker naming it Tape Erase Amount",
+    "Nothing in the module reads this switch beyond lighting itself. No signal is muted or unmuted by it and no other module is told about it.",
+    "Silences this channel's own audio output; what goes to the tape is not affected",
+    "Sets the level of the signal at the audio input, squared, from silence to 6dB above unity",
+    "Silences the signal at the audio input before anything else happens to it; it appears on the panel only after Enable Input Mute has been chosen from the menu",
+    "Nothing in the module reads this screw. It is named Delay in samples and counts 0 to 100, and no delay is applied anywhere in the code.",
+    "The signal this channel mixes",
+    "Where the effects chain comes back; with nothing patched here the send and return are skipped altogether",
+    "The leg of the bus running towards the Tape Recorder, taken from the strip on the right",
+    "The leg of the bus coming back from the Tape Recorder, taken from the recorder's audio output or from the strip on the right",
+    "A rising edge toggles the record switch",
+    "A rising edge toggles the effects bypass switch",
+    "Nothing in the module reads this jack; the ducking it was meant to control was never written.",
+    "Nothing in the module reads this jack; the tape return level is set by its knob alone.",
+    "A rising edge toggles the solo switch, which nothing in the module reads",
+    "A rising edge toggles the mute switch",
+    "Scales the input level knob, 0V for silence and 10V for the knob as it is set, clamped at 20V",
+    "This channel's audio after the effects loop, the mute and the meter",
+    "The signal going out to the effects chain, taken after the input level and after whatever came back from the tape",
+    "The leg of the bus running away from the Tape Recorder, with this channel's track taken off it, for the strip on the left",
+    "The leg of the bus running towards the Tape Recorder, with this channel's audio added to it, for the strip on the right",
+    "Note — the strip does nothing about tape until the bus is joined up, and the Tape Recorder goes to the right of the strips.",
+    "Note — patch the recorder's audio output into the bus from tape input of the nearest strip, that strip's bus from tape output into the next strip's bus from tape input, and so on leftwards.",
+    "Note — the bus to tape jacks run the other way: each strip's bus to tape output goes into the next strip's bus to tape input, ending at the recorder's audio input.",
+    "Note — which track a strip owns is counted along that chain, and the number appears on the display.",
+    "Note — the meter and the track number on the display are drawn by the module; neither can be clicked.",
+    "Menu — the text field at the top — holds the track name shown on the display, of which the first seven characters fit",
+    "Menu — Enable Input Mute — puts a mute button on top of the input level knob, and reads Disable Input Mute once it is there"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "10": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15,
+    "6": 16,
+    "7": 17,
+    "8": 18,
+    "9": 19,
+    "10": 20
+   },
+   "out": {
+    "0": 21,
+    "1": 22,
+    "2": 23,
+    "3": 24
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "trigger",
+     "5": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "TapeRecorderMixer.cpp process() reads inputs[AUDIO_INPUT].getVoltage() with no channel argument"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the send, so the loop is skipped",
+      "why": "the effects return is only mixed inside if (inputs[AUDIO_FX_RETURN].isConnected()) in TapeRecorderMixer.cpp"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "process() copies getVoltage(i) for i up to the track count and again from 4 upwards, shifting each channel by one"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "why": "getChannels() on this jack is what sets channelNumber, and channel 16 is decoded for the track number and link flag"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into a SchmittTrigger"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput() into fxBypassInputTrigger in TapeRecorderMixer.cpp"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput() into soloInputTrigger in TapeRecorderMixer.cpp"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput() into muteInputTrigger in TapeRecorderMixer.cpp"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the knob alone",
+      "why": "clamp(getVoltage(), 0.f, 20.f) / 10.f multiplied into the input level knob in TapeRecorderMixer.cpp"
+     }
+    },
+    "out": {
+     "2": {
+      "poly": true,
+      "why": "setChannels(PORT_MAX_CHANNELS) on both bus outputs in TapeRecorderMixer::process()"
+     },
+     "3": {
+      "poly": true,
+      "why": "setChannels(PORT_MAX_CHANNELS) on both bus outputs in TapeRecorderMixer::process()"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f, whose plugin.json carries the installed 2.3.4. Three controls and two jacks were proved dead by reading every use of their parameter: Tape Ducking, its CV input, the Erase CV input, the Solo switch and the Delay in samples screw are each referenced only where they are configured and where their widget is created. The plugin.json tags this module as a voltage-controlled amplifier and the panel prints duck, so the missing ducking is a real conflict with what the maker documents. A Link To Left Module parameter also exists and its widget is hidden at construction and never shown, so no click can reach it and it gets no line. The Erase knob is named Tape Erase Amount by the maker and what it actually does is set the level of the tape return mixed into the channel; the erasing itself is done by the record switch, which sends -10V down the bus."
   },
   "TapeInspector": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for the Tape Recorder that draws what is on the tape as a waveform, with the bar and beat lines and the loop range marked",
+    "Sets how much tape the display covers; the setting is raised to the sixteenth power, so most of the travel is in the close-up end",
+    "Scales the height of the waveform, from half to one and a half times",
+    "Note — it goes immediately to the right of a Tape Recorder and shows that recorder's tape. With any other module on its left, or none, the display stays empty.",
+    "Note — the display is drawn by the module and carries no controls; it cannot be clicked or dragged."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "notes": "Read from the maker's source at commit 3a9441f. onExpanderChange takes the left neighbour and keeps it only if its model is modelTapeRecorder. The Time knob runs 0.4 to 1 and is raised to the power of 16 in TapeAudioDisplay::drawText; Amplitude runs 0.5 to 1.5 and is the exponent of half the display width. The module has no inputs or outputs at all."
   },
   "FlyingFader": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A motorised volume fader: it scales an audio signal, sends its own position out as a control voltage, and drives itself from a control voltage when one is patched",
+    "Sets the level, from silence to 6dB above unity, marked in decibels down the scale beside it; the gain applied to the audio is the square of the position",
+    "The audio to be scaled",
+    "Drives the fader: 10V holds it where it stood when the cable went in, and the position scales in proportion, so 5V halves it and 0V silences it. Dragging takes control back while the mouse is down.",
+    "The audio after the fader",
+    "The fader position as a voltage, 0V at silence and 10V at the top",
+    "Note — a name can be written on the fader from the menu, and it is drawn down the panel beside it.",
+    "Menu — the text field at the top — holds the name written beside the fader",
+    "Menu — Fader Cap Color: white, grey, black, red, blue, green, brown, orange, pink, purple — chooses the colour of the fader cap",
+    "Menu — Audio Polyphony Mode: Poly In - Poly Out, Poly In - Mono Out — chooses whether a polyphonic input keeps its channels or is summed to one",
+    "Menu — CV-Scale Mode: VCV Standard, MindMeld MixMaster — chooses the law the CV output follows, either ten times the fader position or a curve matching a MixMaster fader"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "why": "FlyingFader.cpp process() takes getChannels() from this jack and loops setVoltageSimd over them unless the poly mode is Poly In - Mono Out"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the fader stays where it is put",
+      "why": "process() multiplies the stored fader value by getVoltage() * 0.1 and clamps the result to 0 and PLUS_6_DB, so a negative voltage drives it to silence"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "setChannels(channels) from the audio input's channel count in FlyingFader.cpp"
+     },
+     "1": {
+      "poly": false,
+      "why": "setVoltage with no channel argument in FlyingFader.cpp"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f and manuals/README.md. PLUS_6_DB is 1.41253757 in src/util/Knobs.hpp, and the audio gain is the square of the fader value, which is why the parameter displays as 40 times the base-ten logarithm of its position. The MindMeld law is pow(value * 22.3606765, 1 / 1.5). When the CV input goes from unpatched to patched the module divides the fader value it had by the incoming voltage over ten and keeps that as the reference, which is what makes 10V hold the fader still. Four of this module's five parameters are internal state with no widget and cannot be clicked."
   },
   "EqualDivision": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A re-tuner for pitch voltages: it takes standard twelve-tone pitch in and gives back the same music in an equal division of any interval, on nine independent pairs of jacks",
+    "Stretches or compresses the whole tuning, -3% to +3%",
+    "Sets how many equal steps the interval is divided into, 1 to 99; the number appears on the display to the left of ed",
+    "Chooses the interval being divided, shown in yellow on the display: the ratios 9/8, 8/7, 7/6, 6/5, 5/4, 4/3 and 3/2, then the whole numbers 2 to 8 standing for that many times the frequency",
+    "A pitch to re-tune, one volt per octave; each semitone of what arrives becomes one step of the chosen tuning",
+    "The re-tuned pitch from the input beside it, one volt per octave",
+    "Note — a new module comes up dividing two octaves into 33 equal steps, which the maker calls 33ed4.",
+    "Note — each output is only written while it is patched, and it takes its channel count from the input beside it, so an output with nothing on its own input carries nothing."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch",
+     "8": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch",
+     "8": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EqualDivision.cpp process() multiplies getPolyVoltageSimd over getChannels() of this jack by the tuning multiplier, with no clamp either side"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EqualDivision.cpp process() multiplies getPolyVoltageSimd over getChannels() of this jack by the tuning multiplier, with no clamp either side"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EqualDivision.cpp process() multiplies getPolyVoltageSimd over getChannels() of this jack by the tuning multiplier, with no clamp either side"
+     },
+     "3": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EqualDivision.cpp process() multiplies getPolyVoltageSimd over getChannels() of this jack by the tuning multiplier, with no clamp either side"
+     },
+     "4": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EqualDivision.cpp process() multiplies getPolyVoltageSimd over getChannels() of this jack by the tuning multiplier, with no clamp either side"
+     },
+     "5": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EqualDivision.cpp process() multiplies getPolyVoltageSimd over getChannels() of this jack by the tuning multiplier, with no clamp either side"
+     },
+     "6": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EqualDivision.cpp process() multiplies getPolyVoltageSimd over getChannels() of this jack by the tuning multiplier, with no clamp either side"
+     },
+     "7": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EqualDivision.cpp process() multiplies getPolyVoltageSimd over getChannels() of this jack by the tuning multiplier, with no clamp either side"
+     },
+     "8": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EqualDivision.cpp process() multiplies getPolyVoltageSimd over getChannels() of this jack by the tuning multiplier, with no clamp either side"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in EqualDivision.cpp"
+     },
+     "1": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in EqualDivision.cpp"
+     },
+     "2": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in EqualDivision.cpp"
+     },
+     "3": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in EqualDivision.cpp"
+     },
+     "4": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in EqualDivision.cpp"
+     },
+     "5": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in EqualDivision.cpp"
+     },
+     "6": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in EqualDivision.cpp"
+     },
+     "7": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in EqualDivision.cpp"
+     },
+     "8": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in EqualDivision.cpp"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f and manuals/README.md. The output is simply the input multiplied by the interval in semitones divided by the number of steps and by the fine-tune factor, so twelve steps of an octave passes pitch through unchanged. Fine tune runs 0.97 to 1.03 and is shown as a percentage with 100 subtracted. The interval switch has fourteen positions and a new module starts on position 9, two octaves, with 33 steps. The display is drawn by the module and carries no controls."
   },
   "CVFreqShift": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A linear frequency shifter for pitch voltages: it converts each pitch to a frequency, adds a fixed number of hertz to it and converts back, on nine independent pairs of jacks",
+    "Sets how many hertz are added to every pitch, over the span chosen by the range knob and the same amount either side of nothing",
+    "Scales the frequency modulation input; the setting is raised to the fourth power, so almost all of the travel is at the top of the knob",
+    "Chooses the span of the shift knob: plus and minus 10, 20, 40, 80, 160, 320, 640, 1280 or 2560Hz. A new module starts on 160Hz.",
+    "A pitch to shift, one volt per octave",
+    "Adds to the frequency shift while the module runs, scaled by the frequency modulation knob; at the knob's top 1V here adds 261.63Hz, which is one times the frequency of C4",
+    "The shifted pitch from the input beside it, one volt per octave, and never lower than -10V",
+    "Note — the shift is in hertz and not in semitones, so a chord fed through it comes out inharmonic: the same shift moves a low note much further in pitch than a high one.",
+    "Note — each output is only written while it is patched, and it takes its channel count from the input beside it, so an output with nothing on its own input carries nothing."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "9": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch",
+     "8": "pitch",
+     "9": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch",
+     "8": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CVFreqShift.cpp process() raises two to the power of getPolyVoltageSimd over getChannels() of this jack, adds the shift and takes the base-two logarithm"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CVFreqShift.cpp process() raises two to the power of getPolyVoltageSimd over getChannels() of this jack, adds the shift and takes the base-two logarithm"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CVFreqShift.cpp process() raises two to the power of getPolyVoltageSimd over getChannels() of this jack, adds the shift and takes the base-two logarithm"
+     },
+     "3": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CVFreqShift.cpp process() raises two to the power of getPolyVoltageSimd over getChannels() of this jack, adds the shift and takes the base-two logarithm"
+     },
+     "4": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CVFreqShift.cpp process() raises two to the power of getPolyVoltageSimd over getChannels() of this jack, adds the shift and takes the base-two logarithm"
+     },
+     "5": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CVFreqShift.cpp process() raises two to the power of getPolyVoltageSimd over getChannels() of this jack, adds the shift and takes the base-two logarithm"
+     },
+     "6": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CVFreqShift.cpp process() raises two to the power of getPolyVoltageSimd over getChannels() of this jack, adds the shift and takes the base-two logarithm"
+     },
+     "7": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CVFreqShift.cpp process() raises two to the power of getPolyVoltageSimd over getChannels() of this jack, adds the shift and takes the base-two logarithm"
+     },
+     "8": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CVFreqShift.cpp process() raises two to the power of getPolyVoltageSimd over getChannels() of this jack, adds the shift and takes the base-two logarithm"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times the knob to the fourth power to the shift, in units of the frequency of C4, and only while the jack is connected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in CVFreqShift.cpp"
+     },
+     "1": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in CVFreqShift.cpp"
+     },
+     "2": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in CVFreqShift.cpp"
+     },
+     "3": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in CVFreqShift.cpp"
+     },
+     "4": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in CVFreqShift.cpp"
+     },
+     "5": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in CVFreqShift.cpp"
+     },
+     "6": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in CVFreqShift.cpp"
+     },
+     "7": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in CVFreqShift.cpp"
+     },
+     "8": {
+      "poly": true,
+      "why": "setChannels(inputs[PITCH_INPUT + i].getChannels()) in CVFreqShift.cpp"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f and manuals/README.md. The shift is held as a multiple of the frequency of C4: the knob runs -10 to 10 and is multiplied by two to the power of the range switch divided by dsp::FREQ_C4, and the range switch's nine positions are powers of two from 1 to 256 times ten hertz. The modulation input is added in those same units without passing through the range switch, so one volt at the top of the modulation knob is one whole C4, 261.63Hz. The result is clamped at a frequency ratio of 0.0009766, which is ten octaves below C4, so the output never falls below -10V. The maker's manual leaves the Root Octave, Frequency Shift and Frequency Modulation sections empty and mentions a root octave control that is not on the module."
   },
   "FunWithFrames": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chord builder for Regen Modular Frames: it rescales four of that module's parameter outputs into semitone intervals and stacks them into a polyphonic chord above one incoming pitch",
+    "Sets how many notes the chord has, 2 to 5. The first note is the pitch at the note input, and each further note takes its interval from the next time-table input in turn.",
+    "Chooses how the voltage beside it is converted: both settings multiply it by 2.125, then linear subtracts 5V while linear with jump point subtracts 21.33V from anything above 10.625V",
+    "One of the four values to convert, taken from a parameter output of Frames, 0 to 10V",
+    "The root of the chord, one volt per octave",
+    "The gate for the chord, copied out on one channel per note",
+    "Patching anything here turns the chord into an arpeggio: each rising edge steps to the next note, the pitch and gate outputs drop to one channel, and a gate of 0V restarts from the root",
+    "The converted voltage from the input beside it",
+    "The chord, one polyphonic channel per note, root first; while a clock is patched it is the arpeggio on a single channel instead",
+    "The gate input on one channel per note of the chord, with 0V on the channel of any note whose time-table input reads 0V; while a clock is patched it is the gate input on a single channel instead",
+    "Note — a time-table input reading exactly 0V does not add a note: that voice holds the pitch it last had and its channel of the gate output is taken to 0V.",
+    "Note — the multiplier of 2.125 turns a full 0 to 10V sweep into 21.25V, one semitone for each step of a 256-step source, and the jump point folds the top half of that sweep to negative semitones.",
+    "Note — each converted output is only written while it is patched, and the chord and gate outputs only while they are patched."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 7,
+    "2": 7,
+    "3": 7,
+    "4": 8,
+    "5": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "pitch",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "pitch",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel and multiplies by 2.125 with no clamp either side"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel and multiplies by 2.125 with no clamp either side"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel and multiplies by 2.125 with no clamp either side"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel and multiplies by 2.125 with no clamp either side"
+     },
+     "4": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel as the root of every chord note"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "process() copies getVoltage() straight to each channel of the gate output, so whatever voltage arrives is what leaves"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into clockInputTrigger"
+     }
+    },
+    "out": {
+     "4": {
+      "poly": true,
+      "why": "setChannels(MAX_CHORD_SIZE_PARAM), or setChannels(1) while the clock input is connected"
+     },
+     "5": {
+      "poly": true,
+      "why": "setChannels(MAX_CHORD_SIZE_PARAM), or setChannels(1) while the clock input is connected"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f. The whole conversion is three literals: a multiplier of 2.125, an offset of 5 in linear mode, and 256 divided by 12 subtracted above 5 times 2.125 in jump-point mode. The chord always uses the jump-point conversion for its intervals whatever the four switches are set to; the switches only affect the four converted outputs."
   },
   "MoreFunWithFrames": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A chord builder for Regen Modular Frames: it rescales four of that module's parameter outputs into semitone intervals and stacks them into a polyphonic chord above one incoming pitch",
+    "Sets how many notes the chord has, 2 to 5. The first note is the pitch at the note input, and each further note takes its interval from the next time-table input in turn.",
+    "Chooses how the voltage beside it is converted: both settings multiply it by 2.125, then linear subtracts 5V while linear with jump point subtracts 21.33V from anything above 10.625V",
+    "One of the four values to convert, taken from a parameter output of Frames, 0 to 10V",
+    "The root of the chord, one volt per octave",
+    "The gate for the chord, copied out on one channel per note",
+    "Patching anything here turns the chord into an arpeggio: each rising edge steps to the next note, the pitch and gate outputs drop to one channel, and a gate of 0V restarts from the root",
+    "The converted voltage from the input beside it",
+    "The chord, one polyphonic channel per note, root first; while a clock is patched it is the arpeggio on a single channel instead",
+    "The gate input on one channel per note of the chord, with 0V on the channel of any note whose time-table input reads 0V; while a clock is patched it is the gate input on a single channel instead",
+    "Note — a time-table input reading exactly 0V does not add a note: that voice holds the pitch it last had and its channel of the gate output is taken to 0V.",
+    "Note — the multiplier of 2.125 turns a full 0 to 10V sweep into 21.25V, one semitone for each step of a 256-step source, and the jump point folds the top half of that sweep to negative semitones.",
+    "Note — each converted output is only written while it is patched, and the chord and gate outputs only while they are patched.",
+    "Note — this module behaves exactly like Fun with Frames: its process function is a line-for-line copy of that one's.",
+    "Note — the port names promise glide time, a glide base note, vibrato and arpeggio, and none of it was written; the intended design is left in the source as comments."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 7,
+    "2": 7,
+    "3": 7,
+    "4": 8,
+    "5": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "pitch",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "pitch",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel and multiplies by 2.125 with no clamp either side"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel and multiplies by 2.125 with no clamp either side"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel and multiplies by 2.125 with no clamp either side"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel and multiplies by 2.125 with no clamp either side"
+     },
+     "4": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel as the root of every chord note"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "process() copies getVoltage() straight to each channel of the gate output, so whatever voltage arrives is what leaves"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into clockInputTrigger"
+     }
+    },
+    "out": {
+     "4": {
+      "poly": true,
+      "why": "setChannels(MAX_CHORD_SIZE_PARAM), or setChannels(1) while the clock input is connected"
+     },
+     "5": {
+      "poly": true,
+      "why": "setChannels(MAX_CHORD_SIZE_PARAM), or setChannels(1) while the clock input is connected"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f. MoreFunWithFrames.cpp process() is character-for-character the same as FunWithFrames.cpp process() apart from the class name, and the panel is the same layout with a different title. The glide, vibrato and arpeggio features the input names advertise appear only in a block of comments at the top of the function. The maker's plugin.json calls this the advanced utility, and the maker's manual does not mention it at all."
   },
   "Metronome": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A rebuild of a mechanical rehearsal metronome: a dial of the 39 traditional tempo marks, and a jack that pulses on the beat",
+    "Sets the tempo, moving between the 39 marks around the dial",
+    "Sets the tempo to the mark beside it and clears whichever mark was set before",
+    "Sets the tempo the reset jack returns to, chosen from the same 39 marks",
+    "Starts and stops the metronome",
+    "A rising edge moves three marks faster, wrapping round to the slowest end past 208",
+    "A rising edge moves two marks faster, wrapping round to the slowest end past 208",
+    "A rising edge moves one mark faster, wrapping round to 40 past 208",
+    "A rising edge moves one mark slower, wrapping round to 208 past 42; 40 is never reached this way",
+    "A rising edge sets the tempo to the mark held by the reset tempo knob",
+    "A rising edge starts the metronome, or stops it and clears the count",
+    "A 10V pulse one millisecond long on every beat, starting the moment the metronome is started",
+    "Note — nothing is counted until the output is patched: the clock only advances while a cable is in the impulse out jack and the start button is on.",
+    "Note — the marks are the traditional metronome numbers, 40 to 60 in twos, 60 to 72 in threes, 72 to 96 in fours, 96 to 120 in fours, then 126 to 144 in sixes and on to 208 in eights."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "16": 2,
+    "17": 2,
+    "18": 2,
+    "19": 2,
+    "20": 2,
+    "21": 2,
+    "22": 2,
+    "23": 2,
+    "24": 2,
+    "25": 2,
+    "26": 2,
+    "27": 2,
+    "28": 2,
+    "29": 2,
+    "30": 2,
+    "31": 2,
+    "32": 2,
+    "33": 2,
+    "34": 2,
+    "35": 2,
+    "36": 2,
+    "37": 2,
+    "38": 2,
+    "39": 2,
+    "40": 3,
+    "41": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10
+   },
+   "out": {
+    "0": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into a SchmittTrigger in Metronome.cpp"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into a SchmittTrigger in Metronome.cpp"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into a SchmittTrigger in Metronome.cpp"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into a SchmittTrigger in Metronome.cpp"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into a SchmittTrigger in Metronome.cpp"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into a SchmittTrigger in Metronome.cpp"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "setVoltage with no channel argument in Metronome.cpp"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f. The 39 tempo marks are a literal array in Metronome.cpp. The one-step-slower input has an off-by-one: the code reads if (--bpmIndex <= 0) bpmIndex = 38, so stepping down from the second mark, 42, lands on 208 rather than on 40, and 40 can never be reached from that jack. Stepping by two or three uses a subtraction loop and wraps correctly at the top. The timer only runs inside a test on the output being connected and the start button being on, so an unpatched metronome counts nothing. The tempo display and the numbers printed round the dial are drawn by the module and are not controls. The start button is a large round switch at the centre of the tempo knob; both can be clicked, the switch answering at the middle and the knob around it."
   },
   "Harmonizer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A bank of sixteen tuned voices from one pitch: each takes the incoming pitch, multiplies its frequency by one whole number and divides it by another, and hands back its own pitch and velocity",
+    "Scales the velocity modulation input that feeds every channel at once, 0 to 100%",
+    "Scales the velocity modulation input beside it for this channel alone, 0 to 100%",
+    "Scales the velocity reaching this channel, 0 to 100%",
+    "Scales the pitch modulation input that feeds every channel at once; the setting is raised to the fourth power and it inverts below the middle",
+    "Scales the pitch modulation input beside it for this channel alone; the setting is raised to the fourth power and it inverts below the middle",
+    "Sets the whole number this channel's frequency is multiplied by, 1 to 96; it is the left half of the ratio on the display",
+    "Sets the whole number this channel's frequency is divided by, 1 to 96; it is the right half of the ratio on the display",
+    "Detunes this channel, adding up to 0.03V either way, which is 36 cents up or down",
+    "Switches this channel in and out. Only channel 1 is on when the module is added, and a channel that is off takes no place on the polyphonic outputs.",
+    "Restricts the module to its own group of four channels and clears whichever group was chosen before; with none of the four on, all sixteen channels are used",
+    "The gate for the voices, passed through to one channel of the gate output for each active channel",
+    "A retrigger for the voices, passed through to one channel of the retrigger output for each active channel",
+    "The velocity all the channels start from, before each channel's own velocity knob",
+    "Modulates the velocity of every channel, scaled by the knob beside it",
+    "Modulates the velocity of this channel alone, scaled by the knob beside it",
+    "The pitch all the channels are built on, one volt per octave",
+    "Modulates the pitch of every channel, scaled by the knob beside it",
+    "Modulates the pitch of this channel alone, scaled by the knob beside it",
+    "A rising edge chooses the mixture of the same number and clears the other three",
+    "The gate input on one polyphonic channel per active channel",
+    "The retrigger input on one polyphonic channel per active channel",
+    "Every active channel's velocity on its own polyphonic channel",
+    "This channel's velocity on its own, monophonic",
+    "Every active channel's pitch on its own polyphonic channel, one volt per octave",
+    "This channel's pitch on its own, monophonic, one volt per octave",
+    "Note — fifteen of the sixteen channels come up switched off, so a new module gives one voice at the pitch it is fed. Switch the further channels on before expecting a chord.",
+    "Note — the polyphonic outputs pack the active channels in order with no gaps, so channel 5 lands on polyphonic channel 2 if it is the second one switched on.",
+    "Note — the ratio of the two whole numbers is what the channel plays: 3 over 2 is a fifth above, 1 over 3 is two octaves and a fifth below, and 1 over 1 is the pitch as it came in.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "16": 2,
+    "17": 3,
+    "18": 3,
+    "19": 3,
+    "20": 3,
+    "21": 3,
+    "22": 3,
+    "23": 3,
+    "24": 3,
+    "25": 3,
+    "26": 3,
+    "27": 3,
+    "28": 3,
+    "29": 3,
+    "30": 3,
+    "31": 3,
+    "32": 3,
+    "33": 4,
+    "34": 5,
+    "35": 5,
+    "36": 5,
+    "37": 5,
+    "38": 5,
+    "39": 5,
+    "40": 5,
+    "41": 5,
+    "42": 5,
+    "43": 5,
+    "44": 5,
+    "45": 5,
+    "46": 5,
+    "47": 5,
+    "48": 5,
+    "49": 5,
+    "50": 6,
+    "51": 6,
+    "52": 6,
+    "53": 6,
+    "54": 6,
+    "55": 6,
+    "56": 6,
+    "57": 6,
+    "58": 6,
+    "59": 6,
+    "60": 6,
+    "61": 6,
+    "62": 6,
+    "63": 6,
+    "64": 6,
+    "65": 6,
+    "66": 7,
+    "67": 7,
+    "68": 7,
+    "69": 7,
+    "70": 7,
+    "71": 7,
+    "72": 7,
+    "73": 7,
+    "74": 7,
+    "75": 7,
+    "76": 7,
+    "77": 7,
+    "78": 7,
+    "79": 7,
+    "80": 7,
+    "81": 7,
+    "82": 8,
+    "83": 8,
+    "84": 8,
+    "85": 8,
+    "86": 8,
+    "87": 8,
+    "88": 8,
+    "89": 8,
+    "90": 8,
+    "91": 8,
+    "92": 8,
+    "93": 8,
+    "94": 8,
+    "95": 8,
+    "96": 8,
+    "97": 8,
+    "98": 9,
+    "99": 9,
+    "100": 9,
+    "101": 9,
+    "102": 9,
+    "103": 9,
+    "104": 9,
+    "105": 9,
+    "106": 9,
+    "107": 9,
+    "108": 9,
+    "109": 9,
+    "110": 9,
+    "111": 9,
+    "112": 9,
+    "113": 9,
+    "114": 10,
+    "115": 10,
+    "116": 10,
+    "117": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 15,
+    "6": 15,
+    "7": 15,
+    "8": 15,
+    "9": 15,
+    "10": 15,
+    "11": 15,
+    "12": 15,
+    "13": 15,
+    "14": 15,
+    "15": 15,
+    "16": 15,
+    "17": 15,
+    "18": 15,
+    "19": 15,
+    "20": 16,
+    "21": 17,
+    "22": 18,
+    "23": 18,
+    "24": 18,
+    "25": 18,
+    "26": 18,
+    "27": 18,
+    "28": 18,
+    "29": 18,
+    "30": 18,
+    "31": 18,
+    "32": 18,
+    "33": 18,
+    "34": 18,
+    "35": 18,
+    "36": 18,
+    "37": 18,
+    "38": 19,
+    "39": 19,
+    "40": 19,
+    "41": 19
+   },
+   "out": {
+    "0": 20,
+    "1": 21,
+    "2": 22,
+    "3": 23,
+    "4": 23,
+    "5": 23,
+    "6": 23,
+    "7": 23,
+    "8": 23,
+    "9": 23,
+    "10": 23,
+    "11": 23,
+    "12": 23,
+    "13": 23,
+    "14": 23,
+    "15": 23,
+    "16": 23,
+    "17": 23,
+    "18": 23,
+    "19": 24,
+    "20": 25,
+    "21": 25,
+    "22": 25,
+    "23": 25,
+    "24": 25,
+    "25": 25,
+    "26": 25,
+    "27": 25,
+    "28": 25,
+    "29": 25,
+    "30": 25,
+    "31": 25,
+    "32": 25,
+    "33": 25,
+    "34": 25,
+    "35": 25
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "cv",
+     "20": "pitch",
+     "21": "cv",
+     "22": "cv",
+     "23": "cv",
+     "24": "cv",
+     "25": "cv",
+     "26": "cv",
+     "27": "cv",
+     "28": "cv",
+     "29": "cv",
+     "30": "cv",
+     "31": "cv",
+     "32": "cv",
+     "33": "cv",
+     "34": "cv",
+     "35": "cv",
+     "36": "cv",
+     "37": "cv",
+     "38": "trigger",
+     "39": "trigger",
+     "40": "trigger",
+     "41": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "pitch",
+     "20": "pitch",
+     "21": "pitch",
+     "22": "pitch",
+     "23": "pitch",
+     "24": "pitch",
+     "25": "pitch",
+     "26": "pitch",
+     "27": "pitch",
+     "28": "pitch",
+     "29": "pitch",
+     "30": "pitch",
+     "31": "pitch",
+     "32": "pitch",
+     "33": "pitch",
+     "34": "pitch",
+     "35": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Harmonizer.cpp process() reads getVoltage() with no channel and copies it to each channel of the gate output"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel and copies it to each channel of the retrigger output"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel and multiplies it by each channel's velocity knob, with no clamp"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times the global velocity modulation knob, and only while the jack is connected"
+     },
+     "20": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() reads getVoltage() with no channel as the base of every channel's pitch"
+     },
+     "21": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times the global pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "14": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "15": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "16": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "17": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "18": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "19": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's velocity modulation knob, and only while the jack is connected"
+     },
+     "22": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "23": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "24": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "25": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "26": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "27": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "28": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "29": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "30": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "31": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "32": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "33": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "34": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "35": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "36": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "37": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "process() adds getVoltage() times this channel's pitch modulation knob raised to the fourth power, and only while the jack is connected"
+     },
+     "38": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into mixtureTriggers"
+     },
+     "39": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into mixtureTriggers"
+     },
+     "40": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into mixtureTriggers"
+     },
+     "41": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "rescaleInput(), which is rescale(v, 0.1, 2, 0, 1) in src/util/Switches.cpp, into mixtureTriggers"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "setChannels(numActiveChannels) at the end of Harmonizer::process()"
+     },
+     "1": {
+      "poly": true,
+      "why": "setChannels(numActiveChannels) at the end of Harmonizer::process()"
+     },
+     "2": {
+      "poly": true,
+      "why": "setChannels(numActiveChannels) at the end of Harmonizer::process()"
+     },
+     "19": {
+      "poly": true,
+      "why": "setChannels(numActiveChannels) at the end of Harmonizer::process()"
+     },
+     "3": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "4": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "5": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "6": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "7": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "8": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "9": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "10": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "11": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "12": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "13": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "14": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "15": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "16": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "17": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "18": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel velocity outputs"
+     },
+     "20": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "21": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "22": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "23": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "24": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "25": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "26": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "27": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "28": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "29": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "30": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "31": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "32": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "33": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "34": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     },
+     "35": {
+      "poly": false,
+      "why": "setVoltage with no channel argument on the per-channel pitch outputs"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f. The harmonic and subharmonic knobs index an array of the base-two logarithms of 1 to 96, added and subtracted in the exponent, which is what makes the two numbers a frequency ratio. The fine knob runs 0.97 to 1.03 and its value minus one is added as volts, so its range is 0.03V, 36 cents, despite the maker displaying it as a percentage. A mixture takes the channels from four times its number minus four up to four times its number. The maker's manual describes this module as a rebuild of a vintage metronome, which is a copy-paste mistake in the manual. The panel prints Mixture and the maker's tooltips say Mixtur. The gate and retrigger outputs are written whether or not they are patched, and the sixteen per-channel outputs only while they are."
   },
   "MIDIController": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An unfinished module for endless-encoder MIDI controllers: it reads control change messages as movement rather than position, builds a voltage from them and sends it back out as control change",
+    "Scales how far one control change message moves the voltage, from a tenth to nearly twice the default step",
+    "Follows the voltage built from whatever control change last arrived, 0 to 10V; turning it by hand sends control change 10 out of the MIDI output",
+    "Nothing in the module reads this jack. No input is read anywhere in the module's code.",
+    "The voltage built from whatever control change last arrived, 0 to 10V",
+    "Note — nothing happens until a MIDI input and a MIDI output device are chosen with the two buttons at the top. Those buttons are not parameters, so clicking one for help gives nothing.",
+    "Note — the module tracks all 128 controllers but has one knob and one jack to show them on, so what appears there is whichever controller moved last. This is as far as the maker got.",
+    "Menu — Panic — clears every stored controller value and re-opens both MIDI ports"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "nothing; the jack is never read",
+      "why": "MIDIController.cpp process() contains no reference to inputs at all"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "cvData is clamped to 0 and 10 in MIDIController.cpp before setVoltage, with no channel argument"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f. The Test input is proved dead: the word inputs does not appear in MIDIController.cpp outside the enum and configInput. The knob named Test Parameter is written from every incoming controller but is only read back for controller 10. The voltage moves by the Adjust Movement knob times 250 divided by the number of frames since the last message for that controller, so the faster the encoder is turned the further it goes. After 5000 frames with no message the module sends the controller's value back out as a control change of the voltage times 12.7. The module has no entry in the maker's manual."
   },
   "MIDIPolyExpression": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns MPE from a MIDI keyboard into polyphonic control voltages, one polyphonic channel for each MIDI channel, with its own envelope shaping the pressure",
+    "Sets the first MIDI channel read, 1 to 16",
+    "Sets how many MIDI channels are read, and so how many channels every output carries; the count is trimmed so it never runs past MIDI channel 16",
+    "Bends the note-on velocity curve, from one raised in its middle at the left to one hollowed in its middle at the right",
+    "Pulls pitch bend towards whole semitones: at the left the bend passes through untouched, and turning it right narrows the band between semitones until the bend snaps from one to the next",
+    "Sets how slowly the volume falls away after a note held for less than about an eighth of a second; the higher the setting the longer the tail",
+    "Sets how slowly the volume falls away after a note held for more than about a fifth of a second; the higher the setting the longer the tail",
+    "Lengthens the fall after a short note in proportion to the modulation value, so a note played further up the key holds on longer",
+    "10V while a note is held on that MIDI channel, on one polyphonic channel per MIDI channel; with Gate Velocity Mode on it carries the note-on velocity instead",
+    "The pressure of the note through the envelope, taken from channel aftertouch, polyphonic aftertouch or control change 11, raised to the power of 1.3 and halved",
+    "The note's pitch with the pitch bend added, one volt per octave, with 0V for MIDI note 60",
+    "Control change 1 or 74 on that MIDI channel, 0 to 10V, smoothed",
+    "The note's pitch without any pitch bend, one volt per octave, with 0V for MIDI note 60",
+    "The pitch bend on its own, one volt per octave; a full bend is 4V, which is 48 semitones",
+    "Note — nothing comes out until a MIDI device is chosen with the button at the top of the panel. That button is not a parameter, so clicking it for help gives nothing.",
+    "Note — the panel marks the outputs W, X, Y and Z after the MPE dimensions: W the gate, X the three pitch jacks, Y the modulation and Z the volume.",
+    "Note — the green lamp at the bottom lights while the volume is arriving as 14-bit control change, that is control change 11 with control change 43 carrying its lower half.",
+    "Menu — Gate Velocity Mode — puts the shaped note-on velocity on the gate output in place of a flat 10V",
+    "Menu — Preserve Pitch after Note-Off — keeps the pitch bend applied once the note has ended, instead of dropping the pitch output back to the plain note",
+    "Menu — Panic — clears every note, gate, bend and modulation and re-opens the MIDI port"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "6": 3,
+    "5": 4,
+    "3": 5,
+    "4": 6,
+    "7": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12,
+    "5": 13
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "pitch",
+     "3": "cv",
+     "4": "pitch",
+     "5": "pitch"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "MIDIPolyExpression.cpp process() calls setChannels on all six outputs with min(the channel-count knob, 16 minus the first-channel knob plus one)"
+     },
+     "1": {
+      "poly": true,
+      "why": "MIDIPolyExpression.cpp process() calls setChannels on all six outputs with min(the channel-count knob, 16 minus the first-channel knob plus one)"
+     },
+     "2": {
+      "poly": true,
+      "why": "MIDIPolyExpression.cpp process() calls setChannels on all six outputs with min(the channel-count knob, 16 minus the first-channel knob plus one)"
+     },
+     "3": {
+      "poly": true,
+      "why": "MIDIPolyExpression.cpp process() calls setChannels on all six outputs with min(the channel-count knob, 16 minus the first-channel knob plus one)"
+     },
+     "4": {
+      "poly": true,
+      "why": "MIDIPolyExpression.cpp process() calls setChannels on all six outputs with min(the channel-count knob, 16 minus the first-channel knob plus one)"
+     },
+     "5": {
+      "poly": true,
+      "why": "MIDIPolyExpression.cpp process() calls setChannels on all six outputs with min(the channel-count knob, 16 minus the first-channel knob plus one)"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f and manuals/README.md. The module has no inputs at all; everything arrives over MIDI. Pitch bend is scaled as 4 times the 14-bit value minus 8192 over 8191, so a full bend is 4V or 48 semitones, the MPE default. Note pitch is the MIDI note number minus 60 over 12. The two menu-only settings, Gate Velocity Mode and Preserve Pitch after Note-Off, are parameters with no widget and cannot be clicked. The envelope switches between three laws on note-off by the note's length: under 0.125 seconds it uses the decay screw, over 0.1875 seconds the release screw, and between them a blend of the two."
   },
   "XGlide": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Merges pairs of polyphonic notes into one voice and slides between them: as the volume moves from one note to the other, the pitch and the modulation follow it across",
+    "Sets one end of the range of notes that may glide. With the lowest-note knob at or above the highest-note knob the range inverts, the red lamp lights, and the notes between them are left out.",
+    "Sets one end of the range of intervals that may glide, 1 to 127 semitones. With the minimum at or above the maximum the range inverts, the red lamp lights, and the intervals between are left out.",
+    "The pitches of the notes, one volt per octave, one polyphonic channel per note",
+    "How loud each note is, one polyphonic channel per note; the balance between two notes' volumes is how far their glide has travelled, and this jack sets the channel count of all three outputs",
+    "A modulation value for each note, one polyphonic channel per note, carried across the glide in step with the pitch",
+    "While a cable is here, a new note only joins a glide if the voltage is above 0V; with nothing patched every new note may join one",
+    "The pitch of each merged voice, one volt per octave, moving between the two notes in proportion to their volumes",
+    "The volume of each merged voice, the two notes added together",
+    "The modulation of each merged voice, moving between the two notes in proportion to their volumes",
+    "Note — nothing comes out until the volume input is patched, together with either the pitch input and pitch output or the modulation input and modulation output.",
+    "Note — with less than that patched, the module clears its note mapping and sets every output to no channels.",
+    "Note — a glide starts when a second note arrives over a sounding one, both notes fall inside the note range, and the interval between them falls inside the interval range.",
+    "Note — the two notes then share one output channel until the first of them is released.",
+    "Note — the two red lamps light to say their range has been turned inside out; they are not controls and cannot be clicked.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "2": 1,
+    "3": 1,
+    "0": 2,
+    "1": 2
+   },
+   "in": {
+    "1": 3,
+    "0": 4,
+    "3": 5,
+    "2": 6
+   },
+   "out": {
+    "1": 7,
+    "0": 8,
+    "2": 9
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "trigger",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "pitch",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "XGlide.cpp clamps this jack to 0 and 100 and takes getChannels() from it as the channel count of every output"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "XGlide.cpp clamps getVoltage(i) here to -100 and 100 and uses it as the note pitch"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "normal": "every note may join a glide",
+      "why": "XGlide.cpp tests inputs[PEDAL_INPUT].getVoltage() > 0 with no channel, and only while the jack is connected"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "XGlide.cpp clamps getVoltage(i) here to -100 and 100 and crossfades it like the pitch"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "setChannels(inputs[VOLUME_INPUT].getChannels()) on all three outputs in XGlide.cpp"
+     },
+     "1": {
+      "poly": true,
+      "why": "setChannels(inputs[VOLUME_INPUT].getChannels()) on all three outputs in XGlide.cpp"
+     },
+     "2": {
+      "poly": true,
+      "why": "setChannels(inputs[VOLUME_INPUT].getChannels()) on all three outputs in XGlide.cpp"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f and manuals/README.md. The note knobs are snapped MIDI note numbers 0 to 127 displayed as note names C0 to G10, and the interval knobs are 1 to 127 semitones. Both ranges are compared in volts with a half-step of slack added at each end. How far a glide has travelled is the second note's volume over the sum of the two volumes, so it is the player's own pressure that moves it, not a clock. The manual is written for a LinnStrument and describes the left and right knob of each pair; the code treats the pair symmetrically and only cares which is the larger."
   },
   "MIDIOverAudio": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Receives MIDI carried inside an audio signal, so a plugin hosted in VCV Host can send MIDI back into Rack; it decodes eight such streams and offers them to the rest of Rack as MIDI devices",
+    "Trims the level of the jack beside it until the lamp reads green, which is where the decoded bytes land exactly; the range is narrow because the level has to be right to the sample",
+    "The audio from a MIDI over Audio plugin, one sample per MIDI byte, with a negative sample ending each message",
+    "Note — adding this module registers a MIDI driver called MIDI over Audio, carrying eight devices named Port 1 to Port 8.",
+    "Note — to use what arrives at a jack, open any MIDI module in Rack, choose the MIDI over Audio driver, and choose the port of the same number as the jack.",
+    "Note — the lamp beside each jack reads the level: green is exact, yellow and orange are close, blue means the signal is too quiet and red that it is too loud.",
+    "Note — the lamps are drawn by the module and are not controls; they cannot be clicked.",
+    "Note — only three-byte MIDI messages are passed on; the decoder has a fixed three-byte buffer.",
+    "Menu — Panic — sends a note-off for all 128 notes on all 16 MIDI channels of all eight ports"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "MIDIOverAudio.cpp process() reads getVoltage() with no channel and multiplies it by the trim knob times 0.112 plus 25.56; a negative result is what ends a message"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "MIDIOverAudio.cpp process() reads getVoltage() with no channel and multiplies it by the trim knob times 0.112 plus 25.56; a negative result is what ends a message"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "MIDIOverAudio.cpp process() reads getVoltage() with no channel and multiplies it by the trim knob times 0.112 plus 25.56; a negative result is what ends a message"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "MIDIOverAudio.cpp process() reads getVoltage() with no channel and multiplies it by the trim knob times 0.112 plus 25.56; a negative result is what ends a message"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "MIDIOverAudio.cpp process() reads getVoltage() with no channel and multiplies it by the trim knob times 0.112 plus 25.56; a negative result is what ends a message"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "MIDIOverAudio.cpp process() reads getVoltage() with no channel and multiplies it by the trim knob times 0.112 plus 25.56; a negative result is what ends a message"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "MIDIOverAudio.cpp process() reads getVoltage() with no channel and multiplies it by the trim knob times 0.112 plus 25.56; a negative result is what ends a message"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "MIDIOverAudio.cpp process() reads getVoltage() with no channel and multiplies it by the trim knob times 0.112 plus 25.56; a negative result is what ends a message"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f and manuals/README.md. The driver is registered by the module's constructor, so it appears as soon as one of these is in the patch. MIDIOverAudioDriver::getInputDeviceName returns Port plus the device number. The lamp thresholds are isNear against -255.56 with tolerances of 0.44, 1.5 and 3 in src/modules/MIDIOverAudio/MIDIOverAudio.cpp. MIDI_MESSAGE_DATA_MAX_LENGTH is 3 in src/util/Drivers.hpp and the source carries a TODO about messages of other lengths. The trim knobs are excluded from randomisation."
   },
   "CopyPastePreset": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Copies one module's settings into its neighbours: it takes the preset of the module on its left and pastes it into every module of the same kind to its right",
+    "Copies the preset of the module on its left into the module on its right, and on rightwards for as long as each next module is of the same kind as the one before it",
+    "A crossing above 1V starts the copy",
+    "10V for one millisecond each time a copy is made, for passing on to another Copy Paste Preset",
+    "Note — it needs a module on its left to copy from and a module of the same kind on its right to paste into. The run stops at the first module on the right of a different kind.",
+    "Note — whatever was on the system clipboard is put back afterwards.",
+    "Note — the module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "CopyPastePreset.cpp compares the previous and current getVoltage() against 1.f with no channel argument"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "setVoltage(10) while the pulse runs and setVoltage(0) otherwise, with no channel argument"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 3a9441f and manuals/README.md. The copying is done in CopyPastePresetWidget::step, which waits a few frames after the button goes down, copies the left neighbour's preset to the clipboard, then walks right pasting while consecutive modules share a model. The pulse is a dsp::PulseGenerator triggered with its default length of one millisecond."
   }
  }
 }

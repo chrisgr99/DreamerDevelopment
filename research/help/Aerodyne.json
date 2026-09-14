@@ -1,13 +1,94 @@
 {
  "plugin": "Aerodyne",
- "source": "https://github.com/gfy20070704-stack/Aerodyne-IdmGlitchNode",
+ "source": "https://github.com/gfy20070704-stack/Aerodyne-IdmGlitchNode/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "IdmGlitchNode": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sixteen-bit shift register turned into a quantised control voltage: each clock rolls the register round and now and then flips the bit coming back in, so a pattern repeats until it mutates",
+    "The chance that the bit coming back round is flipped on each clock, none fully left and every clock fully right",
+    "Adds to the PROB knob, 10V covering the knob's whole range, with the total held between no chance at all and every clock",
+    "The chance that a gate is joined by an accent pulse, none fully left and every gate fully right; it does not change the data being injected, which is what the maker's README says it does",
+    "A rising edge above 1V rolls the register round by one place and works out a new voltage from it",
+    "A rising edge above 1V puts the register back to the fixed pattern it starts on",
+    "Pushes a set bit into the register, fires a gate and an accent at once, and works out a new voltage",
+    "A 1ms pulse whenever the bit newly rolled round is set, and whenever the inject button is pushed",
+    "The low eight bits of the register read as a voltage between -5V and +5V, quantised to twelfth-of-a-volt steps and held until the next clock",
+    "A 1ms pulse on the gates picked out by DENS, and on every push of the inject button",
+    "Note — nothing moves until a clock is patched to CLK IN: the shift, the gate and the voltage are all worked out on a clock edge.",
+    "Note — the register comes up on the same fixed pattern every time, which is also what RST IN puts it back to.",
+    "Note — the screen is drawn rather than built out of controls: the ring of sixteen dots is the register, the left arc is PROB and the right arc is DENS, and none of it can be clicked.",
+    "Note — the maker's README describes a DATA input carrying the voltage to be sampled and shifted; no such jack exists, and the register is fed only from its own last bit.",
+    "Note — the maker's README calls the third input an INJECT CV; the panel prints PROB CV, and adding to PROB is what it does."
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 6
+   },
+   "in": {
+    "2": 2,
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/IdmGlitchNode.cpp process(): clockTrigger.process(inputs[CLOCK_IN].getVoltage()) with dsp::SchmittTrigger's default 0V and 1V thresholds; one getVoltage(), no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/IdmGlitchNode.cpp process(): resetTrigger.process(inputs[RESET_IN].getVoltage()), one getVoltage()"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 1V",
+      "why": "src/IdmGlitchNode.cpp process(): prob += inputs[PROB_CV_IN].getVoltage()/10.f then prob = clamp(prob, 0.f, 1.f), inside if(isConnected()); one getVoltage()"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/IdmGlitchNode.cpp process(): rawCv = (cvBits/255.f)*10.f - 5.f, currentCv = std::round(rawCv*12.f)/12.f, then setVoltage(clamp(currentCv,-5.f,5.f)); a single channel"
+     },
+     "0": {
+      "poly": false,
+      "why": "src/IdmGlitchNode.cpp process(): outputs[GATE_OUT].setVoltage(gatePulse.process(args.sampleTime)?10.f:0.f), a single channel"
+     }
+    }
+   },
+   "notes": "The README on the maker's repository describes the module the code does not build. It lists a DATA input for the source voltage to be sampled and shifted; there is no DATA input, and the bit shifted in is the register's own last bit exclusive-ORed with a random flip. It calls the third jack an INJECT CV; the jack is PROB_CV_IN, configInput names it \"Probability CV\" and the panel prints PROB CV. It says DENS \"controls the intensity and value range of the injected glitch data\"; DENS is read at one place only, as the probability that an accent pulse is fired alongside a gate. It says the GATE output fires whenever a mutation or a manual injection occurs; the gate actually fires whenever the bit that has just rolled round is set, whether or not it was mutated. The panel carries two sets of output labels drawn 1.5mm apart: res/IdmGlitchNode.svg prints GATE, PITCH and ACCENT at x 20.64, 40.64 and 60.64mm while the jacks are at 32.64, 48.64 and 64.64mm, and a runtime text widget prints INJ, GATE, PITCH and ACC correctly aligned beneath them. The SVG row is the misaligned one. The register starts at 0x5A5A and RST_IN restores that same value, so a reset does not clear it. The screen is a single TransparentWidget with no ParamWidget inside it, so nothing on it is clickable. The two lights are set from the gate and accent voltages, so they follow those jacks exactly."
   }
  }
 }

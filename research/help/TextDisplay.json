@@ -1,18 +1,184 @@
 {
  "plugin": "TextDisplay",
- "source": "no published source; read from the installed 2.0.0 build",
+ "source": "https://github.com/detnoise/TextDisplay/blob/master/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "VerticalText": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Draws a line of your own text down the panel, with the typeface, size, colour, glow and letter spacing set from the knobs and the text itself typed in from the right-click menu",
+    "Chooses the typeface by stepping through the font files in the plugin's own fonts folder; two ship with it, a sans and a bold serif",
+    "Sets the height of the lettering, 8 to 76pt",
+    "Sets the hue of the lettering, running once round the colour wheel across its travel",
+    "Sets how strong the colour is, grey lettering at the bottom of its travel and full colour halfway up; the top half does nothing, because the drawing clamps saturation at 1 and this knob goes to 2",
+    "Sets how far the glow spreads behind the lettering, 0 to 15; with a cable in the glow jack this knob stops setting the glow and scales that voltage instead",
+    "Sets how tightly the letters are packed, 0.4 to 1.2 times the font's own spacing",
+    "Turns the hue on from where the hue knob has it, 10V taking it once round the colour wheel; past the end it wraps rather than stopping",
+    "Each pulse above 1V flips the lettering between the colour the saturation knob sets and plain grey",
+    "Adds to the size knob at 5pt per volt, with the total held between 8 and 76pt",
+    "Sets the glow whenever a cable is in it: -5V for none, 0V for half of what the glow knob says, and +5V for all of it",
+    "Note — the module comes up reading Your Text Here; right-click the panel, choose Edit Text and type, and the lettering changes as you go, because the text box is parked off the panel out of sight",
+    "Note — the panel prints no names at all; the controls run down it in this order: typeface, size, size CV, hue, hue CV, saturation, clock, glow, glow CV, spacing",
+    "Note — a Text Effects Expander put immediately to the left or right takes over the lettering, and removing it brings the text you typed back",
+    "Note — the saturation saved into the patch is the one in use, not the one on the knob, so saving while the clock has the lettering grey and reopening leaves the knob itself on zero",
+    "Menu — Edit Text — puts the cursor in the module's text box with the current text selected, so whatever you type next replaces it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "VerticalTextModule.cpp:161 divides getVoltage() by 10 and adds it to the hue knob with no isConnected test and no channel loop; line 163 takes fmodf of the sum, and nanovg's nvgHSLA adds 1 to a negative hue, so the result wraps either way"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "VerticalTextModule.cpp:172 passes getVoltage() to a dsp::SchmittTrigger with its default thresholds, which fire at 1 and reset at 0"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "VerticalTextModule.cpp:156 multiplies getVoltage() by 5 only when the port is connected and line 159 adds it to the size knob, clamping the sum to 8 and 76"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "VerticalTextModule.cpp:187 adds 5 to getVoltage() and divides by 10, then line 189 multiplies the glow knob by that instead of adding, so the knob is a scale factor while a cable is in and the sole control while it is not"
+     }
+    }
+   },
+   "notes": "Source read at commit a7468df, whose plugin.json is byte-identical to the installed one; src and res have not changed since a585095, so the three commits carrying version 2.0.0 are indistinguishable in behaviour anyway. The panel SVG holds no text elements, so nothing on this module is labelled and every line has to start from what the control does. Three faults worth knowing. The saturation knob is configured 0 to 2 but getCurrentColor hands the value to nvgHSL, which clamps saturation to 1, so the upper half of that knob's travel is a proved dead zone. dataFromJson at line 564 writes the saved saturation into the knob, and what dataToJson saved at line 524 is the effective saturation, which the clock input sets to 0 — so a patch saved in the desaturated state reopens with the knob itself on zero. The glow input multiplies its knob rather than adding to it, which is the usual surprise: a patched cable sitting at 0V halves the glow and one at -5V removes it, and the knob is dead as a level while the cable is in. The font knob's maximum is fontPaths.size() - 1, which would be -1 if the fonts folder were ever empty. The text field widget is added to the panel at -1000,-1000, which is why editing shows no box. All four inputs are read on channel 0 only and the module has no outputs and no lights."
   },
   "TextExpander": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Expander for the Vertical Text Display: eight jacks that mirror, scramble, reverse or restore the text on the display it is placed against",
+    "Each pulse above 1V turns mirroring of the lettering left to right on, and the next pulse turns it off",
+    "Each pulse above 1V turns mirroring of the lettering top to bottom on, and the next pulse turns it off",
+    "Each pulse above 1V shuffles the characters into a random order, and the next pulse puts them back",
+    "Each pulse above 1V replaces every letter and digit with a random punctuation mark, and the next pulse puts the text back",
+    "Each pulse above 1V changes one randomly chosen letter or digit, with an even chance of a punctuation mark or another character of the same kind; nothing puts that one character back",
+    "Each pulse above 1V replaces every letter and digit with a random one of the same kind, capitals staying capitals and digits staying digits, and the next pulse puts the text back",
+    "Each pulse above 1V reverses the order of the characters, turning the line of text end for end, and the next pulse puts it back",
+    "The first pulse above 1V takes the current text as the one to return to, and every pulse after that restores it",
+    "Note — this module does nothing on its own: it must be immediately to the left or right of a Vertical Text Display, and the display takes one on each side at once",
+    "Note — a jack with no cable in it is not read at all, so pulling the cable leaves that effect where the last pulse left it rather than turning it off",
+    "Note — with several effects on at once, switching one off does not bring the text back; it returns only when the last of them is off",
+    "Note — the lamp beside a jack is lit while that effect is on, but the two jacks that take a trigger rather than a switch light for a single sample only, so in practice their lamps never show"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TextExpander.cpp:66 reads getVoltage() on channel 0 and passes it to a dsp::SchmittTrigger with default thresholds, firing at 1 and resetting at 0, but only when isConnected() is true"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TextExpander.cpp:66 in processToggle, called for this index from the loop at line 84"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TextExpander.cpp:66 in processToggle, called for this index from the loop at line 84"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TextExpander.cpp:66 in processToggle, called for this index from the loop at line 84"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TextExpander.cpp:95 tests isConnected() and passes getVoltage() to triggers[7], a dsp::SchmittTrigger with default thresholds; the pulse is sent on for one sample"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TextExpander.cpp:66 in processToggle, called for this index from the loop at line 84"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TextExpander.cpp:66 in processToggle, called for this index from the loop at line 84"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "TextExpander.cpp:101 tests isConnected() and passes getVoltage() to triggers[8], a dsp::SchmittTrigger with default thresholds; the pulse is sent on for one sample"
+     }
+    }
+   },
+   "notes": "Source read at commit a7468df, whose plugin.json is byte-identical to the installed one. The module has no parameters at all, so only the eight jacks can be clicked for help; its eight lamps are LightWidgets and cannot. The panel SVG holds no text elements, so nothing is labelled. The expander protocol runs both ways: TextExpander fills both its left and its right producer message and flips whichever side has a VerticalTextModule against it, and VerticalTextModule looks for an expander on both of its sides, so one display can be driven by an expander on each side at once. onExpanderChange clears every toggle, but only when there is no module at all on either side — any neighbour, related or not, keeps the states. Two small faults. The single-symbol jack is index 4, which falls inside the toggle loop as well as being read as a pulse, so its voltage goes through two Schmitt triggers and sets a toggle state that is never sent anywhere; the lamp it sets in that loop is overwritten a few lines later by the pulse value. And the two pulse lamps are driven with setBrightness rather than setBrightnessSmooth, so they are lit for exactly one sample. The toggles fire on a rising edge through 1V and rearm below 0V, which is Rack's default Schmitt trigger and not the 0.1V to 2V window the voltage standards suggest."
   }
  }
 }

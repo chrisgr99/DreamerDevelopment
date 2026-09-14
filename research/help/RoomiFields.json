@@ -1,13 +1,25 @@
 {
  "plugin": "RoomiFields",
- "source": "https://github.com/roomi-fields/vcv-osc",
+ "source": "https://github.com/roomi-fields/vcv-osc/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "OscController": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Controls the whole Rack patch over OSC: any parameter, cable or module can be set, added or removed from an outside client, and the patch is served as an OSCQuery namespace over HTTP",
+    "Note — there is nothing to click on this panel; the module carries no knob and no jack, and everything it does arrives as an OSC message from somewhere else",
+    "Note — the messages it answers are /param/set, /param/get, /param/watch, /cable/add, /cable/remove, /module/add, /module/remove, /state/dump, /state/watch, /registry/dump and /ping",
+    "Note — an address may be sent with a leading /vcv, which the module strips before matching, so a client that speaks through osc-bridge and one that speaks to it directly both work",
+    "Note — the display reads out the port OSC messages arrive on, the address and port replies go to, the OSCQuery port and a running count of messages taken",
+    "Note — the green lamp flashes on each message received and the yellow one on each message sent",
+    "Note — replies are sent to 127.0.0.1 and the address cannot be changed from the panel or the menu; it is saved with the patch and can only be altered by editing the patch file",
+    "Menu — Listen port: 7770, 8000, 9000, 57120 — chooses the UDP port the module takes OSC messages on, and restarts the server on the new one",
+    "Menu — Reply port: 7771, 8001, 9001, 57121 — chooses the UDP port replies and change notifications are sent to",
+    "Menu — Echo /param/value on set — sends a /param/value message back after every /param/set, which is on when the module is placed",
+    "Menu — Enable OSCQuery — serves the patch as an OSCQuery namespace over HTTP, which is on when the module is placed",
+    "Menu — OSCQuery port: 7772, 8080, 9000, 5678 — chooses the HTTP port the OSCQuery namespace is served on",
+    "Menu — Restart OSC server — binds the ports again and starts the server from scratch"
+   ],
+   "notes": "Read from the maker's source at commit 8f5dcbc, whose plugin.json is byte for byte the installed one; that commit is the head of the repository and is the rebrand to the RoomiFields slug at version 2.1.2. The module declares no parameters, no inputs and no outputs at all (ParamId, InputId and OutputId are empty enums), so the census carries nothing to tag and every line here is a module-level note or a menu item. The panel holds only a status display, which is a plain widget::Widget and so cannot be clicked for help, and two lights. The reply host is held in a std::string that is saved to and loaded from the patch JSON but is never written by the menu or by any OSC command, so it stays at 127.0.0.1 for anyone who does not edit the patch file. The module's own step() pumps the applicator on the UI thread; the network thread only enqueues, which is why cable and module changes are safe."
   }
  }
 }

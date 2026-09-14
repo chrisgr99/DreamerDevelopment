@@ -1,23 +1,383 @@
 {
  "plugin": "wildergarden",
- "source": "https://github.com/ArdenButterfield/wildergarden-vcv",
+ "source": "https://github.com/ArdenButterfield/wildergarden-vcv/blob/main/docs/Manual.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Dimit": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A compressor that turns into a waveshaper: it follows the envelope of the input and divides the signal down by however far that envelope has passed a threshold.",
+    "Sets the voltage the envelope has to pass before the signal is pushed down, 0V to 10V.",
+    "Sets how fast the envelope follower moves, 0 to 1; at the top it follows each cycle of the waveform and the reduction becomes harmonic distortion.",
+    "Adds to the grit knob, one unit of its travel per volt, the two together held between 0 and 1.",
+    "The audio to be compressed.",
+    "The input divided by one plus the amount the envelope has passed the threshold, as a fraction of the threshold.",
+    "Note — The module is monophonic: only the first channel of a polyphonic cable is read, and one channel comes out.",
+    "Note — The red lamp beside the output is never lit. The code that drove it is commented out, so it says nothing about how hard the module is working."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "why": "src/dimit.cpp:42-43 params[GRITKNOB_PARAM] + inputs[GRITCV_INPUT].getVoltage(), clamped to 0..1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/dimit.cpp:45 getVoltage(); :46 the envelope follows its absolute value"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/dimit.cpp:48,50 in /= 1 + overage, written with no clamp, so it never exceeds the input"
+     }
+    }
+   },
+   "notes": "The grit knob runs 0 to 1 while the CV is added in volts, so a single volt covers the whole range and anything above 1V is clamped away. The rise and fall of the envelope follower go from 1000 and 10 at grit 0 to 11000 and 1010 at grit 1 (src/dimit.cpp:44). The module has a red light declared and placed on the panel, PATH10_LIGHT, whose only setBrightnessSmooth call is inside a commented-out block at :52-60, so it is permanently dark. The manual describes the threshold and grit as inputs where the panel has a knob and a jack for grit and only a knob for threshold. Panel order and index order agree."
   },
   "Pascal": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sequencer that runs Pascal's triangle: each clock builds the next cell of a row from the two cells before it, and three counters turn that cell into triggers and pitches.",
+    "Holding this down drives the clock high, which is what the clock input does with a gate in it.",
+    "Sets the cell the cursor is on to 1, which seeds a fresh pattern; holding it down keeps writing 1 every sample.",
+    "Stops the cursor moving on to the next row when it reaches the end of this one, so the same row is recomputed over and over.",
+    "Sets how many cells long a row is, 1 to 32; cells past that are cleared, so winding it down is a quick way to empty the grid.",
+    "Sets the modulus for that counter, 1 to 32: the counter fires whenever the current cell does not divide evenly by this, and the row itself is kept modulo the three moduli multiplied together.",
+    "A falling edge here computes the next cell of the row and moves the cursor on; the rising edge is what latches the pitch outputs.",
+    "A trigger here sets the cell the cursor is on to 1.",
+    "Above 1V the cursor stays on the current row instead of moving on to the next.",
+    "Adds to the length knob, 3.2 cells per volt, so 10V covers the whole 32.",
+    "Adds to that counter's modulus, 3.2 divisions per volt, so 10V covers the whole 32.",
+    "10V for as long as the clock is high and the current cell does not divide evenly by that counter's modulus, 0V otherwise.",
+    "The current cell taken modulo that counter's modulus, one less, scaled so a full modulus would reach 10V; it is latched on the rising edge of the clock and held until the next cell that fires.",
+    "10V while the third counter is firing and its remainder is that number, so the six of them split the third counter's triggers across separate drums.",
+    "Note — Nothing moves without a clock: the grid is computed one cell per falling edge of the clock input or the clock button, and the module has no clock of its own.",
+    "Note — The grid of lights is the triangle, four rows of 32 turned on their side, the cursor white; a cell takes red, green or blue for each counter whose modulus it does not divide by.",
+    "Note — The row wraps round every four columns, so the fourth row is built from the first again.",
+    "Note — The five blue lamps under each knob read that knob's setting as a binary number.",
+    "Note — The grid and the lamps are lights rather than controls, so none of them can be clicked for help."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 5,
+    "6": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10,
+    "5": 10,
+    "6": 10
+   },
+   "out": {
+    "0": 11,
+    "4": 11,
+    "2": 11,
+    "1": 12,
+    "11": 12,
+    "3": 12,
+    "5": 13,
+    "6": 13,
+    "7": 13,
+    "8": 13,
+    "9": 13,
+    "10": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "trigger",
+     "3": "pitch",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Pascal.cpp:165 clockTrigger.process(voltage, 0.1f, 1.f); :186 the step happens on the falling edge"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Pascal.cpp:205 insertTrigger.process(insertVolt, 0.1f, 1.f)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Pascal.cpp:160 inputs[FREEZE_CV_INPUT].getVoltage() > 1.0f"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "src/Pascal.cpp:174 round(knob + voltage*32/10) then clamped to 1..32"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "src/Pascal.cpp:180 round(knob + voltage*32/10) then clamped to 1..32"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "src/Pascal.cpp:180, same loop"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "src/Pascal.cpp:180, same loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pascal.cpp:242 setVoltage(trig1 ? 10 : 0)"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pascal.cpp:248 setVoltage(trig2 ? 10 : 0)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pascal.cpp:253 setVoltage(trig3 ? 10 : 0)"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Pascal.cpp:217,271 (val%div - 1)*10/div"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Pascal.cpp:217,272 (val%div - 1)*10/div"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Pascal.cpp:217,273 (val%div - 1)*10/div"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pascal.cpp:254 trig3 && val%div3 == 1"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pascal.cpp:255 trig3 && val%div3 == 2"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pascal.cpp:256 trig3 && val%div3 == 3"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pascal.cpp:257 trig3 && val%div3 == 4"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pascal.cpp:258 trig3 && val%div3 == 5"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Pascal.cpp:259 trig3 && val%div3 == 6"
+     }
+    }
+   },
+   "notes": "The manual says the pitch outputs range between 0 and 5V. The code computes (val % divisions - 1) * 10 / divisions at src/Pascal.cpp:217, which reaches 9.375V at a modulus of 32, so the range is 0V to just under 10V and the pitch line here says 10V. The manual also calls the triggers triggers; they are gates, held high for as long as the clock is high. Index order is nothing like panel order: the three counters are laid out 1, 3, 2 down the panel while their parameters are indexed 4, 5, 6 as 1, 3, 2, and output 11 (pitch 2) sits at the bottom left while outputs 5 to 10 are the six individual triggers on the right. The maker's output name for index 11 is misspelt \"Pitch 2 outut\". COUNTER3_INDICATOR1_LIGHT is written twice at :262 and :263, the first write testing for a remainder of 6 and being overwritten at once, which has no effect on any jack. The 384 grid lights, the five binary lamps under each knob and the counter indicator lamps are all lights, so none of them carries a parameter."
   },
   "modmix": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A three-input mixer whose sum is folded or wrapped back between a low and a high limit, so a signal that passes either limit comes back inside instead of clipping.",
+    "Adds a fixed voltage to the mix, -10V to +10V, which shifts the sum through the folds with nothing patched.",
+    "Sets the low limit the fold works between, -10V to +10V.",
+    "Sets the high limit the fold works between, -10V to +10V.",
+    "Scales the CV into the low limit, -1 to +1, and inverts it below the centre.",
+    "Scales the CV into the high limit, -1 to +1, and inverts it below the centre.",
+    "Chooses how the mix comes back when it passes a limit: reflected back and forth, or wrapped round to start again at the other limit. The position it comes up in reflects.",
+    "Sets the height of the normalised output, -10V to +10V: positive gives 0V up to that voltage, negative gives a swing of half that voltage either side of zero.",
+    "One of the three signals summed into the mix.",
+    "Modulates the low limit through the trimmer above it, one volt per volt at the trimmer's full travel.",
+    "Modulates the high limit through the trimmer above it, one volt per volt at the trimmer's full travel.",
+    "Adds to the normalised output level knob, one volt per volt, the two together held between -10V and +10V.",
+    "The folded mix scaled by the normalised output level, rather than by the two limits.",
+    "The folded mix, spanning the low limit to the high limit.",
+    "Note — The offset knob is a fourth mixer channel with no jack, so the module folds on its own with nothing patched to it.",
+    "Note — With the two limits closer together than 0.001V the fold is switched off and the mix output rests at the low limit.",
+    "Note — The module is monophonic: only the first channel of a polyphonic cable is read.",
+    "Note — The two coloured lamps show the level knob and the normalised output, red for positive and blue for negative."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 8,
+    "2": 8,
+    "3": 9,
+    "4": 10,
+    "5": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/modmix.cpp:65,75 getVoltage() summed into mix with no clamp"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/modmix.cpp:66,75 getVoltage() summed into mix"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/modmix.cpp:67,75 getVoltage() summed into mix"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/modmix.cpp:78,82 tame() clamps to ±10, scaled by LOW_TRIM_PARAM and added to the knob"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/modmix.cpp:80,83 tame() clamps to ±10, scaled by HIGH_TRIM_PARAM and added to the knob"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±10V",
+      "why": "src/modmix.cpp:100,102 tame(knob + tame(voltage)), so the total is clamped to ±10"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/modmix.cpp:103,106 modMix*abs(level) plus half the level when it is negative, level itself clamped to ±10"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/modmix.cpp:105 modMix*(high-low)+low, with high and low each a ±10 knob plus a trimmed ±10 CV"
+     }
+    }
+   },
+   "notes": "The fourth mixer channel is the knob inside the in box, not a jack, and it is what lets the module fold with nothing patched. The waveshape switch is named Saw/Square Waveshape selector by the maker; the code does not make a square of anything — below 0.5 it reflects the normalised mix back and forth, which is a triangle fold, and above 0.5 it takes the fractional part, which is a sawtooth wrap. The variable is called isTriangle at src/modmix.cpp:85. The low and high limits are not clamped against each other, so setting low above high inverts the fold; only a gap smaller than 0.001V is caught, and the mix output then sits at the low limit. Panel order and index order agree apart from the outputs, where the normalised output is index 0 on the left and the plain mix is index 1 on the right. The module widget adds no screws."
   }
  }
 }

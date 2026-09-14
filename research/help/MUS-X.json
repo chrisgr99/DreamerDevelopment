@@ -2,72 +2,1804 @@
  "plugin": "MUS-X",
  "source": "https://github.com/Jojosito/MUS-X",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "ADSR": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Attack-decay-sustain-release envelope with exponential stages, built-in velocity scaling, a CV for the sustain level, and a per-voice random spread that makes each channel behave slightly differently",
+    "Sets the rise time, 0.5ms at fully counter-clockwise to 20 seconds at fully clockwise",
+    "Sets how much the velocity input scales the envelope's peak, 0 to 1; at 0 the velocity jack does nothing",
+    "Sets the fall time from the peak down to the sustain level, 0.5ms to 20 seconds",
+    "Scales the attack, decay, sustain and release of each channel by a random amount, 0 to 1, in the way the voices of an old analogue polysynth differ from each other",
+    "Sets the level the envelope holds at while the gate is high, 0 to 1",
+    "Attenuates and inverts the Sus jack, -1 to 1, before that voltage is added to the sustain level",
+    "Sets the fall time from wherever the envelope has reached down to zero, 0.5ms to 20 seconds",
+    "The note velocity, 0V to 10V, which scales the envelope's peak by as much as the Vel knob allows",
+    "Divided by 10, scaled by the Sus mod knob and added to the sustain level",
+    "The gate: the envelope attacks while this is at 1V or above and releases below that; its channel count sets the polyphony of the whole module",
+    "A rise past 1V restarts the attack without the gate having to fall first",
+    "10V while the envelope is in its decay or sustain stage, and 0V during the attack and the release; useful for firing a second envelope to shape the sustain",
+    "The envelope, 0V to 10V",
+    "Note — the random spread is generated once per module and saved with the patch, so a patch sounds the same each time it is opened",
+    "Note — the polyphony of both outputs follows the gate input alone; the other three jacks are read at whatever channel count that sets"
+   ],
+   "param": {
+    "0": 1,
+    "4": 2,
+    "1": 3,
+    "5": 4,
+    "2": 5,
+    "6": 6,
+    "3": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "ADSR.cpp:131 reads this input with getVoltageSimd per channel; ADSRBlock.hpp:95 clamps it to 0 and 10V"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "ADSR.cpp:127 reads this input with getPolyVoltageSimd, multiplies it by 0.1 and by the Sus mod knob, and adds it to the sustain knob"
+     },
+     "2": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ADSR.cpp:98 takes the module's channel count from this input; ADSR.cpp:132 reads it with getVoltageSimd and ADSRBlock.hpp:83 counts it high at 1V and above"
+     },
+     "3": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "ADSR.cpp:133 reads this input with getVoltageSimd; ADSRBlock.hpp:88 passes it to a Schmitt trigger at Rack's default 1V threshold"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ADSR.cpp:106 sets this output's channel count from the gate input; ADSRBlock.hpp:100 writes 10V or 0V"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "ADSR.cpp:107 sets this output's channel count from the gate input; ADSRBlock.hpp:124 multiplies the envelope by 10V"
+     }
+    }
+   },
+   "notes": "Read from src/ADSR.cpp and src/blocks/ADSRBlock.hpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1; the last change to plugin.json was two commits earlier, so the tag rather than that commit is the release. The stage times run from 0.5ms to 20 seconds, from MIN_TIME and MAX_TIME at ADSR.cpp:48 and 49. The attack aims at 1.2 rather than 1 (ADSR.cpp:51), which is what makes the attack stage curve rather than crawl into its target. The README's account of the module matches the code."
   },
   "Tuner": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Adds the two pitch inputs together and shifts them by octaves, semitones and cents, for tuning a voice or transposing a sequence",
+    "Shifts the pitch in octaves, -7 to 7 by default; the range and whether it snaps to whole octaves are both on the menu",
+    "Shifts the pitch in semitones, -12 to 12 by default, the hover text reading it in cents; the range and the snapping are both on the menu",
+    "Shifts the pitch by up to a semitone either way, the hover text reading it in cents",
+    "A pitch to be tuned, one volt per octave; it is added to the other pitch jack",
+    "A pitch to be tuned, one volt per octave; it is added to the other pitch jack",
+    "A modulation input scaled at 5V to the semitone, meant for small pitch movements rather than for notes",
+    "The sum of the two pitch inputs, the fine input and the three knobs, clamped to -12V and 12V",
+    "Menu — Octave range: 3 (±1) to 15 (±7) — sets how far the octave knob reaches",
+    "Menu — Snap octaves — makes the octave knob move in whole octaves rather than smoothly",
+    "Menu — Semitone range: 3 (±1) to 25 (±12) — sets how far the semitone knob reaches",
+    "Menu — Snap semitones — makes the semitone knob move in whole semitones rather than smoothly",
+    "Note — the output is clamped to -12V and 12V, which is 24 octaves, so the module can transpose much further than any oscillator will follow",
+    "Note — the polyphony of the output is the largest channel count of the three inputs"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "cv"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Tuner.cpp:89 takes this input's channel count and Tuner.cpp:95 reads it with getPolyVoltageSimd, adding it straight to the sum in volts per octave"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Tuner.cpp:90 takes this input's channel count and Tuner.cpp:95 reads it with getPolyVoltageSimd, adding it straight to the sum in volts per octave"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Tuner.cpp:91 takes this input's channel count and Tuner.cpp:96 reads it with getPolyVoltageSimd and divides it by 60, which is 5V to the semitone"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "Tuner.cpp:92 sets this output's channel count from the largest of the three inputs; Tuner.cpp:98 clamps the result to ±12V"
+     }
+    }
+   },
+   "notes": "Read from src/Tuner.cpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1. The panel prints Oct, Semi and Fine, and the third jack is printed Fine while its hover text reads 5V/Semi; the division by 60 at Tuner.cpp:96 makes 5V one semitone, so the hover text is the accurate one. The README calls this module Tune while the browser and the panel title both read Tuner and Tune respectively. The menu ranges run to ±7 octaves and ±12 semitones (Tuner.cpp:166 and 187)."
   },
   "Oscillators": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A pair of analogue-style oscillators with a sub-oscillator, hard sync, through-zero linear FM and a ring modulator, all mixed to one output, and every control with its own CV jack",
+    "Blends oscillator 1 from triangle at fully counter-clockwise through sawtooth in the middle to pulse at fully clockwise",
+    "Moves the phase of oscillator 1's triangle and the width of its pulse, from 0% through 50% at the centre to 100%",
+    "Sets the level of oscillator 1 in the mix, 0 to 1",
+    "Sets the level of the sub-oscillator in the mix, 0 to 1; it is a square one octave below oscillator 1",
+    "Turns hard sync on, which restarts oscillator 2 every time oscillator 1 completes a cycle",
+    "Sets how much oscillator 1 modulates oscillator 2's frequency, 0 to 1; the modulation goes through zero and leaves oscillator 2's pitch where it was",
+    "Sets the level of the ring modulator in the mix, 0 to 1; it is oscillator 1 multiplied by oscillator 2",
+    "Blends oscillator 2 from triangle at fully counter-clockwise through sawtooth in the middle to pulse at fully clockwise",
+    "Moves the phase of oscillator 2's triangle and the width of its pulse, from 0% through 50% at the centre to 100%",
+    "Sets the level of oscillator 2 in the mix, 0 to 1",
+    "Added to its shape knob at a fifth of the knob's travel per volt",
+    "Added to its pulse width knob at a fifth of the knob's travel per volt",
+    "Added to its volume knob at a tenth of the knob's travel per volt",
+    "Added to the Sub knob at a tenth of the knob's travel per volt",
+    "Divided by 5 and added to the Sync switch, so anything above 5V turns sync on",
+    "Added to the FM knob at a tenth of the knob's travel per volt",
+    "Added to the RM knob at a tenth of the knob's travel per volt",
+    "The pitch of oscillator 1, one volt per octave; its channel count and that of the other pitch jack together set the polyphony of the module",
+    "The pitch of oscillator 2, one volt per octave; its channel count and that of the other pitch jack together set the polyphony of the module",
+    "Oscillator 1, the sub-oscillator, oscillator 2 and the ring modulator added together at their set levels",
+    "Menu — Oversampling rate: 1x to 1024x — runs the oscillators above the sample rate to cut aliasing; the waveforms are generated plainly, so heavy oversampling is what keeps sync and FM clean",
+    "Menu — Anti-aliasing — adds polyBLEP and polyBLAMP corrections to the corners of the waveforms, which costs little and helps a great deal",
+    "Menu — DC blocker — takes out the offset that FM and the ring modulator can put on the output; on to begin with",
+    "Menu — Saturator — holds the output to about -10V and 10V",
+    "Menu — LFO mode — drops both oscillators to 2Hz at 0V and switches the oversampling and the DC blocker off inside",
+    "Note — there is no volume control for the module as a whole; the four level knobs are what set the output level",
+    "Note — the two shape controls and the two pulse width controls both take their CV at a fifth of the knob's travel per volt, while the four level controls take theirs at a tenth"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "7": 5,
+    "8": 6,
+    "9": 7,
+    "4": 8,
+    "5": 9,
+    "6": 10
+   },
+   "in": {
+    "0": 11,
+    "4": 11,
+    "1": 12,
+    "5": 12,
+    "2": 13,
+    "6": 13,
+    "3": 14,
+    "7": 15,
+    "8": 16,
+    "9": 17,
+    "10": 18,
+    "11": 19
+   },
+   "out": {
+    "0": 20
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger",
+     "8": "cv",
+     "9": "cv",
+     "10": "pitch",
+     "11": "pitch"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Oscillators.cpp:137 reads this input with getPolyVoltageSimd and multiplies it by 0.2 before adding it to the knob's -1 to 1 travel"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Oscillators.cpp:138 reads this input with getPolyVoltageSimd and multiplies it by 0.2 before adding it to the knob's -1 to 1 travel"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Oscillators.cpp:139 reads this input with getPolyVoltageSimd and multiplies it by 0.1 before adding it to the knob's 0 to 1 travel"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Oscillators.cpp:140 reads this input with getPolyVoltageSimd and multiplies it by 0.1 before adding it to the knob's 0 to 1 travel"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Oscillators.cpp:142 reads this input with getPolyVoltageSimd and multiplies it by 0.2 before adding it to the knob's -1 to 1 travel"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Oscillators.cpp:143 reads this input with getPolyVoltageSimd and multiplies it by 0.2 before adding it to the knob's -1 to 1 travel"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Oscillators.cpp:144 reads this input with getPolyVoltageSimd and multiplies it by 0.1 before adding it to the knob's 0 to 1 travel"
+     },
+     "7": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 5V",
+      "normal": "0V",
+      "why": "Oscillators.cpp:146 reads this input with getPolyVoltageSimd and divides it by 5 before adding it to the switch's 0 or 1"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Oscillators.cpp:147 reads this input with getPolyVoltageSimd and multiplies it by 0.1 before adding it to the knob's 0 to 1 travel"
+     },
+     "9": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Oscillators.cpp:148 reads this input with getPolyVoltageSimd and multiplies it by 0.1 before adding it to the knob's 0 to 1 travel"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Oscillators.cpp:130 takes the module's channel count from this input and Oscillators.cpp:159 reads it with getVoltageSimd as a pitch"
+     },
+     "11": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Oscillators.cpp:131 takes the module's channel count from this input and Oscillators.cpp:160 reads it with getPolyVoltageSimd as a pitch"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "why": "Oscillators.cpp:132 sets this output's channel count from the two pitch inputs; the saturator on the menu holds the result to about ±10V"
+     }
+    }
+   },
+   "notes": "Read from src/Oscillators.cpp and src/blocks/OscillatorsBlock.hpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1. The README's account matches the code. The CV depths differ between control types and the panel does not say so: the two shape jacks and the two pulse width jacks are scaled by 0.2 per volt against a knob spanning -1 to 1, while the four level jacks and the FM jack are scaled by 0.1 per volt against a knob spanning 0 to 1 (Oscillators.cpp:137 to 148). The sync jack is divided by 5 and added to the switch, so 5V or more turns sync on. Oscillator 1's pitch jack is read with getVoltageSimd rather than getPolyVoltageSimd (line 159), so a monophonic cable there does not spread to the other channels the way oscillator 2's does."
   },
   "Delay": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo ping-pong delay modelled on an analogue bucket-brigade pedal, with the size of the bucket line, the filters around it and the compander all brought out as controls",
+    "Sets the delay time; the span depends on the Stages setting, running from a hundredth of the longest time to all of it",
+    "Sets how much of the output goes back into the input, 0 to 3; it passes unity well before the top, and the module will self-oscillate up there",
+    "Tap a tempo: two presses set the delay time to the gap between them",
+    "Sets the cutoff of the filters either side of the bucket line, 200Hz at fully counter-clockwise to 10kHz at fully clockwise, which makes the repeats brighter or darker",
+    "Sets the resonance of those same filters, 0 to 1, which changes the character of the repeats most at high feedback",
+    "Sets how much noise the bucket line adds, 0 to 1; more noise makes self-oscillation start sooner",
+    "Sets how many buckets the delay line has, 256 to 16384 in powers of two; fewer gives very short delays for chorus, more gives longer and brighter delays",
+    "Sets how steep the filters either side of the bucket line are, 6dB per octave to 24dB per octave; steeper is cleaner and duller, shallower is dirtier and brighter",
+    "Sets how quickly the compander reacts, 0.1Hz to 40Hz; a low setting gives the repeats a slight fade in and out",
+    "Sets the level going into the delay, 0 to 4; the dry path is not touched by it, and a lamp lights when the delay circuit is overloaded",
+    "Spreads the two repeats apart, 0 for both channels the same and 1 for full ping-pong; with Inv R on it does nothing",
+    "Makes the right repeat the inverted left repeat, which with a small Stages setting, no feedback and a moving delay time gives a chorus",
+    "Crossfades between dry and wet, both at full level at the centre",
+    "Added to the Time knob at a tenth of the knob's travel per volt, the total clamped to the knob's own range",
+    "Added to the Feedback knob at three tenths per volt",
+    "The left audio input, or the whole signal when it is the only cable",
+    "The right audio input; with no cable it takes the left input",
+    "The left dry and wet signals mixed at the Mix setting",
+    "The right dry and wet signals mixed at the Mix setting",
+    "Note — the delay time span moves with the Stages setting, so changing the number of buckets changes what the Time knob reaches as well as the tone",
+    "Note — the feedback knob goes to 300%, which is far past unity; the output is held to -10V and 10V but the delay line will sing on its own well below the top of the travel",
+    "Note — both inputs sum all channels of a polyphonic cable to one, and both outputs are monophonic",
+    "Note — the lamp in the Tap button blinks at the current delay time"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13
+   },
+   "in": {
+    "0": 14,
+    "1": 15,
+    "2": 16,
+    "3": 17
+   },
+   "out": {
+    "0": 18,
+    "1": 19
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "audio",
+     "3": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Delay.cpp:187 reads this input with getVoltageSum, which adds every channel together, multiplies it by 0.1, adds the knob and clamps the total to 0 and 1"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Delay.cpp:202 reads this input with getVoltageSum, which adds every channel together, and multiplies it by 0.3 before adding the knob"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "Delay.cpp:192 reads this input with getVoltageSum, which adds every channel of a polyphonic cable into one signal"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "Left / Mono",
+      "why": "Delay.cpp:193 reads this input with getVoltageSum and falls back to the left input when it is unconnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Delay.cpp:324 writes channel 1 alone and the module never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "Delay.cpp:330 writes channel 1 alone and the module never calls setChannels"
+     }
+    }
+   },
+   "notes": "Read from src/Delay.cpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1. The delay time is not a fixed span: Delay.cpp:49 and 50 work the minimum and maximum out from the bucket count, as one and a hundred times the count divided by 256 in milliseconds, so at the default 4096 buckets the knob runs about 16ms to 1600ms and at 256 buckets about 1ms to 100ms. The README says the feedback goes well beyond 100%; the knob is configured 0 to 3 and the figure is then multiplied by 0.7 (Delay.cpp:94 and 202), so unity is reached near 0.48 of the travel. The dry and wet gains are worked out as a constant-power pair either side of the centre (Delay.cpp:324), so both are at full level with Mix in the middle. The module has no context menu of its own."
   },
   "OnePole": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A one-pole highpass and a one-pole lowpass in series, both linear and both with a CV input, for taking the extremes off a signal",
+    "Sets the highpass corner, 5Hz at fully counter-clockwise to 22kHz at fully clockwise",
+    "Added to the highpass knob at a tenth of the knob's full travel per volt, which is about 1.2 octaves",
+    "Sets the lowpass corner, 5Hz at fully counter-clockwise to 22kHz at fully clockwise",
+    "Added to the lowpass knob at a tenth of the knob's full travel per volt, which is about 1.2 octaves",
+    "The audio to filter; its channel count sets the polyphony of the module",
+    "The audio after the highpass and then the lowpass",
+    "Note — the highpass comes first and the lowpass takes its output, so the two corners crossing over leaves nothing",
+    "Note — the CV jacks are read at a divided rate rather than every sample, so they are for slow movement rather than audio-rate modulation"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3
+   },
+   "in": {
+    "0": 2,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "OnePole.cpp:61 reads this input with getPolyVoltageSimd, multiplies it by 0.1 and adds it to the knob's 0 to 1 travel, which spans 5Hz to 22kHz"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "OnePole.cpp:66 reads this input with getPolyVoltageSimd, multiplies it by 0.1 and adds it to the knob's 0 to 1 travel, which spans 5Hz to 22kHz"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "why": "OnePole.cpp:57 takes the module's channel count from this input and OnePole.cpp:75 reads it with getVoltageSimd"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "OnePole.cpp:58 sets this output's channel count from the audio input"
+     }
+    }
+   },
+   "notes": "Read from src/OnePole.cpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1. The cutoff CV is a tenth of the knob's travel per volt (OnePole.cpp:61 and 66), and because the knob spans 5Hz to 22kHz, which is about 12.1 octaves, that is about 1.2 octaves per volt rather than the one octave the sister module Filter is scaled to. The module has no context menu of its own."
   },
   "OnePoleLP": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A single one-pole lowpass filter with a CV input, linear and with no resonance",
+    "Sets the corner, 0.01Hz at fully counter-clockwise to 22kHz at fully clockwise",
+    "Added to the knob at a tenth of the knob's full travel per volt, which is about 2.1 octaves",
+    "The audio to filter; its channel count sets the polyphony of the module",
+    "The audio after the filter",
+    "Note — the bottom of the knob's travel is well below any audible frequency, so the filter works as a slew limiter on control voltages too",
+    "Note — the CV jack is read at a divided rate rather than every sample, so it is for slow movement rather than audio-rate modulation"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "OnePoleLP.cpp:56 reads this input with getPolyVoltageSimd, multiplies it by 0.1 and adds it to the knob's 0 to 1 travel, which spans 0.01Hz to 22kHz"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "why": "OnePoleLP.cpp:52 takes the module's channel count from this input and OnePoleLP.cpp:66 reads it with getVoltageSimd"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "OnePoleLP.cpp:53 sets this output's channel count from the audio input"
+     }
+    }
+   },
+   "notes": "Read from src/OnePoleLP.cpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1. The knob spans 0.01Hz to 22kHz (OnePoleLP.cpp:27 and 28), about 21 octaves, so the tenth-of-travel-per-volt CV works out at roughly 2.1 octaves per volt. The module has no context menu of its own."
   },
   "Drift": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Generates a small fixed offset and a slow wander, both different for every polyphonic channel, for giving the voices of a synth the drift of an analogue one",
+    "Sets how large the fixed per-channel offset is, 0 to 1, the setting squared before it is applied; at the top it reaches ±5V",
+    "Draws a new set of fixed offsets, one per channel",
+    "Sets how far the slow wander goes, 0 to 1, the setting squared before it is applied",
+    "Sets how fast the wander moves, 0.01Hz at fully counter-clockwise to 1000Hz at fully clockwise",
+    "Sets how many channels the output carries; nothing on this jack is read except its channel count",
+    "The fixed offset and the wander added together, clamped to -10V and 10V, one value per channel",
+    "Note — the fixed offsets are saved with the patch, so a patch drifts the same way each time it is opened until the RNG button is pressed",
+    "Note — with nothing patched to the Poly jack the output carries a single channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "one channel",
+      "why": "Drift.cpp:73 uses only this input's channel count and never reads a voltage from it, so what is patched here does not matter"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "why": "Drift.cpp:74 sets this output's channel count from the Poly input; DriftBlock.hpp:90 clamps the result to ±10V"
+     }
+    }
+   },
+   "notes": "Read from src/Drift.cpp and src/blocks/DriftBlock.hpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1. The Poly input is read for its channel count alone (Drift.cpp:73), so it takes any cable and its voltage is never looked at; it is given no family for that reason. The Const and Drift knobs are squared before use (Drift.cpp:94 and 95), which puts most of the useful travel near the bottom. The fixed offsets are ±5V before the Const amount scales them (DriftBlock.hpp:33). The rate knob spans 0.01Hz to 1000Hz (Drift.cpp:29 and 30)."
   },
   "ModMatrix": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Modulation matrix with twelve signal inputs and sixteen mix outputs, a depth knob at every crossing, and a row of sixteen control knobs that set the base levels and edit one row at a time",
+    "Sets the base level of its column when no row is selected, and the depth of the selected row's crossing while a Select button is held",
+    "Sets how much its row's input reaches that column's Mix output, -1 to 1",
+    "While it is held, the sixteen Control knobs jump to that row's depths so they can be edited; letting go brings the base values back",
+    "Sets the range the sixteen Control knobs work over: a 16-channel polyphonic cable sets each column separately, and with no cable every column runs to 5V in bipolar mode or 10V in unipolar",
+    "One of the twelve signals to be mixed; its channel count helps set the polyphony of every Mix output",
+    "The base level of its column plus each input times that column's depth knob, clamped to -12V and 12V",
+    "The sixteen base values of the Control knobs on sixteen polyphonic channels",
+    "The sixteen current values of the Control knobs on sixteen polyphonic channels, which differ from the base values while a row is selected",
+    "Menu — Reduce internal sample rate: 1x to 1024x — runs the matrix at a fraction of the sample rate, which costs much less processor time and is harmless on modulation signals",
+    "Menu — Latch buttons — changes the Select buttons from momentary to latching, which suits selecting a row with the mouse; only one row can be selected either way",
+    "Menu — Bipolar — switches the knobs between running -100% to 100% and 0 to 100%",
+    "Menu — Relative MIDI control mode — makes an incoming MIDI knob move the value relative to where it is, which stops the jump you get when a physical knob and the on-screen one disagree",
+    "Note — the module is built to be driven by a MIDI controller: sixteen physical knobs onto the Control row and twelve buttons onto the Select column, mapped with something like stoermelder's MIDI-CAT",
+    "Note — a Mix output is only worked out when it has a cable, so unused columns cost nothing",
+    "Note — the lamp beside a Select button shows which row is selected for editing",
+    "Note — the polyphony of every Mix output is the largest channel count of the twelve signal inputs"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 2,
+    "17": 2,
+    "18": 2,
+    "19": 2,
+    "20": 2,
+    "21": 2,
+    "22": 2,
+    "23": 2,
+    "24": 2,
+    "25": 2,
+    "26": 2,
+    "27": 2,
+    "28": 2,
+    "29": 2,
+    "30": 2,
+    "31": 2,
+    "32": 2,
+    "33": 2,
+    "34": 2,
+    "35": 2,
+    "36": 2,
+    "37": 2,
+    "38": 2,
+    "39": 2,
+    "40": 2,
+    "41": 2,
+    "42": 2,
+    "43": 2,
+    "44": 2,
+    "45": 2,
+    "46": 2,
+    "47": 2,
+    "48": 2,
+    "49": 2,
+    "50": 2,
+    "51": 2,
+    "52": 2,
+    "53": 2,
+    "54": 2,
+    "55": 2,
+    "56": 2,
+    "57": 2,
+    "58": 2,
+    "59": 2,
+    "60": 2,
+    "61": 2,
+    "62": 2,
+    "63": 2,
+    "64": 2,
+    "65": 2,
+    "66": 2,
+    "67": 2,
+    "68": 2,
+    "69": 2,
+    "70": 2,
+    "71": 2,
+    "72": 2,
+    "73": 2,
+    "74": 2,
+    "75": 2,
+    "76": 2,
+    "77": 2,
+    "78": 2,
+    "79": 2,
+    "80": 2,
+    "81": 2,
+    "82": 2,
+    "83": 2,
+    "84": 2,
+    "85": 2,
+    "86": 2,
+    "87": 2,
+    "88": 2,
+    "89": 2,
+    "90": 2,
+    "91": 2,
+    "92": 2,
+    "93": 2,
+    "94": 2,
+    "95": 2,
+    "96": 2,
+    "97": 2,
+    "98": 2,
+    "99": 2,
+    "100": 2,
+    "101": 2,
+    "102": 2,
+    "103": 2,
+    "104": 2,
+    "105": 2,
+    "106": 2,
+    "107": 2,
+    "108": 2,
+    "109": 2,
+    "110": 2,
+    "111": 2,
+    "112": 2,
+    "113": 2,
+    "114": 2,
+    "115": 2,
+    "116": 2,
+    "117": 2,
+    "118": 2,
+    "119": 2,
+    "120": 2,
+    "121": 2,
+    "122": 2,
+    "123": 2,
+    "124": 2,
+    "125": 2,
+    "126": 2,
+    "127": 2,
+    "128": 2,
+    "129": 2,
+    "130": 2,
+    "131": 2,
+    "132": 2,
+    "133": 2,
+    "134": 2,
+    "135": 2,
+    "136": 2,
+    "137": 2,
+    "138": 2,
+    "139": 2,
+    "140": 2,
+    "141": 2,
+    "142": 2,
+    "143": 2,
+    "144": 2,
+    "145": 2,
+    "146": 2,
+    "147": 2,
+    "148": 2,
+    "149": 2,
+    "150": 2,
+    "151": 2,
+    "152": 2,
+    "153": 2,
+    "154": 2,
+    "155": 2,
+    "156": 2,
+    "157": 2,
+    "158": 2,
+    "159": 2,
+    "160": 2,
+    "161": 2,
+    "162": 2,
+    "163": 2,
+    "164": 2,
+    "165": 2,
+    "166": 2,
+    "167": 2,
+    "168": 2,
+    "169": 2,
+    "170": 2,
+    "171": 2,
+    "172": 2,
+    "173": 2,
+    "174": 2,
+    "175": 2,
+    "176": 2,
+    "177": 2,
+    "178": 2,
+    "179": 2,
+    "180": 2,
+    "181": 2,
+    "182": 2,
+    "183": 2,
+    "184": 2,
+    "185": 2,
+    "186": 2,
+    "187": 2,
+    "188": 2,
+    "189": 2,
+    "190": 2,
+    "191": 2,
+    "192": 2,
+    "193": 2,
+    "194": 2,
+    "195": 2,
+    "196": 2,
+    "197": 2,
+    "198": 2,
+    "199": 2,
+    "200": 2,
+    "201": 2,
+    "202": 2,
+    "203": 2,
+    "204": 2,
+    "205": 2,
+    "206": 2,
+    "207": 2,
+    "208": 3,
+    "209": 3,
+    "210": 3,
+    "211": 3,
+    "212": 3,
+    "213": 3,
+    "214": 3,
+    "215": 3,
+    "216": 3,
+    "217": 3,
+    "218": 3,
+    "219": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5,
+    "8": 5,
+    "9": 5,
+    "10": 5,
+    "11": 5,
+    "12": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6,
+    "13": 6,
+    "14": 6,
+    "15": 6,
+    "16": 7,
+    "17": 8
+   },
+   "family": {
+    "out": {
+     "16": "cv",
+     "17": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "5V",
+      "why": "ModMatrix.cpp:592 reads channel j of this input for column j, and uses 5V in bipolar mode or 10V in unipolar when it is unconnected"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "9": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "11": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     },
+     "12": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "0V",
+      "why": "ModMatrix.cpp:442 takes its channel count into the module's polyphony and ModMatrix.cpp:598 reads it with getPolyVoltageSimd"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "1": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "2": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "3": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "4": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "5": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "6": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "7": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "8": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "9": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "10": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "11": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "12": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "13": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "14": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "15": {
+      "poly": true,
+      "range": "-12 to 12V",
+      "why": "ModMatrix.cpp:448 sets this output's channel count from the twelve signal inputs; ModMatrix.cpp:601 clamps the result to ±12V"
+     },
+     "16": {
+      "poly": true,
+      "range": "±10V",
+      "why": "ModMatrix.cpp:451 sets this output to sixteen channels; ModMatrix.cpp:574 writes each knob's base value scaled by 5 in bipolar mode or 10 in unipolar"
+     },
+     "17": {
+      "poly": true,
+      "range": "±10V",
+      "why": "ModMatrix.cpp:452 sets this output to sixteen channels; ModMatrix.cpp:575 writes each knob's current value scaled by 5 in bipolar mode or 10 in unipolar"
+     }
+    }
+   },
+   "notes": "Read from src/ModMatrix.cpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1, alongside the README. The twelve signal inputs and the sixteen Mix outputs carry whatever is patched into them, so they are given no family; only the two knob-value outputs are certain to be control voltages. The Control knob base values input is read one channel per column (ModMatrix.cpp:592), so a sixteen-channel cable sets a different range for each column, and an unconnected jack stands in as 5V in bipolar mode or 10V in unipolar; the jack's own name changes between those two readings (ModMatrix.cpp:367 and 371). A Mix output that has no cable is skipped entirely (ModMatrix.cpp:587). The browser's description calls the matrix 13x16, counting the base-values jack among the inputs; the matrix itself is twelve signals by sixteen mixes."
   },
   "LFO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Polyphonic low-frequency oscillator with eight shapes, a CV for the rate and the level, and a phase reset",
+    "Chooses the waveform: Sine, Triangle, Square, Pulse, Ramp, Saw, Sample & hold or Warped",
+    "Sets the rate, -10 to 10 octaves, the hover text reading the result in hertz",
+    "Added to the Freq knob at one octave per volt",
+    "Sets the output level, 0V to 5V either side of zero in bipolar mode",
+    "Added to the Amp knob one volt for one volt, the total clamped to 10V",
+    "Restarts the waveform at the beginning of its cycle",
+    "A rise of more than half a volt from the last sample restarts the waveform at the beginning of its cycle",
+    "The waveform, centred on 0V in bipolar mode or running from 0V upwards in unipolar mode",
+    "Menu — Reduce internal sample rate: 1x to 1024x — runs the oscillator at a fraction of the sample rate, which costs much less processor time and is harmless on slow shapes",
+    "Menu — Bipolar — switches between a waveform centred on 0V and one running from 0V up to twice the Amp setting",
+    "Note — the channel count of the output is the largest of the three input jacks, so with nothing patched it is a single channel",
+    "Note — the reset jack looks for a step of more than half a volt rather than a fixed threshold, so a slowly rising voltage will not restart the cycle"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 4,
+    "3": 6
+   },
+   "in": {
+    "0": 3,
+    "1": 5,
+    "2": 7
+   },
+   "out": {
+    "0": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "LFO.cpp:78 takes this input's channel count and LFO.cpp:91 reads it with getPolyVoltageSimd, adding it to the knob in octaves"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "LFO.cpp:79 takes this input's channel count and LFO.cpp:92 reads it with getPolyVoltageSimd; LFOBlock.hpp:95 clamps the knob-plus-jack total to 0 and 10"
+     },
+     "2": {
+      "poly": true,
+      "step": "stepped",
+      "normal": "0V",
+      "why": "LFO.cpp:80 takes this input's channel count and LFO.cpp:93 reads it with getPolyVoltageSimd; LFOBlock.hpp:100 restarts the cycle on a step of more than 0.5V from the last sample"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "why": "LFO.cpp:82 sets this output's channel count from the largest of the three inputs; LFOBlock.hpp:180 multiplies a wave running -1 to 1 by the amplitude, which LFOBlock.hpp:95 caps at 10"
+     }
+    }
+   },
+   "notes": "Read from src/LFO.cpp and src/blocks/LFOBlock.hpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1. The reset is a step detector rather than a threshold: LFOBlock.hpp:100 compares the jack against its own value half a volt earlier, so only a jump of more than 0.5V between two samples restarts the cycle. The Reset button adds 1 to the same value, which is how pressing it works. The amplitude knob reaches 5 while the total with the jack is clamped at 10, so a jack alone can drive the output twice as far as the knob. The eight shape names are at LFOBlock.hpp:34 to 43."
   },
   "Last": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four knobs and one output that always carries the value of whichever knob was moved last, so that several mapped sources can reach one destination",
+    "One of four knobs, 0V to 10V; moving it makes the output follow it until another knob is moved",
+    "The value of whichever of the four knobs moved most recently",
+    "Menu — Detect changes to same value — makes a knob count as moved even when it is set to the value it already had, such as by a double click back to its default",
+    "Note — the module is meant to be driven by mapping: map a different source to each knob, then map this output on to the one destination, using a module such as stoermelder's CV-MAP",
+    "Note — the knobs have no printed labels; their hover texts read A, B, C and D",
+    "Note — the output is monophonic"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Last.cpp:64 writes channel 1 alone; Last.cpp:42 configures the knobs from 0 to 10"
+     }
+    }
+   },
+   "notes": "Read from src/Last.cpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1. Parameter smoothing is switched off for all four knobs (Last.cpp:42 to 45) so that a mapped source moves them at once. The four knobs carry no panel labels at all; only the module title and the output are printed. The README's account matches the code."
   },
   "Filter": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A collection of virtual-analogue filters in one module: ladder and Sallen-Key shapes, comb filters and diode clippers, chosen from one knob, with a cutoff and a resonance control",
+    "Sets the cutoff, 20Hz at fully counter-clockwise to 20480Hz at fully clockwise, which is ten octaves",
+    "Sets the resonance, 0 to 1; on the non-resonant modes it does nothing, on the comb filters it is the feedback and on the diode clippers it is the drive",
+    "Chooses the filter: one and two-pole non-resonant shapes, two and four-pole ladders, Sallen-Key lowpass, bandpass and highpass, two comb filters, two diode clippers, plus bypass and mute",
+    "Added to the Cutoff knob at one volt per octave; the knob spans exactly ten octaves so that this scaling comes out right",
+    "Added to the Resonance knob at a tenth of the knob's travel per volt",
+    "The audio to filter; its channel count sets the polyphony of the module",
+    "The filtered audio",
+    "Menu — Oversampling rate: 1x to 64x — runs the filter above the sample rate, which matters most on the resonant and non-linear modes",
+    "Menu — ODE Solver: 1st order Euler (low CPU), 2nd order Runge-Kutta, 4th order Runge-Kutta (best quality) — chooses how the filter's differential equations are solved",
+    "Menu — Integrator type: Linear, OTA with tanh, OTA with alternate saturator, Transistor with tanh, Transistor with alternate saturator — places the non-linearity within each integrator",
+    "Menu — Post-filter saturator — holds the output to about -10V and 10V, and stays in circuit even on the bypass mode",
+    "Note — the bypass mode passes the audio through but leaves the post-filter saturator in circuit, so the level is limited even there",
+    "Note — the cutoff is clamped to at most a fifth of the oversampled sample rate, so a low oversampling setting limits how high the cutoff can reach"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "out": {
+    "0": 7
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Filter.cpp:90 reads this input with getPolyVoltageSimd and multiplies it by 0.1 against a knob spanning ten octaves, which Filter.cpp:34 says is what makes the volt-per-octave scaling work"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Filter.cpp:95 reads this input with getPolyVoltageSimd and multiplies it by 0.1 before adding it to the knob's 0 to 1 travel"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "why": "Filter.cpp:85 takes the module's channel count from this input and Filter.cpp:106 reads it with getVoltageSimd"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "why": "Filter.cpp:86 sets this output's channel count from the audio input; the post-filter saturator holds the result to about ±10V"
+     }
+    }
+   },
+   "notes": "Read from src/Filter.cpp and src/blocks/FilterBlock.hpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1. The cutoff knob spans 20Hz to 20480Hz, exactly ten octaves, which the maker's own comment at Filter.cpp:34 says is required for the volt-per-octave CV scaling. The cutoff is also clamped to a fifth of the oversampled rate (Filter.cpp:92), so it cannot reach the top of the knob at low oversampling settings. The eighteen mode names are at FilterBlock.hpp:65 to 82 and the module starts on the ninth of them, the two-pole Sallen-Key lowpass."
   },
   "Synth": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Polyphonic virtual-analogue synthesizer: two oscillators with a sub, ring modulator and noise, two filters and an amp, with any of 22 modulation sources able to reach any of 50 destinations",
+    "While this is lit, every ringed knob sets how much the V/Oct input moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the Gate input moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the Velocity input moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the Aftertouch input moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the Pitch wheel input moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the Mod wheel input moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the Expression input moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the first Individual modulation input moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the second Individual modulation input moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the voice number, which is a fixed value per polyphonic channel moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much a fresh random value taken at each new note moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much envelope 1 moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much envelope 2 moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much LFO 1 read as a unipolar signal moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much LFO 1 read as a bipolar signal moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much LFO 2 read as a unipolar signal moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much LFO 2 read as a bipolar signal moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the global LFO, which is bipolar and shared by every voice moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the first diverge generator, a fixed random offset per voice moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the second diverge generator, a fixed random offset per voice moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the first drift generator, a slow random wander per voice moves that destination rather than its own value; press again for the base values",
+    "While this is lit, every ringed knob sets how much the second drift generator, a slow random wander per voice moves that destination rather than its own value; press again for the base values",
+    "Sets the rise time of envelope 1",
+    "Sets the fall time of envelope 1 from its peak down to the sustain level",
+    "Sets the level envelope 1 holds at while the gate is high",
+    "Sets the fall time of envelope 1 once the gate falls",
+    "Sets how much the Velocity input scales envelope 1's peak",
+    "Sets the rise time of envelope 2",
+    "Sets the fall time of envelope 2 from its peak down to the sustain level",
+    "Sets the level envelope 2 holds at while the gate is high",
+    "Sets the fall time of envelope 2 once the gate falls",
+    "Sets how much the Velocity input scales envelope 2's peak",
+    "Sets the rate of LFO 1, which runs separately for each voice",
+    "Chooses the waveform of LFO 1: Sine, Triangle, Square, Pulse, Ramp, Saw, Sample & hold or Warped",
+    "Sets the depth of LFO 1 before any assignment scales it further",
+    "Chooses how LFO 1 starts: free running, retrigger, or retrigger with a single cycle",
+    "Sets the rate of LFO 2, which runs separately for each voice",
+    "Chooses the waveform of LFO 2: Sine, Triangle, Square, Pulse, Ramp, Saw, Sample & hold or Warped",
+    "Sets the depth of LFO 2 before any assignment scales it further",
+    "Chooses how LFO 2 starts: free running, retrigger, or retrigger with a single cycle",
+    "Sets the rate of the global LFO, -5 to 5 octaves, the hover text reading it in hertz; this one LFO is shared by every voice",
+    "Sets the depth of the global LFO before any assignment scales it further",
+    "Sets how fast the two drift generators wander",
+    "Sets how far the diverge offsets and the drift wander go, which is what makes the voices differ from each other",
+    "Sets the base value carried by its own Individual modulation output, so a modulation built here can be sent out to another module",
+    "Turns fingered glide on, so the glide runs only when a new note arrives during a held gate",
+    "Sets how long oscillator 1 takes to slide from one note to the next",
+    "Shifts oscillator 2's glide time away from oscillator 1's, so the two can slide at different speeds",
+    "Shifts oscillator 1 in octaves, -4 to 4",
+    "Shifts oscillator 1 in semitones",
+    "Shifts oscillator 1 by a fraction of a semitone",
+    "Shifts oscillator 2 in octaves, -4 to 4",
+    "Shifts oscillator 2 in semitones",
+    "Shifts oscillator 2 by a fraction of a semitone",
+    "Blends oscillator 1 from triangle through sawtooth to pulse",
+    "Moves the phase of oscillator 1's triangle and the width of its pulse",
+    "Blends oscillator 2 from triangle through sawtooth to pulse",
+    "Moves the phase of oscillator 2's triangle and the width of its pulse",
+    "Turns hard sync on, which restarts oscillator 2 every time oscillator 1 completes a cycle",
+    "Sets how much oscillator 1 modulates oscillator 2's frequency, through zero so that oscillator 2 stays in tune",
+    "While this is lit, the six level knobs in the mixer set which filter their source goes to instead of how loud it is: fully counter-clockwise is filter 1, fully clockwise is filter 2",
+    "Sets the level of oscillator 1 in the mix, or its routing between the two filters while Mix Route is lit",
+    "Sets the level of the sub-oscillator in the mix, or its routing between the two filters while Mix Route is lit; it is a square one octave below oscillator 1",
+    "Sets the level of oscillator 2 in the mix, or its routing between the two filters while Mix Route is lit",
+    "Sets the level of the ring modulator in the mix, or its routing between the two filters while Mix Route is lit; it is oscillator 1 multiplied by oscillator 2",
+    "Sets the level of the noise source in the mix, or its routing between the two filters while Mix Route is lit",
+    "Sets the level of the External audio input in the mix, or its routing while Mix Route is lit; with no cable in that jack it feeds the mono signal from before the amp back in instead",
+    "Sets the cutoff of filter 1",
+    "Sets the resonance of filter 1",
+    "Chooses filter 1's type from the same list the Filter module offers, including bypass and mute",
+    "Places filter 1 in the stereo field; with the routing set fully to serial it has no effect",
+    "Sets the cutoff of filter 2, read in the way the cutoff mode switch says",
+    "Sets the resonance of filter 2",
+    "Chooses filter 2's type from the same list the Filter module offers, including bypass and mute",
+    "Places filter 2 in the stereo field",
+    "Chooses how filter 2's cutoff knob is read: individual sets it outright, offset adds it to filter 1's cutoff, space spreads the two filters either side of a shared centre",
+    "Moves the two filters between serial, where filter 1 feeds filter 2 and only filter 2 reaches the amp, and parallel, where both reach the amp",
+    "Sets the level leaving the amp",
+    "The note pitch, one volt per octave; its channel count sets the polyphony of the whole synthesizer, and with no cable here the synthesizer produces nothing at all",
+    "The note gate",
+    "The note velocity",
+    "Aftertouch from the keyboard",
+    "The pitch wheel",
+    "The mod wheel",
+    "An expression pedal",
+    "A modulation source of your own, available to every destination through its assign button",
+    "A rise here restarts both envelopes without the gate having to fall first",
+    "Audio from outside, which joins the mixer as a sixth source",
+    "Carries whatever modulation has been built for it, so a source and depth set here can be sent to another module",
+    "The left channel of the synthesizer, or the whole signal when it is the only cable",
+    "The right channel of the synthesizer",
+    "Menu — Audio oversampling rate: 1x (low CPU) to 16x (best quality) — runs the oscillators and filters above the sample rate to cut aliasing",
+    "Menu — Modulation sample rate reduction: 1x (best quality) to 16x (low CPU) — runs the modulation at a fraction of the sample rate, which costs much less processor time",
+    "Menu — UI sample rate reduction: 1x (best quality) to 64x (low CPU) — sets how often the panel's rings and lamps are worked out",
+    "Menu — Lock quality settings — keeps the three rate settings where they are when a preset is loaded",
+    "Menu — Filter ODE Solver — chooses how the filters' differential equations are solved, from a cheap Euler step to fourth-order Runge-Kutta",
+    "Menu — Filter integrator type — chooses where the non-linearity is placed in each filter integrator",
+    "Note — with no cable in the V/Oct input the whole synthesizer is switched off and both audio outputs rest at 0V, however else it is set",
+    "Note — a new instance makes no sound until modulations are assigned: the maker's starting point is V/Oct to both semitone knobs at full, and an envelope or the gate to amp volume at full",
+    "Note — a knob with a ring around it can be modulated; a green ring is its base value and a blue ring the depth of the source being assigned, and a lamp under the knob lights when anything modulates it",
+    "Note — hovering an assign button lists every destination that source reaches, and hovering a knob lists every source that reaches it; the right-click menu of either can clear those assignments",
+    "Note — while an assign button is lit, Rack's own initialise and randomise act only on that source's assignments rather than on the base values"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14,
+    "14": 15,
+    "15": 16,
+    "16": 17,
+    "17": 18,
+    "18": 19,
+    "19": 20,
+    "20": 21,
+    "21": 22,
+    "22": 23,
+    "23": 24,
+    "24": 25,
+    "25": 26,
+    "66": 27,
+    "26": 28,
+    "27": 29,
+    "28": 30,
+    "29": 31,
+    "67": 32,
+    "30": 33,
+    "68": 34,
+    "31": 35,
+    "69": 36,
+    "32": 37,
+    "70": 38,
+    "33": 39,
+    "71": 40,
+    "72": 41,
+    "34": 42,
+    "73": 43,
+    "35": 44,
+    "36": 45,
+    "37": 45,
+    "38": 45,
+    "39": 45,
+    "40": 45,
+    "76": 46,
+    "41": 47,
+    "46": 48,
+    "74": 49,
+    "42": 50,
+    "43": 51,
+    "75": 52,
+    "47": 53,
+    "48": 54,
+    "44": 55,
+    "45": 56,
+    "49": 57,
+    "50": 58,
+    "78": 59,
+    "51": 60,
+    "77": 61,
+    "60": 62,
+    "61": 63,
+    "64": 64,
+    "62": 65,
+    "63": 66,
+    "65": 67,
+    "52": 68,
+    "53": 69,
+    "79": 70,
+    "54": 71,
+    "55": 72,
+    "56": 73,
+    "81": 74,
+    "57": 75,
+    "80": 76,
+    "58": 77,
+    "59": 78
+   },
+   "in": {
+    "0": 79,
+    "1": 80,
+    "2": 81,
+    "3": 82,
+    "4": 83,
+    "5": 84,
+    "6": 85,
+    "7": 86,
+    "8": 86,
+    "9": 87,
+    "10": 88
+   },
+   "out": {
+    "0": 89,
+    "1": 89,
+    "2": 89,
+    "3": 89,
+    "4": 89,
+    "5": 90,
+    "6": 91
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "trigger",
+     "10": "audio"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "audio",
+     "6": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Synth.cpp:912 takes the whole module's channel count from this input; Synth.cpp:1300 stops the module and writes 0V when that count is zero"
+     },
+     "1": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Synth.cpp:1430 reads this input with getPolyVoltageSimd and the envelope block at ADSRBlock.hpp:83 counts it high at 1V and above"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "why": "this input is read as a modulation source and, where an envelope's velocity scaling uses it, ADSRBlock.hpp:95 clamps it to 0 and 10V"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "this input is read only as a modulation source, scaled by whatever depth its assign button has set on each destination"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "this input is read only as a modulation source, scaled by whatever depth its assign button has set on each destination"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "this input is read only as a modulation source, scaled by whatever depth its assign button has set on each destination"
+     },
+     "6": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "this input is read only as a modulation source, scaled by whatever depth its assign button has set on each destination"
+     },
+     "7": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "this input is read only as a modulation source, scaled by whatever depth its assign button has set on each destination"
+     },
+     "8": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "negative": "swings",
+      "why": "this input is read only as a modulation source, scaled by whatever depth its assign button has set on each destination"
+     },
+     "9": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "this input is passed to both envelope blocks, where ADSRBlock.hpp:88 uses a Schmitt trigger at Rack's default 1V threshold"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "range": "±10V",
+      "normal": "the signal before the amp",
+      "why": "the README and the Ext knob's own behaviour: with no cable the mixer channel takes the mono signal from before the amp instead"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "Synth.cpp:914 sets this output's channel count from the V/Oct input"
+     },
+     "1": {
+      "poly": true,
+      "why": "Synth.cpp:915 sets this output's channel count from the V/Oct input"
+     },
+     "2": {
+      "poly": true,
+      "why": "Synth.cpp:916 sets this output's channel count from the V/Oct input"
+     },
+     "3": {
+      "poly": true,
+      "why": "Synth.cpp:917 sets this output's channel count from the V/Oct input"
+     },
+     "4": {
+      "poly": true,
+      "why": "Synth.cpp:918 sets this output's channel count from the V/Oct input"
+     },
+     "5": {
+      "poly": false,
+      "why": "Synth.cpp:1303 writes channel 1 alone; the two audio outputs are the summed stereo voice rather than one channel per note"
+     },
+     "6": {
+      "poly": false,
+      "why": "Synth.cpp:1304 writes channel 1 alone; the two audio outputs are the summed stereo voice rather than one channel per note"
+     }
+    }
+   },
+   "notes": "Read from src/Synth.cpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1, alongside the README. The module is switched off entirely when the V/Oct input has no cable: Synth.cpp:912 takes the channel count from that jack alone and Synth.cpp:1300 writes 0V to both audio outputs and returns. The README's caveats are the other thing a new user needs: with no modulations assigned nothing is heard, because V/Oct reaches the oscillators only through an assignment and the amp is opened only by one. Ranges are left out of most lines on purpose: the modulatable parameters are configured through one helper (Synth.cpp:880) whose bounds change with the destination, and quoting a figure for the wrong one would be worse than quoting none. The assign buttons carry a description listing their destinations, which is what Rack shows on hover. The five Individual modulation outputs are polyphonic while the two audio outputs are not."
   },
   "SplitStack": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Takes one set of MIDI-to-CV signals and sends them to two synthesizer parts, either layering both parts on the same notes or splitting the keyboard between them at a note you choose",
+    "Sends every note to both parts at once",
+    "Sends notes below the split point to part A and notes at or above it to part B; hold this button down while it is on and play a note to set the split point",
+    "Swaps which part is which, so what was going to A goes to B and the other way about",
+    "The pitch to be split or layered, one volt per octave; its channel count sets how many channels the outputs carry",
+    "The gate to be split or layered; while the split point is being learned, a rise here is what captures the note",
+    "The velocity to be split or layered",
+    "The aftertouch to be split or layered",
+    "The retrigger to be split or layered",
+    "The pitch for part A",
+    "The pitch for part B",
+    "The gate for part A",
+    "The gate for part B",
+    "The velocity for part A",
+    "The velocity for part B",
+    "The aftertouch for part A",
+    "The aftertouch for part B",
+    "The retrigger for part A",
+    "The retrigger for part B",
+    "Note — with neither Stack nor Split on, only part A plays and part B's outputs are set to no channels at all rather than to 0V",
+    "Note — the note name of the split point is shown on the small display",
+    "Note — turning Stack on cancels Split, and every output carries whatever is patched into the matching input rather than anything worked out here"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14,
+    "6": 15,
+    "7": 16,
+    "8": 17,
+    "9": 18
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "trigger",
+     "9": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "SplitStack.cpp:72 takes the module's channel count from this input and SplitStack.cpp:85 reads it with getPolyVoltageSimd"
+     },
+     "1": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "SplitStack.cpp:90 reads this input with getPolyVoltageSimd and passes it straight through; SplitStack.cpp:141 looks for a rise of more than 1V on it when the split point is being learned"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "why": "SplitStack.cpp:95 reads this input with getPolyVoltageSimd and passes it straight through"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "why": "SplitStack.cpp:100 reads this input with getPolyVoltageSimd and passes it straight through"
+     },
+     "4": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "SplitStack.cpp:105 reads this input with getPolyVoltageSimd and passes it straight through"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "SplitStack.cpp:85 sets this output's channel count from the pitch input, or to zero when part A is silent"
+     },
+     "1": {
+      "poly": true,
+      "why": "SplitStack.cpp:87 sets this output's channel count from the pitch input, or to zero when part B is silent"
+     },
+     "2": {
+      "poly": true,
+      "why": "SplitStack.cpp:90 sets this output's channel count from the pitch input, or to zero when part A is silent"
+     },
+     "3": {
+      "poly": true,
+      "why": "SplitStack.cpp:92 sets this output's channel count from the pitch input, or to zero when part B is silent"
+     },
+     "4": {
+      "poly": true,
+      "why": "SplitStack.cpp:95 sets this output's channel count from the pitch input, or to zero when part A is silent"
+     },
+     "5": {
+      "poly": true,
+      "why": "SplitStack.cpp:97 sets this output's channel count from the pitch input, or to zero when part B is silent"
+     },
+     "6": {
+      "poly": true,
+      "why": "SplitStack.cpp:100 sets this output's channel count from the pitch input, or to zero when part A is silent"
+     },
+     "7": {
+      "poly": true,
+      "why": "SplitStack.cpp:102 sets this output's channel count from the pitch input, or to zero when part B is silent"
+     },
+     "8": {
+      "poly": true,
+      "why": "SplitStack.cpp:105 sets this output's channel count from the pitch input, or to zero when part A is silent"
+     },
+     "9": {
+      "poly": true,
+      "why": "SplitStack.cpp:107 sets this output's channel count from the pitch input, or to zero when part B is silent"
+     }
+    }
+   },
+   "notes": "Read from src/SplitStack.cpp at the tag release/v2.1.1, commit f622217, which is the installed 2.1.1. The README spells the section heading Spit/Stack. A part that is not playing has its outputs set to zero channels rather than to 0V (SplitStack.cpp:200 onwards), which is what makes a downstream synth go quiet rather than hold a note. The split test is strictly below the split point for part A and at or above it for part B (SplitStack.cpp:157). Learning the split point looks for the gate rising by more than 1V from its previous value (SplitStack.cpp:141), so a gate already high when the button is held does not set it."
   }
  }
 }

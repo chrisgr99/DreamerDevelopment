@@ -1,18 +1,166 @@
 {
  "plugin": "NocturnalEncoder",
- "source": "https://github.com/djpeterso23662/NocturnalEncoder",
+ "source": "https://github.com/djpeterso23662/NocturnalEncoder#readme",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "AMDecoder": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two independent envelope followers that turn an amplitude-modulated audio signal back into a control voltage, each with an attenuverter, an offset, a scale and a gate output",
+    "Sets how long that channel's follower takes to rise through 10V, from 1ms fully counter-clockwise to about 0.2 seconds fully clockwise",
+    "Sets how long that channel's follower takes to fall through 10V, from 1ms fully counter-clockwise to about 0.2 seconds fully clockwise",
+    "Scales the followed envelope for that channel, -1 to 1, inverting it below 0 and silencing it at 0",
+    "Added to that channel's envelope after the attenuverter and the scale, -10V to 10V",
+    "Multiplies that channel's envelope by 1 to 3 times, after the attenuverter and before the offset",
+    "The amplitude-modulated audio for that channel; the channel's OUT and GATE jacks are written only while a cable is in here",
+    "That channel's followed envelope after the attenuverter, the scale and the offset, clamped to -15V and 15V",
+    "10V while that channel's OUT jack stands at 2V or more and 0V below that, despite the manual describing the threshold as half the follower's range",
+    "Note — A channel writes its OUT and GATE jacks only while a cable is in its IN jack. Pull that cable out and both jacks hold the last voltage they were given.",
+    "Note — The red lamp beside an input lights when the voltage there passes 9.99V.",
+    "Note — The green lamp beside an output follows the raw envelope, before the attenuverter, scale and offset are applied, so it can be dark while that output is high.",
+    "Note — The module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 3,
+    "5": 3,
+    "6": 4,
+    "7": 4,
+    "8": 5,
+    "9": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 7,
+    "2": 8,
+    "3": 8
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/AMDecoder.cpp:70 reads this input with getVoltage(), which is channel 1 alone, and src/AMDecoder.cpp:118 gates the whole channel's output on isConnected"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/AMDecoder.cpp:70 reads this input with getVoltage(), which is channel 1 alone, and src/AMDecoder.cpp:118 gates the whole channel's output on isConnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-15 to 15V",
+      "why": "src/AMDecoder.cpp:120 writes this output with setVoltage(), clamped to -15 and 15"
+     },
+     "1": {
+      "poly": false,
+      "range": "-15 to 15V",
+      "why": "src/AMDecoder.cpp:120 writes this output with setVoltage(), clamped to -15 and 15"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/AMDecoder.cpp:122 and 125 write 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/AMDecoder.cpp:122 and 125 write 10 or 0 to this output with setVoltage(), which is channel 1 alone"
+     }
+    }
+   },
+   "notes": "Read from src/AMDecoder.cpp at commit 7008233, version 2.0.0 and the head of the repository. The follower is the Befaco Rampage slew shape with its shape fixed at 0, so it is always linear. The knob range comes out of two steps: paramToMinTime at src/AMDecoder.cpp:145 maps the knob onto 1e-3 to 1e-1 seconds, and src/AMDecoder.cpp:91 multiplies that by two raised to the knob value, giving 1ms at the bottom and about 0.2 seconds at the top. The switch's default branch, which would return 1.0, cannot be reached, because the knob is clamped to 0 and 1 and so the index never exceeds 5. The gate threshold is a fixed 2V on the finished output, at src/AMDecoder.cpp:121, not the half-range point the README describes. The endOfCyclePulse, trigger and mode_button_trigger members declared at src/AMDecoder.cpp:40 to 42 are never used. Both output jacks are written only inside the isConnected test at src/AMDecoder.cpp:118, so unplugging the input leaves them frozen."
   },
   "AMEncoder": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two channels turning a 0V to 10V control voltage into the loudness of one shared high sine carrier, so the voltage can travel down an audio cable",
+    "Sets the level of the carrier both channels use, 0 to 1; at 1 a 10V input gives a carrier swinging 9.99V either side of zero, and at 0 both outputs are silent",
+    "The control voltage for that channel; it is divided by 10 and clamped to 0 and 1, so anything at or below 0V silences that output and anything from 10V up holds the carrier at full level",
+    "The carrier scaled by the voltage at IN 1, a sine at 8697.36Hz",
+    "The carrier scaled by the voltage at IN 2, a sine at 8697.36Hz, despite the maker's tooltip on this jack reading OUT 1",
+    "Note — With nothing patched into a channel's IN jack, that channel's OUT jack carries the bare carrier at whatever the CARRIER knob is set to, rather than silence.",
+    "Note — The red lamp beside an input lights for negative voltage there, brightening from 0V down to -10V, despite its tooltip naming it a warning for signals above +10V.",
+    "Note — Both channels take the same carrier oscillator, so the two outputs are always in phase.",
+    "Note — The module has no menu of its own beyond Rack's."
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "full carrier level",
+      "why": "src/AMEncoder.cpp:68 divides this input's value by 10 and clamps it to 0 and 1, and does so only when the input is connected"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "full carrier level",
+      "why": "src/AMEncoder.cpp:68 divides this input's value by 10 and clamps it to 0 and 1, and does so only when the input is connected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-9.99 to 9.99V",
+      "why": "src/AMEncoder.cpp:56 builds the carrier as 9.99 times a sine times the carrier knob, and src/AMEncoder.cpp:69 writes that to this output on channel 1 alone"
+     },
+     "1": {
+      "poly": false,
+      "range": "-9.99 to 9.99V",
+      "why": "src/AMEncoder.cpp:56 builds the carrier as 9.99 times a sine times the carrier knob, and src/AMEncoder.cpp:69 writes that to this output on channel 1 alone"
+     }
+    }
+   },
+   "notes": "Read from src/AMEncoder.cpp at commit 7008233, version 2.0.0 and the head of the repository. The carrier frequency is the literal 8697.36Hz at src/AMEncoder.cpp:47; the pitch variable it is scaled by is set to 0 and never changed, so there is no pitch control of any kind. The maker's README calls the carrier approximately C9, which is 8372Hz; the source comment calls it around C9 to C sharp 9, which matches the figure. The warning lamps are inverted: src/AMEncoder.cpp:61 and 62 set their brightness from minus the input voltage divided by ten, clamped to 0 and 1, so they light for negative input and stay dark however far above 10V the input goes, while configLight at src/AMEncoder.cpp:31 and 32 names them warnings for signals above +10V and the README repeats that. Both output jacks are configured with the name OUT 1, at src/AMEncoder.cpp:35 and 36, so the second jack's hover text is wrong. processChannel at src/AMEncoder.cpp:65 scales the carrier only when the input is connected, so an unpatched channel emits the bare carrier."
   }
  }
 }

@@ -1,28 +1,619 @@
 {
  "plugin": "dawnbree",
- "source": "https://github.com/jonesnxt/dawnbree",
+ "source": "https://github.com/jonesnxt/dawnbree/tree/ce832f758bf36bc82d4ac20194f46b5b3128b398",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "seesaw": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A switch that passes input a for a set number of clock pulses, then input b for a set number, over and over",
+    "Note — With both step counts at zero the count would have nowhere to go, so the module forces one step onto a",
+    "Note — The lamp under a step knob lights while the count is in that input's run of steps",
+    "Advances the count by one step each press",
+    "Returns the count to the first step of a",
+    "Sets how many clock pulses go to input a, a whole number from 0 to 9",
+    "Sets how many clock pulses go to input b, a whole number from 0 to 9",
+    "A rising edge above 1V advances the count by one step",
+    "A rising edge above 1V returns the count to the first step of a",
+    "The signal passed on while the count is inside a's run of steps; however many poly channels it carries are carried through",
+    "The signal passed on while the count is inside b's run of steps; however many poly channels it carries are carried through",
+    "Replaces the steps for a knob while it is patched, one step per volt counted from zero, and held between 0 and 9",
+    "Replaces the steps for b knob while it is patched, one step per volt counted from zero, and held between 0 and 9",
+    "Carries input a while the count is inside a's run of steps, and input b for the rest of the cycle",
+    "Carries input a while the count is inside a's run of steps, and a and b added together for the rest of the cycle"
+   ],
+   "param": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 11,
+    "5": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/seesaw.cpp:72, clockTrigger.process(getVoltage() + the button), dsp::SchmittTrigger's default 0V and 1V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/seesaw.cpp:71, resetTrigger.process(getVoltage() + the button)"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/seesaw.cpp:77 getChannels(), looped over at 99-102 and 111-113"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/seesaw.cpp:78 getChannels(), looped over at 107-109 and 111-113"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the steps for a knob",
+      "why": "src/seesaw.cpp:74, clamp(floor(getVoltage()), 0, 9) only when isConnected()"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the steps for b knob",
+      "why": "src/seesaw.cpp:75, clamp(floor(getVoltage()), 0, 9) only when isConnected()"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/seesaw.cpp:97 and 105, setChannels() from whichever input is being passed"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/seesaw.cpp:98 and 106, setChannels() from a alone or from the wider of a and b"
+     }
+    }
+   },
+   "notes": "The a and b jacks and the two outputs carry whatever is patched in, so they are given no family. The steps CV inputs take the floor of the voltage, so 2.9V is two steps. The button and the jack for clock are added together before one Schmitt trigger, and the same for reset (src/seesaw.cpp:71-72), so a press while the jack already reads above 1V does nothing. The maker's tooltips on the step CV inputs already say 0-10V, 1V/step, and the code agrees."
   },
   "nudge": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Multiplies a signal by a set amount and adds a fixed voltage to it",
+    "The signal to be scaled and offset",
+    "Multiplies the input: silence at the bottom of its travel, the input unchanged at the centre, and twice the input at the top",
+    "Adds a fixed voltage to the scaled input, -10V at the bottom of its travel and +10V at the top",
+    "The input multiplied by the scale knob, with the offset knob's voltage added"
+   ],
+   "param": {
+    "0": 2,
+    "1": 3
+   },
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 4
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "src/nudge.cpp:31, a single getVoltage() with no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/nudge.cpp:31, one setVoltage() and no setChannels()"
+     }
+    }
+   },
+   "notes": "The input and output carry whatever is patched in, so neither is given a family. The maker left both jacks unnamed in configInput and configOutput, so Rack's tooltip for each is empty; the panel prints input and output. Only channel 1 of a poly cable is read and only channel 1 comes out."
   },
   "notepad": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Takes one pitch and gives it out again on twenty-five jacks, each a fixed interval above it, up to two octaves",
+    "Note — Every output carries a voltage all the time; the module is a fixed set of transpositions, not a chord you choose",
+    "The pitch all the outputs are measured from, read as 1V per octave",
+    "The input pitch passed through unchanged",
+    "The input pitch raised by one semitone, a minor second above it",
+    "The input pitch raised by 2 semitones, a major second above it",
+    "The input pitch raised by 3 semitones, a minor third above it",
+    "The input pitch raised by 4 semitones, a major third above it",
+    "The input pitch raised by 5 semitones, a fourth above it",
+    "The input pitch raised by 6 semitones, a tritone above it",
+    "The input pitch raised by 7 semitones, a fifth above it",
+    "The input pitch raised by 8 semitones, a minor sixth above it",
+    "The input pitch raised by 9 semitones, a major sixth above it",
+    "The input pitch raised by 10 semitones, a minor seventh above it",
+    "The input pitch raised by 11 semitones, a major seventh above it",
+    "The input pitch raised by 12 semitones, a octave above it",
+    "The input pitch raised by 13 semitones, a minor ninth above it",
+    "The input pitch raised by 14 semitones, a major ninth above it",
+    "The input pitch raised by 15 semitones, a minor tenth above it",
+    "The input pitch raised by 16 semitones, a major tenth above it",
+    "The input pitch raised by 17 semitones, a eleventh above it",
+    "The input pitch raised by 18 semitones, a octave and a tritone above it",
+    "The input pitch raised by 19 semitones, a twelfth above it",
+    "The input pitch raised by 20 semitones, a minor thirteenth above it",
+    "The input pitch raised by 21 semitones, a major thirteenth above it",
+    "The input pitch raised by 22 semitones, a minor fourteenth above it",
+    "The input pitch raised by 23 semitones, a major fourteenth above it",
+    "The input pitch raised by 24 semitones, a double octave above it"
+   ],
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "8": 11,
+    "9": 12,
+    "10": 13,
+    "11": 14,
+    "12": 15,
+    "13": 16,
+    "14": 17,
+    "15": 18,
+    "16": 19,
+    "17": 20,
+    "18": 21,
+    "19": 22,
+    "20": 23,
+    "21": 24,
+    "22": 25,
+    "23": 26,
+    "24": 27
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch",
+     "8": "pitch",
+     "9": "pitch",
+     "10": "pitch",
+     "11": "pitch",
+     "12": "pitch",
+     "13": "pitch",
+     "14": "pitch",
+     "15": "pitch",
+     "16": "pitch",
+     "17": "pitch",
+     "18": "pitch",
+     "19": "pitch",
+     "20": "pitch",
+     "21": "pitch",
+     "22": "pitch",
+     "23": "pitch",
+     "24": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/notepad.cpp:78, one getVoltage() added to i/12 for each output at 80-82"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "4": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "5": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "6": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "7": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "8": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "9": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "10": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "11": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "12": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "13": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "14": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "15": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "16": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "17": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "18": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "19": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "20": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "21": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "22": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "23": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     },
+     "24": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/notepad.cpp:81, setVoltage(input + i/12) with no setChannels()"
+     }
+    }
+   },
+   "notes": "The panel abbreviates the intervals (m2, M2, tri, oct, 2tri, 2oct and so on) while the maker's tooltips spell them out; the lines use the spelled-out names. The loop runs over every output index, so the semitone offset is exactly the output's index and the jack the maker calls octave tritone is eighteen semitones, an augmented eleventh. Only channel 1 of a poly cable is read."
   },
   "prismo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight step sequencer whose step values come from jacks rather than knobs, with four rows read at the same step",
+    "Note — A row gives out 0V on any step whose jack has nothing patched into it",
+    "Note — The step count is read only when a clock pulse arrives, so changing it takes effect at the next pulse",
+    "Note — A reset and a clock arriving together give the reset: the step does not advance on that sample",
+    "Advances the sequence one step each press",
+    "Returns the sequence to step one",
+    "Sets how many of the eight steps are played before the sequence returns to step one, a whole number from 1 to 8",
+    "A rising edge above 1V advances the sequence one step",
+    "A rising edge above 1V returns the sequence to step one",
+    "Replaces the steps knob while it is patched, one step per volt counted from zero, and held between 1 and 8",
+    "The value the a output carries while the sequence is on that step",
+    "The value the b output carries while the sequence is on that step",
+    "The value the c output carries while the sequence is on that step",
+    "The value the d output carries while the sequence is on that step",
+    "Whatever is patched into the a row's jack for the step the sequence is on",
+    "Whatever is patched into the b row's jack for the step the sequence is on",
+    "Whatever is patched into the c row's jack for the step the sequence is on",
+    "Whatever is patched into the d row's jack for the step the sequence is on",
+    "The four rows on one poly cable, a on channel 1, b on channel 2, c on channel 3 and d on channel 4, all for the step the sequence is on"
+   ],
+   "param": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10,
+    "4": 10,
+    "5": 10,
+    "6": 10,
+    "7": 10,
+    "8": 10,
+    "9": 10,
+    "10": 10,
+    "11": 11,
+    "12": 11,
+    "13": 11,
+    "14": 11,
+    "15": 11,
+    "16": 11,
+    "17": 11,
+    "18": 11,
+    "19": 12,
+    "20": 12,
+    "21": 12,
+    "22": 12,
+    "23": 12,
+    "24": 12,
+    "25": 12,
+    "26": 12,
+    "27": 13,
+    "28": 13,
+    "29": 13,
+    "30": 13,
+    "31": 13,
+    "32": 13,
+    "33": 13,
+    "34": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15,
+    "2": 16,
+    "3": 17,
+    "4": 18
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/prismo.cpp:125, clockTrigger.process(getVoltage() + the button), dsp::SchmittTrigger's default 0V and 1V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/prismo.cpp:124, resetTrigger.process(getVoltage() + the button)"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the steps knob",
+      "why": "src/prismo.cpp:134, clamp(floor(getVoltage()), 1, 8) only when isConnected()"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "5": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "6": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "7": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "8": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "9": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "10": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "11": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "12": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "13": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "14": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "15": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "16": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "17": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "18": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "19": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "20": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "21": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "22": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "23": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "24": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "25": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "26": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "27": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "28": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "29": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "30": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "31": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "32": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "33": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     },
+     "34": {
+      "poly": false,
+      "why": "src/prismo.cpp:145-154, a single getVoltage() on the selected step's jack, no getChannels anywhere"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/prismo.cpp:145, one setVoltage() and no setChannels()"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/prismo.cpp:146, one setVoltage() and no setChannels()"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/prismo.cpp:147, one setVoltage() and no setChannels()"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/prismo.cpp:148, one setVoltage() and no setChannels()"
+     },
+     "4": {
+      "poly": true,
+      "why": "src/prismo.cpp:150-154, setChannels(4) then one row per channel"
+     }
+    }
+   },
+   "notes": "The step jacks and the row outputs carry whatever is patched in, so they are given no family. The steps CV takes the floor of the voltage and is clamped up to 1, so anything below 1V gives a single step. The step lamps are lights rather than params and cannot be clicked. The maker's step jack tooltips read a one, a two and so on; the panel prints the row letter in brackets down the left and the step names across the top."
   }
  }
 }

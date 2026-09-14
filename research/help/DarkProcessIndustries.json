@@ -2,57 +2,922 @@
  "plugin": "DarkProcessIndustries",
  "source": "https://darkprocessindustries.com/vcv-rack/",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Wave": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A single oscillator giving a sine, a triangle and a sawtooth at once, all three through one wavefolder",
+    "Sets the pitch, 0 giving C4 at 261.63Hz and one step an octave, so the travel runs 8.18Hz to 8372Hz; the tooltip reads that number as semitones and names a frequency the oscillator never reaches",
+    "Shifts the pitch by a tenth of an octave either way, about 1.2 semitones",
+    "Sets how hard all three waves are folded, from no folding at all to five times the gain into a reflecting fold",
+    "Scales the FM input into the pitch, nothing at the centre and an octave per 5V at either end, inverted anticlockwise",
+    "Adds to the pitch at one volt per octave",
+    "Adds to the FOLD knob, 10V covering the whole of that knob, and the total is held between no folding and full folding",
+    "Frequency modulation, scaled by the FM knob; with that knob hard over, 5V shifts the pitch one octave",
+    "A sine wave at ±5V, folded by the FOLD setting",
+    "A triangle wave at ±5V, folded by the FOLD setting",
+    "A sawtooth at ±5V, folded by the FOLD setting",
+    "Note — monophonic: only the first channel of any cable is read, and each output carries one channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 2,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9,
+    "2": 10
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib WaveModule::process at 0x106b8 tests inputs[0].channels then adds voltages[0] to the pitch; no channel loop anywhere in the function"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "plugin.dylib WaveModule::process at 0x10740 multiplies inputs[1].voltages[0] by 0.1, adds the FOLD knob and clamps the total to 0 and 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib WaveModule::process at 0x106d0 multiplies inputs[2].voltages[0] by 0.2 and by the FM knob before adding it to the pitch"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib WaveModule::process at 0x108bc writes the folded sine times 5 to outputs[0]; setChannels is never called"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib WaveModule::process at 0x108c8 writes the folded triangle times 5 to outputs[1]"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib WaveModule::process at 0x108d4 writes the folded sawtooth times 5 to outputs[2]"
+     }
+    }
+   },
+   "notes": "Closed source; everything here was read out of the compiled binary. The Frequency knob is configured with a display base of 1.0594631, which is the twelfth root of two, while process() raises two to the power of the same number: the tooltip therefore reads the knob in semitones and shows 261.63Hz to 349.23Hz where the oscillator actually runs 8.18Hz to 8372Hz. The fold is skipped entirely when the fold amount is zero or below, and the reflecting fold loop reflects about plus and minus one until the sample is back in range."
   },
   "Orbit": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Six sine wave low frequency oscillators from one clock: one at the clock's own rate and the others at a half, a third, a quarter, a fifth and a sixth of it",
+    "Sets the rate of the internal clock, 0.1Hz to 10Hz, and is not read while a cable is patched to the clock input",
+    "Takes the rate from the time between rising edges here, reading high above 1V and low below 0V",
+    "A sine wave at ±5V at the clock rate",
+    "A sine wave at ±5V at half the clock rate",
+    "A sine wave at ±5V at a third of the clock rate",
+    "A sine wave at ±5V at a quarter of the clock rate",
+    "A sine wave at ±5V at a fifth of the clock rate",
+    "A sine wave at ±5V at a sixth of the clock rate",
+    "Note — with a cable in the clock input every output stays at 0V until two rising edges have arrived, because the rate is measured between them; unpatched, the knob drives it from the start"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the knob sets the rate",
+      "why": "plugin.dylib Orbit::process at 0xb994 tests inputs[0].channels, then runs voltages[0] through a rising edge test at 1V and a falling one at 0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib Orbit::process at 0xba80 writes sin of the phase times 5 to outputs[0]"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib Orbit::process at 0xbacc writes outputs[1] from a phase advanced at half the rate"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib Orbit::process at 0xbb18 writes outputs[2] from a phase advanced at a third of the rate"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib Orbit::process at 0xbb64 writes outputs[3] from a phase advanced at a quarter of the rate"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib Orbit::process at 0xbbac writes outputs[4] from a phase advanced at a fifth of the rate"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib Orbit::process at 0xbbf8 writes outputs[5] from a phase advanced at a sixth of the rate"
+     }
+    }
+   },
+   "notes": "Closed source; read out of the compiled binary. The measured period is stored at Module+0x14c and starts at zero, and process() writes 0V to all six outputs whenever it is not above zero, which is why a freshly patched clock gives nothing until its second rising edge. Six lights are configured and set from the same sine values, but they carry no positions in the census and so cannot be clicked."
   },
   "Stones": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An ADSR envelope generator that can also cycle on its own, with the envelope and its inverse on separate jacks",
+    "Sets how long the envelope takes to climb to full, 1ms to 5 seconds",
+    "Sets how long the envelope takes to fall from full to the sustain level, up to 5 seconds",
+    "Sets the level the envelope holds at while the gate is high, from nothing to full",
+    "Sets how long the envelope takes to fall back to nothing after the gate goes low, up to 5 seconds",
+    "Starts the envelope again each time its decay finishes, and while it is on the Trig input is not read at all",
+    "Starts the envelope on a rising edge above 1V and releases it once the voltage falls back to 1V or below",
+    "Adds to the attack time at one second per volt, and the total is held at 1ms at the shortest",
+    "Adds to the decay time at one second per volt",
+    "Adds to the sustain level, 1V covering the whole of the S knob, and nothing clamps the total",
+    "Adds to the release time at one second per volt",
+    "The envelope, 0V to 10V",
+    "The envelope turned upside down, 10V while the envelope is at rest and 0V while it is at full",
+    "Note — nothing comes out until either a trigger reaches Trig or Cycle is switched on; with neither, the envelope never starts"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9,
+    "4": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "2": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V, which holds the envelope released",
+      "why": "plugin.dylib StonesModule::process at 0xe5a0 tests inputs[0].channels then compares voltages[0] against 1 to set the gate and against 1 again to clear it"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "plugin.dylib StonesModule::process at 0xe604 adds inputs[1].voltages[0] to the Attack knob in seconds and takes the larger of that and 0.001"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "plugin.dylib StonesModule::process at 0xe65c adds inputs[2].voltages[0] to the Decay knob in seconds"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "plugin.dylib StonesModule::process at 0xe660 adds inputs[3].voltages[0] straight to the Sustain knob, whose own range is 0 to 1, with no clamp"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "plugin.dylib StonesModule::process at 0xe634 adds inputs[4].voltages[0] to the Release knob in seconds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "plugin.dylib StonesModule::process at 0xe6cc writes the envelope times 10 to outputs[0]"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "plugin.dylib StonesModule::process at 0xe6d8 writes one minus the envelope, times 10, to outputs[1]"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "plugin.dylib StonesModule::process at 0xe6e0 writes the same register it wrote to outputs[0]"
+     }
+    }
+   },
+   "notes": "Closed source; read out of the compiled binary. Outputs 0 and 2 are written from the same register at 0xe6cc and 0xe6e0 and always carry the identical signal, so both are tagged to the same line. The sustain CV is added to a knob whose range is 0 to 1, so one volt covers the whole control and there is no clamp on the total: above 1V the envelope and the outputs go past 10V. The attack time is floored at 1ms but the decay and release times are not, so a release of zero makes the envelope drop to nothing in a single sample. With Cycle on, the branch at 0xe598 skips the Trig input entirely."
   },
   "Bound": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four channel stereo mixer, each channel with a level knob, a level CV and a direct output that takes it out of the main mix",
+    "Sets the level of that channel, from silence to unity",
+    "Sends a channel whose L(M) jack alone is patched to both main outputs; switched off, such a channel reaches the left output only",
+    "The left input of that channel, or its only input when the R jack of the same channel is empty",
+    "The right input of that channel",
+    "Multiplies that channel's level, 10V giving the level the knob is set to and 0V silence; a patched cable sitting at 0V silences the channel whatever the knob says",
+    "The left and right inputs of that channel summed to one signal after the level knob and CV; patching here removes that channel from both main outputs",
+    "The left main output, carrying every channel whose own output jack is empty",
+    "The right main output, carrying every channel whose own output jack is empty",
+    "Note — a channel with a cable in its own output jack is taken out of the main mix, so the module doubles as four separate voltage controlled amplifiers",
+    "Note — monophonic: only the first channel of any cable is read"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 3,
+    "3": 4,
+    "4": 3,
+    "5": 4,
+    "6": 3,
+    "7": 4,
+    "8": 5,
+    "9": 5,
+    "10": 5,
+    "11": 5
+   },
+   "out": {
+    "0": 7,
+    "1": 8,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib BoundModule::process at 0x4b20 tests inputs[0].channels at 0x4af4 then multiplies voltages[0] by the level"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib BoundModule::process at 0x4c2c tests inputs[1].channels at 0x4b40 then multiplies voltages[0] by the level"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib BoundModule::process at 0x4bd8 tests inputs[2].channels at 0x4b68 then multiplies voltages[0] by the level"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib BoundModule::process at 0x4c54 tests inputs[3].channels at 0x4bf8 then multiplies voltages[0] by the level"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib BoundModule::process at 0x4ccc tests inputs[4].channels at 0x4c74 then multiplies voltages[0] by the level"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib BoundModule::process at 0x4d24 tests inputs[5].channels at 0x4cec then multiplies voltages[0] by the level"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib BoundModule::process at 0x4d9c tests inputs[6].channels at 0x4d44 then multiplies voltages[0] by the level"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib BoundModule::process at 0x4df8 tests inputs[7].channels at 0x4dc0 then multiplies voltages[0] by the level"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "unity, leaving the knob alone",
+      "why": "plugin.dylib BoundModule::process at 0x4b04 multiplies inputs[8].voltages[0] by 0.1 and then by the knob; the 1.0 at 0x4c20 is the unpatched value"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "unity, leaving the knob alone",
+      "why": "plugin.dylib BoundModule::process at 0x4b7c multiplies inputs[9].voltages[0] by 0.1 and then by the knob; the 1.0 at 0x4bc8 is the unpatched value"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "unity, leaving the knob alone",
+      "why": "plugin.dylib BoundModule::process at 0x4c88 multiplies inputs[10].voltages[0] by 0.1 and then by the knob; the 1.0 at 0x4cbc is the unpatched value"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "unity, leaving the knob alone",
+      "why": "plugin.dylib BoundModule::process at 0x4d58 multiplies inputs[11].voltages[0] by 0.1 and then by the knob; the 1.0 at 0x4d8c is the unpatched value"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "plugin.dylib BoundModule::process at 0x4e18 writes the left accumulator to outputs[0]; setChannels is never called"
+     },
+     "1": {
+      "poly": false,
+      "why": "plugin.dylib BoundModule::process at 0x4e20 writes the right accumulator to outputs[1]"
+     },
+     "2": {
+      "poly": false,
+      "why": "plugin.dylib BoundModule::process at 0x4b58 writes the sum of channel one's two sides to outputs[2] and clears both accumulators"
+     },
+     "3": {
+      "poly": false,
+      "why": "plugin.dylib BoundModule::process at 0x4c6c writes the sum of channel two's two sides to outputs[3]"
+     },
+     "4": {
+      "poly": false,
+      "why": "plugin.dylib BoundModule::process at 0x4d3c writes the sum of channel three's two sides to outputs[4]"
+     },
+     "5": {
+      "poly": false,
+      "why": "plugin.dylib BoundModule::process at 0x4e10 writes the sum of channel four's two sides to outputs[5]"
+     }
+    }
+   },
+   "notes": "Closed source; read out of the compiled binary. Each channel's CV jack multiplies its level knob rather than adding to it, at a tenth per volt, so a cable resting at 0V silences that channel and the knob does nothing while it is in. A channel's own output jack carries the mono sum of its left and right inputs, not a stereo pair, and patching it clears that channel from both main accumulators. The Stereo Split switch is only consulted for the L(M) jack: a channel patched on R alone reaches the right output only, whichever way the switch is set. One light is configured and follows the switch, but it has no position in the census and cannot be clicked."
   },
   "Maelstrom": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A random voltage generator giving one stepped and one smoothly moving voltage between two limits",
+    "Sets how often a new random value is drawn, 0.1Hz to 10Hz; a clock patched to Clk takes over from it",
+    "Sets the bottom of the range the random values are drawn from, -10V to 10V, although the tooltip calls it Offset",
+    "Sets the top of the range the random values are drawn from, -10V to 10V, although the tooltip calls it Range",
+    "Draws a new random value on each rising edge above 1V, and sets the rate of the smooth output from the time between edges",
+    "A voltage moving smoothly towards each new random value, always between Min and Max",
+    "A new random voltage between Min and Max, held until the next one is drawn",
+    "Note — set Max below Min and both outputs freeze at the Min voltage until the two are put back in order"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the Rate knob sets the rate",
+      "why": "plugin.dylib MaelstromModule::process at 0xac10 tests inputs[0].channels then runs voltages[0] through a rising edge test at 1V and a falling one at 0V"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "plugin.dylib MaelstromModule::process at 0xae08 writes the slewed value to outputs[0]; its bounds are the Min and Max knobs, each configured -10 to 10"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "plugin.dylib MaelstromModule::process at 0xae14 writes the held random value to outputs[1]"
+     }
+    }
+   },
+   "notes": "Closed source; read out of the compiled binary. The panel prints Min and Max; the two parameters are configured as Offset and Range, so the maker's own tooltips name them differently from the panel. Random values are drawn with rack::random::local and scaled into Min to Max by the multiply at 0xacd0. When Max is below Min the test at 0xabd4 writes the Min voltage to both outputs and returns before anything else runs. One light is configured and follows the smooth output, but it has no position in the census and cannot be clicked."
   },
   "Taurus": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight step voltage sequencer, one knob per step, clocked forward from a jack",
+    "Sets the voltage this step puts out, -5V to 5V",
+    "Moves to the next step on each rising edge above 1V, wrapping round after the eighth",
+    "Sends the sequence back so the next clock plays the first step; until that clock arrives the output is not any of the eight step voltages",
+    "The voltage of the step the sequencer is on, -5V to 5V, held until it moves on",
+    "Note — nothing moves until a clock reaches IN; with none patched, the output holds the first step's knob"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 3
+   },
+   "out": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib TaurusModule::process at 0xf3ec tests inputs[0].channels at 0xf3e4 then runs voltages[0] through a rising edge test at 1V and a falling one at 0V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib TaurusModule::process at 0xf388 tests inputs[1].channels at 0xf380 then writes -1 to the step index on a rising edge"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib TaurusModule::process at 0xf468 writes params[index] to outputs[0]; the knobs are configured -5 to 5 in the constructor at 0xf20c"
+     }
+    }
+   },
+   "notes": "Closed source; read out of the compiled binary. RESET writes -1 to the step index at 0xf3dc, and the output is then loaded with params[index] at 0xf460 without any bounds test, so between a reset and the next clock the jack carries the four bytes lying immediately before the parameter array rather than a step voltage. On the next clock the index becomes 0 and the first step plays normally. Eight lights show which step is current; they have no positions in the census and cannot be clicked."
   },
   "Libra": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four pole resonant filter with a saturating drive stage, giving a low pass and a high pass output",
+    "Sets the corner frequency, 20Hz to 10000Hz, and the filter is never allowed above 45 per cent of the sample rate",
+    "Sets how strongly the corner frequency is emphasised, from none to full",
+    "Blends both outputs from clean towards a saturated copy driven twice as hard",
+    "The signal the filter works on",
+    "Adds to the corner frequency, one volt multiplying it by ten rather than doubling it",
+    "Adds to the resonance, 1V covering the whole of the RES knob, and the total is held between none and full",
+    "Adds to the drive, 1V covering the whole of the DRIVE knob, and nothing clamps the total",
+    "The low passed signal, four poles falling away above the corner frequency",
+    "The input with the low passed signal taken back out of it, which gives the high pass shape"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "out": {
+    "0": 8,
+    "1": 9
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib LibraModule::process at 0x90d4 tests inputs[0].channels at 0x90c4 then feeds voltages[0] into the filter"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "plugin.dylib LibraModule::process at 0x90b8 adds inputs[1].voltages[0] to the knob and raises ten to the sum at 0x90ec, so one volt is a decade"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "plugin.dylib LibraModule::process at 0x90c0 adds inputs[2].voltages[0] to the Resonance knob, whose range is 0 to 1, and clamps the total at 0x90e0"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "plugin.dylib LibraModule::process at 0x9204 adds inputs[3].voltages[0] to the Drive knob, whose range is 0 to 1, with no clamp"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "plugin.dylib LibraModule::process at 0x9238 writes the fourth stage, blended with its saturated copy, to outputs[0]"
+     },
+     "1": {
+      "poly": false,
+      "why": "plugin.dylib LibraModule::process at 0x9240 writes the input minus the feedback, blended with its saturated copy, to outputs[1]"
+     }
+    }
+   },
+   "notes": "Closed source; read out of the compiled binary. The cutoff knob is configured 1.30103 to 4 and process() raises ten to that number, so the knob spans 20Hz to 10000Hz and the FREQ jack moves it by a decade per volt rather than an octave. The result is then clamped between 20Hz and 0.45 of the sample rate at 0x9100, so at low sample rates the top of the knob's travel is cut off. Drive crossfades each output against a hyperbolic tangent of twice its value and is not clamped, so a drive CV past 1V extrapolates beyond the saturated copy. The panel prints FREQ, RES and DRIVE both on the knobs and on the three CV jacks."
   },
   "Scorpio": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A complex oscillator: four detuned sawtooths crossfaded against a sine an octave or two below them, the mix then driven into saturation",
+    "Sets the pitch, 0 giving C4 at 261.63Hz and one step an octave, over ten octaves; the tooltip shows the bare number with no frequency and no unit",
+    "Shifts the four sawtooths by up to a twentieth of an octave either way, leaving the sine where it is",
+    "Offsets that sawtooth by up to a tenth of an octave either way from the pitch the others follow",
+    "Sets the drive into the saturation stage, from unity gain up to five times",
+    "Crossfades the output from the four sawtooths alone through to the sine alone",
+    "Sets what the sine runs at against the sawtooths: half their frequency in one position and a quarter of it in the other, and it comes up at half",
+    "Adds to the pitch of all five oscillators at one volt per octave",
+    "Adds to the drive, 10V covering the whole of the Ψ knob, and the total is held between unity and five times",
+    "Adds to the crossfade, 10V covering the whole of the δ knob, and the total is held between the sawtooths alone and the sine alone",
+    "The saturated mix, ±5V",
+    "Note — the detune setting for the first sawtooth has no knob on the panel, so that oscillator always runs on the pitch and fine tune alone and the other three are detuned against it",
+    "Note — monophonic: only the first channel of a cable into V/O is read"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 4,
+    "7": 5,
+    "8": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib Scorpio::process at 0xd18c reads inputs[0].voltages[0] and adds it to the exponent of every oscillator; no channel loop in the function"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "plugin.dylib Scorpio::process at 0xd164 tests inputs[1].channels at 0xd15c, multiplies voltages[0] by 0.1, adds the Ψ knob and clamps to 0 and 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V, so the knob alone",
+      "why": "plugin.dylib Scorpio::process at 0xd1a0 tests inputs[2].channels at 0xd198, multiplies voltages[0] by 0.1, adds the δ knob and clamps to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "plugin.dylib Scorpio::process at 0xd438 writes the hyperbolic tangent of the driven mix times 5 to outputs[0]"
+     }
+    }
+   },
+   "notes": "Closed source; read out of the compiled binary. Nine parameters are configured but the widget adds only eight: parameter 2, named Detune Oscillator 1, has no ParamWidget, so it can never be clicked or turned and stays at its default of zero. It is still read at 0xd1c8, which is what makes the first sawtooth the reference the other three are detuned against. The Frequency knob is configured with a display base of zero, so the tooltip shows the raw -5 to 5 rather than a frequency, while process() raises two to that number and multiplies by 261.6256. The sine takes the V/OCT input but not the Fine Tune knob. Two lights follow the Mode switch and have no positions in the census."
   },
   "Leo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An eight step trigger sequencer where each step is switched on or off and fires with a probability of its own",
+    "Switches this step on or off, latching on each press; every step comes up off",
+    "Sets the chance that this step fires when the sequencer reaches it, 0 to 100 per cent, and it is read only while that step is switched on",
+    "Moves to the next step on each rising edge above 1V, wrapping round after the eighth",
+    "Sends the sequence back so the next clock plays the first step, and cuts short any pulse in progress",
+    "A 10V pulse 10ms long each time a step fires",
+    "Note — every step comes up switched off, so nothing is put out until you switch steps on and patch a clock to IN"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib LeoModule::process at 0x7ad4 runs inputs[0].voltages[0] through a rising edge test at 1V and a falling one at 0V before advancing the index"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib LeoModule::process at 0x7a68 runs inputs[1].voltages[0] through the same edge test, then writes -1 to the index and zero to the pulse timer at 0x7a84"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "plugin.dylib LeoModule::process at 0x7bf4 writes 10 while the pulse timer is above zero and 0 otherwise; the timer is loaded with 0.01 at 0x7b98"
+     }
+    }
+   },
+   "notes": "Closed source; read out of the compiled binary. The eight step buttons are momentary VCVButtons read through an edge test at 0x76e0 and each toggles a latched byte, so a press changes the step's state rather than holding it. A step's probability trimpot at 0x7b28 is only reached when that step's latched byte is set, and the trimpots default to 1, meaning every enabled step fires. Sixteen lights are configured, eight for the current position and eight for the latched states; none of them carries a position in the census."
   },
   "Lyra": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A low pass gate: one control opens a two pole filter and an amplifier together, so the signal gets brighter as it gets louder",
+    "Holds the gate open by a fixed amount, moving the corner between 100Hz shut and 24100Hz fully open and the level with it; it comes up fully shut",
+    "Sets how fast a strike dies away, a time constant of 1 second at its lowest setting and 0.125 seconds at its highest",
+    "The signal the gate passes",
+    "Multiplies the level knob, 10V giving the knob's own setting and 0V shutting the gate; a patched cable sitting at 0V silences the module whatever the knob says",
+    "Opens the gate fully on each rising edge above 1V, after which it decays at the rate the decay knob sets",
+    "The filtered signal scaled by how far the gate is open",
+    "Note — the level knob comes up fully shut, so a new Lyra passes nothing until you raise it or send a strike"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "trigger"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "plugin.dylib LyraModule::process at 0xa008 reads inputs[0].voltages[0] straight into the first filter stage; no channel loop in the function"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "unity, leaving the knob alone",
+      "why": "plugin.dylib LyraModule::process at 0x9ff0 tests inputs[1].channels at 0x9fe8 then multiplies the knob by 0.1 and by voltages[0]"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "plugin.dylib LyraModule::process at 0xa018 tests inputs[2].channels at 0xa010 then runs voltages[0] through a rising edge test at 1V, writing 1.0 to the envelope"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "plugin.dylib LyraModule::process at 0xa0f8 writes the second filter stage times the gate opening to outputs[0]; setChannels is never called"
+     }
+    }
+   },
+   "notes": "Closed source; read out of the compiled binary. The gate opening is the strike envelope plus the level, clamped to 0 and 1; it sets both the amplifier gain and the corner of two cascaded one pole filters, whose angular frequency is 628.3185 at the bottom and 151424.77 at the top, which is 100Hz and 24100Hz. The LEVEL jack multiplies the knob rather than adding to it, at a tenth per volt, so a cable resting at 0V silences the module. The Decay knob is a rate, not a time: process() multiplies the envelope by the exponential of minus the knob times the sample period each sample, so a higher setting is a shorter decay. The two knobs have no lettering on the panel."
   }
  }
 }

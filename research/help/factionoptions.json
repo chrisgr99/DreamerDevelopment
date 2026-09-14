@@ -2,47 +2,336 @@
  "plugin": "factionoptions",
  "source": "https://factionoptions.com/manual",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "ResonanceHub": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "The module the rest of the plugin hangs off: it logs you in, chooses the room you are in, and holds the connections to the other people in it",
+    "Note — nothing is patched here; every jack in this plugin is on an expander beside the Hub, and the row of modules has to touch with no gap",
+    "Note — a QR code fills the panel until this copy of Rack has been paired: scan it with a phone or open the address in a browser to log in",
+    "Note — the dot in the corner is green when connected, amber and pulsing with a countdown while it retries, red after a failure and grey when offline",
+    "Note — click the room name for the rooms you belong to, and the QR icon under it for an invite somebody else can scan",
+    "Note — a CV Peer is added to the right of the row on its own each time somebody new joins the room, so you do not place one per person",
+    "Note — expanders go to the right of the Hub; Resonance Monitor is the one that goes to the left",
+    "Menu — Deauthorize Device — logs out and returns the panel to the QR code",
+    "Menu — Echo Mode — sends everything received straight back to whoever sent it, so a second copy of Rack in the same room hears your own signals return",
+    "Menu — Auto-add Peer: CV Only, CV + MIDI I/O — sets whether a new arrival gets a CV Peer on its own or a CV Peer with a MIDI I/O beside it",
+    "Menu — Add Peer Now — adds a CV Peer straight away, in place of leaving it until somebody joins",
+    "Menu — Copy Event Log — puts a timestamped list of connection events on the clipboard"
+   ],
+   "notes": "No source is published. Everything above was read from the installed 2.0.17 binary, which is not stripped, together with the maker's manual at factionoptions.com/manual. The module declares no parameters, inputs or outputs, so there is nothing to tag. The room selector and the QR invite are custom widgets (RoomSelectorWidget, QRInviteWidget) rather than parameters, so no click on them reaches this feature; they are covered by Note lines."
   },
   "CVPeer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "One slot for one collaborator: four channels of CV go out to them and four come back, with a Resonance Hub in the same unbroken row",
+    "Takes the four outgoing channels from the CV Peer to its left for any of this one's IN jacks with no cable in them; clicking it sets every CV Peer to the right the same way, and it comes up on",
+    "CV sent to the collaborator in this slot on that channel; a signal arriving by normalling is used on this machine only, and nothing is sent over the network unless a cable is patched here",
+    "The CV the collaborator in this slot is sending on that channel, ramped to each newly received value across a 240th of a second in place of stepping to it",
+    "5V while the collaborator in this slot is sending on any of the four channels, and 0V otherwise",
+    "Note — the panel carries the collaborator's name, their round-trip time, the device they are using, a lamp per channel, and LOCAL or LAN when they are on the same machine or the same network",
+    "Note — a slot reading Waiting... has nobody in it yet; people are put into open slots as they join the room",
+    "Note — a slot keeps its person when they drop out, so the same collaborator comes back to the same module and the patch does not have to be rewired"
+   ],
+   "param": {
+    "1": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 4
+   },
+   "family": {
+    "out": {
+     "4": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the same channel on the CV Peer to its left",
+      "why": "CVPeer::process at 0x311e0 onward reads the channels byte at Port+0x40 only to test for a cable and then takes voltages[0]; when the jack is empty and param 1 is above 0.5 it takes the neighbour's value instead"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the same channel on the CV Peer to its left",
+      "why": "CVPeer::process at 0x311e0 onward reads the channels byte at Port+0x40 only to test for a cable and then takes voltages[0]; when the jack is empty and param 1 is above 0.5 it takes the neighbour's value instead"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the same channel on the CV Peer to its left",
+      "why": "CVPeer::process at 0x311e0 onward reads the channels byte at Port+0x40 only to test for a cable and then takes voltages[0]; when the jack is empty and param 1 is above 0.5 it takes the neighbour's value instead"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the same channel on the CV Peer to its left",
+      "why": "CVPeer::process at 0x311e0 onward reads the channels byte at Port+0x40 only to test for a cable and then takes voltages[0]; when the jack is empty and param 1 is above 0.5 it takes the neighbour's value instead"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "CVPeer::process at 0x31b1c-0x31c10 writes one float to each of outputs 0 to 3 with no setChannels call anywhere in the function"
+     },
+     "1": {
+      "poly": false,
+      "why": "CVPeer::process at 0x31b1c-0x31c10 writes one float to each of outputs 0 to 3 with no setChannels call anywhere in the function"
+     },
+     "2": {
+      "poly": false,
+      "why": "CVPeer::process at 0x31b1c-0x31c10 writes one float to each of outputs 0 to 3 with no setChannels call anywhere in the function"
+     },
+     "3": {
+      "poly": false,
+      "why": "CVPeer::process at 0x31b1c-0x31c10 writes one float to each of outputs 0 to 3 with no setChannels call anywhere in the function"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "CVPeer::process at 0x31c14-0x31c4c selects 5.0 or 0.0 on whether any of the four receive-active flags is set, and stores it to outputs+0x140"
+     }
+    }
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.17 binary, which is not stripped, together with the maker's manual at factionoptions.com/manual. Param 0 (Unassign Peer) has no ParamWidget and so no position in the census: it is read at 0x31c50 but is driven from a custom area of the panel rather than from a knob or button, so it gets no line. The send jacks are printed IN on the panel and the receive jacks OUT, while the manual calls them SEND 1-4 and RECEIVE 1-4. Neither the send jacks nor the receive jacks are given a family: they carry whatever the two people patch. The receive slew runs at one 240th of a second (the constant 240 at 0x317a0 and again for each of the four channels). A change of more than 0.01V on a channel is what lights its activity lamp."
   },
   "MIDIIO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Routes a collaborator's four MIDI ports to and from MIDI hardware on this machine, attached to a CV Peer",
+    "Note — it goes immediately to the right of a CV Peer and reads No CV Peer until it has one; the Hub can be set to add one beside every CV Peer it creates",
+    "Note — the panel has no jacks; the four ports on each side are pointed at devices from the module's menu, and a port with no device does nothing",
+    "Note — the module is not offered in the module browser in this release, and a patch saved with one in it goes on loading and running",
+    "Menu — MIDI Device Assignment — a heading over the four ports",
+    "Menu — Input Device — under each port; chooses which MIDI device on this machine feeds that port to the collaborator, or (None)",
+    "Menu — Output Device — under each port; chooses which MIDI device on this machine that port plays, or (None)"
+   ],
+   "notes": "No source is published. Everything above was read from the installed 2.0.17 binary, which is not stripped, together with the maker's manual at factionoptions.com/manual. The module declares one parameter (Unassign Peer) and no jacks; that parameter has no widget and no census position, so nothing here can be tagged. Device names are stored by name in the patch and matched loosely when the patch is loaded, so a device that has been renamed can still be found."
   },
   "ResonanceMonitor": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A display of what a Resonance Hub is doing, placed immediately to its left; it has no jacks",
+    "Note — click anywhere on the panel to move to the next page",
+    "Note — the pages are Overview, Peers, Scope:Strips, Scope:Mix, Scope:Quad and Scope:Net",
+    "Note — Overview gives connection, authentication and room state with a retry countdown; Peers lists who is connected with their device, latency and open channels",
+    "Note — the three scope pages draw the CV going each way: one strip per person, everybody overlaid, and a four-channel grid; Scope:Net traces the seven values Net CV puts out",
+    "Note — a Monitor placed anywhere but immediately to the left of a Hub prints a reminder to move it"
+   ],
+   "notes": "No source is published. Everything above was read from the installed 2.0.17 binary, which is not stripped, together with the maker's manual at factionoptions.com/manual. The module declares no parameters, inputs or outputs. The page names are the literal strings in the binary, and differ from the manual, which calls them Scope Strips, Scope Overlay, Scope Quad and Net CV Metrics. Paging is done by PageButton::onButton, a plain widget rather than a parameter, so no click on it reaches this feature."
   },
   "NetCV": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Seven jacks turning the state of the network connection into voltages you can patch",
+    "A stepped voltage for the state of the connection: 0V offline, 3.3V connecting, 6.6V connected and 10V once in a room",
+    "10V while at least one other person is in the room, and 0V while you are alone",
+    "1V for each person connected, stopping at 10V",
+    "The worst connection quality across everybody connected, 0 to 10V, reaching 10V for the best rating",
+    "The average round-trip time across everybody connected, 0 to 10V with 10V at 100ms",
+    "The worst packet loss across everybody connected, 0 to 10V with 10V at one part in ten lost",
+    "The worst jitter across everybody connected, 0 to 10V with 10V at 50ms",
+    "Note — the connection, presence and count jacks change the instant the network does; quality, latency, loss and jitter are smoothed towards each new value so they do not click",
+    "Note — the module reads the Resonance Hub in the same unbroken row and takes no peer slot, so it can go anywhere to the right of the Hub"
+   ],
+   "out": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NetCV::process at 0x40aec-0x40af8 indexes a four-float table at 0x120cdbc holding 3.3, 6.6, 10.0 and 0.0, then 0x40bb4 writes it to outputs+0"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NetCV::process at 0x40afc-0x40b08 selects 10.0 or 0.0 on the peer count being above zero, written to outputs+0x50 at 0x40bc4"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NetCV::process at 0x40b0c-0x40b14 takes the peer count, floors it at 0 and caps it at 10, written to outputs+0xa0 at 0x40bd0"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NetCV::process at 0x40b18-0x40b30 divides the quality figure by ten and clamps it to 0 to 10, written to outputs+0xf0 at 0x40bdc"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NetCV::process at 0x40b34-0x40b50 divides the latency in milliseconds by ten and clamps it to 0 to 10, written to outputs+0x140 at 0x40be8"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NetCV::process at 0x40b34-0x40b50 divides the loss percentage by ten and clamps it to 0 to 10, written to outputs+0x190 at 0x40bf4"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "NetCV::process at 0x40b54-0x40b6c divides the jitter in milliseconds by five and clamps it to 0 to 10, written to outputs+0x1e0 at 0x40c00"
+     }
+    }
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.17 binary, which is not stripped, together with the maker's manual at factionoptions.com/manual. No output calls setChannels, so all seven are monophonic. The last four are lerped towards their new value with a coefficient of the sample time times four, and snap once the gap falls under 0.001 (0x40b80-0x40bb0), which is what the manual means by smoothed. The scalings the maker prints in the port names - 100ms, one part in ten, 50ms - are the divisors in the code, so the tooltip and the code agree."
   },
   "CVMix": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four jacks carrying the average of what every connected collaborator is sending on that channel",
+    "The average of that channel across every collaborator who is sending, and 0V when nobody is",
+    "Note — the divisor is the number of collaborators sending on any channel at all, so somebody sending on channel 1 alone counts against the average on the other three as well",
+    "Note — the module reads every peer slot on the Resonance Hub in the same unbroken row, takes no slot of its own, and can go anywhere to the right of the Hub",
+    "Note — the ring around a jack glows with the voltage it is carrying, orange for positive and cyan for negative"
+   ],
+   "out": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "CVMix::process at 0x427e8-0x42810 writes one float to each of the four outputs with no setChannels call in the function"
+     },
+     "1": {
+      "poly": false,
+      "why": "CVMix::process at 0x427e8-0x42810 writes one float to each of the four outputs with no setChannels call in the function"
+     },
+     "2": {
+      "poly": false,
+      "why": "CVMix::process at 0x427e8-0x42810 writes one float to each of the four outputs with no setChannels call in the function"
+     },
+     "3": {
+      "poly": false,
+      "why": "CVMix::process at 0x427e8-0x42810 writes one float to each of the four outputs with no setChannels call in the function"
+     }
+    }
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.17 binary, which is not stripped, together with the maker's manual at factionoptions.com/manual. The averaging loop at 0x42734-0x427d8 walks 32 peer slots, counts a slot once if it is assigned and any of its four channel-active flags is set, adds all four of that slot's channels, and divides all four sums by that one count. So the divisor is per module, not per channel, which is a shade different from the manual's 'averaged from all peers with active CV'. The outputs are given no family: they carry whatever the collaborators patch."
   },
   "DmxHub": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sends one DMX universe of 512 channels to lighting equipment on the local network, over sACN or Art-Net",
+    "Note — the module has no jacks of its own; DMX Fixture expanders placed to its right are where CV goes in",
+    "Note — the panel reads out the transport, the frame rate, the destination address, the start channel and how many fixtures are attached, with a lamp that is lit while frames are going out",
+    "Note — the operating system may ask the first time for permission to let Rack find devices on the local network, and no DMX reaches anything until that is allowed",
+    "Note — the DMX side of the plugin is separate from the collaboration side: this Hub talks to lighting hardware and not to other people",
+    "Menu — Transport: sACN (E1.31), Art-Net — chooses which of the two protocols the universe is sent over",
+    "Menu — Send Rate — sets the frame rate, 1Hz to 44Hz, and comes up at 30Hz",
+    "Menu — Universe — sets the universe number, 1 to 63999 for sACN and 0 to 32767 for Art-Net",
+    "Menu — Start Address — sets the first DMX channel that fixtures count from, 1 to 509, offered as 1 - 64, 65 - 128, 129 - 256, 257 - 509 and Custom...",
+    "Menu — DMX Host — sets the address frames go to, offered as 239.255.0.1 (multicast), 127.0.0.1 (localhost unicast), 255.255.255.255 (broadcast), 2.255.255.255 (classic Art-Net subnet) and Custom..."
+   ],
+   "notes": "No source is published. Everything above was read from the installed 2.0.17 binary, which is not stripped, together with the maker's manual at factionoptions.com/manual. The module declares no parameters, inputs or outputs, so nothing here can be tagged; every setting is on the right-click menu, named here exactly as the binary prints it. The universe is clamped for the chosen transport at load time, which is what the 'DmxHub: clamped universe to %u' warning in the binary reports. The four address choices are literal strings in the binary and the numbers in them are addresses rather than measurements."
   },
   "DmxFixture": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four CV inputs written onto four consecutive channels of the DMX universe a DMX Hub is sending, one lighting fixture per module",
+    "Scales that channel's CV before it becomes a DMX level, 0 to 1, and comes up at 1",
+    "Holds that channel at DMX 0 while it is on",
+    "Holds every channel on this fixture and on every fixture to its right at DMX 0, and dims their mute lamps while it is on",
+    "Passes this fixture's four incoming voltages on to the fixtures to its right, for any of their channels with no cable patched; it comes up off",
+    "Scales every channel on this fixture, 0 to 1, and comes up at 1; what reaches the fixtures to the right is the incoming voltage before this knob, despite its tooltip calling it chain-wide",
+    "The level for that DMX channel, 0V to 10V and clamped to that, mapped onto the full DMX range",
+    "Note — a DMX Fixture does nothing without a DMX Hub somewhere to its left in an unbroken row of modules",
+    "Note — the module claims four consecutive DMX channels, counted from the Hub's start channel and its own place in the row, unless a fixed address is set from the menu",
+    "Note — the coloured swatch on the panel shows what the fixture is being told to do, read through whichever profile is chosen",
+    "Menu — Fixture Profile: PAR (DIM), WASH, SPOT, STROBE, PAR (RGB), RGBW, CUSTOM — relabels the four channels and tells the swatch how to read them; four channels go out whichever is chosen",
+    "Menu — DMX Address: Auto (use Hub's chain position), Override to... — sets whether the first of the four channels follows the Hub and this module's place in the row, or a number you type"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 3,
+    "9": 4,
+    "10": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the same channel on the fixture to its left",
+      "why": "DmxFixture::process at 0x49d14-0x49e1c reads the channels byte at Port+0x40 only to test for a cable, takes voltages[0], and clamps it to 0 and 10 with fminnm and fmaxnm"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the same channel on the fixture to its left",
+      "why": "DmxFixture::process at 0x49d14-0x49e1c reads the channels byte at Port+0x40 only to test for a cable, takes voltages[0], and clamps it to 0 and 10 with fminnm and fmaxnm"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the same channel on the fixture to its left",
+      "why": "DmxFixture::process at 0x49d14-0x49e1c reads the channels byte at Port+0x40 only to test for a cable, takes voltages[0], and clamps it to 0 and 10 with fminnm and fmaxnm"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the same channel on the fixture to its left",
+      "why": "DmxFixture::process at 0x49d14-0x49e1c reads the channels byte at Port+0x40 only to test for a cable, takes voltages[0], and clamps it to 0 and 10 with fminnm and fmaxnm"
+     }
+    }
+   },
+   "notes": "No source is published. Everything above was read from the installed 2.0.17 binary, which is not stripped, together with the maker's manual at factionoptions.com/manual. Channel levels and Master Intensity are all configured 0 to 1 with a default of 1 (constructor at 0x4a350 and 0x4a83c), and Normalize is a two-position switch defaulting to Off (0x4a714), which the manual does not say. The CV to DMX scaling is an instruction immediate rather than a stored constant: 0x41cb3333, which is 25.4, so a full 10V at unity level and unity master gives 254 rather than the 255 the range allows. That figure is kept out of the lines because it cannot be found by a search of the file for stored constants. Master Intensity is named chain-wide by the maker and the manual says it applies downstream, but the value this fixture hands to the one on its right (stored at 0x49e74) is the clamped input voltage, taken before the level and master knobs, so each fixture applies its own. Blackout is checked at the top of each channel and also dims the mute lamps to 0.3 of full."
   }
  }
 }

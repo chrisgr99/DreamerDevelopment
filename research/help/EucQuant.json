@@ -2,12 +2,57 @@
  "plugin": "EucQuant",
  "source": "https://github.com/sindarknave/EucQuant",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "EdoQuant": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer that snaps a pitch to one of the equal divisions of the octave, and can thin those divisions further by keeping only every nth step",
+    "Sets how many equal steps the octave is divided into, over 1 to 24, snapping to whole numbers",
+    "Keeps only every nth step of that division, over 1 to 13; with the octave in 11 steps and this at 4, the pitches left are the root, four steps up and eight steps up",
+    "Nothing in the module reads this control: the value is converted to a whole number before it is used, and every setting in its -0.5 to 0.5 travel converts to 0",
+    "The pitch to be quantized, read as 1V per octave",
+    "The quantized pitch, as 1V per octave; it is always at or below the input, because each step is reached by rounding downward",
+    "Note — The maker's readme says this control adds a voltage offset before the input is quantized, which the built module does not do."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EdoQuant.cpp:33 reads getVoltage() with no channel; line 46 takes floor of it, which works the same way for negative voltages"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "stepped",
+      "why": "EdoQuant.cpp:45-50 builds the result from two floor operations and line 41 writes it with setVoltage, never calling setChannels"
+     }
+    }
+   },
+   "notes": "Source read at commit 9b3250c, settled by comparing the installed plugin.json with each of the four commits: only 9b3250c matches byte for byte, and the installed res/EdoQuant.svg has the same MD5 as that commit's. The offset control is dead. EdoQuant.cpp:38 declares int offset = params[OFFSET_PARAM].getValue() while line 27 gives that parameter the range -0.5 to 0.5, so the conversion to int yields 0 for every position of the knob. The installed binary confirms it: EdoQuant::process at 0x4724 truncates the third parameter with frintz before multiplying, so the shipped build carries the same truncation. The three parameters and both ports were configured with empty names, so every tooltip in this module is blank; the panel prints input, edo, restrict and output. The offset control is also the third parameter and cannot be reached any other way, so it is given a line and a tag saying it does nothing rather than left to fall back on an empty tooltip."
   }
  }
 }

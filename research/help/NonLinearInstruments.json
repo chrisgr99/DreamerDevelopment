@@ -1,48 +1,536 @@
 {
  "plugin": "NonLinearInstruments",
- "source": "https://github.com/NonLinearInstruments/NLNRI_VCVRackPlugins",
+ "source": "https://github.com/NonLinearInstruments/NLNRI_VCVRackPlugins (README.md and the module sources read at commit 215f17aa)",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "QU4DiT": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A pair of logistic maps iterating once per sample in their chaotic range, giving two related noise voltages",
+    "Sets the map's parameter across the chaotic band from 3.56 to 3.9, where the higher settings are the noisier",
+    "Moves the Y map's parameter above the X map's by up to a tenth, so the two outputs drift apart",
+    "Attenuates the voltage at the jack beneath it before it reaches the map's parameter",
+    "Modulates the map's parameter through the attenuator above it; ±5V here moves the parameter by up to a fortieth",
+    "Carries the first map, -5V to 5V, a fresh value every sample",
+    "Carries the second map, -5V to 5V, running the same equation with the offset added to its parameter",
+    "Note — the module runs at the sample rate with no filtering, so both outputs are broadband noise; the chaos knob near its bottom end gives the most structured result",
+    "Note — the two maps start from the same value and only separate because of the offset knob; with the offset at zero they track each other exactly"
+   ],
+   "param": {
+    "0": 1,
+    "2": 2,
+    "1": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "QU4DiT.cpp QU4DiT::process: the jack is divided by 5, clamped to ±1 and scaled by the depth knob and 0.025, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "QU4DiT.cpp QU4DiT::process: the map value between 0 and 1 is written as ten times itself minus five, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "QU4DiT.cpp QU4DiT::process: the map value between 0 and 1 is written as ten times itself minus five, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The maker gave no name to any knob, jack or button on this module, so hovering one shows no tooltip at all. The panel prints chaos, offset, cv ~ C and cv, and X and Y under the two output jacks."
   },
   "BallisticENV": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An envelope shaped like a thrown object's flight, rising and falling as a parabola and able to bounce",
+    "Sets how hard the shot is thrown, which sets how long the flight lasts",
+    "Attenuates the voltage at the jack beside it before it is added to the impulse knob",
+    "Sets how steeply the shot is thrown, from nearly flat at the bottom to nearly vertical at the top",
+    "Attenuates the voltage at the jack beside it before it is added to the angle knob",
+    "Sets how hard the shot is pulled back down, which is what curves the flight",
+    "Attenuates the voltage at the jack beside it before it is added to the gravity knob",
+    "Sets how much of the angle is kept on each bounce, so low settings make the bounces die away quickly",
+    "Attenuates the voltage at the jack beside it before it is added to the bounce knob",
+    "Switched on, the shot bounces when it lands instead of stopping",
+    "Fires a shot, and holding it down keeps firing a fresh one every sample",
+    "Modulates the impulse through the small knob beside it",
+    "Modulates the angle through the small knob beside it",
+    "Modulates the gravity through the small knob beside it",
+    "Modulates the bounce through the small knob beside it",
+    "Any voltage other than zero here fires a shot, and a voltage held high keeps firing fresh ones",
+    "Carries the flight as an audio signal, -5V to 5V, with the sign flipping on alternate bounces so the bounces read as a waveform",
+    "Carries the flight as a control voltage, 0V to 10V, the ordinary envelope output",
+    "Sends a 10ms pulse at 10V when a shot is fired and again each time the flight comes back to zero",
+    "Note — nothing happens until a shot is fired, by the shoot button or by a voltage at the trigger jack",
+    "Note — the four setting knobs are read only while a flight is under way; turning one between shots changes nothing until the next shot starts",
+    "Note — with bounce switched on the flight keeps rebounding for up to sixteen thousand bounces before it gives up, which at low bounce settings is a long tail of very short hops"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "6": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 17,
+    "2": 18
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "cv",
+     "2": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "BallisticENV.cpp BallisticENV::process and classes/Ballistic.cpp: the jack is scaled by its small knob and added to the main knob before the result is clamped to 0 to 1, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "BallisticENV.cpp BallisticENV::process and classes/Ballistic.cpp: the jack is scaled by its small knob and added to the main knob before the result is clamped to 0 to 1, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "BallisticENV.cpp BallisticENV::process and classes/Ballistic.cpp: the jack is scaled by its small knob and added to the main knob before the result is clamped to 0 to 1, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "BallisticENV.cpp BallisticENV::process and classes/Ballistic.cpp: the jack is scaled by its small knob and added to the main knob before the result is clamped to 0 to 1, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 0V",
+      "step": "stepped",
+      "why": "BallisticENV.cpp BallisticENV::process and classes/Ballistic.cpp: the voltage is added to the shoot button and converted to a bool, so any value other than zero fires, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "BallisticENV.cpp BallisticENV::process and classes/Ballistic.cpp: the trajectory is written as five times the normalised height, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "why": "BallisticENV.cpp BallisticENV::process and classes/Ballistic.cpp: the trajectory is written as ten times the normalised height, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "BallisticENV.cpp BallisticENV::process and classes/Ballistic.cpp: a 10ms pulse generator written as ten times its boolean output, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The maker gave no name to any knob, jack or button on this module, so hovering one shows no tooltip at all. The panel prints impulse, angle, gravity, bounce, on off and shoot, and sig, cv and trig under the outputs. The trigger jack is not edge detected: the voltage is cast to a bool, so any held voltage restarts the flight on every sample."
   },
   "LuciCell": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "One cell of a Luci network: a ramp that runs from 0 to 1, fires a pulse on all four sides when it gets there and has its phase knocked about by pulses from its neighbours",
+    "Sends the ramp back to the start and fires the cell's pulse",
+    "A pulse here multiplies the cell's phase by the influence setting, which pulls the ramp back towards its start",
+    "Sets the cell's rate at a volt per octave from a base of about an eighth of a hertz; with nothing patched the ramp takes about eight seconds",
+    "Any voltage other than zero here throws the ramp to a random position and holds the audio output at 0V for that sample",
+    "Sets how much a neighbour's pulse moves this cell's phase, 0V leaving the phase at zero after a pulse and 10V leaving it almost untouched",
+    "Carries the ramp itself, -5V to 5V, rising from the bottom to the top over one cycle",
+    "Goes to 1V for one sample when the ramp reaches the top, for patching into a neighbouring cell",
+    "Note — with nothing patched the cell runs on its own, putting out a rising ramp about once every eight seconds; the frequency, influence and randomize jacks are what the Luci control modules are for",
+    "Note — the four side inputs are not edge detected: any voltage other than zero counts as a pulse, so a held high gate pulls the phase back on every sample",
+    "Note — all four trigger outputs carry exactly the same pulse, and the pulse is 1V rather than the usual 10V, which is what the other Luci modules expect",
+    "Note — the influence input comes up unpatched at 0V, which makes every incoming pulse reset the cell's phase to zero rather than nudge it"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "5": 3,
+    "4": 4,
+    "6": 5
+   },
+   "out": {
+    "0": 6,
+    "2": 7,
+    "3": 7,
+    "4": 7,
+    "5": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "5": "pitch",
+     "4": "trigger",
+     "6": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 0V",
+      "step": "stepped",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: the voltage is passed as a bool, so any value other than zero counts as high, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 0V",
+      "step": "stepped",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: the voltage is passed as a bool, so any value other than zero counts as high, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0V",
+      "step": "stepped",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: the voltage is passed as a bool, so any value other than zero counts as high, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 0V",
+      "step": "stepped",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: the voltage is passed as a bool, so any value other than zero counts as high, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: setFrequency multiplies a base rate by 2 to the power of the voltage, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 0V",
+      "step": "stepped",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: the voltage is passed as a bool to randomize(), read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: setInfluence divides the voltage by 10 and scales it by 1.050732, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: the phase between 0 and 1 is written as ten times itself minus five, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "stepped",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: the trigger flag is a bool written straight to setVoltage, so it is 1V or 0V, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "stepped",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: the trigger flag is a bool written straight to setVoltage, so it is 1V or 0V, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "stepped",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: the trigger flag is a bool written straight to setVoltage, so it is 1V or 0V, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "stepped",
+      "why": "LuciCell.cpp LuciCell::process and classes/Luci.cpp: the trigger flag is a bool written straight to setVoltage, so it is 1V or 0V, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The maker gave no name to any knob, jack or button on this module, so hovering one shows no tooltip at all. The panel labels only four of the jacks: audio, influence, frequency and randomize. Output 1, a fifth trigger output, is declared in the code and given no jack, so it cannot be reached. The four trigger outputs are all written the same value, so they are a mult rather than four separate signals."
   },
   "Luci4AudioSum": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Averages four signals into one, for collecting the audio outputs of four Luci cells",
+    "One of the four signals averaged; unpatched it counts as 0V and pulls the average down",
+    "Carries the four inputs added together and divided by four",
+    "Note — the divisor is always four, so leaving inputs unpatched makes the result quieter rather than keeping the level"
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1
+   },
+   "out": {
+    "0": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Luci4AudioSum.cpp Luci4AudioSum::process: the four jacks are added and multiplied by 0.25, each read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Luci4AudioSum.cpp Luci4AudioSum::process: the four jacks are added and multiplied by 0.25, each read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Luci4AudioSum.cpp Luci4AudioSum::process: the four jacks are added and multiplied by 0.25, each read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Luci4AudioSum.cpp Luci4AudioSum::process: the four jacks are added and multiplied by 0.25, each read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Luci4AudioSum.cpp Luci4AudioSum::process: one setVoltage with no channel argument, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The maker gave no name to any knob, jack or button on this module, so hovering one shows no tooltip at all. The panel prints only 4sum at the top. No family is set on the jacks because they carry whatever is patched into them."
   },
   "Luci4ParamDistr": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Copies one voltage to four outputs, for sending one setting to four Luci cells",
+    "The voltage copied to all four outputs",
+    "Carries a copy of the input voltage",
+    "Note — this is a plain four way mult with no attenuation or offset of any kind"
+   ],
+   "in": {
+    "0": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Luci4ParamDistr.cpp Luci4ParamDistr::process: the jack is copied to all four outputs, read with getVoltage() and no channel argument, so the module is monophonic, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Luci4ParamDistr.cpp Luci4ParamDistr::process: each output is assigned the input voltage, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Luci4ParamDistr.cpp Luci4ParamDistr::process: each output is assigned the input voltage, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Luci4ParamDistr.cpp Luci4ParamDistr::process: each output is assigned the input voltage, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Luci4ParamDistr.cpp Luci4ParamDistr::process: each output is assigned the input voltage, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The maker gave no name to any knob, jack or button on this module, so hovering one shows no tooltip at all. No family is set on the jacks because they carry whatever is patched into them."
   },
   "LuciControlRND": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A button that sends a voltage for randomising the phase of the Luci cells patched to it",
+    "Held down, sends a voltage from the output that throws a Luci cell's phase to a random position",
+    "Nothing in the module reads this jack; the output is computed from the button alone, twice over, because the code adds the button to itself instead of adding the jack",
+    "Carries the randomise signal, 0V while the button is up and 2V while it is held",
+    "Note — the button is not a trigger: while it is held the cells patched to it are randomised on every sample"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "LuciControlRND.cpp LuciControlRND::process: the line reads params[RANDOMIZE_INPUT], and RANDOMIZE_INPUT is 0, which is the button; the inputs array is never indexed, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 2V",
+      "step": "stepped",
+      "why": "LuciControlRND.cpp LuciControlRND::process: the button value of 0 or 1 is added to itself and written out, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The maker gave no name to any knob, jack or button on this module, so hovering one shows no tooltip at all. The process function reads params[RANDOMIZE_INPUT] where it plainly meant inputs[RANDOMIZE_INPUT]; since both enumerations start at zero this reads the button twice, so the jack does nothing and the output is double the button."
   },
   "LuciControlFREQ": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A large knob that sends a pitch voltage to the Luci cells patched to it",
+    "Sets the rate sent to the cells, 0 to 8 on the knob and twice that at the output",
+    "Nothing in the module reads this jack; the output is computed from the knob alone, twice over, because the code adds the knob to itself instead of adding the jack",
+    "Carries twice the knob setting, 0V to 16V, which a Luci cell reads as a volt per octave",
+    "Note — the output is double what the knob shows, because the code adds the knob to itself"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "LuciControFREQ.cpp LuciControlFREQ::process: the line reads params[FREQUENCY_INPUT], and FREQUENCY_INPUT is 0, which is the knob; the inputs array is never indexed, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 16V",
+      "step": "continuous",
+      "why": "LuciControFREQ.cpp LuciControlFREQ::process: the knob, which runs 0 to 8, is added to itself and written out, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The maker gave no name to any knob, jack or button on this module, so hovering one shows no tooltip at all. The process function reads params[FREQUENCY_INPUT] where it plainly meant inputs[FREQUENCY_INPUT]; since both enumerations start at zero this reads the knob twice, so the jack does nothing and the output is double the knob."
   },
   "LuciControlINFL": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A large knob that sends an influence voltage to the Luci cells patched to it, setting how far a neighbour's pulse moves their phase",
+    "Sets how much a neighbour's pulse moves a cell's phase, 0 for a full reset at the minimum and almost no movement at the maximum",
+    "Nothing in the module reads this jack; the code adds a parameter rather than the jack's voltage to the output",
+    "Carries the influence setting for the cells patched to it",
+    "Note — the panel prints min and max at the bottom corners of the knob's travel, and a Luci cell reads 0V as a full phase reset"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "1": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "1": {
+      "poly": false,
+      "why": "LuciControINFcoarse.cpp LuciControlINFcoarse::process: the line reads params[INFLUENCE_FINE_INPUT] rather than inputs[INFLUENCE_FINE_INPUT]; the inputs array is never indexed, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "LuciControINFcoarse.cpp LuciControlINFcoarse::process: the knob, which runs 0 to 10, is written out with a parameter read added to it, commit 215f17aa, the head of the maker’s repository and the only commit carrying version 2.0.0, whose res/ matches the installed panels"
+     }
+    }
+   },
+   "notes": "The maker gave no name to any knob, jack or button on this module, so hovering one shows no tooltip at all. The process function reads params[INFLUENCE_FINE_INPUT] where it plainly meant inputs[INFLUENCE_FINE_INPUT]. That index is 1 and the module declares only one parameter, so the added term is a read past the end of the parameter list rather than any control; the jack on the panel does nothing. Input 0 is declared with no jack and cannot be reached either."
   }
  }
 }

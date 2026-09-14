@@ -1,18 +1,327 @@
 {
  "plugin": "bikeshed",
- "source": "https://github.com/marionm/bikeshed-vcv-rack",
+ "source": "https://github.com/marionm/bikeshed-vcv-rack/blob/main/doc/EntropyPool.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "EntropyPool": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A bank of 240 random values between zero and one, stepped through by a clock, with the start, the length and the filtering of the run all under CV control",
+    "Steps the current index on by one each press, as a trigger at the clk input does; nothing happens while run is off",
+    "Toggles running; with it off the clock is ignored and the eos, trg, gate and cv outputs all stay at 0V",
+    "Sets the current index back to the start of the range, or to the end of it when the length is negative",
+    "Draws a new random seed and fills every value in the bank from it, replacing what was there",
+    "Scales the cv output: clockwise of centre a value of one reaches 10V at full travel, and counter-clockwise the output is centred on 0V instead, reaching -5V to 5V at full travel; at centre it is 0V",
+    "Sets the index the run starts from, 0 to 239, snapped to whole indices",
+    "Scales the start index input, inverting it below the centre; 10V at full travel moves the start by the whole bank",
+    "Sets how far the run reaches from the start index; clockwise of centre it runs forwards and counter-clockwise it runs backwards, and either way it wraps around the end of the bank",
+    "Scales the length input, inverting it below the centre; 10V at full travel changes the length by the whole bank",
+    "Filters the values: clockwise of centre sets a rising minimum and counter-clockwise a falling maximum, and a value outside what is left is read as zero",
+    "Scales the filter input, inverting it below the centre; 10V at full travel covers the knob's whole range",
+    "A trigger here steps the current index on by one, backwards when the length is negative; nothing happens while run is off",
+    "Each trigger here toggles running on or off",
+    "A trigger here sets the current index back to the start of the range, or to the end of it when the length is negative",
+    "A trigger here draws a new random seed and fills every value in the bank from it",
+    "Moves the start index, through the trimpot for it; 10V at full travel moves it by the whole bank",
+    "Changes how far the run reaches, through the trimpot for it; 10V at full travel changes it by the whole bank",
+    "Moves the filter threshold, through the trimpot for it; 10V at full travel covers the knob's whole range",
+    "A 10V trigger 1ms long each time the index wraps back to the start of the range",
+    "A 10V trigger 1ms long each time the index moves to a value above zero; a muted value, or one the filter excludes, gives no trigger",
+    "A 10V gate starting on each step, lasting the value at that index times the length of the previous clock cycle, so zero gives no gate and one holds the gate until the next step",
+    "The value at the current index as a voltage, scaled by the small knob, and 0V while run is off",
+    "Note — the bank is filled with random values the moment the module is added, so a clock makes it play straight away; rnd refills it with a fresh seed",
+    "Note — the squares are the values: drag one up or down to change it, click it to mute it, double-click to put it back, and right-click it for a box to type an exact number",
+    "Note — the squares are drawn as one display rather than as separate controls, so no click on one of them can reach help for it",
+    "Note — the brackets mark the range being played and the dot marks the current index; a grey square is muted or out of range, and an outlined one is excluded by the filter",
+    "Note — the first clock after a patch loads makes no gate, because the gate length is measured from the previous clock cycle",
+    "Menu — Values... — opens a box holding every value as a comma-separated list, which can be edited or pasted over",
+    "Menu — Seed... — opens a box holding the seed the current values were generated from, which can be edited to generate a different set",
+    "Menu — Use GitHub activity... — opens a box for a GitHub token, loads that account's contribution history and uses it, normalised, as the values",
+    "Note — to load somebody else's GitHub activity, put their username and an at sign before the token",
+    "Note — the token typed into the GitHub box is not saved with the patch, but the values it loaded are, so a saved patch can be shared without giving the token away"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16,
+    "5": 17,
+    "6": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 20,
+    "2": 21,
+    "3": 22
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "EntropyBase.cpp:179 reads the single voltage through a Schmitt trigger with Rack's default thresholds of 0V and 1V, stepping the index"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "EntropyBase.cpp:152 reads the single voltage through a Schmitt trigger with Rack's default thresholds of 0V and 1V, toggling the run parameter"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "EntropyBase.cpp:198 reads the single voltage through a Schmitt trigger with Rack's default thresholds of 0V and 1V, returning the index to the start of the range"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "EntropyBase.cpp:165 reads the single voltage through a Schmitt trigger with Rack's default thresholds of 0V and 1V, drawing a new seed and refilling the values"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EntropyBase.cpp:130 divides the single voltage by 10 and multiplies it by the attenuverter before scaling by the bank size and adding it to the start knob"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EntropyBase.cpp:134 divides the single voltage by 10 and multiplies it by the attenuverter before scaling by the bank size and adding it to the length knob"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EntropyBase.cpp:112 divides the single voltage by 10 and multiplies it by the attenuverter before adding it to the filter knob and clamping the total to -1 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "EntropyBase.cpp:208 setVoltage of 10 or 0 on one channel, from a 1ms pulse set at EntropyBase.cpp:186"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "EntropyBase.cpp:212 setVoltage of 10 or 0 on one channel, from a 1ms pulse set at EntropyBase.cpp:190"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "EntropyBase.cpp:243 setVoltage of 10 or 0 on one channel, held for the time set at EntropyBase.cpp:233"
+     },
+     "3": {
+      "poly": false,
+      "why": "EntropyBase.cpp:215 setVoltage on one channel, of the value scaled at EntropyBase.cpp:257"
+     }
+    }
+   },
+   "notes": "The bank holds 240 values. The rnd button and its input are in the code and on the panel but appear nowhere in the maker's manual, which documents only clock, run, reset, start, filter and length. The panel letters the three large knobs with a left bracket, a dot and a right bracket rather than with words; the maker's tooltips call them Start index, Filter and Length, and the manual calls the third one Sequence length. The 240-square and 96-square value displays are a single custom widget with no ParamWidget per square, so the squares carry no parameter positions and cannot be reached for help even though they can be dragged, clicked and muted. Every output is silenced while run is off, the cv output included, so a patch that goes quiet has usually had its run toggled."
   },
   "EntropyPuddle": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A bank of 96 random values between zero and one, stepped through by a clock, with the start, the length and the filtering of the run all under CV control",
+    "Steps the current index on by one each press, as a trigger at the clk input does; nothing happens while run is off",
+    "Toggles running; with it off the clock is ignored and the eos, trg, gate and cv outputs all stay at 0V",
+    "Sets the current index back to the start of the range, or to the end of it when the length is negative",
+    "Draws a new random seed and fills every value in the bank from it, replacing what was there",
+    "Scales the cv output: clockwise of centre a value of one reaches 10V at full travel, and counter-clockwise the output is centred on 0V instead, reaching -5V to 5V at full travel; at centre it is 0V",
+    "Sets the index the run starts from, 0 to 95, snapped to whole indices",
+    "Scales the start index input, inverting it below the centre; 10V at full travel moves the start by the whole bank",
+    "Sets how far the run reaches from the start index; clockwise of centre it runs forwards and counter-clockwise it runs backwards, and either way it wraps around the end of the bank",
+    "Scales the length input, inverting it below the centre; 10V at full travel changes the length by the whole bank",
+    "Filters the values: clockwise of centre sets a rising minimum and counter-clockwise a falling maximum, and a value outside what is left is read as zero",
+    "Scales the filter input, inverting it below the centre; 10V at full travel covers the knob's whole range",
+    "A trigger here steps the current index on by one, backwards when the length is negative; nothing happens while run is off",
+    "Each trigger here toggles running on or off",
+    "A trigger here sets the current index back to the start of the range, or to the end of it when the length is negative",
+    "A trigger here draws a new random seed and fills every value in the bank from it",
+    "Moves the start index, through the trimpot for it; 10V at full travel moves it by the whole bank",
+    "Changes how far the run reaches, through the trimpot for it; 10V at full travel changes it by the whole bank",
+    "Moves the filter threshold, through the trimpot for it; 10V at full travel covers the knob's whole range",
+    "A 10V trigger 1ms long each time the index wraps back to the start of the range",
+    "A 10V trigger 1ms long each time the index moves to a value above zero; a muted value, or one the filter excludes, gives no trigger",
+    "A 10V gate starting on each step, lasting the value at that index times the length of the previous clock cycle, so zero gives no gate and one holds the gate until the next step",
+    "The value at the current index as a voltage, scaled by the small knob, and 0V while run is off",
+    "Note — the bank is filled with random values the moment the module is added, so a clock makes it play straight away; rnd refills it with a fresh seed",
+    "Note — the squares are the values: drag one up or down to change it, click it to mute it, double-click to put it back, and right-click it for a box to type an exact number",
+    "Note — the squares are drawn as one display rather than as separate controls, so no click on one of them can reach help for it",
+    "Note — the brackets mark the range being played and the dot marks the current index; a grey square is muted or out of range, and an outlined one is excluded by the filter",
+    "Note — the first clock after a patch loads makes no gate, because the gate length is measured from the previous clock cycle",
+    "Menu — Values... — opens a box holding every value as a comma-separated list, which can be edited or pasted over",
+    "Menu — Seed... — opens a box holding the seed the current values were generated from, which can be edited to generate a different set",
+    "Menu — Use GitHub activity... — opens a box for a GitHub token, loads that account's contribution history and uses it, normalised, as the values",
+    "Note — to load somebody else's GitHub activity, put their username and an at sign before the token",
+    "Note — the token typed into the GitHub box is not saved with the patch, but the values it loaded are, so a saved patch can be shared without giving the token away"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16,
+    "5": 17,
+    "6": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 20,
+    "2": 21,
+    "3": 22
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "EntropyBase.cpp:179 reads the single voltage through a Schmitt trigger with Rack's default thresholds of 0V and 1V, stepping the index"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "EntropyBase.cpp:152 reads the single voltage through a Schmitt trigger with Rack's default thresholds of 0V and 1V, toggling the run parameter"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "EntropyBase.cpp:198 reads the single voltage through a Schmitt trigger with Rack's default thresholds of 0V and 1V, returning the index to the start of the range"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "EntropyBase.cpp:165 reads the single voltage through a Schmitt trigger with Rack's default thresholds of 0V and 1V, drawing a new seed and refilling the values"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EntropyBase.cpp:130 divides the single voltage by 10 and multiplies it by the attenuverter before scaling by the bank size and adding it to the start knob"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EntropyBase.cpp:134 divides the single voltage by 10 and multiplies it by the attenuverter before scaling by the bank size and adding it to the length knob"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "EntropyBase.cpp:112 divides the single voltage by 10 and multiplies it by the attenuverter before adding it to the filter knob and clamping the total to -1 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "EntropyBase.cpp:208 setVoltage of 10 or 0 on one channel, from a 1ms pulse set at EntropyBase.cpp:186"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "EntropyBase.cpp:212 setVoltage of 10 or 0 on one channel, from a 1ms pulse set at EntropyBase.cpp:190"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "EntropyBase.cpp:243 setVoltage of 10 or 0 on one channel, held for the time set at EntropyBase.cpp:233"
+     },
+     "3": {
+      "poly": false,
+      "why": "EntropyBase.cpp:215 setVoltage on one channel, of the value scaled at EntropyBase.cpp:257"
+     }
+    }
+   },
+   "notes": "The bank holds 96 values. The rnd button and its input are in the code and on the panel but appear nowhere in the maker's manual, which documents only clock, run, reset, start, filter and length. The panel letters the three large knobs with a left bracket, a dot and a right bracket rather than with words; the maker's tooltips call them Start index, Filter and Length, and the manual calls the third one Sequence length. The 240-square and 96-square value displays are a single custom widget with no ParamWidget per square, so the squares carry no parameter positions and cannot be reached for help even though they can be dragged, clicked and muted. Every output is silenced while run is off, the cv output included, so a patch that goes quiet has usually had its run toggled."
   }
  }
 }

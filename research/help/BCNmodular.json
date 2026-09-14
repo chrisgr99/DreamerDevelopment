@@ -1,23 +1,760 @@
 {
  "plugin": "BCNmodular",
- "source": "https://github.com/santifort-commits/BCNmodular",
+ "source": "https://github.com/santifort-commits/BCNmodular/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Maestro": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Probabilistic voice router: at each evaluation a draw picks which of its six channels pass their input to their output, from a weight per channel and a target number of active voices",
+    "Sets how many channels take part in the draw, counting from the first; 1 to 6, growing to 16 when an expander is linked",
+    "Sets how many voices should be active after each evaluation, in whole voices, capped by the number of tracks taking part",
+    "Crossfades the density between the TRACK DENS knob and the DENS CV jack: fully anticlockwise the knob alone, fully clockwise the voltage alone",
+    "Sets how far the voice count may wander from the density target: fully anticlockwise gives exactly that number, and turning clockwise widens a gaussian spread around it",
+    "Sets how many bars pass between evaluations: 1, 2, 4, 8 or 16",
+    "Sets the chance that an evaluation is passed over and the channels keep their current state, 0 for never and 1 for always",
+    "Sets how long a channel takes to fade up when it is switched on, 0 to 10 seconds; it applies to channels in F mode",
+    "Sets how long a channel takes to fade down when it is switched off, 0 to 10 seconds; it applies to channels in F mode",
+    "Sets that channel's weight in the draw, 0 for never chosen and 1 for most likely; the menu's crossfade mode raises the weight to a power before the draw",
+    "Crossfades that channel's weight between its PROB knob and its PROB CV jack: fully anticlockwise the knob alone, fully clockwise the voltage alone",
+    "Sets what that channel does when it is chosen: F fades its input up and down over the fade times, G switches it through at once, T sends a short pulse and passes nothing else",
+    "Counts beats on each rise above 1V; a bar is as many beats as the menu says, and an evaluation comes after the number of bars LENGTH sets",
+    "On a rising edge above 1V it either zeroes the bar count or forces an evaluation at once, whichever the Reset input mode menu is set to",
+    "Sets the target voice count, 0V to 10V covering none to all of the tracks taking part; how far it overrides the TRACK DENS knob is set by TRK DENS XFADE",
+    "Takes over the evaluation period while patched, 0V to 10V stepping through 1, 2, 4, 8 and 16 bars",
+    "Sets the skip chance while patched, 0V to 10V; with the menu set to binary it instead skips every evaluation while it is above 1V",
+    "Sets that channel's weight from a voltage, 0V to 10V; how far it overrides the PROB knob is set by that channel's PROB XFADE",
+    "The signal that channel passes while it is on; with nothing patched it reads the fixed voltage set on the menu, so the channel puts out a plain gate or trigger",
+    "That channel's input while the channel is on and silence while it is off, with the fade or the trigger applied, carrying as many channels as its input",
+    "A voltage for how many channels are on: their share of the tracks taking part scaled to 10V, or a fixed step per voice when the menu says so",
+    "Menu — Prob CV crossfade mode: Loose, Normal, Hard — raises every channel's weight to the power of one, two or three before the draw, so the harder settings favour the strongest weights",
+    "Menu — Beats per bar: 2 to 8 beats — sets how many clock pulses make one bar",
+    "Menu — Min active voices — sets a floor under the number of voices drawn, so an evaluation never leaves everything silent",
+    "Menu — Default input voltage: 1V (gate/trigger), 10V (CV/audio) — sets what an unpatched channel input reads, which is what that channel's output carries while it is on",
+    "Menu — Active output CV mode: Proportional to active tracks, Absolute (1.67V per voice, 6-ch scale), Absolute (0.625V per voice, 16-ch scale) — scales the OUT CH. AMOUNT jack",
+    "Menu — Skip CV mode: Probabilistic, Binary (on/off) — reads the SKIP CV jack as a chance, or as a switch that skips everything while it is above 1V",
+    "Menu — Skip mode: Global, Per channel — passes over the whole evaluation, or draws separately for each channel whether it keeps what it was doing",
+    "Menu — Trigger duration: 1ms, 2ms, 5ms, 10ms — sets the pulse length a channel in T mode sends",
+    "Menu — Reset input mode: Reset bars, Force evaluate — sets whether the RESET jack zeroes the bar count or forces an evaluation at once",
+    "Note — nothing happens until a clock is patched: evaluations are counted in clock pulses and the module has no clock of its own",
+    "Note — a channel with nothing patched into its input works as a gate or trigger source on its own, because an unpatched input reads the fixed voltage set on the menu",
+    "Note — the name beside each channel is an editable four-character label, double-clicked to type; it is drawn in its own widget, so no help line can be reached by clicking it",
+    "Note — a channel's lamp is blue in T mode waiting, white for 300ms after a trigger, green while the channel is open, yellow during a fade and red while it is closed",
+    "Note — the Maestro Expander 10 adds channels 7 to 16, and is linked from the expander's own right-click menu rather than by being placed beside this module",
+    "Note — the small red lamp by OUT CH. AMOUNT lights when the 1.67V-per-voice mode is chosen with an expander linked, where more than six active voices push that jack past 10V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 9,
+    "10": 9,
+    "11": 9,
+    "12": 9,
+    "13": 9,
+    "14": 10,
+    "15": 10,
+    "16": 10,
+    "17": 10,
+    "18": 10,
+    "19": 10,
+    "20": 11,
+    "21": 11,
+    "22": 11,
+    "23": 11,
+    "24": 11,
+    "25": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16,
+    "5": 17,
+    "6": 17,
+    "7": 17,
+    "8": 17,
+    "9": 17,
+    "10": 17,
+    "11": 18,
+    "12": 18,
+    "13": 18,
+    "14": 18,
+    "15": 18,
+    "16": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 19,
+    "2": 19,
+    "3": 19,
+    "4": 19,
+    "5": 19,
+    "6": 20
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv"
+    },
+    "out": {
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "why": "src/Maestro.cpp:487 getVoltage() > 1 with no channel argument, edge detected against lastClk"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "why": "src/Maestro.cpp:451 getVoltage() > 1 with no channel argument, edge detected against lastReset"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the TRACK DENS knob",
+      "sumRange": "0 to 16V",
+      "why": "src/Maestro.cpp:512 getVoltage() over 10 times the channel count, crossfaded with the knob and clamped to the tracks in play"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the LENGTH knob",
+      "why": "src/Maestro.cpp:492-495 getVoltage() over 10 times 4, rounded and clamped to 0 through 4 by barsValue"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the SKIP PROB knob",
+      "why": "src/Maestro.cpp:502-506 getVoltage() over 10 clamped to 0 and 1, or compared against 1V in binary mode"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:413-418 getVoltage() over 10, crossfaded with the knob and clamped to 0 and 1"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:413-418 getVoltage() over 10, crossfaded with the knob and clamped to 0 and 1"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:413-418 getVoltage() over 10, crossfaded with the knob and clamped to 0 and 1"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:413-418 getVoltage() over 10, crossfaded with the knob and clamped to 0 and 1"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:413-418 getVoltage() over 10, crossfaded with the knob and clamped to 0 and 1"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:413-418 getVoltage() over 10, crossfaded with the knob and clamped to 0 and 1"
+     },
+     "11": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the menu",
+      "why": "src/Maestro.cpp:595-596 getChannels() sets the output channel count, :604 getVoltage(c) per channel"
+     },
+     "12": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the menu",
+      "why": "src/Maestro.cpp:595-596 getChannels() sets the output channel count, :604 getVoltage(c) per channel"
+     },
+     "13": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the menu",
+      "why": "src/Maestro.cpp:595-596 getChannels() sets the output channel count, :604 getVoltage(c) per channel"
+     },
+     "14": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the menu",
+      "why": "src/Maestro.cpp:595-596 getChannels() sets the output channel count, :604 getVoltage(c) per channel"
+     },
+     "15": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the menu",
+      "why": "src/Maestro.cpp:595-596 getChannels() sets the output channel count, :604 getVoltage(c) per channel"
+     },
+     "16": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the menu",
+      "why": "src/Maestro.cpp:595-596 getChannels() sets the output channel count, :604 getVoltage(c) per channel"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596 setChannels to the input's channel count, :606 setVoltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596 setChannels to the input's channel count, :606 setVoltage per channel"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596 setChannels to the input's channel count, :606 setVoltage per channel"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596 setChannels to the input's channel count, :606 setVoltage per channel"
+     },
+     "4": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596 setChannels to the input's channel count, :606 setVoltage per channel"
+     },
+     "5": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596 setChannels to the input's channel count, :606 setVoltage per channel"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Maestro.cpp:672 setVoltage with no channel argument; the absolute modes can exceed 10V with an expander linked"
+     }
+    }
+   },
+   "notes": "The maker's README names the Prob CV crossfade modes Normal (Linear), Biased (Quadratic) and Hard (Cubic); the menu the code builds prints Loose, Normal and Hard (src/Maestro.cpp:986-1002), and Normal is the default. The README also gives two Active output CV modes where the code has three (src/Maestro.cpp:1062-1080). The weight for a channel with nothing in its Prob CV jack is the knob alone, whatever the crossfade knob is set to (src/Maestro.cpp:412-421). An evaluation is scheduled and then carried out on the following sample, so a CV arriving with the clock is read after it has settled. The six channel inputs and outputs are given no family: the maker's own summary says they carry gate, clock, audio or trigger signals, so any colour would be a guess."
   },
   "SomeStructure": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Arrangement structure generator for Maestro: it steps through eight sections on a clock, each with its own length, its own target density and its own weight for each of Maestro's six channels",
+    "Chooses the style within the category the STYLE switch selects; the name of the style appears in the GENRE display",
+    "Chooses which set of styles the GEN SEL knob picks from: organic, electronic or custom",
+    "Auto steps to the next section on its own when the current one has run its bars; manual holds there until a JUMP button is pressed",
+    "Loosens the section lengths: at zero a section lasts exactly its duration, and higher settings let it end up to half that many bars early or late",
+    "Scales the Blur CV input before it is added to the PART BLUR knob, and turns it upside down below the middle",
+    "Sets how many bars that section lasts: Skip, 1, 2, 4 or 8 bars, where Skip passes the section over entirely",
+    "Moves the arrangement to that section at once, in either mode, despite the manual saying a jump is held until the next bar",
+    "Counts beats on each rise above 1V; a bar is as many beats as the menu says, and section durations are counted in bars",
+    "Returns the arrangement to the first section on a rising edge above 1V, and fires the section trigger",
+    "Adds to the PART BLUR knob through the BLUR ATT. control, 0V to 10V for the full amount of blur",
+    "The whole structure on one sixteen-channel cable: density, randomness, length, blur, section number, the three triggers, a tension voltage, a protocol version and the six channel weights",
+    "The current section's target voice count, 0V to 10V standing for none to six voices, for patching to Maestro's DENS CV",
+    "Which section is playing, 0V for the first of the eight and 10V for the last",
+    "A 1ms pulse at 10V each time the arrangement moves to another section",
+    "A 1ms pulse at 10V every so many bars, the count set on the menu",
+    "A 1ms pulse at 10V when the arrangement comes back round to the first section",
+    "That channel's weight in the current section, 0V to 10V, for patching to the matching PROB CV on Maestro",
+    "Menu — Phrase trigger every: 1, 2, 3, 4, 6 or 8 bars — sets how often the phrase trigger fires",
+    "Menu — Beats per bar: 2 to 8 beats — sets how many clock pulses make one bar",
+    "Menu — Part 1 — with the STYLE switch on custom, this sets that section's name, its target density, the weight for each of the six channels and the recommended voice names; one per section",
+    "Note — nothing advances without a clock: sections are counted in bars of clock pulses and the module has no clock of its own",
+    "Note — the display across the top names the voice each of Maestro's six channels is meant to carry in the current style; it is a suggestion and changes nothing in the patch",
+    "Note — a section's lamp lights while that section is playing, and the next section's lamp blinks while manual mode is held for a jump",
+    "Note — the name on each section is an editable field drawn in its own widget, so no help line can be reached by clicking it",
+    "Note — the least that has to be patched for this to drive Maestro is DENSITY CV to its DENS CV and the six channel outputs to its PROB CV jacks, with both crossfade knobs turned fully to CV",
+    "Note — the panel prints DENS CV over the column of six channel outputs, while each of them carries that channel's role weight rather than a density"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6,
+    "13": 7,
+    "14": 7,
+    "15": 7,
+    "16": 7,
+    "17": 7,
+    "18": 7,
+    "19": 7,
+    "20": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17,
+    "7": 17,
+    "8": 17,
+    "9": 17,
+    "10": 17,
+    "11": 17
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "why": "src/SomeStructure.cpp:483 getVoltage() > 1 with no channel argument, edge detected against lastClk"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "why": "src/SomeStructure.cpp:464 getVoltage() > 1 with no channel argument, edge detected against lastReset"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "why": "src/SomeStructure.cpp:499-502 getVoltage() over 10 times the attenuverter, added to the knob and clamped to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:533 setChannels(16), then a voltage written to each of the sixteen"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:555 setVoltage with no channel argument"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:556 setVoltage with no channel argument"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:557 10V for the 1ms of TRG_DURATION, else 0V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:558 10V for the 1ms of TRG_DURATION, else 0V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:559 10V for the 1ms of TRG_DURATION, else 0V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:562-563 the section's role weight times 10, no channel argument"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:562-563 the section's role weight times 10, no channel argument"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:562-563 the section's role weight times 10, no channel argument"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:562-563 the section's role weight times 10, no channel argument"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:562-563 the section's role weight times 10, no channel argument"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SomeStructure.cpp:562-563 the section's role weight times 10, no channel argument"
+     }
+    }
+   },
+   "notes": "The jump buttons act at once (src/SomeStructure.cpp:475-480), where the maker's README says they wait for the next bar boundary. The style category switch is configured Organic, Electronic, Custom (src/SomeStructure.cpp:301) with Electronic as the default, and the panel prints them CUSTOM, ELEC., ORG. from the top down. The blur calculation uses the C library's own rand() rather than a seeded generator (src/SomeStructure.cpp:510). A section whose duration is set to Skip is stepped over by a recursive call, so eight sections all set to Skip would recurse without end."
   },
   "MaestroExp": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Expander adding channels 7 to 16 to Maestro: ten more rows of input, probability, mode and output, tied to a Maestro chosen on this module's own right-click menu rather than by position",
+    "Sets that channel's weight in the linked Maestro's draw, 0 for never chosen and 1 for most likely",
+    "Crossfades that channel's weight between its PROB knob and its PROB CV jack: fully anticlockwise the knob alone, fully clockwise the voltage alone",
+    "Sets what that channel does when it is chosen: F fades its input up and down over the linked Maestro's fade times, G switches it through at once, T sends a short pulse",
+    "Sets that channel's weight from a voltage, 0V to 10V; how far it overrides the PROB knob is set by that channel's PROB XFADE",
+    "The signal that channel passes while it is on; with nothing patched it reads the fixed voltage set on the linked Maestro's menu",
+    "That channel's input while the channel is on and silence while it is off, with the fade or the trigger applied, carrying as many channels as its input",
+    "Menu — Link to Core: None, Core — picks which Maestro this expander adds its channels to, listing each by its module number and marking any that another expander has already claimed",
+    "Note — this module does nothing until it is linked to a Maestro from its own right-click menu: unlinked, the panel is dimmed and every output stays at 0V",
+    "Note — it can go anywhere in the rack, beside its Maestro or not, because the link is made through the menu rather than by position",
+    "Note — once linked, the Maestro's ACTIVE TRACKS control reaches 16 and its channels 7 to 16 are the rows on this panel",
+    "Note — the name beside each row is an editable label drawn in its own widget, so no help line can be reached by clicking it",
+    "Note — every decision is made by the linked Maestro, which reads these knobs and switches and writes these outputs itself; this module holds no clock, evaluation or fade of its own"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "16": 2,
+    "17": 2,
+    "18": 2,
+    "19": 2,
+    "20": 3,
+    "21": 3,
+    "22": 3,
+    "23": 3,
+    "24": 3,
+    "25": 3,
+    "26": 3,
+    "27": 3,
+    "28": 3,
+    "29": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "9": 4,
+    "10": 5,
+    "11": 5,
+    "12": 5,
+    "13": 5,
+    "14": 5,
+    "15": 5,
+    "16": 5,
+    "17": 5,
+    "18": 5,
+    "19": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:421-425 the Maestro reads this jack's voltage over 10, crossfades it with the knob and clamps to 0 and 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:421-425 the Maestro reads this jack's voltage over 10, crossfades it with the knob and clamps to 0 and 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:421-425 the Maestro reads this jack's voltage over 10, crossfades it with the knob and clamps to 0 and 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:421-425 the Maestro reads this jack's voltage over 10, crossfades it with the knob and clamps to 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:421-425 the Maestro reads this jack's voltage over 10, crossfades it with the knob and clamps to 0 and 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:421-425 the Maestro reads this jack's voltage over 10, crossfades it with the knob and clamps to 0 and 1"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:421-425 the Maestro reads this jack's voltage over 10, crossfades it with the knob and clamps to 0 and 1"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:421-425 the Maestro reads this jack's voltage over 10, crossfades it with the knob and clamps to 0 and 1"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:421-425 the Maestro reads this jack's voltage over 10, crossfades it with the knob and clamps to 0 and 1"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the PROB knob",
+      "sumRange": "0 to 10V",
+      "why": "src/Maestro.cpp:421-425 the Maestro reads this jack's voltage over 10, crossfades it with the knob and clamps to 0 and 1"
+     },
+     "10": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the Maestro's menu",
+      "why": "src/Maestro.cpp:595-604 the Maestro takes getChannels() and getVoltage(c) from this jack through its linkedExp pointer"
+     },
+     "11": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the Maestro's menu",
+      "why": "src/Maestro.cpp:595-604 the Maestro takes getChannels() and getVoltage(c) from this jack through its linkedExp pointer"
+     },
+     "12": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the Maestro's menu",
+      "why": "src/Maestro.cpp:595-604 the Maestro takes getChannels() and getVoltage(c) from this jack through its linkedExp pointer"
+     },
+     "13": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the Maestro's menu",
+      "why": "src/Maestro.cpp:595-604 the Maestro takes getChannels() and getVoltage(c) from this jack through its linkedExp pointer"
+     },
+     "14": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the Maestro's menu",
+      "why": "src/Maestro.cpp:595-604 the Maestro takes getChannels() and getVoltage(c) from this jack through its linkedExp pointer"
+     },
+     "15": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the Maestro's menu",
+      "why": "src/Maestro.cpp:595-604 the Maestro takes getChannels() and getVoltage(c) from this jack through its linkedExp pointer"
+     },
+     "16": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the Maestro's menu",
+      "why": "src/Maestro.cpp:595-604 the Maestro takes getChannels() and getVoltage(c) from this jack through its linkedExp pointer"
+     },
+     "17": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the Maestro's menu",
+      "why": "src/Maestro.cpp:595-604 the Maestro takes getChannels() and getVoltage(c) from this jack through its linkedExp pointer"
+     },
+     "18": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the Maestro's menu",
+      "why": "src/Maestro.cpp:595-604 the Maestro takes getChannels() and getVoltage(c) from this jack through its linkedExp pointer"
+     },
+     "19": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "1V, or 10V from the Maestro's menu",
+      "why": "src/Maestro.cpp:595-604 the Maestro takes getChannels() and getVoltage(c) from this jack through its linkedExp pointer"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596-606 the Maestro sets this jack's channel count and voltages through its linkedExp pointer"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596-606 the Maestro sets this jack's channel count and voltages through its linkedExp pointer"
+     },
+     "2": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596-606 the Maestro sets this jack's channel count and voltages through its linkedExp pointer"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596-606 the Maestro sets this jack's channel count and voltages through its linkedExp pointer"
+     },
+     "4": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596-606 the Maestro sets this jack's channel count and voltages through its linkedExp pointer"
+     },
+     "5": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596-606 the Maestro sets this jack's channel count and voltages through its linkedExp pointer"
+     },
+     "6": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596-606 the Maestro sets this jack's channel count and voltages through its linkedExp pointer"
+     },
+     "7": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596-606 the Maestro sets this jack's channel count and voltages through its linkedExp pointer"
+     },
+     "8": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596-606 the Maestro sets this jack's channel count and voltages through its linkedExp pointer"
+     },
+     "9": {
+      "poly": true,
+      "why": "src/Maestro.cpp:596-606 the Maestro sets this jack's channel count and voltages through its linkedExp pointer"
+     }
+    }
+   },
+   "notes": "The expander's own process() only zeroes its outputs and lamps while it is unlinked (src/MaestroExp.hpp:139-155); when linked, the Maestro reads and writes this module's params, inputs, outputs and lights inside its own process(), in the same sample. The ten channel inputs and outputs are given no family, for the same reason as the Maestro's own: they carry gate, clock, audio or trigger signals, whatever is patched. The channel labels live on the Maestro, which keeps sixteen of them whether or not an expander is linked."
   }
  }
 }

@@ -2,67 +2,1438 @@
  "plugin": "Extratone",
  "source": "https://github.com/EaterOfSheep/Extratone",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Modulo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A modulo operator: it takes volts off a voltage, one helping at a time, until what is left falls under a ceiling you set, which strips octaves off a pitch and creases a waveform",
+    "Sets both the size of the helping taken off and, with OFFSET at centre, the ceiling the voltage is brought under; a whole number of volts from 1 to 5",
+    "Moves the ceiling away from the RANGE setting, one whole RANGE below it fully left and one whole RANGE above it fully right; it is ignored while anything is patched to the OFFSET input",
+    "The voltage to be folded down, treated one polyphonic channel at a time",
+    "Takes over the OFFSET knob while patched: a fifth of the voltage here becomes the offset, so 5V lifts the ceiling by 1V rather than by one RANGE",
+    "The folded voltage, carrying as many channels as the IN jack",
+    "Note — the fold is done on the size of the voltage and the sign is put back afterwards, so a negative input comes out negative.",
+    "Note — with OFFSET hard left the ceiling falls to zero and every positive input is folded down to zero or below."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Modulo.cpp process(): pitch[i]=inputs[PITCH_INPUT].getVoltage(i) inside for(i=0;i<16;i++), and outputs[MODULO_OUTPUT].channels=inputs[PITCH_INPUT].channels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the OFFSET knob",
+      "why": "src/Modulo.cpp process(): if(inputs[OFF_INPUT].isConnected()){off = inputs[OFF_INPUT].getVoltage()/5;} — one voltage read, no channel loop, and it overwrites off rather than adding"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Modulo.cpp process(): outputs[MODULO_OUTPUT].setVoltage(pitch[i],i) for i<16 with channels copied from the input"
+     }
+    }
+   },
+   "notes": "The OFFSET jack does not add to the OFFSET knob, it replaces it: with a cable in and 0V on it the offset is zero and the knob is dead. The knob's offset is scaled by RANGE (off = knob * mod) while the jack's is not (off = V/5), so the two do not agree about what a given offset means. The fold loop runs a fixed 16 times whatever the input channel count, so unpatched channels are computed and discarded."
   },
   "Opabinia": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A bass drum: a sine whose pitch and level each fall away from a struck peak, run through a wavefolder and a hard clipper that a separate input can borrow for distortion on its own",
+    "How many times the folding stage is run over the wave, a whole number from 1 to 5",
+    "Gain into the wavefolder, unity fully left and three times fully right; anything driven past full scale is reflected back inside instead of clipping",
+    "Scales the voltage at the FOLD input before it is added to the FOLD knob, inverting it left of centre; at full, 10V covers the knob's whole travel",
+    "Adds to the FOLD knob through its attenuverter, the total clamped to the knob's own range",
+    "Gain into the hard clipper, unity fully left and five times fully right, with everything past full scale flattened off",
+    "Scales the voltage at the DIST'R'N input before it is added to the DIST'R'N knob, inverting it left of centre; at full, 10V covers the knob's whole travel",
+    "Adds to the DIST'R'N knob through its attenuverter, the total clamped to the knob's own range",
+    "The pitch the sine is struck at, 100Hz to 500Hz",
+    "Scales the voltage at the HIGH input before it shifts the struck pitch, inverting it left of centre; at full the input tracks 1V per octave",
+    "Multiplies the struck pitch by two for every volt, scaled first by the HIGH attenuverter, so it does nothing while that attenuverter is at zero",
+    "The pitch the sine falls away to and settles at, 0Hz to 100Hz",
+    "Scales the voltage at the LOW input before it shifts the settled pitch, inverting it left of centre; at full the input tracks 1V per octave",
+    "Multiplies the settled pitch by two for every volt, scaled first by the LOW attenuverter, so it does nothing while that attenuverter is at zero",
+    "How long the level takes to fall, a half-life of 1ms fully left and 0.501 seconds fully right",
+    "Scales the voltage at the LIFE input before it is added to the LIFE knob, inverting it left of centre; at full, 10V covers the knob's whole travel",
+    "Adds to the LIFE knob through its attenuverter, the total clamped to the knob's own range",
+    "How long the pitch takes to fall from HIGH to LOW, a half-life of 1ms fully left and 0.201 seconds fully right",
+    "Scales the voltage at the SLIDE input before it is added to the SLIDE knob, inverting it left of centre; at full, 10V covers the knob's whole travel",
+    "Adds to the SLIDE knob through its attenuverter, the total clamped to the knob's own range",
+    "A rising edge above 1V strikes the drum: the phase restarts, the level jumps to full and the pitch jumps to HIGH",
+    "The falling level envelope, 5V at the strike and decaying towards 0V",
+    "The falling pitch envelope, 5V while the sine is at HIGH and 0V once it has reached LOW",
+    "The drum itself, the sine swinging ±5V at the strike, scaled by the level envelope and shaped by the folder and the clipper",
+    "Audio for the folder and the clipper on their own, with no envelope and no oscillator, taken one polyphonic channel at a time",
+    "The DIST-IN signal after folding and clipping, carrying as many channels as it arrived with",
+    "Note — nothing sounds until a trigger arrives at TRIG; on a freshly added module the level has already decayed to silence.",
+    "Note — the folder and the clipper are shared: NUMBER, FOLD and DIST'R'N shape the drum and the DIST-IN signal at the same time.",
+    "Note — ENV(S) is scaled by the gap between HIGH and LOW; set HIGH to 100Hz and LOW to 100Hz and that jack divides by zero."
+   ],
+   "param": {
+    "12": 1,
+    "9": 2,
+    "11": 3,
+    "8": 5,
+    "10": 6,
+    "4": 8,
+    "6": 9,
+    "5": 11,
+    "7": 12,
+    "1": 14,
+    "3": 15,
+    "0": 17,
+    "2": 18
+   },
+   "in": {
+    "6": 4,
+    "5": 7,
+    "2": 10,
+    "3": 13,
+    "1": 16,
+    "0": 19,
+    "4": 20,
+    "7": 24
+   },
+   "out": {
+    "1": 21,
+    "0": 22,
+    "2": 23,
+    "3": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "trigger",
+     "5": "cv",
+     "6": "cv",
+     "7": "audio"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Opabinia.cpp process(): fdecay = params[FDECAY_PARAM]+inputs[FDECAY_CV].getVoltage()*0.1*params[FDECAY_ATT], then clamped to 0..1; one getVoltage(), no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Opabinia.cpp process(): adecay = params[ADECAY_PARAM]+inputs[ADECAY_CV].getVoltage()*0.1*params[ADECAY_ATT], then clamped to 0..1"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Opabinia.cpp process(): peakfreq=params[FREQ_PARAM]*std::pow(2.f,inputs[FREQ_CV].getVoltage()*params[FREQ_ATT])"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Opabinia.cpp process(): basefreq=params[BASEFREQ_PARAM]*std::pow(2.f,inputs[BASEFREQ_CV].getVoltage()*params[BASEFREQ_ATT])"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Opabinia.cpp process(): trigger.process(inputs[TRIGGER_INPUT].getVoltage()) with dsp::SchmittTrigger's default 0V/1V thresholds"
+     },
+     "5": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Opabinia.cpp process(): squareness=params[SQUARE_PARAM]+params[SQUARE_ATT]*inputs[SQUARE_CV].getVoltage()/10.f, then clamped to 0..1"
+     },
+     "6": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Opabinia.cpp process(): fold=params[FOLD_PARAM]+params[FOLD_ATT]*inputs[FOLD_CV].getVoltage()/10.f, then clamped to 0..1"
+     },
+     "7": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Opabinia.cpp process(): sound[i]=inputs[SOUND_INPUT].getVoltage(i)/5.f inside for(i=0;i<16;i++), and outputs[SOUND_OUTPUT].channels=inputs[SOUND_INPUT].channels"
+     }
+    },
+    "out": {
+     "2": {
+      "poly": false,
+      "why": "src/Opabinia.cpp process(): outputs[DRUM_OUTPUT].setVoltage(5.f*amplitude*wave) — a single channel, never setChannels"
+     },
+     "3": {
+      "poly": true,
+      "why": "src/Opabinia.cpp process(): outputs[SOUND_OUTPUT].channels=inputs[SOUND_INPUT].channels with setVoltage(sound[i],i)"
+     }
+    }
+   },
+   "notes": "The distortion path and the drum path are independent except that both run through distort(); DIST-IN never reaches DRUM-OUT and the envelopes never touch DIST-OUT. ENV(S) is 5*(freq-basefreq)/(peakfreq-basefreq): HIGH has a minimum of 100Hz and LOW a maximum of 100Hz, so the denominator can be made exactly zero from the panel. The wavefolder's inner reflection loop runs at most three times per pass, so a very high FOLD setting can leave a sample outside ±1 going into the clipper, where it is flattened."
   },
   "Splitterburst": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock multiplier that runs only while it is switched on, so a steady clock can be broken into bursts of faster pulses",
+    "The clock being multiplied; the interval between two rising edges above 1V is the tempo everything else is worked out from",
+    "Holds the burst on for as long as the voltage here stays at or above 1V",
+    "A 1ms pulse on each incoming clock edge, but only while the burst is off",
+    "A rising edge above 1V starts the burst and sets the step count back to zero",
+    "A rising edge above 1V stops the burst and sets the step count back to zero",
+    "A rising edge above 1V starts the burst if it is off and stops it if it is on, and sets the step count back to zero either way",
+    "A rising edge above 1V counts one step, and the burst stops itself once STEPS of them have arrived; edges are counted only for a burst started by ON or TOGGLE, not for one held on by the GATE input",
+    "The step count as a voltage, climbing from 0V towards 10V as the count fills",
+    "10V for as long as the burst is on, and 0V while it is off",
+    "A 1ms pulse at the moment the burst ends, however it was ended",
+    "How many steps a burst started by ON or TOGGLE runs for before stopping itself, a whole number from 1 to 64",
+    "Scales the voltage at the STEPS input before it is added to the STEPS knob, inverting it left of centre; at full, 10V covers the whole 1 to 64 range",
+    "Adds to the STEPS knob through its attenuverter, the total clamped to 1 to 64 and rounded to a whole number",
+    "How many pulses the burst puts out for each incoming clock, a whole number from 1 to 16",
+    "Scales the voltage at the MULTI input before it is added to the MULTI knob, inverting it left of centre; at full, 10V covers the whole 1 to 16 range",
+    "Adds to the MULTI knob through its attenuverter, the total clamped to 1 to 16 and rounded to a whole number",
+    "Multiplies the MULTI setting by four, taking the burst as high as 64 pulses to the clock",
+    "A 1ms pulse at each beat of the multiplied rate, and nothing at all while the burst is off",
+    "A 1ms pulse on every incoming clock edge, with the multiplied beats added while the burst is on",
+    "Note — every output is timed from the gap between two rising edges at CLOCK, so nothing comes out until a clock is patched there and has ticked twice.",
+    "Note — the burst comes up off when a patch is loaded, so SOLO is silent until ON, TOGGLE or a high GATE starts it.",
+    "Note — the multiplied beats stop once a whole clock interval has gone by with no new edge, so a clock that stops leaves the module silent rather than free-running."
+   ],
+   "param": {
+    "0": 11,
+    "1": 12,
+    "3": 14,
+    "2": 15,
+    "4": 17
+   },
+   "in": {
+    "7": 1,
+    "2": 2,
+    "5": 4,
+    "4": 5,
+    "3": 6,
+    "6": 7,
+    "1": 13,
+    "0": 16
+   },
+   "out": {
+    "1": 3,
+    "0": 8,
+    "2": 9,
+    "5": 10,
+    "3": 18,
+    "4": 19
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Splitterburst.cpp process(): round(clamp(params[MULTI_PARAM]+inputs[MULTI_CV].getVoltage()*1.6*params[MULTI_ATT],1.f,16.f))"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Splitterburst.cpp process(): round(clamp(params[STEPS_PARAM]+inputs[STEPS_CV].getVoltage()*6.4*params[STEPS_ATT],1.f,64.f))"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Splitterburst.cpp process(): gateon=(inputs[GATE_INPUT].getVoltage()>=1.f) — a level test, not an edge"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Splitterburst.cpp process(): togTrigger.process(inputs[TOG_INPUT].getVoltage()), default SchmittTrigger thresholds 0V and 1V"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Splitterburst.cpp process(): offTrigger.process(inputs[OFF_INPUT].getVoltage())"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Splitterburst.cpp process(): trigTrigger.process(inputs[TRIG_INPUT].getVoltage())"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Splitterburst.cpp process(): stepTrigger.process(inputs[STEP_INPUT].getVoltage())"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Splitterburst.cpp process(): clockTrigger.process(inputs[CLOCK_INPUT].getVoltage())"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Splitterburst.cpp process(): outputs[STEP_OUTPUT].setVoltage(step*10/steps), single channel"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/Splitterburst.cpp process(): outputs[SOLO_OUTPUT].setVoltage(soloPulse.process(...)?10.f:0.f), single channel"
+     }
+    }
+   },
+   "notes": "The GATE input is a level test at 1V rather than an edge, so it holds the burst on but never advances the step counter: step counting is gated on trigon, which only ON and TOGGLE set. The clock measurement is kept in whole samples (timer/goal are incremented once per process call), so the multiplied rate follows the sample rate exactly and a change of sample rate is absorbed. The x4 switch has no configParam of its own; Rack's Module::config gives it the default 0 to 1 range and a default of 0, so it comes up off and its tooltip has no name."
   },
   "Puzzlebox": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A puzzle with no instructions except the one on the panel: three lights have to be made green, and working out how is the module",
+    "One of three numbered knobs whose settings have to be guessed; the first light comes on when any one of them is right and the second when all three are",
+    "Sets the whole volts of a number the module is holding in secret, 0 to 10",
+    "Adds a fraction of a volt to the larger knob's setting, 0 to 1, so the two together can be matched against the hidden number to three decimal places",
+    "Counts the conditions met so far, one volt for each, until all five are met; from then on it carries the hidden number the two lower knobs have to be matched to",
+    "Carries a random voltage between 0V and 1V that is redrawn every 2000 samples, but only once the first light is on",
+    "Carries a second random voltage between 0V and 1V, redrawn at the same instants, but only once the second light is on",
+    "Meets a condition while the voltage here is exactly the one the red output is carrying",
+    "Meets a condition while the voltage here is exactly the negative of the one the green output is carrying",
+    "Meets a condition while the voltage here is exactly the two output voltages added together",
+    "Note — the three coloured input jacks are meant to be fed from the module's own coloured outputs: the test is for exact equality against a voltage redrawn every 2000 samples, which no knob can meet.",
+    "Note — the third light needs the two lower knobs held on the hidden number many times over; the score built up by holding a match drains away by one count per sample between matches.",
+    "Note — the module's source code gives the knob settings away, and a comment in it says that reading them spoils the puzzle."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 2,
+    "4": 3
+   },
+   "in": {
+    "1": 7,
+    "2": 8,
+    "0": 9
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 4
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 2V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Puzzlebox.cpp process(): if(inputs[YELLOW_INPUT].getVoltage()==red+green){progress++;} — red and green are each random::uniform(), so the only value that scores is 0V to 2V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Puzzlebox.cpp process(): if(inputs[RED_INPUT].getVoltage()==red){progress++;} with red=random::uniform()"
+     },
+     "2": {
+      "poly": false,
+      "range": "-1 to 0V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Puzzlebox.cpp process(): if(inputs[MAG_INPUT].getVoltage()==-green){progress++;} with green=random::uniform()"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 1V",
+      "why": "src/Puzzlebox.cpp process(): outputs[RED_OUTPUT].setVoltage(red*(progress>0)) with red=random::uniform()"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 1V",
+      "why": "src/Puzzlebox.cpp process(): outputs[GREEN_OUTPUT].setVoltage(green*(progress>1))"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Puzzlebox.cpp process(): setVoltage(progress) below five conditions, otherwise setVoltage(target) with target=random::uniform()*10"
+     }
+    }
+   },
+   "notes": "The five conditions and the three knob settings are all in src/Puzzlebox.cpp, which carries the comment \"Looking through the source code for clues really ruins the fun!\"; the settings are deliberately left out of these lines. The two random values are redrawn every 2000 process calls, so at 44.1kHz they last about 45ms. The equality tests are exact float comparisons, which is what forces the outputs to be patched back to the inputs. The three lights are LightWidgets and cannot be clicked, so they carry no line."
   },
   "Darwinism": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sixteen-step sequencer whose pattern is made by randomising and mutating rather than by setting steps one at a time, with sixteen memories to keep patterns in",
+    "A rising edge above 1V moves the sequence on by one step",
+    "10V while the step now playing is switched on, and 0V while it is off",
+    "A 1ms pulse each time the sequence lands on a step that is switched on",
+    "The note voltage of the step now playing, from 0V to the NOTE RANGE setting",
+    "The position in the sequence as a voltage, 0V on the first step and 10V on the last",
+    "A 1ms pulse each time the sequence wraps from its last step back to its first",
+    "Switches every step off and sets every note voltage to zero, leaving an empty sequence",
+    "A rising edge above 1V switches every step off and sets every note voltage to zero",
+    "Draws a fresh random note voltage for all sixteen steps and switches each one on or off at the odds set by GATE/TRIG DENSITY",
+    "A rising edge above 1V draws a fresh random note for every step and rerolls which steps are switched on",
+    "Rerolls the note voltage and the on-or-off state of each step separately, with the chance of any one step changing set by MUTATION RATE",
+    "A rising edge above 1V rerolls each step at the chance set by MUTATION RATE",
+    "Sends the sequence back to its first step",
+    "A rising edge above 1V sends the sequence back to its first step",
+    "Copies the sequence into memory; pressing it writes the same pattern into all sixteen memories at once",
+    "A rising edge above 1V on a polyphonic channel copies the sequence into the memory of that number, so one cable can address all sixteen memories separately",
+    "Replaces the sequence with one from memory; pressing it brings back the sixteenth memory",
+    "A rising edge above 1V on a polyphonic channel replaces the sequence with the one in the memory of that number",
+    "How many steps the sequence runs before wrapping, 2 to 16",
+    "The chance that any one step is rerolled when MUTATE is pressed, none fully left and every step fully right",
+    "The chance that a step comes out switched on when the sequence is randomised, none fully left and all sixteen fully right",
+    "Chooses what the sixteen lights show: at 0 the step now playing, at 1 which steps are switched on, at 2 the note voltage of each step as brightness",
+    "The highest voltage a step's note can reach, a whole number of volts from 0 to 8",
+    "Holds the NOTE output steady between steps, letting it change only when the sequence lands on a step that is switched on",
+    "A rising edge above 1V copies the current step's note to the NOTE output and holds it there",
+    "Note — the sixteen steps cannot be edited by hand: no knob or button exists for a step's note or its on-or-off state, and a pattern is built only with R'ND'M, MUTATE and ZERO.",
+    "Note — a freshly added module has every step off and every note at zero, so it makes no sound at all until R'ND'M is pressed or a pattern is loaded from memory.",
+    "Note — the SAVE and LOAD jacks are polyphonic and the channel number picks the memory; the panel buttons reach all sixteen at once, so they are worth one memory between them.",
+    "Note — with AUTO S&H off and nothing patched to the S&H input, the NOTE output changes the instant the sequence steps, on steps that are switched off included."
+   ],
+   "param": {
+    "11": 7,
+    "8": 9,
+    "5": 11,
+    "10": 13,
+    "1": 15,
+    "2": 17,
+    "7": 19,
+    "4": 20,
+    "9": 21,
+    "3": 22,
+    "0": 23,
+    "556": 24
+   },
+   "in": {
+    "6": 1,
+    "2": 8,
+    "4": 10,
+    "5": 12,
+    "3": 14,
+    "0": 16,
+    "1": 18,
+    "7": 25
+   },
+   "out": {
+    "3": 2,
+    "4": 3,
+    "2": 4,
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "pitch",
+     "3": "trigger",
+     "4": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Darwinism.cpp process(): saveTrigger[id].process(params[SAVE_PARAM].getValue()+inputs[SAVE_INPUT].getVoltage(id)) inside for(id=0;id<16;id++)"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Darwinism.cpp process(): loadTrigger[id].process(params[LOAD_PARAM].getValue()+inputs[LOAD_INPUT].getVoltage(id)) inside for(id=0;id<16;id++)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Darwinism.cpp process(): clearTrigger.process(params[ZERO_PARAM].getValue()+inputs[ZERO_INPUT].getVoltage()) — one getVoltage(), no channel loop"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Darwinism.cpp process(): resetTrigger.process(params[RESET_PARAM].getValue()+inputs[RESET_INPUT].getVoltage())"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Darwinism.cpp process(): randomTrigger.process(params[RANDOM_PARAM].getValue()+inputs[RANDOM_INPUT].getVoltage())"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Darwinism.cpp process(): mutateTrigger.process(params[MUTATE_PARAM].getValue()+inputs[MUTATE_INPUT].getVoltage())"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Darwinism.cpp process(): stepTrigger.process(inputs[CLOCK_INPUT].getVoltage())"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Darwinism.cpp process(): snhTrigger.process(inputs[SNH_INPUT].getVoltage())"
+     }
+    },
+    "out": {
+     "2": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Darwinism.cpp process(): outputs[NOTE_OUTPUT].setVoltage(range*params[NOTE_PARAM+step].getValue()) with RANGE_PARAM configured 0..8 and the note stored 0..1"
+     },
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Darwinism.cpp process(): outputs[STEP_OUTPUT].setVoltage(10.f*step/(params[STEPS_PARAM].getValue()-1.f))"
+     }
+    }
+   },
+   "notes": "Pressing SAVE adds 1.0 to every channel of saveTrigger, so all sixteen memories are written with the same pattern; pressing LOAD likewise fires every loadTrigger in ascending order, so the pattern that survives is memory fifteen's. Only a polyphonic cable reaches one memory at a time. snhTrigger.process() is called twice per frame on the same voltage (lines 103 and 203); the second call can never fire because the first has already taken the state high, so the duplicate block is dead. The module sets up rightExpander producer and consumer messages but never reads or writes them, and res/HalluciMemory.svg ships with no model behind it. Of the 557 parameters only twelve have a ParamWidget; the 16 note values, the 16 on-or-off flags and the 512 memory slots are parameters with no widget, so they are saved with the patch but can never be clicked."
   },
   "Ichneumonid": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A four-way switch for signals that only ever changes over where two signals momentarily hold the same voltage, so the output never steps",
+    "One of the four signals the output can be taken from; the crossing test only ever moves the output onto it while it has a cable in it",
+    "Forces the output onto this row's signal at once, whatever the two voltages are doing",
+    "A rising edge above 1V forces the output onto this row's signal at once, whatever the two voltages are doing",
+    "10V while the output is being taken from this row's signal, and 0V otherwise",
+    "Scales the chance of a changeover onto this row's signal, never fully left and the full CROSSING chance fully right",
+    "Scales the chance of a changeover away from this row's signal, never fully left and the full CROSSING chance fully right",
+    "Allows changeovers onto this row's signal while the voltage here is at or above 5V and blocks them below that; with nothing patched the row is allowed",
+    "The chance that any one crossing of two signals is taken, none fully left and every crossing fully right",
+    "The selected signal, passed through unchanged",
+    "A 1ms pulse each time the output changes over to a different signal",
+    "Takes every crossing that comes up, ignoring CROSSING and both rows' knobs",
+    "Allows a changeover only where both signals are moving the same way, so a rising signal is swapped only for another rising signal",
+    "Note — a changeover can only happen where two signals come within 0.01V of each other, so signals that never cross will never swap however high the chance is set.",
+    "Note — a row with nothing patched to its SHAPES jack is never reached by the crossing test; its SELECT button forces the output onto that row anyway, where it reads 0V.",
+    "Note — after a crossing is declined that row is barred until the two voltages move more than 0.011V apart, so one slow crossing is offered once rather than at every sample."
+   ],
+   "param": {
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "12": 5,
+    "13": 5,
+    "14": 5,
+    "15": 5,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "2": 8,
+    "0": 11,
+    "1": 12
+   },
+   "in": {
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "0": 7,
+    "1": 7,
+    "2": 7,
+    "3": 7
+   },
+   "out": {
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "1": 9,
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row is allowed",
+      "why": "src/Ichneumonid.cpp process(): enabled[i]=((inputs[ENABLE_INPUT+i].getVoltage()>=5)||!inputs[ENABLE_INPUT+i].isConnected()) — a level test, one getVoltage()"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row is allowed",
+      "why": "src/Ichneumonid.cpp process(): enabled[i] level test at 5V, one getVoltage() per row"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row is allowed",
+      "why": "src/Ichneumonid.cpp process(): enabled[i] level test at 5V, one getVoltage() per row"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row is allowed",
+      "why": "src/Ichneumonid.cpp process(): enabled[i] level test at 5V, one getVoltage() per row"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Ichneumonid.cpp process(): selectTrigger[i].process(params[SELECT_PARAM+i].getValue()+inputs[SELECT_INPUT+i].getVoltage())"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Ichneumonid.cpp process(): selectTrigger[i].process(params[SELECT_PARAM+i].getValue()+inputs[SELECT_INPUT+i].getVoltage())"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Ichneumonid.cpp process(): selectTrigger[i].process(params[SELECT_PARAM+i].getValue()+inputs[SELECT_INPUT+i].getVoltage())"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Ichneumonid.cpp process(): selectTrigger[i].process(params[SELECT_PARAM+i].getValue()+inputs[SELECT_INPUT+i].getVoltage())"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Ichneumonid.cpp process(): current = inputs[INCOMING_INPUT+selection].getVoltage() — one getVoltage(), no channel loop; the voltage is passed through untouched so no range is imposed"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Ichneumonid.cpp jumpable(): inputs[INCOMING_INPUT+to].getVoltage(), one getVoltage() per row"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Ichneumonid.cpp jumpable(): inputs[INCOMING_INPUT+to].getVoltage(), one getVoltage() per row"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Ichneumonid.cpp jumpable(): inputs[INCOMING_INPUT+to].getVoltage(), one getVoltage() per row"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "why": "src/Ichneumonid.cpp process(): outputs[TRUE_OUTPUT].setVoltage(current), a single channel"
+     }
+    }
+   },
+   "notes": "The SHAPES jacks and the OUTPUT jack carry whatever is patched into them, audio or control voltage alike, so they are given no family. SELECTION_PARAM holds which row is selected and has no ParamWidget, so it cannot be clicked and carries no line; it is a parameter rather than a plain member so that the selection survives a patch reload. The crossing tolerance is fixed at 0.01V and is not on the panel or the menu. ENABLE is read as a level at 5V while every other jack on the panel uses Rack's default 1V trigger threshold."
   },
   "Meganeura": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock multiplier with four independent rows and two clock inputs you can flip between, for stacking faster and faster pulse streams",
+    "One of the two clock inputs, and the one in use when a patch is loaded; the interval between two rising edges above 1V is the tempo every output is worked out from",
+    "The second of the two clock inputs, brought into use by FLIP; the interval between two rising edges above 1V is then the tempo every output is worked out from",
+    "Runs this row while the voltage here is at or above 5V and stops it below that; with nothing patched the row runs",
+    "How many pulses this row puts out for each beat of the chosen clock, a whole number from 1 to 8",
+    "A 1ms pulse at this row's multiplied rate",
+    "A 1ms pulse at the first two rows' multipliers multiplied together, counting only rows whose gate is open",
+    "A 1ms pulse at the first three rows' multipliers multiplied together, counting only rows whose gate is open",
+    "A 1ms pulse at all four rows' multipliers multiplied together, counting only rows whose gate is open",
+    "Swaps the module between its two clock inputs",
+    "A rising edge above 1V swaps the module between its two clock inputs",
+    "Makes every row fire on each beat of the chosen clock even where that row's gate is closed, while leaving the faster subdivisions to the open rows alone",
+    "Note — nothing comes out until a clock is patched and has ticked twice: the tempo is measured from the gap between two edges at whichever input is in use.",
+    "Note — the multiplied beats stop once a whole clock interval has gone by with no new edge, so a clock that stops leaves the module silent rather than free-running.",
+    "Note — flipping to the other clock keeps the tempo last measured there, so the rows carry on at the old rate until that clock ticks twice."
+   ],
+   "param": {
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "0": 9,
+    "2": 11
+   },
+   "in": {
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "0": 10
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Meganeura.cpp process(): flipperTrigger.process(params[FLIPPER_PARAM].getValue()+inputs[FLIPPER_INPUT].getVoltage())"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Meganeura.cpp process(): clockTrigger.process(inputs[CLOCK_INPUT].getVoltage())"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Meganeura.cpp process(): clockTrigger2.process(inputs[CLOCK2_INPUT].getVoltage())"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row runs",
+      "why": "src/Meganeura.cpp process(): gate[i]=(!inputs[GATE_INPUT+i].isConnected()||inputs[GATE_INPUT+i].getVoltage()>=5.f)"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row runs",
+      "why": "src/Meganeura.cpp process(): gate[i] level test at 5V, one getVoltage() per row"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row runs",
+      "why": "src/Meganeura.cpp process(): gate[i] level test at 5V, one getVoltage() per row"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row runs",
+      "why": "src/Meganeura.cpp process(): gate[i] level test at 5V, one getVoltage() per row"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Meganeura.cpp process(): outputs[CLOCK_OUTPUT+i].setVoltage(outPulse[i].process(args.sampleTime)?10.f:0.f), a single channel"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/Meganeura.cpp process(): outputs[PRODUCT_OUTPUT+p].setVoltage(prodPulse[p].process(args.sampleTime)?10.f:0.f), a single channel"
+     }
+    }
+   },
+   "notes": "An eighth output is declared (PRODUCT_OUTPUT+3) and never given a PortWidget or a voltage, so there is no jack for it on the panel and it gets no tag. CLOCK_PARAM is the hidden state saying which clock is in use; it has no ParamWidget and is toggled only by the FLIP button or jack. Each row's multiplier is applied by comparing a sample counter against the measured interval, so the subdivisions of a row are evenly spaced but the last one before a new clock edge can be short. Neither clock is normalled to the other: with only CLOCK2 patched, flipping to CLOCK1 stops everything."
   },
   "Pureneura": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A clock multiplier with four independent rows, each turning one clock into a whole-number multiple of it",
+    "The clock being multiplied; the interval between two rising edges above 1V is the tempo every output is worked out from",
+    "Runs this row while the voltage here is at or above 5V and stops it below that; with nothing patched the row runs",
+    "How many pulses this row puts out for each beat of the clock, a whole number from 1 to 8",
+    "A 1ms pulse at this row's multiplied rate",
+    "A 1ms pulse at the first two rows' multipliers multiplied together, counting only rows whose gate is open",
+    "A 1ms pulse at the first three rows' multipliers multiplied together, counting only rows whose gate is open",
+    "A 1ms pulse at all four rows' multipliers multiplied together, counting only rows whose gate is open",
+    "Makes every row fire on each clock beat even where that row's gate is closed, while leaving the faster subdivisions to the open rows alone; it is ignored while the BASE row's jack is patched",
+    "Takes over the BASE switch while patched: at or above 1V every row fires on each clock beat whatever its own gate is doing, and below 1V only open rows do",
+    "Note — nothing comes out until a clock is patched to CLOCK and has ticked twice: the tempo is measured from the gap between two edges.",
+    "Note — the multiplied beats stop once a whole clock interval has gone by with no new edge, so a clock that stops leaves the module silent rather than free-running."
+   ],
+   "param": {
+    "1": 8,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3
+   },
+   "in": {
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "0": 9
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the BASE switch",
+      "why": "src/Pureneura.cpp process(): if(inputs[BASE_INPUT].isConnected()){based=(inputs[BASE_INPUT].getVoltage()>=1.f);}else{based=params[BASE_PARAM].getValue();} — a level test that replaces the switch"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Pureneura.cpp process(): clockTrigger.process(inputs[CLOCK_INPUT].getVoltage())"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row runs",
+      "why": "src/Pureneura.cpp process(): gate[i]=(!inputs[GATE_INPUT+i].isConnected()||inputs[GATE_INPUT+i].getVoltage()>=5.f)"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row runs",
+      "why": "src/Pureneura.cpp process(): gate[i] level test at 5V, one getVoltage() per row"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row runs",
+      "why": "src/Pureneura.cpp process(): gate[i] level test at 5V, one getVoltage() per row"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 5V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row runs",
+      "why": "src/Pureneura.cpp process(): gate[i] level test at 5V, one getVoltage() per row"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Pureneura.cpp process(): outputs[CLOCK_OUTPUT+i].setVoltage(outPulse[i].process(args.sampleTime)?10.f:0.f), a single channel"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/Pureneura.cpp process(): outputs[PRODUCT_OUTPUT+p].setVoltage(prodPulse[p].process(args.sampleTime)?10.f:0.f), a single channel"
+     }
+    }
+   },
+   "notes": "An eighth output is declared (PRODUCT_OUTPUT+3) and never given a PortWidget or a voltage, so there is no jack for it and it gets no tag. CLOCK_PARAM is declared, has no ParamWidget and is never read anywhere in process(); it is a leftover of Meganeura, from which this module was cut down. The BASE jack is a level test at 1V that replaces the BASE switch outright rather than adding to it, so a patched cable sitting at 0V forces every row back onto its own gate and the switch does nothing."
   },
   "Mesoglea": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sixteen gates, one per polyphonic channel, each flipped by its own button or by a channel of a polyphonic gate, with the option of holding every flip back until a trigger arrives",
+    "In MONO mode a voltage at or above 1V on any channel here releases every flip that is waiting; in POLY mode each channel releases only the flip of its own button; in OFF mode the jack is not read",
+    "Steps the module through OFF, MONO and POLY and back round to OFF",
+    "Flips one channel's gate open or closed; in MONO or POLY mode the flip is only pencilled in until the S&H input releases it",
+    "A channel here moving from zero to any other voltage flips that channel's gate, in the same way its button does",
+    "The polyphonic signal being gated, each channel passed through while its gate is open and silenced while it is closed",
+    "The gated signal; a channel with no matching channel at TO MUTE puts out a flat 10V while its gate is open, which turns the module into a bank of manual gates",
+    "Note — all sixteen gates come up closed, so the output is silent until a button is pressed.",
+    "Note — the output's channel count is the largest of the three input jacks' channel counts and the number of the highest gate left open.",
+    "Note — a channel of FLIP counts as high at any voltage other than zero, negative voltages included, so it is not a 1V threshold like the rest of the plugin.",
+    "Note — OFF, MONO and POLY are shown by three lights rather than by the button, and the mode is stepped through in that order."
+   ],
+   "param": {
+    "1": 2,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 3,
+    "13": 3,
+    "14": 3,
+    "15": 3,
+    "16": 3,
+    "17": 3
+   },
+   "in": {
+    "0": 1,
+    "1": 4,
+    "2": 5
+   },
+   "out": {
+    "0": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Mesoglea.cpp process(): mode 2 tests inputs[SANDH_INPUT].getVoltage(i) inside for(i=0;i<16;i++); getMonoflip() loops all 16 channels for mode 1"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Mesoglea.cpp process(): flipTrigger[i].process(params[FLIPBUTTON_PARAM+i].getValue()||inputs[FLIP_INPUT].getVoltage(i)) — the || makes any non-zero voltage, of either sign, read as 1"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "10V",
+      "why": "src/Mesoglea.cpp process(): voltage=inputs[TOMUTE_INPUT].getVoltage(i)*params[GATE_PARAM+i] where the channel exists, else 10.f*params[GATE_PARAM+i]"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "src/Mesoglea.cpp process(): outputs[OUTPUT_OUTPUT].setVoltage(voltage,i) for i<16 with channels set from the largest input channel count"
+     }
+    }
+   },
+   "notes": "MODE_PARAM holds the OFF/MONO/POLY state and has no ParamWidget, so it cannot be clicked; the MODE button steps it. The sixteen gate states and the sixteen pending-flip flags are likewise parameters with no widget, saved with the patch but unreachable by a click. The FLIP jack's test is a boolean OR of a float, not a threshold, so any non-zero voltage counts as high; every other trigger in this plugin uses Rack's 1V default. TO MUTE and OUT carry whatever is patched in, so they are given no family."
   },
   "Mesohyl": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Six manual control voltages, each one held at its last value until a sample-and-hold trigger lets it follow its knob again",
+    "At or above 1V the rows follow their knobs; below that they are held at their last values",
+    "Chooses whether a row follows its knob only while both its own S&H jack and GLOBAL S&H are at or above 1V, or while either one of them is",
+    "At or above 1V this row follows its knob; below that the row is held at its last value",
+    "Sets this row's voltage as a fraction of RANGE; the output only takes up a new position while the row is following",
+    "This row's voltage, 0V to RANGE with the switch at UNI and minus RANGE to plus RANGE with it at BI",
+    "The full-scale voltage all six knobs are measured against, 0V to 10V",
+    "At BI a knob runs from minus RANGE through zero at centre to plus RANGE; at UNI it runs from 0V fully left to RANGE fully right",
+    "Note — with neither S&H jack patched every row follows its knob continuously, and RANGE and the BI/UNI switch take effect at once.",
+    "Note — RANGE comes up at 1V, so until it is turned up the six knobs cover only 0V to 1V.",
+    "Note — changing RANGE or the BI/UNI switch while a row is held does nothing to that row until it is let follow again.",
+    "Note — the small light on a row comes on while the held output differs from where that row's knob now stands."
+   ],
+   "param": {
+    "0": 2,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "1": 6,
+    "2": 7
+   },
+   "in": {
+    "0": 1,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the rows follow their knobs",
+      "why": "src/Mesohyl.cpp isUpdating(): if(!inputs[GSANDH_INPUT].isConnected()){gtrue=true;}else{gtrue=inputs[GSANDH_INPUT].getVoltage()>=1;} — a level test, one getVoltage()"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row follows its knob",
+      "why": "src/Mesohyl.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row follows its knob",
+      "why": "src/Mesohyl.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row follows its knob",
+      "why": "src/Mesohyl.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row follows its knob",
+      "why": "src/Mesohyl.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row follows its knob",
+      "why": "src/Mesohyl.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row follows its knob",
+      "why": "src/Mesohyl.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "src/Mesohyl.cpp process(): knob=(knob-0.5)*2 in bipolar, then knob*range with RANGE_PARAM configured 0..10; outputs[KOUT_OUTPUT+i].setVoltage(output[i]) is a single channel"
+     }
+    }
+   },
+   "notes": "In OR mode an unpatched jack is not counted as a high vote: isUpdating() checks which of the two jacks are patched and uses only those, so one patched S&H jack rules the row on its own. In AND mode an unpatched jack does count as high, so a single patched jack also rules the row. The comment block at the head of the file lists an AND/OR mode, a range knob and a bipolar switch as things still to add; all three are present in the shipped build, and the un-updated-knob lights listed there are present too. The un-updated-count output listed in that comment was never built."
   },
   "Mesoglea2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Five gates flipped by hand, each one holding its last state until a sample-and-hold trigger lets the new one through",
+    "At or above 1V the rows take up whatever their buttons have been set to; below that the rows are held",
+    "Chooses whether a row takes up its button only while both its own S&H jack and GLOBAL S&H are at or above 1V, or while either one of them is",
+    "At or above 1V this row takes up whatever its button has been set to; below that the row is held",
+    "Flips this row's gate open or closed; the flip reaches the output only while the row is free to take it up",
+    "The signal this row gates, passed through while the gate is open and silenced while it is closed",
+    "This row's gated signal, or a flat 10V gate while nothing is patched to that row's TOMUTE jack",
+    "Note — all five gates come up closed, so every output is at 0V until a button is pressed.",
+    "Note — with neither S&H jack patched a button takes effect the moment it is pressed.",
+    "Note — the small pink light on a row comes on while a button has been pressed and the flip has not been let through yet."
+   ],
+   "param": {
+    "0": 2,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4
+   },
+   "in": {
+    "0": 1,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the rows take up their buttons",
+      "why": "src/Mesoglea2.cpp isUpdating(): gtrue = inputs[GSANDH_INPUT].getVoltage()>=1 with an isConnected() fallback to true — a level test, one getVoltage()"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row takes up its button",
+      "why": "src/Mesoglea2.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row takes up its button",
+      "why": "src/Mesoglea2.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row takes up its button",
+      "why": "src/Mesoglea2.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row takes up its button",
+      "why": "src/Mesoglea2.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "high, the row takes up its button",
+      "why": "src/Mesoglea2.cpp isUpdating(): strue = inputs[KSANDH_INPUT+i].getVoltage()>=1, one getVoltage() per row"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "10V",
+      "why": "src/Mesoglea2.cpp process(): setVoltage(output[i]*inputs[TOMUTE_INPUT+i].getVoltage()) where patched, else setVoltage(output[i]*10.f); one getVoltage() per row"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "10V",
+      "why": "src/Mesoglea2.cpp process(): one getVoltage() per row, no channel loop"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "10V",
+      "why": "src/Mesoglea2.cpp process(): one getVoltage() per row, no channel loop"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "10V",
+      "why": "src/Mesoglea2.cpp process(): one getVoltage() per row, no channel loop"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "10V",
+      "why": "src/Mesoglea2.cpp process(): one getVoltage() per row, no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Mesoglea2.cpp process(): outputs[KOUT_OUTPUT+i].setVoltage(...) with no setChannels anywhere in the file"
+     }
+    }
+   },
+   "notes": "The gate states are plain members rather than parameters, so unlike Mesoglea's they are not written into the patch file and every row comes up closed on load. The TOMUTE jacks and the OUTPUT jacks carry whatever is patched in and are given no family. The AND/OR logic is the same routine as Mesohyl's: in OR mode only the jacks that are actually patched get a vote, so one patched jack rules the row."
   },
   "XtrtnBlank": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A blank panel: the word extratöne set vertically in blackletter, an insect, and the figure 3600bpm; it has no controls, no jacks and no effect on a patch"
+   ],
+   "notes": "The module declares no parameters, inputs, outputs or lights, and its process() is empty."
   }
  }
 }

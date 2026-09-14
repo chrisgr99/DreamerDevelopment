@@ -1,13 +1,178 @@
 {
  "plugin": "8Mode",
- "source": "https://github.com/8Mode/8Mode-VCV_Modules",
+ "source": "https://github.com/8Mode/8Mode-VCV_Modules/blob/master/docs/SoftSN.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "softSN": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An emulation of the 1978 Texas Instruments SN76477 sound chip, with the resistors and capacitors that surrounded it turned into knobs: three sources, an envelope and the multiplexer that combines them",
+    "The frequency of the main oscillator, four octaves either side of its centre",
+    "Shifts the main oscillator by one octave per volt",
+    "The frequency of the super low frequency oscillator, eight octaves either side of its centre",
+    "Shifts the super low frequency oscillator by one octave per volt",
+    "How long the envelope takes to rise, instant fully left and about a quarter of a second fully right",
+    "Adds to the Attack knob, 5V covering the knob's whole travel and a negative voltage taking it below its lowest setting",
+    "How long the envelope takes to fall, instant fully left and about 1 second fully right",
+    "Adds to the Decay knob, 5V covering the knob's whole travel and a negative voltage taking it below its lowest setting",
+    "The clock rate of the noise generator, about 97kHz fully left falling to about 490Hz fully right",
+    "Adds to the NOISE Freq knob, 5V covering the knob's whole travel and a negative voltage taking the noise below the rate at which it stops clocking",
+    "The corner of the low-pass filter on the noise, wide open fully left and almost shut fully right",
+    "Adds to the NOISE Filter knob, 5V covering the knob's whole travel",
+    "Starts the one-shot, restarting it on every sample for as long as it is held down",
+    "A rising edge above 1V starts the one-shot",
+    "How long the one-shot runs, about 40ms fully left and about 8 seconds fully right",
+    "Adds to the Length knob, 5V covering the knob's whole travel",
+    "The duty cycle of the main oscillator, 18 per cent fully left, 50 per cent at the centre and close to 100 per cent fully right, which leans the TRI output over towards a sawtooth",
+    "Adds to the Width knob, 5V covering the knob's whole travel",
+    "Puts the main oscillator into the multiplexer",
+    "Puts the super low frequency oscillator into the multiplexer",
+    "Puts the noise source into the multiplexer",
+    "Chooses what opens and closes the envelope: VCO the main oscillator, 1 SHOT the one-shot, MIXER nothing at all so the multiplexer stays open, VCO/ALT the main oscillator on alternate cycles",
+    "Chooses what drives the main oscillator: at EXT its own Freq knob and V/OCT input, at SLF the super low frequency oscillator sweeping it",
+    "The main oscillator's capacitor voltage, a triangle that leans towards a sawtooth as Width is opened, scaled by an automatic gain control",
+    "The multiplexed and enveloped output of the chip, which is the module's voice",
+    "Note — the NOISE Freq and NOISE Filter knobs come up at zero, below their own lowest settings, and the noise source makes nothing at all until NOISE Freq has been moved into its range.",
+    "Note — with all three MIXERS switches off the multiplexer is inhibited and the main output goes quiet; two or three switched on are combined by logical AND rather than mixed.",
+    "Note — the TRI output has a fixed -190V taken off it while OSC is at EXT, and its gain control comes up at zero, so that jack reads exactly -190V for the first 16000 samples after the module is added.",
+    "Note — the main output has 1.3V added to it, so it swings about 1.3V rather than about zero.",
+    "Note — moving OSC to SLF raises both oscillators by about 6.2 octaves as well as changing what drives the main one.",
+    "Note — the one-shot only opens the envelope while ENVELOPE is at 1 SHOT; with any other envelope setting the Trigger button and the TRIG input change nothing you can hear."
+   ],
+   "param": {
+    "4": 1,
+    "6": 3,
+    "3": 5,
+    "2": 7,
+    "0": 9,
+    "1": 11,
+    "12": 13,
+    "13": 15,
+    "5": 17,
+    "7": 19,
+    "8": 20,
+    "9": 21,
+    "10": 22,
+    "11": 23
+   },
+   "in": {
+    "0": 2,
+    "1": 4,
+    "3": 6,
+    "4": 8,
+    "5": 10,
+    "6": 12,
+    "2": 14,
+    "7": 16,
+    "8": 18
+   },
+   "out": {
+    "1": 24,
+    "0": 25
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/softSN.cpp process(): volts = 1.752*powf(2.0f,-1*(inputs[EXT_VCO].getVoltage()+...)) fed to sn.set_vco_params as the oscillator's resistance, whose charging rate is 0.64*2*RANGE/res — one getVoltage(), no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/softSN.cpp process(): slf_volts = 1.283184*powf(2.0f,-1*(inputs[SLF_EXT].getVoltage()+...)) fed to sn.set_slf_params as the oscillator's resistance"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/softSN.cpp process(): OneShotTrigger.process(inputs[ONE_SHOT_GATE_PARAM].getVoltage()) with dsp::SchmittTrigger's default 0V and 1V thresholds"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/softSN.cpp process(): attack_res = params[m_attack_res]+(((inputs[ATTACK_MOD_PARAM].getVoltage()*20)/100)*5000000) — 5V spans the knob's 1 to 5000000 range"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/softSN.cpp process(): decay_res = params[m_decay_res]+(((inputs[DECAY_MOD_PARAM].getVoltage()*20)/100)*20000000)"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/softSN.cpp process(): noise_clock_res = params[m_noise_clock_res]+(((inputs[NOISE_FREQ_MOD_PARAM].getVoltage()*20)/100)*3300000)"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/softSN.cpp process(): noise_filter_res = params[m_noise_filter_res]+(((inputs[NOISE_FILTER_MOD_PARAM].getVoltage()*20)/100)*100000000)"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/softSN.cpp process(): one_shot_length = ((params[ONE_SHOT_CAP_PARAM])+(((inputs[ONE_SHOT_LENGTH_MOD_PARAM].getVoltage()*20)/100)*2000))/1000000000"
+     },
+     "8": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/softSN.cpp process(): duty_cycle = params[m_pitch_voltage]+(((inputs[DUTY_MOD_PARAM].getVoltage()*20)/100)*4.55)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/softSN.cpp process(): outputs[SINE_OUTPUT].setVoltage(5.0*sam.s1/25000 + 1.3), a single channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/softSN.cpp process(): outputs[TRI_OUTPUT].setVoltage((sample*K*6000.5)-190) or (sample*K*100.5), a single channel"
+     }
+    }
+   },
+   "notes": "The enum calls the main jack SINE_OUTPUT; the panel marks it with a square-wave symbol and the maker's own manual calls it the SQR output, which is what the chip actually produces — a multiplexed logic level, not a sine. m_noise_clock_res is configured with a minimum of 10000 and a default of 0, and m_noise_filter_res with a minimum of 1 and a default of 0, so both come up outside their own ranges; compute_noise_gen_freq() returns 0 for any resistance under 10k, which silences the noise source until the knob is moved. K, the automatic gain factor on the TRI output, is a member initialised to zero and recomputed only once every 16000 samples, so the jack is stuck at its offset until the first window closes; in EXT mode that offset is -190V. If the accumulated energy is ever zero the gain becomes infinite. Two outputs, RESOUT and CAPOUT, are declared and given panel positions in src/softSN.hpp, but addOutput is never called for them and nothing is ever written to them, so they have no jack and get no tag. Two parameters, m_envelope_1 and m_envelope_2, are declared with no ParamWidget and are never read. The one-shot length, attack and decay times quoted in the lines are computed from the source constants rather than stored as literals: one-shot length is 0.8024*5000000*cap+0.002079 seconds with cap in farads, and the attack and decay times are the resistance times the 0.00000005F capacitor. The noise clock rates are from 339100000*pow(res,-0.8849) in compute_noise_gen_freq(), which the maker's own comment table confirms at 97493Hz for 10k and 487.59Hz for 3.3M."
   }
  }
 }

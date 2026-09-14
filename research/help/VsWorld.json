@@ -1,23 +1,269 @@
 {
  "plugin": "VsWorld",
- "source": "https://github.com/Synismusist/VsWorld",
+ "source": "https://github.com/Synismusist/VsWorld/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "XLimitJIAutotuner": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A JI quantizer: it builds every pitch reachable by multiplying the root by eight primes raised to the powers you allow, then snaps each channel of the input to the nearest of them.",
+    "Sets how many powers of that prime the search may use, 0 to 20, taken as a span running from minus that figure to plus it; at 0 the prime is left out.",
+    "The pitches to be tuned, 1V per octave; the first channel is the root the others are measured against, and it comes out untouched.",
+    "The tuned pitches, 1V per octave, one channel for each channel of the input, clamped to ±10V.",
+    "What the tuned pitch lost when it was rounded from double to single precision, for adding back at an oscillator that takes it.",
+    "Note — Every knob comes up at 0, which is a list of one pitch, so the module passes the input through unchanged until a knob is raised.",
+    "Note — Turning a knob rebuilds the whole list of allowed pitches, and a large list costs real CPU time while it is built.",
+    "Note — The red lamp lights when the knobs ask for more than ten million pitches; the list is then left as it was and the new setting is ignored until the knobs come back down.",
+    "Note — In the circle, the lines reaching the outer edge are every allowed pitch within one octave, and the shorter lines inside are the pitches being put out right now, one per channel.",
+    "Note — The plugin ships tuning systems as module presets, so the Preset submenu on the right-click menu is the quickest way to a working setting.",
+    "Menu — Remap keyboard inputs to tuning circle steps — takes each incoming semitone as one step along the list of allowed pitches, instead of tuning the pitch that semitone names"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 3,
+    "1": 4
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/XLimitJIAutotuner.cpp:254 getChannels() sets the loop bound; :279 getPolyVoltage(c)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/XLimitJIAutotuner.cpp:256 setChannels(channels); :282 clampD(baseVoltage+harmonicVoltage,-10,10)"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/XLimitJIAutotuner.cpp:284 voutR = vout - (double)voutF, the double-to-float remainder; :257 setChannels"
+     }
+    }
+   },
+   "notes": "REMAP_PARAM is parameter 8 and has no configParam and no widget, so it cannot be clicked and carries no tooltip; the only way at it is the context menu item, which reads and writes the parameter directly. Panel order and index order agree for the eight knobs. The tuning circle is a plain Widget with no parameter, so it cannot be clicked for help either. The README describes dynamic tuning as the default and static tuning as feeding the base key into the first channel; the code has no setting for this, it simply always measures every channel against channel 0."
   },
   "XLimitJIAutotuner2": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A JI quantizer built from eight ratios of your own choosing: each row gives a run of powers of one ratio, and every combination of them is an allowed pitch for the input to snap to.",
+    "Sets the top number of that row's ratio, 1 to 1024; the row's interval is that number over the one beside it.",
+    "Sets the bottom number of that row's ratio, 1 to 1024, which is what makes a row subharmonic.",
+    "Shifts that row's whole run of powers up or down by up to 30, leaving the number of them alone.",
+    "Sets the lowest power of that row's ratio the search uses, -30 to +30; setting it above the upper bound lights that row's red lamp and stops the list being rebuilt.",
+    "Sets the highest power of that row's ratio the search uses, -30 to +30; the row contributes one pitch for every whole number from the lower bound to this one.",
+    "Picks, from the pitches inside the cent window beside it, the one with the smallest Tenney harmonic distance from the root, rather than the one nearest in pitch; switching it on switches Remap off.",
+    "Sets how far either side of the incoming pitch the guess may look, 1 to 150 cents.",
+    "Takes each incoming keyboard step as one step along the list of allowed pitches, instead of tuning the pitch it names; switching it on switches Guess off.",
+    "Sets how many keyboard keys the remap counts to an octave, 1 to 100.",
+    "Chooses whether the lines in the display are spaced by pitch or by frequency.",
+    "Chooses whether the display is a circle covering one octave or a spiral covering three.",
+    "The pitches to be tuned, 1V per octave; the first channel is the root the others are measured against.",
+    "The tuned pitches, 1V per octave, one channel for each channel of the input, clamped to ±10V.",
+    "What the tuned pitch lost when it was rounded from double to single precision, for adding back at an oscillator that takes it.",
+    "Note — Every bound comes up at 0, which is a list of one pitch, so the module passes the input through unchanged until an upper bound is raised.",
+    "Note — A red lamp on a row means its lower bound is above its upper bound; all eight at once mean the bounds ask for more than a million pitches. Either way the list is left as it was.",
+    "Note — In the display, the lines reaching the outer edge are every allowed pitch and the shorter lines inside are the pitches being put out right now, one per channel.",
+    "Note — The plugin ships whole tuning systems as module presets — 3-limit and 5-limit scales and their modes — so the Preset submenu on the right-click menu is the quickest way to a working setting.",
+    "Note — Bypassing the module passes the input jack straight to the V/Oct output."
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "32": 3,
+    "33": 3,
+    "34": 3,
+    "35": 3,
+    "36": 3,
+    "37": 3,
+    "38": 3,
+    "39": 3,
+    "16": 4,
+    "17": 4,
+    "18": 4,
+    "19": 4,
+    "20": 4,
+    "21": 4,
+    "22": 4,
+    "23": 4,
+    "24": 5,
+    "25": 5,
+    "26": 5,
+    "27": 5,
+    "28": 5,
+    "29": 5,
+    "30": 5,
+    "31": 5,
+    "42": 6,
+    "43": 7,
+    "40": 8,
+    "41": 9,
+    "45": 10,
+    "46": 11
+   },
+   "in": {
+    "0": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/XLimitJIAutotuner2.cpp:689 getChannels() sets the loop bound; :698 getPolyVoltage(c)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/XLimitJIAutotuner2.cpp:691 setChannels(channels); :701 clampD(baseVoltage+harmonicVoltage,-10,10)"
+     },
+     "1": {
+      "poly": true,
+      "why": "src/XLimitJIAutotuner2.cpp:703 voutR = vout - (double)voutF, the double-to-float remainder"
+     }
+    }
+   },
+   "notes": "Two of the 48 parameters have no widget and so get no line: EUCLID_PARAM (44), whose addParam line is commented out at src/XLimitJIAutotuner2.cpp:1125 although it is still configured with the names Root only, Input order, Ascending harminic order and Descending harmonic order for a range of 0 to 4, which is one name short; and NONE_PARAM (47), which nothing reads. S0_PARAM is named Subarmonic where the other seven are named Subharmonic, so that row's second knob shows a different tooltip from its neighbours. The panel prints the columns as a-n, b-n, s-n, x-min and x-max, which the maker's parameter names give as Harmonic, Subharmonic, Shift, Lower Bound and Upper Bound. The module has no context menu of its own. Index order and panel order agree, column by column, except that the Shift column sits between the ratio pair and the bounds on the panel while its indices (32 to 39) come after all of them."
   },
   "XLimitJIVCO": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A polyphonic oscillator for the X-Limit JI Autotuner modules: it adds its two pitch inputs in double precision and reads band-limited tables, so two pitches a fraction of a cent apart do not beat.",
+    "A rising edge here restarts the waveform; a monophonic cable restarts every channel together, a polyphonic one restarts each channel from its own.",
+    "Added to the pitch at the V/Oct jack before the frequency is worked out, which is where an Autotuner's residual output goes.",
+    "Sets the pitch at 1V per octave, 0V giving C4; the number of channels here is the number of channels every output carries.",
+    "A sine, ±5V.",
+    "A triangle, ±5V.",
+    "A sawtooth read from a band-limited table, with the number of harmonics taken from the pitch so that none of them passes a fifth of the sample rate.",
+    "A square read from a band-limited table, with the number of harmonics taken from the pitch so that none of them passes a fifth of the sample rate.",
+    "Note — There is nothing to turn: the pitch comes entirely from the two input jacks, so the module is silent until one of them is patched to something other than 0V, where it puts out C4.",
+    "Note — The module keeps eight phases but runs over as many channels as V/Oct carries, so more than eight channels writes past the end of that store. Keep the input to eight channels.",
+    "Note — Building the two wavetables takes ten million entries each, so a new instance costs a noticeable pause and about 160MB of memory."
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "pitch",
+     "2": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "swings",
+      "why": "src/XLimitJIVCO.cpp:145-160 getChannels() branches mono against poly, getPolyVoltage(ii) per channel; the test is a non-zero value after a sample below 0.5V"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/XLimitJIVCO.cpp:171 getPolyVoltage(c) added to the V/Oct input at :172"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/XLimitJIVCO.cpp:163 getChannels() sets the loop bound; :173 exp2(voltage)*FREQ_C4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/XLimitJIVCO.cpp:60 5*sin(2*pi*phase); :165 setChannels"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/XLimitJIVCO.cpp:64 5 - 20*abs(phase-0.5); :166 setChannels"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/XLimitJIVCO.cpp:70 5*readWavetable of the sawtooth table; :167 setChannels"
+     },
+     "3": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/XLimitJIVCO.cpp:76 5*readWavetable of the square table; :168 setChannels"
+     }
+    }
+   },
+   "notes": "The module has no parameters at all, so every line here is a jack. Two faults in the code worth knowing: the phase store is std::array<double,8> at src/XLimitJIVCO.cpp:131 while the process loop runs to inputs[VOCT_INPUT].getChannels(), which Rack allows up to 16, so a nine-channel or wider input writes past the end of it; and the sync test at :148 is `syncVal && !syncState`, where syncState is only set true at 0.5V or more, so a steady voltage between zero and 0.5V restarts the waveform on every sample rather than once. The README says only that the module is a wavetable VCO to reduce floating point inaccuracies; it documents none of the jacks."
   }
  }
 }

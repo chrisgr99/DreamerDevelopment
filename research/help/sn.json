@@ -1,28 +1,461 @@
 {
  "plugin": "sn",
- "source": "https://github.com/transcriptaze/sn-vcv",
+ "source": "https://github.com/transcriptaze/sn-vcv/blob/d72c254e652e1e6b129b8941c51b2cd7e4d9aba1/documentation/MANUAL.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "sn-vco": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator built on the sn generator function, whose waveshape morphs between sine, square, triangle and sawtooth and everything in between",
+    "Note — Each of the six jacks down the left is added to the knob beside it, 5V covering that knob's whole range, and the total is held inside the knob's own limits",
+    "Note — It is the base of a stack: sn-vcox expanders placed directly against its left or right edge add harmonics to it, and the lamps in the top corners light when one is attached",
+    "Note — AUX is not the oscillator. It is a fixed 25Hz copy of the same waveshape meant for a scope, so the shape can be looked at whatever the pitch is doing",
+    "Sets the eccentricity of the generator function, -1 to +1, which is what carries the wave from a sine towards a square, a spike or a sawtooth",
+    "Multiplies the eccentricity before it is taken through a hyperbolic tangent, 0 to 5, so it is the fine adjustment on the shape",
+    "Rotates the generator function, -90 degrees to +90 degrees",
+    "Sets the amplitude of the waveform, 0 at the bottom of its travel and 1 at the top",
+    "Shifts the generator function sideways, -1 to +1",
+    "Shifts the generator function vertically, -1 to +1",
+    "Multiplies the base frequency by a whole number from 1 to 5",
+    "Added to the eccentricity knob, 5V covering its whole range, with the total held between -1 and +1",
+    "Added to the sensitivity knob, 5V covering its whole range, with the total held between 0 and 5",
+    "Added to the rotation knob, 5V covering 90 degrees, with the total held inside 89.95 degrees either way, despite the maker's tooltip naming this jack Φ",
+    "Added to the amplitude knob, 5V covering its whole range, with the total held between 0 and 1",
+    "Added to the horizontal shift knob, 5V covering its whole range, with the total held between -1 and +1",
+    "Added to the vertical shift knob, 5V covering its whole range, with the total held between -1 and +1",
+    "The pitch, 1V per octave with 0V giving C4; the number of poly channels on this cable is the number of voices the module runs",
+    "Scales each voice's output level, 10V leaving it at full; with nothing patched every voice runs at full level",
+    "A 25Hz copy of the waveshape for a scope, at ±5V, carrying this module's own wave, the sum of the whole stack, or both, according to the menu",
+    "A 10V pulse 1ms long at the start of each cycle of the AUX waveform, to trigger a scope",
+    "The oscillator itself, ±5V scaled by velocity, one poly channel per voice",
+    "Menu — k-rate — sets how often the knobs and CV are read to rebuild the waveshape: every sample, or once every 64, 128 or 256 samples",
+    "Menu — aux-mode: OSC, SUM, POLY — chooses whether AUX carries this module's own monitor wave, the summed wave of the whole stack, or the first on channel 1 and the second on channel 2",
+    "Menu — aux-gain: 1, ½, ⅓, ¼, ⅕ — scales the summed monitor wave down so a tall stack fits on a scope"
+   ],
+   "param": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "5": 9,
+    "7": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17,
+    "7": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 20,
+    "2": 21
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "pitch",
+     "7": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±1V",
+      "why": "src/sn-vco.cpp:243, clamp(getVoltage()/5, -1, +1) added to the knob"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 5V",
+      "why": "src/sn-vco.cpp:244, 5 * clamp(getVoltage()/5, -1, +1) added to the knob"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/sn-vco.cpp:245, 90 * clamp(getVoltage()/5, -1, +1) added to the knob in degrees"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "why": "src/sn-vco.cpp:246, clamp(getVoltage()/5, -1, +1) added to the knob"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±1V",
+      "why": "src/sn-vco.cpp:247, clamp(getVoltage()/5, -1, +1) added to the knob"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±1V",
+      "why": "src/sn-vco.cpp:248, clamp(getVoltage()/5, -1, +1) added to the knob"
+     },
+     "6": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "why": "src/sn-vco.cpp:267 getChannels() sets the voice count, 153 getPolyVoltage per voice"
+     },
+     "7": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "10V, full level",
+      "why": "src/sn-vco.cpp:270-281, getPolyVoltage(channel)/10 or the constant 1.0 when unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/sn-vco.cpp:215-227, setChannels(2) in the POLY mode and 1 otherwise"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/sn-vco.cpp:189 and 207, a 0.001s pulse at 10V"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/sn-vco.cpp:176-179, setChannels(channels) with 5 * velocity * the wave per voice"
+     }
+    }
+   },
+   "notes": "The module declares a phase parameter, PLACEHOLDER_PARAM, that has no widget on the panel, so it cannot be clicked and is left untagged; only the LFO modules put that control on the panel. The rotation CV input is configured with the name ±5V Φ (src/sn-vco.cpp:25) while the knob it feeds is θ and the manual calls it rotation, so Rack's tooltip on that jack is wrong. The CHAN, V/OCT and VELOCITY labels sit down the right of the panel with the voice count shown beside CHAN; there is no jack at CHAN."
   },
   "sn-vcox": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for sn-vco that adds another sn waveform, as a harmonic or a variation, to the oscillator it is attached to",
+    "Note — Place it directly against the left or right edge of an sn-vco, or of another sn-vcox in the chain; the lamps in the top corners show which side it draws from and which it feeds",
+    "Note — It takes its pitch, its voices and its velocity from the sn-vco at the head of the chain, which is why it has no pitch jack of its own",
+    "Note — Each of the six jacks down the left is added to the knob beside it, 5V covering that knob's whole range, and the total is held inside the knob's own limits",
+    "Note — The summed output adds every waveform in the stack together, so it readily passes ±5V; the attenuator brings it back into range",
+    "Sets the eccentricity of the generator function, -1 to +1, which is what carries the wave from a sine towards a square, a spike or a sawtooth",
+    "Multiplies the eccentricity before it is taken through a hyperbolic tangent, 0 to 5, so it is the fine adjustment on the shape",
+    "Rotates the generator function, -90 degrees to +90 degrees",
+    "Sets the amplitude of the waveform, 0 at the bottom of its travel and 1 at the top",
+    "Shifts the generator function sideways, -1 to +1",
+    "Shifts the generator function vertically, -1 to +1",
+    "Multiplies the base frequency by a whole number from 1 to 5",
+    "Added to the eccentricity knob, 5V covering its whole range, with the total held between -1 and +1",
+    "Added to the sensitivity knob, 5V covering its whole range, with the total held between 0 and 5",
+    "Added to the rotation knob, 5V covering 90 degrees, with the total held inside 89.95 degrees either way, despite the maker's tooltip naming this jack Φ",
+    "Added to the amplitude knob, 5V covering its whole range, with the total held between 0 and 1",
+    "Added to the horizontal shift knob, 5V covering its whole range, with the total held between -1 and +1",
+    "Added to the vertical shift knob, 5V covering its whole range, with the total held between -1 and +1",
+    "Attenuates the summed output, 0 at the bottom of its travel and full level at the top",
+    "A 25Hz copy of the waveshape for a scope, at ±5V, carrying this module's own wave, the summed wave of the stack, or both, according to the menu",
+    "This module's own waveform alone, ±5V scaled by the velocity coming from the sn-vco, one poly channel per voice",
+    "Every waveform in the stack added together and scaled by the attenuator, ±5V times velocity, one poly channel per voice",
+    "Menu — k-rate — sets how often the knobs and CV are read to rebuild the waveshape: every sample, or once every 64, 128 or 256 samples",
+    "Menu — aux-mode: OSC, SUM, POLY — chooses whether AUX carries this module's own monitor wave, the summed wave of the whole stack, or the first on channel 1 and the second on channel 2",
+    "Menu — aux-gain: 1, ½, ⅓, ¼, ⅕ — scales the summed monitor wave down so a tall stack fits on a scope"
+   ],
+   "param": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "7": 11,
+    "8": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 20,
+    "2": 21
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±1V",
+      "why": "src/sn-vcox.cpp:297, clamp(getVoltage()/5, -1, +1) added to the knob"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 5V",
+      "why": "src/sn-vcox.cpp:298, 5 * clamp(getVoltage()/5, -1, +1) added to the knob"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/sn-vcox.cpp:299, 90 * clamp(getVoltage()/5, -1, +1) added to the knob in degrees"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "why": "src/sn-vcox.cpp:300, clamp(getVoltage()/5, -1, +1) added to the knob"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±1V",
+      "why": "src/sn-vcox.cpp:301, clamp(getVoltage()/5, -1, +1) added to the knob"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±1V",
+      "why": "src/sn-vcox.cpp:302, clamp(getVoltage()/5, -1, +1) added to the knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/sn-vcox.cpp:269-281, setChannels(2) in the POLY mode and 1 otherwise"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/sn-vcox.cpp:237-240, setChannels(channels) with 5 * velocity * the wave per voice"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/sn-vcox.cpp:245-248, 5 * velocity * gain * the running sum, which is not clamped"
+     }
+    }
+   },
+   "notes": "The manual says the six CV inputs override the parameter controls; the code adds them to the knob and then clamps (src/sn-vcox.cpp:297-308), which is what the lines describe. As on sn-vco, the rotation CV input is configured with the name ±5V Φ while the knob it feeds is θ. The phase parameter has no widget on this panel and is left untagged. The attenuator is configured with the name ɡ while the panel prints ATT, and the summed output is configured as VCO-Σ, which is what the panel prints too. The summed output has no range given because it is a running total with no clamp on it."
   },
   "sn-lfo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A low frequency oscillator built on the sn generator function, whose waveshape morphs between sine, square, triangle and sawtooth and everything in between",
+    "Note — It is the base of a stack: sn-lfox expanders placed directly against its left or right edge add harmonics to it",
+    "Note — AUX is not the LFO. It is a fixed 25Hz copy of the same waveshape meant for a scope, so the shape can be looked at whatever the LFO rate is",
+    "Sets the eccentricity of the generator function, -1 to +1, which is what carries the wave from a sine towards a square, a spike or a sawtooth",
+    "Multiplies the eccentricity before it is taken through a hyperbolic tangent, 0 to 5, so it is the fine adjustment on the shape",
+    "Rotates the generator function, -90 degrees to +90 degrees",
+    "Sets the amplitude of the waveform, 0 at the bottom of its travel and 1 at the top",
+    "Shifts the generator function sideways, -1 to +1",
+    "Shifts the generator function vertically, -1 to +1",
+    "Sets the phase offset of the harmonic, -90 degrees to +90 degrees",
+    "Multiplies the base frequency by a whole number from 1 to 5",
+    "Sets the rate, over whichever of the three ranges the menu has chosen; the default range runs from 0.1Hz to 10Hz and is logarithmic",
+    "Added to the frequency knob, 5V covering the knob's whole travel, read one value per poly channel and clamped to the ends of that travel; the number of channels on it is the number the module runs",
+    "A rising edge restarts every channel's waveform at the beginning of its cycle",
+    "A 25Hz copy of the waveshape for a scope, at ±5V, carrying this module's own wave, the summed wave of the stack, or both, according to the menu",
+    "A 10V pulse 1ms long at the start of each cycle of the AUX waveform, to trigger a scope",
+    "The low frequency signal itself, ±5V, one poly channel per channel of the frequency input",
+    "Menu — range: 0.1-10Hz, 0.02-2Hz, 0.5-25Hz — sets the span of the frequency knob; the first two are logarithmic and the third is linear",
+    "Menu — k-rate — sets how often the knobs and CV are read to rebuild the waveshape: every sample, or once every 64, 128 or 256 samples",
+    "Menu — aux-mode: OSC, SUM, POLY — chooses whether AUX carries this module's own monitor wave, the summed wave of the whole stack, or the first on channel 1 and the second on channel 2",
+    "Menu — aux-gain: 1, ½, ⅓, ¼, ⅕ — scales the summed monitor wave down so a tall stack fits on a scope"
+   ],
+   "param": {
+    "0": 3,
+    "1": 4,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "8": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 15,
+    "2": 16
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "why": "src/sn-lfo.cpp:311 getChannels() sets the channel count, 215-216 clamp(knob + 10*clamp(getPolyVoltage/5,-1,1), 0, 10)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/sn-lfo.cpp:129, a dsp::SchmittTrigger on getVoltage() with its default 0V and 1V thresholds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/sn-lfo.cpp:293-305, setChannels(2) in the POLY mode and 1 otherwise"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/sn-lfo.cpp:260 and 285, a 0.001s pulse at 10V"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/sn-lfo.cpp:246-249, setChannels(channels) with 5 times the wave per channel"
+     }
+    }
+   },
+   "notes": "The three frequency ranges in the code are 0.1 to 10Hz, 0.02 to 2Hz and a linear 0.5 to 25Hz (src/sn-lfo.cpp:8-12); the maker's manual lists the second and third as 0.2-2Hz and 0.5-20Hz, which matches neither the menu labels nor the constants in this build. The panel prints no label beside the frequency modulation jack; the maker's tooltip calls it log frequency modulation. Unlike sn-vco, this module puts the phase control on the panel."
   },
   "sn-lfox": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for sn-lfo that adds another sn waveform, as a harmonic or a variation, to the oscillator it is attached to",
+    "Note — Place it directly against the left or right edge of an sn-lfo, or of another sn-lfox in the chain; the lamps in the top corners show which side it draws from and which it feeds",
+    "Note — It has no input jacks at all: the rate, the phase and the channel count come from the sn-lfo at the head of the chain",
+    "Note — The summed output adds every waveform in the stack together, so it readily passes ±5V; the attenuator brings it back into range",
+    "Sets the eccentricity of the generator function, -1 to +1, which is what carries the wave from a sine towards a square, a spike or a sawtooth",
+    "Multiplies the eccentricity before it is taken through a hyperbolic tangent, 0 to 5, so it is the fine adjustment on the shape",
+    "Rotates the generator function, -90 degrees to +90 degrees",
+    "Sets the amplitude of the waveform, 0 at the bottom of its travel and 1 at the top",
+    "Shifts the generator function sideways, -1 to +1",
+    "Shifts the generator function vertically, -1 to +1",
+    "Sets the phase offset of the harmonic, -90 degrees to +90 degrees",
+    "Multiplies the base frequency by a whole number from 1 to 5",
+    "Attenuates the summed output, 0 at the bottom of its travel and full level at the top",
+    "A 25Hz copy of the waveshape for a scope, at ±5V, carrying this module's own wave, the summed wave of the stack, or both, according to the menu",
+    "This module's own waveform alone, ±5V, one poly channel per channel the sn-lfo is running",
+    "Every waveform in the stack added together and scaled by the attenuator, one poly channel per channel the sn-lfo is running",
+    "Menu — k-rate — sets how often the knobs and CV are read to rebuild the waveshape: every sample, or once every 64, 128 or 256 samples",
+    "Menu — aux-mode: OSC, SUM, POLY — chooses whether AUX carries this module's own monitor wave, the summed wave of the whole stack, or the first on channel 1 and the second on channel 2",
+    "Menu — aux-gain: 1, ½, ⅓, ¼, ⅕ — scales the summed monitor wave down so a tall stack fits on a scope"
+   ],
+   "param": {
+    "0": 4,
+    "1": 5,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "5": 9,
+    "6": 10,
+    "7": 11,
+    "8": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/sn-lfox.cpp:272-284, setChannels(2) in the POLY mode and 1 otherwise"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/sn-lfox.cpp:246 and 250, setChannels(channels) with 5 times the wave per channel"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "why": "src/sn-lfox.cpp:247 and 251, 5 * gain * the running sum, which is not clamped"
+     }
+    }
+   },
+   "notes": "The summed output is configured with the name Summed while the panel prints LFO-Σ, and the attenuator is configured as ɡ while the panel prints ATT. The summed output has no range given because it is a running total with no clamp on it. The manual's paragraph about the attenuator on this module talks about VCO-Σ, which is the sn-vcox jack, not this one."
   }
  }
 }

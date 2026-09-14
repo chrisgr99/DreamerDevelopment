@@ -1,43 +1,878 @@
 {
  "plugin": "questionablemodules",
- "source": "https://github.com/isivisi/questionablemodules",
+ "source": "https://isivisi.github.io/questionablemodules/",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "discombobulator": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight signals routed to eight outputs, with the routing shuffled at random every time a gate arrives",
+    "Sets how loudly the signal an output carried before the last shuffle is mixed in while it dies away, none at the far left and its full level at the far right",
+    "One of the eight signals fed into the shuffle; only a jack with a cable in it takes part",
+    "Shuffles the routing on each rising edge, reading high above 2V and low below 0.1V",
+    "Adds to the FADE knob, 1V covering the whole of its travel",
+    "Carries whichever input the shuffle has routed here, with the fading tail of the one it carried before mixed in; before any shuffle it carries the input of the same number",
+    "Note — no output is written at all until at least one of the eight inputs has a cable in it",
+    "Note — only inputs with a cable are shuffled, so patching three of the eight rotates those three among the outputs of the same three numbers and leaves the other five alone"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 3,
+    "9": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 5,
+    "5": 5,
+    "6": 5,
+    "7": 5
+   },
+   "family": {
+    "in": {
+     "8": "trigger",
+     "9": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "discombobulator.cpp:133,145 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "1": {
+      "poly": true,
+      "why": "discombobulator.cpp:133,145 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "2": {
+      "poly": true,
+      "why": "discombobulator.cpp:133,145 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "3": {
+      "poly": true,
+      "why": "discombobulator.cpp:133,145 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "4": {
+      "poly": true,
+      "why": "discombobulator.cpp:133,145 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "5": {
+      "poly": true,
+      "why": "discombobulator.cpp:133,145 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "6": {
+      "poly": true,
+      "why": "discombobulator.cpp:133,145 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "7": {
+      "poly": true,
+      "why": "discombobulator.cpp:133,145 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "discombobulator.cpp:108 gateTrigger.process(inputs[8].getVoltage(), 0.1f, 2.f)"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "discombobulator.cpp:106 adds inputs[FADE_INPUT].getVoltage() to a knob configured 0 to 1 at line 75, with no clamp"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "discombobulator.cpp:148 PolyphonicValue::setOutput calls setChannels and writeVoltages"
+     },
+     "1": {
+      "poly": true,
+      "why": "discombobulator.cpp:148 PolyphonicValue::setOutput calls setChannels and writeVoltages"
+     },
+     "2": {
+      "poly": true,
+      "why": "discombobulator.cpp:148 PolyphonicValue::setOutput calls setChannels and writeVoltages"
+     },
+     "3": {
+      "poly": true,
+      "why": "discombobulator.cpp:148 PolyphonicValue::setOutput calls setChannels and writeVoltages"
+     },
+     "4": {
+      "poly": true,
+      "why": "discombobulator.cpp:148 PolyphonicValue::setOutput calls setChannels and writeVoltages"
+     },
+     "5": {
+      "poly": true,
+      "why": "discombobulator.cpp:148 PolyphonicValue::setOutput calls setChannels and writeVoltages"
+     },
+     "6": {
+      "poly": true,
+      "why": "discombobulator.cpp:148 PolyphonicValue::setOutput calls setChannels and writeVoltages"
+     },
+     "7": {
+      "poly": true,
+      "why": "discombobulator.cpp:148 PolyphonicValue::setOutput calls setChannels and writeVoltages"
+     }
+    }
+   },
+   "notes": "Read from the source at tag v2.1.14 (commit 75e5f70), which is the installed build. Output 8 (SINE_OUTPUT) is configured in the constructor but never given a PortWidget and never written, so it has no line and no tag. The fade tail decays by one part in the sample rate per sample, a time constant of about a second, but the figure is derived rather than stored so no number is quoted. The maker's page describes only the knob and does not mention that the FADE jack adds to it in volts."
   },
   "nandomizer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Passes one of its eight inputs to a single output, picking a different connected one at random every time a gate arrives",
+    "Sets how loudly the input that was selected before the last change is mixed in while it dies away, none at the far left and its full level at the far right",
+    "One of the eight signals the module chooses between; only a jack with a cable in it can be chosen",
+    "Adds to the FADE knob, 1V covering the whole of its travel",
+    "Picks a new input at random on each rising edge, reading high above 2V and low below 0.1V",
+    "The input currently selected, with the fading tail of the one selected before it mixed in",
+    "Note — nothing reaches the output until at least one of the eight inputs has a cable in it",
+    "Note — the green lamp beside an input is lit whenever that input has a cable, not when it is the one being passed, and the red lamp flashes each time the gate picks a new input",
+    "Note — a polyphonic cable is passed through with all its channels, despite the maker's page calling these inputs monophonic"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "9": 3,
+    "8": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "8": "trigger",
+     "9": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "nandomizer.cpp:125,136 wraps the input in PolyphonicValue, which reads getChannels and getPolyVoltage"
+     },
+     "1": {
+      "poly": true,
+      "why": "nandomizer.cpp:125,136 wraps the input in PolyphonicValue, which reads getChannels and getPolyVoltage"
+     },
+     "2": {
+      "poly": true,
+      "why": "nandomizer.cpp:125,136 wraps the input in PolyphonicValue, which reads getChannels and getPolyVoltage"
+     },
+     "3": {
+      "poly": true,
+      "why": "nandomizer.cpp:125,136 wraps the input in PolyphonicValue, which reads getChannels and getPolyVoltage"
+     },
+     "4": {
+      "poly": true,
+      "why": "nandomizer.cpp:125,136 wraps the input in PolyphonicValue, which reads getChannels and getPolyVoltage"
+     },
+     "5": {
+      "poly": true,
+      "why": "nandomizer.cpp:125,136 wraps the input in PolyphonicValue, which reads getChannels and getPolyVoltage"
+     },
+     "6": {
+      "poly": true,
+      "why": "nandomizer.cpp:125,136 wraps the input in PolyphonicValue, which reads getChannels and getPolyVoltage"
+     },
+     "7": {
+      "poly": true,
+      "why": "nandomizer.cpp:125,136 wraps the input in PolyphonicValue, which reads getChannels and getPolyVoltage"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "nandomizer.cpp:108 gateTrigger.process(inputs[8].getVoltage(), 0.1f, 2.f)"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "nandomizer.cpp:106 adds inputs[FADE_INPUT].getVoltage() to a knob configured 0 to 1 at line 69, with no clamp"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "nandomizer.cpp:138 PolyphonicValue::setOutput calls setChannels and writeVoltages"
+     }
+    }
+   },
+   "notes": "Read from the source at tag v2.1.14 (commit 75e5f70), which is the installed build. The maker's page says the eight inputs take a monophonic value; the code passes polyphony straight through. In this build the eight green lamps show which inputs are connected (nandomizer.cpp:111-116); a later commit on master changes them to show the active input, which is not in the installed version."
   },
   "treequencer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sequencer that walks a binary tree of nodes, one node per clock, taking a branch at random wherever a node has two children",
+    "In Step trigger type this steps the sequence in the same way the clock does; in Sequence trigger type it picks a fresh path through the whole tree and starts it at the root",
+    "Moves to the next node on each rising edge, reading high above 2V and low below 0.1V",
+    "Returns to the root node on a rising edge, and the clock is ignored for 1ms afterwards",
+    "A 1ms pulse at 10V each time a path through the tree finishes",
+    "The active node's number as a pitch, one twelfth of a volt per number, so node 1 gives 0V and node 13 gives 1V",
+    "Shifts the chance at every node in the tree, -1 to +1; turned up the second branch becomes more likely, turned down the first branch does",
+    "Adds to the CHANCE MOD knob, 1V covering half of its travel",
+    "Stops the gate and the clock stepping the sequence, so the active node keeps sending",
+    "Flips the HOLD button on each rising edge",
+    "Turns the sequence round at the end of a path so it walks back towards the root, in place of jumping straight to it",
+    "Flips the BOUNCE button on each rising edge",
+    "Chooses Step, where each clock takes a branch at random as it arrives, or Sequence, where a whole path is chosen in advance and the clock walks along it",
+    "Flips the TRIG TYPE button on each rising edge",
+    "A 1ms pulse at 10V while the active node carries this jack's number",
+    "Note — left-click a node square on the screen for a menu that sets its output number and its chance, previews it, adds a child, removes it, or generates a tree below it",
+    "Note — drag the screen to move around the tree and scroll on it to zoom; the three buttons under the screen follow the active node, undo an edit and redo it, and none can be clicked for help",
+    "Note — a node whose number falls outside 1 to 8 fires none of the eight jacks, though its pitch reaches VOCT OUT",
+    "Note — a new Treequencer holds a root node and two children, so it sequences from the moment a clock is patched",
+    "Menu — Reset Screen Position — returns the tree view to the zoom and position it starts at",
+    "Menu — Toggle Follow Nodes — keeps the view centred on the node the sequence is on",
+    "Menu — Default Scale — sets the scale a note is drawn from when Add Child makes a new node",
+    "Menu — Note Representation: Squares, Letters, Numbers — draws a node's number as a block of dots, as a note name with its octave, or as a number; Letters also relabels the eight output jacks",
+    "Menu — Screen Color Mode: Light, Vibrant, Muted, Greyscale — sets the palette the node squares are drawn in"
+   ],
+   "param": {
+    "1": 12,
+    "2": 10,
+    "3": 6,
+    "4": 8
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 7,
+    "4": 9,
+    "5": 13,
+    "6": 11
+   },
+   "out": {
+    "0": 14,
+    "1": 14,
+    "2": 14,
+    "3": 14,
+    "4": 14,
+    "5": 14,
+    "6": 14,
+    "7": 14,
+    "8": 5,
+    "9": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "pitch",
+     "9": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "treequencer.cpp:629 gateTrigger.process(inputs[GATE_IN_1].getVoltage(), 0.1f, 2.f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "treequencer.cpp:630 clockTrigger.process(inputs[CLOCK].getVoltage(), 0.1f, 2.f)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "treequencer.cpp:628 resetTrigger.process(inputs[RESET].getVoltage(), 0.1f, 2.f)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±1V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "treequencer.cpp:553 adds inputs[CHANCE_MOD_INPUT].getVoltage() to a knob configured -1 to 1 at line 504"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "treequencer.cpp:631 holdTrigger.process(inputs[HOLD_INPUT].getVoltage(), 0.1, 2.f)"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "treequencer.cpp:632 typeTrigger.process(inputs[TTYPE_GATE].getVoltage(), 0.1, 2.f)"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "treequencer.cpp:633 bounceTrigger.process(inputs[BOUNCE_GATE].getVoltage(), 0.1, 2.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "treequencer.cpp:678 setVoltage(activeP ? 10.f : 0.0f) on one output, with no setChannels anywhere"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "treequencer.cpp:678 setVoltage(activeP ? 10.f : 0.0f) on one output, with no setChannels anywhere"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "treequencer.cpp:678 setVoltage(activeP ? 10.f : 0.0f) on one output, with no setChannels anywhere"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "treequencer.cpp:678 setVoltage(activeP ? 10.f : 0.0f) on one output, with no setChannels anywhere"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "treequencer.cpp:678 setVoltage(activeP ? 10.f : 0.0f) on one output, with no setChannels anywhere"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "treequencer.cpp:678 setVoltage(activeP ? 10.f : 0.0f) on one output, with no setChannels anywhere"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "treequencer.cpp:678 setVoltage(activeP ? 10.f : 0.0f) on one output, with no setChannels anywhere"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "treequencer.cpp:678 setVoltage(activeP ? 10.f : 0.0f) on one output, with no setChannels anywhere"
+     },
+     "8": {
+      "poly": false,
+      "why": "treequencer.cpp:679 outputs[ALL_OUT].setVoltage(activeNode->output/12) with no setChannels"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "treequencer.cpp:675 outputs[SEQUENCE_COMPLETE].setVoltage(sequenceP ? 10.f : 0.0f)"
+     }
+    }
+   },
+   "notes": "Read from the source at tag v2.1.14 (commit 75e5f70), which is the installed build. Param 0 (FADE_PARAM) is declared and configured but has no widget and is never read, so it gets no line. The FOLLOW, UNDO and REDO buttons under the screen are plain widgets rather than ParamWidgets, so no click on them can reach this feature; they are covered by a Note instead. Index order is not panel order here: input 5 is the TRIG TYPE gate on the right and input 6 the BOUNCE gate beside it, the reverse of what the enum order suggests. The maker's page says right-click and drag moves the view; in the code any drag on the screen moves it and a left click opens the node menu."
   },
   "quatosc": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An oscillator built from three points on a sphere, each turned by its own sine LFO, with the points flattened onto a plane to make the output",
+    "Sets the frequency of that axis's LFO at 1V per octave",
+    "Sets how much that axis's flattened position is added to the output, none at the far left and its full amount at the far right",
+    "Adds to that axis's INFLUENCE knob, 1V covering the whole of its travel, and the total is held between 0 and 1",
+    "Adds a steady turn of that axis on top of whatever its LFO is doing, 0 to 100",
+    "Adds to that axis's ROTATION knob, 1V for each step of its 0 to 100 scale",
+    "Raises that axis's LFO by whole octaves; set to Off the axis is pinned to 1Hz under the Old dephase algorithm and stops turning altogether under the New one",
+    "Adds to that axis's OCTAVE knob at 1V per octave",
+    "Sets how far that axis's LFO turns the sphere, none at the far left and its full amount at the far right",
+    "Adds to that axis's LFO INFLUENCE knob, 1V covering the whole of its travel, and the total is held between 0 and 1",
+    "Sets the base rate the three LFOs are scaled from, measured between rising edges and accepted between 0.001Hz and 1000Hz; with nothing patched that base is 2Hz",
+    "Cycles the number of voices the two outputs carry, 1 to 16, each voice a slightly turned copy of the sphere; right-click it to choose a number directly",
+    "Cycles Mono, where both outputs carry the same signal, Full Stereo, where points near the centre of the sphere are sent to both sides, and Sides, where a point only reaches the side it lies on",
+    "The left side of the flattened sphere, one polyphonic channel per spread voice; in Mono it carries the same signal as the other output",
+    "The right side of the flattened sphere, one polyphonic channel per spread voice; in Mono it carries the same signal as the other output",
+    "Note — setting all three V/OCT jacks to the same pitch moves the pitch while holding the shape of the rotation you have built",
+    "Note — turning one axis moves the other two, so the three never act on their own",
+    "Note — the screen draws the path each of the three points has traced, one colour per axis, faded down by that axis's INFLUENCE knob",
+    "Menu — Projection Axis: X, Y, Z — chooses the plane the three points are flattened onto to make the output",
+    "Menu — Disable Spread Volume Normalization — stops the output being divided down as the spread count rises, so more voices give a louder sum; once off it reads Enable",
+    "Menu — Dephase Algorithm: Old, New — Old pulls each LFO back towards zero phase, New drives each towards the phase a free-running oscillator of that frequency would have reached",
+    "Menu — Sample Rate: Full, Half — Half runs the oscillator on every second sample",
+    "Menu — Enable Quantization — right-click an OCTAVE knob; makes that knob snap to whole octaves again, and it reads Disable Quantization while snapping is on"
+   ],
+   "param": {
+    "0": 6,
+    "1": 6,
+    "2": 6,
+    "3": 8,
+    "4": 8,
+    "5": 8,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 12,
+    "13": 11
+   },
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "4": 10,
+    "5": 7,
+    "6": 7,
+    "7": 7,
+    "8": 9,
+    "9": 9,
+    "10": 9,
+    "11": 5,
+    "12": 5,
+    "13": 5,
+    "14": 3,
+    "15": 3,
+    "16": 3
+   },
+   "out": {
+    "0": 13,
+    "1": 14
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "4": "cv",
+     "5": "pitch",
+     "6": "pitch",
+     "7": "pitch",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "normal": "0V",
+      "why": "quatosc.cpp:232 uses inputs[input].getVoltage() as an exponent of two in calcVOctFreq"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "normal": "0V",
+      "why": "quatosc.cpp:232 uses inputs[input].getVoltage() as an exponent of two in calcVOctFreq"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "normal": "0V",
+      "why": "quatosc.cpp:232 uses inputs[input].getVoltage() as an exponent of two in calcVOctFreq"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "a 2Hz base rate",
+      "why": "quatosc.cpp:304-312 clockTrigger.process(0.1f, 2.f), the measured rate kept only between 0.001 and 1000, and clockFreq forced to 2.f when the jack is empty"
+     },
+     "5": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "quatosc.cpp:216 getValue adds inputs[param+VOCT1_OCT_INPUT].getVoltage() to the octave knob with no clamp, and line 230 rounds the sum"
+     },
+     "6": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "quatosc.cpp:216 getValue adds inputs[param+VOCT1_OCT_INPUT].getVoltage() to the octave knob with no clamp, and line 230 rounds the sum"
+     },
+     "7": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "quatosc.cpp:216 getValue adds inputs[param+VOCT1_OCT_INPUT].getVoltage() to the octave knob with no clamp, and line 230 rounds the sum"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "quatosc.cpp:215 getValue with c=true returns fclamp(0.f, 1.f, knob + inputs[...].getVoltage()) for the LFO influence knobs configured 0 to 1 at lines 165-167"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "quatosc.cpp:215 getValue with c=true returns fclamp(0.f, 1.f, knob + inputs[...].getVoltage()) for the LFO influence knobs configured 0 to 1 at lines 165-167"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "quatosc.cpp:215 getValue with c=true returns fclamp(0.f, 1.f, knob + inputs[...].getVoltage()) for the LFO influence knobs configured 0 to 1 at lines 165-167"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "quatosc.cpp:332-334 getValue adds this jack's voltage to a rotation knob configured 0 to 100 at lines 168-170, with no clamp"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "quatosc.cpp:332-334 getValue adds this jack's voltage to a rotation knob configured 0 to 100 at lines 168-170, with no clamp"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "quatosc.cpp:332-334 getValue adds this jack's voltage to a rotation knob configured 0 to 100 at lines 168-170, with no clamp"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "quatosc.cpp:215 getValue with c=true returns fclamp(0.f, 1.f, knob + inputs[...].getVoltage()) for the position influence knobs configured 0 to 1 at lines 171-173"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "quatosc.cpp:215 getValue with c=true returns fclamp(0.f, 1.f, knob + inputs[...].getVoltage()) for the position influence knobs configured 0 to 1 at lines 171-173"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "quatosc.cpp:215 getValue with c=true returns fclamp(0.f, 1.f, knob + inputs[...].getVoltage()) for the position influence knobs configured 0 to 1 at lines 171-173"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "quatosc.cpp:353 outputs[OUT].setChannels(spread) and line 377 setVoltage per channel"
+     },
+     "1": {
+      "poly": true,
+      "why": "quatosc.cpp:354 outputs[OUT2].setChannels(spread) and line 378 setVoltage per channel"
+     }
+    }
+   },
+   "notes": "Read from the source at tag v2.1.14 (commit 75e5f70), which is the installed build. Input 3 (TRIGGER, named Gate) is configured but has no PortWidget and is never read, so it gets no line, no tag and no props. Param 14 (Dephase Algorithm) likewise has no widget; it is reachable only from the panel menu and is covered by a Menu line. The maker's page says setting an OCTAVE knob to Off disables that LFO; in the code calcVOctFreq returns 1.f for a negative octave under the Old dephase algorithm, which leaves that axis turning at 1Hz, and 0.f under the New one. Under the New algorithm a Z octave below zero also forces the Z LFO influence to a fixed 0.95 (line 325). The three ROTATION jacks are given no range because the knob they add to runs 0 to 100 and the sum is never clamped, so no single voltage span is the fact."
   },
   "nightbin": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A module with no controls of its own, whose purpose is to put a Night-bin button on Rack's menu bar for fetching nightly builds of plugins from GitHub",
+    "Note — the panel carries nothing that can be clicked; everything the module does is on the Night-bin button it adds to Rack's own menu bar, and removing the module removes the button",
+    "Note — a plugin can be checked only if it publishes its source on GitHub and has a release tagged Nightly holding a .vcvplugin file for your operating system and processor",
+    "Note — a downloaded build is written into Rack's plugins folder and takes effect at the next restart of Rack",
+    "Note — a red dot on the Night-bin button means an update was found, and the button's text reports progress while it is querying or downloading",
+    "Note — the plugin's settings, including the access token in plain text and the list of plugins to check, are kept in questionablemodules.json in Rack's user folder",
+    "Menu — Add / Remove Modules — on the Night-bin button in Rack's menu bar; lists every installed plugin, and clicking one adds it to the list that is checked or takes it off",
+    "Menu — Add All Plugins — inside Add / Remove Modules on the Night-bin button in Rack's menu bar; adds every plugin that names a GitHub source, and appears only once a token has been entered",
+    "Menu — Query for Updates — on the Night-bin button in Rack's menu bar; checks each chosen plugin's GitHub repository for a Nightly release newer than the installed build",
+    "Menu — Github Access Token — on the Night-bin button in Rack's menu bar; a text field for a GitHub personal access token, which raises the limit GitHub puts on unauthenticated requests",
+    "Menu — Clear Github Access Token — on the Night-bin button in Rack's menu bar; deletes the stored token, and replaces the text field once a token has been entered",
+    "Menu — Update All — on the Night-bin button in Rack's menu bar; downloads every update the last query found"
+   ],
+   "notes": "Read from the source at tag v2.1.14 (commit 75e5f70), which is the installed build. The module declares no parameters, inputs or outputs, so it has no tags and no props; all of its behaviour is on the button it inserts into Rack's menu bar (nightbin.cpp:500-512), and the menu lines say so. The module sends HTTP requests to api.github.com on a background thread as soon as it is placed and whenever a query is asked for (nightbin.cpp:77, 306). The token the user types is stored unencrypted in questionablemodules.json under gitPersonalAccessToken (nightbin.cpp:361); no token value appears anywhere in this entry."
   },
   "greenscreen": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A 3HP module whose whole function is to paint the rack background a single colour, chosen from its menu",
+    "Shifts the red in the background colour while a cable is patched, 10V covering the range from none to full; beyond that the value wraps back round, and a negative voltage folds back up",
+    "Shifts the green in the background colour while a cable is patched, 10V covering the range from none to full; beyond that the value wraps back round, and a negative voltage folds back up",
+    "Shifts the blue in the background colour while a cable is patched, 10V covering the range from none to full; beyond that the value wraps back round, and a negative voltage folds back up",
+    "Note — the three colour jacks are invisible and refuse cables until Toggle CV Inputs is switched on in the module's menu",
+    "Note — patching any one of the three colour jacks puts all three under control, the two without a cable holding the colour chosen from the menu",
+    "Note — with the lettering hidden the panel is a plain rectangle of the chosen colour and is hard to pick out of the rack; Rack's select tool will find it",
+    "Note — bypassing the module leaves the rack's own background showing",
+    "Menu — Change Color — a submenu of twenty-four named colours, any colours you have saved, and Add Custom Color",
+    "Menu — Add Custom Color — inside Change Color; a name field and red, green and blue sliders that repaint the background as you drag; Save keeps the colour for every patch, Clear returns to Green",
+    "Menu — Remove Custom Color — inside Change Color; lists the colours you have saved, and clicking one deletes it",
+    "Menu — Toggle Text — hides the lettering down the panel",
+    "Menu — Toggle CV Inputs — shows the three colour jacks and lets cables be patched to them",
+    "Menu — Toggle VCV Shadow — draws Rack's own drop shadow under this module",
+    "Menu — Toggle Rack — draws the rails and mounting holes over the colour",
+    "Menu — Box Shadow — a colour list and two sliders, -50 to 50 pixels across and 0 to 50 pixels down, that draw a slab behind every module in the patch",
+    "Note — colours you save are written to questionablemodules.json in Rack's user folder and are offered in every patch"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "greenscreen.cpp:566 rVal = abs(fmod(color.r + inputs[INPUT_R].getVoltage()/10.f, 1))"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "greenscreen.cpp:567 gVal = abs(fmod(color.g + inputs[INPUT_G].getVoltage()/10.f, 1))"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "greenscreen.cpp:568 bVal = abs(fmod(color.b + inputs[INPUT_B].getVoltage()/10.f, 1))"
+     }
+    }
+   },
+   "notes": "Read from the source at tag v2.1.14 (commit 75e5f70), which is the installed build. The theme menu is left out of every other module in this plugin as plugin-wide decoration, but here the colour menu is the module, so it is written out. The maker's page says the three jacks take -10V to 10V for -100 to 100 per cent and are added as offsets; the code takes the voltage divided by ten, adds it, then takes the absolute value of the fractional part, so the colour wraps past full rather than clamping and a negative voltage folds back up instead of subtracting. The jacks are declared with a custom port widget that draws nothing and refuses drags, tooltips and its own menu while Toggle CV Inputs is off (greenscreen.cpp:414-443), so they exist in the census but cannot be used until that item is switched on. Colour changes are smoothed towards the target rather than applied at once (line 573-575)."
   },
   "smute": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight rows of signal, each with a mute that holds off until a chosen point in the clock before it takes effect",
+    "Arms the mute for that row, or disarms it again; the change lands at the next point the row's ratio knob picks out, or at once when that knob is at Immediate",
+    "Chooses when an armed mute for that row lands: Immediate at the centre, /1 to /32 anticlockwise for once every that many clock ticks, and X1 to X32 clockwise for that many times within one clock tick",
+    "The signal for that row, passed to the output of the same number and silenced while that row is muted",
+    "The signal from the input of the same number, silenced while that row is muted",
+    "Sets the tick every ratio counts against, on each rising edge; with no cable the module counts its own tick every 0.5 seconds",
+    "Restarts the tick count on a rising edge and lands every armed mute at once",
+    "Note — a mute fades in and out over a short ramp rather than cutting, until Soft Transition is switched off for that row",
+    "Note — the lamp inside a mute button glows red while that row is muted and blinks green while a change is armed and has not yet landed",
+    "Note — an output with nothing patched to the input of the same number carries no channels at all",
+    "Menu — Automatically Press — right-click a mute button; re-arms that row at every ratio point, so the row switches on and off for as long as this is on",
+    "Menu — Soft Transition — right-click a mute button; switched off, the row is cut and restored at once in place of fading",
+    "Menu — Random Ratio Ranges — right-click a mute button; two sliders, Range Left and Range Right, that let the row's ratio jump to a random neighbour each time a mute lands",
+    "Menu — Light Opacity — right-click a mute button; sets how bright that row's lamp is, 0 to 100 per cent",
+    "Menu — Toggle Left Expander — sends this module's button presses, clock and reset to the Smute immediately to its left",
+    "Menu — Toggle Right Expander — sends this module's button presses, clock and reset to the Smute immediately to its right",
+    "Menu — Global Light Opacity — sets how bright every lamp on this module is, 0 to 100 per cent",
+    "Note — presses, clock and reset passed from one Smute travel on down a row of them; a Smute with its own cable in CLOCK uses that in place of the clock it is sent"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 5,
+    "9": 6
+   },
+   "out": {
+    "0": 4,
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4
+   },
+   "family": {
+    "in": {
+     "8": "trigger",
+     "9": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "why": "syncmute.cpp:398 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "1": {
+      "poly": true,
+      "why": "syncmute.cpp:398 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "2": {
+      "poly": true,
+      "why": "syncmute.cpp:398 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "3": {
+      "poly": true,
+      "why": "syncmute.cpp:398 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "4": {
+      "poly": true,
+      "why": "syncmute.cpp:398 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "5": {
+      "poly": true,
+      "why": "syncmute.cpp:398 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "6": {
+      "poly": true,
+      "why": "syncmute.cpp:398 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "7": {
+      "poly": true,
+      "why": "syncmute.cpp:398 wraps the input in PolyphonicValue, which reads getChannels and readVoltages"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "an internal tick every 0.5 seconds",
+      "why": "syncmute.cpp:370 clockTrigger.process(inputs[CLOCK].getVoltage(), 0.1f, 2.f); line 379 sets clockTime to 0.5f when the jack is empty"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "normal": "0V",
+      "why": "syncmute.cpp:355 resetTrigger.process(inputs[RESET].getVoltage(), 0.1f, 2.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "why": "syncmute.cpp:400 PolyphonicValue::setOutput calls setChannels and writeVoltages, so the output takes the channel count of the input of the same number"
+     },
+     "1": {
+      "poly": true,
+      "why": "syncmute.cpp:400 PolyphonicValue::setOutput calls setChannels and writeVoltages, so the output takes the channel count of the input of the same number"
+     },
+     "2": {
+      "poly": true,
+      "why": "syncmute.cpp:400 PolyphonicValue::setOutput calls setChannels and writeVoltages, so the output takes the channel count of the input of the same number"
+     },
+     "3": {
+      "poly": true,
+      "why": "syncmute.cpp:400 PolyphonicValue::setOutput calls setChannels and writeVoltages, so the output takes the channel count of the input of the same number"
+     },
+     "4": {
+      "poly": true,
+      "why": "syncmute.cpp:400 PolyphonicValue::setOutput calls setChannels and writeVoltages, so the output takes the channel count of the input of the same number"
+     },
+     "5": {
+      "poly": true,
+      "why": "syncmute.cpp:400 PolyphonicValue::setOutput calls setChannels and writeVoltages, so the output takes the channel count of the input of the same number"
+     },
+     "6": {
+      "poly": true,
+      "why": "syncmute.cpp:400 PolyphonicValue::setOutput calls setChannels and writeVoltages, so the output takes the channel count of the input of the same number"
+     },
+     "7": {
+      "poly": true,
+      "why": "syncmute.cpp:400 PolyphonicValue::setOutput calls setChannels and writeVoltages, so the output takes the channel count of the input of the same number"
+     }
+    }
+   },
+   "notes": "Read from the source at tag v2.1.14 (commit 75e5f70), which is the installed build. The mute button and the ratio knob of a row share one centre: the button (a CKD6 at 28px scaled to 0.85) sits inside the knob (36px scaled to 1.085), so a click on the dark inner circle reaches the button and a click on the ringed outer edge reaches the knob. Help.cpp resolves overlapping controls by the smaller box, so both are reachable and both are tagged. The panel prints no label on the knob at all; it is called Ratio in the maker's tooltip and on the maker's page, and the lines use that name. Ratio values map through a 65-entry list, /32 at -32 through Immediate at 0 to X32 at +32."
   }
  }
 }

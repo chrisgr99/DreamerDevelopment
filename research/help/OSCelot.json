@@ -1,18 +1,193 @@
 {
  "plugin": "OSCelot",
- "source": "https://github.com/The-Modular-Mind/oscelot.git",
+ "source": "https://github.com/The-Modular-Mind/oscelot/blob/master/docs/Oscelot.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "OSCelot": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Drives the knobs, sliders and switches of other modules in the patch from OSC messages arriving over the network, and sends each mapped control's name and value back out.",
+    "Switches the OSC receiver on and off, opening or closing the receive port. The lamp is grey while off, green while on, blue as a message arrives.",
+    "Switches the OSC sender on and off, opening or closing the connection to the address and send port. The lamp is grey while off, green while on, blue as a message goes out.",
+    "Steps back through the modules in the patch that have a stored mapping, in rack order, and loads the mapping of the one it reaches.",
+    "Steps forward through the modules in the patch that have a stored mapping, in rack order, and loads the mapping of the one it reaches.",
+    "Arms a click: the pointer becomes a crosshair and the next module clicked has its stored mapping loaded into the slots.",
+    "Chooses which of 128 banks of mappings is in use, numbered 1 to 128. Moving it writes the current slots into the bank being left and loads the slots held in the bank arrived at.",
+    "Note — the module makes no sound of its own. It moves other modules' controls from OSC and reports their values back; nothing at all happens until the receiver is switched on.",
+    "Note — the address and the two port numbers are typed into fields on the panel, not chosen from a list; they start at localhost, 8881 to receive on and 8880 to send to.",
+    "Note — an incoming message is read only when its address ends in /fader, /encoder or /button and carries an integer id and a value. A fader sends 0 to 1, an encoder -1 or +1 a step, a button 0 or 1.",
+    "Note — to map one control: click a slot in the list, click a parameter anywhere in the patch, then move the matching control on the OSC device.",
+    "Note — ESC pressed over the module stops a mapping in progress, and SPACE skips the slot being learned.",
+    "Note — a newly mapped slot copies the encoder sensitivity and controller mode of the slot mapped before it.",
+    "Note — the patch stores the address and ports, whether the sender and receiver were on, every mapping slot, every stored module mapping and all 128 banks.",
+    "Note — an OSC'elot expander placed immediately to the right turns eight of the mapping slots into trigger and CV outputs.",
+    "Menu — Set Context Label — names this instance of the module, so a parameter's own right-click menu can say which one it is being mapped to.",
+    "Menu — Text scrolling — scrolls a mapping row's text when it is wider than the row.",
+    "Menu — Hide mapping indicators — stops the blue marks drawn over mapped parameters elsewhere in the patch.",
+    "Menu — Lock mapping slots — refuses changes to the mapping list, and stops the list from swallowing scroll events when the pointer is over it.",
+    "Menu — Ignore OSC devices — keeps the address and ports set on the panel when a preset is loaded, taking only the mapping slots from it.",
+    "Menu — Clear mapping slots — empties every mapping slot when a preset is loaded.",
+    "Menu — Precision: Unnecessary, Why not, More than Enough, Enough — sets how often values are read and sent, as a division of the sample rate; the menu prints the resulting rate in Hz beside each name.",
+    "Menu — Mode: Operating, Locate and indicate — Operating lets an incoming message move the mapped parameter; Locate and indicate leaves it alone and flashes the mapping mark instead.",
+    "Menu — Now — sends the value and the description of every mapped control to the OSC device once.",
+    "Menu — Periodically — sends the value and the description of every mapped control once a second, changed or not.",
+    "Menu — Send Full feedback — sends the description alongside the value every time, rather than only when the parameter changes.",
+    "Menu — Clear first — empties the mapping slots, then maps the next module clicked.",
+    "Menu — Keep OSC assignments — maps the next module clicked onto the slots already in use, leaving the OSC assignments alone.",
+    "Menu — Clear mappings — empties every mapping slot.",
+    "Menu — Available mappings — lists the stored module mappings; each one opens a Delete item.",
+    "Menu — Store mapping — lists the modules the slots currently reach, and writes the mapping under the one picked. One mapping is held per module type, and storing replaces what was there.",
+    "Menu — Apply mapping — arms a click: the next module clicked has its stored mapping loaded into the slots.",
+    "Menu — Clear OSC assignment — on a row of the mapping list: drops the OSC assignment from that slot.",
+    "Menu — Encoder Sensitivity — on a row of the mapping list holding an encoder: the number of steps that sweep the whole parameter, with Reset putting it back to 649.",
+    "Menu — Input mode for Controller: Direct, Pickup (snap), Pickup (jump), Toggle, Toggle + Value — on a row of the mapping list: sets how that slot turns an incoming value into a parameter move.",
+    "Menu — Learn OSC — on the right-click menu of a knob, slider or switch anywhere in the patch: maps that control to the next OSC message received.",
+    "Menu — Go to mapping module — on the right-click menu of a mapped control: centres the rack view on the OSC'elot holding its slot."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "notes": "The module has no ports of any kind, so almost everything about it is a Note or a Menu line. Panel lettering reads Send over the button the code wires to PARAM_SEND and Receive over PARAM_RECV (Oscelot.cpp:1004-1012 against res/Oscelot_BlackSteel.svg); the two are the right way round. The three memory buttons and the bank slider carry no lettering. The receiving and sending flags at Oscelot.cpp:73-74 are declared without an initialiser and onReset does not set them, so the state a freshly placed module wakes in is whatever the allocation left; both are stored to and restored from the patch. The four panel themes are left out as cosmetic."
   },
   "OSCelotExpander": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "An expander for OSC'elot that turns eight of its mapping slots into a trigger and a CV output each. It goes immediately to the right of OSC'elot, or of another of these.",
+    "Every one of the eight triggers on one cable, one channel per controller.",
+    "Every one of the eight control voltages on one cable, one channel per controller.",
+    "A 1ms pulse at 10V each time that controller's value changes.",
+    "That controller's value as a voltage, spread over the range chosen on the menu, which starts at -5V to 5V.",
+    "Note — every output stays at 0V unless an OSC'elot, or another of these expanders, is immediately to its left.",
+    "Note — the first expander carries the first eight of OSC'elot's mapping slots; a second one chained to its right carries the next eight, and so on.",
+    "Note — the name of each mapped controller is drawn beside its pair of jacks, and POLY beside the pair at the top; the lettering is not a control.",
+    "Menu — Configure CV — opens the three ways of setting the voltage span the CV outputs use.",
+    "Menu — Voltage Range: -1V to 1V, -3V to 3V, -5V to 5V, -10V to 10V, 0V to 1V, 0V to 3V, 0V to 5V, 0V to 10V — sets both ends of the CV span at once.",
+    "Menu — Start Voltage: -10 V, -5 V, -3 V, -1 V, 0 V, 1 V, 3 V, 5 V, 10 V — sets the voltage a controller at its lowest gives.",
+    "Menu — End Voltage: -10 V, -5 V, -3 V, -1 V, 0 V, 1 V, 3 V, 5 V, 10 V — sets the voltage a controller at its highest gives."
+   ],
+   "out": {
+    "16": 1,
+    "17": 2,
+    "0": 3,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 4,
+    "9": 4,
+    "10": 4,
+    "11": 4,
+    "12": 4,
+    "13": 4,
+    "14": 4,
+    "15": 4
+   },
+   "family": {
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "trigger",
+     "17": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "1": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "2": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "3": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "4": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "5": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "6": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "7": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "8": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "9": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "10": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "11": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "12": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "13": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "14": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "15": {
+      "poly": false,
+      "why": "OscelotExpander.cpp process() calls setVoltage on these ports and setChannels on neither"
+     },
+     "16": {
+      "poly": true,
+      "range": "high above 1V",
+      "why": "OscelotExpander.cpp process() calls outputs[POLY_OUTPUT].setChannels(8) and writes one trigger per channel"
+     },
+     "17": {
+      "poly": true,
+      "why": "OscelotExpander.cpp process() calls outputs[POLY_OUTPUT_LAST].setChannels(8) and writes one control voltage per channel"
+     }
+    }
+   },
+   "notes": "None of the eighteen jacks is named in configOutput, and the panel art carries no lettering; the names in the census are blank and the labels beside the jacks are drawn at runtime from the controller names OSC'elot passes across. Output indices are TRIG_OUTPUT 0 to 7, CV_OUTPUT 8 to 15, then the poly trigger jack at 16 and the poly CV jack at 17, which the widget places as the pair at the top. OscelotExpander.cpp process() returns out of the middle of its loop on the first controller whose value is below zero, so where an earlier slot is unmapped the jacks past it hold their last value instead of resting; it also allocates a new expander message every 64 samples without freeing the one before."
   }
  }
 }

@@ -1,28 +1,355 @@
 {
  "plugin": "LOGinstruments",
- "source": "https://github.com/LOGUNIVPM/LOGinstruments",
+ "source": "https://github.com/LOGUNIVPM/LOGinstruments/blob/master/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
-  "Speck": {
+  "Velvet": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A velvet noise generator: sparse one-sample pulses of alternating sign, with a second jack giving plain white noise",
+    "Sets how often a pulse appears, silence at the counter-clockwise end and a pulse on nearly every sample at the clockwise end; the setting is cubed, so most of the change is at the top",
+    "Adds to the density knob, where 1V covers the whole of the knob's travel, and the total is clamped at full density above that",
+    "Chooses between pulses of a fixed 10V and pulses whose height falls as the density rises; on the sloped setting the height runs from 33.75V at zero density down to 1.25V at full",
+    "The velvet noise: 0V between pulses, and one sample either up or down where a pulse lands, the direction chosen at random",
+    "White noise, evenly spread between ±5V",
+    "Note — both jacks are made from the same random number on each sample, so a velvet pulse only ever lands where the white noise output is near the bottom of its swing",
+    "Note — on the sloped mode the pulses reach 33.75V at low densities, well outside the ±12V that Rack modules normally keep to"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3
+   },
+   "in": {
+    "0": 2
+   },
+   "out": {
+    "0": 4,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 1V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "why": "Velvet.cpp:43 reads getVoltage() with no channel argument and line 45 adds the knob to it and clamps the total to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Velvet.cpp:73-79 write one value with setVoltage and the module never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "Velvet.cpp:85 writes one value with setVoltage and the module never calls setChannels"
+     }
+    }
+   },
+   "notes": "Read at commit 1fc62fa, the head of the repository and the only commit carrying the installed 2.0.4; its plugin.json is byte for byte the installed one. The density input reaches full scale at 1V rather than at 10V: Velvet.cpp:45 adds the raw voltage to a knob that runs 0 to 1 and clamps the total there. In the density-weighted mode the pulse height is (1.5 minus the density) cubed times 10, so it is 33.75V at the bottom of the density range and 1.25V at the top, and the pulse height is worked out from the density before the density is cubed. The same uniform random number decides whether a pulse fires and what the white noise output reads, so the two outputs are not independent. Nothing in this plugin is polyphonic and it adds no context menu items."
   },
   "Crystal": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Up to 32 self-exciting delay-line voices detuned against one another, whose pitch and waveform are taken only at the moment a voice is restarted",
+    "Sets how many voices run, 1 to 32; the count moves by one voice per sample, so a large change takes a moment to arrive",
+    "Spreads the voices in pitch, each voice by its own fixed share of the setting, reaching 0.808 of a semitone either way at the clockwise end",
+    "Sets the output level from -30 to 6; the figure is read as ten to the power of a tenth of it, so the clockwise end is about four times and the counter-clockwise end a thousandth",
+    "Retunes and restarts every voice when pressed, one voice per sample, taking the pitch and waveform from the inputs at that moment",
+    "Stops any retuning or restarting at all, so neither the inputs nor the reset button changes what is already sounding",
+    "Restarts every voice on a rising edge above 1V, retuning each one from the other two inputs as it goes",
+    "Chooses the waveform each voice takes at its next restart: the voltage is rounded to a whole number and wrapped over six shapes, saw, triangle, square, pulse, bipolar pulse and sine",
+    "Sets the pitch each voice takes at its next restart, 1V per octave with 0V giving C4 at 261.63Hz, held between 32 semitones below and 54 above",
+    "Every voice summed, clamped to ±15V",
+    "The first voice together with every odd-numbered voice after it, clamped to ±15V",
+    "The first voice together with every even-numbered voice after it, clamped to ±15V",
+    "Note — the pitch and waveform inputs are read only while a voice is being restarted, so patching them changes nothing until the Rst button is pressed or the first input is triggered",
+    "Note — nothing is computed at all until one of the three output jacks is patched",
+    "Note — a voice whose energy falls below half of its starting pulse is re-excited by the module itself, so the sound keeps going with nothing patched in",
+    "Note — the module also restarts all its voices every 1024 samples while the third input is below 0V, and while the first input is above the second and the third is below 1V",
+    "Note — the gem drawn in the middle of the panel shows the energy in each voice; it is drawn by the module rather than placed as a widget, so it cannot be clicked for help"
+   ],
+   "param": {
+    "1": 1,
+    "3": 2,
+    "4": 3,
+    "7": 4,
+    "8": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "crystal.cpp:87 reads getVoltage() with no channel argument and line 99 passes it to a SchmittTrigger at Rack's default thresholds of 0V and 1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "swings",
+      "why": "crystal.cpp:92 rounds the voltage to a whole number and takes it modulo the six waveform types, so a negative voltage selects a negative index"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "crystal.cpp:94 multiplies the voltage by 12 and clamps it to -32 and 54 semitones, and crystal.hpp:348 turns that into 261.626 times two to the power of the semitones over twelve"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "crystal.cpp:158 writes one value with setVoltage and the module never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "crystal.cpp:156 writes one value with setVoltage and the module never calls setChannels"
+     },
+     "2": {
+      "poly": false,
+      "why": "crystal.cpp:157 writes one value with setVoltage and the module never calls setChannels"
+     }
+    }
+   },
+   "notes": "Read at commit 1fc62fa, the only commit carrying the installed 2.0.4 and byte for byte the installed plugin.json. Four of the nine ParamIds are dead: PARAM_F0, PARAM_OSC_TYPE, PARAM_PITCH_IN_AMT and PARAM_KEYB_SCALE are never given a configParam and never given a widget, so they have no tooltip, no position and no way of being reached; F0 and OSC_TYPE are still read at crystal.cpp:75, where with no ParamQuantity they always return zero. The automatic reset condition at crystal.cpp:101 is written as ((cv1 > cv2) > cv3), a chained comparison: the left side becomes 0 or 1 and is then compared against the third input, so any third-input voltage below 0V makes the condition true whatever the other two read, and the module restarts every voice every 1024 samples. Since the third input is the pitch input, that means every pitch below C4 retriggers the whole bank continuously. Voice 0 is processed twice per sample, once for each detune output at crystal.cpp:147 and :148, so it runs at twice the rate of the other voices and the two side outputs get different consecutive samples of it. The volume knob is treated as power decibels, ten to the power of the value over ten, which is half the usual amplitude decibel law. Nothing here is polyphonic and the plugin adds no context menu items."
   },
-  "Velvet": {
+  "Speck": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A spectrum analyser for two signals: a 2048-point Hann-windowed transform of each, drawn in decibels over a linear or logarithmic frequency axis",
+    "Scales the height of the orange trace, eleven whole-number positions from -5 to 5, each one drawing twice as tall as the one below it",
+    "Scales the height of the green trace, eleven whole-number positions from -5 to 5, each one drawing twice as tall as the one below it",
+    "Moves the orange trace up and down the display, -1 to +1 added to its scaled height",
+    "Moves the green trace up and down the display, -1 to +1 added to its scaled height",
+    "Narrows the band of frequencies drawn, 1 to 8, with 1 showing everything up to half the sample rate",
+    "Slides the drawn band along the frequency axis, 0 at the bottom of the range and 1 at the top; it changes nothing while the zoom is at 1",
+    "Switches the frequency axis between linear and logarithmic on each press, the two lamps showing which one is in use",
+    "Stops and restarts the analysis on each press, the lamp showing when it is running; with both input jacks empty it is off and cannot be turned on",
+    "The signal drawn as the orange trace",
+    "The signal drawn as the green trace",
+    "The first input passed straight through, unchanged, for carrying that signal on",
+    "The second input passed straight through, unchanged, for carrying that signal on",
+    "Note — the readout marked Peak f gives the number of the loudest transform bin, not a frequency; multiply it by the sample rate and divide by 2048 to get hertz",
+    "Note — a transform is taken once every 2048 input samples, so the picture is redrawn from new data only that often",
+    "Note — magnitudes are drawn as 20 times the base-ten logarithm of the magnitude plus 0.01, which puts the floor of a silent channel at -40dB"
+   ],
+   "param": {
+    "0": 1,
+    "2": 2,
+    "1": 3,
+    "3": 4,
+    "4": 5,
+    "6": 6,
+    "5": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Speck.cpp:146 and :158 read getVoltage() with no channel argument; the module never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "Speck.cpp:149 and :159 read getVoltage() with no channel argument; the module never calls setChannels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "normal": "the first input, unchanged",
+      "why": "Speck.cpp:146 copies the first input to this jack with setVoltage and no channel argument"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the second input, unchanged",
+      "why": "Speck.cpp:149 copies the second input to this jack with setVoltage and no channel argument"
+     }
+    }
+   },
+   "notes": "Read at commit 1fc62fa, the only commit carrying the installed 2.0.4. The peak readout at Speck.cpp:383 prints stats->peakx, which Stats::calculate fills with the index of the loudest bin rather than a frequency, while the label beside it reads Peak f. The analysis runs as soon as either input is patched; the ON button toggles a forceOff flag that is cleared whenever both inputs are pulled out. The two pass-through jacks copy the input voltage without touching it, one channel only, so a polyphonic cable comes out as a single channel. Nothing here is polyphonic and the plugin adds no context menu items."
   },
   "LessMess": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Nine straight-through connections, each with a text field you type a name into, for labelling cables where they cross a patch",
+    "One end of that row's connection; whatever comes in here leaves the output on the same row untouched",
+    "Carries whatever is patched into that row's input, untouched",
+    "Note — click a text field and type to name that row, and the text is saved with the patch; the fields are drawn by the module rather than placed as widgets, so none of them can be clicked for help",
+    "Note — each row copies one channel only, so a polyphonic cable comes out of the row as a single channel",
+    "Note — a row's output is written only while its own input is patched; pull the input out and the output holds the last voltage it carried"
+   ],
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1
+   },
+   "out": {
+    "0": 2,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2
+   },
+   "family": {
+    "in": {},
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "why": "LessMess.cpp:44 reads getVoltage() with no channel argument inside a loop over the nine rows; the module never calls setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "LessMess.cpp:44 reads getVoltage() with no channel argument inside a loop over the nine rows; the module never calls setChannels"
+     },
+     "2": {
+      "poly": false,
+      "why": "LessMess.cpp:44 reads getVoltage() with no channel argument inside a loop over the nine rows; the module never calls setChannels"
+     },
+     "3": {
+      "poly": false,
+      "why": "LessMess.cpp:44 reads getVoltage() with no channel argument inside a loop over the nine rows; the module never calls setChannels"
+     },
+     "4": {
+      "poly": false,
+      "why": "LessMess.cpp:44 reads getVoltage() with no channel argument inside a loop over the nine rows; the module never calls setChannels"
+     },
+     "5": {
+      "poly": false,
+      "why": "LessMess.cpp:44 reads getVoltage() with no channel argument inside a loop over the nine rows; the module never calls setChannels"
+     },
+     "6": {
+      "poly": false,
+      "why": "LessMess.cpp:44 reads getVoltage() with no channel argument inside a loop over the nine rows; the module never calls setChannels"
+     },
+     "7": {
+      "poly": false,
+      "why": "LessMess.cpp:44 reads getVoltage() with no channel argument inside a loop over the nine rows; the module never calls setChannels"
+     },
+     "8": {
+      "poly": false,
+      "why": "LessMess.cpp:44 reads getVoltage() with no channel argument inside a loop over the nine rows; the module never calls setChannels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "normal": "the input on the same row",
+      "why": "LessMess.cpp:44 writes the matching input to this jack with setVoltage and no channel argument, and only while that input is connected"
+     },
+     "1": {
+      "poly": false,
+      "normal": "the input on the same row",
+      "why": "LessMess.cpp:44 writes the matching input to this jack with setVoltage and no channel argument, and only while that input is connected"
+     },
+     "2": {
+      "poly": false,
+      "normal": "the input on the same row",
+      "why": "LessMess.cpp:44 writes the matching input to this jack with setVoltage and no channel argument, and only while that input is connected"
+     },
+     "3": {
+      "poly": false,
+      "normal": "the input on the same row",
+      "why": "LessMess.cpp:44 writes the matching input to this jack with setVoltage and no channel argument, and only while that input is connected"
+     },
+     "4": {
+      "poly": false,
+      "normal": "the input on the same row",
+      "why": "LessMess.cpp:44 writes the matching input to this jack with setVoltage and no channel argument, and only while that input is connected"
+     },
+     "5": {
+      "poly": false,
+      "normal": "the input on the same row",
+      "why": "LessMess.cpp:44 writes the matching input to this jack with setVoltage and no channel argument, and only while that input is connected"
+     },
+     "6": {
+      "poly": false,
+      "normal": "the input on the same row",
+      "why": "LessMess.cpp:44 writes the matching input to this jack with setVoltage and no channel argument, and only while that input is connected"
+     },
+     "7": {
+      "poly": false,
+      "normal": "the input on the same row",
+      "why": "LessMess.cpp:44 writes the matching input to this jack with setVoltage and no channel argument, and only while that input is connected"
+     },
+     "8": {
+      "poly": false,
+      "normal": "the input on the same row",
+      "why": "LessMess.cpp:44 writes the matching input to this jack with setVoltage and no channel argument, and only while that input is connected"
+     }
+    }
+   },
+   "notes": "Read at commit 1fc62fa, the only commit carrying the installed 2.0.4. The nine rows pass the signal through untouched but drop every channel beyond the first, so the module is not transparent to polyphonic cables. The line at LessMess.cpp:43 guards the copy on the input being connected, so an output whose input is pulled out freezes at its last value rather than falling to 0V. The nine rows carry whatever is patched through them, so none of the eighteen jacks is given a family."
   }
  }
 }

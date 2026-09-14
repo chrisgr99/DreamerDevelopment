@@ -2,77 +2,3437 @@
  "plugin": "LydD-Modules",
  "source": "https://github.com/Lydian-Des/LydD_Modules",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Poppy-fields": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Sequencer that steps along the orbit of one point in a Mandelbrot-style fractal, turning the real and imaginary parts of each iteration into two CVs, with the map drawn on the screen",
+    "Each rise past 1V advances the sequence by one step; this clock drives the X axis, and the Y axis as well when Yi-Clock has no cable",
+    "Advances the sequence by one step each time it is pressed, on both axes at once",
+    "Each rise past 1V advances the Y axis alone, so the two axes can run at different rates; with no cable the Y axis follows Clock In",
+    "A rise past 1V returns both axes to the step set by Start",
+    "Returns both axes to the step set by Start; a cable in Reset In replaces this button",
+    "Each rise past 1V flips the sequence between running forwards and backwards",
+    "Flips the sequence between running forwards and backwards; a cable in Reverse In replaces this button",
+    "The real part of the value the fractal starts iterating from; the knob travels to 1.8 either way but the value is clamped at 1.5, so the last of the travel does nothing",
+    "The imaginary part of the value the fractal starts iterating from; the knob travels to 1.8 either way but the value is clamped at 1.5, so the last of the travel does nothing",
+    "Added to the outer Mutagens knob, 5V moving it by 1; the total is clamped to 1.5 either way",
+    "Added to the inner Mutagens knob, 5V moving it by 1; the total is clamped to 1.5 either way",
+    "The real part of the constant added at every iteration, which is the point on the map the sequence is taken from, -2 to 2",
+    "The imaginary part of the constant added at every iteration, which is the point on the map the sequence is taken from, -2 to 2",
+    "Added to the outer Soil knob, 5V moving it by 1; the total is clamped to the edges of the drawn map",
+    "Inverted before it is added to the inner Soil knob, so a positive voltage moves the point the opposite way from the knob; the total is clamped to the edges of the drawn map",
+    "Sets the exponent the fractal is raised to at every iteration, 1.75 to 5",
+    "The absolute value of the voltage is added to the Petals knob, so a negative voltage raises the exponent as much as the same positive one does, and the total can pass the knob's own maximum of 5",
+    "Sets how many steps the sequence runs before it wraps round, 1 to 64",
+    "Replaces the length knob, 0V giving 1 step and 5V giving 64; the voltage is cut to whole volts first, so only six lengths can be reached",
+    "Sets the step the sequence starts from, 0 to 64",
+    "Replaces the Start knob, 0V giving step 0 and 5V step 64; the voltage is cut to whole volts first, so only six starting points can be reached",
+    "Sets how many steps behind the current one the two shift register outputs are read from, 1 to 4",
+    "Sets the span of the X CV output: 0 to 2V, -2V to 2V, or -5V to 5V",
+    "Sets the span of the Y CV output: 0 to 2V, -2V to 2V, or -5V to 5V",
+    "Moves the whole drawn map left and right, -1.8 to 1.8, and with it the window the Soil knobs are clamped to",
+    "Moves the whole drawn map up and down, -1.8 to 1.8, and with it the window the Soil knobs are clamped to",
+    "Narrows the drawn map around its centre, 1 to 15; the window shrinks with the square of the setting, and the CV outputs are multiplied by one plus the base-ten logarithm of it",
+    "Slews the X CV output, from none at fully counter-clockwise to about one clock interval at fully clockwise",
+    "Slews the Y CV output, from none at fully counter-clockwise to about one clock interval at fully clockwise",
+    "Replaces the Smooth knob for the X axis and runs the other way round from it: 0V gives the most slew and 5V none",
+    "Replaces the Smooth knob for the Y axis and runs the other way round from it: 0V gives the most slew and 5V none",
+    "Steps through six fractals — Mandelbrot, Burning Ship, Beetlebrot, Bird, Daisybrot and Unicron; the hover text names the one in use and marks the last two as costly to draw",
+    "Swaps the Soil and Mutagens values over, which gives the Julia set of the chosen fractal",
+    "Negates the X and Y CV outputs and both shift register outputs",
+    "Steps the Aux output through its four modes — Sum, Magnitude, Centroid and Beginning of Cycle",
+    "Negates the imaginary parts of Soil and Mutagens before the fractal is iterated, which flips the map top to bottom",
+    "Steps the drawing through four styles — Blind Lines, which draws nothing and costs the least, MonoChrome, Flower and BuddhaBrot",
+    "Copies the point set by the Soil knobs into the Move knobs, centring the map on it, and zeroes the Soil knobs so the sequence stays where it was",
+    "Copies the Move knob positions into the Mutagens knobs",
+    "The real part of the step being played, scaled to the X Range switch and slewed by Smooth",
+    "The imaginary part of the step being played, scaled to the Y Range switch and slewed by Smooth",
+    "The real part of the step a set number of places behind the one being played, scaled to the X Range switch, with no slew applied",
+    "The imaginary part of the step a set number of places behind the one being played, scaled to the Y Range switch, with no slew applied",
+    "5V for as long as the clock driving the X axis is above 1V, and 0V otherwise",
+    "5V for as long as the clock driving the Y axis is above 1V, and 0V otherwise",
+    "Carries whichever Aux mode is chosen: the sum of the two CV outputs, their magnitude, the average value of the whole sequence, or a 10V pulse 0.8 seconds long at the start of each cycle",
+    "Note — the screen draws the fractal itself, with a pale blue square at the point the Soil knobs set, a green square at the step being played, and a line joining the steps of the sequence in order",
+    "Note — every output is monophonic, whatever is patched in",
+    "Menu — Soil as Polar — reads the outer Soil knob as a radius and the inner one as an angle, instead of as two coordinates"
+   ],
+   "param": {
+    "0": 8,
+    "1": 9,
+    "2": 12,
+    "3": 13,
+    "4": 16,
+    "5": 18,
+    "6": 20,
+    "7": 22,
+    "8": 23,
+    "9": 24,
+    "10": 25,
+    "11": 26,
+    "12": 27,
+    "13": 28,
+    "14": 29,
+    "15": 32,
+    "16": 33,
+    "17": 34,
+    "18": 35,
+    "19": 36,
+    "20": 2,
+    "21": 5,
+    "22": 7,
+    "23": 37,
+    "24": 38,
+    "25": 39
+   },
+   "in": {
+    "0": 1,
+    "1": 3,
+    "2": 4,
+    "3": 6,
+    "4": 19,
+    "5": 21,
+    "6": 30,
+    "7": 31,
+    "8": 10,
+    "9": 11,
+    "10": 14,
+    "11": 15,
+    "12": 17
+   },
+   "out": {
+    "0": 40,
+    "1": 41,
+    "2": 42,
+    "3": 43,
+    "4": 44,
+    "5": 45,
+    "6": 46
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Poppy-Fields.cpp:830 reads this input with getVoltage(0), which is channel 1 alone; Poppy-Fields.cpp:837 puts it through a Schmitt trigger rising at 1V and falling at 0.8V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "Clock In",
+      "why": "Poppy-Fields.cpp:833 falls back to the clock input when this one is unconnected; Poppy-Fields.cpp:834 reads it with getVoltage(0); Poppy-Fields.cpp:861 puts it through a Schmitt trigger rising at 1V and falling at 0.8V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Poppy-Fields.cpp:554 reads this input with getVoltage(0); LydCommon.h:135 makes momentButton fire on the rise past 1V"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Poppy-Fields.cpp:561 reads this input with getVoltage(0); LydCommon.h:145 makes latchButton flip on the rise past 1V"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 5V",
+      "negative": "ignored",
+      "normal": "the length knob",
+      "why": "Poppy-Fields.cpp:569 reads this input with getVoltage(0), truncates it to whole volts, clamps that to 0 to 5 and maps it onto 1 to 64 steps"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 5V",
+      "negative": "ignored",
+      "normal": "the Start knob",
+      "why": "Poppy-Fields.cpp:574 reads this input with getVoltage(0), truncates it to whole volts, clamps that to 0 to 5 and maps it onto steps 0 to 64"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "negative": "ignored",
+      "normal": "the X Smooth knob",
+      "why": "Poppy-Fields.cpp:690 reads this input with getVoltage(0) and clamps it to 0 to 5V before it replaces the knob"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "negative": "ignored",
+      "normal": "the Y Smooth knob",
+      "why": "Poppy-Fields.cpp:696 reads this input with getVoltage(0) and clamps it to 0 to 5V before it replaces the knob"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Poppy-Fields.cpp:590 reads this input with getVoltage(0); Poppy-Fields.cpp:592 maps ±5V onto ±1, adds the knob and clamps the total to ±1.5"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Poppy-Fields.cpp:591 reads this input with getVoltage(0); Poppy-Fields.cpp:593 maps ±5V onto ±1, adds the knob and clamps the total to ±1.5"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Poppy-Fields.cpp:597 reads this input with getVoltage(0) and divides it by 5 before adding the knob"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Poppy-Fields.cpp:598 reads this input with getVoltage(0), negates it and divides it by 5 before adding the knob"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Poppy-Fields.cpp:585 reads this input with getVoltage(0) and takes its absolute value before adding it to the knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Poppy-Fields.cpp:473 sets every output to one channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "Poppy-Fields.cpp:473 sets every output to one channel"
+     },
+     "2": {
+      "poly": false,
+      "why": "Poppy-Fields.cpp:473 sets every output to one channel"
+     },
+     "3": {
+      "poly": false,
+      "why": "Poppy-Fields.cpp:473 sets every output to one channel"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Poppy-Fields.cpp:473 sets every output to one channel; Poppy-Fields.cpp:856 writes 5V while the clock trigger is high"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "Poppy-Fields.cpp:473 sets every output to one channel; Poppy-Fields.cpp:882 writes 5V while the clock trigger is high"
+     },
+     "6": {
+      "poly": false,
+      "why": "Poppy-Fields.cpp:473 sets every output to one channel"
+     }
+    }
+   },
+   "notes": "Read from src/Poppy-Fields.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. Four places where the code and Manual-Poppy_Fields.md disagree. The Smooth inputs run the opposite way from the Smooth knobs: the knob value is subtracted from 1 (line 688) while the input is used as it stands (line 690), so 0V at the jack gives the most slew where a knob at 0 gives none; the manual says only that the inputs replace the knobs. The length and Start inputs are truncated with int() before being scaled (lines 569 and 574), so only whole volts count and only six values can be reached, which the manual does not mention. Zoom shrinks the drawn window as 2 divided by the square of the setting (lines 635 and 636), which at the maximum of 15 is about 225 times rather than the 50 the manual names. The manual says the Petals input adds a small offset along with the absolute value; line 585 adds no offset. The Mutagens knobs are configured from -1.8 to 1.8 (lines 279 and 280) but the value is clamped to ±1.5 (lines 592 and 593), so the ends of their travel do nothing. The panel-theme submenu is plugin-wide and cosmetic, so it has no line."
   },
   "Dadras-Momeni-Chaos": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three copies of a four-dimensional chaotic attractor by Dadras and Momeni, meant as slow modulation: a central voice called Spawn and two offset ones, Mom and Dad, each with X, Y, Z and W outputs",
+    "A rise past 1V puts all three voices back to their starting coordinates and clears the drawn trails",
+    "Puts all three voices back to their starting coordinates and clears the drawn trails; a cable in the Reset jack replaces this button",
+    "A rise past 1V snaps Mom and Dad onto whatever coordinates Spawn has reached",
+    "Snaps Mom and Dad onto whatever coordinates Spawn has reached; a cable in the Sync jack replaces this button",
+    "Chooses which three of the four dimensions the screen draws: X, Y and Z at the bottom position, Z, Y and X in the middle, W, X and Y at the top, the third of each being the axis drawn as depth",
+    "Swaps the equation used for the W dimension, which makes the W outputs scratch about instead of curving; the hover text reads Scratch while it is on",
+    "Splits the stepping rate of Mom and Dad either side of the rate Haste sets, -2 to 2, each unit of it halving one and doubling the other",
+    "Added to the Difference knob, one unit per volt, before Mom and Dad are pushed either side of the Haste rate",
+    "Sets the first constant of the attractor, the whole travel mapping it from 5 to 9",
+    "Added to the Force knob, one unit per volt, and the total is clamped to the knob's own range",
+    "Sets the second constant of the attractor, the whole travel mapping it from 22 to 45",
+    "Added to the Split knob, one unit per volt, and the total is clamped to the knob's own range",
+    "Sets the third constant of the attractor, the whole travel mapping it from 6 to 12",
+    "Added to the Dwell knob, one unit per volt, and the total is clamped to the knob's own range",
+    "Sets the fourth constant of the attractor, the whole travel mapping it from 1 to 4; the hover text calls this knob Throw where the panel prints Hold",
+    "Added to the Hold knob, one unit per volt, and the total is clamped to the knob's own range",
+    "Sets how fast the attractor is stepped, 261.63 steps a second at the centre, doubling for each unit of travel clockwise and halving for each unit counter-clockwise",
+    "Added to the Haste knob, doubling the stepping rate of all three voices for every volt",
+    "Stops the attractor and hands the four Constants knobs over to setting the coordinates all three voices start from; the outputs hold their last value until it is pressed again",
+    "Pulls Spawn toward Mom, adding up to one hundredth of the gap between them at every step",
+    "The absolute value of the voltage is added to the M knob, 5V giving the full amount, so a negative voltage pulls as hard as the same positive one does",
+    "Pulls Spawn toward Dad, adding up to one hundredth of the gap between them at every step",
+    "The absolute value of the voltage is added to the D knob, 5V giving the full amount, so a negative voltage pulls as hard as the same positive one does",
+    "Pushes Mom and Dad apart from Spawn by a fixed step each time the attractor advances, -1 to 1; the smallest setting grows into a large difference over time",
+    "Added to the Separation knob for the X and Y dimensions but subtracted from it for the Z dimension, so on Z the jack and the knob push opposite ways",
+    "Skews the timestep the derivative is divided by, -3 to 3, slowing Mom and quickening Dad, and the other way round on the far side of the centre",
+    "Added to the Phase knob, one unit per volt, and the total is clamped to -3.14 and 3.14",
+    "The X coordinate of Mom, the copy pushed one way by Separation, -8V to 8V",
+    "The Y coordinate of Mom, the copy pushed one way by Separation, -8V to 8V",
+    "The Z coordinate of Mom, the copy pushed one way by Separation, -8V to 8V",
+    "The W coordinate of Mom, the fourth dimension added to the published equations, -8V to 8V",
+    "The X coordinate of Spawn, the copy the M and D knobs pull about, -8V to 8V",
+    "The Y coordinate of Spawn, the copy the M and D knobs pull about, -8V to 8V",
+    "The Z coordinate of Spawn, the copy the M and D knobs pull about, -8V to 8V",
+    "The W coordinate of Spawn, the fourth dimension added to the published equations, -8V to 8V",
+    "The X coordinate of Dad, the copy Separation pushes the opposite way from Mom, -8V to 8V",
+    "The Y coordinate of Dad, the copy Separation pushes the opposite way from Mom, -8V to 8V",
+    "The Z coordinate of Dad, the copy Separation pushes the opposite way from Mom, -8V to 8V",
+    "The W coordinate of Dad, the fourth dimension added to the published equations, -8V to 8V",
+    "Note — the screen draws a trail for each of the three voices, and the viewport turns slowly on its own, so a line climbing the screen does not mean a climbing output",
+    "Note — any coordinate that passes 120 throws that voice back to its starting point, which is what keeps a runaway setting from stopping the module dead",
+    "Note — every output is monophonic and clamped to -8V to 8V"
+   ],
+   "param": {
+    "0": 17,
+    "1": 24,
+    "2": 26,
+    "3": 7,
+    "4": 4,
+    "5": 2,
+    "6": 5,
+    "7": 6,
+    "8": 22,
+    "9": 20,
+    "10": 9,
+    "11": 11,
+    "12": 13,
+    "13": 15,
+    "14": 19
+   },
+   "in": {
+    "0": 18,
+    "1": 25,
+    "2": 27,
+    "3": 8,
+    "4": 23,
+    "5": 21,
+    "6": 3,
+    "7": 1,
+    "8": 10,
+    "9": 12,
+    "10": 14,
+    "11": 16
+   },
+   "out": {
+    "0": 28,
+    "1": 29,
+    "2": 30,
+    "3": 31,
+    "4": 32,
+    "5": 33,
+    "6": 34,
+    "7": 35,
+    "8": 36,
+    "9": 37,
+    "10": 38,
+    "11": 39
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Mom-and-Dad.cpp:305 reads this input with getVoltage(0), which is channel 1 alone; Mom-and-Dad.cpp:309 adds it to the knob and passes the sum to VoltToFreq, which LydConversion.cpp:13 makes a doubling per volt from 261.625565"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Mom-and-Dad.cpp:314 reads this input with getVoltage(0); Mom-and-Dad.cpp:315 to 317 add it to the knob for X and Y and subtract it for Z"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Mom-and-Dad.cpp:321 reads this input with getVoltage(0); Mom-and-Dad.cpp:322 adds it to the knob and clamps the total to -3.14 and 3.14"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Mom-and-Dad.cpp:307 reads this input with getVoltage(0); Mom-and-Dad.cpp:310 and 311 subtract the sum from one voice's pitch and add it to the other's"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "normal": "0V",
+      "why": "Mom-and-Dad.cpp:324 reads this input with getVoltage(0), takes its absolute value and maps 0 to 5V onto 0 to 1; Mom-and-Dad.cpp:327 clamps the knob-plus-jack total to 0 to 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "normal": "0V",
+      "why": "Mom-and-Dad.cpp:325 reads this input with getVoltage(0), takes its absolute value and maps 0 to 5V onto 0 to 1; Mom-and-Dad.cpp:328 clamps the knob-plus-jack total to 0 to 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Mom-and-Dad.cpp:270 reads this input with getVoltage(0); LydCommon.h:135 makes momentButton fire on the rise past 1V"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Mom-and-Dad.cpp:262 reads this input with getVoltage(0); LydCommon.h:135 makes momentButton fire on the rise past 1V"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "normal": "0V",
+      "why": "Mom-and-Dad.cpp:288 reads this input with getVoltage(0), adds it to the knob and clamps the total to ±5"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "normal": "0V",
+      "why": "Mom-and-Dad.cpp:291 reads this input with getVoltage(0), adds it to the knob and clamps the total to ±5"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "normal": "0V",
+      "why": "Mom-and-Dad.cpp:294 reads this input with getVoltage(0), adds it to the knob and clamps the total to ±5"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "normal": "0V",
+      "why": "Mom-and-Dad.cpp:297 reads this input with getVoltage(0), adds it to the knob and clamps the total to ±5"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:403 and 404 scale and clamp the value to -8 to 8V"
+     },
+     "1": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:403 and 404 scale and clamp the value to -8 to 8V"
+     },
+     "2": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:403 and 404 scale and clamp the value to -8 to 8V"
+     },
+     "3": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:403 and 404 scale and clamp the value to -8 to 8V"
+     },
+     "4": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:401 and 402 scale and clamp the value to -8 to 8V"
+     },
+     "5": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:401 and 402 scale and clamp the value to -8 to 8V"
+     },
+     "6": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:401 and 402 scale and clamp the value to -8 to 8V"
+     },
+     "7": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:401 and 402 scale and clamp the value to -8 to 8V"
+     },
+     "8": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:405 and 406 scale and clamp the value to -8 to 8V"
+     },
+     "9": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:405 and 406 scale and clamp the value to -8 to 8V"
+     },
+     "10": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:405 and 406 scale and clamp the value to -8 to 8V"
+     },
+     "11": {
+      "poly": false,
+      "range": "-8 to 8V",
+      "why": "Mom-and-Dad.cpp:255 sets every output to one channel; Mom-and-Dad.cpp:405 and 406 scale and clamp the value to -8 to 8V"
+     }
+    }
+   },
+   "notes": "Read from src/Mom-and-Dad.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. The Separation input is added for X and Y but subtracted for Z (lines 315 to 317) while the knob adds for all three, so the jack and the knob disagree on one dimension; the manual describes the input only as adding to the knob. The fourth Constants knob is configured as Throw (line 137) while the panel and the input name print Hold, so its hover text differs from the panel. The EDIT - conditions button has no printed label at all; while it is latched on, generateOutput takes the branch at line 423 and writes no output voltages, so the outputs freeze. The manual says the Influence knobs at full put Spawn midway between its parents; the code adds one hundredth of the gap per step (lines 386 and 387), which is a pull rather than a position. The maker's Haste description calls the knob volt-per-octave tuned; it scales a modulation rate, not a pitch, so the jack is marked cv. The panel-theme submenu is plugin-wide and cosmetic, so it has no line."
   },
   "Simone-Chaos": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four voices running through a chaotic flow field by Simone Conradi, each read at a chosen iteration and put out as an X and a Y, at rates from very slow modulation up to audio",
+    "Sets the first constant of the flow field, -3.14 to 3.14",
+    "Scaled to -3.14 to 3.14 and added to the Alpha knob, the total clamped to -6.28 and 6.28",
+    "Sets the second constant of the flow field, -3.14 to 3.14; 1.9 is taken off it inside the equation, so centring both constants centres the output",
+    "Scaled to -3.14 to 3.14 and added to the Beta knob, the total clamped to -6.28 and 6.28",
+    "Squashes the flow field, -2 to 2, and sets the corner of the output filter as well, 220Hz at one unit and doubling for each unit above that",
+    "Scaled to -2 to 2 and multiplied by the Wave knob, which makes that knob an attenuverter over this jack",
+    "Sets the radius of the circle that drives the whole system, 0 to 1.5",
+    "Scales the Gain input, -1 to 1; with no cable in the Gain jack that jack counts as 1, so this knob adds its own setting straight to the Gain knob",
+    "The absolute value of the voltage is scaled to 0 to 1.5, multiplied by the attenuverter and added to the Gain knob, the total clamped to 0 to 1.5",
+    "Sets the rate of all four voices, -4 to 4 octaves from the frequency the Speed button chooses",
+    "Added to the Pitch knob for voice one at one volt per octave, and sets voices two, three and four as well while their own jacks are empty",
+    "Added to the Pitch knob for voice two at one volt per octave, and sets voices three and four as well while their own jacks are empty; with no cable voice two takes voice one's rate",
+    "Added to the Pitch knob for voice three at one volt per octave, and sets voice four as well while its jack is empty; with no cable voice three takes voice two's rate",
+    "Added to the Pitch knob for voice four at one volt per octave; with no cable voice four takes voice three's rate",
+    "Shifts voice two away from the rate the other voices run at, -12 to 12 semitones",
+    "Shifts voice three away from the rate the other voices run at, -12 to 12 semitones",
+    "Shifts voice four away from the rate the other voices run at, -12 to 12 semitones",
+    "Steps through the three frequencies the Pitch knob's centre gives: Torpid at 0.0319Hz, Waves at 4.0875Hz and Voice at 130.8Hz, which is the one the module starts on",
+    "Scales the FM input, -1 to 1; with no cable in the FM jack no modulation is added at all",
+    "Frequency modulation added straight to the coordinates: the voltage is divided by 10 and scaled by the FM knob, the X axis taking it at once and the Y axis 63 samples later",
+    "Crossfades both outputs from a lowpass at fully counter-clockwise to a highpass at fully clockwise, an equal mix of the two at the centre; no distortion is applied, despite the panel printing Drive",
+    "Divided by 5 and multiplied by the Drive knob, so 5V gives the knob's full setting and a negative voltage turns the crossfade the other way",
+    "Places voice one in the field before the iteration starts, -1.5 to 1.5; with a cable in the Position 1 jack this knob multiplies that voltage instead",
+    "Places voice two in the field before the iteration starts, -1.5 to 1.5; with a cable in Position 1 or Position 2 this knob multiplies that voltage instead",
+    "Places voice three in the field before the iteration starts, -1.5 to 1.5; with a cable in any Position jack numbered 3 or less this knob multiplies that voltage instead",
+    "Places voice four in the field before the iteration starts, -1.5 to 1.5; with a cable in any Position jack this knob multiplies that voltage instead",
+    "Scaled to -1.5 to 1.5 and multiplied by the Position 1 knob, and it feeds the other three Position knobs as well while their own jacks are empty",
+    "Scaled to -1.5 to 1.5 and multiplied by the Position 2 knob, and it feeds the Position 3 and Position 4 knobs as well while their own jacks are empty",
+    "Scaled to -1.5 to 1.5 and multiplied by the Position 3 knob, and it feeds the Position 4 knob as well while that jack is empty",
+    "Scaled to -1.5 to 1.5 and multiplied by the Position 4 knob",
+    "Chooses which of the eight iterations of the field voice one is read from, 1 at fully counter-clockwise to 6 at fully clockwise, a setting between two iterations crossfading them",
+    "Chooses which of the eight iterations of the field voice two is read from, 1 at fully counter-clockwise to 6 at fully clockwise, a setting between two iterations crossfading them",
+    "Chooses which of the eight iterations of the field voice three is read from, 1 at fully counter-clockwise to 6 at fully clockwise, a setting between two iterations crossfading them",
+    "Chooses which of the eight iterations of the field voice four is read from, 1 at fully counter-clockwise to 6 at fully clockwise, a setting between two iterations crossfading them",
+    "The absolute value of the voltage times 0.6 multiplies the Pull 1 knob, and it feeds the other three Pull knobs as well while their own jacks are empty",
+    "The absolute value of the voltage times 0.6 multiplies the Pull 2 knob, and it feeds the Pull 3 and Pull 4 knobs as well while their own jacks are empty",
+    "The absolute value of the voltage times 0.6 multiplies the Pull 3 knob, and it feeds the Pull 4 knob as well while that jack is empty",
+    "The absolute value of the voltage times 0.6 multiplies the Pull 4 knob",
+    "The X coordinate of voice one, multiplied by 12 and put through the filter the Wave and Drive knobs set",
+    "The Y coordinate of voice one, multiplied by 12 and put through the filter the Wave and Drive knobs set",
+    "The X coordinate of voice two, multiplied by 12 and put through the filter the Wave and Drive knobs set",
+    "The Y coordinate of voice two, multiplied by 12 and put through the filter the Wave and Drive knobs set",
+    "The X coordinate of voice three, multiplied by 12 and put through the filter the Wave and Drive knobs set",
+    "The Y coordinate of voice three, multiplied by 12 and put through the filter the Wave and Drive knobs set",
+    "The X coordinate of voice four, multiplied by 12 and put through the filter the Wave and Drive knobs set",
+    "The Y coordinate of voice four, multiplied by 12 and put through the filter the Wave and Drive knobs set",
+    "The four X outputs added together and divided by four",
+    "The four Y outputs added together and divided by four",
+    "Note — the screen draws the flow field as short streaks and marks each of the four voices with a coloured square trail; the colours shift as Alpha, Beta and Drive are turned",
+    "Note — on the Voice setting of the Speed button, and only there, both axes are high-passed at 15.2Hz to take the DC offset out",
+    "Note — every output is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 10,
+    "1": 19,
+    "2": 21,
+    "3": 23,
+    "4": 24,
+    "5": 25,
+    "6": 26,
+    "7": 5,
+    "8": 7,
+    "9": 8,
+    "10": 1,
+    "11": 3,
+    "12": 31,
+    "13": 32,
+    "14": 33,
+    "15": 34,
+    "16": 18,
+    "17": 15,
+    "18": 16,
+    "19": 17
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 20,
+    "5": 22,
+    "6": 27,
+    "7": 28,
+    "8": 29,
+    "9": 30,
+    "10": 6,
+    "11": 9,
+    "12": 2,
+    "13": 4,
+    "14": 35,
+    "15": 36,
+    "16": 37,
+    "17": 38
+   },
+   "out": {
+    "0": 39,
+    "1": 40,
+    "2": 41,
+    "3": 42,
+    "4": 43,
+    "5": 44,
+    "6": 45,
+    "7": 46,
+    "8": 47,
+    "9": 48
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "audio",
+     "5": "audio",
+     "6": "audio",
+     "7": "audio",
+     "8": "audio",
+     "9": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Simone.cpp:341 reads this input with getVoltage(0), which is channel 1 alone, adds it to the Pitch knob and passes the sum to VoltToFreq, which LydConversion.cpp:13 makes a doubling per volt"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "Speed - 1",
+      "why": "Simone.cpp:342 falls back to voice one's rate when this jack is unconnected, and otherwise reads it with getVoltage(0) and adds it to the Pitch knob before VoltToFreq"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "Speed - 2",
+      "why": "Simone.cpp:343 falls back to voice two's rate when this jack is unconnected, and otherwise reads it with getVoltage(0) and adds it to the Pitch knob before VoltToFreq"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "Speed - 3",
+      "why": "Simone.cpp:344 falls back to voice three's rate when this jack is unconnected, and otherwise reads it with getVoltage(0) and adds it to the Pitch knob before VoltToFreq"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Simone.cpp:381 reads this input with getVoltage(0), multiplies it by the FM knob and divides by 10; with no cable no modulation is added"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "5V",
+      "why": "Simone.cpp:396 reads this input with getVoltage(0) and divides it by 5 to scale the Drive knob, using 1 in its place when unconnected"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "a multiplier of 1",
+      "why": "Simone.cpp:415 reads this input with getVoltage(0), maps ±5V onto -1.5 to 1.5 and multiplies the Position 1 knob by it, using 1 when unconnected"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "Position -1",
+      "why": "Simone.cpp:416 reads this input with getVoltage(0), maps ±5V onto -1.5 to 1.5, and falls back to the Position 1 value when unconnected"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "Position -2",
+      "why": "Simone.cpp:417 reads this input with getVoltage(0), maps ±5V onto -1.5 to 1.5, and falls back to the Position 2 value when unconnected"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "Position -3",
+      "why": "Simone.cpp:418 reads this input with getVoltage(0), maps ±5V onto -1.5 to 1.5, and falls back to the Position 3 value when unconnected"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "a multiplier of 1",
+      "why": "Simone.cpp:390 reads this input with getVoltage(0), maps ±5V onto -2 to 2 and multiplies the Wave knob by it, using 1 when unconnected"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "a multiplier of 1",
+      "why": "Simone.cpp:393 reads this input with getVoltage(0), maps ±5V onto -1.5 to 1.5 and takes the absolute value, using 1 when unconnected"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Simone.cpp:385 reads this input with getVoltage(0) and maps ±5V onto -3.14 to 3.14; Simone.cpp:387 adds it to the knob and clamps the total to ±6.28"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Simone.cpp:386 reads this input with getVoltage(0) and maps ±5V onto -3.14 to 3.14; Simone.cpp:388 adds it to the knob and clamps the total to ±6.28"
+     },
+     "14": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "a multiplier of 1",
+      "why": "Simone.cpp:405 reads this input with getVoltage(0), takes the absolute value of it times 0.6 and multiplies the Pull 1 knob by it, using 1 when unconnected"
+     },
+     "15": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "Pull - 1",
+      "why": "Simone.cpp:406 reads this input with getVoltage(0) the same way and falls back to the Pull 1 value when unconnected"
+     },
+     "16": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "Pull - 2",
+      "why": "Simone.cpp:407 reads this input with getVoltage(0) the same way and falls back to the Pull 2 value when unconnected"
+     },
+     "17": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "Pull - 3",
+      "why": "Simone.cpp:408 reads this input with getVoltage(0) the same way and falls back to the Pull 3 value when unconnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Simone.cpp:276 sets every output to one channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "Simone.cpp:276 sets every output to one channel"
+     },
+     "2": {
+      "poly": false,
+      "why": "Simone.cpp:276 sets every output to one channel"
+     },
+     "3": {
+      "poly": false,
+      "why": "Simone.cpp:276 sets every output to one channel"
+     },
+     "4": {
+      "poly": false,
+      "why": "Simone.cpp:276 sets every output to one channel"
+     },
+     "5": {
+      "poly": false,
+      "why": "Simone.cpp:276 sets every output to one channel"
+     },
+     "6": {
+      "poly": false,
+      "why": "Simone.cpp:276 sets every output to one channel"
+     },
+     "7": {
+      "poly": false,
+      "why": "Simone.cpp:276 sets every output to one channel"
+     },
+     "8": {
+      "poly": false,
+      "why": "Simone.cpp:276 sets every output to one channel"
+     },
+     "9": {
+      "poly": false,
+      "why": "Simone.cpp:276 sets every output to one channel"
+     }
+    }
+   },
+   "notes": "Read from src/Simone.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. Three things the manual does not say. Drive is not a drive: LydFilter.h:162 crossfades a lowpass and a highpass of the same signal, and Simone.cpp:399 uses the knob as that crossfade position, so the knob moves the output from lowpass to highpass with no non-linearity anywhere. The Wave knob also sets that filter's corner, at 220 times two to the power of the Wave value (Simone.cpp:401). The Gain attenuverter offsets the Gain knob when nothing is patched, because Simone.cpp:393 substitutes 1 for an unconnected jack rather than 0, so the attenuverter's setting is added to the knob directly. The big knob is configured as Speed while the panel prints Pitch, and the range button is configured as Range while the panel prints Speed, so both hover texts differ from the panel. The panel-theme submenu is plugin-wide and cosmetic, so it has no line. The Speed jacks are marked pitch rather than cv because the module comes up on its Voice range, where they set an audible pitch at one volt per octave."
   },
   "Torus-Osc": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two-operator oscillator built from toroidal orbit equations, a little circle winding around a big one, with the X, Y and Z of the traced path as three outputs and a distortion stage on each",
+    "Chooses the orbit equation, Electron, Folded or Toroidal from the bottom position upwards",
+    "Sets the frequency of the big circle, -60 to 60 semitones around 130.813Hz",
+    "Added to the Big Pitch knob at one volt per octave",
+    "Divides the big circle's frequency by 1024, ten octaves down, which turns it into a slow modulator",
+    "Sets the frequency of the little circle, -60 to 60 semitones around 130.813Hz",
+    "Added to the Little Pitch knob at one volt per octave",
+    "Divides the little circle's frequency by 1024, ten octaves down, which turns it into a slow modulator",
+    "Adds the big circle's pitch to the little circle's, so the little circle tracks the big one and the Little Pitch controls become an interval",
+    "Spreads four copies of the whole orbit apart in pitch, up to about a third of a semitone either way, and all four are added together at the outputs",
+    "Multiplies the PM input, -1 to 1; with no cable in the PM jack the knob is used on its own, which shifts both circles slightly in frequency",
+    "Phase modulation for both circles, multiplied by the PM knob and added to both phases every sample",
+    "Sets how much smaller the little circle is than the big one, which is fixed at 45 units; a negative setting makes the little circle the larger of the two",
+    "Scaled to -10 to 45 and added to the Radius knob, the total clamped to that span; a positive voltage shrinks the little circle, which is why the hover text calls it inverted",
+    "Sets how many times the path goes round the big circle in one cycle, 1 to 6, though the value is clamped at 5, so the top of the travel does nothing",
+    "Added to the Big Windings knob, one winding per volt; the absolute value of the total is taken and clamped to 5",
+    "Sets how many times the path goes round the little circle in one cycle, 1 to 6, though the value is clamped at 5, so the top of the travel does nothing",
+    "Added to the Little Windings knob, one winding per volt; the absolute value of the total is taken and clamped to 5",
+    "Sets how hard the three outputs are driven, 0 to 11; with a cable in the Drive jack this knob scales that voltage instead",
+    "The absolute value of the voltage, times a fifth of the Drive knob, replaces the knob's own setting",
+    "Chooses the distortion applied to all three outputs: a warm saturation, eight stages of wavefolding, or hard clipping, from the bottom position upwards",
+    "A rise above 0V restarts both circles at the start of their cycles",
+    "The horizontal axis of the chosen orbit equation, after the distortion stage",
+    "The vertical axis of the chosen orbit equation, after the distortion stage",
+    "The depth axis of the chosen orbit equation, after the distortion stage",
+    "Note — four copies of the orbit run at once and are added together at the outputs; with Detune at the centre all four are identical",
+    "Note — the screen draws the path the orbit traces, which is what the three outputs are the coordinates of",
+    "Note — every output is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 2,
+    "1": 5,
+    "2": 1,
+    "3": 7,
+    "4": 4,
+    "5": 14,
+    "6": 16,
+    "7": 10,
+    "8": 12,
+    "9": 18,
+    "10": 20,
+    "11": 8,
+    "12": 9
+   },
+   "in": {
+    "0": 3,
+    "1": 6,
+    "2": 15,
+    "3": 17,
+    "4": 11,
+    "5": 13,
+    "6": 19,
+    "7": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23,
+    "2": 24
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Torus.cpp:345 reads this input with getVoltage(0), which is channel 1 alone; Torus.cpp:346 adds it to the knob and passes the sum to VoltToFreq, which LydConversion.cpp:13 makes a doubling per volt from 130.813"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Torus.cpp:350 reads this input with getVoltage(0); Torus.cpp:351 adds it to the knob and passes the sum to VoltToFreq, which LydConversion.cpp:13 makes a doubling per volt from 130.813"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "negative": "swings",
+      "sumRange": "0 to 5V",
+      "normal": "0V",
+      "why": "Torus.cpp:336 reads this input with getVoltage(0) and adds it to the knob; Torus.cpp:338 takes the absolute value of the total and clamps it to 0 to 5"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "negative": "swings",
+      "sumRange": "0 to 5V",
+      "normal": "0V",
+      "why": "Torus.cpp:337 reads this input with getVoltage(0) and adds it to the knob; Torus.cpp:339 takes the absolute value of the total and clamps it to 0 to 5"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Torus.cpp:382 reads this input with getVoltage(0) and multiplies it by the PM knob; with no cable the knob alone is used"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Torus.cpp:330 reads this input with getVoltage(0), maps ±5V onto -10 to 45 and adds it to the knob; Torus.cpp:332 clamps the total to -10 to 45"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "the Drive knob",
+      "why": "Torus.cpp:423 reads this input with getVoltage(0) and multiplies its absolute value by a fifth of the Drive knob, using the knob alone when unconnected"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "Torus.cpp:388 reads this input with getVoltage(0) and compares it against 0V; Torus.cpp:389 turns that into a rising-edge trigger"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Torus.cpp:321 sets every output to one channel"
+     },
+     "1": {
+      "poly": false,
+      "why": "Torus.cpp:321 sets every output to one channel"
+     },
+     "2": {
+      "poly": false,
+      "why": "Torus.cpp:321 sets every output to one channel"
+     }
+    }
+   },
+   "notes": "Read from src/Torus.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. Manual-Torus.md says the LFO buttons drop the pitch by eight octaves; Torus.cpp:364 and 367 divide by 1024, which is ten. Both Windings knobs are configured 1 to 6 (lines 190 and 191) but the value is clamped to 5 (lines 338 and 339), so the last fifth of each knob does nothing. The Radius knob is configured -10 to 42 (line 193) while the clamp after the jack is added runs to 45, so the jack can push it past what the knob alone reaches. The output scaling has no final clamp: four detuned copies are each limited to the loudness-compensation figure and then added (lines 456 to 460), so the three outputs can pass 5V by several times when Detune is off centre. The Drive Type switch has no printed label. The panel prints Type, Follow, Radius and PM where the hover texts read Equation, Little Pitch Follow, Radial Difference and FM. The panel-theme submenu is plugin-wide and cosmetic, so it has no line."
   },
   "Clock-Long": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Master clock putting out eighteen divisions and multiples of one tempo at once, plus six ramps running across the longer spans, in any time signature from 2 to 16 beats",
+    "Sets the tempo, doubling for each unit of travel: 7.5BPM at fully counter-clockwise, 120BPM at the 0 position and 240BPM at fully clockwise",
+    "Added to the BPM knob, doubling the tempo for every volt",
+    "An external clock: each rise past 1V counts as one beat, and the tempo is taken from the average of the last four gaps, which replaces the BPM knob and its jack altogether",
+    "Sets how many beats a measure has, 2 to 16; changing it restarts every clock",
+    "Sets the note value one beat counts as, the bottom number of the time signature: 2 for a half note, 4 for a quarter, 8 for an eighth, 16 for a sixteenth; changing it restarts every clock",
+    "Starts and stops the whole clock; while it is stopped every output stays at 0V and the clocks are held at their reset point",
+    "Each rise past 0.9V starts or stops the clock, and a cable here replaces the Run button",
+    "A 10V pulse 0.08 seconds long each time the clock starts and each time it stops",
+    "Returns every clock to the start of its cycle",
+    "A rise past 1V returns every clock to the start of its cycle, and a cable here replaces the Reset button",
+    "A 10V pulse 0.08 seconds long each time the clock is reset",
+    "Sets how much of its own cycle each pulse output stays high, 1% to 99%",
+    "Divided by 5 and added to the Pulse Width knob, the total clamped between 1% and 99%",
+    "Moves the second half of each beat later or earlier, -1 to 1, the centre giving an even beat; it reaches the eighth, sixteenth and offbeat quarter outputs",
+    "Bends the six ramp outputs from nearly logarithmic at -0.99, through a straight line at 0, to exponential at 0.99",
+    "A pulse on every beat, the clock every other output is divided from",
+    "Four pulses in each beat, the offbeat ones moved by Swing",
+    "Two pulses in each beat, the second of them moved by Swing",
+    "A pulse every three quarters of a beat, free-running rather than pulled back at the bar line",
+    "One pulse in each beat, halfway through it, moved by Swing",
+    "Three pulses in the time of two beats",
+    "Three pulses in each measure",
+    "Two pulses in each measure; on an odd number of beats the first part takes the extra beat, so five beats split three then two",
+    "One pulse at the start of every measure",
+    "One pulse every four measures",
+    "One pulse every number of measures equal to the beats in a measure, so every eight measures in 8/8",
+    "One pulse every sixteen measures",
+    "One pulse every number of measures equal to the beats multiplied by the note value, so every sixteen measures in 4/4",
+    "A ramp from 0V to 10V across each half measure, bent by the Curve knob",
+    "A ramp from 0V to 10V across each measure, bent by the Curve knob",
+    "A ramp from 0V to 10V across each four measures, bent by the Curve knob",
+    "A ramp from 0V to 10V across as many measures as there are beats in one, bent by the Curve knob",
+    "A ramp from 0V to 10V across each sixteen measures, bent by the Curve knob",
+    "A ramp from 0V to 10V across the beats multiplied by the note value in measures, bent by the Curve knob",
+    "A pulse every three eighths of a beat, its cycle pulled back to the start of every measure",
+    "A pulse every three quarters of a beat, its cycle pulled back to the start of every measure",
+    "A pulse every two beats, its cycle pulled back to the start of every measure",
+    "Three pulses in the time of two beats, the cycle pulled back to the start of every measure",
+    "A pulse every beat and a half, its cycle pulled back to the start of every measure",
+    "Note — the clock comes up stopped, and nothing leaves any output until Run is pressed or a cable in the Run jack takes it high",
+    "Note — the two displays read the tempo in beats per minute and the time signature the Beats and Quaver knobs set",
+    "Note — the measure-bound outputs restart at every bar line, so a division that does not fit the bar begins again rather than carrying its offset into the next one",
+    "Note — every output is monophonic and every pulse output is 10V while it is high"
+   ],
+   "param": {
+    "0": 1,
+    "1": 4,
+    "2": 5,
+    "3": 14,
+    "4": 15,
+    "5": 12,
+    "6": 9,
+    "7": 6
+   },
+   "in": {
+    "0": 2,
+    "1": 3,
+    "2": 10,
+    "3": 7,
+    "4": 13
+   },
+   "out": {
+    "0": 8,
+    "1": 11,
+    "2": 16,
+    "3": 17,
+    "4": 18,
+    "5": 19,
+    "6": 20,
+    "7": 21,
+    "8": 22,
+    "9": 23,
+    "10": 24,
+    "11": 25,
+    "12": 26,
+    "13": 27,
+    "14": 28,
+    "15": 29,
+    "16": 30,
+    "17": 31,
+    "18": 32,
+    "19": 33,
+    "20": 34,
+    "21": 35,
+    "22": 36,
+    "23": 37,
+    "24": 38,
+    "25": 39
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "cv",
+     "20": "cv",
+     "21": "trigger",
+     "22": "trigger",
+     "23": "trigger",
+     "24": "trigger",
+     "25": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Concierge.cpp:537 reads this input with getVoltage(0), which is channel 1 alone; Concierge.cpp:105 adds it to the knob and passes the sum to VoltToFreq against a reference of 2Hz, which is 120BPM"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Concierge.cpp:538 reads this input with getVoltage(0); Concierge.cpp:283 counts a beat whenever that voltage reaches 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Concierge.cpp:528 reads this input with getVoltage(0); LydCommon.h:135 makes momentButton fire on the rise past 1V"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.9V",
+      "why": "Concierge.cpp:510 reads this input with getVoltage(0) and adds 0.1V before passing it to latchButton, which LydCommon.h:145 flips on the rise past 1V"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "the Pulse Width knob",
+      "why": "Concierge.cpp:534 reads this input with getVoltage(0), divides it by 5, adds it to the knob and clamps the total to 0.01 and 0.99"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:588 writes 10V while the run pulse is high"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:589 writes 10V while the reset pulse is high"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:562 multiplies the pulse state by 10V"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:345 scales the clock's phase to 0 to 10V"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:345 scales the clock's phase to 0 to 10V"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:345 scales the clock's phase to 0 to 10V"
+     },
+     "18": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:345 scales the clock's phase to 0 to 10V"
+     },
+     "19": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:345 scales the clock's phase to 0 to 10V"
+     },
+     "20": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:345 scales the clock's phase to 0 to 10V"
+     },
+     "21": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:566 multiplies the pulse state by 10V"
+     },
+     "22": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:566 multiplies the pulse state by 10V"
+     },
+     "23": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:566 multiplies the pulse state by 10V"
+     },
+     "24": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:566 multiplies the pulse state by 10V"
+     },
+     "25": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Concierge.cpp:490 sets every output to one channel; Concierge.cpp:566 multiplies the pulse state by 10V"
+     }
+    }
+   },
+   "notes": "Read from src/Concierge.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. The Run jack has 0.1V added before its threshold test (line 510), so it flips at 0.9V rather than the 1V every other jack on this plugin uses. The BPM knob is unlabelled on the panel; the tempo it sets is shown on the display instead. The README says the external clock assumes a quarter note; in the code it simply replaces the fundamental clock, whatever the Quaver knob says that beat is worth. The whole clock tree restarts after 50 cycles of the longest clock (line 229) to keep double-precision phase error from building up, and it restarts whenever either time-signature knob is moved. The panel-theme submenu is plugin-wide and cosmetic, so it has no line."
   },
   "Dobbs-Env": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two independent halves, each holding a pair of attack-release envelopes: a first one fired by its own gate and a second that follows after a set delay, both with end-of-cycle triggers",
+    "Sets the attack time of the first envelope, 12 microseconds at fully counter-clockwise to 12 seconds at fully clockwise, the setting squared; its Fast button shortens that to half a second",
+    "Divided by 5 and added to the A1 knob, the total clamped to the knob's own range before it is squared",
+    "Sets the attack time of the second envelope, 12 microseconds at fully counter-clockwise to 12 seconds at fully clockwise, the setting squared; its Fast button shortens that to half a second",
+    "Divided by 5 and added to the A2 knob, the total clamped to the knob's own range before it is squared",
+    "Sets the release time of the first envelope, 12 microseconds at fully counter-clockwise to 12 seconds at fully clockwise, the setting squared along the way",
+    "Divided by 5 and added to the R1 knob, the total clamped to the knob's own range before it is squared",
+    "Sets the release time of the second envelope, 12 microseconds at fully counter-clockwise to 12 seconds at fully clockwise, the setting squared along the way",
+    "Divided by 5 and added to the R2 knob, the total clamped to the knob's own range before it is squared",
+    "Multiplies the first envelope's attack and release times by 0.5 instead of 12, so its longest stage becomes half a second",
+    "Multiplies the second envelope's attack and release times by 0.5 instead of 12, so its longest stage becomes half a second",
+    "Bends both envelopes of that half from nearly logarithmic at -0.99, through straight at 0, to exponential at 0.99",
+    "Divided by 5 and multiplied by the Shape knob, so the knob becomes an attenuverter over this jack; the total is clamped to -1 and 1",
+    "Sets how long after the first envelope is triggered the second one starts, 1 millisecond to 1 second",
+    "The absolute value of the voltage, divided by 5, is added to the 2 Delay knob, the total clamped to 1 second",
+    "Holds both envelopes at full while the gate is above 0.5V, turning them from attack-release into attack-sustain-release",
+    "Any rise away from 0V starts the first envelope; while AR/ASR is on, a level above 0.5V also holds both envelopes at full",
+    "The first envelope, 0V to 10V",
+    "The second envelope, 0V to 10V",
+    "A 10V pulse 0.08 seconds long when the first envelope reaches the end of its release",
+    "A 10V pulse 0.08 seconds long when the second envelope reaches the end of its release",
+    "Note — the two halves share nothing: each has its own gate, its own pair of envelopes and its own set of knobs",
+    "Note — retriggering an envelope part way through picks the phase up from where it had got to rather than jumping back to zero",
+    "Note — every output is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 3,
+    "3": 3,
+    "4": 5,
+    "5": 5,
+    "6": 7,
+    "7": 7,
+    "8": 11,
+    "9": 11,
+    "10": 13,
+    "11": 13,
+    "12": 15,
+    "13": 15,
+    "14": 9,
+    "15": 9,
+    "16": 10,
+    "17": 10
+   },
+   "in": {
+    "0": 2,
+    "1": 2,
+    "2": 4,
+    "3": 4,
+    "4": 6,
+    "5": 6,
+    "6": 8,
+    "7": 8,
+    "8": 12,
+    "9": 12,
+    "10": 14,
+    "11": 14,
+    "12": 16,
+    "13": 16
+   },
+   "out": {
+    "0": 17,
+    "1": 17,
+    "2": 18,
+    "3": 18,
+    "4": 19,
+    "5": 19,
+    "6": 20,
+    "7": 20
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "trigger",
+     "13": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Dobbs.cpp:289 reads this input with getVoltage(0), which is channel 1 alone, divides it by 5, adds it to the knob and clamps the total to 0.0001 and 1"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Dobbs.cpp:289 reads this input with getVoltage(0), divides it by 5, adds it to the knob and clamps the total to 0.0001 and 1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Dobbs.cpp:291 reads this input with getVoltage(0), divides it by 5, adds it to the knob and clamps the total to 0.0001 and 1"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Dobbs.cpp:291 reads this input with getVoltage(0), divides it by 5, adds it to the knob and clamps the total to 0.0001 and 1"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Dobbs.cpp:290 reads this input with getVoltage(0), divides it by 5, adds it to the knob and clamps the total to 0.0001 and 1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Dobbs.cpp:290 reads this input with getVoltage(0), divides it by 5, adds it to the knob and clamps the total to 0.0001 and 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Dobbs.cpp:292 reads this input with getVoltage(0), divides it by 5, adds it to the knob and clamps the total to 0.0001 and 1"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Dobbs.cpp:292 reads this input with getVoltage(0), divides it by 5, adds it to the knob and clamps the total to 0.0001 and 1"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "a multiplier of 1",
+      "why": "Dobbs.cpp:293 reads this input with getVoltage(0), divides it by 5 and multiplies the Shape knob by it, using 1 when unconnected"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "a multiplier of 1",
+      "why": "Dobbs.cpp:293 reads this input with getVoltage(0), divides it by 5 and multiplies the Shape knob by it, using 1 when unconnected"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Dobbs.cpp:294 reads this input with getVoltage(0), divides it by 5, takes the absolute value and adds it to the knob"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Dobbs.cpp:294 reads this input with getVoltage(0), divides it by 5, takes the absolute value and adds it to the knob"
+     },
+     "12": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "Dobbs.cpp:282 reads this input with getVoltage(0); Dobbs.cpp:302 passes it to a BooleanTrigger, which fires on any voltage away from zero, and tests it against 0.5V for the sustain"
+     },
+     "13": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "Dobbs.cpp:282 reads this input with getVoltage(0); Dobbs.cpp:302 passes it to a BooleanTrigger, which fires on any voltage away from zero, and tests it against 0.5V for the sustain"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Dobbs.cpp:274 sets every output to one channel; Dobbs.cpp:307 multiplies the envelope by 10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Dobbs.cpp:274 sets every output to one channel; Dobbs.cpp:307 multiplies the envelope by 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Dobbs.cpp:274 sets every output to one channel; Dobbs.cpp:309 multiplies the envelope by 10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Dobbs.cpp:274 sets every output to one channel; Dobbs.cpp:309 multiplies the envelope by 10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Dobbs.cpp:274 sets every output to one channel; Dobbs.cpp:305 multiplies a 0.08 second pulse by 10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Dobbs.cpp:274 sets every output to one channel; Dobbs.cpp:305 multiplies a 0.08 second pulse by 10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Dobbs.cpp:274 sets every output to one channel; Dobbs.cpp:306 multiplies a 0.08 second pulse by 10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Dobbs.cpp:274 sets every output to one channel; Dobbs.cpp:306 multiplies a 0.08 second pulse by 10V"
+     }
+    }
+   },
+   "notes": "Read from src/Dobbs.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. The Trig/Gate jack has no threshold of its own: Dobbs.cpp:302 hands the raw voltage to a BooleanTrigger, so any value that is not exactly zero counts as high and a negative voltage fires the envelope as readily as a positive one. Only the sustain test uses a real threshold, 0.5V. The two Fast buttons are unlabelled apart from the word Fast beside each; their hover texts read TimeScale 1 and TimeScale 2. The AR/ASR button is one per half and reaches both envelopes of that half, as does the Shape knob. The README calls the delayed envelope a twin Peak with its own attack and decay, which is right, but the Shape knob and the AR/ASR mode are shared rather than separate. The panel-theme submenu is plugin-wide and cosmetic, so it has no line."
   },
   "Ledger-Logic": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Five blocks of logic on two gate inputs each, giving AND, XOR, NAND, NOR, NOT and a flip-flop from every block, with each block able to fold in the result of the block above it",
+    "The first gate of the top block, counted as high at 1V and above",
+    "The second gate of the top block, counted as high at 1V and above",
+    "The first gate of its block, counted as high at 1V and above; with no cable it takes an internal flip-flop clocked by the first gate of the block above, which no jack carries",
+    "The second gate of its block, counted as high at 1V and above; with no cable it takes the flip-flop output of the block above, and that empty jack is also what makes this block cascade",
+    "10V while both gates of the top block are at 1V or above",
+    "10V while this block's first gate is high and the second thing it compares is high: the AND result of the block above when cascading, or its own second gate when not",
+    "10V while exactly one of the top block's two gates is high",
+    "10V while exactly one of the two things this block compares is high: its first gate against the XOR of the block above when cascading, or its own two gates when not",
+    "10V except while both gates of the top block are at 1V or above, which is the inverse of the AND",
+    "The inverse of this block's own AND output, 10V whenever that one is at 0V",
+    "10V while both gates of the top block are below 1V",
+    "10V while this block's first gate is low and the second thing it compares is low: the NOR of the block above when cascading, or its own second gate when not",
+    "10V while the first gate of its block is below 1V; the second gate never reaches this jack",
+    "Flips between 0V and 10V on every rise of the top block's second gate past 1V",
+    "Flips between 0V and 10V on every rise of whatever its block's second gate carries, which when cascading is the flip-flop output of the block above",
+    "Note — a block cascades from the one above it whenever its second gate has no cable; patching that gate makes the block stand on its own, and the first gate has no say in it",
+    "Note — an empty gate jack is not silent: a block's first gate falls back to an internal flip-flop clocked by the block above's first gate, and its second gate to that block's FlipFlop output",
+    "Note — the module has no controls at all; everything it does is set by which jacks have cables in them",
+    "Note — every output is monophonic and is either 0V or 10V"
+   ],
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 3,
+    "5": 4,
+    "6": 3,
+    "7": 4,
+    "8": 3,
+    "9": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 8,
+    "8": 8,
+    "9": 8,
+    "10": 9,
+    "11": 10,
+    "12": 10,
+    "13": 10,
+    "14": 10,
+    "15": 11,
+    "16": 12,
+    "17": 12,
+    "18": 12,
+    "19": 12,
+    "20": 13,
+    "21": 13,
+    "22": 13,
+    "23": 13,
+    "24": 13,
+    "25": 14,
+    "26": 15,
+    "27": 15,
+    "28": 15,
+    "29": 15
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger",
+     "18": "trigger",
+     "19": "trigger",
+     "20": "trigger",
+     "21": "trigger",
+     "22": "trigger",
+     "23": "trigger",
+     "24": "trigger",
+     "25": "trigger",
+     "26": "trigger",
+     "27": "trigger",
+     "28": "trigger",
+     "29": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Ledger.cpp:251 reads this input with getVoltage(0), which is channel 1 alone; Ledger.cpp:43 counts it high at 1V and above"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Ledger.cpp:252 reads this input with getVoltage(0); Ledger.cpp:44 counts it high at 1V and above"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the block above's first flip-flop",
+      "why": "Ledger.cpp:264 reads this input with getVoltage(0) and falls back to the previous block's first flip-flop; Ledger.cpp:43 counts it high at 1V and above"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the block above's FlipFlop jack",
+      "why": "Ledger.cpp:265 reads this input with getVoltage(0) and falls back to the previous block's second flip-flop; Ledger.cpp:272 also uses this jack being empty to switch the block into cascading"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the block above's first flip-flop",
+      "why": "Ledger.cpp:264 reads this input with getVoltage(0) and falls back to the previous block's first flip-flop; Ledger.cpp:43 counts it high at 1V and above"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the block above's FlipFlop jack",
+      "why": "Ledger.cpp:265 reads this input with getVoltage(0) and falls back to the previous block's second flip-flop; Ledger.cpp:272 also uses this jack being empty to switch the block into cascading"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the block above's first flip-flop",
+      "why": "Ledger.cpp:264 reads this input with getVoltage(0) and falls back to the previous block's first flip-flop; Ledger.cpp:43 counts it high at 1V and above"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the block above's FlipFlop jack",
+      "why": "Ledger.cpp:265 reads this input with getVoltage(0) and falls back to the previous block's second flip-flop; Ledger.cpp:272 also uses this jack being empty to switch the block into cascading"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the block above's first flip-flop",
+      "why": "Ledger.cpp:264 reads this input with getVoltage(0) and falls back to the previous block's first flip-flop; Ledger.cpp:43 counts it high at 1V and above"
+     },
+     "9": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the block above's FlipFlop jack",
+      "why": "Ledger.cpp:265 reads this input with getVoltage(0) and falls back to the previous block's second flip-flop; Ledger.cpp:272 also uses this jack being empty to switch the block into cascading"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:277 multiplies a true or false by 10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:284 multiplies a true or false by 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:284 multiplies a true or false by 10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:284 multiplies a true or false by 10V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:284 multiplies a true or false by 10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:278 multiplies a true or false by 10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:285 multiplies a true or false by 10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:285 multiplies a true or false by 10V"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:285 multiplies a true or false by 10V"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:285 multiplies a true or false by 10V"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:279 multiplies a true or false by 10V"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:286 multiplies a true or false by 10V"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:286 multiplies a true or false by 10V"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:286 multiplies a true or false by 10V"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:286 multiplies a true or false by 10V"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:280 multiplies a true or false by 10V"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:287 multiplies a true or false by 10V"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:287 multiplies a true or false by 10V"
+     },
+     "18": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:287 multiplies a true or false by 10V"
+     },
+     "19": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:287 multiplies a true or false by 10V"
+     },
+     "20": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:281 multiplies a true or false by 10V"
+     },
+     "21": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:288 multiplies a true or false by 10V"
+     },
+     "22": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:288 multiplies a true or false by 10V"
+     },
+     "23": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:288 multiplies a true or false by 10V"
+     },
+     "24": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:288 multiplies a true or false by 10V"
+     },
+     "25": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:282 multiplies a true or false by 10V"
+     },
+     "26": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:289 multiplies a true or false by 10V"
+     },
+     "27": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:289 multiplies a true or false by 10V"
+     },
+     "28": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:289 multiplies a true or false by 10V"
+     },
+     "29": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Ledger.cpp:227 sets every output to one channel; Ledger.cpp:289 multiplies a true or false by 10V"
+     }
+    }
+   },
+   "notes": "Read from src/Ledger.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. Three places where the README and the code disagree. The README says a block becomes independent once both its inputs are connected; Ledger.cpp:272 tests only the second input, so patching the first input alone leaves the block cascading. The README says an unconnected first input is normalled to NOT the first input of the block above; Ledger.cpp:264 normals it to that block's first flip-flop, which is not the same thing and is not brought out to any jack. The README describes the second input as normalled to the same operation's result from the block above; Ledger.cpp:265 normals it to the previous block's second flip-flop. Two internal results never reach a jack: the first flip-flop, used only for normalling, and the NOT of the second input. The XOR in a cascading block is (first gate OR previous XOR) AND NOT the new AND (Ledger.cpp:76), which is not an exclusive-or of two independent terms. The panel-theme submenu is plugin-wide and cosmetic, so it has no line."
   },
   "The-Onceler": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four counters, each holding off until a set number of gates has arrived and then opening a gate of its own, with seven ways of doing that and a jack that passes a signal only while it is open",
+    "Counts one chop on every rise past 1V, and that count is what the row is waiting on",
+    "Counts one chop on every rise past 1V; with no cable the row counts the chops of the Axe jack above it instead",
+    "Any voltage away from 0V sets that row's count back to the start",
+    "Any voltage away from 0V sets that row's count back to the start; with no cable the row is reset whenever the row above it is",
+    "Sets that row's count back to the start",
+    "The signal passed to the Talk jack while that row's gate is open; with no cable the Axe voltage is passed instead",
+    "Sets how many chops that row counts before its gate opens, 1 to 16",
+    "The absolute value of the voltage, scaled so that 10V adds 15, is added to the Cuts knob, the total clamped to 16",
+    "Sets how many chops the gate stays open for in the modes that close it again, 1 to 16",
+    "The absolute value of the voltage, scaled so that 10V adds 15, is added to the knob that sets how long the gate stays open, the total clamped to 16",
+    "Steps that row through seven modes — Hold For _, Auto Reset, Latch, Trigger, Auto Trigger, Not Not and Auto Not Not — the lamp colour and the hover text naming the one in use",
+    "10V while that row's gate is open and 0V while it is closed",
+    "Whatever the Speak jack of that row carries while its gate is open, and 0V while the gate is closed",
+    "Note — Hold For _ opens the gate when the count reaches the Cuts number and closes it again a set number of chops later; Not Not is its exact inverse, open everywhere else",
+    "Note — Auto Reset wraps the count round the total of the row's two knobs, so the gate opens and closes over and over; Auto Not Not is its inverse",
+    "Note — Latch opens the gate at the Cuts number and leaves it open until a reset; Trigger sends one 8 millisecond pulse there instead, and Auto Trigger an 80 millisecond pulse each time round",
+    "Note — the count starts one below zero, so a row needs one chop more than its Cuts number before the gate opens",
+    "Note — each row's display reads its two knob settings, turning green while the gate is open and magenta once the count has run past the Cuts number",
+    "Note — a change to either knob on a row only takes effect at that row's next chop",
+    "Note — every output is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 7,
+    "1": 7,
+    "2": 7,
+    "3": 7,
+    "4": 11,
+    "5": 11,
+    "6": 11,
+    "7": 11,
+    "8": 5,
+    "9": 5,
+    "10": 5,
+    "11": 5,
+    "12": 9,
+    "13": 9,
+    "14": 9,
+    "15": 9
+   },
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 8,
+    "13": 8,
+    "14": 8,
+    "15": 8,
+    "16": 10,
+    "17": 10,
+    "18": 10,
+    "19": 10
+   },
+   "out": {
+    "0": 12,
+    "1": 12,
+    "2": 12,
+    "3": 12,
+    "4": 13,
+    "5": 13,
+    "6": 13,
+    "7": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "why": "Onceler.cpp:289 reads this input with getVoltage(0), which is channel 1 alone; Onceler.cpp:47 counts a chop on the rise past 1V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the Axe jack above",
+      "why": "Onceler.cpp:290 reads this input with getVoltage(0) and falls back to the row above's Axe voltage; Onceler.cpp:47 counts a chop on the rise past 1V"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the Axe jack above",
+      "why": "Onceler.cpp:291 reads this input with getVoltage(0) and falls back to the row above's Axe voltage; Onceler.cpp:47 counts a chop on the rise past 1V"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the Axe jack above",
+      "why": "Onceler.cpp:292 reads this input with getVoltage(0) and falls back to the row above's Axe voltage; Onceler.cpp:47 counts a chop on the rise past 1V"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "why": "Onceler.cpp:297 reads this input with getVoltage(0) and passes it to a BooleanTrigger, which fires on any voltage away from zero"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "normal": "the Redo jack above",
+      "why": "Onceler.cpp:298 reads this input with getVoltage(0) and passes it to a BooleanTrigger, falling back to the row above's reset when unconnected"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "normal": "the Redo jack above",
+      "why": "Onceler.cpp:299 reads this input with getVoltage(0) and passes it to a BooleanTrigger, falling back to the row above's reset when unconnected"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0V",
+      "normal": "the Redo jack above",
+      "why": "Onceler.cpp:300 reads this input with getVoltage(0) and passes it to a BooleanTrigger, falling back to the row above's reset when unconnected"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the Axe jack of that row",
+      "why": "Onceler.cpp:334 reads this input with getVoltage(0); Onceler.cpp:332 uses the row's Axe voltage in its place when unconnected"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the Axe jack of that row",
+      "why": "Onceler.cpp:334 reads this input with getVoltage(0); Onceler.cpp:332 uses the row's Axe voltage in its place when unconnected"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the Axe jack of that row",
+      "why": "Onceler.cpp:334 reads this input with getVoltage(0); Onceler.cpp:332 uses the row's Axe voltage in its place when unconnected"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the Axe jack of that row",
+      "why": "Onceler.cpp:334 reads this input with getVoltage(0); Onceler.cpp:332 uses the row's Axe voltage in its place when unconnected"
+     },
+     "12": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "sumRange": "1 to 16V",
+      "normal": "0V",
+      "why": "Onceler.cpp:307 reads this input with getVoltage(0), takes its absolute value, maps 0 to 10V onto 0 to 15 and adds the knob, clamping the total to 1 and 16"
+     },
+     "13": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "sumRange": "1 to 16V",
+      "normal": "0V",
+      "why": "Onceler.cpp:307 reads this input with getVoltage(0), takes its absolute value, maps 0 to 10V onto 0 to 15 and adds the knob, clamping the total to 1 and 16"
+     },
+     "14": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "sumRange": "1 to 16V",
+      "normal": "0V",
+      "why": "Onceler.cpp:307 reads this input with getVoltage(0), takes its absolute value, maps 0 to 10V onto 0 to 15 and adds the knob, clamping the total to 1 and 16"
+     },
+     "15": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "sumRange": "1 to 16V",
+      "normal": "0V",
+      "why": "Onceler.cpp:307 reads this input with getVoltage(0), takes its absolute value, maps 0 to 10V onto 0 to 15 and adds the knob, clamping the total to 1 and 16"
+     },
+     "16": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "sumRange": "1 to 16V",
+      "normal": "0V",
+      "why": "Onceler.cpp:311 reads this input with getVoltage(0), takes its absolute value, maps 0 to 10V onto 0 to 15 and adds the knob, clamping the total to 1 and 16"
+     },
+     "17": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "sumRange": "1 to 16V",
+      "normal": "0V",
+      "why": "Onceler.cpp:311 reads this input with getVoltage(0), takes its absolute value, maps 0 to 10V onto 0 to 15 and adds the knob, clamping the total to 1 and 16"
+     },
+     "18": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "sumRange": "1 to 16V",
+      "normal": "0V",
+      "why": "Onceler.cpp:311 reads this input with getVoltage(0), takes its absolute value, maps 0 to 10V onto 0 to 15 and adds the knob, clamping the total to 1 and 16"
+     },
+     "19": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "sumRange": "1 to 16V",
+      "normal": "0V",
+      "why": "Onceler.cpp:311 reads this input with getVoltage(0), takes its absolute value, maps 0 to 10V onto 0 to 15 and adds the knob, clamping the total to 1 and 16"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Onceler.cpp:236 sets every output to one channel; Onceler.cpp:336 multiplies the gate state by 10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Onceler.cpp:236 sets every output to one channel; Onceler.cpp:336 multiplies the gate state by 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Onceler.cpp:236 sets every output to one channel; Onceler.cpp:336 multiplies the gate state by 10V"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Onceler.cpp:236 sets every output to one channel; Onceler.cpp:336 multiplies the gate state by 10V"
+     },
+     "4": {
+      "poly": false,
+      "why": "Onceler.cpp:236 sets every output to one channel; Onceler.cpp:335 multiplies the Speak voltage by the gate state, so what it carries depends on what is patched"
+     },
+     "5": {
+      "poly": false,
+      "why": "Onceler.cpp:236 sets every output to one channel; Onceler.cpp:335 multiplies the Speak voltage by the gate state, so what it carries depends on what is patched"
+     },
+     "6": {
+      "poly": false,
+      "why": "Onceler.cpp:236 sets every output to one channel; Onceler.cpp:335 multiplies the Speak voltage by the gate state, so what it carries depends on what is patched"
+     },
+     "7": {
+      "poly": false,
+      "why": "Onceler.cpp:236 sets every output to one channel; Onceler.cpp:335 multiplies the Speak voltage by the gate state, so what it carries depends on what is patched"
+     }
+    }
+   },
+   "notes": "Read from src/Onceler.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. The count begins at -1 (Onceler.cpp:26) and is incremented once per chop, so a row set to 4 needs five chops before its gate opens; neither the panel nor the README says so. The Cuts and Wait values are only pushed into the counter when a chop arrives or the count is zero (Onceler.cpp:317), so turning either knob does nothing until the next chop. The Redo jacks have no threshold: Onceler.cpp:297 to 300 hand the raw voltage to a BooleanTrigger, so any non-zero value resets, negative included. The Speak and Talk jacks carry whatever is patched into Speak, so they are given no family. The panel prints Redo where the hover texts read Re-don't and ReDon't, and the mode button is printed as O/L/R with no expansion anywhere. The panel-theme submenu is plugin-wide and cosmetic, so it has no line."
   },
   "Shear-Comb": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo comb filter built from twelve parallel bandpass filters, with a feedback path that can be sent out to another effect and brought back",
+    "Sets the frequency of the lowest of the twelve bands, -3 to 3 octaves around 130.8125Hz, the eleven above it landing at whole multiples of it",
+    "Clamped to -3V and 3V and added to the Cutoff knob at one volt per octave",
+    "Sets the sharpness of all twelve bands together, 0 to 0.99, which becomes a filter Q of 4 up to about 48; it also lifts the output level to make up for what the filtering takes away",
+    "The absolute value of the voltage divided by 10, clamped to 0.9, multiplies the Resonance knob; with no cable the knob is used on its own",
+    "Pushes the eleven upper bands off the whole multiples of the lowest one, -1 to 1, which takes the comb out of tune and makes it more percussive",
+    "Fades the even-numbered bands against the odd-numbered ones, -1 to 1: one end leaves only the odd bands, the other only the even, and the centre passes both at half level",
+    "Divided by 5, clamped to -1 and 1, and multiplied by the Odd/Even knob; with no cable the knob is used on its own",
+    "Sets how much of the comb's own output goes back into its input, 0 to 1, halved before it is applied",
+    "Multiplies the Feedback knob; with no cable the knob is used on its own, and the voltage is not clamped, so a few volts here push the loop far past what the knob alone reaches",
+    "The return of the left feedback loop, added to the left input alongside the internal feedback; it is read only while the left Send jack also has a cable",
+    "The return of the right feedback loop, added to the right input alongside the internal feedback; it is read only while the right Send jack also has a cable",
+    "The left comb sum before the drive stage, at 5V for full scale, meant to feed an effect whose output comes back to the left Return jack",
+    "The right comb sum before the drive stage, at 5V for full scale, meant to feed an effect whose output comes back to the right Return jack",
+    "The left audio input, divided by 2.5 before the filters; with no cable this channel is silent and its feedback path carries nothing",
+    "The right audio input, divided by 2.5 before the filters; with no cable the right channel takes the left input, feedback and all",
+    "The left comb sum after the drive stage, clamped to -5V and 5V",
+    "The right comb sum after the drive stage, clamped to -5V and 5V",
+    "Note — twelve bandpass filters run in parallel, the lowest one at the Cutoff frequency and the other eleven at multiples of it that the Skew knob can pull off true",
+    "Note — the send and return path only runs when both the Send jack and the Return jack of that channel have cables; either one on its own does nothing",
+    "Note — the internal feedback is added to the audio input, so with no cable in that channel's Input jack the filters cannot ring on their own",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 3,
+    "2": 8,
+    "3": 6,
+    "4": 5
+   },
+   "in": {
+    "0": 14,
+    "1": 15,
+    "2": 2,
+    "3": 4,
+    "4": 9,
+    "5": 10,
+    "6": 11,
+    "7": 7
+   },
+   "out": {
+    "0": 16,
+    "1": 17,
+    "2": 12,
+    "3": 13
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "pitch",
+     "3": "cv",
+     "4": "cv",
+     "5": "audio",
+     "6": "audio",
+     "7": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "why": "Shear.cpp:173 reads this input with getVoltage(0), which is channel 1 alone, and divides it by 2.5 before the filters"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "Audio Left",
+      "why": "Shear.cpp:182 reads this input with getVoltage(0) and divides it by 2.5; Shear.cpp:190 uses the left channel in its place when unconnected"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Shear.cpp:123 reads this input with getVoltage(0), clamps it to -3V and 3V and adds it to the knob before VoltToFreq, which LydConversion.cpp:13 makes a doubling per volt from 130.8125"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "normal": "a multiplier of 1",
+      "why": "Shear.cpp:129 reads this input with getVoltage(0), divides it by 10, takes the absolute value and clamps to 0.9 before multiplying the knob; 1 is used when unconnected"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "a multiplier of 1",
+      "why": "Shear.cpp:149 reads this input with getVoltage(0) and multiplies the knob by it with no clamp of any kind; 1 is used when unconnected"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Shear.cpp:176 reads this input with getVoltage(0) and divides it by 2.5; Shear.cpp:153 only reads it when the matching Send output also has a cable"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Shear.cpp:185 reads this input with getVoltage(0) and divides it by 2.5; Shear.cpp:154 only reads it when the matching Send output also has a cable"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "a multiplier of 1",
+      "why": "Shear.cpp:133 reads this input with getVoltage(0), divides it by 5 and clamps to -1 and 1 before multiplying the knob; 1 is used when unconnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Shear.cpp:119 sets every output to one channel; Shear.cpp:223 writes the drive stage's output, which Shear.cpp:166 clamps to ±5V"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Shear.cpp:119 sets every output to one channel; Shear.cpp:224 writes the drive stage's output, which Shear.cpp:166 clamps to ±5V"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Shear.cpp:119 sets every output to one channel; Shear.cpp:221 multiplies a value clamped to ±1 by 5V"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "why": "Shear.cpp:119 sets every output to one channel; Shear.cpp:222 multiplies a value clamped to ±1 by 5V"
+     }
+    }
+   },
+   "notes": "Read from src/Shear.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. The Feedback jack is the one input on the module with no clamp: Shear.cpp:149 multiplies the knob by the raw voltage, so 10V there makes the feedback ten times what the knob alone can reach, and the only thing holding the result in is the ±1 clamp on the comb sum. The Skew knob has no printed label. The README calls this a true twelve band IIR comb filter; what the code builds is twelve parallel biquad bandpass filters whose centre frequencies are multiples of the Cutoff, which is a comb by shape rather than by delay line. The send and return path is gated on both jacks being connected (lines 153 and 154), so patching only one of the pair does nothing. The panel-theme submenu is plugin-wide and cosmetic, so it has no line."
   },
   "Master-Switch": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four rows, each holding a two-into-one switch and a one-into-two switch, with a master control that flips every one of them at once",
+    "Above 0.5V it flips all eight switches, and it replaces the master button once a cable is in it",
+    "While held, it flips all eight switches; with the Latch button on, each press flips them and they stay flipped",
+    "Changes the master control from following its gate to toggling on each press, so one press flips all eight switches and leaves them flipped",
+    "Chooses which of the two inputs of its row is passed to the C output, and sets the one-into-two switch of that row as well while that switch's own jack is empty",
+    "Changes both switches of its row from following their gates to toggling on each rise, so one press flips them and they stay flipped",
+    "Above 0.5V it chooses the second of the two inputs of its row, replacing that row's Switch button",
+    "Above 0.5V it sends that row's one-into-two switch to its second output, replacing whatever the two-into-one switch of the row is set to",
+    "The first input of the two-into-one switch of its row, passed to the C output while the switch is off",
+    "The second input of the two-into-one switch of its row, passed to the C output while the switch is on",
+    "Carries whichever of that row's two inputs the switch has chosen, and 0V if neither has a cable",
+    "The input of the one-into-two switch of its row; with no cable it takes the C output of the two-into-one switch on the same row",
+    "Carries that row's one-into-two input while its switch is off, and 0V while the switch is on",
+    "Carries that row's one-into-two input while its switch is on, and 0V while the switch is off",
+    "Note — each row is two separate switches, a two-into-one and a one-into-two; they share a button but can be given different gates",
+    "Note — the master control inverts every switch rather than setting it, so it swaps whatever each row was doing",
+    "Note — nothing is faded or crossfaded: a switch jumps from one signal to the other, and the unused output of a one-into-two switch is held at 0V",
+    "Note — every jack is monophonic, whatever is patched in",
+    "Note — this module carries no right-click menu of its own, so it has no panel-colour choice; its panel is always the dark one"
+   ],
+   "param": {
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "10": 5,
+    "11": 5,
+    "12": 5,
+    "13": 5
+   },
+   "in": {
+    "0": 1,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 7,
+    "6": 7,
+    "7": 7,
+    "8": 7,
+    "9": 8,
+    "10": 8,
+    "11": 8,
+    "12": 8,
+    "13": 9,
+    "14": 9,
+    "15": 9,
+    "16": 9,
+    "17": 11,
+    "18": 11,
+    "19": 11,
+    "20": 11
+   },
+   "out": {
+    "0": 10,
+    "1": 10,
+    "2": 10,
+    "3": 10,
+    "4": 12,
+    "5": 12,
+    "6": 12,
+    "7": 12,
+    "8": 13,
+    "9": 13,
+    "10": 13,
+    "11": 13
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.5V",
+      "why": "Domain.cpp:177 reads this input with getVoltage(0), which is channel 1 alone, and compares it against 0.5V"
+     },
+     "1": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.5V",
+      "normal": "that row's Switch button",
+      "why": "Domain.cpp:190 reads this input with getVoltage(0) and compares it against 0.5V, using the row's button when unconnected"
+     },
+     "2": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.5V",
+      "normal": "that row's Switch button",
+      "why": "Domain.cpp:190 reads this input with getVoltage(0) and compares it against 0.5V, using the row's button when unconnected"
+     },
+     "3": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.5V",
+      "normal": "that row's Switch button",
+      "why": "Domain.cpp:190 reads this input with getVoltage(0) and compares it against 0.5V, using the row's button when unconnected"
+     },
+     "4": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.5V",
+      "normal": "that row's Switch button",
+      "why": "Domain.cpp:190 reads this input with getVoltage(0) and compares it against 0.5V, using the row's button when unconnected"
+     },
+     "5": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.5V",
+      "normal": "the 2 to 1 switch of that row",
+      "why": "Domain.cpp:193 reads this input with getVoltage(0) and compares it against 0.5V, using the row's two-into-one state when unconnected"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.5V",
+      "normal": "the 2 to 1 switch of that row",
+      "why": "Domain.cpp:193 reads this input with getVoltage(0) and compares it against 0.5V, using the row's two-into-one state when unconnected"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.5V",
+      "normal": "the 2 to 1 switch of that row",
+      "why": "Domain.cpp:193 reads this input with getVoltage(0) and compares it against 0.5V, using the row's two-into-one state when unconnected"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 0.5V",
+      "normal": "the 2 to 1 switch of that row",
+      "why": "Domain.cpp:193 reads this input with getVoltage(0) and compares it against 0.5V, using the row's two-into-one state when unconnected"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Domain.cpp:187 reads this input with getVoltage(0) and passes it straight through, so what it carries is whatever is patched"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Domain.cpp:187 reads this input with getVoltage(0) and passes it straight through, so what it carries is whatever is patched"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Domain.cpp:187 reads this input with getVoltage(0) and passes it straight through, so what it carries is whatever is patched"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Domain.cpp:187 reads this input with getVoltage(0) and passes it straight through, so what it carries is whatever is patched"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Domain.cpp:188 reads this input with getVoltage(0) and passes it straight through, so what it carries is whatever is patched"
+     },
+     "14": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Domain.cpp:188 reads this input with getVoltage(0) and passes it straight through, so what it carries is whatever is patched"
+     },
+     "15": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Domain.cpp:188 reads this input with getVoltage(0) and passes it straight through, so what it carries is whatever is patched"
+     },
+     "16": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "0V",
+      "why": "Domain.cpp:188 reads this input with getVoltage(0) and passes it straight through, so what it carries is whatever is patched"
+     },
+     "17": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the C output of that row",
+      "why": "Domain.cpp:211 reads this input with getVoltage(0) and falls back to that row's two-into-one output when unconnected"
+     },
+     "18": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the C output of that row",
+      "why": "Domain.cpp:211 reads this input with getVoltage(0) and falls back to that row's two-into-one output when unconnected"
+     },
+     "19": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the C output of that row",
+      "why": "Domain.cpp:211 reads this input with getVoltage(0) and falls back to that row's two-into-one output when unconnected"
+     },
+     "20": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the C output of that row",
+      "why": "Domain.cpp:211 reads this input with getVoltage(0) and falls back to that row's two-into-one output when unconnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Domain.cpp:208 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "1": {
+      "poly": false,
+      "why": "Domain.cpp:208 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "2": {
+      "poly": false,
+      "why": "Domain.cpp:208 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "3": {
+      "poly": false,
+      "why": "Domain.cpp:208 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "4": {
+      "poly": false,
+      "why": "Domain.cpp:217 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "5": {
+      "poly": false,
+      "why": "Domain.cpp:217 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "6": {
+      "poly": false,
+      "why": "Domain.cpp:217 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "7": {
+      "poly": false,
+      "why": "Domain.cpp:217 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "8": {
+      "poly": false,
+      "why": "Domain.cpp:218 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "9": {
+      "poly": false,
+      "why": "Domain.cpp:218 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "10": {
+      "poly": false,
+      "why": "Domain.cpp:218 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "11": {
+      "poly": false,
+      "why": "Domain.cpp:218 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     }
+    }
+   },
+   "notes": "Read from src/Domain.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. Four parameters are declared and never given a widget: TO2_BUTTON_PARAMS 0 to 3, which the maker's own comment at Domain.cpp:20 says are not used because one button is shared by both switches of a row. They have no position in the census and no click can reach them, so they get no line. The signal jacks carry whatever is patched into them, so they are given no family. The master control inverts each row's switch state rather than forcing it, and it is applied before the per-row latch (Domain.cpp:198), so pressing it while a row is latched toggles that row rather than holding it. The big master button and the per-row Switch and Latch buttons have no printed labels; only Gate, Latch, 2 -> 1 and 1 -> 2 are printed. This module has no appendContextMenu at all, so unlike nine of the fourteen it offers no panel-colour submenu; Canyon, Reflection, Seethe and Tonnet are the same."
   },
   "Hex-Quantizer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four-channel quantizer whose scale is set by twelve hexagon buttons, either as one chromatic octave repeated everywhere or as a Tonnetz page of absolute notes, with eight stored note sets",
+    "Switches between quantizing to a twelve-note scale repeated in every octave and the Page layout, where each hexagon stands for one absolute note",
+    "Turns that note on or off in the scale; in Page mode it turns on the hexagon of that name on whichever page the knob has chosen",
+    "Shifts the incoming pitch by -12 to 12 semitones; in Page mode it chooses which page the twelve hexagons stand for instead, and the hover text then reads that page number",
+    "Added to the incoming pitch at one volt per octave, on top of the Transpose knob, in both modes",
+    "Chooses one of eight stored note sets, 0 to 7; moving it loads that set over whatever the hexagons are showing",
+    "Truncated to whole volts and added to the Bank knob, the total clamped to 7",
+    "Every channel patched here turns on the note its voltage names, on top of whatever the hexagons have on, and lets go of it when that channel moves to another note",
+    "A pitch to quantize, one volt per octave, with the Transpose setting added before the quantizing",
+    "The nearest enabled note to the pitch on its own input, one volt per octave",
+    "A 10V pulse 8 milliseconds long each time the quantized note on its own channel changes",
+    "Note — until at least one note is turned on, every Quantized output is held at C",
+    "Note — in Page mode the twelve hexagons are laid out as a Tonnetz, five of them standing for notes an octave below the page and one an octave above, so a page spans more than one octave",
+    "Note — the note set is written back to the current bank the moment a note is turned on or off, so there is nothing to press to save; moving the Bank control loads that bank over what is showing",
+    "Note — in Page mode the incoming pitch is clamped to -3V and 3V before it is quantized, and in the other mode it is not clamped at all",
+    "Note — in Page mode the Transpose knob no longer transposes; the transposition freezes at whatever it was when the mode was switched, and only the Transpose jack moves it after that",
+    "Note — only the Poly In jack reads more than one channel; the four Pitch inputs and all eight outputs are monophonic"
+   ],
+   "param": {
+    "0": 3,
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 5
+   },
+   "in": {
+    "0": 7,
+    "1": 4,
+    "2": 8,
+    "3": 8,
+    "4": 8,
+    "5": 8,
+    "6": 6
+   },
+   "out": {
+    "0": 9,
+    "1": 9,
+    "2": 9,
+    "3": 9,
+    "4": 10,
+    "5": 10,
+    "6": 10,
+    "7": 10
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "pitch",
+     "5": "pitch",
+     "6": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "why": "Tonnet.cpp:318 asks this input for its channel count and Tonnet.cpp:325 reads every one of them by index"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Tonnet.cpp:367 reads this input with getVoltage(0), which is channel 1 alone, and adds it to the knob in volts"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Tonnet.cpp:371 reads this input with getVoltage(0), which is channel 1 alone"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Tonnet.cpp:371 reads this input with getVoltage(0), which is channel 1 alone"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Tonnet.cpp:371 reads this input with getVoltage(0), which is channel 1 alone"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Tonnet.cpp:371 reads this input with getVoltage(0), which is channel 1 alone"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "0 to 7V",
+      "negative": "subtracts",
+      "sumRange": "0 to 7V",
+      "normal": "0V",
+      "why": "Tonnet.cpp:290 reads this input with getVoltage(0), takes its floor and adds it to the knob; Tonnet.cpp:291 clamps the total to 0 and 7"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "Tonnet.cpp:373 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "1": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "Tonnet.cpp:373 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "Tonnet.cpp:373 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "Tonnet.cpp:373 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Tonnet.cpp:378 writes channel 1 alone and multiplies an 8 millisecond pulse by 10V"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Tonnet.cpp:378 writes channel 1 alone and multiplies an 8 millisecond pulse by 10V"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Tonnet.cpp:378 writes channel 1 alone and multiplies an 8 millisecond pulse by 10V"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Tonnet.cpp:378 writes channel 1 alone and multiplies an 8 millisecond pulse by 10V"
+     }
+    }
+   },
+   "notes": "Read from src/Tonnet.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. With no note enabled the nearest-note search finds nothing and leaves its result at zero (Tonnet.cpp:55 in basic mode, Tonnet.cpp:88 in page mode), so every output reads C. In Page mode the Transpose knob is repurposed as the page selector (Tonnet.cpp:404) and the transposition is frozen at the value held when the mode was switched (Tonnet.cpp:277), which the panel does not say; the hover text changes to read the page number. The hexagon layout offsets five of the twelve notes down an octave and one up, from the table at Tonnet.cpp:18. The Poly In jack merges its notes into whatever the buttons have on, and the merged set is written into the current bank. The module has no right-click menu of its own, so no panel-colour choice. There is no polyphony anywhere except the Poly In jack: no setChannels call exists in the file."
   },
   "Reflector": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two wavefolders that fold or wrap whatever goes past the edges of a voltage window back inside it, each giving the result and the result of the inverted input",
+    "Sets how tall the window is, 0.5V to 10V, the window being centred on the Height setting",
+    "The absolute value of the voltage is added to the Frame knob, the total clamped to 0.5V and 10V",
+    "Moves the centre of the window, -5V to 5V",
+    "Added to the Height knob, the total clamped to -5V and 5V",
+    "Bends the result inside the window, -0.99 for nearly logarithmic through 0 for untouched to 0.99 for exponential",
+    "Divided by 5 and added to the Bend knob, the total clamped to -0.99 and 0.99",
+    "Switches that half between folding what goes past an edge back in and wrapping it round to the far edge",
+    "The signal to fold; with no cable this half gets 0V",
+    "The signal to fold; with no cable this half takes whatever the other Signal jack carries",
+    "The folded signal, always inside the window",
+    "The folded signal with the input inverted first, always inside the window",
+    "Note — the window runs from the Height setting minus half the Frame setting to the Height setting plus half of it, so Frame at 10 and Height at 0 leaves everything between -5V and 5V untouched",
+    "Note — folding and wrapping are applied over and over until the result lands inside the window, but no more than ten times, so an input far enough outside a narrow window can come out beyond its edges",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 3,
+    "3": 3,
+    "4": 5,
+    "5": 5,
+    "6": 7,
+    "7": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 2,
+    "3": 2,
+    "4": 4,
+    "5": 4,
+    "6": 6,
+    "7": 6
+   },
+   "out": {
+    "0": 10,
+    "1": 10,
+    "2": 11,
+    "3": 11
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Reflection.cpp:150 reads this input with getVoltage(0), which is channel 1 alone, and uses 0V when it is unconnected"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "the other Signal jack",
+      "why": "Reflection.cpp:151 reads this input with getVoltage(0) and falls back to the first half's signal when unconnected"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "sumRange": "0.5 to 10V",
+      "normal": "0V",
+      "why": "Reflection.cpp:158 reads this input with getVoltage(0) and takes its absolute value; Reflection.cpp:159 adds the knob and clamps the total to 0.5 and 10"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "sumRange": "0.5 to 10V",
+      "normal": "0V",
+      "why": "Reflection.cpp:158 reads this input with getVoltage(0) and takes its absolute value; Reflection.cpp:159 adds the knob and clamps the total to 0.5 and 10"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "normal": "0V",
+      "why": "Reflection.cpp:162 reads this input with getVoltage(0); Reflection.cpp:163 adds the knob and clamps the total to ±5"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "normal": "0V",
+      "why": "Reflection.cpp:162 reads this input with getVoltage(0); Reflection.cpp:163 adds the knob and clamps the total to ±5"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Reflection.cpp:166 reads this input with getVoltage(0) and divides it by 5; Reflection.cpp:167 adds the knob and clamps the total to ±0.99"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Reflection.cpp:166 reads this input with getVoltage(0) and divides it by 5; Reflection.cpp:167 adds the knob and clamps the total to ±0.99"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Reflection.cpp:189 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "1": {
+      "poly": false,
+      "why": "Reflection.cpp:189 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "2": {
+      "poly": false,
+      "why": "Reflection.cpp:190 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "3": {
+      "poly": false,
+      "why": "Reflection.cpp:190 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     }
+    }
+   },
+   "notes": "Read from src/Reflection.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. The fold and the wrap are both written as recursions with a hard stop after ten passes (Reflection.cpp:26 and 41), so a signal far enough outside a narrow window is returned still outside it; the panel gives no sign of that, though a lamp does light when the recursion runs. The Inverted output is not an inversion of the Main output: the input is negated first and then folded, which on an off-centre window gives a different shape rather than a mirror image. The Mirror Type button has no printed label, only two glyphs. There is no manual for this module and no README entry. The module has no right-click menu of its own, so no panel-colour choice."
   },
   "Canyon-Echo": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Stereo delay with two independent lines that can run side by side, ping-pong or cross-feed, each with its own time and tone, plus freeze, reverse, pitch shift and diffusion",
+    "Sets the echo time of its side, from a hundredth of the module's buffer at fully counter-clockwise to all of it at fully clockwise",
+    "Attenuates and inverts the Echo jack of its side, -1 to 1; with nothing patched there it does nothing at all",
+    "Shifts the echo time of its side, scaled by its own attenuverter; 5V at full attenuverter moves the time across the whole buffer",
+    "Sets the tone of the echoes on its side: the filter corner runs from 300Hz to 1200Hz and the output crossfades from the lowpass to the highpass across the same travel",
+    "Attenuates and inverts the Light/Dark jack of its side, -1 to 1; with nothing patched there it does nothing at all",
+    "Divided by 5, scaled by its own attenuverter, and added to the Light/Dark knob of its side",
+    "Steps between Dual-Mono, where each side feeds only itself, Ping-Pong, where each side feeds the other, and Cross-Feed, where each keeps 57 per cent of its echoes and takes 43 per cent of the other's",
+    "Transposes the echoes, -12 to 12; the jack can carry it a further octave either way",
+    "Added to the Pitch knob, the total clamped to -2 and 2",
+    "Diffuses the echoes through a chain of all-pass filters, from none at fully counter-clockwise to the full smear at fully clockwise",
+    "Divided by 5 and multiplied by the Scatter knob; with no cable the knob is used on its own",
+    "Stops new audio going into the delay lines, so what is in them circles round for as long as it is held",
+    "Above 1V it stops new audio going into the delay lines, and a cable here replaces the Freeze button",
+    "Plays the contents of the delay lines backwards",
+    "Above 1V it plays the contents of the delay lines backwards, and a cable here replaces the Reverse button",
+    "Sets how much of each line's output goes back into it, 0 at fully counter-clockwise up to 1.1 at fully clockwise, which is past unity and will build rather than fade",
+    "Divided by 5 and multiplied by the Feedback knob, the total clamped to 1.1; with no cable the knob is used on its own",
+    "Sets how much of the input signal reaches the outputs, 0 to 1",
+    "Divided by 5 and added to the Dry knob, the total clamped to 0 and 1",
+    "Sets how much of the delayed signal reaches the outputs, 0 to 1",
+    "Divided by 5 and added to the Wet knob, the total clamped to 0 and 1",
+    "The left audio input; with no cable the left line gets 0V",
+    "The right audio input; with no cable the right line takes the left input",
+    "The left line's echoes mixed with the left input, at the Dry and Wet settings",
+    "The right line's echoes mixed with the right input, at the Dry and Wet settings",
+    "Note — in Ping-Pong mode with nothing in the right input, only the left line is fed the dry signal and the right line carries nothing but what the left one hands it",
+    "Note — the two cliff faces light up in time with each line's echoes, their colour set by that line's echo time",
+    "Note — the delay lines keep their contents through a Freeze, so freezing and then turning the echo time gives the sound of the buffer being read at a new rate",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 4,
+    "5": 4,
+    "6": 5,
+    "7": 5,
+    "8": 16,
+    "9": 8,
+    "10": 10,
+    "11": 12,
+    "12": 14,
+    "13": 18,
+    "14": 20,
+    "15": 7
+   },
+   "in": {
+    "0": 3,
+    "1": 3,
+    "2": 6,
+    "3": 6,
+    "4": 17,
+    "5": 9,
+    "6": 11,
+    "7": 13,
+    "8": 15,
+    "9": 19,
+    "10": 21,
+    "11": 22,
+    "12": 23
+   },
+   "out": {
+    "0": 24,
+    "1": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "cv",
+     "10": "cv",
+     "11": "audio",
+     "12": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Canyon.cpp:258 reads this input with getVoltage(0), which is channel 1 alone, multiplies it by the attenuverter and divides by 5 before adding it to the knob"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Canyon.cpp:258 reads this input with getVoltage(0), multiplies it by the attenuverter and divides by 5 before adding it to the knob"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Canyon.cpp:356 reads this input with getVoltage(0) and divides it by 5; Canyon.cpp:357 multiplies by the attenuverter and adds the knob"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Canyon.cpp:356 reads this input with getVoltage(0) and divides it by 5; Canyon.cpp:357 multiplies by the attenuverter and adds the knob"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "normal": "a multiplier of 1",
+      "why": "Canyon.cpp:343 reads this input with getVoltage(0), divides it by 5 and multiplies the knob by it; Canyon.cpp:344 clamps the total to 0 and 1.1"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "-2 to 2V",
+      "normal": "0V",
+      "why": "Canyon.cpp:253 reads this input with getVoltage(0) and adds it to the knob; Canyon.cpp:254 clamps the total to -2 and 2"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 5V",
+      "normal": "a multiplier of 1",
+      "why": "Canyon.cpp:350 reads this input with getVoltage(0), divides it by 5 and multiplies the knob by it; Canyon.cpp:351 clamps the total to 0 and 1"
+     },
+     "7": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the Freeze button",
+      "why": "Canyon.cpp:367 reads this input with getVoltage(0) in place of the button; Canyon.cpp:369 counts it high at 1V and above"
+     },
+     "8": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "normal": "the Reverse button",
+      "why": "Canyon.cpp:368 reads this input with getVoltage(0) in place of the button; Canyon.cpp:370 counts it high at 1V and above"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Canyon.cpp:282 reads this input with getVoltage(0) and divides it by 5; Canyon.cpp:283 adds the knob and clamps the total to 0 and 1"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Canyon.cpp:284 reads this input with getVoltage(0) and divides it by 5; Canyon.cpp:285 adds the knob and clamps the total to 0 and 1"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Canyon.cpp:193 reads this input with getVoltage(0), which is channel 1 alone, and uses 0V when it is unconnected"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "Audio In - Left",
+      "why": "Canyon.cpp:194 reads this input with getVoltage(0) and falls back to the left input when unconnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Canyon.cpp:290 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "1": {
+      "poly": false,
+      "why": "Canyon.cpp:290 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     }
+    }
+   },
+   "notes": "Read from src/Canyon.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. The buffer is 352800 samples (Canyon.cpp:14), which the maker's comment calls about eight seconds; the delay block is stepped every second sample, so the entry states the time as a fraction of the buffer rather than in seconds. Feedback is multiplied by 1.1 before the jack is applied and clamped at 1.1 (Canyon.cpp:342 and 344), so the top of the knob is above unity gain and the lines build rather than decay; nothing on the panel says so. In Light/Dark the filter corner is worked out from the unclamped knob-plus-jack sum and only the crossfade position is clamped (Canyon.cpp:357 to 359), so a large CV can push the corner far outside the 300Hz to 1200Hz the knob alone reaches. The Feedback, Freeze and Reverse controls are marked with glyphs rather than words, as are their jacks, and the four small CV attenuverters have no labels at all. The module has no right-click menu of its own, so no panel-colour choice. There is no manual and no README entry for it."
   },
   "Seethe-Distort": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Three-band saturator: the input is split into a low, a middle and a high band, each driven into its own waveshaper and mixed back against its dry band, with all three bands out separately and summed",
+    "Sets how hard its band is driven into the waveshaper, 0.1 to 10",
+    "Divided by 2 and added to the Drive knob of its band, the total clamped to 0.1 and 10",
+    "Crossfades its band's waveshaper between three curves: a symmetrical sigmoid at 0, a full-wave rectified one at 1 and a sine fold at 2",
+    "Divided by 5 and added to the Morph knob of its band, the total clamped to 0 and 2",
+    "Bends the waveshaper of its band, -1 to 1, and moves that band's filter frequency two octaves either way at the same time",
+    "Divided by 5 and added to the Curve knob of its band, the total clamped to -1 and 1",
+    "Crossfades that band's output between the untouched band at fully counter-clockwise and the saturated band at fully clockwise",
+    "Divided by 5 and added to the Mix knob of its band, the total clamped to 0 and 1",
+    "The audio to be split into all three bands",
+    "Audio added to the low band alone, on top of whatever the ALL input carries",
+    "Audio added to the middle band alone, on top of whatever the ALL input carries",
+    "Audio added to the high band alone, on top of whatever the ALL input carries",
+    "The low band, saturated and mixed back against its dry signal; its filter is a lowpass at 450Hz with the Curve knob centred",
+    "The middle band, saturated and mixed back against its dry signal; its filter is a bandpass at 850Hz with the Curve knob centred",
+    "The high band, saturated and mixed back against its dry signal; its filter is a highpass at 1500Hz with the Curve knob centred",
+    "The three band outputs added together and divided by three",
+    "Note — every Mix knob comes up fully counter-clockwise, which is all dry, so the module passes its input through until at least one of them is turned up",
+    "Note — each band's saturated signal is high-passed at 15.2Hz before the mix, because the rectifying curves put a DC offset on it",
+    "Note — the Curve controls do two things at once: they bend the waveshaper and they move the band's filter frequency, so turning one changes the crossover as well as the tone",
+    "Note — every jack is monophonic, whatever is patched in"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 5,
+    "7": 5,
+    "8": 5,
+    "9": 7,
+    "10": 7,
+    "11": 7
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "7": 4,
+    "8": 4,
+    "9": 4,
+    "10": 6,
+    "11": 6,
+    "12": 6,
+    "13": 8,
+    "14": 8,
+    "15": 8
+   },
+   "out": {
+    "0": 16,
+    "1": 13,
+    "2": 14,
+    "3": 15
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Seethe.cpp:251 reads this input with getVoltage(0), which is channel 1 alone, and uses 0V when it is unconnected"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Seethe.cpp:262 reads this input with getVoltage(0) and adds it to the ALL input for that band alone"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Seethe.cpp:262 reads this input with getVoltage(0) and adds it to the ALL input for that band alone"
+     },
+     "3": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "normal": "0V",
+      "why": "Seethe.cpp:262 reads this input with getVoltage(0) and adds it to the ALL input for that band alone"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Seethe.cpp:265 reads this input with getVoltage(0) and divides it by 2; Seethe.cpp:266 adds the knob and clamps the total to 0.1 and 10"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Seethe.cpp:265 reads this input with getVoltage(0) and divides it by 2; Seethe.cpp:266 adds the knob and clamps the total to 0.1 and 10"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
+      "normal": "0V",
+      "why": "Seethe.cpp:265 reads this input with getVoltage(0) and divides it by 2; Seethe.cpp:266 adds the knob and clamps the total to 0.1 and 10"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 2V",
+      "normal": "0V",
+      "why": "Seethe.cpp:268 reads this input with getVoltage(0) and divides it by 5; Seethe.cpp:269 adds the knob and clamps the total to 0 and 2"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 2V",
+      "normal": "0V",
+      "why": "Seethe.cpp:268 reads this input with getVoltage(0) and divides it by 5; Seethe.cpp:269 adds the knob and clamps the total to 0 and 2"
+     },
+     "9": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 2V",
+      "normal": "0V",
+      "why": "Seethe.cpp:268 reads this input with getVoltage(0) and divides it by 5; Seethe.cpp:269 adds the knob and clamps the total to 0 and 2"
+     },
+     "10": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "±1V",
+      "normal": "0V",
+      "why": "Seethe.cpp:273 reads this input with getVoltage(0) and divides it by 5; Seethe.cpp:274 adds the knob and clamps the total to -1 and 1"
+     },
+     "11": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "±1V",
+      "normal": "0V",
+      "why": "Seethe.cpp:273 reads this input with getVoltage(0) and divides it by 5; Seethe.cpp:274 adds the knob and clamps the total to -1 and 1"
+     },
+     "12": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "sumRange": "±1V",
+      "normal": "0V",
+      "why": "Seethe.cpp:273 reads this input with getVoltage(0) and divides it by 5; Seethe.cpp:274 adds the knob and clamps the total to -1 and 1"
+     },
+     "13": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Seethe.cpp:278 reads this input with getVoltage(0) and divides it by 5; Seethe.cpp:279 adds the knob and clamps the total to 0 and 1"
+     },
+     "14": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Seethe.cpp:278 reads this input with getVoltage(0) and divides it by 5; Seethe.cpp:279 adds the knob and clamps the total to 0 and 1"
+     },
+     "15": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "subtracts",
+      "sumRange": "0 to 1V",
+      "normal": "0V",
+      "why": "Seethe.cpp:278 reads this input with getVoltage(0) and divides it by 5; Seethe.cpp:279 adds the knob and clamps the total to 0 and 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "Seethe.cpp:301 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "1": {
+      "poly": false,
+      "why": "Seethe.cpp:298 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "2": {
+      "poly": false,
+      "why": "Seethe.cpp:298 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     },
+     "3": {
+      "poly": false,
+      "why": "Seethe.cpp:298 writes channel 1 alone and the module never calls setChannels, so this output stays monophonic"
+     }
+    }
+   },
+   "notes": "Read from src/Seethe.cpp at commit 71e0bcb, the last commit whose plugin.json carries the installed 2.0.30. Every Mix knob defaults to 0, which is fully dry, so a new instance passes its input through without any saturation until one of them is turned up; nothing on the panel says so. The Curve controls are doubled up: Seethe.cpp:274 uses the value as the tension of the waveshaper and Seethe.cpp:275 uses the same value to set the band's filter frequency, two octaves either side of 450Hz, 850Hz and 1500Hz, so the crossover moves with the tone. The three curves the Morph knob crossfades are built at Seethe.cpp:198 to 200 as a symmetrical sigmoid, a full-wave rectified sigmoid and a sine fold; a half-wave curve is written in the file but never used. Each band output is high-passed at 15.2Hz to take out the offset the rectifying curves create. The module has no right-click menu of its own, so no panel-colour choice, and there is no manual or README entry for it."
   }
  }
 }

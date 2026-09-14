@@ -1,13 +1,137 @@
 {
  "plugin": "InfrasonicAudio",
- "source": "https://github.com/infrasonicaudio/Infrasonic-VCV",
+ "source": "https://github.com/infrasonicaudio/Infrasonic-VCV/blob/main/doc/WarpCore/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "WarpCore": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A phase distortion oscillator: a rising phasor is bent by two warping stages in series, has its phase pushed about by a second oscillator and by an external signal, and is then read through a sine",
+    "Tunes the carrier across five octaves, 32.7Hz at fully counter-clockwise up to 1046.4Hz at fully clockwise, with the V/OCT input added to it",
+    "Sets how far the internal modulating sine shifts the carrier's phase; the setting is squared before it is used, so most of the change happens in the upper half of the travel",
+    "Picks one of sixteen fixed ratios between the internal modulating sine and the carrier, and appears in place of the INT PM knob only while Edit Internal PM Ratio is switched on in the menu",
+    "Steps the first warping stage through Bend, Sync, Pinch and Fold, one algorithm per press, and shows which is chosen on the blue lamps",
+    "Steps the second warping stage through Bend, Sync, Pinch and Fold, one algorithm per press, and shows which is chosen on the red lamps",
+    "Sets how hard the first warping stage bends the phasor, leaving it straight at fully counter-clockwise",
+    "Sets how hard the second warping stage bends the phasor, which it takes already bent by the first stage, leaving it untouched at fully counter-clockwise",
+    "Attenuates and inverts the A CV input before it is added to the WARP A amount; at the centre that jack changes nothing",
+    "Attenuates and inverts the B CV input before it is added to the WARP B amount; at the centre that jack changes nothing",
+    "Chooses whether the phase modulation reaches the phasor before the two warping stages, at PRE, or after them, at POST; PRE gives the harsher result",
+    "Multiplies the output by a shape running once per carrier cycle: OFF leaves the output alone, the middle position uses a falling sawtooth, and the bottom position a triangle",
+    "Added to the WARP A amount through the A CV attenuverter, a tenth of the knob's travel per volt, with the total held between none and full",
+    "Added to the WARP B amount through the B CV attenuverter, a tenth of the knob's travel per volt, with the total held between none and full",
+    "Sets the carrier pitch at 1V per octave, added to the TUNE knob; this is also the jack the module counts polyphonic channels from",
+    "Added to the INT PM setting at a tenth of the knob's travel per volt, held between none and full before that total is squared",
+    "Shifts the carrier's phase directly, a tenth of a cycle per volt, summed with the internal modulating sine; it is read at full audio rate",
+    "A sine read through the warped and modulated phasor, swinging 5V either way",
+    "A cosine read through that same warped phasor, which is not a phase-shifted copy of the main output because the wrap falls differently under it; the menu can make it something else",
+    "Note — the four lamps show the first warping stage's algorithm in blue and the second stage's in red; with Edit Internal PM Ratio on they read out the ratio in binary instead",
+    "Note — the channel count comes from the V/OCT input alone, so a polyphonic cable in any other jack is read as its first channel unless V/OCT is patched as well",
+    "Note — the DSP runs in blocks of eight samples, which puts a short delay on both outputs; feeding an output back into EXT PM will not track cleanly",
+    "Note — the manual gives the tuning range as C1 at 32.7Hz up to C6 at 2646.4Hz; the code gives five octaves from 32.7Hz, which puts the top at 1046.4Hz, and C6 is the right note name",
+    "Menu — Edit Internal PM Ratio — swaps the INT PM knob for a ratio knob and turns the four lamps into a binary readout of that ratio; pressing either warp button switches it off again",
+    "Menu — Warp A Algorithm: Bend, Sync, Pinch, Fold — picks the first warping stage's algorithm without using the button",
+    "Menu — Warp B Algorithm: Bend, Sync, Pinch, Fold — picks the second warping stage's algorithm without using the button",
+    "Menu — Auxiliary Output Mode: 90°, Sine (Unison), Sine (Sub), Phasor — chooses whether the second output carries the cosine, a plain sine at the carrier pitch, a sine an octave below, or the phasor",
+    "Menu — Oversampling: 1x (Disabled), 2x, 4x, 8x, 16x — sets how many times over the internal rate runs before the result is brought back down, trading aliasing against processor load; it comes up at 4x"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "10": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 9,
+    "8": 10,
+    "9": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16
+   },
+   "out": {
+    "0": 17,
+    "1": 18
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "pitch",
+     "3": "cv",
+     "4": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "WarpCore.cpp:200 reads getPolyVoltage(c) inside a loop bounded by numChannels, divides by 10, multiplies by the PD1_ATTEN_PARAM value and adds it to the knob; line 201 clamps the total to 0 and 1"
+     },
+     "1": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "WarpCore.cpp:204 reads getPolyVoltage(c) inside a loop bounded by numChannels, divides by 10, multiplies by the PD2_ATTEN_PARAM value and adds it to the knob; line 205 clamps the total to 0 and 1"
+     },
+     "2": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "sumRange": "1V per octave",
+      "why": "WarpCore.cpp:195 adds getVoltage(c) to the TUNE knob's octave value and line 196 raises two to that power over a 32.7Hz base; line 134 takes the module's channel count from this port's getChannels()"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "WarpCore.cpp:209 reads getPolyVoltage(c) inside a loop bounded by numChannels and divides by 10 into the INT PM knob value; line 210 clamps the total to 0 and 1 and line 211 squares it"
+     },
+     "4": {
+      "poly": true,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "WarpCore.cpp:151 reads getPolyVoltage(c) inside a loop bounded by numChannels and divides by 10 into a per-sample buffer; PDO.cpp:208 adds that straight onto the phasor's phase, which runs 0 to 1 per cycle"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "WarpCore.cpp:241 calls setVoltage with a channel argument on a value scaled by 5, inside a loop bounded by numChannels, and line 245 calls setChannels(numChannels)"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "why": "WarpCore.cpp:242 calls setVoltage with a channel argument on a value scaled by 5, inside a loop bounded by numChannels, and line 246 calls setChannels(numChannels)"
+     }
+    }
+   },
+   "notes": "The installed build is 2.0.1 and the repository's plugin.json never got past 2.0.0, so no commit carries the installed version. Read at 36bf491, the tip of main. The last commit to touch any source file is 367dc3f, which changed the model slug from InfrasonicAudio-WarpCore to WarpCore; the installed manifest uses the short slug and the string InfrasonicAudio-WarpCore does not appear in the installed plugin.dylib, so the build is at or after that commit, and everything after it is documentation. Every string the source passes to configParam, configSwitch, configInput, configOutput and the context menu was found verbatim in the installed binary. Each configInput and configOutput is called once with its own enum. Two parameters share one panel position: INT PM at index 1 and the PM Ratio knob at index 10 are both created at 48.465, 22.829mm, and the widget shows one and hides the other according to the Edit Internal PM Ratio menu item, so both are real controls at different times and both are tagged. Widget order otherwise follows enum order except that the PM Ratio knob is added last, after the two switches. Four things worth checking against the maker's manual. The manual gives the tuning range as 32.7Hz to 2646.4Hz; configParam sets five octaves over a 32.7Hz base, which is 1046.4Hz, and the note name C6 the manual also gives agrees with the code rather than with its own figure. The constructor calls setRatioIndex(8), which is 1 to 1, but process() overwrites the ratio from the PM Ratio parameter on every block and that parameter's default is 3, so a fresh module actually starts at the 3 to 2 ratio. The window switch's three positions map through WIN_TYPE_LAST - 1 - value, so the top position is Off and the module comes up with no windowing. And the algorithm the manual and menu call Pinch is PD_TYPE_FORMANT in the code. The eight lights sit in four BlueRedLight widgets and are not ParamWidgets, so they get a Note rather than lines. Oversampling defaults to 4x in SampleRateConfig."
   }
  }
 }

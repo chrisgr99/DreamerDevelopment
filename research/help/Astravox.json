@@ -1,13 +1,519 @@
 {
  "plugin": "Astravox",
- "source": "https://github.com/JackArkyDev/Astravox",
+ "source": "https://github.com/JackArkyDev/Astravox/blob/main/docs/MANUAL.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Vocoder": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A 16-band vocoder after the Moog Spectravox: a program signal is split into 16 bands, each band's level is measured, and those levels are imposed on a carrier split through a matching bank",
+    "Sets the internal VCO's pitch over -54 to 36 semitones, with the centre detent at middle C, 261.63Hz, and the V/OCT input added to it",
+    "Switches the internal VCO between a sawtooth and a pulse, shown by the SAW and PULSE lamps",
+    "Sets the duty cycle of the internal VCO's pulse wave, 1 percent to 50 percent, and does nothing while the wave is set to SAW",
+    "MIX knob — crossfades the carrier between the CARRIER input, or the internal VCO if that jack is empty, and the internal noise; fully anticlockwise is carrier and fully clockwise is noise",
+    "Switches the internal noise source between white and pink, shown by the WHITE and PINK lamps",
+    "Sets the gain on the program signal before analysis, 0 to 3 with 1 as the starting point, through a soft saturation that gets harder as the gain rises",
+    "Sets the level of that band in the output, 0 for silence, 1.0 for unity and 1.5 at the top; a double-click returns it to 1.0 and a double-click with Cmd or Ctrl held sets it to 0",
+    "FORMANT knob — moves the synthesis bank up or down against the analysis bank, a quarter of the band frequencies fully anticlockwise, unshifted at centre and four times fully clockwise",
+    "Sets the Q shared by all 16 synthesis filters, 0.7 fully anticlockwise up to 15 fully clockwise",
+    "Sets the LFO speed, 0.05Hz fully anticlockwise up to 500Hz fully clockwise; the lamp beside it blinks with the LFO and stays solid once the knob passes three fifths of its travel",
+    "Sets how much of the LFO reaches whatever LFO target is set in the panel menu, none fully anticlockwise",
+    "Switches the band envelope followers between a 0ms attack and a 40ms attack, shown by the FAST and SLOW lamps",
+    "Sets both the release of the envelope followers and the decay of the EG together, 1ms fully anticlockwise to 5 seconds fully clockwise",
+    "Turns on firing of the EG from the program signal, shown by a green lamp when on and a red one when off; the EG fires once the program envelope passes 6V and re-arms once it drops below 2V",
+    "TRIGGER button — fires the EG while it is pressed, and resets the LFO phase as well when LFO sync is set to Reset on trigger",
+    "Switches between VOCODER, where each synthesis band is opened by the matching band of the program, and FILTER BANK, where every band stays open and the sliders act as a fixed equaliser",
+    "Sets the level of the MIX, EVEN and ODD outputs together",
+    "Switches the output VCA between EG, which opens it only while the EG is running, and ON, which holds it open",
+    "FREEZE button — latches the 16 band envelope followers at the values they hold, so the band outputs and the band VCAs stop moving; a cable in the FREEZE input overrules it",
+    "The signal that is analysed, usually a voice; it sets how much of the carrier gets through in each band, and it is read on one channel",
+    "The signal that is filtered and heard; with nothing patched the internal VCO supplies it, and a polyphonic cable is averaged down to one channel first",
+    "Sets the level of the MIX, EVEN and ODD outputs, 0V for silence up to 10V for full, with negative voltages read as 0V; the maker's tooltip says -5V is silence and 0V unity, which the code does not do",
+    "Sets the internal VCO's pitch at 1V per octave on top of the PITCH knob, and a polyphonic cable makes one VCO per channel whose outputs are averaged into one signal",
+    "Shifts the internal VCO's pulse width, -5V to 5V covering the whole 1 percent to 50 percent span from the PULSE WIDTH knob's setting, and it has no effect while the wave is set to SAW",
+    "Multiplies the LFO rate by two for every volt, so 1V doubles the speed the RATE knob sets and -1V halves it",
+    "TRIGGER input — a rising edge past 1V fires the EG, and resets the LFO phase as well when LFO sync is set to Reset on trigger",
+    "FORMANT input — adds to the FORMANT knob, 10V shifting the synthesis bank by the knob's whole travel and -10V by the same amount downwards",
+    "FREEZE input — latches the band envelope followers at their present values while it reads 2V or more; with a cable patched here the FREEZE button does nothing",
+    "Sets the level of that band's VCA, 0V to 8V for closed to fully open, in place of the band's envelope follower unless Band CV mode is set to Sum with envelope",
+    "MIX output — the 16 bands summed, through the output VCA and VOLUME, around 5V at a healthy setting",
+    "The LFO, a triangle running from 0V to 5V",
+    "The EG, 0V to 8V, falling from 8V at the rate DECAY sets each time it is fired",
+    "The envelope follower on the whole program signal, 0V to 8V, before it is split into bands",
+    "The envelope follower for that band, 0V to 8V, tracking how much of the program signal is in that band, and latched at its present value while FREEZE is on",
+    "Bands 2, 4, 6, 8, 10, 12, 14 and 16 summed, through the output VCA, VOLUME and the VCA CV input, clamped to -12V and 12V",
+    "Bands 1, 3, 5, 7, 9, 11, 13 and 15 summed, through the output VCA, VOLUME and the VCA CV input, clamped to -12V and 12V",
+    "Note — a new module comes up with VCA MODE on EG, so the output stays silent until the EG is fired: press TRIGGER, patch a gate to the TRIGGER input, or set VCA MODE to ON.",
+    "Note — the PROGRAM LEVEL knob doubles as the sensitivity for PROG TRIG EG, because the EG is fired from the program envelope measured after that gain is applied.",
+    "Note — the module is monophonic at the output. The V/OCT and CARRIER inputs accept polyphonic cables but average their channels into one signal, and every output writes one channel.",
+    "Note — the EXPANDER lamp lights only when a module with the slug Astravox-VocoderExpander is placed to the right. No such module exists in this version, so the lamp never lights.",
+    "Menu — Sibilance — adds a highpassed copy of the program signal, taken above the top band, straight into the output, which makes s and f sounds carry",
+    "Menu — Band 1: LP → BP — turns band 1 from a lowpass into a bandpass, in both the analysis and the synthesis bank",
+    "Menu — Band 16: HP → BP — turns band 16 from a highpass into a bandpass, in both the analysis and the synthesis bank",
+    "Menu — Band spacing: LIN, MEL, BARK — sets the 16 band frequencies; LIN runs 100Hz to 8000Hz, MEL spreads that span evenly by perceived pitch, and BARK runs 50Hz to 2900Hz on the critical bands",
+    "Menu — Band CV mode: Replace envelope (default), Sum with envelope — sets whether a patched band CV input takes the place of that band's envelope follower or is added to it",
+    "Menu — LFO target: Spectrum (default), PWM, Both — sets what the DEPTH knob sends the LFO to: the formant shift, the VCO pulse width, or both at once",
+    "Menu — LFO sync: Free (default), Reset on trigger — sets whether the LFO runs on regardless or starts again from zero phase each time the EG is fired",
+    "Menu — Reset all faders to unity — puts all 16 band sliders back to 1.0",
+    "Menu — Set all faders to zero — puts all 16 band sliders to 0"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "25": 5,
+    "4": 6,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "8": 11,
+    "33": 12,
+    "27": 13,
+    "32": 14,
+    "30": 15,
+    "26": 16,
+    "28": 17,
+    "29": 18,
+    "31": 19,
+    "9": 7,
+    "10": 7,
+    "11": 7,
+    "12": 7,
+    "13": 7,
+    "14": 7,
+    "15": 7,
+    "16": 7,
+    "17": 7,
+    "18": 7,
+    "19": 7,
+    "20": 7,
+    "21": 7,
+    "22": 7,
+    "23": 7,
+    "24": 7
+   },
+   "in": {
+    "0": 20,
+    "1": 21,
+    "2": 22,
+    "3": 23,
+    "4": 24,
+    "5": 25,
+    "6": 26,
+    "7": 27,
+    "8": 28,
+    "9": 29,
+    "10": 29,
+    "11": 29,
+    "12": 29,
+    "13": 29,
+    "14": 29,
+    "15": 29,
+    "16": 29,
+    "17": 29,
+    "18": 29,
+    "19": 29,
+    "20": 29,
+    "21": 29,
+    "22": 29,
+    "23": 29,
+    "24": 29
+   },
+   "out": {
+    "0": 30,
+    "1": 31,
+    "2": 32,
+    "3": 33,
+    "20": 35,
+    "21": 36,
+    "4": 34,
+    "5": 34,
+    "6": 34,
+    "7": 34,
+    "8": 34,
+    "9": 34,
+    "10": 34,
+    "11": 34,
+    "12": 34,
+    "13": 34,
+    "14": 34,
+    "15": 34,
+    "16": 34,
+    "17": 34,
+    "18": 34,
+    "19": 34
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio",
+     "2": "cv",
+     "3": "pitch",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "cv",
+     "8": "trigger",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "cv",
+     "20": "cv",
+     "21": "cv",
+     "22": "cv",
+     "23": "cv",
+     "24": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "20": "audio",
+     "21": "audio",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "17": "cv",
+     "18": "cv",
+     "19": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Vocoder.cpp:375 reads it with getVoltage and no channel argument, so only channel 1 is used; :378-380 scales it by the PROGRAM LEVEL knob and saturates it with tanh"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the internal VCO",
+      "why": "src/Vocoder.cpp:363-371 loops to getChannels and divides the sum by the channel count, so a polyphonic cable is averaged; when the jack is not connected the internal VCO output is used instead"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "10V, the full level",
+      "why": "src/Vocoder.cpp:515-517 divides the voltage by 10 and clamps it to 0 and 1, and uses 1 when the jack is not connected, so 0V and anything below it silences the output and 10V is unity"
+     },
+     "3": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Vocoder.cpp:305 takes the channel count as the loop bound and :318-339 runs one oscillator per channel, summing them and dividing by the count; :319-320 adds the voltage to the knob's pitch and takes 2 to that power times 261.626"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the PULSE WIDTH knob alone",
+      "why": "src/Vocoder.cpp:308-310 rescales -5V to 5V onto -0.495 to 0.495, adds it to the knob's duty cycle and clamps the total to 0.01 and 0.50; the jack is read only when it is connected"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the RATE knob alone",
+      "why": "src/Vocoder.cpp:295-296 multiplies the knob's rate by 2 to the power of the voltage, and only when the jack is connected"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Vocoder.cpp:444 puts the voltage through a dsp::SchmittTrigger with Rack's default thresholds of 0V and 1V, and fires the EG on the rising edge"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the FORMANT knob alone",
+      "sumRange": "±5V",
+      "why": "src/Vocoder.cpp:421-424 divides the voltage by 10, adds it to the FORMANT knob and the LFO, and clamps the total to 0 and 1; the jack is read only when it is connected"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "the FREEZE button",
+      "why": "src/Vocoder.cpp:392-394 sets the freeze from the button, then replaces that with the jack whenever the jack is connected, so a patched cable takes the button out of the decision"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "18": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "19": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "20": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "21": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "22": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "23": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     },
+     "24": {
+      "poly": false,
+      "range": "0 to 8V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "that band's envelope follower",
+      "why": "src/Vocoder.cpp:485-494 divides the voltage by 8 and clamps it to 0 and 1, replacing the band envelope, or adds it to that envelope when Band CV mode is Sum with envelope; when the jack is not connected the envelope is used in VOCODER mode and the band is fully open in FILTER BANK mode"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Vocoder.cpp:506-518 sums the 16 levelled bands, scales by 0.1, the output VCA, VOLUME times 1.7783 and the VCA CV, and writes it with setVoltage on one channel; nothing clamps it"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "why": "src/Vocoder.cpp:299-300 makes a triangle running -1 to 1 from the LFO phase and writes it as that plus 1 times 2.5"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:451 and :456 decay the EG from 1 and write it multiplied by 8"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:381-382 runs the gained program through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it"
+     },
+     "20": {
+      "poly": false,
+      "range": "±12V",
+      "why": "src/Vocoder.cpp:499-502 adds the even-numbered bands into evenSum and :519 scales that by 0.1, the output VCA, VOLUME and the VCA CV, and clamps it to -12V and 12V"
+     },
+     "21": {
+      "poly": false,
+      "range": "±12V",
+      "why": "src/Vocoder.cpp:499-502 adds the odd-numbered bands into oddSum and :520 scales that by 0.1, the output VCA, VOLUME and the VCA CV, and clamps it to -12V and 12V"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "15": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "16": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "17": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "18": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     },
+     "19": {
+      "poly": false,
+      "range": "0 to 8V",
+      "why": "src/Vocoder.cpp:399-416 runs the band's analysis output through an envelope follower, multiplies by 8, clamps to 0 and 8 and writes it, or writes the frozen value while FREEZE is on"
+     }
+    }
+   },
+   "notes": "Written against commit c9b8c74, the release commit for 2.0.3. Only one later commit carries 2.0.3, 833c2d3, and it adds a font licence text and nothing under src or res, so the source read is the source that shipped.\n\nThe VCA CV jack contradicts both the maker's tooltip and the manual. The tooltip, which is the jack's configInput name at src/Vocoder.cpp:245, reads \"VCA CV (-5V = silence, 0V = unity, +5V = no effect)\" and the manual says \"0-5V = 0-100%\". The code at :515-517 divides the voltage by 10 and clamps to 0 and 1, so 0V silences the output, 5V halves it and 10V is unity. The line for that jack says so.\n\nThe main output jack is printed MIX on the panel, called OUT in the manual and named VCA Out in its tooltip. The line uses the panel name.\n\nThe manual's tip about polyphonic chord vocoding says each voice is independently shaped by the spectral envelope. It is not: :364-368 averages the carrier's channels into one signal before the synthesis bank, and :318-339 averages the internal VCO's channels the same way. There is one filter bank and one output channel.\n\nThe manual's specification table gives the frequency range as 100Hz to 8000Hz for the default LIN spacing, which matches the table at :267-270. MEL covers the same span (:273-280). BARK runs 50Hz to 2900Hz (:282-285), which the manual does not give.\n\nThe EXPANDER lamp at :464-466 tests the right neighbour for the slug Astravox-VocoderExpander. No such model is registered in this plugin, and the manual lists the expander as a future product, so the lamp cannot light in 2.0.3.\n\nThe 16 band lamps, the LFO rate lamp, the SAW, PULSE, WHITE, PINK, FAST, SLOW, VOCODER, FILTER BANK, ON and EG lamps are lights rather than parameters, so none of them can be clicked for help; the lines for the buttons name them instead.\n\nPROG TRIG EG is on when a module is created (:157) and its firing only happens while VCA MODE is on EG (:450)."
   }
  }
 }

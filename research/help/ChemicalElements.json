@@ -2,17 +2,99 @@
  "plugin": "ChemicalElements",
  "source": "https://gitlab.com/pythongirl/chemical-elements",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Tritium": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Trigger generator whose pulses arrive at random intervals, drawn from the exponential distribution that describes radioactive decay, at an average rate you set",
+    "Sets the average number of triggers per second, from 0.0001 to 100, marked in becquerels",
+    "At 0% the interval to the next trigger is drawn fresh each time and varies widely; at 100% every interval is the same length, which turns the output into an even clock at the rate set by RATE",
+    "Scales the rate set by the RATE knob, and reads 10V when nothing is patched: 5V halves the rate, and 0V or any negative voltage stops the triggers altogether",
+    "Nothing in the module reads this jack; the spacing of the triggers comes from the STABILITY knob alone, despite the maker's tooltip calling it Stability CV",
+    "A 1ms pulse at 10V, one for each trigger",
+    "Note — the module runs from its own timing, so it produces triggers with nothing patched into it.",
+    "Note — the green lamp flashes on each trigger, and holds at half brightness whenever the rate has fallen to zero and no triggers are being produced."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "10V",
+      "why": "src/Tritium.cpp:34 reads it with getNormalVoltage(10.0), a single-channel read; line 35 multiplies the knob's rate by voltage/10 and clamps the result at 0 with std::max"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/Tritium.cpp:62 and 64 call setVoltage(10) and setVoltage(0) on channel 0 only, gated by a dsp::PulseGenerator whose default duration is 1e-3 seconds (Rack-SDK include/dsp/digital.hpp:189)"
+     }
+    }
+   },
+   "notes": "The Stability CV input is declared, given a panel jack and named by the maker, but is read nowhere in process(): getStability() at src/Tritium.cpp:38 returns the parameter alone. It is therefore given a line saying so and no family, since a colour would say something can be patched there.\n\nThe rate is a product, not a sum: rate = 10^knob * volts/10, so the jack scales the knob rather than adding to it, and the knob alone is what is heard when the jack is unpatched (the normal is 10V, which makes the multiplier 1).\n\nThe interval between triggers is stability-weighted: (1-s)*period + s, where period is a fresh -log(uniform) draw, so stability blends the exponential draw toward a fixed interval of one over the rate."
   },
   "Lead": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two knobs, each holding a steady voltage at its own jack, for offsets and for setting another module's CV input by hand",
+    "Sets the voltage carried by OUT 1, -10V to +10V",
+    "Carries the voltage set by the CONST 1 knob, -10V to +10V, with no smoothing or slew",
+    "Sets the voltage carried by OUT 2, -10V to +10V",
+    "Carries the voltage set by the CONST 2 knob, -10V to +10V, with no smoothing or slew",
+    "Note — the two halves are wholly separate: neither knob or jack has any effect on the other."
+   ],
+   "param": {
+    "0": 1,
+    "1": 3
+   },
+   "out": {
+    "0": 2,
+    "1": 4
+   },
+   "family": {
+    "out": {
+     "0": "cv",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/Lead.cpp:31 calls setVoltage with the parameter value on channel 0 only; the parameter is configured -10 to 10 at src/Lead.cpp:24"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "why": "src/Lead.cpp:32 calls setVoltage with the parameter value on channel 0 only; the parameter is configured -10 to 10 at src/Lead.cpp:25"
+     }
+    }
+   },
+   "notes": "Read from the repository at commit 414e488, the tip of the default branch; every commit in the repository carries version 2.0.0 in plugin.json, so the installed build cannot be narrowed further than that.\n\nThe repository holds a Carbon.svg panel in res/ and assets/, but no Carbon source file and no Carbon model in plugin.json, so there is no third module."
   }
  }
 }

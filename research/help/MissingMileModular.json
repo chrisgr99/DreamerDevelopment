@@ -2,12 +2,91 @@
  "plugin": "MissingMileModular",
  "source": "https://github.com/kuangmk11/Doubleplus_Pulses_VCV",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "DoubleplusPulses": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A gate router for the Music Thing Turing Machine: it rebuilds that sequencer's eight-bit register from a clock and one bit, and merges any chosen set of the eight onto two output buses",
+    "Sends this channel's bit to bus A at the left throw and to bus B at the right throw; in the centre the bit goes to neither bus",
+    "Chooses what its bus puts out: AND at the top throw, high only while every channel routed to it is high; MUTE in the centre, holding the jack at 0V; OR at the bottom, high while any of them is high",
+    "Takes the same clock that drives the Turing Machine; each rising edge above 1V shifts the register on by one stage",
+    "Takes the Turing Machine's first-stage bit; a pulse above 1V here at any point in a clock period is shifted in as a one on the next clock",
+    "A 10V gate carrying the merge of every channel routed to bus A, in the mode its toggle is set to",
+    "A 10V gate carrying the merge of every channel routed to bus B, in the mode its toggle is set to",
+    "Note — a new module puts out nothing at all: all eight routing toggles start in their centre position, routed to neither bus, and both bus toggles start at OR, which gives 0V with nothing routed",
+    "Note — patch the same clock that drives the Turing Machine into CLK, and the Turing Machine's stage-1 bit into BIT; on Stellare Modular's Turing Machine that is the BIT1 output of its Pulses expander",
+    "Note — the eight bits are rebuilt here from those two cables rather than taken over Rack's expander bus, so the module works anywhere in the rack and need not be placed beside the Turing Machine",
+    "Note — channel 1 carries the bit shifted in on the most recent clock, and each higher-numbered channel carries that same bit one more clock later, up to seven clocks at channel 8",
+    "Note — a pulse at BIT is held for the whole clock period before being shifted in, which is what makes the very short triggers of Stellare Modular's Pulses expander register at all",
+    "Note — the module is clocked by the cable at CLK rather than by the Turing Machine itself, so its register can be one clock out of step with the sequencer's; only the alignment differs",
+    "Note — the lamp on the centre line beside each channel number shows that channel's bit whatever its routing toggle is set to, so the whole register can be watched marching down the panel",
+    "Note — the lamp above each output jack shows what that jack is putting out",
+    "Note — a bus set to AND with no channel routed to it is held at 10V without pulsing, which is the behaviour of the hardware this copies; the menu can make an empty AND bus read low instead",
+    "Menu — Gate outputs with clock — on, each output passes only while the voltage at CLK is high, so two high steps in a row come out as two separate gates; off, each output is held for the whole step",
+    "Menu — AND of empty bus is high — on, a bus in AND mode with no channel routed to it is held at 10V; off, that bus reads 0V"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2,
+    "9": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/DoubleplusPulses.cpp process() calls clockTrigger.process(inputs[CLOCK_INPUT].getVoltage(), 0.1f, 1.0f) with no channel argument"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/DoubleplusPulses.cpp process() calls bitTrigger.process(inputs[BIT_INPUT].getVoltage(), THRESH_LO, THRESH_HI) with THRESH_HI 1.0f and THRESH_LO 0.2f, no channel argument"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/DoubleplusPulses.cpp process() ends with outputs[OUTA_OUTPUT].setVoltage(outA ? GATE_HIGH : 0.f), GATE_HIGH 10.f, and no channel count is ever set"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/DoubleplusPulses.cpp process() ends with outputs[OUTB_OUTPUT].setVoltage(outB ? GATE_HIGH : 0.f), GATE_HIGH 10.f, and no channel count is ever set"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 4120a74, the head of main. Every commit in the repository carries version 2.0.0, so the version string settles nothing; the installed build is the post-rebrand one, because the installed plugin.json has slug MissingMileModular and model DoubleplusPulses, which are the names introduced by eb7c34b, and the only two commits after that touch README.md alone. src/ is unchanged from 095f204 onward. The panel prints CLK, not CLOCK as the README's control table and the maker's configured port name both have it; the lines use CLK. The panel prints AND above, MUTE in the middle and OR below, between the two bus toggles, and the constants agree: MODE_AND is 2, which res-src/rotate_befaco.py documents as the up throw of the stock Befaco lever, and MODE_OR is 0, the down throw. A comment in DoubleplusPulsesWidget says the opposite, 'OR up / MUTE centre / AND down'; it contradicts both the constants and the panel and is a stale comment rather than behaviour. The maker tags the module Expander, but it is not one in Rack's sense: it reads no expander bus and has no side to be placed on. Ten lights are configured and none of them has a ParamWidget, so none is clickable; the two that matter to using the module are covered by Note lines. Index order and panel order agree for the routing toggles, which run 1 to 8 down the panel zig-zagging between two columns, and for the two bus toggles and two outputs, which run left to right as A then B."
   }
  }
 }

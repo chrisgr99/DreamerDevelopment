@@ -1,7 +1,7 @@
 {
  "plugin": "MockbaModular",
  "source": "https://github.com/MockbaTheBorg/MockbaModular",
- "read": "2026-09-13",
+ "read": "2026-09-14",
  "modules": {
   "Blank": {
    "lines": [
@@ -1251,6 +1251,170 @@
     }
    },
    "notes": "The 'sometimes will not start when added' behaviour and the one-Slavah-per-computer rule are the maker's own, from the README at the 2.0.1 tree. The socket is opened in onAdd and bound with SO_REUSEADDR on port 7000, listening on any address."
+  },
+  "Chorusah": {
+   "lines": [
+    "A 2HP stereo chorus: the input is delayed by a tap that a low frequency oscillator sweeps, and the two outputs are swept half a cycle apart so the pair reads as wide",
+    "Sets the speed of the sweeping oscillator, 0.1Hz to 5Hz",
+    "Sets how far the sweep moves the delay tap, up to 10ms either side of a 15ms base delay",
+    "Crossfades between the dry input and the swept delay, all dry fully counter-clockwise and all wet fully clockwise",
+    "Adds to the rate knob, one hertz per volt, and the total is held between 0.1Hz and 5Hz",
+    "The audio put through the chorus",
+    "The input crossfaded with its swept delay, the sweep following the oscillator directly",
+    "The input crossfaded with its swept delay, the sweep taken half a cycle later than the other output's, which is what widens the pair",
+    "Note — the audio input takes polyphony and both outputs carry the same number of channels, each channel getting its own delay line and its own sweep"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Chorusah.cpp:123 adds this jack per channel with getPolyVoltage to the rate knob, one hertz per volt, and clamps the sum to 0.1Hz to 5Hz"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Chorusah.cpp:110 takes its getChannels as the output channel count and Chorusah.cpp:134 reads getPolyVoltage per channel"
+     }
+    }
+   },
+   "notes": "The rate CV is summed with the knob in hertz rather than in volts, so it carries no sumRange field: Chorusah.cpp:123 clamps the total to 0.1Hz to 5Hz."
+  },
+  "Delayah": {
+   "lines": [
+    "A 2HP stereo delay: two delay lines sharing one set of controls, with the right input normalled to the left so one cable gives a plain mono delay",
+    "Sets the delay, 1ms to 2 seconds, squared across the knob's travel so the short times take most of it",
+    "Sets how much of the delayed signal is fed back into the line, 0% to 98%",
+    "Crossfades between the dry input and the delayed signal, all dry fully counter-clockwise and all wet fully clockwise",
+    "Moves the delay, a tenth of the time knob's travel per volt, the total held within the knob's range; the read point glides to the new time rather than jumping to it",
+    "The audio into the left delay line",
+    "The audio into the right delay line; unpatched it reads the L in jack",
+    "The left input crossfaded with the output of the left delay line",
+    "The right input crossfaded with the output of the right delay line",
+    "Note — both audio inputs take polyphony and both outputs carry as many channels as the wider of the two, each channel getting its own pair of delay lines"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5,
+    "2": 6
+   },
+   "out": {
+    "0": 7,
+    "1": 8
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "audio",
+     "2": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "Delayah.cpp:122 adds a tenth of this jack, read per channel with getPolyVoltage, to the time knob and clamps the sum to 0 to 1"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "why": "Delayah.cpp:118 takes its getChannels into the output channel count and Delayah.cpp:135 reads getPolyVoltage per channel"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "normal": "the L in jack",
+      "why": "Delayah.cpp:137 reads getPolyVoltage per channel, or the left jack's channel when this one is unpatched"
+     }
+    }
+   }
+  },
+  "Reverbah": {
+   "lines": [
+    "A 2HP stereo reverb: eight parallel comb filters into four allpass filters for each side, the right side's buffers a little longer than the left's so the tail spreads",
+    "Sets the length of the tail by raising the feedback of the comb filters",
+    "Takes more of the high frequencies off the tail with each pass round the comb filters",
+    "Crossfades between the dry signal and the reverb, all dry fully counter-clockwise and all wet fully clockwise",
+    "The audio into the reverb; with nothing in the R in jack it goes in at full level",
+    "Averaged with the L in jack to make the signal fed into the reverb, so a stereo pair is no louder than one side alone",
+    "The dry signal crossfaded with the left side's reverb tail",
+    "The dry signal crossfaded with the right side's reverb tail, whose filters run a little longer than the left's",
+    "Note — mono only: a polyphonic cable at either input is summed down to one channel, and each output carries one channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+   },
+   "in": {
+    "0": 4,
+    "1": 5
+   },
+   "out": {
+    "0": 6,
+    "1": 7
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "why": "Reverbah.cpp:128 reads the jack with getVoltageSum, which adds every channel into one value"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the L in jack alone",
+      "why": "Reverbah.cpp:130 reads the jack with getVoltageSum and averages it with the left jack, and skips it entirely when unpatched"
+     }
+    }
+   }
   }
  }
 }

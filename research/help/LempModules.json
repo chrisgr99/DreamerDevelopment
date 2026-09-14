@@ -2,12 +2,69 @@
  "plugin": "LempModules",
  "source": "https://github.com/lempface/VCV-LempModules",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "LempToggle": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A latching switch: while it is engaged the output carries a constant voltage you set, and while it is off the output is 0V",
+    "Switches the latch on with one press and off with the next; the lamp in it glows while the latch is on",
+    "Sets the voltage the output carries while the latch is on, 0V to 10V, and it starts fully clockwise at 10V",
+    "A rising edge above 2V flips the latch, exactly as a press of HOLD does; it rearms once the voltage falls below 0.1V",
+    "Added to the CONST trimpot volt for volt while the latch is on, with the total held between 0V and 10V",
+    "The voltage set by CONST plus the modulation input while the latch is on, and 0V while it is off",
+    "Note — the output stays at 0V until the latch is switched on, either by pressing HOLD or by a trigger at the trigger input",
+    "Note — the modulation input is only read while the latch is on, so a voltage there cannot lift the output off zero by itself",
+    "Note — the latch state is saved with the patch, and a newly added module comes up with the latch off",
+    "Note — the module is monophonic: both inputs are read as one channel and the output carries one channel"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "cv"
+    },
+    "out": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "toggle.cpp:77 reads inputs[TRIG_INPUT].getVoltage() with no channel argument and rescales 0.1 to 2.0 onto 0 to 1 before a SchmittTrigger whose default thresholds are 0 and 1, so the edge is at 2V and the rearm at 0.1V"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "sumRange": "0 to 10V",
+      "why": "toggle.cpp:87 reads inputs[VALUE_INPUT].getVoltage() with no channel argument, guarded by isConnected at line 86, and line 90 adds it to the knob and clamps the total to 0 and 10; the whole block runs only while hold is true"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "toggle.cpp:91 calls setVoltage with no channel argument on a value clamped to 0 and 10, and line 93 writes 0.0f with no channel argument while the latch is off"
+     }
+    }
+   },
+   "notes": "Read at commit 762045d, the tip of master. Two commits carry 2.0.0, 0c31f73 and 9c67656, and two later ones touch nothing that ships. The installed plugin.json is byte-identical to the one at 9c67656, which fills in the three empty URLs and the module description that 0c31f73 left as three dots, so the build is at or after that commit; the only commit after it, 762045d, changes the Makefile's default RACK_DIR from a Windows path to the relative one, which cannot change the binary. No source file has been touched since 0c31f73, so there is one behaviour to describe either way. Panel lettering is TOGGLE, HOLD over the button, CONST over the trimpot, OUT on the output jack, and a plain upward triangle over each of the two input jacks - so neither input carries a name and both lines lead with what the jack does. Widget order follows enum order and the panel runs straight down in that order. Each configInput and configOutput is called once with its own enum. No dead controls: both parameters and both inputs are read in process(). One thing the maker's README does not say. It calls the trigger input a trigger without a figure, and the code rescales 0.1 to 2.0 onto the SchmittTrigger's default 0 to 1 window, so the threshold is 2V rather than Rack's usual 1V and a 1V trigger will not fire it. A dsp::SchmittTrigger member named holdSchmitt is declared at line 43 and never used; it is not a control and gets no line. The LOGO_LIGHT is set to full brightness once in the constructor and is decoration. The module has no menu of its own; the two panel SVGs are Rack's own light and dark theming rather than a setting."
   }
  }
 }

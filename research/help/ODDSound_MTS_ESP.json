@@ -2,27 +2,448 @@
  "plugin": "ODDSound_MTS_ESP",
  "source": "https://github.com/ODDSound/MTS-ESP-VCVRack",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "MIDI_CV_MTS_ESP": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns MIDI from an external device into CV and gates, with the pitch output bent to the tuning held by an MTS-ESP master",
+    "The note pitch at 1V per octave, with the MTS-ESP retuning for that note and the pitch wheel bend added in",
+    "10V while a note is held on that channel and 0V otherwise",
+    "The velocity of the note on that channel, 0 to 10V across the MIDI range of 0 to 127",
+    "The key pressure for the note on that channel, 0 to 10V across the MIDI range of 0 to 127",
+    "The pitch wheel, ±5V across its full travel",
+    "The mod wheel, 0 to 10V across the MIDI range of 0 to 127",
+    "A 10V pulse on a channel whenever the note there is retriggered",
+    "10V while a MIDI clock pulse is high, at 24 pulses to the quarter note",
+    "10V while a divided clock pulse is high, at the division set on the panel menu",
+    "A 10V pulse when a MIDI start message arrives",
+    "A 10V pulse when a MIDI stop message arrives",
+    "A 10V pulse when a MIDI continue message arrives",
+    "Note — no MIDI is read until a driver, a device and a channel have been chosen on the module's own display",
+    "Note — with no MTS-ESP master running on the computer the pitch output is plain twelve-tone tuning; the lamp is fully lit only while a master is found",
+    "Note — a master has to be loaded elsewhere: in a VCV Host module in this patch, or in any application on the same computer, since MTS-ESP passes tunings between processes",
+    "Note — a note the master has marked as filtered out is thrown away when it arrives, so it never reaches the outputs at all",
+    "Note — the driver, device and channel choosers are drawn inside one display widget and cannot be clicked for a help entry of their own",
+    "Menu — Polyphony channels: Monophonic, 2 to 16 — sets how many channels the note outputs carry",
+    "Menu — Monophonic priority: Last, First, Lowest, Highest — chooses which of the held notes sounds while the module is monophonic",
+    "Menu — Polyphony allocation: Rotate, Reuse, Reset, MPE — chooses how arriving notes are spread over the channels",
+    "Menu — Retrigger on legato release — retriggers the remaining held note when an overlapping note is let go",
+    "Menu — Use release velocity — reports the velocity of the note off rather than of the note on",
+    "Menu — Pitch bend range: Off, 1 to 11 semitones, 1 to 4 octaves — sets how far the pitch wheel bends the pitch output",
+    "Menu — Smooth pitch/mod wheel — ramps the two wheel outputs between values instead of stepping them",
+    "Menu — CLK/N divider: Whole, Half, Quarter, 8th, 16th, 32nd, 12 PPQN, 24 PPQN — sets the division of the divided clock output",
+    "Menu — MTS-ESP retuning note-nn only — takes the retuning once as the note starts instead of following the master while the note is held",
+    "Menu — Reset MIDI (Panic) — clears every held note and resets the MIDI input"
+   ],
+   "param": {},
+   "in": {},
+   "out": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12
+   },
+   "family": {
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger"
+    }
+   },
+   "props": {
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "MIDI_CV_MTS_ESP.cpp:102 writes the note in volts per channel; line 91 sets the channel count from the parser"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "MIDI_CV_MTS_ESP.cpp:103 writes 10V or 0V per channel",
+      "step": "stepped"
+     },
+     "2": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "MIDI_CV_MTS_ESP.cpp:104 divides the velocity by 127 and multiplies by 10"
+     },
+     "3": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "MIDI_CV_MTS_ESP.cpp:105 divides the aftertouch by 127 and multiplies by 10"
+     },
+     "4": {
+      "poly": true,
+      "range": "±5V",
+      "why": "MIDI_CV_MTS_ESP.cpp:116 multiplies the wheel by 5; line 113 sets the channel count from the wheel channels"
+     },
+     "5": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "MIDI_CV_MTS_ESP.cpp:117 multiplies the wheel by 10; line 114 sets the channel count from the wheel channels"
+     },
+     "6": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "MIDI_CV_MTS_ESP.cpp:106 writes 10V while the retrigger pulse is high; line 95 sets the channel count from the parser",
+      "step": "stepped"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MIDI_CV_MTS_ESP.cpp:121 writes 10V while the clock pulse is high, with no channel count set",
+      "step": "stepped"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MIDI_CV_MTS_ESP.cpp:122 writes 10V while the divided clock pulse is high, with no channel count set",
+      "step": "stepped"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MIDI_CV_MTS_ESP.cpp:123 writes 10V while the start pulse is high, with no channel count set",
+      "step": "stepped"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MIDI_CV_MTS_ESP.cpp:124 writes 10V while the stop pulse is high, with no channel count set",
+      "step": "stepped"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "MIDI_CV_MTS_ESP.cpp:125 writes 10V while the continue pulse is high, with no channel count set",
+      "step": "stepped"
+     }
+    }
+   },
+   "notes": "This is VCV's own MIDI-CV with an MTS-ESP client added. The retuning is applied in semitones on top of the MIDI note number (MIDI_CV_MTS_ESP.cpp:99-102), so the pitch output follows the master's tuning while a note is held unless the note-on-only menu item is set. A note the master filters out is skipped before the parser sees it (lines 79-83), so no gate is produced for it either."
   },
   "CV_MIDI_MTS_ESP": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns CV and gates into MIDI for an external device, with each note number worked out from the tuning held by an MTS-ESP master",
+    "The pitch at 1V per octave; the note number comes from the MTS-ESP tuning when a master is connected, and its channel count sets how many notes are sent",
+    "A note sounds on that channel while this is at 1V or above, and ends when it falls",
+    "Sets the velocity of the note on that channel, 0 to 10V across the MIDI range of 0 to 127; with nothing patched it counts as 100",
+    "Sets the key pressure sent for the note on that channel, 0 to 10V across the MIDI range of 0 to 127",
+    "Sets the pitch wheel, ±5V across its full fourteen-bit range",
+    "Sets the mod wheel, 0 to 10V across the MIDI range of 0 to 127",
+    "A MIDI clock pulse is sent while this is at 1V or above",
+    "Sets the channel volume controller, 0 to 10V across the MIDI range of 0 to 127; with nothing patched it counts as 10V",
+    "Sets the pan controller, ±5V across the MIDI range of 0 to 127",
+    "A MIDI start message is sent while this is at 1V or above",
+    "A MIDI stop message is sent while this is at 1V or above",
+    "A MIDI continue message is sent while this is at 1V or above",
+    "Note — nothing is sent until a driver, a device and a channel have been chosen on the module's own display",
+    "Note — with no MTS-ESP master running on the computer the note numbers are worked out as plain twelve-tone tuning; the lamp is fully lit only while a master is found",
+    "Note — a master has to be loaded elsewhere: in a VCV Host module in this patch, or in any application on the same computer, since MTS-ESP passes tunings between processes",
+    "Note — the two wheel jacks and the volume and pan jacks are read 200 times a second rather than every sample",
+    "Note — the driver, device and channel choosers are drawn inside one display widget and cannot be clicked for a help entry of their own",
+    "Menu — Reset MIDI (Panic) — sends a note off for everything held and resets the MIDI output"
+   ],
+   "param": {},
+   "out": {},
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "cv",
+     "8": "cv",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CV_MIDI_MTS_ESP.cpp:87 takes the channel count from this jack and line 93 reads each channel with getVoltage(c)"
+     },
+     "1": {
+      "poly": true,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "CV_MIDI_MTS_ESP.cpp:97 reads it with getPolyVoltage and treats 1V and above as a note held"
+     },
+     "2": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "7.87V, which is velocity 100",
+      "why": "CV_MIDI_MTS_ESP.cpp:88-90 reads it with getNormalPolyVoltage defaulting to 1000/127 volts, divides by 10, multiplies by 127 and clamps to 0..127"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "CV_MIDI_MTS_ESP.cpp:100-102 reads it with getPolyVoltage, divides by 10, multiplies by 127 and clamps to 0..127"
+     },
+     "4": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CV_MIDI_MTS_ESP.cpp:106-108 reads channel one only with getVoltage, adds 5, divides by 10 and spreads it over the fourteen-bit wheel"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "CV_MIDI_MTS_ESP.cpp:110-112 reads channel one only with getVoltage, divides by 10, multiplies by 127 and clamps to 0..127"
+     },
+     "6": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "CV_MIDI_MTS_ESP.cpp:124 reads channel one only with getVoltage and treats 1V and above as a clock pulse"
+     },
+     "7": {
+      "poly": false,
+      "step": "continuous",
+      "range": "0 to 10V",
+      "negative": "ignored",
+      "normal": "10V",
+      "why": "CV_MIDI_MTS_ESP.cpp:114-116 reads it with getNormalVoltage defaulting to 10V, divides by 10, multiplies by 127 and clamps to 0..127"
+     },
+     "8": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "CV_MIDI_MTS_ESP.cpp:118-120 reads channel one only with getVoltage, adds 5, divides by 10 and multiplies by 127"
+     },
+     "9": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "CV_MIDI_MTS_ESP.cpp:127 reads channel one only with getVoltage and treats 1V and above as a start"
+     },
+     "10": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "CV_MIDI_MTS_ESP.cpp:130 reads channel one only with getVoltage and treats 1V and above as a stop"
+     },
+     "11": {
+      "poly": false,
+      "step": "stepped",
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "CV_MIDI_MTS_ESP.cpp:133 reads channel one only with getVoltage and treats 1V and above as a continue"
+     }
+    }
+   },
+   "notes": "This is VCV's own CV-MIDI with an MTS-ESP client added. With a master connected the pitch voltage is turned into a frequency and the master is asked which note that frequency belongs to (CV_MIDI_MTS_ESP.cpp:93-96), so the note number follows the master's mapping rather than twelve-tone tuning; with no master it falls back to twelve semitones to the volt around note 60."
   },
   "Quantizer_MTS_ESP": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Quantizes or retunes a 1V/octave pitch to the tuning table held by an MTS-ESP master running elsewhere on the computer",
+    "Chooses which way a pitch falling between two tuned pitches is rounded: down, to the nearer of the two, or up",
+    "Chooses how the tuning is applied: quant moves the input to the nearest tuned pitch, retune rounds the input to a twelve-tone note and plays that note's tuned pitch",
+    "The pitch to be quantized, at 1V per octave",
+    "The quantized pitch at 1V per octave; with no MTS-ESP master connected the input is passed through untouched",
+    "A 10V pulse 1ms long on a channel whenever that channel's output pitch changes",
+    "Note — with no MTS-ESP master running anywhere on the computer this module quantizes nothing and passes its input straight through, and the trigger output is never written",
+    "Note — a master has to be loaded elsewhere: in a VCV Host module in this patch, or in any application on the same computer, since MTS-ESP passes tunings between processes",
+    "Note — the lamp is fully lit while a master is found and dim while none is",
+    "Note — the output is worked out again at most every 5ms and holds its last value between those",
+    "Note — notes the master has marked as filtered out are skipped in quant mode, so the output never lands on them"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3
+   },
+   "out": {
+    "0": 4,
+    "1": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Quantizer_MTS_ESP.cpp:84 takes the channel count from this jack and line 102 reads each channel with getVoltage(c); line 106 raises two to the power of it against C4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "Quantizer_MTS_ESP.cpp:160 sets the channel count from the input and line 145 writes the pitch in volts"
+     },
+     "1": {
+      "poly": true,
+      "step": "stepped",
+      "range": "0 to 10V",
+      "why": "Quantizer_MTS_ESP.cpp:148 triggers a PulseGenerator for 1e-3 seconds per channel and line 153 writes 10V while it runs"
+     }
+    }
+   },
+   "notes": "Quant mode searches the master's 128 tuned frequencies for the two either side of the input and picks one by the rounding switch; retune mode rounds to a twelve-tone note first and then looks that note's frequency up, so the two modes can give different answers for the same input (Quantizer_MTS_ESP.cpp:105-140). With no master the module is a wire: line 154 onwards copies the input to the output."
   },
   "Interval": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Shifts a 1V/octave pitch by an interval, given either as a whole-number ratio or in cents, by a whole number of those intervals plus a fraction of one",
+    "Sets the top number of the interval ratio, 1 to 9999999; the shift in volts is the base-two logarithm of this over the bottom number",
+    "Sets the bottom number of the interval ratio, 1 to 9999999",
+    "Sets the interval in cents, -9999.9 to 9999.9, where 1200 cents is an octave",
+    "Sets a fraction of one interval to add, -1 to +1, multiplied by the voltage at the bend CV jack",
+    "Sets a whole number of intervals to add, -9999 to +9999, multiplied by the voltage at the transpose CV jack",
+    "Chooses whether the interval is taken from the ratio or from the cents value",
+    "The pitch to be shifted, at 1V per octave",
+    "Multiplies the BEND setting: ±5V here maps to -1 to +1, and with nothing patched the setting counts in full",
+    "Multiplies the TRANSPOSE setting: ±5V here maps to -1 to +1, and with nothing patched the setting counts in full",
+    "The shifted pitch, held inside ±5V",
+    "The pitch at the input passed on unchanged",
+    "Note — the two CV jacks multiply rather than add, so 0V at either holds that amount at zero and an unpatched jack counts as one",
+    "Note — a polyphonic cable at either CV jack uses only its first channel for every channel of the pitch",
+    "Note — the number of the channels at the pitch input sets the channel count of both outputs",
+    "Note — the small display under the transpose figure reads out the transpose amount after the CV has multiplied it"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "step": "continuous",
+      "range": "1V per octave",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Interval.cpp:126 takes the channel count from this jack and line 128 reads each channel with getVoltage(c)"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "1, which is full scale",
+      "why": "Interval.cpp:81-102 clamps the voltage to ±5V and multiplies by 0.2; with nothing patched every channel is set to 1"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "range": "±5V",
+      "negative": "swings",
+      "normal": "1, which is full scale",
+      "why": "Interval.cpp:81-102 clamps the voltage to ±5V and multiplies by 0.2; with nothing patched every channel is set to 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "Interval.cpp:135-136 clamps the shifted pitch to ±5V and line 139 sets the channel count from the pitch input"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "Interval.cpp:129 writes the input voltage unchanged and line 138 sets the channel count from the pitch input"
+     }
+    }
+   },
+   "notes": "The bend and transpose CV jacks are read wrongly for polyphonic cables: Interval.cpp:96-99 loops over the channels but reads getVoltage(0) inside the loop, so every channel takes the first channel's voltage, and channels above the cable's count are set to 1 rather than 0. The numerator and cents displays occupy the same place on the panel and only one is shown at a time, so a click reaches whichever the Interval Mode switch has chosen."
   }
  }
 }

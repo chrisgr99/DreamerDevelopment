@@ -1,63 +1,1551 @@
 {
  "plugin": "Coalescent",
- "source": "https://github.com/jeremycg/coalescent",
+ "source": "https://github.com/jeremycg/coalescent/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "GENDYN": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A stochastic oscillator after Xenakis's GENDY3: a piecewise-linear waveform whose breakpoints each take a random walk every cycle, so the pitch and the timbre drift together.",
+    "Sets how many breakpoints make up one cycle of the waveform, 2 to 64.",
+    "Sets the centre frequency the segment durations are built around, 20Hz to 5000Hz; the default 261.63Hz is C4.",
+    "Scales the durations of every cycle so the measured period tracks the centre frequency while the waveform keeps changing shape; the switch comes up off.",
+    "Chooses which distribution the random draws come from: Cauchy, Gaussian, Uniform or Logistic.",
+    "Sets how many cycles a breakpoint's step keeps its direction: 0% gives uncorrelated jitter, the default 30% about 16 cycles, 100% long steady glides.",
+    "Scales how far the amplitude walk moves a breakpoint each cycle, 0 to 1, which sets the rate of timbral change.",
+    "Scales how far the duration walk moves a breakpoint each cycle, 0 to 1, which sets the rate of the glissandi.",
+    "Sets the amplitude barrier the walk reflects off, 0 to 1; 0 freezes the amplitudes and 1 opens the full ±5V swing.",
+    "Sets how far the segment durations may open either side of the centre frequency, 0 to 1; at 0 the pitch is fixed.",
+    "An attenuverter, -1 to +1, scaling the CV into the amplitude step scale.",
+    "An attenuverter, -1 to +1, scaling the CV into the duration step scale.",
+    "An attenuverter, -1 to +1, scaling the CV into the amplitude barrier.",
+    "An attenuverter, -1 to +1, scaling the CV into the duration barrier width.",
+    "Modulates the amplitude step scale, at a tenth of the knob's range per volt through its attenuverter.",
+    "Modulates the duration step scale, at a tenth of the knob's range per volt through its attenuverter.",
+    "Modulates the amplitude barrier, at a tenth of the knob's range per volt through its attenuverter.",
+    "Modulates the duration barrier width, at a tenth of the knob's range per volt through its attenuverter.",
+    "The oscillator's audio, ±5V, with a 5Hz high-pass removing the walk's slow drift.",
+    "A 10V trigger 1ms long at the end of every completed waveform cycle.",
+    "The frequency of the most recently completed cycle as 1V/octave, 0V for C4, clamped to ±5V.",
+    "Note — The waveform drawn at the top is the current breakpoints of one cycle, redrawn about 45 times a second rather than every cycle.",
+    "Note — The evolved breakpoints are saved with the patch, so a sound left to run reloads with the shape it had.",
+    "Menu — Initial waveform: Sine, Triangle, Saw, Square, Random — chooses the shape the breakpoints are seeded from and re-seeds at once; the four deterministic shapes start on the exact centre pitch.",
+    "Menu — Re-seed waveform — re-seeds the breakpoints from the chosen initial waveform."
+   ],
+   "param": {
+    "0": 1,
+    "4": 2,
+    "12": 3,
+    "6": 4,
+    "11": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "5": 9,
+    "7": 10,
+    "8": 11,
+    "9": 12,
+    "10": 13
+   },
+   "in": {
+    "0": 14,
+    "1": 15,
+    "2": 16,
+    "3": 17
+   },
+   "out": {
+    "0": 18,
+    "1": 19,
+    "2": 20
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/GENDYN.cpp:431 getVoltage()*att*0.1 added to the knob, clamp(0,1); docs/gendyn.md CV table"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/GENDYN.cpp:437"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/GENDYN.cpp:443"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/GENDYN.cpp:449"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/GENDYN.cpp:517 setVoltage(dcBlock.highpass()*5.f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/GENDYN.cpp:520-521 and :588 cycleTrigger.trigger(1e-3f), 10V"
+     },
+     "2": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/GENDYN.cpp:383 clamp(log2(sr/period/FREQ_C4),-5,5)"
+     }
+    }
+   },
+   "notes": "All nine CV-fed parameters are read with getVoltage(), not getPolyVoltage(), so the module is monophonic despite the plugin's other modules being polyphonic. The manual's CV table states the four CV inputs are ±5V; the code applies no clamp to the jack itself, scaling volts by 0.1 through the attenuverter and clamping only the knob-plus-CV sum to the parameter's 0 to 1, so ±10V reaches the full range. The manual writes the fourth CV input as B DUR CV where the panel prints B WID; the maker's own port name is \"Duration barrier CV\" and the knob above it is \"Frequency barrier width\" — they are the same control, described from the duration side and the frequency side."
   },
   "Haptik": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A scanned-synthesis oscillator: a ring of masses on springs is set moving, and a read head sweeps the ring at audio rate, reading each mass's displacement as the waveform.",
+    "Sets how many masses make up the ring, 8 to 128, which is also the length of the scanned table.",
+    "Sets the rate the read head sweeps the ring, over ±4 octaves, with the centre giving C4 at 261.63Hz.",
+    "Chooses what a trigger does: Impulse kicks one mass, Bump raises a Hann-windowed hump, Noise perturbs every mass, and Continuous ignores triggers and feeds a quiet random force.",
+    "Sets where around the ring the excitation and the external force enter, 0 to 100% of the way round.",
+    "Stops the ring physics and plays the shape held at that moment as a fixed waveform.",
+    "Chooses Fast, which steps the ring physics once per sample, or Slow, which steps it once every 256 samples and interpolates between frames.",
+    "Sets the rate of the restoring force that pulls each mass back to rest, 0.05Hz to 30Hz.",
+    "Sets the spring stiffness between neighbouring masses, 0 to 0.9, which is the main control over the timbre.",
+    "Sets how fast the ring loses energy, 0 to 1; at 0 the motion never decays.",
+    "Sets how hard an excitation kicks the ring, 0 to 1, and the gain applied to the external force.",
+    "An attenuverter, -1 to +1, scaling the CV into the centering rate.",
+    "An attenuverter, -1 to +1, scaling the CV into the coupling stiffness.",
+    "An attenuverter, -1 to +1, scaling the CV into the damping.",
+    "An attenuverter, -1 to +1, scaling the CV into the injection amount.",
+    "Modulates the centering rate in the log domain, a tenth of an octave per volt through its attenuverter.",
+    "Modulates the coupling stiffness, at a tenth per volt through its attenuverter.",
+    "Modulates the damping, at a tenth per volt through its attenuverter.",
+    "Modulates the injection amount, at a tenth per volt through its attenuverter.",
+    "Adds to the PITCH knob at 1V per octave, setting the rate the read head sweeps the ring.",
+    "A rising edge past 1V re-excites the ring with the shape EXCITE is set to; the edge is armed again below 0.1V, and nothing is injected while FREEZE is on.",
+    "Injects an external signal as a force at the driver mass, scaled by INJECT; a polyphonic cable is summed to mono.",
+    "The scanned waveform, high-passed at 20Hz and soft-clipped to ±5V.",
+    "The displacement of mass 0, a fixed point on the ring rather than the driver mass, as an audio-rate CV clamped to ±5V and not high-passed.",
+    "Note — The ring is given a full bump whenever the number of masses changes and when the module is created, so it sounds without a trigger patched.",
+    "Note — The screen draws the masses as vertices on a circle, each pushed outward by its displacement; the orange node marks the driver mass and the sweeping dot the read head."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "6": 3,
+    "12": 4,
+    "7": 5,
+    "13": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "8": 11,
+    "9": 12,
+    "10": 13,
+    "11": 14
+   },
+   "in": {
+    "1": 15,
+    "2": 16,
+    "3": 17,
+    "4": 18,
+    "0": 19,
+    "5": 20,
+    "6": 21
+   },
+   "out": {
+    "0": 22,
+    "1": 23
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Haptik.cpp:392 params[PITCH]+getVoltage(), exp2 about FREQ_C4"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Haptik.cpp:323 getVoltage()*att*0.1 added in log2(Hz), clamped 0.05 to 30Hz"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Haptik.cpp:339 clamp(knob+getVoltage()*att*0.1, 0, 0.9)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Haptik.cpp:343 clamp(knob+getVoltage()*att*0.1, 0, 1)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Haptik.cpp:267 clamp(knob+getVoltage()*att*0.1, 0, 1)"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Haptik.cpp:303 trig.process(getVoltage(), 0.1f, 1.f)"
+     },
+     "6": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Haptik.cpp:308 getVoltageSum() into externalDrive(); src/dsp/haptik_core.hpp:33 kExternalGain 0.005"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Haptik.cpp:426 5.f*fastTanh(dcBlock.highpass())"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Haptik.cpp:429 clamp(motion*4, -5, 5)"
+     }
+    }
+   },
+   "notes": "Only EXT reads more than one channel, and it sums them: there is a single lattice, so the module is monophonic. The manual's control table gives RATE as the ring's restoring rate and calls it subtle against COUPLE; the code bears that out — the centering coefficient is scaled by the step divider, so RATE only becomes a strong control in Slow mode. The manual writes the third bottom-row jack as EXT IN; the panel prints EXT."
   },
   "Axon": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A spiking-neuron oscillator on the FitzHugh-Nagumo equations: at rest it fires a single spike per trigger, and across a middle band of current it free-runs as a relaxation oscillator.",
+    "Sets the speed the simulation runs at, over ±4 octaves, with the centre giving C4 at 261.63Hz.",
+    "Sets the injected current, -0.2 to 1.6, which is what puts the cell into one regime or the other: at rest at either end, oscillating across a middle band of roughly 0.33 to 1.42.",
+    "Sets the ratio between the fast and the slow timescale, 0.01 to 0.30; small values sharpen the spike and large ones round it towards a sine.",
+    "Sets the asymmetry of the waveform by moving the threshold position, 0.4 to 1.0.",
+    "An attenuverter, -1 to +1, scaling the CV into the injected current.",
+    "An attenuverter, -1 to +1, scaling the CV into the timescale ratio.",
+    "Modulates the injected current, at a tenth per volt through its attenuverter.",
+    "Modulates the timescale ratio, at a tenth per volt through its attenuverter.",
+    "Adds to the PITCH knob at 1V per octave, setting the speed the simulation runs at.",
+    "A rising edge past 1V injects a short decaying current pulse: from rest that fires one spike, and inside the oscillating band it perturbs the phase.",
+    "A rising edge past 1V re-seeds the cell at its rest point, which locks the cycle to a clock and gives hard-sync timbres against a swept pitch.",
+    "The membrane voltage, high-passed at 20Hz and soft-clipped to ±5V.",
+    "A 10V pulse 1ms long on each upward threshold crossing of the membrane voltage, one per spike, with hysteresis so a noisy peak cannot fire twice.",
+    "The recovery variable as a slow ±5V CV, not high-passed.",
+    "Note — The number of voices follows the V/OCT or TRIG cable, whichever carries more channels; the CV, SYNC and TRIG jacks are all read per channel.",
+    "Note — The screen draws the phase portrait: the orbit in the membrane-voltage against recovery plane, with the two nullclines behind it.",
+    "Menu — Anti-aliasing: Off, ×2 oversampling, ×4 oversampling, ×8 oversampling — sets how many times the simulation is stepped per sample before decimation, and with it the pitch ceiling."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "1": 7,
+    "2": 8,
+    "0": 9,
+    "3": 10,
+    "4": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/neuron/Axon.cpp:319 pitchKnob + getPolyVoltageSimd(); :243 getChannels() sets the voice count"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/neuron/Axon.cpp:283 getPolyVoltageSimd()*att*0.1 added to the knob"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/neuron/Axon.cpp:278 clamp(knob+getPolyVoltageSimd()*att*0.1, 0.01, 0.30)"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/neuron/Axon.cpp:306 trigIn4.process(getPolyVoltageSimd(), 0.1f, 1.f); :244 getChannels() sets the voice count"
+     },
+     "4": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/neuron/Axon.cpp:299 syncIn4.process(getPolyVoltageSimd(), 0.1f, 1.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/neuron/Axon.cpp:381 5.f*fastTanh(highpass); :245 setChannels()"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "why": "src/neuron/Axon.cpp:378 trigger(1e-3f) and :409 10V; :246 setChannels()"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/neuron/Axon.cpp:406 clamp(w*2.5, -5, 5); :247 setChannels()"
+     }
+    }
+   },
+   "notes": "The voice count is taken from V/OCT and TRIG only (Axon.cpp:243). A polyphonic cable into a CV or SYNC jack alone does not add voices, though its channels are read once the count is set from elsewhere. Voices above the current count keep their state frozen rather than being reset."
   },
   "Soma": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A bursting neuron oscillator on the Hindmarsh-Rose equations: one current control moves it from silence through single spikes to bursts and on into chaos.",
+    "Sets the speed the simulation runs at, over ±4 octaves, with the centre giving C4 at 261.63Hz at the default voicing.",
+    "Sets the injected current, 0.4 to 4.0, which moves the cell between quiescent, tonic spiking, bursting and chaos; the chaotic region is around 3.25.",
+    "Sets the adaptation rate on a logarithmic scale, 0.001 to 0.05; small values give long bursts and large ones tonic spiking.",
+    "Sets the strength of the adaptation, 1.0 to 5.0, which is the depth of the burst.",
+    "An attenuverter, -1 to +1, scaling the CV into the injected current.",
+    "An attenuverter, -1 to +1, scaling the CV into the adaptation rate.",
+    "Modulates the injected current, at a tenth per volt through its attenuverter.",
+    "Modulates the adaptation rate in the log domain, multiplying it by a tenth of an octave per volt through its attenuverter.",
+    "Adds to the PITCH knob at 1V per octave, setting the speed the simulation runs at.",
+    "A rising edge past 1V injects a decaying current pulse, which from a current below threshold starts a single burst.",
+    "A rising edge past 1V re-seeds all three state variables at rest, which locks the cell to a clock and gives hard-sync timbres.",
+    "The membrane potential, high-passed and soft-clipped to ±5V.",
+    "A 10V pulse 1ms long on each spike, so a burst puts out a flurry of triggers.",
+    "The slow adaptation variable as a ±5V CV centred on its midpoint: the burst envelope, and not high-passed.",
+    "Note — The number of voices follows the V/OCT or TRIG cable, whichever carries more channels; the CV, SYNC and TRIG jacks are all read per channel.",
+    "Note — The screen draws the phase portrait: the orbit in the membrane-potential against recovery plane.",
+    "Menu — Anti-aliasing: Off, ×2 oversampling, ×4 oversampling, ×8 oversampling — sets how many times the simulation is stepped per sample before decimation, and with it the pitch ceiling."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "1": 7,
+    "2": 8,
+    "0": 9,
+    "3": 10,
+    "4": 11
+   },
+   "out": {
+    "0": 12,
+    "1": 13,
+    "2": 14
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "trigger",
+     "2": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/neuron/Soma.cpp pitchKnob + getPolyVoltageSimd(); :259 getChannels() sets the voice count"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/neuron/Soma.cpp:302 I = knob + getPolyVoltageSimd()*att*0.1"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/neuron/Soma.cpp:304 added in log2(r), then clamp to 0.001..0.05 at :321"
+     },
+     "3": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/neuron/Soma.cpp trigIn4.process(getPolyVoltageSimd(), 0.1f, 1.f); :260 getChannels()"
+     },
+     "4": {
+      "poly": true,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/neuron/Soma.cpp:327 syncIn4.process(getPolyVoltageSimd(), 0.1f, 1.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/neuron/Soma.cpp:463 setVoltageSimd of the tanh-clipped, DC-blocked x"
+     },
+     "1": {
+      "poly": true,
+      "range": "high above 1V",
+      "why": "src/neuron/Soma.cpp:468, a 1ms 10V pulse per spike"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/neuron/Soma.cpp:464 clamp((z-2.0)*2.5, -5, 5)"
+     }
+    }
+   },
+   "notes": "The voice count is taken from V/OCT and TRIG only (Soma.cpp:259). The Z output is offset by a fixed z midpoint of 2.0 before the gain, so it swings either side of zero rather than being unipolar; the manual calls it a ±5V CV without saying where the centre comes from."
   },
   "Operon": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A three-phase oscillator built on the repressilator: three genes each repressing the next around a ring, so their three proteins run about 120 degrees apart.",
+    "Sets the speed the simulation runs at, -8 to +4 octaves; the centre gives C4 at 261.63Hz and the bottom about 1Hz for clock and LFO use.",
+    "Sets the promoter strength, 0 to 60, which is what starts the ring oscillating; it leaves rest at about 3.",
+    "Sets the cooperativity of the repression, 1.2 to 8, taking the shape from smooth to sharp relaxation pulses.",
+    "Sets the ratio between protein and mRNA decay, 0.2 to 5, which shifts the period, the spacing of the phases and the duty cycle.",
+    "Sets the floor of transcription that carries on whatever the repressor is doing, 0 to 1.",
+    "An attenuverter, -1 to +1, scaling the CV into the promoter strength.",
+    "An attenuverter, -1 to +1, scaling the CV into the cooperativity.",
+    "An attenuverter, -1 to +1, scaling the CV into the decay ratio.",
+    "Adds to the PITCH knob at 1V per octave, setting the speed the simulation runs at.",
+    "Modulates the promoter strength, 6 units per volt through its attenuverter, with the total clamped to 0 through 80.",
+    "Modulates the cooperativity, 0.6 per volt through its attenuverter, with the total clamped to 1.01 through 10.",
+    "Modulates the decay ratio, 0.5 per volt through its attenuverter, with the total clamped to 0.05 through 8.",
+    "Adds a signal into the transcription of gene 1 at half a unit per volt, which kicks a near-threshold rest into a burst, entrains a running ring, or cross-modulates at audio rate.",
+    "One of the three proteins as a ±5V audio signal, centred on the ring's fixed point and soft-clipped.",
+    "A 10V pulse 1ms long each time that protein crosses upward through its centre, once per cycle.",
+    "Note — Near the oscillation threshold the swing is small and the gates can stay quiet while the protein outputs are already moving; raising DRIVE or HILL brings them back.",
+    "Note — The screen plots the three centred proteins over about the last 10 seconds, sampled 25 times a second, so an audio-rate setting aliases there."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13
+   },
+   "out": {
+    "0": 14,
+    "1": 14,
+    "2": 14,
+    "3": 15,
+    "4": 15,
+    "5": 15
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Operon.cpp:219-220 pitchBase+getVoltage(), clamped to the pitch total range"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Operon.cpp:167 modulatedParam with ALPHA_CV_DEPTH 6.f, clamp(0, 80)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Operon.cpp:169 HILL_CV_DEPTH 0.6f, clamp(1.01, 10)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Operon.cpp:171 BETA_CV_DEPTH 0.5f, clamp(0.05, 8)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Operon.cpp:180-181 clamp(getVoltage(), -10, 10)*0.5 added to gene 1's transcription"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/dsp/operon_core.hpp:240 5.f*fastTanh(centered*OUT_GAIN)"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/dsp/operon_core.hpp:240"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/dsp/operon_core.hpp:240"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Operon.cpp:95 GATE_LEVEL 10.f, GATE_TIME 1e-3f; :253"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Operon.cpp:95, :253"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Operon.cpp:95, :253"
+     }
+    }
+   },
+   "notes": "Every jack is read with getVoltage(), so the module is monophonic. The three protein outputs share one line and the three gate outputs share another: they carry the same quantity for a different gene and differ by number alone. The panel prints GATE, but the pulse is a fixed 1ms trigger rather than a gate that stays high for a phase of the cycle. The CV depths differ per destination (6, 0.6 and 0.5 units per volt) rather than the tenth-of-range used elsewhere in the plugin; the manual says only \"scale-appropriate depths\"."
   },
   "Bunnies": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A predator-prey oscillator: a population of prey and a population of predators chase each other round a cycle about a quarter of a turn apart.",
+    "Sets the speed the simulation runs at, -8 to +4 octaves; the centre gives C4 at 261.63Hz and the bottom about 1Hz.",
+    "Sets the asymmetry between the two populations, 0 to 1: in Lotka-Volterra it is the predator-prey timescale ratio and the relative swing, and in Rosenzweig-MacArthur the predator's efficiency.",
+    "Sets the size of the boom and bust, 0 to 1: in Lotka-Volterra a target the amplitude servo holds, and in Rosenzweig-MacArthur the enrichment that takes the system from rest into a cycle.",
+    "Chooses Lotka-Volterra, a conservative cycle whose size is held where you set it, or Rosenzweig-MacArthur, which settles onto a limit cycle of its own.",
+    "An attenuverter, -1 to +1, scaling the CV into the balance.",
+    "An attenuverter, -1 to +1, scaling the CV into the boom-bust size.",
+    "Adds to the RATE knob at 1V per octave, setting the speed the simulation runs at.",
+    "Modulates the balance, at a tenth per volt through its attenuverter.",
+    "Modulates the boom-bust size, at a tenth per volt through its attenuverter.",
+    "A continuous force added to the prey population at half a unit per volt: a short gate perturbs the cycle, and an audio-rate signal cross-modulates it.",
+    "The prey population centred on its equilibrium, soft-clipped to ±5V.",
+    "The predator population centred on its equilibrium, soft-clipped to ±5V.",
+    "A 10V pulse 1ms long at each local maximum of the prey population.",
+    "A 10V pulse 1ms long at each local maximum of the predator population.",
+    "Note — Changing the mode switch re-seeds the simulation, so the cycle restarts from its default state rather than carrying over.",
+    "Note — The peak outputs are most usable at LFO and low audio rates; at high rates the pulses crowd together."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6
+   },
+   "in": {
+    "0": 7,
+    "1": 8,
+    "2": 9,
+    "3": 10
+   },
+   "out": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Bunnies.cpp:189-191 pitchBase+getVoltage(), clamped to the pitch total range"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Bunnies.cpp:153 BALANCE_CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Bunnies.cpp:155 WILD_CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Bunnies.cpp:156-159 finiteClamp(getVoltage(), -15, 15)*KICK_GAIN 0.5f"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/dsp/bunnies_core.hpp:141 5.f*fastTanh(centered*0.9f)"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/dsp/bunnies_core.hpp:141"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Bunnies.cpp:84 GATE_LEVEL 10.f, GATE_TIME 1e-3f; :231"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Bunnies.cpp:84, :232"
+     }
+    }
+   },
+   "notes": "Every jack is read with getVoltage(), so the module is monophonic. The KICK jack is clamped to ±15V before being scaled, so it is not limited to the ±5V the other CV jacks expect; the manual mentions the sanitized range on Foxes but not here, where the code does the same thing. A peak pulse only fires where the centred population is above 0.05, so a very small cycle produces no peak pulses at all."
   },
   "Foxes": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A three-species food chain: grass feeds bunnies and bunnies feed foxes, and one knob takes the chase from a steady rest through period doubling into chaos.",
+    "Sets the speed the simulation runs at, -8 to +4 octaves; the centre gives C4 at 261.63Hz at the periodic default and the bottom about 1Hz.",
+    "Sets the saturation of the bunny-to-fox link, 0 to 1, mapped onto a narrow band around 2, which reshapes the chase and moves the chaotic windows.",
+    "Sets the bifurcation parameter, 0 to 1, taking the chain from rest through a regular chase and period doubling into chaos at about 0.62, and on into deep crashes.",
+    "An attenuverter, -1 to +1, scaling the CV into the upper trophic saturation.",
+    "An attenuverter, -1 to +1, scaling the CV into the bifurcation parameter.",
+    "Adds to the RATE knob at 1V per octave, setting the speed the simulation runs at.",
+    "Modulates the upper trophic saturation, at a tenth per volt through its attenuverter.",
+    "Modulates the bifurcation parameter, at a tenth per volt through its attenuverter.",
+    "A continuous force added to the grass at a quarter unit per volt, clamped to ±15V first: a short gate re-times the ecology and an audio-rate signal cross-modulates it.",
+    "The grass population centred on its equilibrium, at a gain of 8 and soft-clipped to ±5V.",
+    "The bunny population centred on its equilibrium, at a gain of 18 and soft-clipped to ±5V.",
+    "The fox population centred on its equilibrium, at a gain of 2.5 and soft-clipped to ±5V.",
+    "A 10V pulse 1ms long at each local maximum of the grass population.",
+    "A 10V pulse 1ms long at each local maximum of the bunny population.",
+    "A 10V pulse 1ms long at each local maximum of the fox population.",
+    "Note — The peak outputs are events, not a three-phase clock. At the periodic default they tick once each per lap in grass, bunny, fox order; in chaos the order and the count vary.",
+    "Note — The three populations are not equally spaced in phase, and the output gains of 8, 18 and 2.5 exist to bring their very different native swings to a comparable level."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+   },
+   "in": {
+    "0": 6,
+    "1": 7,
+    "2": 8,
+    "3": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Foxes.cpp:226 voct added to the RATE knob, clamped to the pitch total range"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Foxes.cpp:195-196 BALANCE_CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Foxes.cpp:197-198 WILD_CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Foxes.cpp:199-201 finiteClamp(getVoltage(), -15, 15)*KICK_GAIN 0.25f"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/dsp/foxes_core.hpp:123 5.f*fastTanh(centered*gain(species))"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/dsp/foxes_core.hpp:123"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/dsp/foxes_core.hpp:123"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Foxes.cpp:106 GATE_LEVEL 10.f, GATE_TIME 1e-3f; :272"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Foxes.cpp:106, :273"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Foxes.cpp:106, :274"
+     }
+    }
+   },
+   "notes": "Every jack is read with getVoltage(), so the module is monophonic. BALANCE is documented as 0 to 1 on the panel scale but the code narrows it to roughly 1.75 to 2.25 for the underlying saturation parameter (Foxes.cpp, the comment above b1FromWild), because above about 2.35 a fox-extinction basin captures the seed."
   },
   "Finches": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A slow evolving-population CV source: a distribution of traits is pushed apart by competition and smeared back together by mutation, so one cluster of birds can split into two and merge again.",
+    "Sets the speed evolution runs at, -8 to +4 octaves, with the centre giving 8 units of evolutionary time per second.",
+    "Sets the mutation diffusion between neighbouring traits, 0.00002 to 0.00012 on an exponential scale; low keeps the peaks distinct and high smooths them together.",
+    "Sets how local the competition is, 0.35 to 2.8 on an exponential scale; branching starts above 1, which is near 0.505 on the knob.",
+    "Sets the width of the environmental opportunity around the optimum, 0.20 to 0.45 trait units.",
+    "Sets where an injected mutant starts, up to 0.70 trait units either side of the current environmental optimum.",
+    "Mixes a narrow cohort of mutants into the population at the offset MUTANT sets; it is an invasion attempt, and selection may wipe it out.",
+    "An attenuverter, -1 to +1, scaling the CV into the mutation diffusion.",
+    "An attenuverter, -1 to +1, scaling the CV into the competition locality.",
+    "Doubles the speed evolution runs at for every volt, added to the RATE knob; the two together are capped at +4.25 octaves, so positive volts stop tracking near the top of the knob.",
+    "Modulates the mutation diffusion, a tenth of the knob's range per volt through its attenuverter.",
+    "Modulates the competition locality, a tenth of the knob's range per volt through its attenuverter.",
+    "Moves the environmental optimum by 0.11 trait units per volt, clamped to -0.55 through +0.55.",
+    "A rising edge past 1V injects a mutant cohort at the offset MUTANT sets, which is what the SEED button also does.",
+    "A rising edge past 1V returns the population to one narrow ancestor at the current environmental optimum, without firing MERGE.",
+    "The fraction of the population in the lower-trait basin, 0 to 10V; before a split it carries the whole population.",
+    "The fraction of the population in the higher-trait basin, 0 to 10V; before a split it reads 0V.",
+    "The position of the lower-trait cluster at 2V per trait unit, from -2V to +2V; before a split both position outputs follow the same unresolved mean.",
+    "The position of the higher-trait cluster at 2V per trait unit, from -2V to +2V; before a split both position outputs follow the same unresolved mean.",
+    "The standard deviation of the trait distribution, 0 to 10V, reaching full scale at a spread of 0.5.",
+    "A 10V pulse 1ms long when a viable two-cluster state is accepted.",
+    "A 10V pulse 1ms long when a two-cluster state returns to one cluster.",
+    "Note — The default ecology is stabilising: the competition knob starts below the branching threshold, so the population stays as one peak until you turn COMPETE past about noon.",
+    "Note — The field is stepped 500 times a second whatever the sample rate; the five continuous outputs are smoothed with a 20ms one-pole, and the two pulse outputs are not.",
+    "Note — If RESET and SEED arrive on the same field tick, RESET wins and the seed is discarded; a reset tick does not also advance evolutionary time.",
+    "Note — The screen draws the trait distribution as a filled curve, with the environmental opportunity behind it and the current optimum marked."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14
+   },
+   "out": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "pitch",
+     "3": "pitch",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Finches.cpp:364-367 knob + inputVoltage(RATE_INPUT), clamp(-12, 4.25), exp2"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Finches.cpp:184 CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Finches.cpp:187 CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Finches.cpp:175-177 getVoltage()*ENV_DEPTH 0.11f, clamp(-0.55, 0.55)"
+     },
+     "4": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Finches.cpp:338 seedInputTrigger.process(v, 0.1f, 1.f)"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Finches.cpp:344 resetTrigger.process(v, 0.1f, 1.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Finches.cpp:211 clamp(lowMass, 0, 1)*10.f"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Finches.cpp:212 clamp(highMass, 0, 1)*10.f"
+     },
+     "2": {
+      "poly": false,
+      "range": "-2 to 2V",
+      "why": "src/Finches.cpp:213 clamp(lowTrait, -1, 1)*TRAIT_VOLTS 2.f"
+     },
+     "3": {
+      "poly": false,
+      "range": "-2 to 2V",
+      "why": "src/Finches.cpp:214 clamp(highTrait, -1, 1)*TRAIT_VOLTS 2.f"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Finches.cpp:215 clamp(spread/0.5, 0, 1)*10.f"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Finches.cpp:122 GATE_LEVEL 10.f, :123 GATE_TIME 1e-3f; :384"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Finches.cpp:122-123, :385"
+     }
+    }
+   },
+   "notes": "Every jack is read with getVoltage(), so the module is monophonic. The maker's port names call PITCH L and PITCH R \"1 V/oct\" but the code scales the trait position at 2V per trait unit (TRAIT_VOLTS = 2.f), which is a voltage per arbitrary trait unit rather than a pitch standard; the manual's output table says 2V per trait unit and is the one that matches the code. The manual gives the NICHE default as about 0.50 where configParam sets 0.48. SPLIT and MERGE use prominence, separation, basin mass, persistence and separate enter and leave thresholds, so a flat-topped hill does not chatter between states."
   },
   "Islands": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four small populations drifting at random: each island resamples its allele frequency every generation under selection, mutation and migration, and puts the four frequencies out as bounded CV.",
+    "Sets the number of allele copies in each island, 8 to 4096 on a log2 scale; more copies make each random step smaller and smoother.",
+    "Sets the signed fitness advantage, -0.25 to +0.25; below centre favours allele B and above it favours allele A.",
+    "Sets the symmetric mutation probability per copy per generation: exactly zero at the bottom, then 0.000001 to 0.05 on a logarithmic scale.",
+    "Sets the fraction of each island replaced from the common migrant pool, 0 to 1; at 1 every island starts a generation from the same probability.",
+    "Sets the internal generation rate, stopped at the bottom and then exponential up to 200 generations a second.",
+    "Resamples the next island in the repeating order 1, 2, 3, 4 from eight copies only, which it holds until the next ordinary generation redraws it at the SIZE setting.",
+    "Returns all four islands and the event memory to the deterministic starting state.",
+    "An attenuverter, -1 to +1, scaling the CV into the selection.",
+    "An attenuverter, -1 to +1, scaling the CV into the mutation probability.",
+    "An attenuverter, -1 to +1, scaling the CV into the migration fraction.",
+    "Doubles the allele-copy count for every volt, added to the SIZE knob and clamped to 8 through 4096 copies.",
+    "Modulates the selection, 0.05 per volt through its attenuverter.",
+    "Modulates the mutation probability along its logarithmic scale, a tenth of the knob's range per volt through its attenuverter.",
+    "Modulates the migration fraction, a tenth per volt through its attenuverter.",
+    "Doubles the running generation rate for every volt, added to the GENERATIONS knob and capped at 200 generations a second.",
+    "A rising edge past 1V advances exactly one synchronous generation, without resetting the phase of the internal clock.",
+    "A rising edge past 1V bottlenecks the next island in rotation to eight copies.",
+    "A rising edge past 1V restores the initial population and clears the event memory.",
+    "The allele-A frequency of that island, 0 to 10V.",
+    "The mean allele-A frequency across the four islands, 0 to 10V.",
+    "The within-island heterozygosity, 0 to 10V: 10V when every island is at a frequency of a half, and 0V when every island is internally fixed, including when the four are split between all-A and all-B.",
+    "10V for as long as every island is fixed at allele A.",
+    "10V for as long as every island is fixed at allele B.",
+    "A 10V pulse 1ms long on entry into either global fixation state.",
+    "A 10V pulse 1ms long when the mean frequency enters the A-high or the B-high region.",
+    "Note — With the generation rate at the bottom the simulation is stopped, and nothing changes until a trigger arrives at STEP; the two can also be used together.",
+    "Note — Changing a knob never redraws the population already on screen; a new setting only alters the probabilities of the generations that follow.",
+    "Note — The five frequency and heterozygosity outputs ramp to each new generation's value over 50ms rather than stepping, so they can be patched to audio-rate destinations without clicking.",
+    "Note — The screen plots the recent history of the four island frequencies, with a ring marking the island the next founder bottleneck will hit.",
+    "Menu — New random seed — replaces the random stream the simulation draws from, so the sequence from here on differs.",
+    "Menu — Restore factory seed — returns the random stream to the one the module ships with, making the sequence repeatable."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17,
+    "7": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 19,
+    "2": 19,
+    "3": 19,
+    "4": 20,
+    "5": 21,
+    "6": 22,
+    "7": 23,
+    "8": 24,
+    "9": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Islands.cpp:293-295 knob + inputVoltage(), clamp(3, 12) octaves, exp2"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Islands.cpp:297-302 SELECT_CV_DEPTH 0.05f, clamp(-0.25, 0.25)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Islands.cpp:303-306 UNIT_CV_DEPTH 0.1f then mutationFromUnit()"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Islands.cpp:308-313 UNIT_CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "4": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Islands.cpp:318-324 knob + inputVoltage(), exp2, capped at log2(200)"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Islands.cpp:745 stepTrigger.process(v, 0.1f, 1.f)"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Islands.cpp:746-747 founderInputTrigger.process(v, 0.1f, 1.f)"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Islands.cpp:750-751 resetInputTrigger.process(v, 0.1f, 1.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Islands.cpp:329-330 clamp(frequency, 0, 1)*10.f"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Islands.cpp:329-330"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Islands.cpp:329-330"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Islands.cpp:329-330"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Islands.cpp:331 clamp(mean, 0, 1)*10.f"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Islands.cpp:332 clamp(diversity, 0, 1)*10.f"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Islands.cpp:782 metrics.fixA ? GATE_LEVEL 10.f : 0.f"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Islands.cpp:783"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Islands.cpp:784 lossPulse, PULSE_TIME 1e-3f, GATE_LEVEL 10.f"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Islands.cpp:785 sweepPulse, PULSE_TIME 1e-3f"
+     }
+    }
+   },
+   "notes": "Every jack is read with getVoltage(), so the module is monophonic. The four island outputs share one line: they carry the same quantity for a different island and differ by number alone. FIX A and FIX B are steady levels rather than pulses, unlike the other four event outputs; the panel gives them no visual distinction. A reset arriving in the same sample as a founder or step trigger takes priority and the other two are discarded (Islands.cpp:757-766)."
   },
   "Archipelago": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Eight habitats in a line, each adapting to its own point on an environmental gradient, with mutation and neighbour migration shaping where the traits step and where the population can hold on.",
+    "Sets the speed evolution runs at, -8 to +4 octaves, giving 4 units of evolutionary time per second at the centre.",
+    "Sets how hard each habitat is pulled toward its own optimum, 0 to 1 on the knob, mapped to a selection strength of 8 times the square of that.",
+    "Sets the mutation diffusion through trait space: exactly zero at the bottom, then 0.00001 to 0.003 per unit of evolutionary time on a logarithmic scale.",
+    "Sets the migration between neighbouring habitats: exactly zero at the bottom, then 0.002 to 2 per unit of evolutionary time on a logarithmic scale.",
+    "Sets the slope of the environmental gradient, -0.85 to +0.85 trait units; the optimum of habitat 8 differs from habitat 1 by twice this, and positive values favour higher traits toward habitat 8.",
+    "Closes the migration link between habitats 4 and 5, 0 to 1, with a permeability of one minus the setting squared; 0 leaves it open and 1 shuts it exactly.",
+    "Adds a shared offset to all eight environmental optima, -0.85 to +0.85 trait units.",
+    "Restores the deterministic starting field at the current gradient and climate, and clears the event state.",
+    "An attenuverter, -1 to +1, scaling the CV into the selection strength.",
+    "An attenuverter, -1 to +1, scaling the CV into the mutation diffusion.",
+    "An attenuverter, -1 to +1, scaling the CV into the migration.",
+    "An attenuverter, -1 to +1, scaling the CV into the gradient slope.",
+    "An attenuverter, -1 to +1, scaling the CV into the central barrier.",
+    "Chooses Row, which links habitats 1 through 8 in a line so the two end habitats have one neighbour each, or Ring, which adds an 8 to 1 link and gives every habitat two.",
+    "Doubles the speed evolution runs at for every volt, added to the RATE knob, with the two together clamped to -12 through +4 octaves.",
+    "Modulates the selection strength, a tenth of the knob's range per volt through its attenuverter.",
+    "Modulates the mutation diffusion, a tenth of the knob's range per volt through its attenuverter.",
+    "Modulates the migration, a tenth of the knob's range per volt through its attenuverter.",
+    "Modulates the gradient slope, a tenth per volt through its attenuverter.",
+    "Modulates the central barrier, a tenth per volt through its attenuverter.",
+    "Adds 0.1 trait units per volt to the shared climate offset, with the total clamped to -0.85 through +0.85; there is no attenuverter on this one.",
+    "A rising edge past 1V restores the deterministic starting field.",
+    "Eight channels of local mean trait, one per habitat, at 2V per trait unit and spanning -2V to +2V; a channel freezes at its last value while its habitat is empty.",
+    "Eight channels of local population mass, one per habitat, 0 to 10V; this is what says whether a habitat is occupied at all.",
+    "The abundance-weighted mean trait across all eight habitats, at 2V per trait unit and spanning -2V to +2V.",
+    "The trait mean of habitats 5 to 8 minus that of habitats 1 to 4, at 2V per trait difference and spanning -4V to +4V.",
+    "The current migration activity between neighbours, unsigned and normalised to 0 to 10V.",
+    "A 10V pulse 1ms long when any habitat becomes occupied.",
+    "A 10V pulse 1ms long when any habitat stops being occupied.",
+    "Note — The barrier only ever closes the link between habitats 4 and 5. In Row that cuts the line into two groups of four; in Ring, migration travels the other way round instead.",
+    "Note — There is no step input: the field is a continuous ecology, and a knob or CV change alters what happens next without redrawing the population already on screen.",
+    "Note — The screen draws the eight habitats left to right as stacked trait distributions, with the line through them tracking each local mean."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 13,
+    "13": 14
+   },
+   "in": {
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21,
+    "7": 22
+   },
+   "out": {
+    "0": 23,
+    "1": 24,
+    "2": 25,
+    "3": 26,
+    "4": 27,
+    "5": 28,
+    "6": 29
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "cv",
+     "2": "pitch",
+     "3": "cv",
+     "4": "cv",
+     "5": "trigger",
+     "6": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Archipelago.cpp:516-519 knob + inputVoltage(), clamp(-12, 4), exp2"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Archipelago.cpp:283-286 CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Archipelago.cpp:288-291 CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Archipelago.cpp:293-296 CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Archipelago.cpp:298-301 CV_DEPTH 0.1f, clamp(-0.85, 0.85)"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/Archipelago.cpp:303-306 CV_DEPTH 0.1f, clamp(0, 1)"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Archipelago.cpp:308-310 CLIMATE_DEPTH 0.1f, clamp(-0.85, 0.85); no attenuverter"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Archipelago.cpp:494-495 resetInputTrigger.process(v, 0.1f, 1.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "-2 to 2V",
+      "why": "src/Archipelago.cpp:535 setChannels(8); :326 trait*TRAIT_VOLTS 2.f clamped -2..2"
+     },
+     "1": {
+      "poly": true,
+      "range": "0 to 10V",
+      "why": "src/Archipelago.cpp:536 setChannels(8); :328 mass*10 clamped 0..10"
+     },
+     "2": {
+      "poly": false,
+      "range": "-2 to 2V",
+      "why": "src/Archipelago.cpp:330-331 globalMean*2 clamped -2..2"
+     },
+     "3": {
+      "poly": false,
+      "range": "-4 to 4V",
+      "why": "src/Archipelago.cpp:332-333 difference*2 clamped -4..4"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Archipelago.cpp:334-335 flux*10 clamped 0..10"
+     },
+     "5": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Archipelago.cpp:544-545 colonizePulse, 10V, about 1ms"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Archipelago.cpp:546-547 extinctPulse, 10V, about 1ms"
+     }
+    }
+   },
+   "notes": "Every input jack is read with getVoltage(), so nothing here is polyphonic on the way in; TRAIT and MASS are the only polyphonic outputs and always carry exactly eight channels in habitat order. The TRAIT channels follow an occupancy latch rather than the raw local mean: a channel stops updating when its habitat's mass crosses the extinction threshold and picks up again from the newly established mean on colonisation, so a dying voice holds its pitch instead of falling to 0V. The panel numbers habitats 1 to 8 while the equations index them from zero, so the barrier the manual calls the 4-5 link is between the fourth and fifth panel habitats."
   },
   "Lineages": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A sequencer built on an ancestral tree: a cursor travels through a random genealogy, and the mutations each sample has inherited at that moment become a polyphonic chord.",
+    "Sets the internal traversal speed, -6 to +5 octaves around a tenth of a complete tree per second; the centre takes about 10 seconds to cross one tree.",
+    "Sets how many samples the next tree is generated with, 2 to 16, which is also the number of channels TRAITS puts out.",
+    "Sets the expected total number of mutations on the next tree, 0 to 64.",
+    "Sets how much voltage each inherited mutation adds to a sample's trait, 0 to 12 semitones; it changes the current tree at once rather than waiting for a new one.",
+    "Chooses Ancestry, travelling back from the present toward the common ancestor, or Descent, travelling forward from the ancestor; switching it reverses the movement from where the cursor already is.",
+    "Sets whether the cursor jumps back to the start after reaching the end of its direction, or stops there until a new tree, a replay or a change of direction moves it.",
+    "Generates a new tree from the current SAMPLES and MUTATE settings, with new topology, branch timings, mutation placements and signs.",
+    "Replays the current tree from the start of the chosen direction, without changing the topology or the mutations, so the replay is exact.",
+    "Adds to the RATE knob at 1V per octave; the two together are clamped to -12 through +5 octaves, giving at most 3.2 complete trees a second.",
+    "Sets the cursor's position through the tree absolutely, 0V at the sampled present and 10V at the common ancestor; while a cable is here the rate and loop controls no longer move it.",
+    "A rising edge past 1V generates a new tree, the same operation as the NEW button.",
+    "A rising edge past 1V replays the current tree, the same operation as the RESET button.",
+    "One channel per sample carrying the signed sum of the mutations that sample has inherited at the cursor's position, at a twelfth of the STEP setting in volts per mutation.",
+    "A 10V pulse 1ms long when the cursor crosses one or more coalescent nodes, the root included.",
+    "A 10V pulse 1ms long when the cursor crosses one or more mutation positions.",
+    "A 10V pulse 1ms long on arrival at the common ancestor, or on starting a descent there.",
+    "The number of distinct ancestral lineages at the cursor's position, mapped to 10V at the sampled present and 0V at the common ancestor.",
+    "The mean pairwise number of inherited mutations between samples, at 2V per mutation and clamped at 10V; the STEP setting does not change it.",
+    "Note — SAMPLES and MUTATE describe the next tree, not the one playing. Moving either off the values the current tree was made with lights the yellow lamp beside NEW; pressing NEW clears it.",
+    "Note — With nothing patched to TIME the cursor is driven by RATE. Patching a cable there takes the cursor over at the input voltage, and unpatching hands it back to the internal transport.",
+    "Note — Rack's Initialize is not the panel RESET: it restores every parameter to its default and then generates a fresh tree, where RESET replays the tree already loaded.",
+    "Note — At the common ancestor every TRAITS channel and the diversity output are exactly zero, because no mutation has happened yet."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 18
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "pitch",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "cv",
+     "5": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/Lineages.cpp:769-773 knob + getVoltage(), clamp(-12, 5), 0.1*exp2"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/Lineages.cpp:762-766 clamp(getVoltage()*0.1, 0.0, 1.0)"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Lineages.cpp:914-915 newInputTrigger.process(v, 0.1f, 1.f)"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/Lineages.cpp:918-919 resetInputTrigger.process(v, 0.1f, 1.f)"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "src/Lineages.cpp:877 setChannels(leafCount); :882-886 traitSteps*step/12, clamped to ±10V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Lineages.cpp:36 PULSE_VOLTS 10.f, :35 PULSE_SECONDS 1e-3f; :978"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Lineages.cpp:35-36, :980"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 1V",
+      "why": "src/Lineages.cpp:35-36, :982"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Lineages.cpp:893-897 10*(k-1)/(n-1), clamped 0..10"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Lineages.cpp:899-902 meanPairwise*DIVERSITY_VOLTS_PER_MUTATION 2.f, clamped 0..10"
+     }
+    }
+   },
+   "notes": "No input is polyphonic; TRAITS is the only polyphonic output and carries one channel per leaf of the tree that is currently loaded, which is the SAMPLES value the tree was generated with rather than the current knob position. The yellow lamp beside NEW has no widget in the census's parameter list because it is a light rather than a control, so no click reaches it; the Note line carries what it means. With a cable in TIME, NEW and RESET install or replay at the voltage-selected age rather than at an endpoint, and emit no historical event pulses."
   }
  }
 }

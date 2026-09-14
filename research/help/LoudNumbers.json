@@ -2,12 +2,113 @@
  "plugin": "LoudNumbers",
  "source": "https://github.com/loudnumbers/loudnumbers_vcv",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "LoudNumbers": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Plays a column of numbers from a CSV file: each trigger steps to the next value in the column and puts it out as three voltages and a gate",
+    "A trigger here plays the next value in the column, moving the three voltage outputs to it and firing a gate",
+    "A trigger here returns the playhead to the first value without playing it; the voltage outputs hold what they had, and the next trigger at TRIG plays that first value",
+    "Sets how many octaves the V/OCT output spans, 1 to 8; from 1 to 3 octaves the span rises from 0V, and from 4 octaves up the top of the span is fixed at +4V and the extra octaves are added below it",
+    "Sets how long the gate is held high for each value played, from 1ms to 1 second",
+    "A 10ms trigger fired as the last value in the column plays; patched back to RESET it loops the data with no gap",
+    "The value played, scaled so that the smallest number in the column gives -5V and the largest gives +5V",
+    "The value played, scaled so that the smallest number in the column gives 0V and the largest gives 10V",
+    "The value played as a pitch, scaled across the octave span set by RANGE",
+    "A 10V gate for each value played, held for the time set by LENGTH; a missing value in the column fires no gate",
+    "Note — a new module is loaded with a built-in series of 64 yearly global temperature figures, so it plays something before any file is chosen",
+    "Note — to play your own numbers, right-click and choose Load CSV, then right-click again and choose a column from the list at the foot of the menu",
+    "Note — the file needs one header row of column names, and only columns with at least one number in them can be chosen; the rest are greyed out in the menu",
+    "Note — a blank or non-numeric cell becomes a gap: that step fires no gate and the voltage outputs hold their last value, so it is heard as a silence",
+    "Note — nothing advances without a trigger at TRIG; the module has no clock of its own",
+    "Note — hovering the chart highlights the value under the cursor, and a left-click cues it, so the next trigger plays that value and play carries on from there",
+    "Note — a right-click on the chart opens the module's menu rather than cueing anything",
+    "Note — a hollow circle on the chart marks the value cued to play next, and a filled circle marks the one most recently played",
+    "Note — with no reset patched the circle disappears once the playhead has run past the last value, and nothing plays until a reset arrives",
+    "Note — the chosen column is saved inside the patch, up to 10000 values, so the patch plays even where the file has been moved or deleted",
+    "Note — while the patch is playing that saved copy, the column list and the delimiter choice cannot be changed until a reload from disk succeeds",
+    "Note — the chart prints CSV file not found where the file has gone, and Invalid CSV where the file is there but cannot be read as data; while either is shown the module produces nothing at all",
+    "Menu — Load CSV — opens a file browser for a csv, tsv or txt file and selects the first column in it that holds numbers",
+    "Menu — Reload CSV from disk — reads the file again, keeping the chosen column by matching its name, so an edit to the file is picked up; it is offered once a file has been loaded",
+    "Menu — Delimiter: Detect automatically, Comma, Tab, Semicolon, Custom — sets the character that separates the columns and reads the file again with it, which gives a different set of columns",
+    "Menu — Detect automatically — counts commas, tabs, semicolons and pipes in the first line of the file and takes the commonest as the separator; it is in the Delimiter submenu",
+    "Menu — Custom character, then Enter: — a box in the Delimiter submenu taking any single character as the separator, applied when you press Enter"
+   ],
+   "param": {
+    "0": 3,
+    "1": 4
+   },
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "pitch",
+     "4": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/LoudNumbers.cpp process() calls ingate.process(inputs[TRIG_INPUT].getVoltage()) with no channel, a dsp::SchmittTrigger at Rack's default 0.1V and 1V thresholds"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/LoudNumbers.cpp process() calls resetgate.process(inputs[RESET_INPUT].getVoltage()) with no channel, a dsp::SchmittTrigger at Rack's default 0.1V and 1V thresholds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/LoudNumbers.cpp process() ends with outputs[END_OUTPUT].setVoltage(epulse ? 10.0 : 0.0) and never sets a channel count"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/LoudNumbers.cpp setCVOutputs() calls scalemap(..., -5.f, 5.f) into MINUSFIVETOFIVE_OUTPUT with no channel count set anywhere"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/LoudNumbers.cpp setCVOutputs() calls scalemap(..., 0.f, 10.f) into ZEROTOTEN_OUTPUT with no channel count set anywhere"
+     },
+     "3": {
+      "poly": false,
+      "range": "1V per octave",
+      "why": "src/LoudNumbers.cpp setCVOutputs() maps the value into the voctmin..voctmax span from voctRange(), which is in octaves, and never sets a channel count"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/LoudNumbers.cpp process() ends with outputs[GATE_OUTPUT].setVoltage(gpulse ? 10.0 : 0.0) and never sets a channel count"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit 157a217, the head of main, which is one of three commits carrying the installed 2.1.0 (291430e bumped the version, a1c2bdd and 157a217 touched only README, CI and the changelog); src/ and res/ are byte-identical across all three, so there is nothing to settle between them. The installed binary is confirmed as that build by the delimiter strings 'Reload CSV from disk', 'Detect automatically (' and 'Custom character, then Enter:', which arrived in d3bba0e just before the bump. Index order matches panel order here, left to right: inputs TRIG and RESET, then knobs RANGE and LENGTH on the same row, then the five outputs END, -5-5V, 0-10V, V/OCT and GATE on the row below. Panel names were read from a render of res/LoudNumbers.svg and are shorter than the maker's configured names: the panel prints RANGE for 'Octave range', LENGTH for 'Gate length', TRIG for 'Trigger', END for 'End of Data Trigger'. The brief expected this module to do nothing until a file is loaded; it does not — the constructor builds a Dataset from a 64-value defaultdata vector named 'Temps 1956-2019', so a fresh module plays out of the box. It does go silent in the two error states, where process() returns immediately while badcsv is set. The RANGE knob carries a custom ParamQuantity that prints the exact voltage span in its tooltip, for example '6 octaves (-2V to +4V)'. The asymmetric mapping from 4 octaves upward is in voctRange() and is also stated in the README. The chart is a single DataViz widget with no ParamWidget in it, so its hover and click gestures cannot be reached by clicking for help and are written as Note lines. The column list at the foot of the context menu is built from the loaded file rather than being fixed items, so it has no Menu line of its own and is described in the Load CSV note."
   }
  }
 }

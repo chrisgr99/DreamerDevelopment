@@ -1,13 +1,143 @@
 {
  "plugin": "SphericalSoundSocietyFree",
- "source": "https://github.com/spherical-sound-society/VCV-Free",
+ "source": "https://github.com/spherical-sound-society/VCV-Free/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "GlitchStorm": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A bytebeat oscillator: a counter is driven at an audio rate through one of 21 short integer equations, and the byte that falls out of the equation is the waveform",
+    "Picks which of the 21 equations runs, numbered 0 to 20, and snaps to whole numbers",
+    "Sets how fast the counter advances, from 3072Hz to 44100Hz",
+    "Switches on the drawing of the mono output in the black display; with it off the display stays empty",
+    "Reads the equation's byte as a phase and gives a sine at that phase; switched off, the byte itself is the waveform and the output is stepped",
+    "Sets A, one of three whole numbers from 0 to 15 that the running equation uses in its shifts and masks",
+    "Sets B, one of three whole numbers from 0 to 15 that the running equation uses in its shifts and masks",
+    "Sets C, one of three whole numbers from 0 to 15 that the running equation uses in its shifts and masks",
+    "Scales the voltage at the A CV jack, -100% to +100%, before it is added to the A knob; at the centre that jack changes nothing",
+    "Scales the voltage at the B CV jack, -100% to +100%, before it is added to the B knob; at the centre that jack changes nothing",
+    "Scales the voltage at the C CV jack, -100% to +100%, before it is added to the C knob; at the centre that jack changes nothing",
+    "Adds to the PROGRAM knob, 10V moving the whole span of 21 equations, and the total is held between 0 and 20",
+    "Sets the counter rate on its own, 0V giving 3072Hz and 10V giving 44100Hz; while a cable is patched here the RATE knob changes nothing",
+    "Modulates A through its attenuverter; at a full attenuverter 10V adds 15, and the total with the knob is held between 0 and 15",
+    "Modulates B through its attenuverter; at a full attenuverter 10V adds 15, and the total with the knob is held between 0 and 15",
+    "Modulates C through its attenuverter; at a full attenuverter 10V adds 15, and the total with the knob is held between 0 and 15",
+    "Holds the counter at zero for as long as the voltage here stays above 1V, so the equation restarts from the beginning when that voltage falls",
+    "Goes to 10V for one step of the counter each time the counter reaches a multiple of 1024, and rests at 0V in between",
+    "Carries the mono signal at full level while the equation's byte is in the lower half of its range, fading to silence as the byte climbs to the top",
+    "Carries the mono signal at full level while the equation's byte is in the upper half of its range, fading to silence as the byte falls to the bottom",
+    "The equation's output as audio, swinging from -15V to +5V rather than around zero",
+    "Note — a gold arc drawn around PROGRAM, RATE or one of the three number knobs shows how far the voltage at that knob's jack has moved the value away from the knob's own setting",
+    "Note — the module sounds as soon as it is placed, because the counter free-runs at the rate set by RATE with nothing patched"
+   ],
+   "param": {
+    "0": 2,
+    "1": 1,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 10,
+    "8": 4,
+    "9": 3
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 11,
+    "4": 12,
+    "7": 16
+   },
+   "out": {
+    "0": 20,
+    "1": 18,
+    "2": 19,
+    "3": 17
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "7": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GlitchStorm.cpp:383 calls calculate_parameter_input, which at line 298 reads getVoltage() with no channel, scales it by 1.5 and by the attenuverter, and line 307 clamps the knob-plus-jack total to 0 and 15"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GlitchStorm.cpp:384 calls calculate_parameter_input, which at line 298 reads getVoltage() with no channel, scales it by 1.5 and by the attenuverter, and line 307 clamps the knob-plus-jack total to 0 and 15"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GlitchStorm.cpp:385 calls calculate_parameter_input, which at line 298 reads getVoltage() with no channel, scales it by 1.5 and by the attenuverter, and line 307 clamps the knob-plus-jack total to 0 and 15"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "GlitchStorm.cpp:349 reads getVoltage() with no channel, multiplies it by 2.1 and adds it to the Program knob; line 350 clamps the total to 0 and 20"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "GlitchStorm.cpp:331 reads getVoltage() with no channel, line 332 maps it from 3072 to 44100 without the knob, and line 333 clamps it to those bounds"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "GlitchStorm.cpp:315 compares getVoltage() with no channel against 1.0 and zeroes the counter while it is greater"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-15 to 5V",
+      "why": "GlitchStorm.cpp:390 computes compute() * 10 - 5, and compute returns -1 to 1 at lines 642 and 644; line 391 writes it with setVoltage and no setChannels"
+     },
+     "1": {
+      "poly": false,
+      "why": "GlitchStorm.cpp:424 writes the mono signal times a gain derived from the byte at lines 416 to 422, with setVoltage and no setChannels"
+     },
+     "2": {
+      "poly": false,
+      "why": "GlitchStorm.cpp:425 writes the mono signal times a gain derived from the byte at lines 416 to 422, with setVoltage and no setChannels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "GlitchStorm.cpp:428 writes 10V when the counter is a multiple of 1024 and 0V otherwise, with setVoltage and no setChannels"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit f086c41, whose plugin.json carries the installed 2.0.0; four commits carry that version and src/ is byte-identical across all four, and the installed plugin.json matches f086c41's tag list exactly. Inputs 5 (T input) and 6 (Sync clock) are configured in the module but no PortWidget is added for them, so no cable can reach them; T input would replace the counter with the patched voltage times 2048 and Sync clock is read nowhere at all. MONO is centred on -5V, not on zero: line 390 scales a -1 to +1 signal by 10 and then subtracts 5, giving -15V to +5V, and LEFT and RIGHT inherit the same offset scaled by their gains. Rate CV replaces the RATE knob rather than adding to it, which the README's parameter list does not say. The A, B and C knobs, their attenuverters and their CV jacks carry no lettering on the panel; the names used here are the maker's own parameter names. The equation ranges the maker once computed per program are commented out at lines 354 to 374, so all three knobs run 0 to 15 whichever program is selected. The module has no context menu of its own."
   }
  }
 }

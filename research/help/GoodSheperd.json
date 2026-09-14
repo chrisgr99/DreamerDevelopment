@@ -1,38 +1,1122 @@
 {
  "plugin": "GoodSheperd",
- "source": "https://github.com/jensschulze/GoodSheperd",
+ "source": "https://github.com/jensschulze/GoodSheperd/blob/6363510/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "Hurdle": {
    "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "Stable16": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "SEQ3st": {
-   "lines": [
-    "TODO: what this module is"
-   ]
-  },
-  "Stall": {
-   "lines": [
-    "TODO: what this module is"
-   ]
+    "A gate let through or dropped at random, with the chance of passing set by a voltage",
+    "Sets the chance that a rising edge at the Gate input opens the gate output, clamped to 0-10V with no chance at 0V and certain at 10V; the voltage is read only at the moment the edge arrives",
+    "The gate being tested, counted as high at 1V and above; each rising edge starts a fresh decision, and once open the output holds until this voltage falls back below 1V",
+    "10V while the gate is open and 0V while it is closed",
+    "Note — an unpatched P input reads 0V, which is no chance at all, so the gate output never opens until a voltage is patched there.",
+    "Note — the module has no clock of its own; with nothing patched to the Gate input the output stays at 0V."
+   ],
+   "param": {},
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 3
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Hurdle.cpp process(): clamp(inputs[PROBABILITY_INPUT].getVoltage(), 0.0f, 10.0f), then probability >= random::uniform() * 10.0f at the rising edge; no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Hurdle.cpp process(): gateInIsHigh = inputs[GATE_INPUT].getVoltage() >= 1.0f, one voltage, no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Hurdle.cpp process(): setVoltage(10.0f) or setVoltage(0.0f), no setChannels"
+     }
+    }
+   },
+   "notes": "The decision is probability >= random::uniform() * 10.0f, so 10V always opens the gate and 0V never does. There is no Schmitt hysteresis on the gate input: the single 1.0f threshold decides both edges, and the open gate is closed again by the input falling below it rather than by a new draw. The README's 0V-10V for 0%-100% wording matches the code."
   },
   "Switch1": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A latching two-way signal switch: a trigger on one side passes that side's input to the output and holds it there until a trigger arrives on the other side",
+    "A trigger here selects In 1; the two Tr 1 jacks are added as magnitudes and fire when the total passes 2V, so a negative voltage triggers as readily as a positive one",
+    "A trigger here selects In 2; the two Tr 2 jacks are added as magnitudes and fire when the total passes 2V, so a negative voltage triggers as readily as a positive one",
+    "The signal passed to Out while In 1 is selected",
+    "The signal passed to Out while In 2 is selected",
+    "Carries whichever of In 1 and In 2 the last trigger selected",
+    "Note — the module comes up with In 1 selected and the choice is saved with the patch; the lit lamp under a column shows which input is being passed.",
+    "Note — a trigger on Tr 1 and Tr 2 in the same frame leaves In 1 selected.",
+    "Note — one voltage is passed through, not polyphonic channels, whatever the cable carries."
+   ],
+   "param": {},
+   "in": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 3,
+    "5": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {}
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Switch1.cpp process(): t1Trigger.process(rescale(fabs(inputs[TRIGGER_IN_1].getVoltage()) + fabs(inputs[TRIGGER_IN_2].getVoltage()), 0.1f, 2.f, 0.f, 1.f)) with SchmittTrigger's default 0 and 1 thresholds"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Switch1.cpp process(): t1Trigger.process(rescale(fabs(inputs[TRIGGER_IN_1].getVoltage()) + fabs(inputs[TRIGGER_IN_2].getVoltage()), 0.1f, 2.f, 0.f, 1.f)) with SchmittTrigger's default 0 and 1 thresholds"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Switch1.cpp process(): t2Trigger.process(rescale(fabs(inputs[TRIGGER_IN_3].getVoltage()) + fabs(inputs[TRIGGER_IN_4].getVoltage()), 0.1f, 2.f, 0.f, 1.f)) with SchmittTrigger's default 0 and 1 thresholds"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Switch1.cpp process(): t2Trigger.process(rescale(fabs(inputs[TRIGGER_IN_3].getVoltage()) + fabs(inputs[TRIGGER_IN_4].getVoltage()), 0.1f, 2.f, 0.f, 1.f)) with SchmittTrigger's default 0 and 1 thresholds"
+     },
+     "4": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/Switch1.cpp process(): outputs[OUTPUT].setVoltage(inputs[INPUT + switchPosition].getVoltage()), one voltage, no channel loop and no setChannels"
+     },
+     "5": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/Switch1.cpp process(): outputs[OUTPUT].setVoltage(inputs[INPUT + switchPosition].getVoltage()), one voltage, no channel loop and no setChannels"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Switch1.cpp process(): outputs[OUTPUT].setVoltage(inputs[INPUT + switchPosition].getVoltage()), one voltage, no channel loop and no setChannels"
+     }
+    }
+   },
+   "notes": "The two signal jacks and the output carry whatever is patched into them, so no family is given for them. The four trigger jacks are read as two OR-linked pairs through fabs(), so a negative pulse triggers as readily as a positive one; the README does not say this. The pair threshold is a rescale of 0.1V to 2V onto 0 to 1 before a default SchmittTrigger, so the pair fires when the summed magnitude passes 2V and rearms below 0.1V. Tr 2 is tested first and Tr 1 second, so a simultaneous pair ends with In 1 selected, which matches the README. The two lamps are lights with no ParamWidget and cannot be clicked."
   },
   "Seqtrol": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Turns a MIDI transport's start, continue and stop signals into a reset pulse and a divided clock for a sequencer",
+    "A trigger above 2V sets the clock divisor count back to zero and starts the clock; the Reset output then pulses on the first frame the Clock input is high",
+    "A trigger above 2V starts the clock without clearing the divisor count and without a pulse at the Reset output",
+    "A trigger above 2V stops the clock; the Clock output drops to 0V",
+    "The clock being divided; each pulse above 2V is counted, and this jack's own voltage is what the Clock output passes on",
+    "Pulses once after a trigger at Start, carrying the Clock input's voltage for the single frame it appears; patch it to a sequencer's reset input",
+    "The Clock input passed on while the clock is running, thinned to one pulse in every group set by the Clock divisor menu",
+    "Menu — 1:1 (1/96) — passes every pulse to the Clock output",
+    "Menu — 3:1 (1/32) — passes one pulse in every three",
+    "Menu — 6:1 (1/16) — passes one pulse in every six",
+    "Menu — 12:1 (1/8) — passes one pulse in every twelve",
+    "Menu — 24:1 (1/4) — passes one pulse in every twenty-four",
+    "Menu — 48:1 (1/2) — passes one pulse in every forty-eight",
+    "Menu — 96:1 (1/1) — passes one pulse in every ninety-six",
+    "Menu — 2:1 (1/32T) — passes one pulse in every two",
+    "Menu — 4:1 (1/16T) — passes one pulse in every four",
+    "Menu — 8:1 (1/8T) — passes one pulse in every eight",
+    "Menu — 16:1 (1/4T) — passes one pulse in every sixteen",
+    "Menu — 32:1 (1/2T) — passes one pulse in every thirty-two",
+    "Menu — 64:1 (1/1T) — passes one pulse in every sixty-four",
+    "Note — the module comes up stopped and has no clock of its own; nothing appears at either output until a clock is patched to Clock and a trigger arrives at Start or Cont.",
+    "Note — the note values printed in the Clock divisor menu assume the 96 pulses to a whole note that a MIDI clock sends, and the names ending in T are the triplet divisions.",
+    "Note — patch the MIDI module's raw clock to the Clock input rather than a divided output, because the divisor menu does the dividing.",
+    "Note — the green lamp near the top of the panel is lit while the clock is running."
+   ],
+   "param": {},
+   "in": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "out": {
+    "0": 5,
+    "1": 6
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Seqtrol.cpp process(): startTrigger.process(rescale(inputs[START_TRIGGER_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f)) with SchmittTrigger's default 0 and 1 thresholds, one voltage and no channel loop"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Seqtrol.cpp process(): continueTrigger.process(rescale(inputs[CONTINUE_TRIGGER_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f)) with SchmittTrigger's default 0 and 1 thresholds, one voltage and no channel loop"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Seqtrol.cpp process(): stopTrigger.process(rescale(inputs[STOP_TRIGGER_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f)) with SchmittTrigger's default 0 and 1 thresholds, one voltage and no channel loop"
+     },
+     "3": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Seqtrol.cpp process(): inputClockTrigger.process(rescale(inputs[CLOCK_INPUT].getVoltage(), 0.1f, 2.f, 0.f, 1.f)) with SchmittTrigger's default 0 and 1 thresholds, one voltage and no channel loop"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Seqtrol.cpp process(): outputs[RESET_OUTPUT].setVoltage(inputs[CLOCK_INPUT].getVoltage()) or 0.0f, no setChannels, so it carries the clock's own height"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/Seqtrol.cpp process(): outputs[CLOCK_OUTPUT].setVoltage(clockCounter == 0 ? intermediateClock : 0.f), no setChannels, so it carries the clock's own height"
+     }
+    }
+   },
+   "notes": "Both outputs pass the Clock input's own voltage rather than a fixed 10V, so no range is claimed for them. The Reset output is high only on the frame at which the clock input is first found high after a Start trigger, which is a one-frame pulse rather than a full clock pulse. counterMax[13] holds 1, 3, 6, 12, 24, 48, 96, 2, 4, 8, 16, 32 and 64, matching the thirteen divisor names in the order the menu prints them. The divisor and the counter are saved with the patch; the running state is not, so the module comes up stopped."
+  },
+  "Stall": {
+   "lines": [
+    "Splits a note and gate pair into 48 separate gate outputs, one per semitone, sending the gate to the output whose printed note number matches the note at CV",
+    "The note voltage choosing which output the gate goes to, one volt per octave with 0V selecting the jack printed 60; a polyphonic cable is read channel by channel",
+    "The gate or trigger sent on to the chosen output; its voltage is copied through unchanged, so whatever height arrives here is the height that leaves the output",
+    "Carries the Gate/Trig voltage while the note at CV is the number printed beside this jack, and 0V otherwise",
+    "Carries the Gate/Trig voltage while the note at CV is 35, and also whenever that note falls outside the range printed on the panel, because the note search returns this output when it matches nothing",
+    "Nothing in the module ever drives this output; the note search stops one note short, so note 82 fires the jack printed 35 and this jack stays at 0V, despite the panel printing 82 beside it",
+    "Note — nothing appears at any output until cables are patched to both CV and Gate/Trig; with either one missing every output stays at 0V.",
+    "Note — the lamp above each jack is lit in proportion to the voltage at that jack.",
+    "Note — a polyphonic cable at CV gives each channel its own output, so several outputs can be high at once; the output jacks themselves are mono.",
+    "Note — the outputs run from the bottom left of the grid upwards, following the note numbers printed down the left-hand side."
+   ],
+   "param": {},
+   "in": {
+    "0": 1,
+    "1": 2
+   },
+   "out": {
+    "0": 4,
+    "1": 3,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 3,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 3,
+    "13": 3,
+    "14": 3,
+    "15": 3,
+    "16": 3,
+    "17": 3,
+    "18": 3,
+    "19": 3,
+    "20": 3,
+    "21": 3,
+    "22": 3,
+    "23": 3,
+    "24": 3,
+    "25": 3,
+    "26": 3,
+    "27": 3,
+    "28": 3,
+    "29": 3,
+    "30": 3,
+    "31": 3,
+    "32": 3,
+    "33": 3,
+    "34": 3,
+    "35": 3,
+    "36": 3,
+    "37": 3,
+    "38": 3,
+    "39": 3,
+    "40": 3,
+    "41": 3,
+    "42": 3,
+    "43": 3,
+    "44": 3,
+    "45": 3,
+    "46": 3,
+    "47": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "trigger"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger",
+     "15": "trigger",
+     "16": "trigger",
+     "17": "trigger",
+     "18": "trigger",
+     "19": "trigger",
+     "20": "trigger",
+     "21": "trigger",
+     "22": "trigger",
+     "23": "trigger",
+     "24": "trigger",
+     "25": "trigger",
+     "26": "trigger",
+     "27": "trigger",
+     "28": "trigger",
+     "29": "trigger",
+     "30": "trigger",
+     "31": "trigger",
+     "32": "trigger",
+     "33": "trigger",
+     "34": "trigger",
+     "35": "trigger",
+     "36": "trigger",
+     "37": "trigger",
+     "38": "trigger",
+     "39": "trigger",
+     "40": "trigger",
+     "41": "trigger",
+     "42": "trigger",
+     "43": "trigger",
+     "44": "trigger",
+     "45": "trigger",
+     "46": "trigger",
+     "47": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/Stall.cpp process(): channels = std::max(inputs[CV_IN].getChannels(), 1) bounds the loop and inputs[CV_IN].getPolyVoltage(c) is matched against cvStep[i] = (i - 25) / 12.0"
+     },
+     "1": {
+      "poly": true,
+      "normal": "0V",
+      "why": "src/Stall.cpp process(): inputs[GATE_IN].getPolyVoltage(c) inside the same channel loop, copied straight into gateOuts[] with no threshold"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/Stall.cpp getNoteNumberFromCv() falls through to `return 0;` for any unmatched voltage, and process() then writes gateOuts[0] to this jack"
+     },
+     "1": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "2": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "3": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "4": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "5": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "6": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "7": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "8": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "9": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "10": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "11": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "12": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "13": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "14": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "15": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "16": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "17": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "18": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "19": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "20": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "21": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "22": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "23": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "24": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "25": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "26": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "27": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "28": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "29": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "30": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "31": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "32": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "33": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "34": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "35": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "36": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "37": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "38": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "39": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "40": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "41": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "42": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "43": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "44": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "45": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "46": {
+      "poly": false,
+      "why": "src/Stall.cpp process(): outputs[GATE_OUT + i].setVoltage(gateOuts[i]) in a loop over 48, no setChannels"
+     },
+     "47": {
+      "poly": false,
+      "why": "src/Stall.cpp getNoteNumberFromCv() loops for (int i = 0; i < 47; i++), so 47 is never returned and gateOuts[47] stays 0 before outputs[GATE_OUT + 47].setVoltage()"
+     }
+    }
+   },
+   "notes": "The gate voltage is copied rather than thresholded, so a 5V gate arrives at the output as 5V and no range is claimed for the gate jack or the outputs. getNoteNumberFromCv() loops for (int i = 0; i < 47; i++), so index 47 is never returned: the jack printed 82 is written on every frame but only ever with 0. Its fallback, marked in the source with the comment \"Wrong, but …\", returns 0 for any voltage it cannot match, which makes the jack printed 35 fire for note 82 and for anything above or below the printed 35 to 82 span. The README says the module accepts notes 35 to 82; the code covers 35 to 81. Both jacks must be connected before anything is routed, because the channel loop's body is guarded by isConnected() on each."
+  },
+  "SEQ3st": {
+   "lines": [
+    "An eight-step, three-row sequencer whose row voltages are read a second time as gate probabilities, giving each row a gate output that fires at random in proportion to the step's value",
+    "Sets the rate of the internal clock, its value from -2 to 6 read as two to that power in hertz",
+    "Starts and stops the sequence; it comes up running",
+    "Sends the sequence back to the first step",
+    "Sets how many steps are played before the sequence returns to the first, 1 to 8",
+    "Bends the random number the row values are tested against: at -5 the draw collapses to the middle, at +5 it goes to one end or the other, at 0 it is even; the value is rounded to whole numbers",
+    "Sets the voltage this row's output carries while the sequence is on this step, 0-10V, and at the same time the chance that the row's P Gate output fires on it, none at 0 and certain at 10",
+    "Turns this step's gate on or off; the Gate output and this step's own Gate Out jack stay at 0V on a step turned off, while the row outputs carry their voltages either way",
+    "Added to the Clock knob before the rate is worked out, so one volt doubles the rate",
+    "Takes over the clock; each rising edge above 1V advances one step, and the Clock knob and Clock input are ignored while a cable is here",
+    "Added to the Reset button, and a total above 1V sends the sequence back to the first step",
+    "Added to the Steps knob at one step per volt, the total rounded and held between 1 and 8",
+    "Added to the Shape knob at one unit per volt, the total rounded and held between -5 and 5",
+    "10V while the clock is high on a step whose gate button is on, and 0V otherwise",
+    "The voltage set by the first row's knob on the current step, 0-10V, held until the step changes",
+    "The voltage set by the second row's knob on the current step, 0-10V, held until the step changes",
+    "The voltage set by the third row's knob on the current step, 0-10V, held until the step changes",
+    "10V for as long as the clock is high when this row's knob on the current step beats a fresh random draw, and 0V when it loses",
+    "10V while the clock is high and the sequence is on this step with its gate button on, and 0V otherwise",
+    "Note — the sequence runs on its own clock as soon as the module is added; patch a clock to Ext Clk to take it over.",
+    "Note — each P Gate output draws its own random number at every step, so the three rows fire independently of one another.",
+    "Note — the draw happens once, at the moment the step changes; the P Gate output then stays at whatever it took until the clock goes low.",
+    "Note — the gate buttons are toggles and their pattern is saved with the patch; randomising the module sets that pattern at random and leaves the knobs alone."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "36": 5,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6,
+    "10": 6,
+    "11": 6,
+    "12": 6,
+    "13": 6,
+    "14": 6,
+    "15": 6,
+    "16": 6,
+    "17": 6,
+    "18": 6,
+    "19": 6,
+    "20": 6,
+    "21": 6,
+    "22": 6,
+    "23": 6,
+    "24": 6,
+    "25": 6,
+    "26": 6,
+    "27": 6,
+    "28": 7,
+    "29": 7,
+    "30": 7,
+    "31": 7,
+    "32": 7,
+    "33": 7,
+    "34": 7,
+    "35": 7
+   },
+   "in": {
+    "0": 8,
+    "1": 9,
+    "2": 10,
+    "3": 11,
+    "4": 12
+   },
+   "out": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "3": 16,
+    "4": 17,
+    "5": 17,
+    "6": 17,
+    "7": 18,
+    "8": 18,
+    "9": 18,
+    "10": 18,
+    "11": 18,
+    "12": 18,
+    "13": 18,
+    "14": 18
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "trigger",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/SEQ3st.cpp process(): clockTime = powf(2.0f, params[CLOCK_PARAM].getValue() + inputs[CLOCK_INPUT].getVoltage()), one voltage and no clamp"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/SEQ3st.cpp process(): inputs[EXT_CLOCK_INPUT].isConnected() switches to it and clockTrigger.process(inputs[EXT_CLOCK_INPUT].getVoltage()) uses SchmittTrigger's default 0 and 1 thresholds"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/SEQ3st.cpp process(): resetTrigger.process(params[RESET_PARAM].getValue() + inputs[RESET_INPUT].getVoltage()) with the default 0 and 1 thresholds"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/SEQ3st.cpp setIndex(): clamp(roundf(params[STEPS_PARAM].getValue() + inputs[STEPS_INPUT].getVoltage()), 1.0f, 8.0f)"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/SEQ3st.cpp process(): shapeValue = params[SHAPE_PARAM].getValue() + inputs[SHAPE_INPUT].getVoltage(), then clamp(roundf(shapeValue), -5.f, 5.f) inside getShapedRandom()"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATES_OUTPUT].setVoltage((gateIn && gates[index]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[ROW1_OUTPUT].setVoltage(params[ROW1_PARAM + index].getValue()) with the knob configured 0.0f to 10.0f, no setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[ROW2_OUTPUT].setVoltage(params[ROW2_PARAM + index].getValue()) with the knob configured 0.0f to 10.0f, no setChannels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[ROW3_OUTPUT].setVoltage(params[ROW3_PARAM + index].getValue()) with the knob configured 0.0f to 10.0f, no setChannels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_ROW1_OUTPUT].setVoltage(gateRow1Out ? 10.0f : 0.0f), no setChannels"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_ROW2_OUTPUT].setVoltage(gateRow2Out ? 10.0f : 0.0f), no setChannels"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_ROW3_OUTPUT].setVoltage(gateRow3Out ? 10.0f : 0.0f), no setChannels"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_OUTPUT + i].setVoltage((running && gateIn && i == index && gates[i]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_OUTPUT + i].setVoltage((running && gateIn && i == index && gates[i]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "9": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_OUTPUT + i].setVoltage((running && gateIn && i == index && gates[i]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_OUTPUT + i].setVoltage((running && gateIn && i == index && gates[i]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_OUTPUT + i].setVoltage((running && gateIn && i == index && gates[i]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_OUTPUT + i].setVoltage((running && gateIn && i == index && gates[i]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_OUTPUT + i].setVoltage((running && gateIn && i == index && gates[i]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/SEQ3st.cpp process(): outputs[GATE_OUTPUT + i].setVoltage((running && gateIn && i == index && gates[i]) ? 10.0f : 0.0f), no setChannels"
+     }
+    }
+   },
+   "notes": "The probability test is params[ROWn_PARAM + index].getValue() >= getShapedRandom(shapeValue), a 0 to 10 knob against a 0 to 10 draw, so the knob is both the row's CV and its gate chance. getShapedRandom() maps a uniform draw through a transfer curve set by the rounded Shape value: at -5 the curve collapses the draw onto the middle of the range, so a step above halfway always fires and one below never does; at +5 the draw lands near one end or the other. Shape is rounded inside getShapedRandom(), so the knob moves continuously but has eleven effective positions. The Steps total is rounded and clamped to 1 to 8, and the Clock input is added to the knob without any clamp. The maker calls this a modified Fundamental SEQ3; the Shape control and the three P Gate outputs are the additions."
+  },
+  "Stable16": {
+   "lines": [
+    "Eight 16-step gate rows on one clock, each row with its own start point, end point, mute and pattern-shifting buttons",
+    "Sets the rate of the internal clock, its value from -2 to 6 read as two to that power in hertz",
+    "Starts and stops all eight rows; they come up running",
+    "Sends every row back to its own Start step",
+    "Turns this step on or off for its row; a row's Gate output goes to 10V while the clock is high on a step that is on",
+    "Sets the step this row returns to after passing its End step; the knob counts from 0 while the panel numbers the columns from 1, so it reads one less than the column",
+    "Sets the last step this row plays before returning to its Start step; the knob counts from 0 while the panel numbers the columns from 1, so it reads one less than the column",
+    "Holds this row's Gate output at 0V while it is switched on; the row keeps stepping and its pattern is unchanged",
+    "Shifts this row's pattern one step to the left each time it is pressed, the step falling off the left end coming back in at the right",
+    "Shifts this row's pattern one step to the right each time it is pressed, the step falling off the right end coming back in at the left",
+    "Chooses what the nudge buttons move: the upper position, marked i, shifts only the steps between that row's Start and End, and the lower, marked a, shifts all 16",
+    "Added to the Clock knob before the rate is worked out, so one volt doubles the rate",
+    "Takes over the clock; each rising edge above 1V advances every row one step, and the Clock knob and CV input are ignored while a cable is here",
+    "Added to the Reset button, and a total above 1V sends every row back to its own Start step",
+    "10V while the clock is high and this row's current step is on, and 0V otherwise; a muted row stays at 0V",
+    "Note — the module comes up running on its own clock; patch a clock to Trig to take it over.",
+    "Note — a row whose End knob is set below its Start knob plays its Start step and nothing else.",
+    "Note — the lamp behind each row's mute switch is lit while that row's Gate output is high, and the lamp in each step button shows whether the step is on, brightest on the step the row is playing.",
+    "Note — randomising the module fills every row's step pattern at random and leaves the knobs, the mutes and the nudge mode switch untouched."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 4,
+    "8": 4,
+    "9": 4,
+    "10": 4,
+    "11": 4,
+    "12": 4,
+    "13": 4,
+    "14": 4,
+    "15": 4,
+    "16": 4,
+    "17": 4,
+    "18": 4,
+    "19": 4,
+    "20": 4,
+    "21": 4,
+    "22": 4,
+    "23": 4,
+    "24": 4,
+    "25": 4,
+    "26": 4,
+    "27": 4,
+    "28": 4,
+    "29": 4,
+    "30": 4,
+    "31": 4,
+    "32": 4,
+    "33": 4,
+    "34": 4,
+    "35": 4,
+    "36": 4,
+    "37": 4,
+    "38": 4,
+    "39": 4,
+    "40": 4,
+    "41": 4,
+    "42": 4,
+    "43": 4,
+    "44": 4,
+    "45": 4,
+    "46": 4,
+    "47": 4,
+    "48": 4,
+    "49": 4,
+    "50": 4,
+    "51": 4,
+    "52": 4,
+    "53": 4,
+    "54": 4,
+    "55": 4,
+    "56": 4,
+    "57": 4,
+    "58": 4,
+    "59": 4,
+    "60": 4,
+    "61": 4,
+    "62": 4,
+    "63": 4,
+    "64": 4,
+    "65": 4,
+    "66": 4,
+    "67": 4,
+    "68": 4,
+    "69": 4,
+    "70": 4,
+    "71": 4,
+    "72": 4,
+    "73": 4,
+    "74": 4,
+    "75": 4,
+    "76": 4,
+    "77": 4,
+    "78": 4,
+    "79": 4,
+    "80": 4,
+    "81": 4,
+    "82": 4,
+    "83": 4,
+    "84": 4,
+    "85": 4,
+    "86": 4,
+    "87": 4,
+    "88": 4,
+    "89": 4,
+    "90": 4,
+    "91": 4,
+    "92": 4,
+    "93": 4,
+    "94": 4,
+    "95": 4,
+    "96": 4,
+    "97": 4,
+    "98": 4,
+    "99": 4,
+    "100": 4,
+    "101": 4,
+    "102": 4,
+    "103": 4,
+    "104": 4,
+    "105": 4,
+    "106": 4,
+    "107": 4,
+    "108": 4,
+    "109": 4,
+    "110": 4,
+    "111": 4,
+    "112": 4,
+    "113": 4,
+    "114": 4,
+    "115": 4,
+    "116": 4,
+    "117": 4,
+    "118": 4,
+    "119": 4,
+    "120": 4,
+    "121": 4,
+    "122": 4,
+    "123": 4,
+    "124": 4,
+    "125": 4,
+    "126": 4,
+    "127": 4,
+    "128": 4,
+    "129": 4,
+    "130": 4,
+    "131": 5,
+    "132": 5,
+    "133": 5,
+    "134": 5,
+    "135": 5,
+    "136": 5,
+    "137": 5,
+    "138": 5,
+    "139": 6,
+    "140": 6,
+    "141": 6,
+    "142": 6,
+    "143": 6,
+    "144": 6,
+    "145": 6,
+    "146": 6,
+    "147": 7,
+    "148": 7,
+    "149": 7,
+    "150": 7,
+    "151": 7,
+    "152": 7,
+    "153": 7,
+    "154": 7,
+    "155": 8,
+    "156": 8,
+    "157": 8,
+    "158": 8,
+    "159": 8,
+    "160": 8,
+    "161": 8,
+    "162": 8,
+    "163": 9,
+    "164": 9,
+    "165": 9,
+    "166": 9,
+    "167": 9,
+    "168": 9,
+    "169": 9,
+    "170": 9,
+    "171": 10
+   },
+   "in": {
+    "0": 11,
+    "1": 12,
+    "2": 13
+   },
+   "out": {
+    "1": 14,
+    "2": 14,
+    "3": 14,
+    "4": 14,
+    "5": 14,
+    "6": 14,
+    "7": 14,
+    "8": 14
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "trigger",
+     "2": "trigger"
+    },
+    "out": {
+     "1": "trigger",
+     "2": "trigger",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "trigger",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/Stable16.cpp process(): clockTime = powf(2.0f, params[CLOCK_PARAM].getValue() + inputs[CLOCK_INPUT].getVoltage()), one voltage and no clamp"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Stable16.cpp process(): inputs[EXT_CLOCK_INPUT].isConnected() switches to it and clockTrigger.process(rescale(inputs[EXT_CLOCK_INPUT].getVoltage(), 0.1f, 1.f, 0.f, 1.f))"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "src/Stable16.cpp process(): resetTrigger.process(rescale(params[RESET_PARAM].getValue() + inputs[RESET_INPUT].getVoltage(), 0.1f, 1.f, 0.f, 1.f))"
+     }
+    },
+    "out": {
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Stable16.cpp process(): outputs[ROW_OUTPUT + y].setVoltage((gateIn && !mute[y] && stepValue[getMatrixPosition(y)]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Stable16.cpp process(): outputs[ROW_OUTPUT + y].setVoltage((gateIn && !mute[y] && stepValue[getMatrixPosition(y)]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Stable16.cpp process(): outputs[ROW_OUTPUT + y].setVoltage((gateIn && !mute[y] && stepValue[getMatrixPosition(y)]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Stable16.cpp process(): outputs[ROW_OUTPUT + y].setVoltage((gateIn && !mute[y] && stepValue[getMatrixPosition(y)]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Stable16.cpp process(): outputs[ROW_OUTPUT + y].setVoltage((gateIn && !mute[y] && stepValue[getMatrixPosition(y)]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Stable16.cpp process(): outputs[ROW_OUTPUT + y].setVoltage((gateIn && !mute[y] && stepValue[getMatrixPosition(y)]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Stable16.cpp process(): outputs[ROW_OUTPUT + y].setVoltage((gateIn && !mute[y] && stepValue[getMatrixPosition(y)]) ? 10.0f : 0.0f), no setChannels"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Stable16.cpp process(): outputs[ROW_OUTPUT + y].setVoltage((gateIn && !mute[y] && stepValue[getMatrixPosition(y)]) ? 10.0f : 0.0f), no setChannels"
+     }
+    }
+   },
+   "notes": "Nine outputs beyond the eight row jacks are declared in the source and never reach the panel: GATES_OUTPUT and the eight GATE_OUTPUT jacks are in the OutputIds enum, are counted by config(), and are neither added as widgets nor written in process(), so they have no position in the census and get no line or tag. The eight mute switches are the one group of controls the maker never passed to configParam; Rack's own config() gives every parameter a default 0 to 1 quantity, so the switches still toggle and still save, but each shows a blank name on hover. The 128 step buttons are configured without a name for the same reason and behave the same way. The Start and End knobs are configured 0 to 15 with no display offset while the panel numbers the columns 1 to 16, so every reading is one lower than the column it points at. dataToJson() writes the per-row step increment under the key \"increments\" and dataFromJson() reads \"increment\", so that value never restores; nothing in the module changes it from 1, so the mismatch has no effect today. onRandomize() replaces Rack's default instead of extending it, so randomising changes only the step pattern."
   }
  }
 }

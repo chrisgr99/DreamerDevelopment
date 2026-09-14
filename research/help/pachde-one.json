@@ -1,63 +1,1330 @@
 {
  "plugin": "pachde-one",
- "source": "https://github.com/Paul-Dempsey/pachde1",
+ "source": "https://github.com/Paul-Dempsey/pachde1/blob/9717b30dfadf2504d410a5e65a9c5036f7be7b61/docs/index.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "pachde-null": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A blank panel you can make any width and any colour, with one hidden jack that makes it flicker",
+    "Flickers the panel from a cable; the module treats the signal as bipolar once it goes below 0V, and as 0-10V once it goes above 5.25V, subtracting 5V in that case",
+    "Note — the flicker jack is behind the #d medallion at the bottom, and is only there while both Show branding and Brand logo are on; Brand logo comes up off, so a new Null shows no jack",
+    "Note — drag the left or right edge to change the width; the drag handle appears when the pointer is over an edge",
+    "Note — a Copper or Copper-mini sets this panel's colour only from the right-hand side; the module tests its right-hand neighbour twice and never looks left",
+    "Note — Copper sets panel color has to be on here and Share color as Extender on in the Copper; the colour is then kept in the patch, so the Copper can be taken out again",
+    "Menu — Palette color — sets the panel colour from a list of named colours",
+    "Menu — Background — opens a colour picker for the panel colour, transparency included",
+    "Menu — Copper sets panel color — allows a Copper or Copper-mini beside this module to set the panel colour",
+    "Menu — Show branding — shows or hides the ring-and-slash mark and the #d medallion",
+    "Menu — Brand logo — shows the #d medallion when branding is on, which is also what puts the flicker jack on the panel",
+    "Menu — Glow in the dark — the panel keeps its own light when the Rack room brightness is turned down, with a halo scaled by the Rack light bloom setting",
+    "Menu — Bright in a dark room — the panel is not dimmed when the Rack room brightness is turned down"
+   ],
+   "in": {
+    "0": 1
+   },
+   "family": {
+    "in": {
+     "0": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "Null.hpp:39 reads the jack with getVoltage(0), and Null.cpp:208-222 scales it by 0.2 after deciding unipolar or bipolar from the voltages seen"
+     }
+    }
+   },
+   "notes": "The panel colour set by a Copper is taken from the right-hand expander only: Null.cpp:81-94 calls expanderColor(getRightExpander(), ...) twice rather than once for each side, so a Copper on the left is never read. The clamp on line 221 discards its own result, so the scaled flicker value is not actually limited to ±5."
   },
   "pachde-info": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A resizable panel for patch notes: type on it and set the font, size, margins, alignment, orientation and colours",
+    "Note — click anywhere inside the panel to start editing, then click where the text should go; ESC or the Close box ends editing",
+    "Note — the font, size, margins, alignment, orientation and the panel and text colours are all set in the Text options dialog, opened from the i mark in the title bar, from F2, or from the menu",
+    "Note — none of those settings has a control on the panel, so no click on the module reaches help for any of them",
+    "Note — drag the left or right edge to change the width; the drag handle appears when the pointer is over an edge",
+    "Note — any TrueType font file can be loaded from the Font button in the Text options dialog",
+    "Note — a Copper or Copper-mini on either side can set the panel colour or the text colour; which of the two, or neither, is chosen per side in the Text options dialog",
+    "Menu — Text options... — opens the dialog holding the font, size, margins, alignment, orientation, colours and Copper targets",
+    "Menu — Bright text in a dark room — the text and the block behind it are not dimmed when the Rack room brightness is turned down",
+    "Menu — Show branding — shows or hides the #d mark on the panel",
+    "Menu — Copy info — copies the text to the clipboard",
+    "Menu — Paste info — replaces the text with whatever is on the clipboard"
+   ],
+   "notes": "All ten of this module's parameters are declared without a widget on the panel; they are driven from the Text options dialog, so no click on the module can reach any of them and none is tagged. Info.cpp:17 configures the vertical alignment parameter with the name \"Horizontal alignment\", the same string given to the horizontal one on line 14; because neither parameter has a widget, the wrong name never appears as a tooltip."
   },
   "pachde-imagine": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Reads an image with a moving read head and turns the colour under it into voltages, gates and triggers",
+    "Limits how fast the v output can move; at 0% it is not limited at all, and higher settings slow it down",
+    "Switches between Unipolar, where the v output runs 0-10V and x and y are measured from the top left corner of the image, and Bipolar, where x and y are measured from the centre",
+    "Starts and stops the read head",
+    "Chooses how the read head moves over the image: Scanline, Bounce, Vinyl, Wander, X/Y Pad, Tabalar or Ralabat; the chosen one is named in the lit display in the middle of the panel",
+    "Sets how fast the read head moves, 0 to 100, before the multiplier is applied",
+    "Multiplies the speed setting by a whole number from x1 to x10",
+    "Chooses which part of the colour under the read head feeds the v, g and t outputs: Lightness, Luminance, Saturation, Hue, Minimum, Maximum, Average, Red, Green, Blue or Alpha",
+    "Sets how far the last six readings of the chosen colour part have to spread before a trigger fires, 0 to 1 against readings that run 0-10V, so a low setting fires often",
+    "Sets the shortest time between one trigger and the next, 0 to 1000ms",
+    "A trigger here switches the read head between playing and paused",
+    "A trigger here puts the read head back at its saved start position",
+    "Sets the horizontal position of the read head, 0-10V across the width of the image; the read head follows the cables only while this jack and the one beside it are both patched",
+    "Sets the vertical position of the read head, 0-10V down the height of the image; with both position jacks patched the path, speed and multiplier settings are not used",
+    "Sets the speed knob from a cable, 0-10V covering its 0 to 100 range; the voltage is written into the knob, so the knob moves, and the jack is not read while both position jacks are patched",
+    "Adds to the minimum trigger time, 50ms per volt on top of the knob setting",
+    "The horizontal position of the read head, 0-10V across the width of the image, or measured from the middle of the image with the polarity switch on Bipolar",
+    "The vertical position of the read head, 0-10V down the height of the image, or measured from the middle of the image and rising upwards with the polarity switch on Bipolar",
+    "The chosen part of the colour under the read head, 0-10V, limited in speed by the slew knob; with the polarity switch on Bipolar it is that same voltage less 0.5V, not the -5V to +5V the manual states",
+    "Flips between 0V and 10V each time a trigger fires, once six readings have been taken",
+    "A 10V pulse each time the spread of the last six readings passes the g/t setting and the minimum time has gone by",
+    "The red part of the colour under the read head, 0-10V",
+    "The green part of the colour under the read head, 0-10V",
+    "The blue part of the colour under the read head, 0-10V",
+    "Note — the module reads nothing until an image is loaded: click the picture button to open one, or drag an image file onto the image area",
+    "Note — shift-click the picture button to reload the file, and Cmd+Shift-click on Mac or Ctrl+Shift-click elsewhere to close it",
+    "Note — click the image to put the read head where you clicked, and drag to scrub, whichever path is chosen",
+    "Note — with the path set to X/Y Pad and no image loaded, the module is a plain XY pad, and the x and y outputs follow the polarity switch",
+    "Note — the v, g, t, R, G and B outputs are worked out only while at least one of those six has a cable in it; with none patched, the read head moves but no colour is computed",
+    "Note — the small round button beside the r jack returns the read head to its start position, and shift-clicking it makes the present position the new start; no click on it reaches this help",
+    "Note — the picture button opening the image file is not a parameter either, so no click on it reaches this help",
+    "Note — every knob is also a click control: click to step the value up, Cmd-click on Mac or Ctrl-click elsewhere to step down, and hold Shift for ten times the step",
+    "Note — with the colour part set to Alpha, an image with no transparency gives a steady maximum voltage",
+    "Menu — Labels — shows or hides the lettering printed beside the knobs and jacks",
+    "Menu — Gold medallion — shows or hides the gold #d mark",
+    "Menu — Bright image in a dark room — the image is not dimmed when the Rack room brightness is turned down"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9
+   },
+   "in": {
+    "0": 10,
+    "1": 11,
+    "2": 12,
+    "3": 13,
+    "4": 14,
+    "5": 15
+   },
+   "out": {
+    "0": 16,
+    "1": 17,
+    "2": 18,
+    "3": 19,
+    "4": 20,
+    "5": 21,
+    "6": 22,
+    "7": 23
+   },
+   "family": {
+    "in": {
+     "0": "trigger",
+     "1": "trigger",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "trigger",
+     "4": "trigger",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 5V",
+      "normal": "0V",
+      "why": "Imagine.cpp:299-303 reads the jack with getVoltage and a SchmittTrigger set to 0.1V and 5V"
+     },
+     "1": {
+      "poly": false,
+      "range": "high above 5V",
+      "normal": "0V",
+      "why": "Imagine.cpp:306-310 reads the jack with getVoltage and a SchmittTrigger set to 0.1V and 5V"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Imagine.cpp:330 multiplies the image width by the voltage over ten, and traversal.hpp:69-73 clips the result to the image"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "Imagine.cpp:330 multiplies the image height by the voltage over ten, and traversal.hpp:69-73 clips the result to the image"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "ignored",
+      "normal": "the speed knob",
+      "why": "Imagine.cpp:272-274 writes clamp(voltage times 100, 0, 100) into the speed parameter while the jack is patched"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "Imagine.cpp:234-239 scales the voltage by the parameter maximum over ten and then by a half before adding it to the knob"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Imagine.cpp:337-348 sets one voltage, scaled to ten volts across the image width"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Imagine.cpp:351-363 sets one voltage, scaled to ten volts across the image height"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Imagine.cpp:383 and 396 scale the colour part by ten and set one voltage"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Imagine.cpp:398 sets the gate to the flag times ten volts"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Imagine.cpp:399 sets the trigger to the pulse times ten volts"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Imagine.cpp:379 sets the red part of the pixel times ten volts"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Imagine.cpp:380 sets the green part of the pixel times ten volts"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Imagine.cpp:381 sets the blue part of the pixel times ten volts"
+     }
+    }
+   },
+   "notes": "Output index 8 is declared in the header as a test output but its configOutput call is commented out (Imagine.cpp:85) and it has no jack on the panel, so it gets no line and no tag. The manual says the Polarity switch puts the v output at -5V to +5V; the code (Imagine.cpp:396) subtracts 0.5 from a value already scaled 0 to 10, so bipolar gives -0.5V to 9.5V. The g/t knob runs 0 to 1 while the spread it is compared against is taken from voltages scaled 0 to 10 (Imagine.cpp:383-386), so only the lowest tenth of the knob's travel has any effect above zero."
   },
   "pachde-copper": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A colour picker with knobs and control voltage for hue, saturation, lightness and transparency, jacks carrying the result as voltages, and a colour for a Null, Info or PanelTone beside it",
+    "Sets the hue of the colour, 0 to 360 degrees",
+    "Sets the saturation of the colour, 0 to 1",
+    "Sets the lightness of the colour, 0 to 1",
+    "Sets the transparency of the colour, 0 fully transparent and 1 fully opaque",
+    "Moves the hue away from the knob setting, a tenth of a full turn per volt, wrapping round at either end",
+    "Moves the saturation away from the knob setting, 0.1 per volt, clamped at 0 and 1",
+    "Moves the lightness away from the knob setting, 0.1 per volt, clamped at 0 and 1",
+    "Moves the transparency away from the knob setting, 0.1 per volt, clamped at 0 and 1",
+    "The red part of the colour, 0-10V",
+    "The green part of the colour, 0-10V",
+    "The blue part of the colour, 0-10V",
+    "The hue, 0-10V over a full turn",
+    "The saturation, 0-10V",
+    "The lightness, 0-10V",
+    "The transparency, 0-10V, with 10V fully opaque",
+    "Nothing in the module reaches this jack: the seven channels of colour are written into a copy of the port and thrown away, so it carries no signal, despite the Poly jack order menu item",
+    "Note — no cable is needed for the main job: the colour is handed to a Null, Info or PanelTone standing beside it, with Share color as Extender on here and the matching option on in that module",
+    "Note — the blue lamp is lit while Share color as Extender is on and there is a module on one side or the other",
+    "Note — a cable from another Copper or Copper-mini output is taken as the value itself rather than as an offset from the knob, so the two track each other exactly",
+    "Note — an input taking an offset reads the signal as bipolar once the voltage goes below 0V, and as unipolar once it goes above 5V, subtracting 5V in that case",
+    "Note — bypassing the module passes each input straight through to the output for the same colour part",
+    "Note — every knob is also a click control: click to step up, Cmd-click on Mac or Ctrl-click elsewhere to step down, Shift for a bigger step",
+    "Note — click the tall strip on the left to choose a hue, and click in the large square to set lightness up and down and saturation left and right; no click on either reaches this help",
+    "Note — the bar under the pickers shows the colour opaque on the left and over a chequered gradient on the right, so transparency shows",
+    "Note — with a cable in any input the colour bar splits, the unmodulated colour above and the modulated colour below",
+    "Note — the hex code of the chosen colour is printed in the output section",
+    "Menu — Poly jack order: HSLARGB, RGBAHSL — sets the channel order the poly output would use; that jack carries nothing",
+    "Menu — Palette color — sets the colour from a list of named colours",
+    "Menu — Share color as Extender — allows this module to set the colour of a Null, Info or PanelTone beside it; F2 over the module does the same",
+    "Menu — Copy hex color — copies the chosen colour to the clipboard as a hex code",
+    "Menu — Paste hex color — sets the colour from a hex code on the clipboard"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12,
+    "4": 13,
+    "5": 14,
+    "6": 15,
+    "7": 16
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the hue knob",
+      "why": "Copper.cpp:193-211 reads the jack with getVoltage, scales it by 0.1, adds it to the knob and wraps the total back into 0 to 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the saturation knob",
+      "why": "Copper.cpp:212-223 reads the jack with getVoltage, scales it by 0.1, adds it to the knob and clamps the total to 0 to 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the lightness knob",
+      "why": "Copper.cpp:224-235 reads the jack with getVoltage, scales it by 0.1, adds it to the knob and clamps the total to 0 to 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the transparency knob",
+      "why": "Copper.cpp:236-247 reads the jack with getVoltage, scales it by 0.1, adds it to the knob and clamps the total to 0 to 1"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:253 sets one voltage, the red part times ten"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:254 sets one voltage, the green part times ten"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:255 sets one voltage, the blue part times ten"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:258 sets one voltage, the hue times ten"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:259 sets one voltage, the saturation times ten"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:260 sets one voltage, the lightness times ten"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:261 sets one voltage, the transparency times ten"
+     }
+    }
+   },
+   "notes": "The polyphonic output is dead. Copper.cpp:267 writes `auto out = getOutput(POLY_OUT);`, which copies the port by value, and the setChannels and voltage writes that follow land on that copy. The shipped binary agrees: in CopperModule::process the port is loaded onto the stack at 0x3c2c0, the channel count is read back from the stack copy, and the seven voltage stores are gone altogether as dead code, with no write back to the module's outputs. The red, green and blue outputs are only computed while one of R, G, B or poly is patched (Copper.cpp:251); since poly writes nothing, patching poly alone gives nothing anywhere."
   },
   "pachde-copper-mini": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A 2HP colour picker with knobs and control voltage for hue, saturation, lightness and transparency, four jacks carrying them as voltages, and a colour for a Null, Info or PanelTone beside it",
+    "Sets the hue of the colour, 0 to 360 degrees",
+    "Sets the saturation of the colour, 0 to 1",
+    "Sets the lightness of the colour, 0 to 1",
+    "Sets the transparency of the colour, 0 fully transparent and 1 fully opaque",
+    "Moves the hue away from the knob setting, a tenth of a full turn per volt, wrapping round at either end",
+    "Moves the saturation away from the knob setting, 0.1 per volt, clamped at 0 and 1",
+    "Moves the lightness away from the knob setting, 0.1 per volt, clamped at 0 and 1",
+    "Moves the transparency away from the knob setting, 0.1 per volt, clamped at 0 and 1",
+    "The hue, 0-10V over a full turn",
+    "The saturation, 0-10V",
+    "The lightness, 0-10V",
+    "The transparency, 0-10V, with 10V fully opaque",
+    "Note — no cable is needed for the main job: the colour is handed to a Null, Info or PanelTone standing beside it, with Share color as Extender on here and the matching option on in that module",
+    "Note — the blue lamp is lit while Share color as Extender is on and there is a module on one side or the other",
+    "Note — a cable from another Copper or Copper-mini output is taken as the value itself rather than as an offset from the knob, so the two track each other exactly",
+    "Note — an input taking an offset reads the signal as bipolar once the voltage goes below 0V, and as unipolar once it goes above 5V, subtracting 5V in that case",
+    "Note — bypassing the module passes each input straight through to the output for the same colour part",
+    "Note — every knob is also a click control: click to step up, Cmd-click on Mac or Ctrl-click elsewhere to step down, Shift for a bigger step",
+    "Note — the module underneath is the one Copper uses; this panel leaves out the hue strip, the lightness and saturation square, and the red, green, blue and poly outputs",
+    "Note — the modulated colour is shown as a hex code above the colour sample at the bottom",
+    "Menu — Palette color — sets the colour from a list of named colours",
+    "Menu — Color — opens a colour picker for the colour, transparency included",
+    "Menu — Share color as Extender — allows this module to set the colour of a Null, Info or PanelTone beside it; F2 over the module does the same",
+    "Menu — Copy hex color — copies the chosen colour to the clipboard as a hex code",
+    "Menu — Paste hex color — sets the colour from a hex code on the clipboard"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8
+   },
+   "out": {
+    "3": 9,
+    "4": 10,
+    "5": 11,
+    "6": 12
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    },
+    "out": {
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the HUE knob",
+      "why": "Copper.cpp:193-211 reads the jack with getVoltage, scales it by 0.1, adds it to the knob and wraps the total back into 0 to 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the SAT knob",
+      "why": "Copper.cpp:212-223 reads the jack with getVoltage, scales it by 0.1, adds it to the knob and clamps the total to 0 to 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the LUM knob",
+      "why": "Copper.cpp:224-235 reads the jack with getVoltage, scales it by 0.1, adds it to the knob and clamps the total to 0 to 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the ALPH knob",
+      "why": "Copper.cpp:236-247 reads the jack with getVoltage, scales it by 0.1, adds it to the knob and clamps the total to 0 to 1"
+     }
+    },
+    "out": {
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:258 sets one voltage, the hue times ten"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:259 sets one voltage, the saturation times ten"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:260 sets one voltage, the lightness times ten"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "Copper.cpp:261 sets one voltage, the transparency times ten"
+     }
+    }
+   },
+   "notes": "Outputs 0, 1, 2 (red, green, blue) and 7 (polyphonic) exist in the module but have no jack on this panel, so they get no line and no tag. The polyphonic output does nothing in either Copper: Copper.cpp:267 copies the port by value before writing to it."
   },
   "pachde-skiff": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Changes the look of the whole rack: alternate rails, transparent panels, plainer knobs and jacks, no screws, hidden empty jacks, hidden lights, and a button that packs the modules into neat rows",
+    "Note — none of the buttons on this panel is a parameter, so no click on any of them reaches this help; what each one does is set out below",
+    "Note — ALT RAILS is the hamburger mark at the top, and its menu holds the alternate rail drawings, a Rail Theme section and Custom rail SVG for a drawing of your own",
+    "Note — DERAIL hides the rails, Rack's own as well as any alternate set",
+    "Note — NOPANELS makes module panels transparent, leaving knobs, jacks, displays and any other added widgets drawn",
+    "Note — CALM swaps Rack's black knobs and jacks for plainer, less glossy ones",
+    "Note — UNSCREW takes the screws out of every module using Rack's standard screws; modules with screws of their own are left alone",
+    "Note — NOJACK hides every jack with no cable in it, and while they are hidden no new cable can be patched; unplugging a cable leaves that jack visible until the button is used again",
+    "Note — DARKNESS hides the lights on every module",
+    "Note — PACK'EM packs the modules into left-aligned rows and fills any empty row, keeping each row's modules together so expanders are not separated",
+    "Note — PACK'EM works on the selection if there is one, and F7 with the pointer over the module does the same",
+    "Note — the round button at the bottom puts the whole rack back to Rack's normal appearance in one click",
+    "Note — F6 with the pointer over the module zooms the view to the selected modules; the ? mark shows both keyboard tips",
+    "Note — only one Skiff works at a time; a second one added to the patch is drawn greyed out with no controls on it at all",
+    "Menu — Rack — in the ALT RAILS hamburger menu at the top: goes back to Rack's own rail drawing",
+    "Menu — Plain — in the ALT RAILS hamburger menu at the top: draws the rails from the Plain drawing",
+    "Menu — Simple — in the ALT RAILS hamburger menu at the top: draws the rails from the Simple drawing",
+    "Menu — No-hole — in the ALT RAILS hamburger menu at the top: draws the rails from the No-hole drawing",
+    "Menu — Blank — in the ALT RAILS hamburger menu at the top: draws the rails from the Blank drawing",
+    "Menu — Gradient — in the ALT RAILS hamburger menu at the top: draws the rails from the Gradient drawing",
+    "Menu — Pinstripe — in the ALT RAILS hamburger menu at the top: draws the rails from the Pinstripe drawing",
+    "Menu — Sine — in the ALT RAILS hamburger menu at the top: draws the rails from the Sine drawing",
+    "Menu — Custom rail SVG — in the ALT RAILS hamburger menu: opens an SVG file of your own to use as the rails, best drawn a multiple of 15 pixels wide and 380 pixels high or more",
+    "Menu — Rail Theme: None, Follow Rack UI theme, Follow Rack prefer dark panels, Light, Dark, High Contrast — recolours the rail drawing; only the light colouring is loaded by this build",
+    "Menu — Shouting buttons — switches the button lettering between capitals and mixed case",
+    "Menu — Calm jack shape: Plain, Spades, Hearts, Diamonds, Clubs, Splat — sets the shape drawn inside a patched jack while CALM is on"
+   ],
+   "notes": "The Rail Theme menu offers Light, Dark and High Contrast, and res/rails holds -light.vgt, -dark.vgt and -high.vgt, but rails.cpp:13-15 returns the light file from all three accessors, so load_rail_themes loads -light.vgt three times. The shipped binary carries only the string res/rails/-light.vgt, confirming the other two files are never read. This module has no parameters, inputs or outputs at all: every control on the panel is a plain widget, so nothing here can be tagged."
   },
   "pachde-fancybox": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Draws the Rack background: a picture, a colour wash, a linear gradient, a radial gradient, a vignette and cases around groups of modules, each of them animated from control voltage",
+    "Turns the background picture layer on and off",
+    "Turns the colour wash layer on and off",
+    "Sets how far the colour wash is brought in, 0% to 100%",
+    "Turns the linear gradient layer on and off",
+    "Sets how far the gradient's start colour is brought in, 0% to 100%",
+    "Sets where the gradient starts across the Rack window, 0% at the left edge and 100% at the right",
+    "Sets where the gradient starts down the Rack window, 0% at the top and 100% at the bottom",
+    "Sets how far the gradient's end colour is brought in, 0% to 100%",
+    "Sets where the gradient ends across the Rack window, 0% at the left edge and 100% at the right",
+    "Sets where the gradient ends down the Rack window, 0% at the top and 100% at the bottom",
+    "Turns the radial gradient layer on and off",
+    "Sets how far the radial gradient's inner colour is brought in, 0% to 100%",
+    "Sets the centre of the radial gradient across the Rack window, 0% at the left edge and 100% at the right",
+    "Sets the centre of the radial gradient down the Rack window, 0% at the top and 100% at the bottom",
+    "Sets how far the radial gradient's outer colour is brought in, 0% to 100%",
+    "Sets the radius of the radial gradient, 0% to 100% of the Rack window",
+    "Turns the box gradient, the vignette, on and off",
+    "Sets how far the vignette's inner colour is brought in, 0% to 100%",
+    "Pulls the left and right sides of the vignette in from the edges of the Rack window, 0% to 100%",
+    "Pulls the top and bottom of the vignette in from the edges of the Rack window, 0% to 100%",
+    "Sets how far the vignette's outer colour is brought in, 0% to 100%",
+    "Rounds the corners of the vignette, 0% to 100%",
+    "Sets how soft the edge of the vignette is, 0% to 100%",
+    "Moves the colour wash away from the colour picked for it, a tenth of the range per volt; this one voltage is applied to hue, saturation, lightness and transparency alike",
+    "Patching a cable here switches the colour wash to modulated, but this jack's own voltage is never read; the hue jack of this row drives all four colour parts",
+    "Adds to the colour wash's own fade, 10% per volt, and the total is held between none and full",
+    "Moves the linear gradient's start colour away from the colour picked for it, a tenth of the range per volt; this one voltage is applied to hue, saturation, lightness and transparency alike",
+    "Patching a cable here switches the linear gradient's start colour to modulated, but this jack's own voltage is never read; the hue jack of this row drives all four colour parts",
+    "Adds to the gradient's start fade, 10% per volt, and the total is held between none and full",
+    "Moves the linear gradient's end colour away from the colour picked for it, a tenth of the range per volt; this one voltage is applied to hue, saturation, lightness and transparency alike",
+    "Patching a cable here switches the linear gradient's end colour to modulated, but this jack's own voltage is never read; the hue jack of this row drives all four colour parts",
+    "Adds to the gradient's end fade, 10% per volt, and the total is held between none and full",
+    "Moves the radial gradient's inner colour away from the colour picked for it, a tenth of the range per volt; this one voltage is applied to hue, saturation, lightness and transparency alike",
+    "Patching a cable here switches the radial gradient's inner colour to modulated, but this jack's own voltage is never read; the hue jack of this row drives all four colour parts",
+    "Adds to the radial gradient's inner fade, 10% per volt, and the total is held between none and full",
+    "Moves the radial gradient's outer colour away from the colour picked for it, a tenth of the range per volt; this one voltage is applied to hue, saturation, lightness and transparency alike",
+    "Patching a cable here switches the radial gradient's outer colour to modulated, but this jack's own voltage is never read; the hue jack of this row drives all four colour parts",
+    "Adds to the radial gradient's outer fade, 10% per volt, and the total is held between none and full",
+    "Moves the vignette's inner colour away from the colour picked for it, a tenth of the range per volt; this one voltage is applied to hue, saturation, lightness and transparency alike",
+    "Patching a cable here switches the vignette's inner colour to modulated, but this jack's own voltage is never read; the hue jack of this row drives all four colour parts",
+    "Adds to the vignette's inner fade, 10% per volt, and the total is held between none and full",
+    "Moves the vignette's outer colour away from the colour picked for it, a tenth of the range per volt; this one voltage is applied to hue, saturation, lightness and transparency alike",
+    "Patching a cable here switches the vignette's outer colour to modulated, but this jack's own voltage is never read; the hue jack of this row drives all four colour parts",
+    "Adds to the vignette's outer fade, 10% per volt, and the total is held between none and full",
+    "Adds to the gradient start's position across the Rack window, 10% per volt, and the total is held between the left and right edges",
+    "Adds to the gradient start's position down the Rack window, 10% per volt, and the total is held between the top and bottom edges",
+    "Adds to the gradient end's position across the Rack window, 10% per volt, and the total is held between the left and right edges",
+    "Adds to the gradient end's position down the Rack window, 10% per volt, and the total is held between the top and bottom edges",
+    "Adds to the radial gradient's centre across the Rack window, 10% per volt, and the total is held between the left and right edges",
+    "Adds to the radial gradient's centre down the Rack window, 10% per volt, and the total is held between the top and bottom edges",
+    "Adds to the radial gradient's radius, 10% per volt, and the total is held between nothing and the full window",
+    "Adds to how far the vignette's sides are pulled in, 10% per volt, and the total is held between none and full",
+    "Adds to how far the vignette's top and bottom are pulled in, 10% per volt, and the total is held between none and full",
+    "Adds to the rounding of the vignette's corners, 10% per volt, and the total is held between none and full",
+    "Adds to the softness of the vignette's edge, 10% per volt, and the total is held between none and full",
+    "Note — nothing is drawn until the background is switched on; every layer stays hidden and the blue lamp stays dark until then",
+    "Note — a layer's own check box has to be ticked as well; only the colour wash is ticked on a new module",
+    "Note — the picture layer shows nothing until an image file is chosen, whatever the check box says",
+    "Note — a colour input is only read while its layer is ticked and that colour's fade is above zero",
+    "Note — a fast, full-range signal on these inputs gives flashing results; a bipolar signal through an attenuator, with the knobs set part way, gives a gentler one",
+    "Note — only one FancyBox works at a time, counting the mini: a second one added to the patch is drawn greyed out with no controls on it at all",
+    "Note — the six layers are drawn one over another in this order: picture, colour wash, linear gradient, radial gradient, vignette, cases",
+    "Note — the cases layer draws a frame and a drop shadow around each unbroken run of modules; a module standing on its own gets no case, and a gap of more than 1HP starts a new one",
+    "Menu — Keep effects when removed — leaves the background in place after this module is deleted from the patch; the settings are then lost when the patch is unloaded, so save a preset first",
+    "Note — the ON•OFF button in the title bar switches the whole background on and off, and it is not a parameter, so no click on it reaches this help",
+    "Note — the picture button and the hamburger beside it open the image file and the Image options dialog, which holds the fitting, grayscale, offset and scale settings",
+    "Note — the image settings have no control on the panel, so no click on the module reaches help for them",
+    "Note — the palette button in each layer picks that layer's colour, and the swatch beside it shows the colour as it stands; the buttons are not parameters, so no click on them reaches this help",
+    "Note — the plug mark in the title bar folds the column of jacks away to make the module narrower; it refuses while any cable is patched",
+    "Note — the case settings, the bezel and edge widths, the four colours and the drop shadow, are in the Skiff box options dialog on the module menu, with no control on the panel",
+    "Menu — Shouting button — switches the ON•OFF lettering between capitals and mixed case",
+    "Menu — Skiff box options... — opens the dialog holding the case colours, the edge and bezel widths and the drop shadow"
+   ],
+   "param": {
+    "22": 1,
+    "0": 2,
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 9,
+    "8": 10,
+    "9": 11,
+    "10": 12,
+    "11": 13,
+    "12": 14,
+    "13": 15,
+    "14": 16,
+    "15": 17,
+    "16": 18,
+    "17": 19,
+    "18": 20,
+    "19": 21,
+    "20": 22,
+    "21": 23
+   },
+   "in": {
+    "0": 24,
+    "1": 25,
+    "2": 25,
+    "3": 25,
+    "4": 26,
+    "5": 27,
+    "6": 28,
+    "7": 28,
+    "8": 28,
+    "9": 29,
+    "12": 30,
+    "13": 31,
+    "14": 31,
+    "15": 31,
+    "16": 32,
+    "19": 33,
+    "20": 34,
+    "21": 34,
+    "22": 34,
+    "23": 35,
+    "26": 36,
+    "27": 37,
+    "28": 37,
+    "29": 37,
+    "30": 38,
+    "32": 39,
+    "33": 40,
+    "34": 40,
+    "35": 40,
+    "36": 41,
+    "39": 42,
+    "40": 43,
+    "41": 43,
+    "42": 43,
+    "43": 44,
+    "10": 45,
+    "11": 46,
+    "17": 47,
+    "18": 48,
+    "24": 49,
+    "25": 50,
+    "31": 51,
+    "37": 52,
+    "38": 53,
+    "44": 54,
+    "45": 55
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "12": "cv",
+     "13": "cv",
+     "14": "cv",
+     "15": "cv",
+     "16": "cv",
+     "19": "cv",
+     "20": "cv",
+     "21": "cv",
+     "22": "cv",
+     "23": "cv",
+     "26": "cv",
+     "27": "cv",
+     "28": "cv",
+     "29": "cv",
+     "30": "cv",
+     "32": "cv",
+     "33": "cv",
+     "34": "cv",
+     "35": "cv",
+     "36": "cv",
+     "39": "cv",
+     "40": "cv",
+     "41": "cv",
+     "42": "cv",
+     "43": "cv",
+     "10": "cv",
+     "11": "cv",
+     "17": "cv",
+     "18": "cv",
+     "24": "cv",
+     "25": "cv",
+     "31": "cv",
+     "37": "cv",
+     "38": "cv",
+     "44": "cv",
+     "45": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "6": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "7": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "8": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "9": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "12": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "13": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "14": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "15": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "16": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "19": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "20": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "21": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "22": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "23": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "26": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "27": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "28": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "29": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "30": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "32": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "33": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "34": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "35": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "36": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "39": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "40": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "41": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "42": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "43": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "10": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "11": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "17": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "18": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "24": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "25": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "31": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "37": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "38": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "44": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     },
+     "45": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the knob or colour picked for it",
+      "why": "Fancy.hpp:155 reads the jack with getVoltage and scales it by 0.1, and Fancy.cpp:249 and 268-282, 300-312, 333-348 add that to the setting and clamp the total to 0 to 1"
+     }
+    }
+   },
+   "notes": "The saturation, lightness and transparency inputs of every colour row do nothing with their own voltage. Fancy::modulate_color (Fancy.cpp:204-219) checks all four jacks of a row for a cable but then calls scaled_voltage(input_id_first) four times, so the hue jack's voltage is added to all four colour parts. The shipped binary agrees: in Fancy::modulate_color the voltage is loaded once from the port at input_id_first times 0x50 and the same register is added to hue, saturation, lightness and alpha. Parameters 23 to 32 (image fitting, grayscale, the image offsets and scale, the background switch, and the four case settings) have no widget on this panel and are driven from the ON•OFF button and the two dialogs, so they get no line and no tag. Parameters 25, 26 and 27, the image X offset, Y offset and scale, are configured with an empty name (Fancy.cpp:19-21), which is why the census shows them nameless."
   },
   "pachde-mini-fancybox": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A 2HP version of FancyBox: the same six background layers with their options in dialogs, and no control voltage inputs",
+    "Switches the whole background on and off",
+    "Turns the background picture layer on and off",
+    "Turns the colour wash layer on and off",
+    "Turns the linear gradient layer on and off",
+    "Turns the radial gradient layer on and off",
+    "Turns the box gradient, the vignette, on and off",
+    "Turns the cases layer on and off, drawing a frame and a drop shadow around each unbroken run of modules",
+    "Note — nothing is drawn until the background is switched on; every layer stays hidden and the blue lamp stays dark until then",
+    "Note — a layer's own check box has to be ticked as well; only the colour wash is ticked on a new module",
+    "Note — the picture layer shows nothing until an image file is chosen, whatever the check box says",
+    "Note — a colour input is only read while its layer is ticked and that colour's fade is above zero",
+    "Note — a fast, full-range signal on these inputs gives flashing results; a bipolar signal through an attenuator, with the knobs set part way, gives a gentler one",
+    "Note — only one FancyBox works at a time, counting the mini: a second one added to the patch is drawn greyed out with no controls on it at all",
+    "Note — the six layers are drawn one over another in this order: picture, colour wash, linear gradient, radial gradient, vignette, cases",
+    "Note — the cases layer draws a frame and a drop shadow around each unbroken run of modules; a module standing on its own gets no case, and a gap of more than 1HP starts a new one",
+    "Menu — Keep effects when removed — leaves the background in place after this module is deleted from the patch; the settings are then lost when the patch is unloaded, so save a preset first",
+    "Note — every setting other than these switches is in the dialogs behind the hamburger marks, one per layer; those settings have no control on the panel, so no click on the module reaches help for them",
+    "Note — the module underneath is the one FancyBox uses, so the same background can be built here; this panel leaves out all 46 control voltage inputs, and none of them can be patched"
+   ],
+   "param": {
+    "28": 1,
+    "22": 2,
+    "0": 3,
+    "2": 4,
+    "9": 5,
+    "15": 6,
+    "29": 7
+   },
+   "notes": "All 46 inputs and 26 of the 33 parameters have no widget on this panel, so they get no line and no tag: the census lists them because the model is shared with FancyBox. The colour-modulation defect described on the FancyBox entry is in the shared module but cannot be reached from this panel, which has no jacks."
   },
   "pachde-rui": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Knobs and control voltage for four of Rack's own appearance settings: cable opacity, cable tension, room brightness and light bloom",
+    "Sets Rack's cable opacity, 0% to 100%",
+    "Sets Rack's cable tension, 0% to 100%",
+    "Sets Rack's room brightness, 0% to 100%",
+    "Sets Rack's light bloom, 0% to 100%",
+    "Sets how far the cable opacity input moves the setting, 0% to 100%; it comes up at 0%, so a patched cable does nothing until this is turned up",
+    "Sets how far the cable tension input moves the setting, 0% to 100%; it comes up at 0%, so a patched cable does nothing until this is turned up",
+    "Sets how far the room brightness input moves the setting, 0% to 100%; it comes up at 0%, so a patched cable does nothing until this is turned up",
+    "Sets how far the light bloom input moves the setting, 0% to 100%; it comes up at 0%, so a patched cable does nothing until this is turned up",
+    "Moves the cable opacity away from the knob setting, 10% per volt at a full amount, scaled by the small knob beside it and held between 0% and 100%",
+    "Moves the cable tension away from the knob setting, 10% per volt at a full amount, scaled by the small knob beside it and held between 0% and 100%",
+    "Moves the room brightness away from the knob setting, 10% per volt at a full amount, scaled by the small knob beside it and held between 0% and 100%",
+    "Moves the light bloom away from the knob setting, 10% per volt at a full amount, scaled by the small knob beside it and held between 0% and 100%",
+    "Note — this module writes Rack's own settings, so the change outlives the patch; the four values it found when it started are put back when it is removed",
+    "Note — only one Rui works at a time; a second one added to the patch is drawn greyed out with no controls on it at all",
+    "Note — the small round button at the top hides and shows all cables at once, and F6 with the pointer over the module does the same; it is not a parameter, so no click on it reaches this help",
+    "Note — the triangle button at the bottom, and F2 with the pointer over the module, stops the module writing the settings; no click on it reaches this help",
+    "Note — the settings are read from the knobs about once every 64 samples rather than every sample, so a fast signal on the inputs is sampled coarsely",
+    "Menu — Reset — puts the four large knobs back to Rack's default settings and the four amounts to zero",
+    "Menu — Fluff — shows or hides the coloured shapes drawn behind the controls"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8
+   },
+   "in": {
+    "0": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the large knob beside it",
+      "why": "Rui.cpp:146-157 reads the jack with getVoltage, scales it by 0.1 and by the amount knob over 100, adds it to the large knob and clamps the total to 0 to 1"
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the large knob beside it",
+      "why": "Rui.cpp:146-157 reads the jack with getVoltage, scales it by 0.1 and by the amount knob over 100, adds it to the large knob and clamps the total to 0 to 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the large knob beside it",
+      "why": "Rui.cpp:146-157 reads the jack with getVoltage, scales it by 0.1 and by the amount knob over 100, adds it to the large knob and clamps the total to 0 to 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "±10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "the large knob beside it",
+      "why": "Rui.cpp:146-157 reads the jack with getVoltage, scales it by 0.1 and by the amount knob over 100, adds it to the large knob and clamps the total to 0 to 1"
+     }
+    }
+   },
+   "notes": "Output index 0 is declared in the module but is never configured, never written and has no jack on the panel, so it gets no line and no tag. The panel prints only the single letters O, T, B and L for the four sections."
   },
   "pachde-guide": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A tool for module makers: put it immediately to the right of a module and it lays a screen and a set of guide lines over that module's panel",
+    "Turns the screen and guides on the module to the left on and off",
+    "Chooses whether the screen covers the panel only, or the knobs, jacks and displays as well; covering them stops that module from being used",
+    "Sets the horizontal position of the guide being edited, -1500 to 1500 pixels; a negative value is measured from the right edge, which is how a right margin is made",
+    "Sets the vertical position of the guide being edited, -380 to 380 pixels; a negative value is measured from the bottom edge",
+    "Sets the thickness of the guide being edited, 0 to 50 pixels",
+    "Repeats the guide being edited every so many pixels across the panel, 0 to 50; at 0 it is drawn once",
+    "Switches the guide being edited between Horizontal and Vertical",
+    "Note — this module draws nothing on itself: it works on the module immediately to its left, and only while the switch at the top left is on",
+    "Note — the list filling the lower half of the panel holds the guides; click one to load it into the knobs for editing, and click a blank part of the list to stop editing it",
+    "Note — the plus, minus and cross buttons add the current knob settings to the list, remove the selected guide, and empty the list; they are not parameters, so no click on them reaches this help",
+    "Note — the row of small pictures adds a ready-made set of guides, and each set is added to what is already in the list rather than replacing it",
+    "Note — the box under the template row names the guide about to be added; leave it empty and the module names it",
+    "Note — the upper palette button sets the colour and transparency of the screen and the lower one the colour of the guide being edited; they are not parameters, so no click on them reaches this help",
+    "Note — right-click any of these knobs to type an exact pixel value",
+    "Note — the lamp in the title bar is lit while the guides are being drawn on a module",
+    "Menu — Open... — in the hamburger menu at the end of the template row: reads a saved set of guides from a file",
+    "Menu — Save... — in the hamburger menu at the end of the template row: writes the current list of guides to a file",
+    "Menu — 20px top margin — in the hamburger menu at the end of the template row: adds that ready-made set to the list",
+    "Menu — 1hp bottom margin — in the hamburger menu at the end of the template row: adds that ready-made set to the list",
+    "Menu — 1/2hp left margin — in the hamburger menu at the end of the template row: adds that ready-made set to the list",
+    "Menu — 1/2hp right margin — in the hamburger menu at the end of the template row: adds that ready-made set to the list",
+    "Menu — 1/2hp horizontal rules — in the hamburger menu at the end of the template row: adds that ready-made set to the list",
+    "Menu — 1/2hp vertical rules — in the hamburger menu at the end of the template row: adds that ready-made set to the list",
+    "Menu — 1/2hp ruled grid — in the hamburger menu at the end of the template row: adds that ready-made set to the list",
+    "Menu — 10px horizontal rules — in the hamburger menu at the end of the template row: adds that ready-made set to the list",
+    "Menu — 10px vertical rules — in the hamburger menu at the end of the template row: adds that ready-made set to the list",
+    "Menu — 10px ruled grid — in the hamburger menu at the end of the template row: adds that ready-made set to the list",
+    "Menu — 1/2hp striped grid — in the hamburger menu at the end of the template row: adds that ready-made set to the list"
+   ],
+   "param": {
+    "6": 1,
+    "5": 2,
+    "0": 3,
+    "1": 4,
+    "3": 5,
+    "4": 6,
+    "2": 7
+   },
+   "notes": "The knobs are not in panel order: left to right the panel reads X, Y, W, R, A, which is parameter index 0, 1, 3, 4, 2. Parameter 2 is the angle switch at the right-hand end and parameter 3 is the width knob in the middle. The module's own right-click menu holds nothing but the theme choices, so it has no line here; everything else is on the hamburger at the end of the template row."
   },
   "pachde-paneltone": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Lays a colour over the panels of the modules in your rack, faded in and out by a button or a cable",
+    "Chooses whether the colour goes over the panel only, leaving the knobs and jacks clear, or over the whole module, in which case that module can no longer be used",
+    "Sets how long the colour takes to fade in and to fade out, 0 to 10 seconds",
+    "Chooses whether the jack above it is read as a trigger that turns the toning on and off, or as a continuous level setting the strength of the colour",
+    "A trigger here fades the colour in, and the next one fades it out; with the switch below set to Continuous the voltage sets the strength of the colour instead, 0-10V",
+    "Note — no panel is toned until the GO button is pressed, or F2 with the pointer over the module; press again to fade out",
+    "Note — with the switch below the jack set to Continuous, the GO button has to be on before the voltage does anything, and the jack is then named Fade amount",
+    "Note — which modules are toned is chosen in the hamburger menu at the top; the choice is remembered with the patch",
+    "Note — the palette button opens a colour picker for the toning colour, and the transparency of that colour sets the strength: an opaque colour hides the panel altogether",
+    "Note — the palette button is not a parameter, so no click on it reaches this help",
+    "Note — the GO button and the lamp beside it are not parameters, so no click on them reaches this help",
+    "Note — a Copper or Copper-mini on either side can set and animate the toning colour, with Use Copper color turned on here and Share color as Extender turned on in the Copper",
+    "Note — the toning lays a widget the size of the panel over each module, which assumes a module is built the usual way; modules that draw their own panels may come out differently",
+    "Note — toning shows best on dark panels",
+    "Menu — Use Copper color — in the hamburger menu at the top: takes the toning colour from a Copper or Copper-mini standing beside this module",
+    "Menu — Tone this PanelTone — in the hamburger menu at the top: includes this module itself among the toned ones",
+    "Menu — All — in the hamburger menu at the top: tones every module in the rack",
+    "Menu — Selected modules — in the hamburger menu at the top: tones the modules that were selected when this was chosen, and keeps that list until it is chosen again",
+    "Menu — Modules in this row — in the hamburger menu at the top: tones every module in the same rack row as this one",
+    "Menu — Modules to the left — in the hamburger menu at the top: tones every module to the left in this row",
+    "Menu — Continuous modules to the left — in the hamburger menu at the top: tones the unbroken run of modules immediately to the left",
+    "Menu — Modules to the right — in the hamburger menu at the top: tones every module to the right in this row",
+    "Menu — Continuous modules to the right — in the hamburger menu at the top: tones the unbroken run of modules immediately to the right",
+    "Menu — Module to the left — in the hamburger menu at the top: tones the one module immediately to the left",
+    "Menu — Module to the right — in the hamburger menu at the top: tones the one module immediately to the right"
+   ],
+   "param": {
+    "0": 1,
+    "2": 2,
+    "1": 3
+   },
+   "in": {
+    "0": 4
+   },
+   "family": {
+    "in": {
+     "0": "trigger"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "high above 5V",
+      "normal": "0V",
+      "why": "PanelTone.cpp:201-204 reads the jack with getVoltage and a SchmittTrigger set to 0.1V and 5V while the switch is on Trigger"
+     }
+    }
+   },
+   "notes": "The input jack does two different things. On Trigger it is read by a Schmitt trigger at 0.1V and 5V (PanelTone.cpp:201-204); on Continuous the voltage is scaled by 0.1 to set the overlay strength (PanelTone.cpp:386), which makes it a 0-10V control voltage input. It is coloured as a trigger here because that is the setting the module comes up in, and because the maker renames the jack to Go trigger or Fade amount to match (PanelTone.cpp:190-194). The module menu carries nothing but the theme choices, so it has no line here; everything else is on the hamburger at the top of the panel."
   }
  }
 }

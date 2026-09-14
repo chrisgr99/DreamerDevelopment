@@ -1,18 +1,377 @@
 {
  "plugin": "gregsbrain",
- "source": "no published source; read from the installed 2.6.5 build",
+ "source": "https://www.gregsbrain.co/uploads/1/4/6/1/146121474/xvox_user_manual.pdf",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "xVox": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Four-voice pitch shifter: it takes one audio input and shifts it to four pitches set by the volt-per-octave jacks, shaping each voice with an envelope and a filter",
+    "One of the two knobs a screen parameter can be assigned to; with nothing assigned to it, turning it changes nothing",
+    "Turn it to move between the parameters on the current page and click it to select one, then turn it to change the value and click again; double-click it to hand a parameter to a CV jack or knob",
+    "Opens the page for the audio mode in use; press it again and the list of audio modes appears, which the encoder then steps through",
+    "Opens the function page last used; press it again and the list of function pages appears, covering the gates, the envelope, the filter, the vocoder, the audio settings and the system settings",
+    "One of the four jacks a screen parameter can be assigned to, 0 to 5V covering the whole of that parameter's range; with nothing assigned to it the jack is read but changes nothing",
+    "The audio the module pitch shifts, and the one to use for a single source: it feeds the second audio input as well whenever nothing is patched there",
+    "A second audio source, so that two of the four voices can be driven by a different sound; with nothing patched here it reads the first audio input",
+    "A gate or trigger for the voice in that colour, read as high above 1V; what it does — fire one envelope, fire several, start a strum or sample the pitches — is set on the Gates page",
+    "Sets the pitch of the voice in that colour at 1V per octave, and the module reads it between -4V and +4V, so the shift stops four octaves either way rather than the five the maker's manual gives",
+    "One of the two audio outputs, carrying two of the four voices; the Down Mix option on the Audio Settings page sends all four to both outputs instead",
+    "Note — almost nothing on this module is set from the panel: the encoder moves the focus between parameters and selects them, and the Mode and Func buttons open the pages carrying them",
+    "Note — the four CV jacks and the two knobs do nothing until a screen parameter is assigned to one; focus the parameter, double-click the encoder, and pick the input from the page that pops up",
+    "Note — while the pointer is over the encoder, or over a flashing Mode or Func button, the mouse scroll wheel turns the encoder rather than scrolling the rack",
+    "Note — the module collects 256 samples before processing them, so there is a delay of at least that between what goes in and what comes out",
+    "Note — the note names on the display are only right once the tuner has run; without it they are relative to a C root",
+    "Note — three things the maker's manual describes are not in this plugin: there is no MIDI mode, the Calibration page is greyed out, and the display dimming setting has no effect",
+    "Menu — Capture mouse scroll — turns off the module taking the mouse scroll wheel over the encoder and the buttons, so the wheel scrolls the rack as it normally does"
+   ],
+   "param": {
+    "0": 1,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 5,
+    "2": 5,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 8,
+    "8": 8,
+    "9": 8,
+    "10": 9,
+    "11": 9,
+    "12": 9,
+    "13": 9
+   },
+   "out": {
+    "0": 10,
+    "1": 10
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "audio",
+     "5": "audio",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "pitch",
+     "11": "pitch",
+     "12": "pitch",
+     "13": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "XVoxBSP::ReadCV at 0x34824 reads inputs[0].voltages[0] and multiplies it by 0.2, giving the same 0 to 1 that the X and Y knobs give at 0x34878"
+     },
+     "1": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "XVoxBSP::ReadCV at 0x3485c reads inputs[1].voltages[0] and multiplies it by 0.2"
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "XVoxBSP::ReadCV at 0x347e4 reads inputs[2].voltages[0] and multiplies it by 0.2"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "XVoxBSP::ReadCV at 0x34840 reads inputs[3].voltages[0] and multiplies it by 0.2"
+     },
+     "4": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "XVoxModule::process at 0x36118-0x36214 loops over inputs[4].channels adding every channel's voltage into one value, which is Rack's getVoltageSum"
+     },
+     "5": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the other audio input",
+      "why": "XVoxModule::process at 0x36228 sums every channel of inputs[5]; when its channel count is zero, 0x36244-0x36254 copies the first audio input's sample into this one's buffer instead"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "XVoxModule::process at 0x36578 reads inputs[6].voltages[0] and compares it against 1.0, latching the result for GateImpl::ReadState at 0x34b94"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "XVoxModule::process at 0x36594 reads inputs[7].voltages[0] and compares it against 1.0"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "XVoxModule::process at 0x365ac reads inputs[8].voltages[0] and compares it against 1.0"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "XVoxModule::process at 0x365c4 reads inputs[9].voltages[0] and compares it against 1.0"
+     },
+     "10": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "XVoxBSP::VoltPerOctave at 0x34790 reads inputs[10].voltages[0] and clamps it to -4 and 4; PitchMode::GetPitch at 0x2bce8 multiplies that by 1200 to get cents"
+     },
+     "11": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "XVoxBSP::VoltPerOctave at 0x34790 reads inputs[11].voltages[0] through the same indexed load and clamps it to -4 and 4"
+     },
+     "12": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "XVoxBSP::VoltPerOctave at 0x34790 reads inputs[12].voltages[0] through the same indexed load and clamps it to -4 and 4"
+     },
+     "13": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "XVoxBSP::VoltPerOctave at 0x34790 reads inputs[13].voltages[0] through the same indexed load and clamps it to -4 and 4"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "XVoxModule::process at 0x363e8 writes one value into outputs[0].voltages[0] and never calls setChannels; 0x363e0 multiplies the internal sample by 5"
+     },
+     "1": {
+      "poly": false,
+      "why": "XVoxModule::process at 0x36498 writes one value into outputs[1].voltages[0] and never calls setChannels; 0x36490 multiplies the internal sample by 5"
+     }
+    }
+   },
+   "notes": "gregsbrain publish no source. Read from the installed 2.6.5 binary alongside the maker's own PDF, whose URL is in the module's entry in plugin.json rather than at the top of it. The manual is written for the hardware and carries a VCV Rack Addendum at the end, which is where the double-click assignment gesture, the missing MIDI mode, the greyed-out Calibration page, the dead display dimming and the scroll-wheel capture all come from. THE PITCH RANGE DISAGREES WITH THE MANUAL. XVoxBSP::VoltPerOctave clamps the jack voltage to -4 and 4 before PitchMode::GetPitch multiplies by 1200 cents, so the shift stops at four octaves; the manual says five. The manual also says that selecting the 0V to 5V VPO Range normals an unpatched VPO jack to 3V and moves the zero point there. Nothing in this build does that: SetVPOBias has an empty body, SetVPOPolarity only stores a value at XVoxBSP+0xc0, and VoltPerOctave never reads it. Microtonal quantization multiplies the same clamped voltage by 100 rather than 1200. A pitch has to move more than 15 cents before the module acts on it. The two audio inputs are read with getVoltageSum, so a polyphonic cable is mixed down to one signal; the first is normalled into the second. The outputs are mono and are soft-saturated or hard-clipped at 0.95 of full scale depending on the Clipping setting on the Audio Settings page, then multiplied by 5. The maker's own port names are the tooltips and are worth reading: they name the four gate and volt-per-octave jacks by the colour of their dress nuts, which is how the display identifies the voices. One disagreement inside the manual itself: its Audio Settings page says the A Gain slider controls the upper audio input, while the port the maker names Audio In A is the lower of the two jacks and the one the code normals into the other."
   },
   "dSpec": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Two-channel additive oscillator: each channel builds its waveform out of a set of sine waves picked by an algorithm chosen on the screen, and the panel knobs then filter and reshape that set",
+    "Turn it to move the focus between the controls on the current page and click it to select one, then turn to change the value and click again; double-click a control's name to map it to an Aux input",
+    "Shifts the pitch of both channels in semitone steps and sets the root note the quantizer works from; with nothing patched into Transpose it does that on its own",
+    "Scales the voltage at the Low Pass jack before it is added to the low-pass offset knob, from none of it through to all of it",
+    "Sets where the exponential curve that thins out the upper harmonics falls; the centre of its travel is no shift and the ends are the full swing either way, and with Low Pass empty it acts alone",
+    "Sets how strongly the Mod1 and Mod2 audio inputs reshape the harmonics of their channels; it has no input jack of its own",
+    "Scales the voltage at the Noise Mix jack before it is added to the noise offset knob, from none of it through to all of it",
+    "Sets how much randomness goes into the spectrum, and with Noise Mix empty it does that alone; whether the randomness adds new frequencies or jitters the ones already there is set on the Algorithm page",
+    "Scales the voltage at the O/E Mix jack before it is added to the odd-even offset knob, from none of it through to all of it",
+    "Sets the balance between odd and even multiples of the fundamental, odd being reedy and even warmer; with nothing patched into O/E Mix it sets the balance on its own",
+    "Scales the voltage at the Comb Width jack before it is added to the comb width offset knob, from none of it through to all of it",
+    "Sets how wide the teeth of the comb filter are; with nothing patched into Comb Width it sets the width on its own",
+    "Sets how deep the comb's teeth cut, with the comb turned inside out on one side of the centre so its peaks become troughs, and the comb off at the centre; it has no input jack of its own",
+    "Drives whatever screen controls have been mapped to it, 0 to 5V spread evenly across that control's values; a negative voltage is read as its positive twin, so -3V and +3V give the same value",
+    "A pulse here flips whatever screen check boxes have been mapped to it, read as high above 0.2V",
+    "Shifts the pitch of both channels, added to the Transpose knob at a tenth of full scale per volt; despite the blue nut and the manual's wording, it does not track 1V per octave",
+    "Moves the low-pass curve, scaled by the low-pass attenuation knob and added to the low-pass offset knob",
+    "Moves the amount of randomness in the spectrum, scaled by the noise attenuation knob and added to the noise offset knob",
+    "Moves the odd-to-even balance, scaled by the odd-even attenuation knob and added to the odd-even offset knob",
+    "Moves the width of the comb's teeth, scaled by the comb width attenuation knob and added to the comb width offset knob",
+    "An audio signal whose own harmonics multiply the harmonics of the first channel, adding no new frequencies of its own; it feeds Mod2 as well whenever nothing is patched there",
+    "An audio signal whose own harmonics multiply the harmonics of the second channel; with nothing patched here it reads Mod1",
+    "Sets the pitch of the first channel at 1V per octave, before the quantizer on the Quantization page turns that into a note",
+    "Sets the pitch of the second channel at 1V per octave, before the quantizer on the Quantization page turns that into a note",
+    "The first channel's audio",
+    "The second channel's audio",
+    "Note — an attenuation knob and the offset knob beside it are a pair: with the jack empty the offset knob alone sets the level, and with a cable in it the attenuation knob scales what is added",
+    "Note — the knobs come up hard anticlockwise when the module is added, which is not where the maker's reset puts them; Initialize on the panel menu centres the offset knobs and Comb Depth",
+    "Note — which set of frequencies each channel is built from is set on the Algorithm page and which notes it may play on the Quantization page; the panel only shapes what those two settle",
+    "Note — while the pointer is over the encoder the mouse scroll wheel turns it rather than scrolling the rack",
+    "Note — the System pages the maker's manual describes are not in this plugin; Initialize on the panel menu is what puts the settings back",
+    "Menu — Capture mouse scroll — turns off the module taking the mouse scroll wheel over the encoder, so the wheel scrolls the rack as it normally does"
+   ],
+   "param": {
+    "0": 1,
+    "7": 2,
+    "5": 3,
+    "6": 4,
+    "4": 5,
+    "10": 6,
+    "11": 7,
+    "8": 8,
+    "9": 9,
+    "1": 10,
+    "2": 11,
+    "3": 12
+   },
+   "in": {
+    "0": 13,
+    "2": 14,
+    "6": 15,
+    "5": 16,
+    "9": 17,
+    "7": 18,
+    "4": 19,
+    "1": 20,
+    "3": 21,
+    "8": 22,
+    "10": 23
+   },
+   "out": {
+    "0": 24,
+    "1": 25
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "2": "trigger",
+     "6": "cv",
+     "5": "cv",
+     "9": "cv",
+     "7": "cv",
+     "4": "cv",
+     "1": "audio",
+     "3": "audio",
+     "8": "pitch",
+     "10": "pitch"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "dspec::BSP::PollAnalogControls at 0x58d4-0x58f4 reads inputs[0].voltages[0], multiplies it by 0.2 and takes the absolute value, then clamps to 1, so a negative voltage gives the same result as its positive twin"
+     },
+     "1": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "why": "DSpecModule::process at 0x75ac-0x76b0 loops over inputs[1].channels adding every channel's voltage into one value, then multiplies by 0.2"
+     },
+     "2": {
+      "poly": false,
+      "range": "high above 0.2V",
+      "negative": "ignored",
+      "normal": "0V",
+      "why": "dspec::GateImpl::State at 0x5bb4-0x5bd0 returns false unless inputs[2] is connected, then compares its voltages[0] against 0.2"
+     },
+     "3": {
+      "poly": true,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "Mod1",
+      "why": "DSpecModule::process at 0x76c8 sums every channel of inputs[3]; when its channel count is zero, 0x76e4-0x76f4 copies the Mod1 sample into this one's buffer instead"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "why": "dspec::BSP::PollAnalogControls at 0x5834-0x584c reads inputs[4].voltages[0] only when the port is connected, multiplies it by 0.1 and by the comb width attenuator, adds it to the offset knob's 2v-1 and clamps the sum to -1 and 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "why": "dspec::BSP::PollAnalogControls at 0x57e4-0x57fc reads inputs[5].voltages[0] only when the port is connected, multiplies it by 0.1 and by the low-pass attenuator, adds it to the offset knob and clamps to -1 and 1"
+     },
+     "6": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "why": "dspec::BSP::PollAnalogControls at 0x5730-0x5740 reads inputs[6].voltages[0] only when the port is connected and adds it at 0.1 per volt straight to the Transpose knob, with no attenuator in the path, clamped to -1 and 1"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "why": "dspec::BSP::PollAnalogControls at 0x58a0-0x58b8 reads inputs[7].voltages[0] only when the port is connected, multiplies it by 0.1 and by the odd-even attenuator, adds it to the offset knob and clamps to -1 and 1"
+     },
+     "8": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "dspec::BSP::VoltPerOctave at 0x56ac-0x56c8 reads inputs[8].voltages[0] when connected and returns 0 when it is not"
+     },
+     "9": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "±5V",
+      "why": "dspec::BSP::PollAnalogControls at 0x5794-0x57ac reads inputs[9].voltages[0] only when the port is connected, multiplies it by 0.1 and by the noise attenuator, adds it to the offset knob and clamps to -1 and 1"
+     },
+     "10": {
+      "poly": false,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "dspec::BSP::VoltPerOctave at 0x56ac-0x56c8 reads inputs[10].voltages[0] when connected and returns 0 when it is not"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "DSpecModule::process writes one value into outputs[0].voltages[0] and never calls setChannels, multiplying the internal sample by 5 first"
+     },
+     "1": {
+      "poly": false,
+      "why": "DSpecModule::process writes one value into outputs[1].voltages[0] and never calls setChannels, multiplying the internal sample by 5 first"
+     }
+    }
+   },
+   "notes": "gregsbrain publish no source. Read from the installed 2.6.5 binary alongside the maker's PDF, whose URL is in the module's entry in plugin.json rather than at the top of it. THE KNOBS ARE WRONG WHEN THE MODULE IS ADDED. Every configParam is called with a range of 0 to 1 and a default of 0, while DSpecModule::onReset sets the five offset knobs, Comb Depth and Transpose to 0.5 and the four attenuators to 0 — with Odd/Even Mix Offset going to 0.05 rather than 0.5. Rack calls onReset for Initialize but not when a module is created from the browser, so a freshly placed dSpec has every knob hard anticlockwise, which puts each offset at the bottom of its swing instead of the centre the manual describes and the maker's own screenshot shows. PollAnalogControls maps every offset knob as 2v-1, so the centre of an offset knob is zero. A CV is only added when its jack is connected, which is what makes the offset knob the sole control with nothing patched. Transpose is the exception among the CV rows: it has an offset knob but no attenuator, and its voltage goes in at a flat 0.1 per volt. Mod Depth and Comb Depth have knobs but no jacks. The Transpose jack is given a blue dress nut like VPO1 and VPO2 and the manual calls it the third volt-per-octave input, but the code reads it as a normalised control clamped to -1 and 1 rather than in octaves, so it is coloured as a control voltage here and the conflict is named on its line. The panel names differ from the maker's port names in several places: the panel prints Noise Mix where the port is called Noise Insertion, O/E Mix where it is Odd/Even Mix, Aux CV and Aux with a pulse symbol where they are Assignable Control and Assignable Gate, and Select beside the encoder. The two Mod inputs are read with getVoltageSum, so a polyphonic cable is mixed down; Mod1 is normalled into Mod2. The encoder is configured with a maximum of positive infinity and is read as a direction rather than a value, its motion registering once it moves more than 0.01."
   }
  }
 }

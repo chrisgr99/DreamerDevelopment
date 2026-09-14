@@ -1,13 +1,70 @@
 {
  "plugin": "bmbo",
- "source": "https://github.com/kamlaktaye/BmboBTFQuantizer",
+ "source": "https://github.com/kamlaktaye/BmboBTFQuantizer/blob/main/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "BTFQuantizer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "A quantizer that snaps 1V/octave pitch to a tuning read from a Bmbo Tuning Format file, repeating that tuning at every octave and treating each polyphonic channel the same way",
+    "Shifts the tuning's root by as much as twelve semitones either way, carrying the whole scale with it; the knob is continuous, so the output follows it between the scale's own steps",
+    "Adds whole octaves to the output, four down to four up, without changing which step of the tuning is chosen",
+    "The pitch to be quantized; the number of channels patched here sets how many the output carries",
+    "Moves the tuning's root at one volt per octave, read separately for each polyphonic channel",
+    "The quantized pitch at one volt per octave, with the root offset and the octave shift added back on",
+    "Note — pitch passes straight through until a tuning is loaded; press LOAD BTF and pick a .btf file, or load one of the seventeen tunings the plugin ships as module presets",
+    "Note — the display gives the loaded tuning's title, how many intervals it holds, its root frequency in hertz and whether it is Closed or Open, then the result of the last load",
+    "Note — the lamp by the load button glows green while a tuning is loaded and red when a load has failed; a failed load leaves whatever tuning was already active in place",
+    "Note — a tuning marked Open is read and shown as Open but quantized as though it repeated at the octave, because only the Closed behaviour is written",
+    "Note — the loaded tuning's text is stored in the patch, so it returns when the patch is reopened even if the .btf file has been moved or deleted",
+    "Note — every loaded tuning gets a unison whether or not the file lists 1/1, and intervals are folded into a single octave, so an interval written as 2/1 collapses onto the unison"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2
+   },
+   "in": {
+    "0": 3,
+    "1": 4
+   },
+   "out": {
+    "0": 5
+   },
+   "family": {
+    "in": {
+     "0": "pitch",
+     "1": "pitch"
+    },
+    "out": {
+     "0": "pitch"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "BmboBTFQuantizer.cpp:119 reads getChannels() to bound the per-channel loop and line 135 reads getPolyVoltage(c) inside it"
+     },
+     "1": {
+      "poly": true,
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "BmboBTFQuantizer.cpp:132 reads getPolyVoltage(c) for each channel while the jack is connected and substitutes 0 when it is not"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "1V per octave",
+      "why": "BmboBTFQuantizer.cpp:120 calls setChannels with the pitch input's channel count and line 140 writes setVoltage(out, c) once per channel"
+     }
+    }
+   },
+   "notes": "Read from the maker's source at commit ba1b628, the last commit carrying the installed 2.0.0; main has moved on to 2.1.0 with a second module. Six commits carry a plugin.json byte-identical to the installed one, and src/ is identical across five of them (the sixth has no src at all), so the code is settled whichever is picked; the installed binary's strings confirm it, carrying LOAD BTF, BMBO BTF QUANTIZER, No tuning loaded and Dark mode from that tree. The LOAD BTF button and the tuning display are plain widgets rather than ParamWidgets, so neither can be clicked for help and neither gets a line or a tag; both are covered by Note lines instead. The module's only menu item is Dark mode, which is cosmetic and changes no behaviour, so it is left out under the theme-menu rule. The module declares configBypass from the pitch input to the output, so bypassing it passes pitch through. The quantizer folds every interval into one octave and sorts and de-duplicates them, which means an Open tuning's intervals above the octave are collapsed rather than used; the maker's README says as much."
   }
  }
 }

@@ -1,28 +1,647 @@
 {
  "plugin": "swv-guitar-tools",
- "source": "https://github.com/shortwavlabs/vcv-guitar-collection",
+ "source": "https://github.com/shortwavlabs/vcv-guitar-collection/blob/main/manual/README.md",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "NamPlayer": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Neural Amp Modeler player: it runs a captured amp model over a mono guitar signal, with a noise gate in front of the model and a five-band equaliser after it",
+    "Sets the gain into the amp model, silent fully anticlockwise and twice the input voltage fully clockwise",
+    "Sets the gain out of the amp model, from silence to double, after which the signal is limited to 7.5V either way",
+    "Sets the level below which the noise gate closes, -80dB to 0dB",
+    "Sets how quickly the gate opens once the signal rises past the threshold, 0.1ms to 50ms",
+    "Sets how quickly the gate closes once the hold time has run out, 10ms to 500ms",
+    "Sets how long the gate stays open after the signal drops below the threshold, 10ms to 500ms",
+    "A low shelf at 100Hz on the model's output, 12dB of cut fully anticlockwise and 12dB of boost fully clockwise, flat in the middle",
+    "A peaking filter at 650Hz on the model's output, 12dB of cut fully anticlockwise and 12dB of boost fully clockwise, flat in the middle",
+    "A high shelf at 3200Hz on the model's output, 12dB of cut fully anticlockwise and 12dB of boost fully clockwise, flat in the middle",
+    "A peaking filter at 3500Hz on the model's output, 12dB of cut fully anticlockwise and 12dB of boost fully clockwise, flat in the middle",
+    "A peaking filter at 80Hz on the model's output, 12dB of cut fully anticlockwise and 12dB of boost fully clockwise, flat in the middle",
+    "The guitar or line signal to be amplified, mono, with 5V taken as the model's full scale",
+    "Takes over the input gain while patched, -5V for silence and 5V for double gain; the knob does nothing while a cable is in here",
+    "Takes over the gate threshold while patched, -5V for -80dB and 5V for 0dB; the knob does nothing while a cable is in here",
+    "Takes over the gate attack while patched, -5V for 0.1ms and 5V for 50ms; the knob does nothing while a cable is in here",
+    "Takes over the gate release while patched, -5V for 10ms and 5V for 500ms; the knob does nothing while a cable is in here",
+    "Takes over the gate hold while patched, -5V for 10ms and 5V for 500ms; the knob does nothing while a cable is in here",
+    "Takes over the BASS control while patched, -5V for a 12dB cut and 5V for a 12dB boost; the knob does nothing while a cable is in here",
+    "Takes over the MID control while patched, -5V for a 12dB cut and 5V for a 12dB boost; the knob does nothing while a cable is in here",
+    "Takes over the TRBL control while patched, -5V for a 12dB cut and 5V for a 12dB boost; the knob does nothing while a cable is in here",
+    "Takes over the PRES control while patched, -5V for a 12dB cut and 5V for a 12dB boost; the knob does nothing while a cable is in here",
+    "Takes over the DPTH control while patched, -5V for a 12dB cut and 5V for a 12dB boost; the knob does nothing while a cable is in here",
+    "Takes over the output gain while patched, -5V for silence and 5V for double gain; the knob does nothing while a cable is in here",
+    "The amp model's output, mono, limited to 7.5V either way",
+    "Menu — Bundled Models — lists the model files that ship with the plugin; picking one loads it",
+    "Menu — Load Custom Model... — opens a file dialogue for a .nam model file anywhere on disk",
+    "Menu — Unload Model — drops the loaded model, leaving the module passing its input through",
+    "Menu — Eco Mode: Off, On — averages each pair of samples and runs the model once per pair, for about half the processor cost",
+    "Menu — Use Fast Tanh — computes the model's activation function from an approximation rather than the library function, for less processor cost",
+    "Menu — Waveform Color: Green, Baby Blue, Amber, Red, Purple, White — sets the colour of the bars in the output display",
+    "Note — the module passes its input through with the two level knobs applied and nothing else until a model is loaded from the right-click menu",
+    "Note — every CV input here replaces its knob rather than adding to it: while a cable is patched, -5V to 5V covers the whole range of that control and the knob is out of circuit",
+    "Note — the display across the top is a bar meter of the output signal, and it prints ECO ON in the corner while Eco Mode is on",
+    "Note — the green lamp lights when a model is loaded and glows at half brightness while one is loading",
+    "Note — the yellow lamp lights when the loaded model was captured at a different sample rate from the engine, which is resampled to match",
+    "Note — the red lamp lights while the noise gate is closed",
+    "Note — the NAM FX Loop expander goes immediately to the right of this module and inserts its send and return between the amp model and this module's output jack"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11
+   },
+   "in": {
+    "0": 12,
+    "1": 13,
+    "3": 14,
+    "4": 15,
+    "5": 16,
+    "6": 17,
+    "7": 18,
+    "8": 19,
+    "9": 20,
+    "10": 21,
+    "11": 22,
+    "2": 23
+   },
+   "out": {
+    "0": 24
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "cv",
+     "9": "cv",
+     "10": "cv",
+     "11": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/NamPlayer.cpp:125 getVoltage() with no channel loop; the voltage is divided by 5 for the model"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the input level knob",
+      "why": "src/NamPlayer.cpp:121-124 rescale(cv, -5, 5, 0, 2) replacing the param when isConnected"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the output level knob",
+      "why": "src/NamPlayer.cpp:252-255 rescale(cv, -5, 5, 0, 2) replacing the param when isConnected"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the THRES knob",
+      "why": "src/NamPlayer.cpp:131-134 rescale(cv, -5, 5, -80, 0) replacing the param when isConnected"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the ATTCK knob",
+      "why": "src/NamPlayer.cpp:137-140 rescale(cv, -5, 5, 0.1, 50) replacing the param when isConnected"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the REL knob",
+      "why": "src/NamPlayer.cpp:143-146 rescale(cv, -5, 5, 10, 500) replacing the param when isConnected"
+     },
+     "6": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the HOLD knob",
+      "why": "src/NamPlayer.cpp:149-152 rescale(cv, -5, 5, 10, 500) replacing the param when isConnected"
+     },
+     "7": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the BASS knob",
+      "why": "src/NamPlayer.cpp:156-160 rescale(cv, -5, 5, 0, 1), then scaled to ±12dB"
+     },
+     "8": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the MID knob",
+      "why": "src/NamPlayer.cpp:162-166 rescale(cv, -5, 5, 0, 1), then scaled to ±12dB"
+     },
+     "9": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the TRBL knob",
+      "why": "src/NamPlayer.cpp:168-172 rescale(cv, -5, 5, 0, 1), then scaled to ±12dB"
+     },
+     "10": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the PRES knob",
+      "why": "src/NamPlayer.cpp:174-178 rescale(cv, -5, 5, 0, 1), then scaled to ±12dB"
+     },
+     "11": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the DPTH knob",
+      "why": "src/NamPlayer.cpp:180-184 rescale(cv, -5, 5, 0, 1), then scaled to ±12dB"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/NamPlayer.cpp:262 setVoltage with no channel argument and no setChannels anywhere"
+     }
+    }
+   },
+   "notes": "The equaliser is applied after the amp model, not before it (src/dsp/Nam.h:215-223). The noise gate and equaliser settings are read once per 128-sample block rather than every sample (src/NamPlayer.cpp:127), so a fast CV into any of those nine jacks is quantized to that block. Model loading happens on a background thread, so the module keeps passing audio while a large model loads."
   },
   "NamFxLoop": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Send and return loop for the NAM Player, placed immediately to its right: it takes the amp model's output out to another module and mixes what comes back into the Player's own output jack",
+    "Fades between the signal the NAM Player sent and the signal arriving at the return jack, all send fully anticlockwise and all return fully clockwise",
+    "Whatever the NAM Player would otherwise have put out, for patching into an effect; it carries 0V when this module is not touching a NAM Player",
+    "The effect's output coming back; unpatched, the sent signal is used in its place, so the blend control then has nothing to fade between",
+    "Note — the blended result does not come out of this module: it goes back through the expander connection and out of the NAM Player's own output jack",
+    "Note — the green lamp lights while a NAM Player is immediately to the left of this module",
+    "Note — placed anywhere else, the send carries 0V and the return is ignored"
+   ],
+   "param": {
+    "0": 1
+   },
+   "in": {
+    "0": 3
+   },
+   "out": {
+    "0": 2
+   },
+   "family": {
+    "in": {
+     "0": "audio"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "normal": "the send signal",
+      "why": "src/NamFxLoopExpander.cpp:50-52 getVoltage() with no channel loop, falling back to dryVoltage when unpatched"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/NamFxLoopExpander.cpp:47 setVoltage with no channel argument and no setChannels anywhere"
+     }
+    }
+   },
+   "notes": "The link lamp follows whether a NAM Player is the module to the left, but the send only carries signal once that Player has flagged its message active, which happens on the Player's first process call (src/NamFxLoopExpander.cpp:36-45)."
   },
   "CabSim": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Cabinet simulator: it convolves a mono signal with up to two impulse responses loaded from WAV files, fades between them, and puts a high-pass and a low-pass filter on the result",
+    "With both impulse responses loaded, fades from the first fully anticlockwise to the second fully clockwise; with only one loaded, fades from the unprocessed signal to the convolved one",
+    "Sets the corner of the 2-pole low-pass filter on the output, 1000Hz fully anticlockwise to 20000Hz fully clockwise, on a logarithmic scale",
+    "Sets the corner of the 2-pole high-pass filter on the output, 20Hz fully anticlockwise to 2000Hz fully clockwise, on a logarithmic scale",
+    "Sets the output gain, from silence to double",
+    "The signal to be convolved, mono, with 5V taken as full scale",
+    "Takes over the BLEND control while patched, -5V for one end of the fade and 5V for the other; the knob does nothing while a cable is in here",
+    "Takes over the LP corner while patched, -5V for 1000Hz and 5V for 20000Hz; the knob does nothing while a cable is in here",
+    "Takes over the HP corner while patched, -5V for 20Hz and 5V for 2000Hz; the knob does nothing while a cable is in here",
+    "Takes over the output gain while patched, -5V for silence and 5V for double; the knob does nothing while a cable is in here",
+    "The filtered, convolved signal, mono",
+    "Menu — Load IR A... — opens a file dialogue for a WAV impulse response to put in the first slot",
+    "Menu — Unload IR A — empties the first slot, greyed out when nothing is in it",
+    "Menu — Normalize IR A — scales the first impulse response to full scale as it is loaded, which evens out the level between different files",
+    "Menu — Load IR B... — opens a file dialogue for a WAV impulse response to put in the second slot",
+    "Menu — Unload IR B — empties the second slot, greyed out when nothing is in it",
+    "Menu — Normalize IR B — scales the second impulse response to full scale as it is loaded, which evens out the level between different files",
+    "Note — with no impulse response loaded the module passes its input through the two filters and the output gain, and nothing else; load one from the right-click menu",
+    "Note — an impulse response is cut to one second and resampled to the engine's rate as it loads, and is reloaded from its file whenever the engine's sample rate changes",
+    "Note — the panel prints IR1 and IR2 beside the two lamps, while the menu calls the same two slots IR A and IR B; a lit lamp means that slot holds an impulse response",
+    "Note — the menu prints a line under the two slots saying what the blend control is doing: a crossfade between the two responses when both are loaded, or a dry-to-wet fade when only one is"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4
+   },
+   "in": {
+    "0": 5,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9
+   },
+   "out": {
+    "0": 10
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv"
+    },
+    "out": {
+     "0": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/CabSim.cpp:78 getVoltage() with no channel loop, divided by 5"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the BLEND knob",
+      "why": "src/CabSim.cpp:81-85 rescale(cv, -5, 5, 0, 1) replacing the param when isConnected"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the LP knob",
+      "why": "src/CabSim.cpp:89-94 rescale(cv, -5, 5, 0, 1), then 1000 times 20 to that power"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the HP knob",
+      "why": "src/CabSim.cpp:97-102 rescale(cv, -5, 5, 0, 1), then 20 times 100 to that power"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "the OUTPUT knob",
+      "why": "src/CabSim.cpp:104-108 rescale(cv, -5, 5, 0, 2) replacing the param when isConnected"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/CabSim.cpp:129 setVoltage with no channel argument and no setChannels anywhere"
+     }
+    }
+   },
+   "notes": "The convolution runs in 256-sample blocks, so the blend is applied once per block rather than per sample (src/dsp/CabSimDSP.h:189-192); the two filters run per sample. The filter corners are recomputed only when they move by more than 1Hz (src/CabSim.cpp:111-116), so very small CV movements do not retune them. Rack's own bypass is configured to pass the input jack to the output jack."
   },
   "Mnemonix": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Bucket-brigade delay modelled on an analogue memory delay pedal, with chorus and vibrato modulation of the delay clock, a compander, and the hiss and clock bleed of the original circuit",
+    "Sets the drive into the modelled preamp and compander, so higher settings add saturation before the delay",
+    "Fades between the direct signal and the delayed one, on a law that lifts the middle so the level does not drop there",
+    "Sets how much of the delayed signal is returned to the input for repeats; high settings bloom into self-oscillation",
+    "Sets the delay time by setting the bucket-brigade clock period, about 33ms fully anticlockwise to about 410ms fully clockwise, or 819ms in the long range; moving it bends the repeats",
+    "Sets how far the chorus or vibrato modulation moves the delay clock",
+    "Scales the Level CV input before it is added to the LEVEL knob, backwards at negative settings",
+    "Scales the Blend CV input before it is added to the BLEND knob, backwards at negative settings",
+    "Scales the Feedback CV input before it is added to the FEED knob, backwards at negative settings",
+    "Scales the Delay CV input before it is added to the delay time, backwards at negative settings",
+    "Scales the Depth CV input before it is added to the DEPTH knob, backwards at negative settings",
+    "Chooses chorus or vibrato: chorus modulates at about 0.35Hz in the middle of the delay range and vibrato at about 1.65Hz, and shorter delay times raise both",
+    "Chooses the modulation wave, a triangle in one position and a square in the other; the square steps the delay time between two values",
+    "Doubles the longest delay time, from about 410ms to about 819ms",
+    "Engages the effect in the upper position and bypasses it in the lower, despite the panel printing BYPASS beside it; bypassed, the input comes out untouched",
+    "Adds to the LEVEL knob after the trimpot for this jack scales it, 5V covering the whole range at a trimpot fully clockwise",
+    "Adds to the BLEND knob after the trimpot for this jack scales it, 5V covering the whole range at a trimpot fully clockwise",
+    "Adds to the FEED knob after the trimpot for this jack scales it, 5V covering the whole range at a trimpot fully clockwise",
+    "Adds to the delay time after the trimpot for this jack scales it, 5V covering the whole range at a trimpot fully clockwise, whether the knob or the tapped tempo is setting that time",
+    "Adds to the DEPTH knob after the trimpot for this jack scales it, 5V covering the whole range at a trimpot fully clockwise",
+    "Chooses vibrato above 1V and chorus below it while patched, in place of the CH/VB switch",
+    "Chooses the square modulation wave above 1V and the triangle below it while patched, in place of the TRI/SQ switch",
+    "Chooses the long delay range above 1V and the normal range below it while patched, in place of the RANGE switch",
+    "Engages the effect above 1V and bypasses it below while patched, in place of the BYPASS switch",
+    "Sets the delay time from the interval between rising edges above 2V, taking taps between 0.08 and 4 seconds apart, and switches the menu's Timing to the tapped setting",
+    "The signal to be delayed; each channel of a polyphonic cable gets its own delay engine, up to sixteen",
+    "The direct and delayed signals mixed by the BLEND control, one channel per input channel, or two when a mono input is spread by one of the stereo modes",
+    "The input signal passed through untouched, for parallel patching",
+    "The delayed signal on its own, before the BLEND control",
+    "The LEVEL control's value after its CV and trimpot, as 0V to 10V",
+    "The BLEND control's value after its CV and trimpot, as 0V to 10V",
+    "The FEED control's value after its CV and trimpot, as 0V to 10V",
+    "The delay time as a proportion of the current range after its CV and trimpot, as 0V to 10V",
+    "The DEPTH control's value after its CV and trimpot, as 0V to 10V",
+    "10V while vibrato is chosen and 0V while chorus is",
+    "The modulation wave itself, triangle or square as chosen, swinging between -5V and 5V",
+    "10V while the long delay range is chosen and 0V while the normal range is",
+    "10V while the effect is engaged and 0V while it is bypassed",
+    "A square wave at the bucket-brigade clock divided by 64, switching between 0V and 10V, so it speeds up as the delay time shortens",
+    "A square wave at the bucket-brigade clock divided by 512, switching between 0V and 10V, so it speeds up as the delay time shortens",
+    "The modelled compander's envelope as 0V to 10V, rising with the level going into the delay",
+    "Menu — Artifact profile: Cleaner BBD, Rev_D authentic, Worn unit — sets how much hiss, clock bleed and drift the delay adds",
+    "Menu — Bypass behavior: Trails, CPU mute — chooses whether the delay memory keeps running while the effect is bypassed, or is cleared and the processing skipped",
+    "Menu — Timing: Free delay knob, Tap/sync delay — chooses whether the DELAY knob sets the time or the tapped tempo and division do",
+    "Menu — Division: 1/1, 1/2, 1/4., 1/4, 1/8., 1/8, 1/8T, 1/16 — on the Timing submenu, sets the note value of the tapped tempo that the delay time takes",
+    "Menu — Tap tempo seed: 60 BPM, 90 BPM, 120 BPM, 140 BPM — on the Timing submenu, sets a tempo without tapping and switches Timing to the tapped setting",
+    "Menu — Stereo mode: Mono pedal, Wide chorus, Ping-pong offset — chooses whether a mono input is spread over two channels, and how far the second channel's delay and modulation are offset",
+    "Menu — Advanced calibration — seven trims over input gain, bucket-brigade bias, clock bleed, compander, noise, wet makeup and feedback headroom, each from off to 200 per cent of normal",
+    "Menu — Reset calibration trims — returns all seven calibration trims to 100 per cent",
+    "Menu — Clear delay memory — empties the delay buffer, cutting off repeats and any self-oscillation",
+    "Note — the DELAY knob does nothing while the menu's Timing is set to Tap/sync delay: the tapped tempo and division set the time, and the Delay CV is added to that",
+    "Note — a stereo mode other than Mono pedal spreads a mono input over two channels only while the effect is engaged",
+    "Note — tapping the Tap input switches the menu's Timing to Tap/sync delay on its own, which takes the DELAY knob out of circuit"
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "9": 6,
+    "10": 7,
+    "11": 8,
+    "12": 9,
+    "13": 10,
+    "5": 11,
+    "6": 12,
+    "8": 13,
+    "7": 14
+   },
+   "in": {
+    "1": 15,
+    "2": 16,
+    "3": 17,
+    "4": 18,
+    "5": 19,
+    "6": 20,
+    "7": 21,
+    "9": 22,
+    "8": 23,
+    "10": 24,
+    "0": 25
+   },
+   "out": {
+    "0": 26,
+    "1": 27,
+    "2": 28,
+    "3": 29,
+    "4": 30,
+    "5": 31,
+    "6": 32,
+    "7": 33,
+    "8": 34,
+    "9": 35,
+    "11": 36,
+    "10": 37,
+    "12": 38,
+    "13": 39,
+    "14": 40
+   },
+   "family": {
+    "in": {
+     "0": "audio",
+     "1": "cv",
+     "2": "cv",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "trigger",
+     "7": "trigger",
+     "8": "trigger",
+     "9": "trigger",
+     "10": "trigger"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio",
+     "2": "audio",
+     "3": "cv",
+     "4": "cv",
+     "5": "cv",
+     "6": "cv",
+     "7": "cv",
+     "8": "trigger",
+     "9": "cv",
+     "10": "trigger",
+     "11": "trigger",
+     "12": "trigger",
+     "13": "trigger",
+     "14": "cv"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "step": "continuous",
+      "why": "src/Mnemonix.cpp:207 getChannels() sets the engine count, :268 getPolyVoltage(inputChannel) per channel"
+     },
+     "1": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "why": "src/Mnemonix.cpp:183-185 through applyCv at :15, which adds voltage over 5 times the trimpot and clamps the total to 0 and 1"
+     },
+     "2": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "why": "src/Mnemonix.cpp:186-188 through applyCv at :15, clamped to 0 and 1"
+     },
+     "3": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "why": "src/Mnemonix.cpp:189-191 through applyCv at :15, clamped to 0 and 1"
+     },
+     "4": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "why": "src/Mnemonix.cpp:192-199 voltage over 5 times the trimpot added to the knob or to the synced time, clamped to 0 and 1"
+     },
+     "5": {
+      "poly": false,
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "sumRange": "0 to 1V",
+      "why": "src/Mnemonix.cpp:200-202 through applyCv at :15, clamped to 0 and 1"
+     },
+     "6": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "the CH/VB switch",
+      "why": "src/Mnemonix.cpp:167-169 getVoltage() >= 1 when isConnected, otherwise the param"
+     },
+     "7": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "the TRI/SQ switch",
+      "why": "src/Mnemonix.cpp:170-172 getVoltage() >= 1 when isConnected, otherwise the param"
+     },
+     "8": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "the BYPASS switch",
+      "why": "src/Mnemonix.cpp:176-178 getVoltage() >= 1 when isConnected, otherwise the param"
+     },
+     "9": {
+      "poly": false,
+      "range": "high above 1V",
+      "step": "stepped",
+      "normal": "the RANGE switch",
+      "why": "src/Mnemonix.cpp:173-175 getVoltage() >= 1 when isConnected, otherwise the param"
+     },
+     "10": {
+      "poly": false,
+      "range": "high above 2V",
+      "step": "continuous",
+      "why": "src/Mnemonix.cpp:158 SchmittTrigger::process(v, 0.1, 2) and a tap window of 0.08 to 4 seconds"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/Mnemonix.cpp:211 setChannels to the input count, or 2 when a mono input is spread"
+     },
+     "1": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/Mnemonix.cpp:213 setChannels to the same count when connected"
+     },
+     "2": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/Mnemonix.cpp:216 setChannels to the same count when connected"
+     },
+     "3": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:294 outputControlVoltage, which clamps to 0 and 1 and multiplies by 10, on channel 0"
+     },
+     "4": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:295 outputControlVoltage on channel 0"
+     },
+     "5": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:296 outputControlVoltage on channel 0"
+     },
+     "6": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:297 outputControlVoltage on channel 0"
+     },
+     "7": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:298 outputControlVoltage on channel 0"
+     },
+     "8": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:299 10V or 0V on channel 0"
+     },
+     "9": {
+      "poly": false,
+      "range": "±5V",
+      "why": "src/Mnemonix.cpp:300 the LFO value times 5, clamped to ±5V, on channel 0"
+     },
+     "10": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:301 10V or 0V on channel 0"
+     },
+     "11": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:302 10V or 0V on channel 0"
+     },
+     "12": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:303 10V or 0V from bit 5 of the clock counter, src/dsp/MnemonixDSP.h:790"
+     },
+     "13": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:304 10V or 0V from bit 8 of the clock counter, src/dsp/MnemonixDSP.h:791"
+     },
+     "14": {
+      "poly": false,
+      "range": "0 to 10V",
+      "why": "src/Mnemonix.cpp:305 outputControlVoltage of the compander envelope, on channel 0"
+     }
+    }
+   },
+   "notes": "The delay figures come from the clock constants at src/dsp/MnemonixDSP.h:280-283: 4096 bucket-brigade stages at a clock period of 8 to 100 microseconds, or 8 to 200 in the long range, giving 32.768ms to 409.6ms and 819.2ms. The LFO, clock and envelope outputs are taken from the first channel only, even when the audio is polyphonic (src/Mnemonix.cpp:285-291). The four gate outputs and the five control-value outputs are written only while something is patched to them. The panel prints BYPASS beside the engage switch, while the switch's own tooltip reads Effect with positions Bypassed and Engaged, and the upper position is Engaged."
   }
  }
 }

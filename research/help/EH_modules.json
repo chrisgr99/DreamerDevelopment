@@ -2,12 +2,135 @@
  "plugin": "EH_modules",
  "source": "https://github.com/eh2k/vcvrack-fv1-emu.git",
  "read": "2026-09-14",
- "partial": true,
  "modules": {
   "FV-1emu": {
    "lines": [
-    "TODO: what this module is"
-   ]
+    "Emulation of the Spin Semiconductor FV-1 reverb and effects chip, running an assembler program loaded from a .spn file, with the chip's three control pots brought out as knobs",
+    "Sets the loaded program’s first control, 0 to 1; what it changes is decided by the program, and the display names it when the program comes from a bank that says",
+    "Sets the loaded program’s second control, 0 to 1; what it changes is decided by the program, and the display names it when the program comes from a bank that says",
+    "Sets the loaded program’s third control, 0 to 1; what it changes is decided by the program, and the display names it when the program comes from a bank that says",
+    "Attenuverter on the CV jack for the first control, and at its centre when the module is added, which leaves that jack doing nothing",
+    "Attenuverter on the CV jack for the second control, and at its centre when the module is added, which leaves that jack doing nothing",
+    "Attenuverter on the CV jack for the third control, and at its centre when the module is added, which leaves that jack doing nothing",
+    "Balances untreated signal against the program’s output: anticlockwise gives the untreated signal alone and stops the emulator, clockwise gives the program alone, the centre gives both at full level",
+    "Attenuverter on the DRY/WET jack, and at its centre when the module is added, which leaves that jack doing nothing",
+    "Trims the left input going into the emulator: silent fully anticlockwise, unchanged at the centre, and doubled fully clockwise",
+    "Trims the right input going into the emulator: silent fully anticlockwise, unchanged at the centre, and doubled fully clockwise",
+    "Steps back one program in the loaded FX bank, or back through the .spn files in the folder the current program came from when no bank is loaded",
+    "Steps on one program in the loaded FX bank, or on through the .spn files in the folder the current program came from when no bank is loaded",
+    "Adds to the first control, a tenth of a unit per volt with its attenuverter fully open, on the knob's own 0 to 1 scale",
+    "Adds to the second control, a tenth of a unit per volt with its attenuverter fully open, on the knob's own 0 to 1 scale",
+    "Adds to the third control, a tenth of a unit per volt with its attenuverter fully open, on the knob's own 0 to 1 scale",
+    "Adds to the dry and wet balance, half a unit per volt with its attenuverter fully open, on the knob's own -1 to +1 scale",
+    "The left input; with nothing patched into the right input the right channel is fed silence rather than this signal",
+    "The right input; with nothing patched into the left input the left channel is fed silence rather than this signal",
+    "The left channel, the trimmed left input and the program's left output mixed by DRY/WET, clipped to ±10V",
+    "The right channel, the trimmed right input and the program's right output mixed by DRY/WET, clipped to ±10V",
+    "Menu — Select SPN File... — opens a file chooser for one FV-1 assembler program, and the arrow buttons then step through the other .spn files in that same folder",
+    "Menu — Parser log... — writes what the assembler made of the loaded program into a file beside the plugin and opens it",
+    "Menu — Select FX-Bank... — on the display's own menu rather than the panel's: opens a file chooser for a programs.json holding many programs at once",
+    "Note — Clicking the display with either mouse button opens its own menu, which is where the FX bank is loaded and where the bank's programs are listed by category.",
+    "Note — The module comes up with demo.spn, the one program shipped with the plugin, so the arrow buttons do nothing until another .spn file or an FX bank is loaded.",
+    "Note — A bank of 157 programs is published as programs.json in the maker's repository; it is not part of the plugin and has to be fetched and loaded.",
+    "Note — All four attenuverters are at their centre when the module is added, so none of the four CV jacks does anything until one is turned.",
+    "Note — Each jack carries one channel, so a polyphonic cable is reduced to its first channel.",
+    "Note — The back arrow cannot reach the first program of a bank: stepping back from the second jumps to the last instead."
+   ],
+   "param": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "8": 7,
+    "9": 8,
+    "10": 9,
+    "11": 10,
+    "6": 11,
+    "7": 12
+   },
+   "in": {
+    "0": 13,
+    "1": 14,
+    "2": 15,
+    "5": 16,
+    "3": 17,
+    "4": 18
+   },
+   "out": {
+    "0": 19,
+    "1": 20
+   },
+   "family": {
+    "in": {
+     "0": "cv",
+     "1": "cv",
+     "2": "cv",
+     "5": "cv",
+     "3": "audio",
+     "4": "audio"
+    },
+    "out": {
+     "0": "audio",
+     "1": "audio"
+    }
+   },
+   "props": {
+    "in": {
+     "0": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/FV1EmuVCVPlugIn.cpp:234 getVoltage times 0.1 times the trimpot"
+     },
+     "1": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/FV1EmuVCVPlugIn.cpp:235 getVoltage times 0.1 times the trimpot"
+     },
+     "2": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "subtracts",
+      "normal": "0V",
+      "why": "src/FV1EmuVCVPlugIn.cpp:236 getVoltage times 0.1 times the trimpot"
+     },
+     "5": {
+      "poly": false,
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/FV1EmuVCVPlugIn.cpp:239 getVoltage times the trimpot, with no further scaling"
+     },
+     "3": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/FV1EmuVCVPlugIn.cpp:218 getVoltage, one channel; the normalling at 221-226 is commented out"
+     },
+     "4": {
+      "poly": false,
+      "normal": "0V",
+      "why": "src/FV1EmuVCVPlugIn.cpp:219 getVoltage, one channel; the normalling at 221-226 is commented out"
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "src/FV1EmuVCVPlugIn.cpp:250 clamp before setVoltage"
+     },
+     "1": {
+      "poly": false,
+      "range": "-10 to 10V",
+      "why": "src/FV1EmuVCVPlugIn.cpp:251 clamp before setVoltage"
+     }
+    }
+   },
+   "notes": "No parameter, input or output is given a name: every configParam call passes an empty string and there are no configInput or configOutput calls at all, so Rack's tooltips are blank on the whole panel. The DRY/WET law is not a crossfade: d = clamp(1 - mix, 0, 1) and w = clamp(1 + mix, 0, 1) with mix running -1 to +1, so the centre position passes the untreated signal and the program's output both at full level, summed. When w reaches 0 the emulator is not run at all that sample. The three control CV jacks are scaled by 0.1 before their attenuverters while the DRY/WET jack is not scaled at all, so a volt reaches two and a half times further there in proportion to its knob's travel. The input trims multiply by (1 + value) over a -1 to +1 parameter, so the anticlockwise end silences that input. The back-arrow branch reads `if (--selectedProgram <= 0) selectedProgram = programs.size() - 1`, which skips index 0. The plugin ships only fx/demo.spn and fx/README.TXT; there is no programs.json in the installed folder. The display's draw() uses Rack's deprecated NVGcontext* signature, which still works."
   }
  }
 }
