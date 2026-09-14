@@ -146,6 +146,27 @@ def check(path):
                                 problems.append(
                                     '%s: range is %r; write it as "0 to 10V", "±5V", '
                                     '"1V per octave" or "high above 1V"' % (at, value))
+                        elif key == 'negative':
+                            # WHAT A NEGATIVE VOLTAGE DOES, which is three different behaviours
+                            # that all look alike from outside. Clamped away before use; subtracted
+                            # from a knob until the total hits its floor; or carried through.
+                            if value not in ('ignored', 'subtracts', 'swings'):
+                                problems.append(
+                                    '%s: negative is %r, not ignored, subtracts or swings' % (at, value))
+                        elif key == 'normal':
+                            # WHAT AN UNPATCHED JACK READS. Usually a voltage, sometimes another
+                            # jack, so this is the one field that cannot take a closed vocabulary —
+                            # it is held short instead, and to a phrase rather than a sentence.
+                            if not isinstance(value, str) or not value or len(value) > 48:
+                                problems.append('%s: normal is %r; a short phrase, 48 characters '
+                                                'at most' % (at, value))
+                            elif value.endswith('.'):
+                                problems.append('%s: normal is a phrase, not a sentence: %r'
+                                                % (at, value))
+                        elif key == 'sumRange':
+                            if not isinstance(value, str) or not RANGE_OK.match(value):
+                                problems.append(
+                                    '%s: sumRange is %r; the same spellings as range' % (at, value))
                         elif key == 'polarity':
                             if value not in ('unipolar', 'bipolar'):
                                 problems.append('%s: polarity is %r, not unipolar or bipolar'

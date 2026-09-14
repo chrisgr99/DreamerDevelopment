@@ -43,6 +43,23 @@ Beware the input that is polyphonic **only in one mode**, and the module that re
 - `step: "stepped"` where the code quantises the input — `std::floor(v)`, `std::round(v * 12.f)`, an index into a table. `"continuous"` where it is used as a value.
 - A threshold comparison, `v >= 1.f`, means the jack is a gate or trigger: **stepped**, and `"high above 1V"` is the range spelling for it.
 
+## Three more facts, added after the first plugins were done
+
+These came out of using the help: the four quick facts answer what to send a jack, and leave three obvious questions unanswered.
+
+**`normal` — what an unpatched jack reads.** Rack gives an unpatched input 0V, but a great many makers normal one jack to another or to a constant, and it changes what the module does when you take a cable out. `getNormalVoltage(x)` states it outright; so does a manual read of the right channel when nothing is connected. Write the short phrase a person would say: `10V`, `the jack above it`, `the left channel`. Forty-eight characters at most, no full stop.
+
+**`negative` — what a negative voltage does.** Three behaviours that look alike from outside, and the one people get wrong:
+- `"ignored"` — the jack's own voltage is bounded below at zero before use, `clamp(v / 10.f, 0.f, 1.f)`. A negative voltage does nothing at all.
+- `"subtracts"` — the jack is scaled and added to a knob and the **sum** is clamped at zero. A negative voltage is not ignored: it pulls the knob's value down until the total hits the floor. This is the commonest pattern.
+- `"swings"` — nothing bounds it below, `clamp(v / 5.f, -1.f, 1.f)`. This also supplies the polarity, so do not write `polarity` as well.
+
+The distinction is the clamp's low bound **and** whether the clamp wraps the jack alone or the knob-plus-jack sum. Both are on the same line you are already reading for the range. In a binary, a clamp is `fmaxnm`/`fminnm` against literals, or a compare and a conditional select; whether it comes before or after the `fadd` that mixes in the knob is what tells you which case you have.
+
+**`sumRange` — the clamp on the total**, where the knob and the input are summed. Same four spellings as `range`. This is what makes a blank `range` useful instead of merely honest: `range` says nothing because the clamp does not belong to the jack, and `sumRange` says what the clamp actually is.
+
+Where the destination is a Rack parameter, the census already holds that parameter's own minimum and maximum — a free corroboration for the floor.
+
 ## Polarity
 
 `polarity` is `"unipolar"` or `"bipolar"`.
@@ -68,7 +85,10 @@ In the module's entry in `research/help/<Plugin>.json`, beside `lines`, `in`, `o
 - `"in"` and `"out"` are both allowed; port numbers are the same indices the matching tag map uses.
 - `poly` is `true` or `false` — never a string, never "maybe". Omit it if unsettled.
 - `step` is exactly `continuous` or `stepped`.
-- `polarity` is exactly `unipolar` or `bipolar`, and only where no range was established.
+- `polarity` is exactly `unipolar` or `bipolar`, and only where no range and no `negative` was established.
+- `negative` is exactly `ignored`, `subtracts` or `swings`.
+- `normal` is a short phrase, 48 characters at most, with no full stop.
+- `sumRange` takes the same four shapes as `range`.
 - `range` takes one of four **shapes**, with whatever number is the fact: `<lo> to <hi>V` (`0 to 10V`, `-5 to 10V`), `±<n>V`, `1V per octave`, or `high above <n>V` (`high above 2V`, `high above 3.6V`). The validator enforces the shape and not the number, because a column somebody scans for a match is worthless if the same fact is spelled three ways — but a threshold that really is 2V must say 2V rather than being rounded to a house figure or left blank.
 - `why` is required on every port you touch. One clause. A file and line, a manual page, or the binary.
 - Omit any field you did not establish. Omit the whole port. Omit `props` entirely if you established nothing — that is a real outcome and the honest one.

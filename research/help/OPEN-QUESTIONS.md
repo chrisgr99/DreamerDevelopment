@@ -36,6 +36,7 @@ The port pass turned up a class of thing no amount of manual-reading would have 
 The `Polyphonic` tag in `plugin.json` is the maker's declaration, and it is the fallback the module note uses where we have established nothing. Three cases where it is wrong, all found by reading the code:
 
 - **SubmarineFree tags nothing at all**, in a plugin where ten modules are genuinely polyphonic — AG-202, OG-202, XG-202, NG-206, the four DO delays, MZ-909, LT-116, LA-216 and the arithmetic modules.
+- **Geodesics' Fate is polyphonic and untagged** — it takes `getChannels()` on both event inputs and the clock and sets all three outputs from them. Torus is polyphonic in the mixer sense, summing all sixteen channels, and is likewise untagged.
 - **SurgeXTRack omits the tag from RotarySpeaker, FrequencyShifter and Exciter**, although `FXConfig::allowsPolyphony()` returns true and is never specialised, so all twenty effects offer the polyphony menu.
 - **Bogaudio tags UNISON polyphonic** while every one of its inputs reads channel one only — that one is defensible, since the tag is about its outputs.
 
@@ -141,6 +142,10 @@ STYLE.md already says a control proved to do nothing gets a line saying so. Writ
 
 **computerscare, ten figures not literal in the binary.** All ten were verified as correct derivations in source, not inventions — `0.625V` is `ch / 1.6f`, `221222` is a string, and so on. `check_numbers.py` flags derived figures by design; see NUMBER-CHECK.md.
 
+## One reported fault that is not one
+
+FehlerFabrik's Chi carries the tag `Poly` rather than `Polyphonic`, which an agent reported as a manifest error that would hide the module from Rack's library filter. It is not: Rack's own tag table lists `Poly` as an alias of `Polyphonic` (`src/tag.cpp:49`), so it resolves to the same tag id. Our own flag reads resolved ids rather than strings, so Chi is already detected correctly. Recorded so the "fault" is not found and re-reported a third time.
+
 ## Repositories that have moved, or are gone
 
 Matching the installed build is the first rule of every pass, and five source URLs in this project turned out to be wrong. These are now known-good:
@@ -150,6 +155,8 @@ Matching the installed build is the first rule of every pass, and five source UR
 - **mscHack**'s installed 2.0.0 is **baconpaul's port**, `github.com/baconpaul/mschack-VCV-Rack-Plugins` at `v2.0.0`. The original maker's repository stops at 1.0.2.
 - **Bidoo** has no tag for 2.1.1; the matching commit is `85c00f2`.
 - **ImpromptuModular** has no tag for 2.5.0; the matching commit is `9d26bfb`.
+
+**A pattern rather than a list.** By the end of the port pass, more plugins had *no tag matching the installed version* than had one. voxglitch, AudibleInstruments, PathSet, ImpromptuModular, MindMeldModular, Bidoo, FrozenWasteland, SurgeRack and squinkylabs all needed a commit found by reading `plugin.json` at each candidate, because the maker never tagged the release that shipped. Every agent brief should say this outright: find the commit whose `plugin.json` carries the installed version, and record which commit you used. Several did that unprompted and said so; that is the habit to keep.
 
 And one claim of mine that was wrong in the briefs, though right in STYLE.md: **ImpromptuModular writes no `inputDesc` second lines at all.** Counted from the census, 817 descriptions exist library-wide and they belong to Stoermelder (356), CountModula (150), Befaco (120), Venom (83) and Amalgamated Harmonics (76), with a dozen in Fundamental and a scattering elsewhere. STYLE.md names exactly those five; I added Impromptu to an agent brief from memory.
 

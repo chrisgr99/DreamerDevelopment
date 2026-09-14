@@ -141,17 +141,67 @@ const char* const HELP_PROP_TEXT[] = {
 	"±2V",
 	"±5V",
 	"±10V",
-	"±10V · continuous",
-	"high above 2V · stepped",
-	"±2V · continuous",
-	"0 to 8V",
-	"polyphonic",
-	"high above 2V · stepped · one channel only",
-	"continuous · polyphonic",
-	"0 to 10V · continuous · polyphonic",
-	"high above 2V · stepped · polyphonic",
 	"1V per octave · continuous · polyphonic",
+	"high above 0V · stepped · polyphonic",
+	"0 to 7V · stepped · one channel only",
+	"0 to 5V · stepped · one channel only",
+	"1 to 16V · stepped · one channel only",
+	"-24 to 24V · stepped · one channel only",
+	"0 to 3V · stepped · one channel only",
+	"stepped · one channel only\n\nunpatched it reads the ROOT knob's setting.",
+	"0 to 10V · stepped · one channel only\n\nunpatched it reads the MODE knob's setting.",
+	"continuous · one channel only\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 10V.",
+	"1V per octave · continuous · one channel only\n\nunpatched it reads the matching channel of the first pitch input.",
+	"bipolar · continuous · one channel only",
+	"continuous · one channel only\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 1V.",
+	"bipolar · continuous · one channel only\n\nthe knob and this input are summed and the total held to -2 to 6V.",
+	"±10V · continuous",
+	"continuous · polyphonic",
+	"continuous · one channel only\n\nunpatched it reads the BIAS knob's setting.",
+	"0 to 10V · stepped · one channel only\n\nunpatched it reads the ROOT knob's setting.",
+	"stepped · one channel only\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 1 to 8V.",
+	"0 to 10V · stepped · one channel only\n\nunpatched it reads the PART knob's setting; a negative voltage does nothing here.",
+	"stepped · polyphonic\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 10V.",
+	"continuous · polyphonic\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 10V.",
+	"bipolar · stepped · polyphonic\n\nthe knob and this input are summed and the total held to ±5V.",
+	"high above 0.7V · stepped · one channel only",
+	"stepped · one channel only\n\nunpatched it reads the KEY knob's setting.",
+	"0 to 10V · stepped · one channel only\n\nunpatched it reads the SCALE knob's setting.",
 	"high above 1V · stepped · polyphonic",
+	"high above 2V · stepped",
+	"continuous · one channel only\n\nunpatched it reads 5V.",
+	"0 to 5V · continuous · one channel only\n\na negative voltage subtracts from the knob.",
+	"high above 2V · stepped · polyphonic",
+	"high above 2V · stepped · polyphonic\n\nunpatched it reads the channel 1 input.",
+	"0 to 10V · continuous · polyphonic\n\na negative voltage subtracts from the knob.",
+	"continuous · one channel only\n\nunpatched it reads the left input.",
+	"±5V · continuous · polyphonic",
+	"0 to 5V · continuous · polyphonic\n\na negative voltage does nothing here.",
+	"±5V · continuous · polyphonic\n\na negative voltage subtracts from the knob.",
+	"continuous · one channel only\n\nunpatched it reads the ALL input.",
+	"continuous · one channel only\n\nunpatched it reads the module's own white noise.",
+	"±2V · continuous",
+	"polyphonic",
+	"high above 1.7V · stepped · one channel only",
+	"0 to 8V · continuous · polyphonic",
+	"0 to 5V · continuous · polyphonic",
+	"±5V · continuous · one channel only\n\na negative voltage subtracts from the knob.",
+	"±5V · continuous · one channel only\n\nunpatched it reads 1V.",
+	"high above 1V · stepped · one channel only\n\nunpatched it reads an internal strum on each note change.",
+	"1V per octave · continuous · one channel only\n\nunpatched it reads 1/12V, one semitone.",
+	"continuous · one channel only\n\nunpatched it reads the internal exciter.",
+	"continuous · polyphonic\n\nunpatched it reads 12V.",
+	"0 to 8V · continuous · one channel only\n\na negative voltage subtracts from the knob.",
+	"continuous · polyphonic\n\nunpatched it reads 5V.",
+	"continuous · polyphonic\n\nunpatched it reads 8V.",
+	"±5V · continuous · one channel only\n\nunpatched it reads 0.1V.",
+	"0 to 8V · continuous · one channel only\n\nunpatched it reads 8V; a negative voltage does nothing here.",
+	"0 to 8V",
+	"0 to 10V · continuous · one channel only\n\na negative voltage subtracts from the knob.",
+	"0 to 10V · continuous · one channel only\n\na negative voltage does nothing here.",
+	"±16V · continuous · one channel only",
+	"high above 2V · stepped · one channel only",
+	"0 to 10V · continuous · polyphonic",
 	"-5 to 10V · continuous · one channel only",
 	"high above 4V · stepped · one channel only",
 	"one channel only",
@@ -161,22 +211,41 @@ const char* const HELP_PROP_TEXT[] = {
 	"unipolar · continuous · one channel only",
 	"high above 5V · stepped",
 	"0 to 10V · one channel only",
-	"bipolar · continuous · one channel only",
 	"high above 0.5V · stepped · polyphonic",
 	"high above 0.01V · stepped · polyphonic",
-	"±5V · continuous · polyphonic",
 	"-9.99 to 9.99V · stepped · polyphonic",
 	"0 to 4.5V · stepped · polyphonic",
 	"-10 to 10V · continuous · polyphonic",
+	"0 to 10V · continuous",
+	"continuous · one channel only\n\na negative voltage subtracts from the knob.",
+	"1V per octave · stepped · one channel only",
+	"bipolar · continuous",
+	"stepped · one channel only\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 3V.",
+	"1V per octave · continuous · one channel only\n\nthe knob and this input are summed and the total held to ±5V.",
+	"bipolar · continuous · one channel only\n\nthe knob and this input are summed and the total held to ±5V.",
+	"continuous · one channel only\n\nunpatched it reads the MOD input.",
 	"8 to 0V",
+	"high above 1V · stepped · polyphonic\n\nunpatched it reads the FREEZE button.",
+	"continuous · polyphonic\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to ±5V.",
+	"continuous · polyphonic\n\nunpatched it reads the left audio input.",
+	"continuous · polyphonic\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to ±10V.",
+	"bipolar · continuous · polyphonic\n\nthe knob and this input are summed and the total held to ±5V.",
+	"continuous · polyphonic\n\nunpatched it reads the left return input.",
+	"high above 1V · stepped · polyphonic\n\nunpatched it reads the REV button.",
+	"continuous · polyphonic\n\nunpatched it reads half of the right audio input.",
+	"continuous · polyphonic\n\nunpatched it reads half of the left audio input.",
+	"high above 1V · stepped · polyphonic\n\nunpatched it reads the POWER button.",
+	"continuous · polyphonic\n\nunpatched it reads Empath's own chaos voltage; a negative voltage subtracts from the knob; the knob and this input are summed and the total held to ±5V.",
+	"bipolar · continuous · polyphonic\n\nunpatched it reads Empath's own chaos voltage; the knob and this input are summed and the total held to ±5V.",
+	"continuous · polyphonic\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 2V.",
+	"high above 1V · stepped · polyphonic\n\nunpatched it reads that row's own MOOT button.",
+	"bipolar · continuous · polyphonic",
 	"0 to -10V",
 	"high above 2V",
 	"0 to 8.99V · continuous · one channel only",
 	"±12V · continuous · one channel only",
 	"2 to 4V · stepped · one channel only",
-	"0 to 5V · stepped · one channel only",
 	"±12V",
-	"0 to 10V · continuous",
 	"0 to 4.99V · continuous · one channel only",
 	"high above 3.6V · stepped · one channel only",
 	"0 to 5V · polyphonic",
@@ -185,58 +254,135 @@ const char* const HELP_PROP_TEXT[] = {
 	"1.25 to 10V",
 	"0.15625 to 10V",
 	"±5V · one channel only",
+	"0 to 12V · stepped · one channel only\n\nunpatched it reads the A sequencer output.",
+	"0 to 12V · stepped · one channel only\n\nunpatched it reads the B sequencer output.",
+	"continuous · one channel only\n\nunpatched it reads half the first gate bus, 0V or 5V.",
+	"0 to 10V · continuous · one channel only\n\nunpatched it reads 10V.",
+	"continuous · polyphonic\n\na negative voltage subtracts from the knob.",
+	"stepped · one channel only\n\na negative voltage subtracts from the knob.",
+	"bipolar · continuous · one channel only\n\nthe knob and this input are summed and the total held to ±10V.",
+	"continuous · one channel only\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 12V.",
+	"1V per octave · continuous · one channel only\n\nthe knob and this input are summed and the total held to ±4V.",
+	"continuous · polyphonic\n\nunpatched it reads the DEPTH output.",
+	"stepped · polyphonic\n\na negative voltage subtracts from the knob.",
+	"continuous · one channel only\n\nthe knob and this input are summed and the total held to ±10V.",
 	"0 to 10V · polyphonic",
 	"-5 to 5V · one channel only",
 	"-10 to 10V · one channel only",
 	"-10 to 10V · continuous · one channel only",
 	"-3 to 3V · continuous · one channel only",
-	"high above 0V · stepped · polyphonic",
 	"0 to 5V · one channel only",
 	"0.001 to 10V · continuous · one channel only",
 	"high above 5V · stepped · one channel only",
 	"0 to 5V · continuous",
 	"0 to -5V · continuous",
+	"continuous · polyphonic\n\nunpatched it reads 10V.",
+	"continuous · polyphonic\n\nunpatched it reads the top BLACKHOLE output while WORMHOLE is lit.",
+	"1V per octave · stepped",
+	"continuous · one channel only\n\nunpatched it reads that brane's own noise source.",
+	"high above 0.9V · stepped · one channel only",
+	"0 to 10V · continuous · polyphonic\n\na negative voltage does nothing here.",
+	"high above 0.9V · stepped · polyphonic",
+	"continuous · polyphonic\n\nunpatched it reads the other event input.",
+	"continuous · polyphonic\n\nunpatched it reads the matching top pulsar input.",
+	"continuous · one channel only\n\nunpatched it reads the top rotation input.",
 	"±5V · stepped · polyphonic",
-	"0 to 5V · continuous · polyphonic",
 	"0 to 2V · continuous · polyphonic",
 	"0 to 4V · continuous · polyphonic",
 	"0 to 1V · continuous · polyphonic",
 	"0 to 7V · stepped · polyphonic",
 	"0 to 6V · stepped · polyphonic",
-	"1V per octave · stepped · one channel only",
 	"high above 0.5V · stepped · one channel only",
 	"1V per octave · stepped · polyphonic",
 	"high above 2.5V · stepped · one channel only",
 	"high above 0.8V · stepped · one channel only",
 	"0 to 6V · continuous · one channel only",
 	"±5V · stepped · one channel only",
+	"1V per octave · continuous · one channel only\n\nunpatched it reads the carrier pitch input.",
+	"-2 to 6V · continuous",
+	"0 to 1V · stepped",
 	"0 to 8V · continuous · one channel only",
 	"1 to 8V · stepped · one channel only",
+	"high above 10V · stepped · one channel only",
+	"high above 0.01V · stepped · one channel only",
+	"continuous · one channel only\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 4V.",
+	"unipolar · continuous · one channel only\n\na negative voltage does nothing here.",
+	"continuous · one channel only\n\nunpatched it reads the SAMPLE knob plus its CV.",
+	"0 to 5V · continuous · one channel only\n\nunpatched it reads 5V; a negative voltage does nothing here.",
+	"±10V · continuous · one channel only\n\nunpatched it reads the left input.",
+	"±10V · continuous · one channel only\n\nunpatched it reads the X mix.",
+	"±10V · continuous · one channel only\n\nunpatched it reads the left input of that channel.",
+	"±10V · continuous · one channel only\n\nunpatched it reads the Aux X left return.",
+	"±10V · continuous · one channel only\n\nunpatched it reads the Aux Y left return.",
+	"0 to 5V · continuous · one channel only\n\nunpatched it reads 5V.",
+	"high above 0V · stepped · one channel only\n\na negative voltage does nothing here.",
+	"±10V · continuous · one channel only\n\nunpatched it reads the ENV output.",
+	"0 to 5V · continuous · one channel only\n\nunpatched it reads the A CV input, with the switch in NORM.",
+	"0 to 10V · continuous · one channel only\n\nunpatched it reads 5V; a negative voltage does nothing here.",
+	"continuous · one channel only\n\nunpatched it reads the LIN output, with self-modulation on.",
+	"high above 3V · stepped · one channel only",
 	"high above 9V · stepped · one channel only",
 	"0.1 to 99V · continuous · one channel only",
 	"1.2 to 99V · continuous · one channel only",
-	"high above 10V · stepped · one channel only",
+	"high above 1V · stepped · one channel only\n\nunpatched it reads the tap tempo button.",
+	"one channel only\n\na negative voltage subtracts from the knob.",
+	"high above 1V · stepped · one channel only\n\nunpatched it reads the restart button.",
+	"high above 1V · stepped · one channel only\n\nunpatched it reads the button beside it.",
+	"continuous · one channel only\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 5V.",
 	"±15V · continuous · one channel only",
 	"high above 3V · stepped",
 	"±6V",
 	"1 to 2V",
 	"0.1 to 10V",
 	"1.1 to 7.7V",
+	"high above 2V · stepped · polyphonic\n\nunpatched it reads the same jack on the row above.",
+	"1V per octave · continuous · polyphonic\n\nunpatched it reads the same jack on the row above.",
+	"0 to 10V · continuous · polyphonic\n\nunpatched it reads the same jack on the row above; a negative voltage subtracts from the knob.",
+	"±5V · continuous · polyphonic\n\nunpatched it reads the same jack on the row above.",
+	"stepped · one channel only\n\nunpatched it reads 1V.",
+	"±10V · continuous · one channel only\n\nunpatched it reads 1V for the odds, 0V for the offset.",
+	"±10V · continuous · one channel only\n\nunpatched it reads 3V for the odds, 0V for the offset.",
+	"±10V · continuous · one channel only\n\nunpatched it reads 5V for the odds, 0V for the offset.",
+	"±10V · continuous · one channel only\n\nunpatched it reads 7V for the odds, 0V for the offset.",
+	"±10V · continuous · one channel only\n\nunpatched it reads 9V for the odds, 0V for the offset.",
+	"high above 2V · stepped · one channel only\n\nunpatched it reads the gate input.",
+	"±10V · stepped · one channel only",
+	"high above 2V · stepped · one channel only\n\nunpatched it reads the internal clock.",
+	"high above 2V · stepped · one channel only\n\nunpatched it reads the clock through the divider.",
+	"0 to 10V · continuous · one channel only\n\nunpatched it reads a random value, new on each hit.",
 	"±20V · continuous",
 	"0 to 2V",
 	"±8V · continuous",
 	"0 to 3V",
-	"bipolar · continuous · polyphonic",
 	"high above 3V · stepped · polyphonic",
 	"high above 0.1V · stepped",
 	"0 to 1V",
-	"high above 0.5V · stepped",
+	"continuous · one channel only\n\nunpatched it reads the X right input.",
+	"continuous · one channel only\n\nunpatched it reads the X left input.",
+	"continuous · one channel only\n\nunpatched it reads the Y right input.",
+	"continuous · one channel only\n\nunpatched it reads the Y left input.",
+	"0 to 10V · stepped · one channel only\n\na negative voltage subtracts from the knob.",
+	"continuous · one channel only\n\nunpatched it reads the right input.",
+	"1V per octave · continuous · one channel only\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 10V.",
+	"0 to 10V · continuous · one channel only\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 10V.",
+	"1V per octave · continuous · polyphonic\n\nthe knob and this input are summed and the total held to 0 to 10V.",
+	"0 to 10V · continuous · polyphonic\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 10V.",
+	"high above 0.1V · stepped · one channel only",
+	"continuous · polyphonic\n\nunpatched it reads the right input.",
+	"continuous · polyphonic\n\nunpatched it reads the left input.",
+	"0 to 1V · continuous · one channel only\n\na negative voltage subtracts from the knob; the knob and this input are summed and the total held to 0 to 1V.",
+	"continuous · polyphonic\n\nunpatched it reads the SKEW knob.",
+	"0 to 9V · continuous · one channel only\n\na negative voltage subtracts from the knob.",
 	"-1 to 1V · stepped · one channel only",
 	"0 to 4V · continuous · one channel only",
 	"-4 to 4V · continuous · one channel only",
-	"0 to 3V · stepped · one channel only",
 	"0 to 8V · stepped · one channel only",
 	"0 to 4V · polyphonic",
+	"continuous · polyphonic\n\nunpatched it reads the menu's Off value.",
+	"continuous · polyphonic\n\nunpatched it reads the menu's On value.",
+	"continuous · polyphonic\n\nunpatched it reads later channels of an earlier insert input.",
+	"high above 0.5V · stepped · polyphonic\n\nunpatched it reads the row's own on/off button.",
+	"high above 0.5V · stepped · one channel only\n\nunpatched it reads the freeze button.",
 	"-15 to 15V · stepped · one channel only",
 	"0 to 9.99V · continuous · one channel only",
 	"0 to 3.99V · stepped · polyphonic",
@@ -246,15 +392,30 @@ const char* const HELP_PROP_TEXT[] = {
 	"0 to 9.9999V · continuous · one channel only",
 	"-2 to 1V · continuous · one channel only",
 	"0 to 1V · stepped · polyphonic",
-	"high above 0.01V · stepped · one channel only",
 	"±6V · continuous · polyphonic",
 	"±6V · continuous · one channel only",
 	"high above 1.6V · stepped · one channel only",
 	"high above 5V · stepped · polyphonic",
 	"±10V · stepped · polyphonic",
 	"high above 1.6V · stepped · polyphonic",
+	"0 to 10V · stepped · one channel only\n\na negative voltage does nothing here.",
+	"0 to 10V · stepped · one channel only\n\nunpatched it reads the position sequencer row.",
+	"0 to 10V · stepped · one channel only\n\nunpatched it reads the sample sequencer row.",
+	"0 to 10V · continuous · one channel only\n\nunpatched it reads the volume sequencer row.",
+	"0 to 10V · continuous · one channel only\n\nunpatched it reads the pan sequencer row.",
+	"high above 5V · stepped · one channel only\n\nunpatched it reads the reverse sequencer row.",
+	"0 to 10V · continuous · one channel only\n\nunpatched it reads the ratchet sequencer row.",
+	"continuous · one channel only\n\nunpatched it reads 1V.",
+	"bipolar · stepped · one channel only",
+	"high above 2V · stepped · one channel only\n\nunpatched it reads the global step input.",
+	"0 to 10V · stepped · polyphonic\n\na negative voltage does nothing here.",
+	"high above 0V · stepped · one channel only\n\nunpatched it reads the jitter switch.",
+	"±10V · continuous · one channel only\n\nunpatched it reads the internal LFO.",
+	"stepped · one channel only\n\nunpatched it reads the freeze switch.",
+	"0 to 9V · stepped · one channel only\n\na negative voltage subtracts from the knob.",
+	"unipolar · stepped · one channel only\n\na negative voltage does nothing here.",
 };
-const int HELP_PROP_TEXT_COUNT = 135;
+const int HELP_PROP_TEXT_COUNT = 296;
 
 static const char* const L0[] = {
 	"Transposes and inverts a polyphonic V/OCT signal, with trigger inputs that switch the transposition and the inversion on and off",
@@ -1752,7 +1913,7 @@ static const short O73[] = {9,10,11};
 static const short P73[] = {1,2};
 static const signed char FI73[] = {2,3,2,1,1,2};
 static const signed char FO73[] = {3,2,2};
-static const short PR73[] = {0,1,0,-1,-1,0};
+static const short PR73[] = {5,23,24,25,11,5};
 static const short PO73[] = {1,0,0};
 static const char* const L74[] = {
 	"Arpeggiator that builds a pattern of intervals around one root pitch, one note per clock",
@@ -1781,7 +1942,7 @@ static const short O74[] = {13,14,15};
 static const short P74[] = {1,2,3,4,5};
 static const signed char FI74[] = {2,3,1,1,1,1,2};
 static const signed char FO74[] = {3,2,2};
-static const short PR74[] = {0,1,-1,-1,-1,-1,0};
+static const short PR74[] = {5,14,26,27,28,11,5};
 static const short PO74[] = {1,0,0};
 static const char* const L75[] = {
 	"Arpeggiator over as many as six input pitches, repeating and transposing the arpeggio to make a longer sequence",
@@ -1812,7 +1973,7 @@ static const short O75[] = {15,16,17,18};
 static const short P75[] = {5,4,8,6,12,10,14};
 static const signed char FI75[] = {2,2,3,3,3,3,3,3,1,1,1,1};
 static const signed char FO75[] = {3,2,2,2};
-static const short PR75[] = {0,0,1,1,1,1,1,1,-1,-1,-1,-1};
+static const short PR75[] = {5,5,14,14,14,14,14,14,26,29,27,28};
 static const short PO75[] = {1,0,0,0};
 static const char* const L76[] = {
 	"Shift-register chord looper: a loop of 2 to 16 chords, clocked round, whose head is replaced by a fresh chord at a set chance",
@@ -1840,8 +2001,8 @@ static const short O76[] = {11,12,12,12,12,12};
 static const short P76[] = {5,7,9,1,3};
 static const signed char FI76[] = {2,1,1,2,1};
 static const signed char FO76[] = {3,3,3,3,3,3};
-static const short PR76[] = {0,-1,-1,-1,-1};
-static const short PO76[] = {1,1,1,1,1,1};
+static const short PR76[] = {5,30,31,9,32};
+static const short PO76[] = {23,14,14,14,14,14};
 static const char* const L77[] = {
 	"Six oscillators, one per voice, each with its own wave, octave, detune, level and pan, mixed to a stereo pair",
 	"The 1V/octave pitch for the first voice, and the polyphonic source for any voice whose own pitch jack is empty, one channel per voice",
@@ -1864,7 +2025,7 @@ static const short O77[] = {12,13};
 static const short P77[] = {3,3,3,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,7,7,7,7,7,7,8,8,8,8,8,8,9,9,9,9,9,9,10,10,10,10,10,10,11};
 static const signed char FI77[] = {3,3,3,3,3,3,1,1,1,1,1,1};
 static const signed char FO77[] = {0,0};
-static const short PR77[] = {1,1,1,1,1,1,-1,-1,-1,-1,-1,-1};
+static const short PR77[] = {23,33,33,33,33,33,8,8,8,8,8,8};
 static const short PO77[] = {2,2};
 static const char* const L78[] = {
 	"Circle of fifths: turns a key and a mode into the control voltages that drive the chord sequencers and quantisers, and steps round the circle on triggers",
@@ -1884,7 +2045,7 @@ static const short O78[] = {7,8};
 static const short P78[] = {3,5};
 static const signed char FI78[] = {2,2,1,1};
 static const signed char FO78[] = {1,1};
-static const short PR78[] = {0,0,-1,-1};
+static const short PR78[] = {5,5,30,31};
 static const short PO78[] = {-1,6};
 static const char* const L79[] = {
 	"Semi-random chord generator: each trigger moves the choice around a galaxy whose arms are chord qualities and whose stars are root notes",
@@ -1908,8 +2069,8 @@ static const short O79[] = {7,8,8,8,8,8};
 static const short P79[] = {2,4,6};
 static const signed char FI79[] = {2,1,1};
 static const signed char FO79[] = {3,3,3,3,3,3};
-static const short PR79[] = {0,-1,-1};
-static const short PO79[] = {1,1,1,1,1,1};
+static const short PR79[] = {5,30,31};
+static const short PO79[] = {23,14,14,14,14,14};
 static const char* const L80[] = {
 	"Toolkit for generative patches: an LFO crossed with pink noise, a clock filtered by chance into delayed gates, and a slewed sample of the mix",
 	"Sets the frequency of the LFO in octaves, -8 to 10, where 0 gives 1Hz and 10 gives 1024Hz",
@@ -1948,8 +2109,8 @@ static const short O80[] = {23,24,25,26,27};
 static const short P80[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 static const signed char FI80[] = {1,1,1,1,2,1,1,1};
 static const signed char FO80[] = {1,1,0,1,2};
-static const short PR80[] = {-1,-1,-1,-1,0,-1,-1,-1};
-static const short PO80[] = {-1,-1,23,-1,0};
+static const short PR80[] = {8,34,8,35,8,36,32,9};
+static const short PO80[] = {-1,-1,37,-1,10};
 static const char* const L81[] = {
 	"Turns each clock tick into sixteen polyphonic gates, each with its own random delay and length, after dividing the clock and filtering it by chance",
 	"The clock; each rising edge is counted, and the module makes nothing until something is patched here",
@@ -1969,8 +2130,8 @@ static const short O81[] = {8};
 static const short P81[] = {3,4,5,6,7,2};
 static const signed char FI81[] = {2};
 static const signed char FO81[] = {2};
-static const short PR81[] = {0};
-static const short PO81[] = {0};
+static const short PR81[] = {5};
+static const short PO81[] = {17};
 static const char* const L82[] = {
 	"Four channels that turn triggers into gates with a random delay and a random length, and divide the trigger count",
 	"The trigger for that channel; with nothing patched, the channel takes the trigger from the nearest channel above that has one, and only while this channel's output is patched",
@@ -1992,7 +2153,7 @@ static const short O82[] = {11,11,11,11};
 static const short P82[] = {2,2,2,2,4,4,4,4,6,6,6,6,8,8,8,8,10,10,10,10};
 static const signed char FI82[] = {2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO82[] = {2,2,2,2};
-static const short PR82[] = {0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR82[] = {5,5,5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
 static const short PO82[] = {0,0,0,0};
 static const char* const L83[] = {
 	"Splits one polyphonic cable into sixteen mono outputs, and merges sixteen mono inputs into one polyphonic cable",
@@ -2008,6 +2169,7 @@ static const short I83[] = {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,5};
 static const short O83[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,6,7};
 static const short P83[] = {4};
 static const signed char FI83[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1};
+static const short PR83[] = {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,38,39};
 static const char* const L84[] = {
 	"Displays the per-channel voltages of two polyphonic cables side by side, along with a chosen operation on the pair",
 	"One of the two polyphonic cables read: its channel count and the voltage on each of its channels are listed on the display",
@@ -2016,6 +2178,7 @@ static const char* const L84[] = {
 };
 static const short I84[] = {1,1};
 static const short O84[] = {2};
+static const short PR84[] = {38,38};
 static const char* const L85[] = {
 	"Oscilloscope that draws every channel of one polyphonic cable as its own coloured trace",
 	"The polyphonic cable drawn; each channel gets its own trace and colour",
@@ -2030,6 +2193,7 @@ static const char* const L85[] = {
 };
 static const short I85[] = {1};
 static const short P85[] = {2,3,5,4};
+static const short PR85[] = {38};
 static const char* const L86[] = {
 	"Two polyphonic tools on one panel: one that cuts a cable down to a set number of channels, and one that deals a cable out into two",
 	"The polyphonic cable to be cut down",
@@ -2043,6 +2207,7 @@ static const char* const L86[] = {
 static const short I86[] = {1,4};
 static const short O86[] = {3,6,7};
 static const short P86[] = {2,5};
+static const short PR86[] = {38,38};
 static const char* const L87[] = {
 	"Sets the voltage on each channel of a polyphonic cable by hand, with optional quantising to semitones",
 	"Sets the voltage on that channel of the output, -10V to 10V",
@@ -2079,7 +2244,7 @@ static const short O88[] = {17,15,15,15,15,15,15,16,16,16,16,16,16,16,16};
 static const short P88[] = {1,3,5,7,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,13,13,13,13,13,13,13,13,14,14,14,14,14,14,14,14};
 static const signed char FI88[] = {1,1,1,2,2,1};
 static const signed char FO88[] = {2,3,3,3,3,3,3,2,2,2,2,2,2,2,2};
-static const short PR88[] = {6,6,-1,0,0,-1};
+static const short PR88[] = {40,31,34,5,5,41};
 static const short PO88[] = {0,1,1,1,1,1,1,0,0,0,0,0,0,0,0};
 static const char* const L89[] = {
 	"Eight-step chord sequencer keyed to a scale, holding 32 parts, sending the chord of the current step out as one polyphonic cable",
@@ -2115,8 +2280,8 @@ static const short O89[] = {20,21,19,19,19,19,19,19,19,19};
 static const short P89[] = {1,3,5,7,9,11,18,18,18,18,18,18,18,18,13,16,15};
 static const signed char FI89[] = {1,1,1,2,2,1,1,1};
 static const signed char FO89[] = {2,3,2,2,2,2,2,2,2,2};
-static const short PR89[] = {-1,-1,-1,0,0,-1,-1,-1};
-static const short PO89[] = {0,1,0,0,0,0,0,0,0,0};
+static const short PR89[] = {30,31,34,5,5,41,42,11};
+static const short PO89[] = {10,23,10,10,10,10,10,10,10,10};
 static const char* const L90[] = {
 	"Trigger sequencer built from sixteen clock dividers in a four by four grid, with the triggers of each row and each column summed to one output",
 	"Sets the division for that cell, 0 to 64; at 0 the cell is switched off and never fires",
@@ -2138,7 +2303,7 @@ static const short O90[] = {11,11,11,11,12,12,12,12};
 static const short P90[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5};
 static const signed char FI90[] = {2,2,1,1,1};
 static const signed char FO90[] = {2,2,2,2,2,2,2,2};
-static const short PR90[] = {0,0,-1,-1,-1};
+static const short PR90[] = {5,5,43,44,45};
 static const short PO90[] = {0,0,0,0,0,0,0,0};
 static const char* const L91[] = {
 	"Noise source sampled on a trigger, with the output slewing towards each new sample",
@@ -2156,8 +2321,8 @@ static const short O91[] = {6,7};
 static const short P91[] = {2,3,4,5};
 static const signed char FI91[] = {2};
 static const signed char FO91[] = {1,0};
-static const short PR91[] = {0};
-static const short PO91[] = {-1,23};
+static const short PR91[] = {46};
+static const short PO91[] = {-1,37};
 static const char* const L92[] = {
 	"Quantiser that snaps one pitch to a scale and reports which interval of that scale the note landed on",
 	"The 1V/octave pitch to be quantised",
@@ -2172,8 +2337,8 @@ static const short I92[] = {1,2,3};
 static const short O92[] = {4,5,6,6,6,6,6,6,6,6,6,6,6,6};
 static const signed char FI92[] = {3,1,1};
 static const signed char FO92[] = {3,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR92[] = {1,6,6};
-static const short PO92[] = {1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR92[] = {14,10,10};
+static const short PO92[] = {14,10,10,10,10,10,10,10,10,10,10,10,10,10};
 static const char* const L93[] = {
 	"Eight independent quantisers sharing one key and one scale, each with its own hold, octave shift and change trigger",
 	"The 1V/octave pitch into that quantiser; a polyphonic cable is quantised channel by channel",
@@ -2194,7 +2359,7 @@ static const short O93[] = {4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5};
 static const short P93[] = {6,8,3,3,3,3,3,3,3,3,10};
 static const signed char FI93[] = {3,3,3,3,3,3,3,3,1,1,1,2,2,2,2,2,2,2,2};
 static const signed char FO93[] = {3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2};
-static const short PR93[] = {1,1,1,1,1,1,1,1,-1,-1,-1,0,0,0,0,0,0,0,0};
+static const short PR93[] = {23,23,23,23,23,23,23,23,47,48,8,49,49,49,49,49,49,49,49};
 static const short PO93[] = {1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0};
 static const char* const L94[] = {
 	"A polyphonic wavefolder that scales and shifts the input before folding it, with a triangular fold and a sine fold",
@@ -2235,7 +2400,7 @@ static const short O95[] = {10,9};
 static const short P95[] = {1,-1,-1,3,-1,4,-1,2,5,6};
 static const signed char FI95[] = {0,2};
 static const signed char FO95[] = {1};
-static const short PR95[] = {2,24};
+static const short PR95[] = {2,50};
 static const char* const L96[] = {
 	"Four ring-modulator channels: each multiplies its input by a gain set by a knob and modulated by a CV input, with chained outputs",
 	"Sets the gain of that channel from -1 to 1, the centre muting it and counter-clockwise inverting it",
@@ -2249,6 +2414,7 @@ static const short I96[] = {3,3,3,3,4,4,4,4};
 static const short O96[] = {5,5,5,5};
 static const short P96[] = {1,1,1,1,2,2,2,2};
 static const signed char FI96[] = {-1,-1,-1,-1,1,1,1,1};
+static const short PR96[] = {51,51,51,51,7,7,7,7};
 static const char* const L97[] = {
 	"Digital oscillator carrying 47 synthesis models, from analogue waveforms and wavetables to physical models, speech and drum circuits, each shaped by two parameters",
 	"Steps through the 47 models; the four-letter code of the one in use shows on the display",
@@ -2277,7 +2443,7 @@ static const short O97[] = {13};
 static const short P97[] = {2,3,4,5,6,7,1};
 static const signed char FI97[] = {2,3,1,1,1};
 static const signed char FO97[] = {0};
-static const short PR97[] = {0,1,-1,-1,-1};
+static const short PR97[] = {5,14,8,52,52};
 static const short PO97[] = {2};
 static const char* const L98[] = {
 	"Two Bernoulli gates: each incoming gate is sent to one of two outputs on the toss of a coin, with the odds set by a knob and a CV input",
@@ -2296,7 +2462,7 @@ static const short O98[] = {6,6,7,7};
 static const short P98[] = {1,1,2,2};
 static const signed char FI98[] = {2,2,1,1};
 static const signed char FO98[] = {2,2,2,2};
-static const short PR98[] = {0,0,-1,-1};
+static const short PR98[] = {53,54,55,55};
 static const short PO98[] = {0,0,0,0};
 static const char* const L99[] = {
 	"Granular texture synthesizer: incoming stereo audio is recorded into a buffer and replayed as a cloud of grains, with feedback and reverb after it",
@@ -2336,7 +2502,7 @@ static const short O99[] = {24,25};
 static const short P99[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
 static const signed char FI99[] = {2,2,1,1,3,1,0,0,1,1};
 static const signed char FO99[] = {0,0};
-static const short PR99[] = {-1,-1,-1,-1,1,-1,2,2,-1,-1};
+static const short PR99[] = {5,5,52,52,14,52,8,56,52,52};
 static const short PO99[] = {2,2};
 static const char* const L100[] = {
 	"Physical-modelling voice: three exciters — bowing, blowing and striking — feeding a bank of tuned resonant modes, with a stereo reverb after it",
@@ -2395,7 +2561,7 @@ static const short O100[] = {45,46};
 static const short P100[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
 static const signed char FI100[] = {3,1,2,1,0,0,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO100[] = {0,0};
-static const short PR100[] = {1,-1,-1,-1,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR100[] = {23,57,49,58,57,57,59,59,59,59,59,59,59,59,59,59};
 static const short PO100[] = {2,2};
 static const char* const L101[] = {
 	"Four-channel VCA mixer whose four gains are stored in keyframes, the FRAME knob moving through the animation and interpolating between them",
@@ -2428,6 +2594,7 @@ static const short I101[] = {10,11,11,11,11,12};
 static const short O101[] = {13,14,14,14,14,15};
 static const short P101[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI101[] = {-1,-1,-1,-1,-1,1};
+static const short PR101[] = {8,60,60,60,60,4};
 static const char* const L102[] = {
 	"Three utility sections: an inverter with two rectifiers, an analogue maximum and minimum, and a sample and hold with its own noise source",
 	"The signal the inverter and the two rectifiers work on",
@@ -2448,8 +2615,8 @@ static const short I102[] = {1,5,5,8,9};
 static const short O102[] = {2,3,4,6,7,10,11};
 static const signed char FI102[] = {-1,-1,-1,-1,2};
 static const signed char FO102[] = {-1,-1,-1,-1,-1,0,1};
-static const short PR102[] = {-1,-1,-1,-1,0};
-static const short PO102[] = {-1,-1,-1,-1,-1,25,-1};
+static const short PR102[] = {8,8,8,61,46};
+static const short PO102[] = {-1,-1,-1,-1,-1,62,-1};
 static const char* const L103[] = {
 	"Three fixed utility sections: a buffered mult with one input and three outputs, a two-into-two mixer, and a three-into-one mixer",
 	"The signal copied to the three outputs of the mult section; a polyphonic cable is copied channel for channel",
@@ -2463,6 +2630,7 @@ static const char* const L103[] = {
 };
 static const short I103[] = {1,3,3,5,5,5};
 static const short O103[] = {2,2,2,4,4,6};
+static const short PR103[] = {63,63,63,63,63,63};
 static const char* const L104[] = {
 	"Random sampler: a jittery internal clock split into two streams of random gates, and three random voltages shaped by a distribution, a quantiser and a loopable memory",
 	"Switches the deja vu loop on for the gate section, so its random decisions are recycled instead of freshly drawn",
@@ -2507,7 +2675,7 @@ static const short O104[] = {25,26,25,27,28,28,28};
 static const short P104[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 static const signed char FI104[] = {1,1,2,1,1,1,1,1,2};
 static const signed char FO104[] = {2,2,2,1,1,1,1};
-static const short PR104[] = {-1,-1,0,-1,-1,-1,-1,-1,0};
+static const short PR104[] = {52,52,64,12,52,52,52,52,64};
 static const short PO104[] = {0,0,0,-1,-1,-1,-1};
 static const char* const L105[] = {
 	"Digital oscillator with sixteen models in two banks, eight pitched and eight noise or percussive, each shaped by three parameters and played through a built-in envelope and low-pass gate",
@@ -2544,7 +2712,7 @@ static const short O105[] = {20,21};
 static const short P105[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI105[] = {1,1,1,1,1,2,1,3};
 static const signed char FO105[] = {0,0};
-static const short PR105[] = {-1,-1,-1,-1,-1,0,-1,1};
+static const short PR105[] = {16,65,38,65,66,16,65,23};
 static const short PO105[] = {2,2};
 static const char* const L106[] = {
 	"Resonator: a bank of tuned filters, sympathetic strings or plucked string models, excited by an audio input or by a burst it generates itself",
@@ -2581,7 +2749,7 @@ static const short O106[] = {21,22};
 static const short P106[] = {1,2,3,4,5,6,7,8,9,10,11,12};
 static const signed char FI106[] = {1,1,1,1,1,2,3,0};
 static const signed char FO106[] = {0,0};
-static const short PR106[] = {-1,-1,-1,-1,-1,-1,1,2};
+static const short PR106[] = {67,68,67,67,67,69,70,71};
 static const short PO106[] = {2,2};
 static const char* const L107[] = {
 	"Analogue-modelled low-pass filter with two-pole and four-pole outputs, a band-pass output, and a VCA on the four-pole output",
@@ -2604,7 +2772,7 @@ static const short O107[] = {9,10,11,12};
 static const short P107[] = {1,2,3};
 static const signed char FI107[] = {1,3,1,0,1};
 static const signed char FO107[] = {0,0,0,0};
-static const short PR107[] = {-1,1,-1,2,-1};
+static const short PR107[] = {38,23,23,38,72};
 static const short PO107[] = {2,2,2,2};
 static const char* const L108[] = {
 	"Three attenuator or attenuverter channels with chained outputs, so leaving an output unpatched sends that channel on to the one below",
@@ -2617,6 +2785,7 @@ static const char* const L108[] = {
 static const short I108[] = {3,3,3};
 static const short O108[] = {4,4,4};
 static const short P108[] = {1,1,1,2,2,2};
+static const short PR108[] = {51,51,51};
 static const char* const L109[] = {
 	"Four-band equaliser — a low shelf, two parametric bands and a high shelf — with the high-pass, band-pass and low-pass taps of both parametric filters brought out separately",
 	"Sets the corner frequency of the high shelf, 20Hz to 20kHz, above which the shelf gain applies",
@@ -2657,7 +2826,7 @@ static const short O109[] = {24,25,26,27,28,29,30};
 static const short P109[] = {1,2,3,4,5,6,7,8,9,10};
 static const signed char FI109[] = {3,1,3,1,1,3,1,1,3,1,3,1,0};
 static const signed char FO109[] = {0,0,0,0,0,0,0};
-static const short PR109[] = {1,-1,1,-1,-1,1,-1,-1,1,-1,1,-1,2};
+static const short PR109[] = {23,38,23,38,38,23,38,38,23,38,23,38,38};
 static const short PO109[] = {2,2,2,2,2,2,2};
 static const char* const L110[] = {
 	"Six segments that group into envelopes, sequencers and LFOs, the grouping set by which gate inputs are patched: a patched gate starts a group and every unpatched segment to its right joins it",
@@ -2677,7 +2846,7 @@ static const short O110[] = {6,6,6,6,6,6};
 static const short P110[] = {1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3};
 static const signed char FI110[] = {1,1,1,1,1,1,2,2,2,2,2,2};
 static const signed char FO110[] = {1,1,1,1,1,1};
-static const short PR110[] = {-1,-1,-1,-1,-1,-1,0,0,0,0,0,0};
+static const short PR110[] = {73,73,73,73,73,73,64,64,64,64,64,64};
 static const char* const L111[] = {
 	"Two channels of filter and amplifier whose gain and brightness are driven from the EXCITE input by an envelope, a vactrol model, an envelope follower or a compressor",
 	"Sets the attack and decay character of that channel's function: the envelope times, the slowness of the vactrol, or the reaction time of the follower",
@@ -2701,7 +2870,7 @@ static const short O111[] = {10,10};
 static const short P111[] = {1,2,3,4,1,2,3,4,5,5,6};
 static const signed char FI111[] = {-1,0,1,-1,0,1};
 static const signed char FO111[] = {0,0};
-static const short PR111[] = {-1,2,-1,-1,2,-1};
+static const short PR111[] = {63,74,75,63,74,75};
 static const short PO111[] = {2,2};
 static const char* const L112[] = {
 	"Shape generator that runs as an LFO, an audio oscillator or a one-shot AD or AR envelope, with the wave adjustable in curvature, rise-to-fall balance and harmonic content",
@@ -2733,8 +2902,8 @@ static const short O112[] = {17,18,19,20};
 static const short P112[] = {1,2,3,4,5,6,7};
 static const signed char FI112[] = {1,1,1,2,2,3,1,1,2};
 static const signed char FO112[] = {2,2,1,1};
-static const short PR112[] = {-1,-1,-1,-1,-1,1,-1,-1,0};
-static const short PO112[] = {0,0,26,21};
+static const short PR112[] = {12,12,12,46,46,14,76,77,46};
+static const short PO112[] = {0,0,78,21};
 static const char* const L113[] = {
 	"Segment generator running as an LFO, an audio oscillator or a one-shot AD or AR envelope, with four outputs that can differ in waveshape, level, timing or frequency",
 	"Sets what the middle of the FREQUENCY knob means: 1/8Hz for slow movement, 2Hz for modulation, or 130.8Hz for audible tones",
@@ -2767,7 +2936,7 @@ static const short O113[] = {22,23,23,23};
 static const short P113[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
 static const signed char FI113[] = {1,1,3,1,1,1,2,2};
 static const signed char FO113[] = {1,1,1,1};
-static const short PR113[] = {-1,-1,1,-1,-1,-1,0,0};
+static const short PR113[] = {79,8,14,79,79,79,64,64};
 static const char* const L114[] = {
 	"Four VCAs with adjustable response curves and chained outputs, so leaving an output unpatched sends that channel on to the one below",
 	"Sets the level of that channel; with nothing patched into its CV input this knob alone sets the gain",
@@ -2781,6 +2950,7 @@ static const short I114[] = {3,3,3,3,4,4,4,4};
 static const short O114[] = {5,5,5,5};
 static const short P114[] = {1,1,1,1,2,2,2,2};
 static const signed char FI114[] = {-1,-1,-1,-1,1,1,1,1};
+static const short PR114[] = {8,8,8,8,80,80,80,80};
 static const char* const L115[] = {
 	"Cross-modulator: two signals combined by one of nine algorithms, from crossfading and wavefolding through ring modulation and bit crushing to a twenty-band vocoder",
 	"Sweeps continuously through the nine algorithms marked around it, and in the vocoder sets the release time of its envelope followers",
@@ -2806,7 +2976,7 @@ static const short O115[] = {12,13};
 static const short P115[] = {1,2,3,4,5};
 static const signed char FI115[] = {1,1,1,1,0,0};
 static const signed char FO115[] = {0,0};
-static const short PR115[] = {-1,-1,-1,-1,2,2};
+static const short PR115[] = {52,52,8,52,81,81};
 static const short PO115[] = {2,2};
 static const char* const L116[] = {
 	"Plays a recorded handclap, one press of the button picking which of eight vintage drum machines it is taken from",
@@ -3179,7 +3349,7 @@ static const short O137[] = {-1,17};
 static const short P137[] = {1,2,3,4,5,6,7,8};
 static const signed char FI137[] = {3,2,2,2,2,2,2,2};
 static const signed char FO137[] = {-1,3};
-static const short PR137[] = {1,24,24,24,24,24,24,24};
+static const short PR137[] = {1,50,50,50,50,50,50,50};
 static const short PO137[] = {-1,2};
 static const char* const L138[] = {
 	"Polyphonic plucked-string voice built on the Karplus-Strong algorithm, each pluck ringing on and fading out by itself",
@@ -3206,7 +3376,7 @@ static const short P138[] = {5,13,3,9,7,14,14,1,11};
 static const signed char FI138[] = {2,1,-1,3,1,1};
 static const signed char FO138[] = {0};
 static const short PR138[] = {0,-1,-1,1,-1,-1};
-static const short PO138[] = {25};
+static const short PO138[] = {62};
 static const char* const L139[] = {
 	"Developer tool that runs a check over whichever module it is patched to and prints the warnings and the findings on its screen; it makes no sound",
 	"Patching a cable from here to an output on another module makes that module the one checked",
@@ -3374,7 +3544,7 @@ static const char* const L148[] = {
 static const short I148[] = {3,4,5,3,4,5};
 static const short O148[] = {6,7};
 static const short P148[] = {1,2,1,2};
-static const short PR148[] = {27,27,27,27,27,27};
+static const short PR148[] = {63,63,63,63,63,63};
 static const char* const L149[] = {
 	"ADSR envelope generator with a variable curve and a gate output for each of its four stages",
 	"Picks how the envelope responds to its gate: Gate holds the sustain for as long as the gate is high, Trigger runs attack and decay right through on a single edge",
@@ -3401,7 +3571,7 @@ static const short O149[] = {13,14,15,16,17};
 static const short P149[] = {1,2,3,4,5,6,7};
 static const signed char FI149[] = {2,1,1,1,1};
 static const signed char FO149[] = {1,2,2,2,2};
-static const short PR149[] = {28,8,8,8,8};
+static const short PR149[] = {82,8,8,8,8};
 static const short PO149[] = {6,0,0,0,0};
 static const char* const L150[] = {
 	"Four attenuator and inverter channels whose inputs cascade into one another, so one signal can be split four ways",
@@ -3414,7 +3584,7 @@ static const char* const L150[] = {
 static const short I150[] = {3,3,3,3};
 static const short O150[] = {4,4,4,4};
 static const short P150[] = {1,1,1,1,2,2,2,2};
-static const short PR150[] = {27,27,27,27};
+static const short PR150[] = {63,63,63,63};
 static const char* const L151[] = {
 	"Two voltage-controlled voltage processors, each working out A times B plus C, with switchable gain on both B and C",
 	"Attenuates the B input of that section, from silence at the bottom to its full level at the top",
@@ -3432,7 +3602,7 @@ static const char* const L151[] = {
 static const short I151[] = {6,7,8,6,7,8};
 static const short O151[] = {9,10};
 static const short P151[] = {2,1,4,3,2,1,4,3,5};
-static const short PR151[] = {27,29,27,27,29,27};
+static const short PR151[] = {63,38,63,63,38,63};
 static const char* const L152[] = {
 	"Four-band splitter and mixer: one signal cut into four bands, each with its own level, send and return, then summed back together",
 	"Sets the level of the low band below 300Hz before it is sent out",
@@ -3454,8 +3624,8 @@ static const short O152[] = {10,10,10,10,11};
 static const short P152[] = {1,2,3,4};
 static const signed char FI152[] = {0,0,0,0,0,0,0,0,1,1,1,1,0,1};
 static const signed char FO152[] = {0,0,0,0,0};
-static const short PR152[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,30};
-static const short PO152[] = {2,2,2,2,23};
+static const short PR152[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,83};
+static const short PO152[] = {2,2,2,2,37};
 static const char* const L153[] = {
 	"Trigger processor: one trigger in produces a run of up to 32 triggers, spread across a window set by a tapped tempo",
 	"Switches between one burst per trigger and a burst that restarts itself as soon as the last one ends",
@@ -3508,7 +3678,7 @@ static const short O154[] = {10,11,12,13};
 static const short P154[] = {1,2,3,4};
 static const signed char FI154[] = {0,0,0,2,0};
 static const signed char FO154[] = {0,0,0,0};
-static const short PR154[] = {29,29,29,5,29};
+static const short PR154[] = {38,38,38,5,38};
 static const short PO154[] = {2,2,2,2};
 static const char* const L155[] = {
 	"Two wavefolders with different curves, plus a chopper that switches between them under a gate or at the input's zero crossings",
@@ -3532,7 +3702,7 @@ static const short O155[] = {9,10,11};
 static const short P155[] = {1,2,3,3};
 static const signed char FI155[] = {0,0,2,1,1,1,1};
 static const signed char FO155[] = {0,0,0};
-static const short PR155[] = {29,8,31,8,8,8,8};
+static const short PR155[] = {38,8,53,8,8,8,8};
 static const short PO155[] = {2,2,2};
 static const char* const L156[] = {
 	"Two attenuverters, each scaling and inverting a signal and adding a fixed offset to it",
@@ -3544,7 +3714,7 @@ static const char* const L156[] = {
 static const short I156[] = {3,3};
 static const short O156[] = {4,4};
 static const short P156[] = {1,2,1,2};
-static const short PR156[] = {29,29};
+static const short PR156[] = {38,38};
 static const char* const L157[] = {
 	"Oscillator with five waveforms available at once, among them an even wave carrying the fundamental and its even harmonics",
 	"Sets the octave in ten steps, marked as organ footage from 32 foot down to 1/16 foot",
@@ -3568,7 +3738,7 @@ static const short O157[] = {8,9,10,11,12};
 static const short P157[] = {1,2,3};
 static const signed char FI157[] = {3,3,1,2,1};
 static const signed char FO157[] = {0,0,0,0,0};
-static const short PR157[] = {32,32,27,33,29};
+static const short PR157[] = {23,23,63,49,38};
 static const short PO157[] = {2,2,2,2,2};
 static const char* const L158[] = {
 	"Six VCAs with adjustable response curves, cascading into one mix",
@@ -3585,7 +3755,7 @@ static const short O158[] = {5,5,5,5,5,5};
 static const short P158[] = {1,1,1,1,1,1,2,2,2,2,2,2};
 static const signed char FI158[] = {0,0,0,0,0,0,1,1,1,1,1,1};
 static const signed char FO158[] = {0,0,0,0,0,0};
-static const short PR158[] = {29,29,29,29,29,29,4,4,4,4,4,4};
+static const short PR158[] = {38,38,38,38,38,38,4,4,4,4,4,4};
 static const short PO158[] = {2,2,2,2,2,2};
 static const char* const L159[] = {
 	"Stereo effects processor in four sections: a filter, a resonator, a ping-pong echo and an ambience reverb, with a modulation source and per-knob CV and randomisation mapping",
@@ -3639,7 +3809,7 @@ static const short O159[] = {38,39};
 static const short P159[] = {1,4,6,9,10,7,11,14,13,16,17,18,19,20,21,22,23,24,8,2,3,5,12,15,26,26,26,26,26,26,26,26,27,27,27,27,27,27,27,27,28,28,28,28,28,28,28,28,-1,25};
 static const signed char FI159[] = {0,0,1,1,1,1,2,2,1,1,1,1};
 static const signed char FO159[] = {0,0};
-static const short PR159[] = {29,29,13,13,13,13,5,5,34,34,34,34};
+static const short PR159[] = {38,38,13,13,13,13,5,5,84,84,84,84};
 static const short PO159[] = {2,2};
 static const char* const L160[] = {
 	"Bass drum voice: a sine core through a wave shaper, with a pitch envelope and a decay envelope",
@@ -3661,7 +3831,7 @@ static const short O160[] = {12};
 static const short P160[] = {1,2,3,4,5,6};
 static const signed char FI160[] = {2,1,3,1,1};
 static const signed char FO160[] = {0};
-static const short PR160[] = {35,8,14,8,8};
+static const short PR160[] = {85,8,14,8,8};
 static const short PO160[] = {2};
 static const char* const L161[] = {
 	"Gate expander for Muxlicer, giving one more gate output whose behaviour is set step by step; it goes immediately to the right of a Muxlicer, or to the right of another Mex chained to one",
@@ -3675,7 +3845,7 @@ static const short O161[] = {3};
 static const short P161[] = {1,1,1,1,1,1,1,1};
 static const signed char FI161[] = {2};
 static const signed char FO161[] = {2};
-static const short PR161[] = {28};
+static const short PR161[] = {82};
 static const short PO161[] = {0};
 static const char* const L162[] = {
 	"Bridge to the MIDI Thing v2 hardware: twelve CV inputs sent out over MIDI to the unit's twelve assignable ports",
@@ -3691,7 +3861,7 @@ static const char* const L162[] = {
 static const short I162[] = {2,2,2,2,2,2,2,2,2,2,2,2};
 static const short P162[] = {1};
 static const signed char FI162[] = {1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR162[] = {36,36,36,36,36,36,36,36,36,36,36,36};
+static const short PR162[] = {86,86,86,86,86,86,86,86,86,86,86,86};
 static const char* const L163[] = {
 	"Four-channel mixer for audio or CV, with a straight output and an inverted one",
 	"Sets the level of that channel in the mix, from silence to unity gain",
@@ -3703,7 +3873,7 @@ static const char* const L163[] = {
 static const short I163[] = {2,2,2,2};
 static const short O163[] = {3,4};
 static const short P163[] = {1,1,1,1};
-static const short PR163[] = {29,29,29,29};
+static const short PR163[] = {38,38,38,38};
 static const char* const L164[] = {
 	"Four-channel mixer for audio or CV in 4HP, split into two pairs that cascade into one master",
 	"Sets the level of that channel in the mix, from silence to unity gain",
@@ -3715,7 +3885,7 @@ static const char* const L164[] = {
 static const short I164[] = {2,2,2,2};
 static const short O164[] = {3,4};
 static const short P164[] = {1,1,1,1};
-static const short PR164[] = {29,29,29,29};
+static const short PR164[] = {38,38,38,38};
 static const char* const L165[] = {
 	"Four crossfaders driven by one fader, each blending an A input into a B input, with a cascading mix",
 	"Attenuates the CV 1 input before it is added to the fader position",
@@ -3735,7 +3905,7 @@ static const short I165[] = {7,8,8,8,9,9,9,9,10,10,10,10};
 static const short O165[] = {11,11,11,11};
 static const short P165[] = {1,2,2,2,2,3,3,3,3,4,4,4,4,5,6};
 static const signed char FI165[] = {1,1,1,1};
-static const short PR165[] = {30,30,30,30,29,29,29,29,29,29,29,29};
+static const short PR165[] = {83,83,83,83,38,38,38,38,38,38,38,38};
 static const char* const L166[] = {
 	"Three attenuator and inverter channels with a lamp ring on each showing the signal, cascading into one mix",
 	"Picks what that channel does and how its ring is lit: CV Inversion inverts the signal, CV Attenuation passes it as it stands, and Audio shows the level in dB",
@@ -3748,7 +3918,7 @@ static const char* const L166[] = {
 static const short I166[] = {3,3,3};
 static const short O166[] = {4,4,5};
 static const short P166[] = {1,2,1,2,1,2};
-static const short PR166[] = {36,36,36};
+static const short PR166[] = {86,86,86};
 static const char* const L167[] = {
 	"Clock conditioner, multiple and divider in 2HP, giving the incoming clock and four halvings of it",
 	"The clock to be divided; every output changes on its rising edges",
@@ -3764,8 +3934,8 @@ static const short I167[] = {1,2};
 static const short O167[] = {3,4,5,6,7};
 static const signed char FI167[] = {2,2};
 static const signed char FO167[] = {2,2,2,2,2};
-static const short PR167[] = {33,33};
-static const short PO167[] = {37,37,0,0,0};
+static const short PR167[] = {49,49};
+static const short PO167[] = {87,87,0,0,0};
 static const char* const L168[] = {
 	"Eight-step sequential switch, gate generator and step sequencer: one signal routed to or from eight jacks under a clock, with a gain and a gate on every step",
 	"Picks which step the switch is on, one step per position; turned fully anti-clockwise to RUN, the step advances with the clock instead",
@@ -3802,7 +3972,7 @@ static const short O168[] = {13,17,18,14,14,14,14,14,14,14,14,19,19,19,19,19,19,
 static const short P168[] = {3,1,2,4,5,5,5,5,5,5,5,5};
 static const signed char FI168[] = {1,1,2,2};
 static const signed char FO168[] = {2,2,2,2,2,2,2,2,2,2,2};
-static const short PR168[] = {4,8,28,28,27,29,29,29,29,29,29,29,29,27};
+static const short PR168[] = {4,8,82,82,63,38,38,38,38,38,38,38,38,63};
 static const short PO168[] = {0,0,0,0,0,0,0,0,0,0,0};
 static const char* const L169[] = {
 	"Two digital noise generators running one algorithm each from a library of banks, with a resonant filter on each, plus a third section of grit and white noise",
@@ -3838,7 +4008,7 @@ static const short O169[] = {18,18,19,20,21};
 static const short P169[] = {1,2,3,4,5,6,7,1,2,3,4,5,6,8,9,10,5,6,11};
 static const signed char FI169[] = {1,1,1,1,1,1,1,1,1,1};
 static const signed char FO169[] = {0,0,0,0,0};
-static const short PR169[] = {36,36,36,11,11,36,36,36,7,8};
+static const short PR169[] = {86,86,86,11,11,86,86,86,7,8};
 static const short PO169[] = {2,2,2,2,2};
 static const char* const L170[] = {
 	"Oscillator building six pulse waves an octave apart from one core, each with its own level slider, level CV and output",
@@ -3863,7 +4033,7 @@ static const short O170[] = {11,11,11,11,11,11};
 static const short P170[] = {1,3,2,4,5,6,6,6,6,6,6};
 static const signed char FI170[] = {3,3,2,1,1,1,1,1,1,1};
 static const signed char FO170[] = {0,0,0,0,0,0};
-static const short PR170[] = {32,32,33,38,29,27,27,27,27,27};
+static const short PR170[] = {23,23,49,88,38,63,63,63,63,63};
 static const short PO170[] = {2,2,2,2,2,2};
 static const char* const L171[] = {
 	"Four percussive envelope generators, each with a VCA and a channel of a mixer, and a choke on each pair",
@@ -3882,7 +4052,7 @@ static const short O171[] = {8,8,8,8,9,9,9,9};
 static const short P171[] = {1,1,1,1,2,2,2,2,3,3};
 static const signed char FI171[] = {0,0,0,0,1,2,2,2,2,1,1,1,1};
 static const signed char FO171[] = {0,0,0,0,1,1,1,1};
-static const short PR171[] = {29,29,29,29,8,28,28,28,28,8,8,8,8};
+static const short PR171[] = {38,38,38,38,8,82,82,82,82,8,8,8,8};
 static const short PO171[] = {2,2,2,2,6,6,6,6};
 static const char* const L172[] = {
 	"Compact oscillator with through-zero linear FM, a wavefolder and a VCA on its output, running as either a VCO or an LFO",
@@ -3907,7 +4077,7 @@ static const short O172[] = {11};
 static const short P172[] = {1,2,4,3,5};
 static const signed char FI172[] = {1,1,3,2,1};
 static const signed char FO172[] = {0};
-static const short PR172[] = {27,29,32,33,29};
+static const short PR172[] = {63,38,23,49,38};
 static const short PO172[] = {2};
 static const char* const L173[] = {
 	"Two ramp generators that also work as slew limiters, envelope followers and function generators, with a logic section combining the two",
@@ -3937,7 +4107,7 @@ static const short O173[] = {15,15,16,16,17,17,14,14,18,19,20};
 static const short P173[] = {1,1,2,2,3,3,4,4,5,5,6,6,7};
 static const signed char FI173[] = {1,1,2,2,1,1,1,1,1,1,2,2};
 static const signed char FO173[] = {2,2,2,2,2,2,1,1,2,1,1};
-static const short PR173[] = {27,27,39,39,27,27,27,27,27,27,39,39};
+static const short PR173[] = {63,63,89,89,63,63,63,63,63,63,89,89};
 static const short PO173[] = {0,0,0,0,0,0,6,6,-1,-1,-1};
 static const char* const L174[] = {
 	"Eight channels of random voltage, one per trigger input, each with its own division, probability, quantising and looping",
@@ -3989,7 +4159,7 @@ static const short O175[] = {6,7};
 static const short P175[] = {1,1,1,1};
 static const signed char FI175[] = {0,0,0,0,0,0,0,0,0,0};
 static const signed char FO175[] = {0,0};
-static const short PR175[] = {29,29,29,29,29,29,29,29,29,29};
+static const short PR175[] = {38,38,38,38,38,38,38,38,38,38};
 static const short PO175[] = {2,2};
 static const char* const L176[] = {
 	"Sample and hold with a clock of its own that reaches audio rate, and an eight-step switch deciding which ticks fire",
@@ -4011,7 +4181,7 @@ static const short O176[] = {9,10,11};
 static const short P176[] = {1,2,3,4,4,4,4,4,4,4,4};
 static const signed char FI176[] = {2,3,2};
 static const signed char FO176[] = {2,2};
-static const short PR176[] = {28,14,28,36};
+static const short PR176[] = {82,14,82,86};
 static const short PO176[] = {0,0};
 static const char* const L177[] = {
 	"Voltage-controlled lag processor with a slope detector, limiting how fast its output can follow its input",
@@ -4031,7 +4201,7 @@ static const short O177[] = {8,9,10};
 static const short P177[] = {1,2,3,4,5};
 static const signed char FI177[] = {-1,1};
 static const signed char FO177[] = {-1,2,2};
-static const short PR177[] = {27,30};
+static const short PR177[] = {63,83};
 static const char* const L178[] = {
 	"Lag processor limiting how fast its output can follow its input, with separate rise and fall times",
 	"Bends the slope, straight counter-clockwise and increasingly curved clockwise as the gap to the input shrinks",
@@ -4047,7 +4217,7 @@ static const short I178[] = {4,5,6};
 static const short O178[] = {7};
 static const short P178[] = {1,2,3};
 static const signed char FI178[] = {1,1};
-static const short PR178[] = {27,27,27};
+static const short PR178[] = {63,63,63};
 static const char* const L179[] = {
 	"Spring reverb, a convolution of a real spring tank, with two inputs driving the tank and both a wet and a mixed output",
 	"Crossfades the MIX output between the dry signal at IN 1 and the reverb",
@@ -4066,8 +4236,8 @@ static const short O179[] = {8,9};
 static const short P179[] = {1,2,2,3};
 static const signed char FI179[] = {1,1,0,0,1};
 static const signed char FO179[] = {0,0};
-static const short PR179[] = {8,8,29,29,8};
-static const short PO179[] = {23,23};
+static const short PR179[] = {8,8,38,38,8};
+static const short PO179[] = {37,37};
 static const char* const L180[] = {
 	"Stereo channel strip: three-band EQ, pan, mute and a voltage-controlled level, with a limiter on the output",
 	"Lifts or cuts a low shelf at 125Hz, -20dB to 20dB",
@@ -4097,7 +4267,7 @@ static const short O180[] = {14,15};
 static const short P180[] = {1,2,3,4,7,8,9,5,6};
 static const signed char FI180[] = {0,1,0,1};
 static const signed char FO180[] = {0,0};
-static const short PR180[] = {29,29,29,29};
+static const short PR180[] = {38,38,38,38};
 static const short PO180[] = {2,2};
 static const char* const L181[] = {
 	"Precision voltage source and adder, setting a voltage by octave and semitone for tuning and transposition",
@@ -4112,7 +4282,7 @@ static const short O181[] = {5};
 static const short P181[] = {1,2,3};
 static const signed char FI181[] = {3};
 static const signed char FO181[] = {3};
-static const short PR181[] = {29};
+static const short PR181[] = {38};
 static const short PO181[] = {2};
 static const char* const L182[] = {
 	"Patch bay and mixer, sixteen inputs by eight outputs, with a level for every crossing and sixteen stored snapshots of the whole grid",
@@ -4141,7 +4311,7 @@ static const short I182[] = {15,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16}
 static const short O182[] = {17,17,17,17,17,17,17,17};
 static const short P182[] = {5,2,3,12,13,14,11,11,11,11,11,11,11,11,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,6};
 static const signed char FI182[] = {1};
-static const short PR182[] = {10,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36};
+static const short PR182[] = {10,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86};
 static const char* const L183[] = {
 	"Splits the signal into four bands, distorts each one on its own, and adds them back together",
 	"Sets one of the three crossover frequencies the four bands are split at",
@@ -4164,7 +4334,7 @@ static const short O183[] = {14};
 static const short P183[] = {1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6};
 static const signed char FI183[] = {0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO183[] = {0};
-static const short PR183[] = {12,8,8,8,8,8,8,8,8,8,8,8,11,11,11,11,5,5,5,5,40,40,40,40};
+static const short PR183[] = {12,8,8,8,8,8,8,8,8,8,8,8,11,11,11,11,5,5,5,5,90,90,90,90};
 static const short PO183[] = {2};
 static const char* const L184[] = {
 	"Splits a signal into its eight bits and builds a signal back out of eight bits, with nothing between them but the cables you patch",
@@ -4181,7 +4351,7 @@ static const short O184[] = {6,4,4,4,4,4,4,4,4};
 static const signed char FI184[] = {0,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO184[] = {0,2,2,2,2,2,2,2,2};
 static const short PR184[] = {7,5,5,11,11,11,11,11,11,11,11};
-static const short PO184[] = {23,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PO184[] = {37,-1,-1,-1,-1,-1,-1,-1,-1};
 static const char* const L185[] = {
 	"Two slope generators, each one a slew limiter, an envelope and an oscillator depending on what is patched into it",
 	"Sets how long the slope takes to rise, from instant at one end to several seconds at the other",
@@ -4208,7 +4378,7 @@ static const short P185[] = {1,3,2,4,1,3,2,4,5,6,5,6,7,7};
 static const signed char FI185[] = {1,2,3,1,1,1,1,2,3,1,1,1};
 static const signed char FO185[] = {2,2,1,1,2,1};
 static const short PR185[] = {8,5,14,7,7,7,8,5,14,7,7,7};
-static const short PO185[] = {41,-1,26,-1,-1,26};
+static const short PO185[] = {91,-1,78,-1,-1,78};
 static const char* const L186[] = {
 	"Simulates an object dropped from a height and left to bounce, and turns its fall into gates and voltages",
 	"The height the object is dropped from, 1cm to 3 metres",
@@ -4254,7 +4424,7 @@ static const short O187[] = {8,9,10,11,12,13,14};
 static const short P187[] = {1,2,3,4};
 static const signed char FI187[] = {3,1,1};
 static const signed char FO187[] = {3,3,3,3,3,3,3};
-static const short PR187[] = {32,27,27};
+static const short PR187[] = {23,63,63};
 static const short PO187[] = {1,2,2,2,2,2,2};
 static const char* const L188[] = {
 	"Logic gates — AND, OR and XOR on a pair of inputs each, an inverter, and the negated form of all four",
@@ -4366,7 +4536,7 @@ static const short O190[] = {37,37,37,37,37,37,37,37,38,38,38,38,38,38,38,38,39,
 static const short P190[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,5,6,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,9,10,11,12,16,18,19,20,21,22,23,23,24,25,26,27,28,13,14,15,17};
 static const signed char FI190[] = {2,2,2,2,2,2,2,2,2,2,-1,-1,1,2,2,2,2,2,2,2,2,2,2,3,2};
 static const signed char FO190[] = {2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR190[] = {28,28,5,5,5,5,5,5,5,5,36,36,10,5,5,5,5,5,5,5,5,9,9,8,11};
+static const short PR190[] = {82,82,5,5,5,5,5,5,5,5,86,86,10,5,5,5,5,5,5,5,5,9,9,8,11};
 static const short PO190[] = {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22};
 static const char* const L191[] = {
 	"Expander for enCORE, sitting immediately to its right, giving each of its eight tracks a row of per-track controls",
@@ -4513,7 +4683,7 @@ static const short O197[] = {25};
 static const short P197[] = {2,3,8,4,9,7,6,5,1,10,11,12,13,14};
 static const signed char FI197[] = {2,1,1,1,1,1,1,1,1,1};
 static const signed char FO197[] = {0};
-static const short PR197[] = {33,-1,30,30,16,30,30,30,17,17};
+static const short PR197[] = {49,-1,83,83,16,83,83,83,17,17};
 static const short PO197[] = {2};
 static const char* const L198[] = {
 	"Sixteen voltage sources with sixteen stored scenes, and a fader that morphs the whole set from one scene to another",
@@ -4631,7 +4801,7 @@ static const short O201[] = {21};
 static const short P201[] = {2,3,8,4,9,7,6,5,1,10};
 static const signed char FI201[] = {2,1,1,1,1,1,1,1,1,1};
 static const signed char FO201[] = {0};
-static const short PR201[] = {33,17,30,30,16,30,30,30,17,17};
+static const short PR201[] = {49,17,83,83,16,83,83,83,17,17};
 static const short PO201[] = {2};
 static const char* const L202[] = {
 	"Sample player with a slicing grid — it plays a loaded sample from a trigger, from a gate, or one slice at a time",
@@ -4722,7 +4892,7 @@ static const short O203[] = {37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37};
 static const short P203[] = {3,3,8,7,9,8,7,9,10,12,11,4,4,14,17,2,5,6,5,6,16,15,19,20,19,20,1,18,13,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22};
 static const signed char FI203[] = {1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,2,2,2,2};
 static const signed char FO203[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR203[] = {10,10,40,11,11,11,11,11,11,8,8,8,8,10,40,11,11,11,5};
+static const short PR203[] = {10,10,90,11,11,11,11,11,11,8,8,8,8,10,90,11,11,11,5};
 static const char* const L204[] = {
 	"Sixteen-voice sample player — one sample loaded, and sixteen channels each taking their own slice of it",
 	"Chooses which of the sixteen channels the controls are editing, 0 to 15; every channel keeps its own settings",
@@ -4751,7 +4921,7 @@ static const short O204[] = {17};
 static const short P204[] = {1,2,3,6,4,5,7,8,9,10};
 static const signed char FI204[] = {2,1,1,1,1,1};
 static const signed char FO204[] = {0};
-static const short PR204[] = {33,-1,30,30,16,30};
+static const short PR204[] = {49,-1,83,83,16,83};
 static const short PO204[] = {2};
 static const char* const L205[] = {
 	"Gate generator built on a grid of sixteen cells, each dividing the incoming clock its own way, with eight outputs taking the rows and the columns of that grid",
@@ -4868,7 +5038,7 @@ static const short O209[] = {11,12,13,14};
 static const short P209[] = {1,2,4,5,3};
 static const signed char FI209[] = {3,2,1,1,1};
 static const signed char FO209[] = {0,0,0,0};
-static const short PR209[] = {32,16,4,4,29};
+static const short PR209[] = {23,16,4,4,38};
 static const short PO209[] = {2,2,2,2};
 static const char* const L210[] = {
 	"A panel with a picture on it and nothing else — no controls, no jacks and no signal path",
@@ -4934,7 +5104,7 @@ static const short O211[] = {37,37,37,37,37,37,37,37,38,38,38,38,38,38,38,38,39,
 static const short P211[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,5,6,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,9,10,11,12,16,18,19,20,21,22,23,23,24,25,26,27,28,13,14,15,17};
 static const signed char FI211[] = {2,2,2,2,2,2,2,2,2,2,-1,-1,1,2,2,2,2,2,2,2,2,2,2,3,2};
 static const signed char FO211[] = {2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR211[] = {5,5,5,5,5,5,5,5,5,5,36,36,10,5,5,5,5,5,5,5,5,9,9,8,11};
+static const short PR211[] = {5,5,5,5,5,5,5,5,5,5,86,86,10,5,5,5,5,5,5,5,5,9,9,8,11};
 static const short PO211[] = {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22};
 static const char* const L212[] = {
 	"Expander for zOù MAï, sitting immediately to its right, giving each of its eight tracks a row of per-track controls",
@@ -5045,7 +5215,7 @@ static const short O215[] = {35,36,37,38,38,38,38,38,38,38,38};
 static const short P215[] = {1,2,3,4,8,7,5,6,9,10,11,12,-1,-1,-1,-1,-1,-1,-1,22,22,22,22,22,22,22,22,24,24,24,24,24,24,24,24,18,18,18,18,18,18,18,18,25,25,25,25,25,25,25,25,26,26,26,26,26,26,26,26,23,23,23,23,23,23,23,23,19,19,19,19,19,19,19,19,20,20,20,20,20,20,20,20,21,21,21,21,21,21,21,21,14,15,16,17,13};
 static const signed char FI215[] = {1,2,2,1,1,1,1,1,-1,-1,1,3,1};
 static const signed char FO215[] = {2,3,1,2,2,2,2,2,2,2,2};
-static const short PR215[] = {8,5,11,11,40,40,42,36,36,36,10,14,4};
+static const short PR215[] = {8,5,11,11,90,90,92,86,86,86,10,14,4};
 static const short PO215[] = {0,2,6,0,0,0,0,0,0,0,0};
 static const char* const L216[] = {
 	"Sampler that records what is patched into it, cuts the recording into slices, and plays them back",
@@ -5090,7 +5260,7 @@ static const short O216[] = {23,24,25};
 static const short P216[] = {1,3,4,5,6,7,2,8,9,10};
 static const signed char FI216[] = {0,0,2,2,1,1,1,1,2,1,1,2};
 static const signed char FO216[] = {0,0,2};
-static const short PR216[] = {43,43,5,9,8,8,10,8,11,8,11,11};
+static const short PR216[] = {34,34,5,9,8,8,10,8,11,8,11,11};
 static const short PO216[] = {2,2,0};
 static const char* const L217[] = {
 	"Mono-in, stereo-out reverb of a large room, built on Gverb",
@@ -5167,7 +5337,7 @@ static const short O218[] = {36,37,38,38,38,38,38,38,38,38};
 static const short P218[] = {1,2,3,4,8,7,5,6,9,10,11,12,-1,-1,-1,-1,-1,-1,-1,19,19,19,19,19,19,19,19,20,20,20,20,20,20,20,20,18,18,18,18,18,18,18,18,21,21,21,21,21,21,21,21,22,22,22,22,22,22,22,22,14,15,16,17,13};
 static const signed char FI218[] = {1,2,2,1,1,1,1,1,-1,-1,1,3,1};
 static const signed char FO218[] = {2,3,2,2,2,2,2,2,2,2};
-static const short PR218[] = {8,5,11,11,40,40,42,36,36,36,10,14,4};
+static const short PR218[] = {8,5,11,11,90,90,92,86,86,86,10,14,4};
 static const short PO218[] = {0,2,0,0,0,0,0,0,0,0};
 static const char* const L219[] = {
 	"Four voltage sources on sliders, each with its own range and its own CV input",
@@ -5234,7 +5404,7 @@ static const short O220[] = {36};
 static const short P220[] = {1,2,3,4,-1,5,-1,16,17,6,7,8,12,13,14,9,10,11,18,15,19};
 static const signed char FI220[] = {2,3,1,1,1,1,-1,1,-1,1,1,1,1,1,1,1,1,1};
 static const signed char FO220[] = {0};
-static const short PR220[] = {44,32,8,8,8,8,-1,8,-1,4,4,4,4,4,4,7,7,7};
+static const short PR220[] = {93,23,8,8,8,8,-1,8,-1,4,4,4,4,4,4,7,7,7};
 static const short PO220[] = {2};
 static const char* const L221[] = {
 	"Spectrogram display — it draws the incoming sound as frequency against time, and sends out the energy in a box drawn across that picture",
@@ -5292,7 +5462,7 @@ static const short O223[] = {11,12};
 static const short P223[] = {1,2,4,3,5};
 static const signed char FI223[] = {0,0,1,1,1};
 static const signed char FO223[] = {0,0};
-static const short PR223[] = {43,43,8,8,8};
+static const short PR223[] = {34,34,8,8,8};
 static const short PO223[] = {2,2};
 static const char* const L224[] = {
 	"Six-stage shift register — on every clock the voltage at the input moves to the first output and each stored voltage moves on to the next",
@@ -5366,7 +5536,7 @@ static const short O225[] = {39};
 static const short P225[] = {-1,9,1,2,3,4,5,6,7,8,10,11,29,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,31};
 static const signed char FI225[] = {3,1,2,2,1,0,1};
 static const signed char FO225[] = {0};
-static const short PR225[] = {32,29,16,0,40,8,4};
+static const short PR225[] = {23,38,16,0,90,8,4};
 static const short PO225[] = {2};
 static const char* const L226[] = {
 	"Mono compressor, 3HP, with a display reading out whichever control was last touched",
@@ -5407,7 +5577,7 @@ static const short O227[] = {7,8,9};
 static const short P227[] = {1,2,3};
 static const signed char FI227[] = {0,3,1};
 static const signed char FO227[] = {0,0,0};
-static const short PR227[] = {43,8,8};
+static const short PR227[] = {34,8,8};
 static const short PO227[] = {3,3,3};
 static const char* const L228[] = {
 	"Bit crusher working on the eight bits of the digitised signal one at a time, clearing them or flipping them",
@@ -5480,7 +5650,7 @@ static const short O230[] = {11};
 static const short P230[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,3,4,5,5,5,6,7,8};
 static const signed char FI230[] = {0,0};
 static const signed char FO230[] = {0};
-static const short PR230[] = {43,43};
+static const short PR230[] = {34,34};
 static const short PO230[] = {2};
 static const char* const L231[] = {
 	"Stereo multimode filter offering 35 filter modes and bypass, with zero-delay feedback topologies, 4x oversampled drive, and a jack for every control",
@@ -5614,7 +5784,7 @@ static const short O234[] = {9,10};
 static const short P234[] = {1,2,4,5,3};
 static const signed char FI234[] = {2,1,1};
 static const signed char FO234[] = {1,2};
-static const short PR234[] = {33,30,30};
+static const short PR234[] = {49,83,83};
 static const short PO234[] = {6,0};
 static const char* const L235[] = {
 	"ADSR envelope generator, 3HP",
@@ -5633,7 +5803,7 @@ static const short O235[] = {8};
 static const short P235[] = {5,6,2,7,4};
 static const signed char FI235[] = {2};
 static const signed char FO235[] = {1};
-static const short PR235[] = {33};
+static const short PR235[] = {49};
 static const short PO235[] = {6};
 static const char* const L236[] = {
 	"Ring and amplitude modulator with a variable rectifier; expects 5V signals",
@@ -5648,7 +5818,7 @@ static const short O236[] = {1,3};
 static const short P236[] = {2,4};
 static const signed char FI236[] = {0,0,1,1};
 static const signed char FO236[] = {0,0};
-static const short PR236[] = {29,29,30,30};
+static const short PR236[] = {38,38,83,83};
 static const short PO236[] = {2,2};
 static const char* const L237[] = {
 	"Envelope generator — AR when triggered, ASR when gated",
@@ -5667,7 +5837,7 @@ static const short O237[] = {8,9};
 static const short P237[] = {1,2,3,4};
 static const signed char FI237[] = {2,1,1};
 static const signed char FO237[] = {1,2};
-static const short PR237[] = {33,30,30};
+static const short PR237[] = {49,83,83};
 static const short PO237[] = {-1,0};
 static const char* const L238[] = {
 	"Additive oscillator — up to 100 sine partials summed",
@@ -5699,7 +5869,7 @@ static const short O238[] = {22};
 static const short P238[] = {1,3,4,5,6,7,8,9,10,11,2};
 static const signed char FI238[] = {3,2,1,1,1,1,1,1,1,1};
 static const signed char FO238[] = {0};
-static const short PR238[] = {32,45,17,46,46,46,46,46,46,46};
+static const short PR238[] = {23,94,17,57,57,57,57,57,57,57};
 static const short PO238[] = {2};
 static const char* const L239[] = {
 	"Eight-step sequencer — one knob per step, the step chosen by a clock, by a voltage, or by both together",
@@ -5724,7 +5894,7 @@ static const short O239[] = {7};
 static const short P239[] = {2,3,4,8,8,8,8,8,8,8,8};
 static const signed char FI239[] = {2,2,1};
 static const signed char FO239[] = {1};
-static const short PR239[] = {33,33,47};
+static const short PR239[] = {49,49,95};
 static const char* const L240[] = {
 	"Chainable expander for ADDR-SEQ — eight more steps",
 	"Note — with an ASX fitted, the ADDR-SEQ's STEPS and SELECT work across the whole chain",
@@ -5746,7 +5916,7 @@ static const char* const L241[] = {
 static const short I241[] = {1,1,1,1};
 static const short O241[] = {1,1,1,1};
 static const short P241[] = {-1,3,4,-1,5,2};
-static const short PR241[] = {29,29,29,29};
+static const short PR241[] = {38,38,38,38};
 static const char* const L242[] = {
 	"Spectrum analyser, eight channels, 42HP, almost all display",
 	"Note — clicking the display freezes it, so drag near the left edge to move the module",
@@ -5761,7 +5931,7 @@ static const char* const L242[] = {
 };
 static const short I242[] = {2,2,2,2,2,2,2,2};
 static const signed char FI242[] = {0,0,0,0,0,0,0,0};
-static const short PR242[] = {29,29,29,29,29,29,29,29};
+static const short PR242[] = {38,38,38,38,38,38,38,38};
 static const char* const L243[] = {
 	"Arpeggiator fed from polyphonic pitch and gate — patch it straight to Rack's MIDI-CV",
 	"A gate going high on a channel of GATE adds the pitch on that channel of V/OCT to the arpeggio",
@@ -5780,7 +5950,7 @@ static const short O243[] = {7,7};
 static const short P243[] = {3,4,5};
 static const signed char FI243[] = {2,2,3,2};
 static const signed char FO243[] = {3,2};
-static const short PR243[] = {5,5,32,33};
+static const short PR243[] = {5,5,23,49};
 static const short PO243[] = {2,-1};
 static const char* const L244[] = {
 	"Assigns notes to the channels of a polyphonic voice — so envelope tails can ring out",
@@ -5794,21 +5964,21 @@ static const short O244[] = {1,1};
 static const short P244[] = {2};
 static const signed char FI244[] = {3,2,2};
 static const signed char FO244[] = {3,2};
-static const short PR244[] = {32,33,5};
+static const short PR244[] = {23,49,5};
 static const short PO244[] = {1,0};
 static const char* const L245[] = {
 	"Blank panel, 3HP",
 	"A signal patched here colours the lettering on the panel with its level, green through orange to red; the jack itself is not drawn on the panel",
 };
 static const short I245[] = {1};
-static const short PR245[] = {29};
+static const short PR245[] = {38};
 static const char* const L246[] = {
 	"Blank panel, 6HP",
 	"A signal patched here lights the lettering down the panel, its colour following the signal's level",
 	"Note — that jack is drawn nowhere in the artwork; nothing else on the panel does anything",
 };
 static const short I246[] = {1};
-static const short PR246[] = {29};
+static const short PR246[] = {38};
 static const char* const L247[] = {
 	"Boolean logic",
 	"The upper section takes two inputs and outputs their AND, OR and XOR",
@@ -5819,7 +5989,7 @@ static const short I247[] = {1,1,2};
 static const short O247[] = {1,1,1,2};
 static const signed char FI247[] = {2,2,2};
 static const signed char FO247[] = {2,2,2,2};
-static const short PR247[] = {33,33,33};
+static const short PR247[] = {49,49,49};
 static const char* const L248[] = {
 	"Delay meant for CV, though it works on audio — delay a trigger, double an envelope, correct latency",
 	"The delay in seconds, scaled by the range knob to 0.1, 1 or 10 seconds; CV 0-10V",
@@ -5835,7 +6005,7 @@ static const short I248[] = {4,5,6};
 static const short O248[] = {7};
 static const short P248[] = {1,3,2};
 static const signed char FI248[] = {1,1};
-static const short PR248[] = {30,46,29};
+static const short PR248[] = {83,57,38};
 static const char* const L249[] = {
 	"Swept-sine generator",
 	"The ends of the sweep; V/O1 and V/O2 are 1V/octave inputs added to them",
@@ -5858,7 +6028,7 @@ static const short O249[] = {5,13};
 static const short P249[] = {2,6,7,10,3,11};
 static const signed char FI249[] = {3,3,1,2};
 static const signed char FO249[] = {2,0};
-static const short PR249[] = {32,32,30,33};
+static const short PR249[] = {23,23,83,49};
 static const short PO249[] = {0,2};
 static const char* const L250[] = {
 	"Hard clipper and distortion, 6HP, stereo",
@@ -5878,7 +6048,7 @@ static const short O250[] = {7,7};
 static const short P250[] = {2,3,4};
 static const signed char FI250[] = {0,0,1,1};
 static const signed char FO250[] = {0,0};
-static const short PR250[] = {29,29,30,30};
+static const short PR250[] = {38,38,83,83};
 static const short PO250[] = {2,2};
 static const char* const L251[] = {
 	"Window comparator",
@@ -5893,7 +6063,7 @@ static const short O251[] = {2,2,2,2};
 static const short P251[] = {1,1,3,4,5};
 static const signed char FI251[] = {-1,-1,1,1};
 static const signed char FO251[] = {2,2,2,2};
-static const short PR251[] = {29,29,30,30};
+static const short PR251[] = {38,38,83,83};
 static const char* const L252[] = {
 	"Distortion built on a window comparator; meant for audio rates",
 	"Scaled by their knobs and bipolar CVs. B unpatched is normalled to +5V",
@@ -5907,7 +6077,7 @@ static const short O252[] = {3,3,3,4};
 static const short P252[] = {1,2,1,4,4,4,4,4,4};
 static const signed char FI252[] = {1,1,1,1,0,1,0,1};
 static const signed char FO252[] = {-1,-1,-1,0};
-static const short PR252[] = {46,46,30,46,29,46,29,46};
+static const short PR252[] = {57,57,83,57,38,57,38,57};
 static const short PO252[] = {-1,-1,-1,2};
 static const char* const L253[] = {
 	"ADSR envelope generator with a delay stage before the attack, and a self-gating hold mode",
@@ -5934,7 +6104,7 @@ static const short O253[] = {3,4,5};
 static const short P253[] = {8,9,10,11,12,13,6,6,6,14,1,2,7,16};
 static const signed char FI253[] = {2};
 static const signed char FO253[] = {1,1,2};
-static const short PR253[] = {33};
+static const short PR253[] = {49};
 static const short PO253[] = {6,-1,0};
 static const char* const L254[] = {
 	"ADSR envelope generator with a delay stage and a self-gating hold mode, and a CV input for every knob",
@@ -5974,7 +6144,7 @@ static const short O254[] = {22,23,24,25,26,27,28,29};
 static const short P254[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 static const signed char FI254[] = {1,1,1,1,1,1,2};
 static const signed char FO254[] = {2,2,2,2,2,1,1,2};
-static const short PR254[] = {30,30,30,30,30,30,33};
+static const short PR254[] = {83,83,83,83,83,83,49};
 static const short PO254[] = {-1,-1,-1,-1,-1,6,-1,0};
 static const char* const L255[] = {
 	"Trigger-to-gate converter",
@@ -5993,7 +6163,7 @@ static const short O255[] = {8,2};
 static const short P255[] = {4,5,3,6};
 static const signed char FI255[] = {2};
 static const signed char FO255[] = {2,2};
-static const short PR255[] = {33};
+static const short PR255[] = {49};
 static const short PO255[] = {0,0};
 static const char* const L256[] = {
 	"Pitch CV processor for a detuned pair of oscillators",
@@ -6005,7 +6175,7 @@ static const short O256[] = {2,1,1};
 static const short P256[] = {1};
 static const signed char FI256[] = {1,3};
 static const signed char FO256[] = {3,3,3};
-static const short PR256[] = {30,32};
+static const short PR256[] = {83,23};
 static const short PO256[] = {2,1,1};
 static const char* const L257[] = {
 	"Three-band equalizer, fixed frequencies — LOW 100Hz, MID 350Hz, HIGH 1000Hz",
@@ -6017,7 +6187,7 @@ static const short O257[] = {2};
 static const short P257[] = {1,1,1};
 static const signed char FI257[] = {0};
 static const signed char FO257[] = {0};
-static const short PR257[] = {29};
+static const short PR257[] = {38};
 static const short PO257[] = {2};
 static const char* const L258[] = {
 	"Three-band equalizer in stereo — LOW 100Hz, MID 350Hz, HIGH 1000Hz",
@@ -6029,7 +6199,7 @@ static const short O258[] = {1,1};
 static const short P258[] = {1,1,1};
 static const signed char FI258[] = {0,0};
 static const signed char FO258[] = {0,0};
-static const short PR258[] = {29,29};
+static const short PR258[] = {38,38};
 static const short PO258[] = {2,2};
 static const char* const L259[] = {
 	"Edge detector, comparator and trigger-to-gate utility",
@@ -6045,7 +6215,7 @@ static const short I259[] = {7};
 static const short O259[] = {4,5,6};
 static const short P259[] = {1,2,3};
 static const signed char FO259[] = {2,2,2};
-static const short PR259[] = {29};
+static const short PR259[] = {38};
 static const short PO259[] = {0,0,0};
 static const char* const L260[] = {
 	"Low-frequency oscillator — one wave shape at eight phases, 45 degrees apart",
@@ -6065,7 +6235,7 @@ static const short O260[] = {8,8,8,8,8,8,8,8};
 static const short P260[] = {2,1,4,7,7,7,7,7,7,7,7,3,6,6,5};
 static const signed char FI260[] = {1,1,1,1,1,1,1,1,1,3,2,1,1,1};
 static const signed char FO260[] = {1,1,1,1,1,1,1,1};
-static const short PR260[] = {29,46,46,46,46,46,46,46,46,32,45,46,30,30};
+static const short PR260[] = {38,57,57,57,57,57,57,57,57,23,94,57,83,83};
 static const char* const L261[] = {
 	"Router, one of eight in to one out — selected by clock, by voltage, or both",
 	"A trigger advances the selection",
@@ -6085,7 +6255,7 @@ static const short I261[] = {6,6,6,6,6,6,6,6,1,2,5};
 static const short O261[] = {7};
 static const short P261[] = {3,4,5};
 static const signed char FI261[] = {-1,-1,-1,-1,-1,-1,-1,-1,2,2,1};
-static const short PR261[] = {29,29,29,29,29,29,29,29,33,33,47};
+static const short PR261[] = {38,38,38,38,38,38,38,38,49,49,95};
 static const char* const L262[] = {
 	"Fixed filter bank — twelve band-pass filters with a low-pass and a high-pass on the ends, at the band frequencies of the Moog 914",
 	"One knob per band, attenuating that band before they are mixed back together",
@@ -6104,7 +6274,7 @@ static const short O262[] = {8,9,10};
 static const short P262[] = {5,4,4,4,4,4,4,4,4,4,4,4,4,6,2};
 static const signed char FI262[] = {0,1};
 static const signed char FO262[] = {0,0,0};
-static const short PR262[] = {29,46};
+static const short PR262[] = {38,57};
 static const short PO262[] = {2,2,2};
 static const char* const L263[] = {
 	"Sine oscillator and simple voice — several patched together make the classic FM algorithms",
@@ -6126,7 +6296,7 @@ static const short O263[] = {8};
 static const short P263[] = {1,6,5,5,5,5,2,3,4,5,5,5};
 static const signed char FI263[] = {1,1,1,1,3,2,0};
 static const signed char FO263[] = {0};
-static const short PR263[] = {30,30,30,30,32,33,29};
+static const short PR263[] = {83,83,83,83,23,49,38};
 static const short PO263[] = {2};
 static const char* const L264[] = {
 	"Two independent flip-flops",
@@ -6138,7 +6308,7 @@ static const short I264[] = {1,3,1,3};
 static const short O264[] = {2,2,2,2};
 static const signed char FI264[] = {2,2,2,2};
 static const signed char FO264[] = {2,2,2,2};
-static const short PR264[] = {45,33,45,33};
+static const short PR264[] = {94,49,94,49};
 static const char* const L265[] = {
 	"Envelope follower — a CV tracking the amplitude at IN",
 	"Slows and smooths how quickly the output follows a change in the input",
@@ -6153,7 +6323,7 @@ static const short O265[] = {6};
 static const short P265[] = {1,3};
 static const signed char FI265[] = {1,1,0};
 static const signed char FO265[] = {1};
-static const short PR265[] = {30,46,29};
+static const short PR265[] = {83,57,38};
 static const char* const L266[] = {
 	"Quadrature low-frequency oscillator — one wave shape at four phases, 0, 90, 180 and 270 degrees",
 	"Selects the wave; all four outputs carry the same shape",
@@ -6173,7 +6343,7 @@ static const short O266[] = {8,8,8,8};
 static const short P266[] = {2,1,3,4,5,6,6,7,7,7,7};
 static const signed char FI266[] = {1,1,1,1,3,2,1,1,1,1};
 static const signed char FO266[] = {1,1,1,1};
-static const short PR266[] = {29,30,46,30,32,45,46,46,46,46};
+static const short PR266[] = {38,83,57,83,23,94,57,57,57,57};
 static const char* const L267[] = {
 	"Four independent manual gates, a button and an output each",
 	"An output sends +5V while its button is held, 0V otherwise",
@@ -6193,7 +6363,7 @@ static const short I268[] = {1,1,1,1};
 static const short O268[] = {1,1};
 static const short P268[] = {1,2,1,2};
 static const signed char FI268[] = {2,-1,2};
-static const short PR268[] = {33,29,33,29};
+static const short PR268[] = {49,38,49,38};
 static const char* const L269[] = {
 	"Low-frequency oscillator — six waveforms out at once: ramp down, ramp up, triangle, stepped random, square and sine",
 	"Calibrated in volts; 0V is C-3, 2.04Hz. V/OCT is added to it, seven octaves below a normal oscillator",
@@ -6222,7 +6392,7 @@ static const short I269[] = {18,19,8,9,17,10};
 static const short O269[] = {12,11,15,13,16,14};
 static const short P269[] = {1,2,3,4,6,7,5};
 static const signed char FI269[] = {1,1,1,1,3,2};
-static const short PR269[] = {30,46,29,30,32,45};
+static const short PR269[] = {83,57,38,83,23,94};
 static const char* const L270[] = {
 	"Low-frequency oscillator, 3HP — one waveform at a time",
 	"Rate; V/OCT is added to it",
@@ -6245,7 +6415,7 @@ static const short O270[] = {8};
 static const short P270[] = {1,3,2,6,7};
 static const signed char FI270[] = {1,2};
 static const signed char FO270[] = {1};
-static const short PR270[] = {32,45};
+static const short PR270[] = {23,94};
 static const char* const L271[] = {
 	"Low-pass gate, compact — envelope, low-pass filter and VCA in one",
 	"The length and basic shape of the envelope; turning it up lengthens the minimum gate and both the rise and the fall together",
@@ -6262,7 +6432,7 @@ static const short O271[] = {7};
 static const short P271[] = {1,2,3,4};
 static const signed char FI271[] = {2,0};
 static const signed char FO271[] = {0};
-static const short PR271[] = {33,29};
+static const short PR271[] = {49,38};
 static const short PO271[] = {2};
 static const char* const L272[] = {
 	"Low-pass gate — envelope, low-pass filter and VCA in one",
@@ -6288,7 +6458,7 @@ static const short O272[] = {15};
 static const short P272[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI272[] = {1,1,1,2,0};
 static const signed char FO272[] = {0};
-static const short PR272[] = {30,46,46,33,29};
+static const short PR272[] = {83,57,57,49,38};
 static const short PO272[] = {2};
 static const char* const L273[] = {
 	"Filter, compact — low-pass, high-pass, band-pass or band-reject, switched",
@@ -6307,7 +6477,7 @@ static const short O273[] = {6};
 static const short P273[] = {1,3,2,4};
 static const signed char FI273[] = {0,1};
 static const signed char FO273[] = {0};
-static const short PR273[] = {29,46};
+static const short PR273[] = {38,57};
 static const short PO273[] = {2};
 static const char* const L274[] = {
 	"Oscillator, 3HP — one waveform at a time",
@@ -6330,7 +6500,7 @@ static const short O274[] = {8};
 static const short P274[] = {1,2,3,4};
 static const signed char FI274[] = {3,1,2};
 static const signed char FO274[] = {0};
-static const short PR274[] = {32,29,45};
+static const short PR274[] = {23,38,94};
 static const short PO274[] = {2};
 static const char* const L275[] = {
 	"Signal router, two channels, with two gate inputs and logic between them",
@@ -6349,7 +6519,7 @@ static const short I275[] = {1,1,4,7,8};
 static const short O275[] = {9};
 static const short P275[] = {5,6,3};
 static const signed char FI275[] = {2,2,1};
-static const short PR275[] = {33,33,48,29,29};
+static const short PR275[] = {49,49,96,38,38};
 static const char* const L276[] = {
 	"Limiter, 6HP, stereo",
 	"Note — it holds the signal below the threshold by reducing its level rather than chopping it, so it distorts far less than CLPR",
@@ -6369,7 +6539,7 @@ static const short O276[] = {7,8};
 static const short P276[] = {2,3,4};
 static const signed char FI276[] = {0,0,1,1};
 static const signed char FO276[] = {0,0};
-static const short PR276[] = {29,29,30,30};
+static const short PR276[] = {38,38,83,83};
 static const short PO276[] = {2,2};
 static const char* const L277[] = {
 	"Manual gate — all eight outputs send +5V while the TRIG button is held, 0V otherwise",
@@ -6394,7 +6564,7 @@ static const char* const L278[] = {
 static const short I278[] = {2};
 static const short O278[] = {3,3,3,3,3,3,3,3};
 static const short P278[] = {1,1,1,1,1,1,1,1};
-static const short PR278[] = {29};
+static const short PR278[] = {38};
 static const char* const L279[] = {
 	"Matrix mixer, four by four — each input into each output mix through its own attenuverter",
 	"Knobs default to zero, so nothing is heard until some are turned up",
@@ -6411,7 +6581,7 @@ static const char* const L279[] = {
 static const short I279[] = {4,4,4,4};
 static const short O279[] = {2,2,2,2};
 static const short P279[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR279[] = {29,29,29,29};
+static const short PR279[] = {38,38,38,38};
 static const char* const L280[] = {
 	"Expander for MATRIX44 — a bipolar CV input and a mute button per matrix point",
 	"Each CV is attenuverted by its own knob",
@@ -6422,7 +6592,7 @@ static const char* const L280[] = {
 static const short I280[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short P280[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI280[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR280[] = {46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46};
+static const short PR280[] = {57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57};
 static const char* const L281[] = {
 	"Matrix mixer, eight in and one out — each input into the mix through its own attenuverter",
 	"Knobs default to zero, so nothing is heard until some are turned up",
@@ -6438,7 +6608,7 @@ static const char* const L281[] = {
 static const short I281[] = {3,3,3,3,3,3,3,3};
 static const short O281[] = {2};
 static const short P281[] = {1,1,1,1,1,1,1,1};
-static const short PR281[] = {29,29,29,29,29,29,29,29};
+static const short PR281[] = {38,38,38,38,38,38,38,38};
 static const char* const L282[] = {
 	"Matrix mixer, eight by eight — each input into each output mix through its own attenuverter",
 	"Note — the knobs are attenuverters and start at zero, so nothing reaches any output until some are turned up",
@@ -6457,7 +6627,7 @@ static const char* const L282[] = {
 static const short I282[] = {5,6,6,6,6,6,6,6};
 static const short O282[] = {7,7,7,7,7,7,7,7};
 static const short P282[] = {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
-static const short PR282[] = {29,29,29,29,29,29,29,29};
+static const short PR282[] = {38,38,38,38,38,38,38,38};
 static const char* const L283[] = {
 	"Expander for MATRIX88 — a bipolar CV input per matrix point, each attenuverted by its own knob",
 	"Note — goes immediately to the right of the MATRIX88, or of an MX88M already expanding one",
@@ -6465,7 +6635,7 @@ static const char* const L283[] = {
 };
 static const short I283[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI283[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR283[] = {46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46};
+static const short PR283[] = {57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57};
 static const char* const L284[] = {
 	"Expander for MATRIX88 — a mute button per matrix point",
 	"A mute overrides the knob, and any CV from an MX88CV",
@@ -6511,7 +6681,7 @@ static const short O285[] = {25,26,26};
 static const short P285[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,12,17,14,18,19,12,20,14};
 static const signed char FI285[] = {1,1,1,1,1,1,0,0,2,1,1,1,1,1,1};
 static const signed char FO285[] = {1,0,0};
-static const short PR285[] = {30,30,30,46,30,46,29,29,33,46,46,46,46,46,46};
+static const short PR285[] = {83,83,83,57,83,57,38,38,49,57,57,57,57,57,57};
 static const short PO285[] = {-1,2,2};
 static const char* const L286[] = {
 	"Fader and VCA, 3HP, with a mute button",
@@ -6530,7 +6700,7 @@ static const short O286[] = {8};
 static const short P286[] = {3,4};
 static const signed char FI286[] = {1,1,0};
 static const signed char FO286[] = {0};
-static const short PR286[] = {44,30,29};
+static const short PR286[] = {93,83,38};
 static const short PO286[] = {2};
 static const char* const L287[] = {
 	"Fader and VCA in stereo, with a mute button",
@@ -6549,7 +6719,7 @@ static const short O287[] = {7,8};
 static const short P287[] = {1,2};
 static const signed char FI287[] = {1,1,0,0};
 static const signed char FO287[] = {0,0};
-static const short PR287[] = {30,44,29,29};
+static const short PR287[] = {83,93,38,38};
 static const short PO287[] = {2,2};
 static const char* const L288[] = {
 	"Four-channel mixer with panning, mutes and a master fader",
@@ -6578,7 +6748,7 @@ static const short O288[] = {15,16};
 static const short P288[] = {5,7,8,5,7,8,5,7,8,5,7,8,6,9,10};
 static const signed char FI288[] = {1,1,0,1,1,0,1,1,0,1,1,0,1};
 static const signed char FO288[] = {0,0};
-static const short PR288[] = {4,12,29,4,12,29,4,12,29,4,12,29,4};
+static const short PR288[] = {4,12,38,4,12,38,4,12,38,4,12,38,4};
 static const short PO288[] = {2,2};
 static const char* const L289[] = {
 	"Expander for MIX4 — a three-band EQ for each of its four channels, two sends, and two stereo returns",
@@ -6629,7 +6799,7 @@ static const short O290[] = {11,12};
 static const short P290[] = {1,5,8,1,5,8,1,5,8,1,5,8,1,5,8,1,5,8,1,5,8,1,5,8,2,6,7};
 static const signed char FI290[] = {1,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1};
 static const signed char FO290[] = {0,0};
-static const short PR290[] = {4,12,29,4,12,29,4,12,29,4,12,29,4,12,29,4,12,29,4,12,29,4,12,29,4};
+static const short PR290[] = {4,12,38,4,12,38,4,12,38,4,12,38,4,12,38,4,12,38,4,12,38,4,12,38,4};
 static const short PO290[] = {2,2};
 static const char* const L291[] = {
 	"Expander for MIX8 — a three-band EQ per channel, two sends and two stereo returns",
@@ -6664,7 +6834,7 @@ static const char* const L292[] = {
 static const short I292[] = {3};
 static const short O292[] = {4};
 static const short P292[] = {1,2};
-static const short PR292[] = {29};
+static const short PR292[] = {38};
 static const char* const L293[] = {
 	"Multiple, 3HP — two 1-to-3 splitters",
 	"With nothing patched to the second section's input, it becomes one 1-to-6",
@@ -6674,7 +6844,7 @@ static const char* const L293[] = {
 };
 static const short I293[] = {3,1};
 static const short O293[] = {4,4,4,4,4,4};
-static const short PR293[] = {29,29};
+static const short PR293[] = {38,38};
 static const char* const L294[] = {
 	"Unity mixer, eight inputs summed to one output, with a mute button on each",
 	"One of the eight signals summed into the output",
@@ -6688,7 +6858,7 @@ static const char* const L294[] = {
 static const short I294[] = {1,1,1,1,1,1,1,1};
 static const short O294[] = {3};
 static const short P294[] = {2,2,2,2,2,2,2,2};
-static const short PR294[] = {29,29,29,29,29,29,29,29};
+static const short PR294[] = {38,38,38,38,38,38,38,38};
 static const char* const L295[] = {
 	"Eight independent mutes",
 	"Each channel passes IN to OUT unless its button is on or its CV input is positive",
@@ -6699,7 +6869,7 @@ static const char* const L295[] = {
 static const short I295[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short O295[] = {1,1,1,1,1,1,1,1};
 static const short P295[] = {1,1,1,1,1,1,1,1};
-static const short PR295[] = {29,29,29,29,29,29,29,29,33,33,33,33,33,33,33,33};
+static const short PR295[] = {38,38,38,38,38,38,38,38,49,49,49,49,49,49,49,49};
 static const char* const L296[] = {
 	"Noise source — blue, white, pink, red and Gaussian, each at its own output, all at once",
 	"Blue noise, rising in power with frequency",
@@ -6713,7 +6883,7 @@ static const char* const L296[] = {
 static const short I296[] = {6};
 static const short O296[] = {2,3,4,5,6,1};
 static const signed char FO296[] = {0,0,0,0,-1,0};
-static const short PR296[] = {29};
+static const short PR296[] = {38};
 static const short PO296[] = {2,2,2,2,-1,2};
 static const char* const L297[] = {
 	"Noise gate, 6HP, stereo — it attenuates whatever is quieter than the threshold",
@@ -6733,7 +6903,7 @@ static const short O297[] = {6,7};
 static const short P297[] = {1,2,3};
 static const signed char FI297[] = {0,0,1,1};
 static const signed char FO297[] = {0,0};
-static const short PR297[] = {29,29,30,30};
+static const short PR297[] = {38,38,83,83};
 static const short PO297[] = {2,2};
 static const char* const L298[] = {
 	"Adds an offset to a signal and scales it",
@@ -6746,7 +6916,7 @@ static const short I298[] = {1,1,2};
 static const short O298[] = {2};
 static const short P298[] = {1,1};
 static const signed char FI298[] = {1,1};
-static const short PR298[] = {49,49,29};
+static const short PR298[] = {97,97,38};
 static const char* const L299[] = {
 	"Router, one in to one of eight out — selected by clock, by voltage, or both",
 	"A trigger advances the selection",
@@ -6767,7 +6937,7 @@ static const short I299[] = {1,2,5,6};
 static const short O299[] = {7,7,7,7,7,7,7,7};
 static const short P299[] = {3,4,5};
 static const signed char FI299[] = {2,2,1};
-static const short PR299[] = {33,33,47,29};
+static const short PR299[] = {49,49,95,38};
 static const char* const L300[] = {
 	"Parametric equalizer, three bands",
 	"Each band filters IN at its own FREQ and LEVEL; the three mix to OUT",
@@ -6781,7 +6951,7 @@ static const short O300[] = {1};
 static const short P300[] = {1,1,4,3,1,1,4,3,1,1,4,3,5,5};
 static const signed char FI300[] = {1,1,1,1,1,1,1,1,1,1,0};
 static const signed char FO300[] = {0};
-static const short PR300[] = {30,30,30,46,46,46,30,30,30,46,29};
+static const short PR300[] = {83,83,83,57,57,57,83,83,83,57,38};
 static const short PO300[] = {2};
 static const char* const L301[] = {
 	"Parametric equalizer, fourteen bands",
@@ -6809,7 +6979,7 @@ static const short O301[] = {3,2,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short P301[] = {6,8,10,11,12,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15};
 static const signed char FI301[] = {1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO301[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR301[] = {46,30,29,30,46,30,46,30,46,30,46,30,46,30,46,30,46,30,46,30,46,30,46,30,46,30,46,30,46,30,46};
+static const short PR301[] = {57,83,38,83,57,83,57,83,57,83,57,83,57,83,57,83,57,83,57,83,57,83,57,83,57,83,57,83,57,83,57};
 static const short PO301[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L302[] = {
 	"Expander for PEQ14 — an envelope follower output per band",
@@ -6825,7 +6995,7 @@ static const short O302[] = {6,6,6,6,6,6,6,6,6,6,6,6,6,6};
 static const short P302[] = {1,2};
 static const signed char FI302[] = {1,1};
 static const signed char FO302[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR302[] = {30,46};
+static const short PR302[] = {83,57};
 static const char* const L303[] = {
 	"Parametric equalizer, six bands",
 	"Each band filters the signal at IN at its own frequency and level, and the six are mixed to OUT",
@@ -6843,7 +7013,7 @@ static const short O303[] = {1,8,8,8,8,8,8};
 static const short P303[] = {4,5,7,7,6,3,2,2,3,2,2,3,2,2,3,2,2,3,2,2,3,2,2};
 static const signed char FI303[] = {1,1,0,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO303[] = {0,0,0,0,0,0,0};
-static const short PR303[] = {46,30,29,30,46,30,46,30,46,30,46,30,46,30,46};
+static const short PR303[] = {57,83,38,83,57,83,57,83,57,83,57,83,57,83,57};
 static const short PO303[] = {2,2,2,2,2,2,2};
 static const char* const L304[] = {
 	"Expander for PEQ6 — an envelope follower output per band",
@@ -6868,7 +7038,7 @@ static const short O305[] = {4,5};
 static const short P305[] = {1,1};
 static const signed char FI305[] = {1,0,1,0};
 static const signed char FO305[] = {0,0};
-static const short PR305[] = {46,29,46,29};
+static const short PR305[] = {57,38,57,38};
 static const short PO305[] = {2,2};
 static const char* const L306[] = {
 	"Four-step programmer — knobs A, B, C and D per step, going to the four outputs when that step is current",
@@ -6896,7 +7066,7 @@ static const short O306[] = {5,5,5,5,2,3,3,3,3};
 static const short P306[] = {1,6,7,7,7,7,8,7,7,7,7,8,7,7,7,7,8,7,7,7,7,8};
 static const signed char FI306[] = {2,1,2,2,2,2};
 static const signed char FO306[] = {1,1,1,1,2,2,2,2,2};
-static const short PR306[] = {33,47,33,33,33,33};
+static const short PR306[] = {49,95,49,49,49,49};
 static const short PO306[] = {-1,-1,-1,-1,0,0,0,0,0};
 static const char* const L307[] = {
 	"Chainable expander for PGMR — four more steps",
@@ -6908,7 +7078,7 @@ static const short O307[] = {1,1,1,1};
 static const short P307[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FI307[] = {2,2,2,2};
 static const signed char FO307[] = {2,2,2,2};
-static const short PR307[] = {33,33,33,33};
+static const short PR307[] = {49,49,49,49};
 static const short PO307[] = {0,0,0,0};
 static const char* const L308[] = {
 	"A fixed voltage to each of up to sixteen channels of a polyphonic output, one knob per channel",
@@ -6924,7 +7094,7 @@ static const short O308[] = {5};
 static const short P308[] = {3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI308[] = {1};
 static const signed char FO308[] = {1};
-static const short PR308[] = {27};
+static const short PR308[] = {63};
 static const char* const L309[] = {
 	"A fixed voltage to each of up to eight channels of a polyphonic output, one knob per channel",
 	"Note — for putting deliberate variation across the channels of a poly voice",
@@ -6964,7 +7134,7 @@ static const short I311[] = {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1};
 static const short O311[] = {6};
 static const short P311[] = {4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,2};
 static const signed char FI311[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR311[] = {12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,29};
+static const short PR311[] = {12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,38};
 static const char* const L312[] = {
 	"Offsets and scales each of up to eight channels of a polyphonic signal, a knob pair per channel",
 	"With a cable at IN it processes that signal's channels",
@@ -6981,7 +7151,7 @@ static const short I312[] = {3,3,3,3,3,3,3,3,1};
 static const short O312[] = {7};
 static const short P312[] = {4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,6};
 static const signed char FI312[] = {1,1,1,1,1,1,1,1};
-static const short PR312[] = {12,12,12,12,12,12,12,12,29};
+static const short PR312[] = {12,12,12,12,12,12,12,12,38};
 static const char* const L313[] = {
 	"Stereo compressor and noise gate with a sidechain",
 	"Compress, or gate",
@@ -7012,7 +7182,7 @@ static const short O313[] = {3,21,21};
 static const short P313[] = {6,7,8,9,10,11,12,1,4,5};
 static const signed char FI313[] = {0,0,1,1,0,1,1,1,1};
 static const signed char FO313[] = {1,0,0};
-static const short PR313[] = {29,29,30,30,29,30,30,46,30};
+static const short PR313[] = {38,38,83,83,38,83,83,57,83};
 static const short PO313[] = {-1,2,2};
 static const char* const L314[] = {
 	"Oscillator, 3HP — square and pulse only, built around pulse-width modulation",
@@ -7032,7 +7202,7 @@ static const short O314[] = {8};
 static const short P314[] = {1,2,3,4};
 static const signed char FI314[] = {3,1,2};
 static const signed char FO314[] = {0};
-static const short PR314[] = {32,46,45};
+static const short PR314[] = {23,57,94};
 static const short PO314[] = {2};
 static const char* const L315[] = {
 	"Gate generator whose gate length is a fraction of the clock period; also a clock divider and multiplier",
@@ -7055,7 +7225,7 @@ static const short O315[] = {9};
 static const short P315[] = {2,4,6};
 static const signed char FI315[] = {1,1,2,1,2};
 static const signed char FO315[] = {2};
-static const short PR315[] = {30,30,33,30,33};
+static const short PR315[] = {83,83,49,83,49};
 static const short PO315[] = {0};
 static const char* const L316[] = {
 	"Frequency-response analyser — mainly useful to developers",
@@ -7117,7 +7287,7 @@ static const short I318[] = {6,5,7,5};
 static const short O318[] = {8,8};
 static const short P318[] = {1,1,2,2,4,4};
 static const signed char FI318[] = {2,-1,2};
-static const short PR318[] = {33,29,33,29};
+static const short PR318[] = {49,38,49,38};
 static const char* const L319[] = {
 	"Envelope generator and VCA, after the EMS VCS3",
 	"Stages are attack, on, decay and off — a trapezoid, not an ADSR. Each runs from near zero to 10 seconds",
@@ -7134,7 +7304,7 @@ static const short O319[] = {6,5,5,3};
 static const short P319[] = {1,1,1,1,5,6,2,7,4};
 static const signed char FI319[] = {0,2};
 static const signed char FO319[] = {0,1,1,2};
-static const short PR319[] = {29,33};
+static const short PR319[] = {38,49};
 static const short PO319[] = {2,-1,-1,0};
 static const char* const L320[] = {
 	"Envelope generator and VCA, after the EMS VCS3, with a CV input for every knob",
@@ -7167,7 +7337,7 @@ static const short O320[] = {19,20,21,22,1,1,1,1};
 static const short P320[] = {2,3,4,5,9,10,6,7,8};
 static const signed char FI320[] = {0,2,1,1,1,1,1,1};
 static const signed char FO320[] = {0,1,1,2,2,2,2,2};
-static const short PR320[] = {29,33,30,30,30,30,30,30};
+static const short PR320[] = {38,49,83,83,83,83,83,83};
 static const short PO320[] = {2,6,-1,0,0,0,0,0};
 static const char* const L321[] = {
 	"Oscillator, 3HP, aimed at drum synthesis — sine by default, other shapes on the menu",
@@ -7189,7 +7359,7 @@ static const short O321[] = {7};
 static const short P321[] = {1,5,2,3};
 static const signed char FI321[] = {3,1,1,2};
 static const signed char FO321[] = {0};
-static const short PR321[] = {32,29,46,45};
+static const short PR321[] = {23,38,57,94};
 static const short PO321[] = {2};
 static const char* const L322[] = {
 	"Slew limiter — when the input changes quickly, the output follows more slowly",
@@ -7207,7 +7377,7 @@ static const short I322[] = {6,7,8};
 static const short O322[] = {9};
 static const short P322[] = {1,2,3,4,5};
 static const signed char FI322[] = {1,1};
-static const short PR322[] = {30,30,29};
+static const short PR322[] = {83,83,38};
 static const char* const L323[] = {
 	"Pitch CV transposer, for stacking oscillators",
 	"An interval, added to the pitch at V/OCT and sent to OUT",
@@ -7220,7 +7390,7 @@ static const short O323[] = {2,1};
 static const short P323[] = {1,1,1,4};
 static const signed char FI323[] = {1,3};
 static const signed char FO323[] = {3,3};
-static const short PR323[] = {46,32};
+static const short PR323[] = {57,23};
 static const short PO323[] = {2,1};
 static const char* const L324[] = {
 	"Arithmetic",
@@ -7231,7 +7401,7 @@ static const char* const L324[] = {
 };
 static const short I324[] = {1,1,2};
 static const short O324[] = {1,1,1,1,2};
-static const short PR324[] = {29,29,29};
+static const short PR324[] = {38,38,38};
 static const char* const L325[] = {
 	"Signal router, two channels",
 	"While the button is held or GATE is high, each channel's HIGH input goes to its OUT; otherwise its LOW input does",
@@ -7242,7 +7412,7 @@ static const short I325[] = {1,1,1,1,1};
 static const short O325[] = {1,1};
 static const short P325[] = {1,2};
 static const signed char FI325[] = {2};
-static const short PR325[] = {33,29,29,29,29};
+static const short PR325[] = {49,38,38,38,38};
 static const char* const L326[] = {
 	"Matrix mixer, sixteen by sixteen, with switches instead of knobs",
 	"A switch passes its input into that output mix at unity gain, or at a level typed on its right-click menu",
@@ -7260,7 +7430,7 @@ static const char* const L326[] = {
 static const short I326[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const short O326[] = {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
 static const short P326[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR326[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29};
+static const short PR326[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
 static const char* const L327[] = {
 	"Router, one in and eight out, with switches — the input reaches an output only while its switch is on",
 	"A switch passes at unity gain; right-click one and type any level from -100% to 100%",
@@ -7275,7 +7445,7 @@ static const char* const L327[] = {
 static const short I327[] = {2};
 static const short O327[] = {3,3,3,3,3,3,3,3};
 static const short P327[] = {1,1,1,1,1,1,1,1};
-static const short PR327[] = {29};
+static const short PR327[] = {38};
 static const char* const L328[] = {
 	"Matrix mixer, four by four, with switches instead of knobs",
 	"Every switch is off by default; a click passes that input into that output mix at unity gain",
@@ -7294,7 +7464,7 @@ static const char* const L328[] = {
 static const short I328[] = {4,4,4,4};
 static const short O328[] = {5,5,5,5};
 static const short P328[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR328[] = {29,29,29,29};
+static const short PR328[] = {38,38,38,38};
 static const char* const L329[] = {
 	"Mixer, eight in and one out, with switches instead of knobs — an input reaches the output only while its switch is on",
 	"A switch passes at unity gain; right-click one and type any level from -100% to 100%",
@@ -7310,7 +7480,7 @@ static const char* const L329[] = {
 static const short I329[] = {2,2,2,2,2,2,2,2};
 static const short O329[] = {3};
 static const short P329[] = {1,1,1,1,1,1,1,1};
-static const short PR329[] = {29,29,29,29,29,29,29,29};
+static const short PR329[] = {38,38,38,38,38,38,38,38};
 static const char* const L330[] = {
 	"Matrix mixer, eight by eight, with switches instead of knobs",
 	"A switch passes its input into that output mix at unity gain, or at a level typed on its right-click menu",
@@ -7328,7 +7498,7 @@ static const char* const L330[] = {
 static const short I330[] = {2,2,2,2,2,2,2,2};
 static const short O330[] = {3,3,3,3,3,3,3,3};
 static const short P330[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR330[] = {29,29,29,29,29,29,29,29};
+static const short PR330[] = {38,38,38,38,38,38,38,38};
 static const char* const L331[] = {
 	"Unity mixer, 3HP — up to eight inputs summed to one output. Audio, or CV and triggers",
 	"Output limited to 12V, soft by default",
@@ -7340,7 +7510,7 @@ static const char* const L331[] = {
 };
 static const short I331[] = {2,3,3,3,3,3,3,3};
 static const short O331[] = {1};
-static const short PR331[] = {29,29,29,29,29,29,29,29};
+static const short PR331[] = {38,38,38,38,38,38,38,38};
 static const char* const L332[] = {
 	"Copies a monophonic pitch and gate out to several polyphonic channels, for unison playing",
 	"How many channels",
@@ -7370,7 +7540,7 @@ static const short I333[] = {1,4,1,4};
 static const short O333[] = {5,5};
 static const short P333[] = {3,3,2};
 static const signed char FI333[] = {1,-1,1};
-static const short PR333[] = {30,29,30,29};
+static const short PR333[] = {83,38,83,38};
 static const char* const L334[] = {
 	"Voltage-controlled amplifier — adds up to 12dB of gain, which is four times the input amplitude",
 	"Level takes a 0-10V CV, attenuated by the slider",
@@ -7383,7 +7553,7 @@ static const short O334[] = {3};
 static const short P334[] = {2};
 static const signed char FI334[] = {1,0};
 static const signed char FO334[] = {0};
-static const short PR334[] = {30,29};
+static const short PR334[] = {83,38};
 static const short PO334[] = {2};
 static const char* const L335[] = {
 	"Filter — low-pass, high-pass, band-pass or band-reject, switched",
@@ -7403,7 +7573,7 @@ static const short O335[] = {9};
 static const short P335[] = {1,2,4,5,7,6};
 static const signed char FI335[] = {1,1,3,0,1,1};
 static const signed char FO335[] = {0};
-static const short PR335[] = {46,29,32,29,30,30};
+static const short PR335[] = {57,38,23,38,83,83};
 static const short PO335[] = {2};
 static const char* const L336[] = {
 	"Four-channel mixer, 10HP, summing to one mono output",
@@ -7421,7 +7591,7 @@ static const short I336[] = {6,2,6,2,6,2,6,2,4};
 static const short O336[] = {7};
 static const short P336[] = {1,1,1,1,3,5};
 static const signed char FI336[] = {-1,1,-1,1,-1,1,-1,1,1};
-static const short PR336[] = {29,30,29,30,29,30,29,30,30};
+static const short PR336[] = {38,83,38,83,38,83,38,83,83};
 static const char* const L337[] = {
 	"Oscillator with square, saw, triangle and sine running at once, each on its own output",
 	"Sets the pitch, marked in volts; 0V gives C4 at 261.63Hz",
@@ -7443,7 +7613,7 @@ static const short O337[] = {11,11,11,11};
 static const short P337[] = {1,2,3,5,6,7,4};
 static const signed char FI337[] = {3,2,1,1};
 static const signed char FO337[] = {0,0,0,0};
-static const short PR337[] = {32,45,46,29};
+static const short PR337[] = {23,94,57,38};
 static const short PO337[] = {2,2,2,2};
 static const char* const L338[] = {
 	"Stereo level meter",
@@ -7453,7 +7623,7 @@ static const char* const L338[] = {
 };
 static const short I338[] = {1,2};
 static const short O338[] = {1,1};
-static const short PR338[] = {29,29};
+static const short PR338[] = {38,38};
 static const char* const L339[] = {
 	"VCA with three CV inputs of different kinds",
 	"The knob sets how far the VCA opens; a 0-10V CV here takes over, attenuated by the knob. Patch an envelope",
@@ -7469,7 +7639,7 @@ static const short O339[] = {6};
 static const short P339[] = {1,2,3,4};
 static const signed char FI339[] = {1,1,1,0};
 static const signed char FO339[] = {0};
-static const short PR339[] = {30,46,30,29};
+static const short PR339[] = {83,57,83,38};
 static const short PO339[] = {2};
 static const char* const L340[] = {
 	"Envelope generator imitating the voltage shapes of the vactrol circuits in hardware low-pass gates, which suits percussive envelopes",
@@ -7495,7 +7665,7 @@ static const short O340[] = {13};
 static const short P340[] = {4,5,6,7,2,11,12};
 static const signed char FI340[] = {1,1,1,1,2};
 static const signed char FO340[] = {1};
-static const short PR340[] = {30,30,30,46,33};
+static const short PR340[] = {83,83,83,57,49};
 static const char* const L341[] = {
 	"One channel of random-walk CV, 3HP",
 	"How fast and how far the voltage wanders, 0 to 100%",
@@ -7515,7 +7685,7 @@ static const short O341[] = {8};
 static const short P341[] = {1,2,3};
 static const signed char FI341[] = {1,1,1,2};
 static const signed char FO341[] = {1};
-static const short PR341[] = {30,46,30,33};
+static const short PR341[] = {83,57,83,49};
 static const char* const L342[] = {
 	"Two channels of random-walk CV, drawn as an X/Y trace on the display",
 	"A third CV, 0-10V, derived from the other two",
@@ -7565,7 +7735,7 @@ static const short O343[] = {14,14,14,14,15};
 static const short P343[] = {8,9,13,10,11,1,5,6,2,5,6,3,5,6,4,5,6};
 static const signed char FI343[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,2};
 static const signed char FO343[] = {0,0,0,0,0};
-static const short PR343[] = {29,30,46,46,30,30,46,30,30,46,30,30,46,30,32,45};
+static const short PR343[] = {38,83,57,57,83,83,57,83,83,57,83,83,57,83,23,94};
 static const short PO343[] = {2,2,2,2,2};
 static const char* const L344[] = {
 	"Crossfader between inputs A and B — also a two-channel mixer, or a dry/wet control",
@@ -7580,7 +7750,7 @@ static const short I344[] = {1,4,5};
 static const short O344[] = {6};
 static const short P344[] = {1,2,3};
 static const signed char FI344[] = {1};
-static const short PR344[] = {46,29,29};
+static const short PR344[] = {57,38,38};
 static const char* const L345[] = {
 	"Two independent constant voltage sources, each switched on and off by hand",
 	"One press turns that half on and the next turns it off; the lamp is lit while it is on, and the output is held at 0V while it is off",
@@ -7591,6 +7761,7 @@ static const char* const L345[] = {
 static const short O345[] = {3,3};
 static const short P345[] = {2,2,1,1};
 static const signed char FO345[] = {1,1};
+static const short PO345[] = {98,98};
 static const char* const L346[] = {
 	"Four-step sequencer clocked from step to step, working over the 0-10V range that CV uses rather than the bipolar range a note sequencer covers",
 	"Advances to the next of the four steps on each rising edge through 1.7V",
@@ -7604,7 +7775,8 @@ static const short O346[] = {2};
 static const short P346[] = {3,3,3,3};
 static const signed char FI346[] = {1,1,1,1,2};
 static const signed char FO346[] = {1};
-static const short PR346[] = {-1,-1,-1,-1,0};
+static const short PR346[] = {32,32,32,32,64};
+static const short PO346[] = {87};
 static const char* const L347[] = {
 	"Four-pole resonant low pass filter modelled on the Moog ladder, with frequency and resonance under knob and CV control",
 	"The signal to be filtered; with nothing patched here the output stays at 0V",
@@ -7620,7 +7792,7 @@ static const short O347[] = {6};
 static const short P347[] = {2,4};
 static const signed char FI347[] = {1,1,0};
 static const signed char FO347[] = {0};
-static const short PR347[] = {-1,-1,2};
+static const short PR347[] = {99,99,8};
 static const short PO347[] = {2};
 static const char* const L348[] = {
 	"Generator for the dual tone multi-frequency pairs a telephone keypad sends, one of sixteen keys picked by pitch voltage and sounded while a gate is high",
@@ -7634,8 +7806,8 @@ static const short I348[] = {2,1};
 static const short O348[] = {3};
 static const signed char FI348[] = {3,2};
 static const signed char FO348[] = {0};
-static const short PR348[] = {2,0};
-static const short PO348[] = {2};
+static const short PR348[] = {100,64};
+static const short PO348[] = {101};
 static const char* const L349[] = {
 	"Single-band equalizer with seven filter shapes, a frequency from 30Hz to 14000Hz and an adjustable bandwidth",
 	"The signal to be filtered",
@@ -7651,7 +7823,7 @@ static const short O349[] = {2};
 static const short P349[] = {3,5,6};
 static const signed char FI349[] = {0,1,1};
 static const signed char FO349[] = {0};
-static const short PR349[] = {2,-1,-1};
+static const short PR349[] = {8,99,99};
 static const short PO349[] = {2};
 static const char* const L350[] = {
 	"Compressor reducing anything that rises above a threshold, with ratio, attack and release",
@@ -7667,7 +7839,7 @@ static const short O350[] = {6};
 static const short P350[] = {1,2,3,4};
 static const signed char FI350[] = {0};
 static const signed char FO350[] = {0};
-static const short PR350[] = {2};
+static const short PR350[] = {8};
 static const short PO350[] = {2};
 static const char* const L351[] = {
 	"Two independent two-input mixers in one narrow panel, each crossfading between its pair of inputs",
@@ -7681,7 +7853,7 @@ static const short O351[] = {4,4};
 static const short P351[] = {3,3};
 static const signed char FI351[] = {0,0,0,0};
 static const signed char FO351[] = {0,0};
-static const short PR351[] = {2,2,2,2};
+static const short PR351[] = {8,8,8,8};
 static const short PO351[] = {2,2};
 static const char* const L352[] = {
 	"Eight channel stereo mixer, each channel with a level slider, a pan knob and solo and mute buttons, summed to a stereo pair with its own levels and mutes",
@@ -7704,7 +7876,7 @@ static const short O352[] = {10,11};
 static const short P352[] = {2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,6,7,8,9};
 static const signed char FI352[] = {0,0,0,0,0,0,0,0};
 static const signed char FO352[] = {0,0};
-static const short PR352[] = {2,2,2,2,2,2,2,2};
+static const short PR352[] = {8,8,8,8,8,8,8,8};
 static const short PO352[] = {2,2};
 static const char* const L353[] = {
 	"Eight channel stereo mixer with a CV input for every channel control and a send and return loop on each channel and on the stereo mix",
@@ -7746,7 +7918,7 @@ static const short O353[] = {10,10,10,10,10,10,10,10,18,19,20,21};
 static const short P353[] = {2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,6,6,6,6,6,6,6,6,8,8,8,8,8,8,8,8,12,12,12,12,12,12,12,12,14,15,16,17,24,25};
 static const signed char FI353[] = {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,2,2,1,1};
 static const signed char FO353[] = {0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR353[] = {2,2,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,2,2,0,0,-1,-1};
+static const short PR353[] = {8,8,8,8,8,8,8,8,99,99,99,99,99,99,99,99,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,8,8,8,8,8,8,8,8,8,8,64,64,35,35};
 static const short PO353[] = {2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L354[] = {
 	"Noise generator producing white or pink noise for as long as a gate is high",
@@ -7760,7 +7932,8 @@ static const short O354[] = {3};
 static const short P354[] = {2};
 static const signed char FI354[] = {2};
 static const signed char FO354[] = {0};
-static const short PO354[] = {2};
+static const short PR354[] = {64};
+static const short PO354[] = {101};
 static const char* const L355[] = {
 	"Inverter, either flipping the sign of a voltage or turning a gate into its opposite",
 	"The voltage to be inverted",
@@ -7771,6 +7944,7 @@ static const char* const L355[] = {
 static const short I355[] = {1};
 static const short O355[] = {3};
 static const short P355[] = {2};
+static const short PR355[] = {86};
 static const char* const L356[] = {
 	"Two oscillators blended into a single output, each with its own wave, start shift, octave, fine tuning, polarity and random dropping of cycles",
 	"Picks the wave that oscillator draws in whole steps, 0 sine, 1 triangle, 2 sawtooth and 3 square, with the name of the chosen wave shown in the green display for it",
@@ -7796,8 +7970,8 @@ static const short O356[] = {16};
 static const short P356[] = {1,1,3,17,5,5,7,7,9,9,13,11,12};
 static const signed char FI356[] = {1,1,1,1,3,3,1,1,1,1,1,3};
 static const signed char FO356[] = {0};
-static const short PR356[] = {-1,-1,-1,-1,1,1,-1,-1,-1,-1,-1,2};
-static const short PO356[] = {2};
+static const short PR356[] = {102,102,32,32,103,14,34,34,99,99,32,14};
+static const short PO356[] = {3};
 static const char* const L357[] = {
 	"Splits one input between two outputs under knob and CV control",
 	"The signal divided between the two outputs",
@@ -7811,7 +7985,7 @@ static const short O357[] = {4,5};
 static const short P357[] = {2};
 static const signed char FI357[] = {0,1};
 static const signed char FO357[] = {0,0};
-static const short PR357[] = {2,-1};
+static const short PR357[] = {8,104};
 static const short PO357[] = {2,2};
 static const char* const L358[] = {
 	"Adds a fixed voltage to a signal, offsetting it up or down; a waveform running -5V to 5V becomes a 0-10V CV source when shifted by 5V",
@@ -7826,6 +8000,7 @@ static const short I358[] = {4,1};
 static const short O358[] = {5};
 static const short P358[] = {2,3};
 static const signed char FI358[] = {1};
+static const short PR358[] = {34,8};
 static const char* const L359[] = {
 	"Routes one signal to either of two outputs, choosing between them by comparing a second voltage against a split point",
 	"The signal routed to one output or the other; with nothing patched here the modulator voltage is routed instead",
@@ -7845,6 +8020,7 @@ static const short I359[] = {1,2,5,7,9};
 static const short O359[] = {10,11};
 static const short P359[] = {3,4,6,8};
 static const signed char FI359[] = {-1,1,1,1,1};
+static const short PR359[] = {105,8,32,34,34};
 static const char* const L360[] = {
 	"Wave multiplier making eight delayed copies of one input and summing them into a running mix, with each copy also available on its own",
 	"The signal copied into all eight delay lines",
@@ -7861,8 +8037,8 @@ static const short O360[] = {6,6,6,6,6,6,6,6,7,8};
 static const short P360[] = {5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,2};
 static const signed char FI360[] = {1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,0};
 static const signed char FO360[] = {0,0,0,0,0,0,0,0,0,0};
-static const short PR360[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2};
-static const short PO360[] = {2,2,2,2,2,2,2,2,2,2};
+static const short PR360[] = {99,99,99,99,99,99,99,99,-1,-1,-1,-1,-1,-1,-1,-1,8};
+static const short PO360[] = {2,2,2,2,2,2,2,2,38,2};
 static const char* const L361[] = {
 	"Two independent exciters, each blending its input with a saturated copy of it",
 	"The signal saturated in that half",
@@ -7875,7 +8051,7 @@ static const short O361[] = {4,4};
 static const short P361[] = {3,3};
 static const signed char FI361[] = {0,0,1,1};
 static const signed char FO361[] = {0,0};
-static const short PR361[] = {2,2,-1,-1};
+static const short PR361[] = {8,8,99,99};
 static const short PO361[] = {2,2};
 static const char* const L362[] = {
 	"A clocked kick and bass voice for psytrance: a pitch-swept sine kick on each beat, a filtered saw bass on the sixteenths between them, and ramp and gate outputs spanning a sixteen-bar cycle",
@@ -7904,7 +8080,7 @@ static const short P362[] = {1,2,3,4,5,7,8,6};
 static const signed char FI362[] = {2,3,2};
 static const signed char FO362[] = {0,0,1,2,1};
 static const short PR362[] = {0,1,0};
-static const short PO362[] = {2,2,26,-1,50};
+static const short PO362[] = {2,2,78,-1,106};
 static const char* const L363[] = {
 	"A through-zero FM oscillator pair at a fixed tuning: a modulator and a carrier, with the through-zero result spread across a stereo pair",
 	"Sets the root note, -12 to 12 semitones from C, and the readout names it",
@@ -8119,7 +8295,7 @@ static const char* const L376[] = {
 static const short I376[] = {11,12,13,14,15,16};
 static const short P376[] = {1,2,3,4,5,6,7,10,8,9};
 static const signed char FI376[] = {1,2,2,2,1,1};
-static const short PR376[] = {-1,0,0,0,-1,-1};
+static const short PR376[] = {16,49,49,107,108,108};
 static const char* const L377[] = {
 	"Multi-tap stereo and polyphonic delay, carrying one delay tap of its own along with the feedback, freeze, clear, clock and input gain shared by every tap in the chain",
 	"Adds an Echo Tap to the right, cloned from this tap's settings, shifting the rest of the chain over to make room",
@@ -8186,7 +8362,7 @@ static const short O377[] = {38,39,40};
 static const short P377[] = {1,2,3,4,5,6,7,-1,14,8,9,10,11,12,22,13,19,23,24,16,20,21,-1,17,18,15};
 static const signed char FI377[] = {0,0,1,1,1,1,1,0,0,2,2,2,2};
 static const signed char FO377[] = {0,0,1};
-static const short PR377[] = {2,2,-1,-1,-1,-1,-1,2,2,0,0,0,0};
+static const short PR377[] = {38,109,38,110,111,108,108,38,112,113,107,49,49};
 static const short PO377[] = {2,2,-1};
 static const char* const L378[] = {
 	"Mixes a Sapphire Echo chain down to its stereo or polyphonic output, and goes to the right of the last Echo Tap",
@@ -8208,6 +8384,7 @@ static const short O378[] = {7,8};
 static const short P378[] = {1,2,3,4};
 static const signed char FI378[] = {1,1};
 static const signed char FO378[] = {0,0};
+static const short PR378[] = {110,108};
 static const short PO378[] = {2,2};
 static const char* const L379[] = {
 	"Adds one more delay tap to a Sapphire Echo chain, and goes to the right of Echo or of another Echo Tap",
@@ -8248,7 +8425,7 @@ static const short O379[] = {21,22,23};
 static const short P379[] = {1,2,3,4,5,6,7,8,9,10,11,-1,12,13,14};
 static const signed char FI379[] = {1,1,-1,1,0,0,2};
 static const signed char FO379[] = {0,0,1};
-static const short PR379[] = {-1,-1,-1,-1,2,2,0};
+static const short PR379[] = {38,111,-1,108,38,112,113};
 static const short PO379[] = {2,2,-1};
 static const char* const L380[] = {
 	"Stereo synthesis filter that runs audio through a simulated hexagonal mesh of balls and springs, turning it into metallic, bell-like or drone textures, and able to self-oscillate with no input",
@@ -8300,7 +8477,7 @@ static const short O380[] = {30,31};
 static const short P380[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,-1,-1,18,19};
 static const signed char FI380[] = {1,1,1,1,1,0,0,2,1,1};
 static const signed char FO380[] = {0,0};
-static const short PR380[] = {-1,-1,-1,-1,-1,2,2,0,-1,-1};
+static const short PR380[] = {108,108,108,111,111,114,115,116,108,108};
 static const short PO380[] = {2,2};
 static const char* const L381[] = {
 	"Input stage of an expandable chain of bandpass, notch and comb filters, carrying the audio inputs, the cascade control and a chaotic modulation source routed through the whole chain",
@@ -8337,7 +8514,7 @@ static const char* const L381[] = {
 static const short I381[] = {17,18,19,20,21,22};
 static const short P381[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 static const signed char FI381[] = {0,0,1,1,1,1};
-static const short PR381[] = {2,2,-1,-1,-1,-1};
+static const short PR381[] = {38,109,117,118,119,117};
 static const char* const L382[] = {
 	"Adds one more filter to a Sapphire Empath chain, and goes to the right of Empath or of another Empath Filter",
 	"Adds another Empath Filter to the right, cloned from this filter's settings, shifting the rest of the chain over to make room",
@@ -8377,7 +8554,7 @@ static const short O382[] = {22,23,24};
 static const short P382[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 static const signed char FI382[] = {3,1,1,1,-1,0,0};
 static const signed char FO382[] = {0,0,1};
-static const short PR382[] = {1,-1,-1,-1,-1,2,2};
+static const short PR382[] = {23,117,118,117,-1,38,112};
 static const short PO382[] = {2,2,-1};
 static const char* const L383[] = {
 	"Mixes a Sapphire Empath chain down to its stereo or polyphonic output, and goes to the right of the last Empath Filter",
@@ -8402,6 +8579,7 @@ static const short O383[] = {9,10};
 static const short P383[] = {1,2,3,4,5,-1,6};
 static const signed char FI383[] = {1,1};
 static const signed char FO383[] = {0,0};
+static const short PR383[] = {117,117};
 static const short PO383[] = {2,2};
 static const char* const L384[] = {
 	"Polyphonic envelope follower and pitch detector, measuring the loudness and the pitch of a single tone in the incoming audio by counting samples between zero crossings",
@@ -8435,7 +8613,7 @@ static const short O384[] = {17,18,19};
 static const short P384[] = {1,2,3,4,5,6,7,8,9,10};
 static const signed char FI384[] = {0,1,1,3,1,1};
 static const signed char FO384[] = {1,3,2};
-static const short PR384[] = {2,-1,-1,1,-1,-1};
+static const short PR384[] = {38,111,108,23,108,108};
 static const short PO384[] = {-1,1,0};
 static const char* const L385[] = {
 	"Chaotic oscillator that moves a particle along the Rucklidge attractor and puts out its three coordinates as smooth, unpredictable voltages, anywhere from very slow modulation to audio rate",
@@ -8465,6 +8643,8 @@ static const short O385[] = {9,10,11,12};
 static const short P385[] = {1,2,3,4,-1,-1,-1,-1,5,6};
 static const signed char FI385[] = {1,1};
 static const signed char FO385[] = {1,1,1,1};
+static const short PR385[] = {111,111};
+static const short PO385[] = {8,8,8,38};
 static const char* const L386[] = {
 	"Stereo reverb, a port of the Airwindows Galactic algorithm by Chris Johnson, verified against the original to the sample",
 	"Sets how much of the reverb's energy each incoming sample replaces: at 0 the tanks are frozen indefinitely, at 1 new audio takes them over quickly",
@@ -8501,7 +8681,7 @@ static const short O386[] = {22,23};
 static const short P386[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
 static const signed char FI386[] = {0,0,1,1,1,1,1,2};
 static const signed char FO386[] = {0,0};
-static const short PR386[] = {2,2,-1,-1,-1,-1,-1,0};
+static const short PR386[] = {114,115,108,108,108,108,108,49};
 static const short PO386[] = {2,2};
 static const char* const L387[] = {
 	"Chaotic oscillator that moves a particle along the Aizawa attractor and puts out its three coordinates as smooth, unpredictable voltages, anywhere from very slow modulation to audio rate",
@@ -8533,6 +8713,8 @@ static const short O387[] = {9,10,11,12};
 static const short P387[] = {1,2,3,4,-1,-1,-1,-1,5,6};
 static const signed char FI387[] = {1,1};
 static const signed char FO387[] = {1,1,1,1};
+static const short PR387[] = {111,111};
+static const short PO387[] = {8,8,8,38};
 static const char* const L388[] = {
 	"Stereo state-variable filter with resonance, wet-dry mix and output gain, running as a lowpass, bandpass or highpass",
 	"Sets the corner frequency, spanning 5 octaves either side of C5 at 523.251Hz, with each unit on the dial an octave",
@@ -8568,7 +8750,7 @@ static const short O388[] = {18,19};
 static const short P388[] = {1,2,3,4,5,6,7,8,9,-1,10,11};
 static const signed char FI388[] = {0,0,3,1,1,1};
 static const signed char FO388[] = {0,0};
-static const short PR388[] = {2,2,1,-1,-1,-1};
+static const short PR388[] = {114,115,23,108,108,108};
 static const short PO388[] = {2,2};
 static const char* const L389[] = {
 	"Generates streams of random vectors that point in every direction of an N-dimensional space with equal probability, for driving physics simulations such as Nucleus",
@@ -8577,7 +8759,7 @@ static const char* const L389[] = {
 };
 static const short O389[] = {1,1,1,1,1,1,1,1,1,1};
 static const signed char FO389[] = {0,0,0,0,0,0,0,0,0,0};
-static const short PO389[] = {2,2,2,2,2,2,2,2,2,2};
+static const short PO389[] = {38,38,38,38,38,38,38,38,38,38};
 static const char* const L390[] = {
 	"Chaotic oscillator that moves a particle along the Dequan Li attractor and puts out its three coordinates as smooth, unpredictable voltages, anywhere from very slow modulation to audio rate",
 	"Sets how fast the simulation runs, from -7 to +7, each unit doubling the rate; right-clicking adds turbo mode, which multiplies the rate by a further 32",
@@ -8607,6 +8789,8 @@ static const short O390[] = {9,10,11,12};
 static const short P390[] = {1,2,3,4,-1,-1,-1,-1,5,6};
 static const signed char FI390[] = {1,1};
 static const signed char FO390[] = {1,1,1,1};
+static const short PR390[] = {111,111};
+static const short PO390[] = {8,8,8,38};
 static const char* const L391[] = {
 	"Five controls that connect and disconnect a cable rather than muting it, so the module downstream reads a disconnected row as nothing patched at all, which differs from receiving 0V",
 	"Connects or disconnects that row while nothing is patched to the control input of the same row",
@@ -8621,7 +8805,8 @@ static const short I391[] = {2,2,2,2,2,3,3,3,3,3};
 static const short O391[] = {4,4,4,4,4};
 static const short P391[] = {1,1,1,1,1};
 static const signed char FI391[] = {-1,-1,-1,-1,-1,2,2,2,2,2};
-static const short PR391[] = {-1,-1,-1,-1,-1,0,0,0,0,0};
+static const short PR391[] = {38,38,38,38,38,120,120,120,120,120};
+static const short PO391[] = {38,38,38,38,38};
 static const char* const L392[] = {
 	"Simulates five particles labelled A to E moving under invented laws of physics; the position of A goes in as three voltages and the positions of the other four come out as twelve",
 	"Sets the rate at which time flows in the simulation, from -6 to +6, each unit doubling it; low settings give slow control voltages and high settings give audible tones",
@@ -8670,6 +8855,7 @@ static const short I392[] = {12,13,14,15,16,17,18,19};
 static const short O392[] = {20,21,22,23,24,25,26,27,28,29,30,31};
 static const short P392[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI392[] = {-1,-1,-1,1,1,1,1,1};
+static const short PR392[] = {38,38,38,111,108,111,108,108};
 static const char* const L393[] = {
 	"Rotates an incoming 3D vector around the diagonal axis through the origin and the point 1,1,1, which cycles the coordinates into one another",
 	"Sets the twist angle from -3 to +3, one unit per 120 degrees, so each whole unit cycles the coordinates exactly once and 0 leaves the vector as it arrived",
@@ -8691,6 +8877,7 @@ static const short O393[] = {6,7,8,9};
 static const short P393[] = {1,2,3};
 static const signed char FI393[] = {1,1};
 static const signed char FO393[] = {1,1,1,1};
+static const short PR393[] = {38,111};
 static const char* const L394[] = {
 	"Simulates five particles labelled A to E moving under invented laws of physics; particle A goes in as one 3-channel vector and the positions of the other four come out as four more",
 	"Sets the rate at which time flows in the simulation, from -6 to +6, each unit doubling it; low settings give slow control voltages and high settings give audible tones",
@@ -8728,6 +8915,7 @@ static const short I394[] = {13,14,15,16,17,18};
 static const short O394[] = {19,20,21,22};
 static const short P394[] = {1,2,3,4,5,-1,-1,6,7,8,9,10,-1,-1,11,-1,-1,12};
 static const signed char FI394[] = {-1,1,1,1,1,1};
+static const short PR394[] = {38,111,108,111,108,108};
 static const char* const L395[] = {
 	"Polyphonic trigger generator whose pulse timing runs anywhere from perfectly regular to the random statistics of radioactive decay",
 	"Sets the mean pulse rate from -7 to +7, each unit doubling it, with 0 giving 2Hz, +7 giving 256Hz and -7 giving about one pulse a minute",
@@ -8754,8 +8942,8 @@ static const short O395[] = {11};
 static const short P395[] = {1,2,3,4,-1,5,6,7};
 static const signed char FI395[] = {1,1,2};
 static const signed char FO395[] = {2};
-static const short PR395[] = {-1,-1,0};
-static const short PO395[] = {0};
+static const short PR395[] = {23,108,49};
+static const short PO395[] = {16};
 static const char* const L396[] = {
 	"Takes the 3D vector cross product of two incoming vectors, giving a third vector at right angles to both, which turns a pair of chaotic oscillators into a more complex chaotic signal",
 	"Adds a Tricorder to the right, which plots the output vector in 3D",
@@ -8773,6 +8961,7 @@ static const short O396[] = {4,5,6,7};
 static const short P396[] = {1};
 static const signed char FI396[] = {1,1};
 static const signed char FO396[] = {1,1,1,1};
+static const short PR396[] = {38,38};
 static const char* const L397[] = {
 	"Polyphonic state-variable filter with resonance, wet-dry mix and output gain, offering lowpass, bandpass, highpass and notch outputs at the same time",
 	"Sets the corner frequency, spanning 5 octaves either side of C5 at 523.251Hz, with each unit on the dial an octave",
@@ -8807,7 +8996,7 @@ static const short O397[] = {16,17,18,19};
 static const short P397[] = {1,2,3,4,5,6,7,8,-1,9};
 static const signed char FI397[] = {0,3,1,1,1};
 static const signed char FO397[] = {0,0,0,0};
-static const short PR397[] = {2,1,-1,-1,-1};
+static const short PR397[] = {38,23,108,108,108};
 static const short PO397[] = {2,2,2,2};
 static const char* const L398[] = {
 	"Splits, adds and merges a stereo or 3D signal in 2HP: three monophonic inputs and a polyphonic input are added channel by channel, and each sum reaches both a monophonic and a polyphonic output",
@@ -8827,6 +9016,7 @@ static const char* const L398[] = {
 static const short I398[] = {5,2,3,4};
 static const short O398[] = {9,6,7,8};
 static const short P398[] = {-1,1};
+static const short PR398[] = {38,38,38,38};
 static const char* const L399[] = {
 	"Feeds any three voltages into a Tricorder for graphing, and goes immediately to the left of it",
 	"Scales the three voltages passed on for graphing by a factor of 0 to 16, marked from minus infinity dB to +24dB, with 0dB leaving them unchanged",
@@ -8846,7 +9036,7 @@ static const char* const L399[] = {
 static const short I399[] = {4,5,6,7,8,9};
 static const short P399[] = {1,2,3};
 static const signed char FI399[] = {-1,-1,-1,2,-1,1};
-static const short PR399[] = {-1,-1,-1,0,-1,-1};
+static const short PR399[] = {38,38,38,49,38,108};
 static const char* const L400[] = {
 	"Takes the vector a Tricorder is graphing out to ports, and goes immediately to the right of it",
 	"Scales the output vector by a factor of 0 to 16, marked from minus infinity dB to +24dB, with 0dB leaving it unchanged",
@@ -8869,6 +9059,7 @@ static const short O400[] = {5,6,7,8,9};
 static const short P400[] = {1,2,3};
 static const signed char FI400[] = {1};
 static const signed char FO400[] = {1,1,1,2,1};
+static const short PR400[] = {108};
 static const short PO400[] = {-1,-1,-1,0,-1};
 static const char* const L401[] = {
 	"A 3D oscilloscope that plots the path of a vector arriving from the module on its left, and passes that vector on to the module on its right",
@@ -8927,7 +9118,7 @@ static const short O402[] = {29,30};
 static const short P402[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
 static const signed char FI402[] = {1,1,1,1,1,1,1,1,2,0,0};
 static const signed char FO402[] = {0,0};
-static const short PR402[] = {-1,-1,-1,-1,-1,-1,-1,-1,0,2,2};
+static const short PR402[] = {108,108,108,108,108,111,108,108,49,121,121};
 static const short PO402[] = {2,2};
 static const char* const L403[] = {
 	"Programmable chaotic oscillator: three velocity formulas typed into its menu move a particle through 3D space, and its coordinates come out as smooth, unpredictable voltages",
@@ -8965,6 +9156,8 @@ static const short O403[] = {9,10,11,12};
 static const short P403[] = {1,2,3,4,-1,-1,-1,-1,5,6};
 static const signed char FI403[] = {1,1};
 static const signed char FO403[] = {1,1,1,1};
+static const short PR403[] = {111,111};
+static const short PO403[] = {8,8,8,38};
 static const char* const L404[] = {
 	"Shift register with eight stages, A to H, working as one eight-stage register or as two independent four-stage ones",
 	"The voltage sampled into stage A each time the shift input feeding stages A to D receives a rising edge",
@@ -8977,7 +9170,7 @@ static const short I404[] = {1,2,3,4};
 static const short O404[] = {5,5,5,5,5,5,5,5};
 static const signed char FI404[] = {1,2,1,2};
 static const signed char FO404[] = {1,1,1,1,1,1,1,1};
-static const short PR404[] = {36,28,36,28};
+static const short PR404[] = {86,82,86,82};
 static const char* const L405[] = {
 	"Arpeggiator taking a polyphonic chord and playing its notes one at a time in a chosen pattern, with programme, octave and modify settings per step",
 	"Locks the arpeggiator onto the chord that is playing, so changes at the V/OCT and GATE inputs are ignored; every other control keeps working",
@@ -9007,7 +9200,7 @@ static const short O405[] = {8,7,9};
 static const short P405[] = {12,11,10,13,14,15,1};
 static const signed char FI405[] = {2,3,2,2,2};
 static const signed char FO405[] = {2,3,2};
-static const short PR405[] = {31,32,28,28,28};
+static const short PR405[] = {53,23,82,82,82};
 static const short PO405[] = {0,1,0};
 static const char* const L406[] = {
 	"Dual attenuator, one channel switchable between attenuating and attenuverting; a channel with nothing patched to its input becomes a manual voltage source",
@@ -9022,7 +9215,7 @@ static const char* const L406[] = {
 static const short I406[] = {4,5};
 static const short O406[] = {6,7};
 static const short P406[] = {1,2,3};
-static const short PR406[] = {29,29};
+static const short PR406[] = {38,38};
 static const char* const L407[] = {
 	"Attenuator and attenuverter for two signals, one knob setting the level of both, with a straight and a sign-flipped output for each",
 	"Sets the level applied to both channels; in attenuate mode the travel runs from silence to full level, and in attenuvert mode from full inversion through silence to full level",
@@ -9035,7 +9228,7 @@ static const char* const L407[] = {
 static const short I407[] = {3,3};
 static const short O407[] = {4,4,5,5};
 static const short P407[] = {1,2};
-static const short PR407[] = {27,27};
+static const short PR407[] = {63,63};
 static const char* const L408[] = {
 	"LED bar graph reading the voltage of a signal, linearly, in 1V steps from -10V to 10V",
 	"The signal whose voltage is displayed",
@@ -9075,7 +9268,7 @@ static const short O409[] = {14,15,12,13};
 static const short P409[] = {-1,-1,-1,-1,-1,-1,-1,-1,9,9,9,9,9,9,9,9,7,-1,8,6,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11};
 static const signed char FI409[] = {2,2,2,1,1};
 static const signed char FO409[] = {2,2,1,1};
-static const short PR409[] = {28,28,28,11,4};
+static const short PR409[] = {82,82,82,11,4};
 static const short PO409[] = {0,0,-1,-1};
 static const char* const L410[] = {
 	"Compares two 8-bit binary numbers built from gate inputs, with six outputs for the possible results",
@@ -9094,7 +9287,7 @@ static const short O410[] = {4,5,6,7,8,9};
 static const short P410[] = {3,3,3,3,3,3,3,3};
 static const signed char FI410[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO410[] = {2,2,2,2,2,2};
-static const short PR410[] = {28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28};
+static const short PR410[] = {82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82};
 static const char* const L411[] = {
 	"Sequencer built on a binary counter, mixing the counter's bits together in whatever proportions the knobs set to make a repeating control voltage",
 	"How much that bit of the counter adds to the output voltage, from -10 to +10, so a bit can pull the voltage down as well as push it up",
@@ -9123,7 +9316,7 @@ static const short O411[] = {10,11,12,13};
 static const short P411[] = {1,1,1,1,1,1,2,3,4,5};
 static const signed char FI411[] = {2,2,2,1};
 static const signed char FO411[] = {1,1,2,2};
-static const short PR411[] = {28,28,28,7};
+static const short PR411[] = {82,82,82,7};
 static const short PO411[] = {-1,-1,0,0};
 static const char* const L412[] = {
 	"Blank panel 12HP wide, carrying the Count Modula logo and no controls, for filling unused rack space",
@@ -9167,7 +9360,7 @@ static const short I419[] = {1,2,3,4,6};
 static const short O419[] = {5,7};
 static const signed char FI419[] = {2,2,2,2,2};
 static const signed char FO419[] = {2,2};
-static const short PR419[] = {31,31,31,31,31};
+static const short PR419[] = {53,53,53,53,53};
 static const short PO419[] = {0,0};
 static const char* const L420[] = {
 	"Four-input OR gate with a separate logical inverter, polyphonic; a voltage over 2V counts as high and stays high until it falls below 0.1V",
@@ -9183,7 +9376,7 @@ static const short I420[] = {1,2,3,4,6};
 static const short O420[] = {5,7};
 static const signed char FI420[] = {2,2,2,2,2};
 static const signed char FO420[] = {2,2};
-static const short PR420[] = {31,31,31,31,31};
+static const short PR420[] = {53,53,53,53,53};
 static const short PO420[] = {0,0};
 static const char* const L421[] = {
 	"Two logical inverters with voltage control over whether each one inverts, A and B",
@@ -9195,7 +9388,7 @@ static const short I421[] = {1,1,2,2};
 static const short O421[] = {3,3};
 static const signed char FI421[] = {2,2,2,2};
 static const signed char FO421[] = {2,2};
-static const short PR421[] = {31,31,31,31};
+static const short PR421[] = {53,53,53,53};
 static const short PO421[] = {0,0};
 static const char* const L422[] = {
 	"Four-input XOR gate with a separate logical inverter, polyphonic; a voltage over 2V counts as high and stays high until it falls below 0.1V",
@@ -9211,7 +9404,7 @@ static const short O422[] = {4,6};
 static const short P422[] = {3};
 static const signed char FI422[] = {2,2,2,2,2};
 static const signed char FO422[] = {2,2};
-static const short PR422[] = {31,31,31,31,31};
+static const short PR422[] = {53,53,53,53,53};
 static const short PO422[] = {0,0};
 static const char* const L423[] = {
 	"Sends the channels of a polyphonic signal out one at a time to be processed separately, takes them back, and rebuilds the polyphonic signal",
@@ -9224,7 +9417,7 @@ static const char* const L423[] = {
 static const short I423[] = {1,4,4,4,4,4,4,4,4};
 static const short O423[] = {2,3,3,3,3,3,3,3,3};
 static const short P423[] = {5};
-static const short PR423[] = {27,36,36,36,36,36,36,36,36};
+static const short PR423[] = {63,86,86,86,86,86,86,86,86};
 static const char* const L424[] = {
 	"Fires a burst of 1 to 16 pulses each time it is triggered, timed by its own clock or by one you patch in",
 	"Sets how many pulses make up the burst, 1 to 16",
@@ -9252,7 +9445,7 @@ static const short O424[] = {15,16,17,18};
 static const short P424[] = {1,3,4,5,8,2,9,6,7};
 static const signed char FI424[] = {2,1,2,1,1};
 static const signed char FO424[] = {2,2,2,2};
-static const short PR424[] = {28,7,28,7,8};
+static const short PR424[] = {82,7,82,7,8};
 static const short PO424[] = {0,0,0,0};
 static const char* const L425[] = {
 	"Fires a burst of 1 to 64 pulses each time it is triggered, timed by its own jittering clock or by one you patch in",
@@ -9286,7 +9479,7 @@ static const short O425[] = {19,20,21,22,23};
 static const short P425[] = {1,3,4,5,14,2,15,11,12,6,8,9};
 static const signed char FI425[] = {2,1,2,1,1,1,1};
 static const signed char FO425[] = {2,2,2,2,2};
-static const short PR425[] = {28,7,28,7,8,4,8};
+static const short PR425[] = {82,7,82,7,8,4,8};
 static const short PO425[] = {0,0,0,0,0};
 static const char* const L426[] = {
 	"Combines up to seven gate or trigger signals onto one of two busses, each bus being a seven-input OR gate",
@@ -9301,7 +9494,7 @@ static const short O426[] = {3,4};
 static const short P426[] = {2,2,2,2,2,2,2};
 static const signed char FI426[] = {2,2,2,2,2,2,2};
 static const signed char FO426[] = {2,2};
-static const short PR426[] = {28,28,28,28,28,28,28};
+static const short PR426[] = {82,82,82,82,82,82,82};
 static const short PO426[] = {0,0};
 static const char* const L427[] = {
 	"Combines up to seven gate or trigger signals onto two busses, each row able to feed bus A, bus B, both or neither",
@@ -9317,7 +9510,7 @@ static const short O427[] = {4,5};
 static const short P427[] = {2,2,2,2,2,2,2,3,3,3,3,3,3,3};
 static const signed char FI427[] = {2,2,2,2,2,2,2};
 static const signed char FO427[] = {2,2};
-static const short PR427[] = {28,28,28,28,28,28,28};
+static const short PR427[] = {82,82,82,82,82,82,82};
 static const short PO427[] = {0,0};
 static const char* const L428[] = {
 	"Takes a base voltage and a spread amount and gives eleven voltages spaced evenly around the base",
@@ -9357,7 +9550,7 @@ static const short I429[] = {1,1,1,1,1,1,1,1,3,5,7};
 static const short O429[] = {2,2,2,2,2,2,2,2};
 static const short P429[] = {4,6,8};
 static const signed char FI429[] = {-1,-1,-1,-1,-1,-1,-1,-1,2,2,2};
-static const short PR429[] = {36,36,36,36,36,36,36,36,28,28,28};
+static const short PR429[] = {86,86,86,86,86,86,86,86,82,82,82};
 static const char* const L430[] = {
 	"Bernoulli gate: each gate arriving is sent at random to one of two outputs, with the odds set by CHANCE",
 	"Sets the odds, from every gate going to OUTPUT A at one end of the travel to every gate going to OUTPUT B at the other, and an even split in the middle",
@@ -9373,7 +9566,7 @@ static const short O430[] = {5,6};
 static const short P430[] = {1,2};
 static const signed char FI430[] = {2,1};
 static const signed char FO430[] = {2,2};
-static const short PR430[] = {28,8};
+static const short PR430[] = {82,8};
 static const short PO430[] = {0,0};
 static const char* const L431[] = {
 	"Clock divider giving eight divisions of one clock at the same time, with the set of divisions picked by a switch and each output carrying either a gate or a trigger",
@@ -9397,7 +9590,7 @@ static const short O431[] = {6,7,8,9,10,11,12,13};
 static const short P431[] = {4,5,3};
 static const signed char FI431[] = {2,2};
 static const signed char FO431[] = {2,2,2,2,2,2,2,2};
-static const short PR431[] = {28,28};
+static const short PR431[] = {82,82};
 static const char* const L432[] = {
 	"Expander for the Clocked Random Gates module, placed immediately to its right, turning the state of the eight gates into a control voltage",
 	"Sets what that channel adds to the CV outputs while its gate is high, 0 to 8; the values of all the high gates are added together",
@@ -9453,7 +9646,7 @@ static const short O434[] = {7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,10,
 static const short P434[] = {5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,3};
 static const signed char FI434[] = {2,2,1,1,1,1,1,1,1,1};
 static const signed char FO434[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR434[] = {31,28,8,8,8,8,8,8,8,8};
+static const short PR434[] = {53,82,8,8,8,8,8,8,8,8};
 static const short PO434[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const char* const L435[] = {
 	"Compares a voltage against a threshold and puts out gates saying which side of it the voltage is on",
@@ -9469,7 +9662,7 @@ static const short O435[] = {4,5};
 static const short P435[] = {1};
 static const signed char FI435[] = {1,1};
 static const signed char FO435[] = {2,2};
-static const short PR435[] = {36,36};
+static const short PR435[] = {86,86};
 static const char* const L436[] = {
 	"Sequencer up to 96 steps long that spreads a chosen number of hits as evenly as it can across the pattern, with voltage control over length, hits and rotation",
 	"Sets how many steps the pattern runs for, from 1 to 96",
@@ -9504,7 +9697,7 @@ static const short O436[] = {18,19,20,21,22};
 static const short P436[] = {1,3,5,2,4,6,7,8,9};
 static const signed char FI436[] = {2,2,2,1,1,1,2,2};
 static const signed char FO436[] = {2,2,2,2,2};
-static const short PR436[] = {28,28,28,8,8,8,28,28};
+static const short PR436[] = {82,82,82,8,8,8,82,82};
 static const short PO436[] = {0,0,0,0,0};
 static const char* const L437[] = {
 	"Expander for the Euclidean Sequencer, placed immediately to the right of it, turning that sequencer's steps into a stepped control voltage",
@@ -9542,7 +9735,7 @@ static const short O438[] = {7,8,9};
 static const short P438[] = {3,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FI438[] = {2,2,2};
 static const signed char FO438[] = {2,2,2};
-static const short PR438[] = {28,28,28};
+static const short PR438[] = {82,82,82};
 static const short PO438[] = {-1,-1,0};
 static const char* const L439[] = {
 	"Three digit countdown timer: it counts down from the value set on the display and puts out a gate and a trigger when it reaches zero",
@@ -9564,7 +9757,7 @@ static const short O439[] = {8,9};
 static const short P439[] = {1,1,1,2,2,2,3,4};
 static const signed char FI439[] = {2,2,2};
 static const signed char FO439[] = {2,2};
-static const short PR439[] = {28,28,28};
+static const short PR439[] = {82,82,82};
 static const short PO439[] = {-1,0};
 static const char* const L440[] = {
 	"Five digit countdown timer: it counts down from the value set on the display and puts out a gate and a trigger when it reaches zero",
@@ -9586,7 +9779,7 @@ static const short O440[] = {8,9};
 static const short P440[] = {1,1,1,1,1,2,2,2,2,2,3,4};
 static const signed char FI440[] = {2,2,2};
 static const signed char FO440[] = {2,2};
-static const short PR440[] = {28,28,28};
+static const short PR440[] = {82,82,82};
 static const short PO440[] = {-1,0};
 static const char* const L441[] = {
 	"A stereo VCA driven by a built-in fade-in and fade-out envelope, for topping and tailing a recording",
@@ -9612,7 +9805,7 @@ static const short O441[] = {3,4,10,11};
 static const short P441[] = {7,8,9,5};
 static const signed char FI441[] = {0,0,2};
 static const signed char FO441[] = {0,0,2,2};
-static const short PR441[] = {29,29,28};
+static const short PR441[] = {38,38,82};
 static const short PO441[] = {2,2,-1,0};
 static const char* const L442[] = {
 	"Expander for the Fade module, placed immediately to its right, breaking out the fade envelope and the signals that go with it",
@@ -9625,7 +9818,7 @@ static const char* const L442[] = {
 };
 static const short O442[] = {1,3,4,5,6,2};
 static const signed char FO442[] = {1,2,2,2,2,1};
-static const short PO442[] = {6,-1,0,-1,-1,51};
+static const short PO442[] = {6,-1,0,-1,-1,122};
 static const char* const L443[] = {
 	"Turns any signal into a gate, and into triggers at the start and end of that gate",
 	"The signal being converted; the gate goes high over 2V and returns low below 0.1V",
@@ -9640,8 +9833,8 @@ static const short I443[] = {1};
 static const short O443[] = {2,3,4,5,6};
 static const signed char FI443[] = {2};
 static const signed char FO443[] = {2,2,2,2,2};
-static const short PR443[] = {28};
-static const short PO443[] = {52,52,0,0,0};
+static const short PR443[] = {82};
+static const short PO443[] = {123,123,0,0,0};
 static const char* const L444[] = {
 	"Two independent gate delay lines, each giving up to 40 seconds of delay with voltage control over the time",
 	"Voltage control over that section's delay time, attenuverted and added to the DELAY knob",
@@ -9660,7 +9853,7 @@ static const short O444[] = {6,6,7,7,8,8};
 static const short P444[] = {3,3,2,2,4,4};
 static const signed char FI444[] = {1,1,2,2};
 static const signed char FO444[] = {2,2,2,2,2,2};
-static const short PR444[] = {8,8,28,28};
+static const short PR444[] = {8,8,82,82};
 static const short PO444[] = {0,0,0,0,0,0};
 static const char* const L445[] = {
 	"Gate delay line with eight taps spaced evenly along it, giving up to 40 seconds of delay",
@@ -9682,7 +9875,7 @@ static const short O445[] = {6,7,7,7,7,7,7,7,7,8};
 static const short P445[] = {4,3,5,9,10,10,10,10,10,10,10,10};
 static const signed char FI445[] = {1,2};
 static const signed char FO445[] = {2,2,2,2,2,2,2,2,2,2};
-static const short PR445[] = {8,28};
+static const short PR445[] = {8,82};
 static const short PO445[] = {0,0,0,0,0,0,0,0,0,0};
 static const char* const L446[] = {
 	"Lengthens or shortens a gate under voltage control, and fires a trigger at the end of each gate it produces",
@@ -9703,7 +9896,7 @@ static const short O446[] = {8,9};
 static const short P446[] = {4,5,6,7};
 static const signed char FI446[] = {1,2,2};
 static const signed char FO446[] = {2,2};
-static const short PR446[] = {7,28,28};
+static const short PR446[] = {7,82,82};
 static const short PO446[] = {0,0};
 static const char* const L447[] = {
 	"Eight tracks of sixteen steps, all clocked and addressed together, each track with a gate output and a trigger output",
@@ -9728,7 +9921,7 @@ static const short O447[] = {12,12,12,12,12,12,12,12,13,13,13,13,13,13,13,13,14}
 static const short P447[] = {11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,5,10,10,10,10,10,10,10,10,6,8};
 static const signed char FI447[] = {2,2,2,1,1,1};
 static const signed char FO447[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR447[] = {28,28,28,11,53,4};
+static const short PR447[] = {82,82,82,11,124,4};
 static const short PO447[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1};
 static const char* const L448[] = {
 	"Twelve tracks of sixteen steps, all clocked and addressed together, each track with a gate output and a trigger output",
@@ -9753,7 +9946,7 @@ static const short O448[] = {12,12,12,12,12,12,12,12,12,12,12,12,13,13,13,13,13,
 static const short P448[] = {11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,5,10,10,10,10,10,10,10,10,10,10,10,10,6,8};
 static const signed char FI448[] = {2,2,2,1,1,1};
 static const signed char FO448[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR448[] = {28,28,28,11,53,4};
+static const short PR448[] = {82,82,82,11,124,4};
 static const short PO448[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1};
 static const char* const L449[] = {
 	"Eight tracks of eight steps, all clocked and addressed together, each track with a gate output and a trigger output",
@@ -9778,7 +9971,7 @@ static const short O449[] = {12,12,12,12,12,12,12,12,13,13,13,13,13,13,13,13,14}
 static const short P449[] = {11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,5,10,10,10,10,10,10,10,10,6,8};
 static const signed char FI449[] = {2,2,2,1,1,1};
 static const signed char FO449[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR449[] = {28,28,28,11,53,4};
+static const short PR449[] = {82,82,82,11,124,4};
 static const short PO449[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1};
 static const char* const L450[] = {
 	"An eight-bit shift register fed by a comparator, with a weighted sum of the bits as a CV output, for building random gate patterns and melodies",
@@ -9809,7 +10002,7 @@ static const short O450[] = {5,13,14,11,11,11,11,11,11,11,11};
 static const short P450[] = {1,2,9,12,12,12,12,12,12,12,12,10};
 static const signed char FI450[] = {2,-1,1,2,2};
 static const signed char FO450[] = {2,1,1,2,2,2,2,2,2,2,2};
-static const short PR450[] = {28,36,8,28,28};
+static const short PR450[] = {82,86,8,82,82};
 static const char* const L451[] = {
 	"Six LFOs summed into one complex waveform, with an optional glide on the result",
 	"Sets that oscillator's rate across the eight octaves of whichever span its RANGE switch selects",
@@ -9863,7 +10056,7 @@ static const short I454[] = {9,10,8};
 static const short O454[] = {11};
 static const short P454[] = {1,3,5,2,4,6,7};
 static const signed char FI454[] = {1,1};
-static const short PR454[] = {8,8,29};
+static const short PR454[] = {8,8,38};
 static const char* const L455[] = {
 	"Spreads a mono or polyphonic signal across a chosen number of polyphonic channels, in two independent sections carrying two signals each",
 	"The signal to be spread out; where it is polyphonic its channels are repeated round robin until the chosen channel count is filled",
@@ -9873,7 +10066,7 @@ static const char* const L455[] = {
 static const short I455[] = {1,1,1,1};
 static const short O455[] = {2,2,2,2};
 static const short P455[] = {3,3};
-static const short PR455[] = {27,27,27,27};
+static const short PR455[] = {63,63,63,63};
 static const char* const L456[] = {
 	"Two independent manual control voltage sources, each running -10V to +10V from a coarse and a fine knob",
 	"Sets the voltage of that section, -10V to +10V",
@@ -9927,7 +10120,7 @@ static const short O459[] = {6,3,4,4,4};
 static const short P459[] = {7};
 static const signed char FI459[] = {2,2,2,2,2};
 static const signed char FO459[] = {2,2,2,2,2};
-static const short PR459[] = {28,16,11,11,11};
+static const short PR459[] = {82,16,11,11,11};
 static const short PO459[] = {0,0,0,0,0};
 static const char* const L460[] = {
 	"A grid of buttons combining up to seven gate sources onto six destinations, each destination carrying an OR of the sources switched into it",
@@ -9943,7 +10136,7 @@ static const short O460[] = {3,3,3,3,3,3};
 static const short P460[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4};
 static const signed char FI460[] = {2,2,2,2,2,2,2};
 static const signed char FO460[] = {2,2,2,2,2,2};
-static const short PR460[] = {28,28,28,28,28,28,28};
+static const short PR460[] = {82,82,82,82,82,82,82};
 static const short PO460[] = {0,0,0,0,0,0};
 static const char* const L461[] = {
 	"Four inputs mixed independently into four separate outputs, each output having its own column of level knobs, main level and polarity switch",
@@ -9960,7 +10153,7 @@ static const char* const L461[] = {
 static const short I461[] = {2,3,3,3};
 static const short O461[] = {6,6,6,6};
 static const short P461[] = {1,1,1,1,5,4,1,1,1,1,5,4,1,1,1,1,5,4,1,1,1,1,5,4};
-static const short PR461[] = {36,36,36,36};
+static const short PR461[] = {86,86,86,86};
 static const char* const L462[] = {
 	"Expander adding voltage control over each of the six oscillators of the Hyper Maniacal LFO, placed immediately to the left of it",
 	"Voltage control over that oscillator's rate, taken between -12V and 12V, attenuverted here and then added to that oscillator's RATE knob on the Hyper Maniacal LFO",
@@ -9973,7 +10166,7 @@ static const char* const L462[] = {
 static const short I462[] = {1,1,1,1,1,1,5,5,5,5,5,5,6,6,6,6,6,6,3,3,3,3,3,3};
 static const short P462[] = {2,2,2,2,2,2,4,4,4,4,4,4};
 static const signed char FI462[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR462[] = {54,54,54,54,54,54,55,55,55,55,55,55,11,11,11,11,11,11,4,4,4,4,4,4};
+static const short PR462[] = {125,125,125,125,125,125,126,126,126,126,126,126,11,11,11,11,11,11,4,4,4,4,4,4};
 static const char* const L463[] = {
 	"Finds the lowest, highest and average of up to four voltages, with a gate on each channel showing that it holds the lowest or the highest",
 	"One of the four voltages compared; only patched inputs are counted",
@@ -9992,7 +10185,7 @@ static const short O463[] = {6,6,6,6,5,5,5,5,2,3,4};
 static const short P463[] = {7,8,9};
 static const signed char FI463[] = {1,1,1,1};
 static const signed char FO463[] = {2,2,2,2,2,2,2,2,1,1,1};
-static const short PR463[] = {36,36,36,36};
+static const short PR463[] = {86,86,86,86};
 static const short PO463[] = {0,0,0,0,0,0,0,0,-1,-1,-1};
 static const char* const L464[] = {
 	"Four-input utility mixer with a level control on each input, a main output and an inverted copy of that output",
@@ -10010,7 +10203,7 @@ static const char* const L464[] = {
 static const short I464[] = {2,3,3,3};
 static const short O464[] = {5,6};
 static const short P464[] = {1,1,1,1,7,4};
-static const short PR464[] = {36,36,36,36};
+static const short PR464[] = {86,86,86,86};
 static const char* const L465[] = {
 	"Turns a rising voltage into four overlapping triangles, one after another, for crossfading a mixer between up to four signals; a VCV Rack version of the Doepfer A-144",
 	"Sets how much of the CV input drives the morph and in which direction, from full inversion through nothing to full",
@@ -10037,7 +10230,7 @@ static const char* const L466[] = {
 };
 static const short I466[] = {1,2,2,2,2,2,2,2};
 static const short O466[] = {3,3,3,3,3,3,3,3};
-static const short PR466[] = {27,27,27,27,27,27,27,27};
+static const short PR466[] = {63,63,63,63,63,63,63,63};
 static const char* const L467[] = {
 	"Eight step sequencer with a clock division, a repeat count and a probability setting on every step, and outputs for the divided clock, step changes and the repeat count",
 	"A high gate runs the sequencer and a low gate pauses it, picking up again at the next clock; with nothing patched the sequencer runs. 2V starts it, 0.1V stops it",
@@ -10073,7 +10266,7 @@ static const short O467[] = {19,18,22,23,16,20,17,21,24};
 static const short P467[] = {11,11,11,11,11,11,11,11,14,14,14,14,14,14,14,14,12,12,12,12,12,12,12,12,10,10,10,10,10,10,10,10,13,13,13,13,13,13,13,13,6,8,9,7,15,15,15,15,15,15,15,15};
 static const signed char FI467[] = {2,2,2,1,-1,1};
 static const signed char FO467[] = {2,2,1,1,2,2,2,1,2};
-static const short PR467[] = {28,28,28,11,-1,4};
+static const short PR467[] = {82,82,82,11,-1,4};
 static const short PO467[] = {0,-1,-1,-1,0,0,0,6,0};
 static const char* const L468[] = {
 	"Two linked clocked switches: a router stepping one input across eight sends, and a selector stepping eight receives into one output",
@@ -10097,7 +10290,7 @@ static const short I468[] = {2,9,3,10,4,11,1,8,8,8,8,8,8,8,8};
 static const short O468[] = {14,7,7,7,7,7,7,7,7};
 static const short P468[] = {5,12,6,13};
 static const signed char FI468[] = {2,2,2,2,1,1};
-static const short PR468[] = {28,28,28,28,4,4,36,36,36,36,36,36,36,36,36};
+static const short PR468[] = {82,82,82,82,4,4,86,86,86,86,86,86,86,86,86};
 static const char* const L469[] = {
 	"Mutes two signals together, from a button or a gate, with a choice of instant or click-free muting",
 	"One of the two signals to be muted; all channels of a polyphonic cable are muted together",
@@ -10111,7 +10304,7 @@ static const short I469[] = {1,1,2};
 static const short O469[] = {3,4};
 static const short P469[] = {6,5};
 static const signed char FI469[] = {-1,-1,2};
-static const short PR469[] = {29,29,28};
+static const short PR469[] = {38,38,82};
 static const char* const L470[] = {
 	"Two four-way mutable multiples, or one eight-way when only the upper input is used",
 	"The signal copied to the first four outputs, and to all eight when nothing is patched into INPUT B",
@@ -10124,7 +10317,7 @@ static const char* const L470[] = {
 static const short I470[] = {1,2};
 static const short O470[] = {4,4,4,4,4,4,4,4};
 static const short P470[] = {3,3,3,3,3,3,3,3,5,6};
-static const short PR470[] = {27,27};
+static const short PR470[] = {63,63};
 static const char* const L471[] = {
 	"Sixteen-step trigger sequencer built from four 4-step patterns played one after another, each pattern a whole number from 0 to 15 whose four bits are its four steps",
 	"Chooses the four-step pattern for that section as a number from 0 to 15, the bits of the number being the steps that carry a trigger",
@@ -10143,7 +10336,7 @@ static const short O471[] = {7};
 static const short P471[] = {1,1,1,1,2,2,2,2};
 static const signed char FI471[] = {2,2,2,1,1,1,1};
 static const signed char FO471[] = {2};
-static const short PR471[] = {28,28,28,8,8,8,8};
+static const short PR471[] = {82,82,82,8,8,8,8};
 static const short PO471[] = {0};
 static const char* const L472[] = {
 	"Two-channel trigger sequencer in which each 8-step pattern is a whole number from 0 to 255, the eight bits of that number being the eight steps",
@@ -10168,7 +10361,7 @@ static const short O472[] = {9,10};
 static const short P472[] = {2,2,1,1,3};
 static const signed char FI472[] = {2,2,2,1,1,2};
 static const signed char FO472[] = {2,2};
-static const short PR472[] = {28,28,28,8,8,28};
+static const short PR472[] = {82,82,82,8,8,82};
 static const short PO472[] = {0,-1};
 static const char* const L473[] = {
 	"Expander for the Octet Trigger Sequencer and the Nibble Trigger Sequencer, placed immediately to the right of one of them, adding a control voltage for every step of both channels",
@@ -10207,7 +10400,7 @@ static const short O475[] = {6};
 static const short P475[] = {1,2};
 static const signed char FI475[] = {1,1,2};
 static const signed char FO475[] = {1};
-static const short PR475[] = {29,36,28};
+static const short PR475[] = {38,86,82};
 static const char* const L476[] = {
 	"Oscilloscope with a large display and four independent traces; it does not draw polyphonic signals",
 	"The signal drawn as that channel's trace",
@@ -10229,7 +10422,7 @@ static const char* const L476[] = {
 };
 static const short I476[] = {1,1,1,1,6};
 static const short P476[] = {2,2,2,2,3,3,3,3,4,4,4,4,9,10,5,-1,7,8,11,12,14,13};
-static const short PR476[] = {36,36,36,36,36};
+static const short PR476[] = {86,86,86,86,86};
 static const char* const L477[] = {
 	"Sets the colour the next cable you patch will be given, from a list of up to seven colours; only one of these can be used in a patch",
 	"Lit, every new cable takes the colour now chosen instead of the choice stepping on to the next colour in the list",
@@ -10260,7 +10453,7 @@ static const short O478[] = {5,6};
 static const short P478[] = {1,2};
 static const signed char FI478[] = {2,1};
 static const signed char FO478[] = {2,2};
-static const short PR478[] = {31,27};
+static const short PR478[] = {53,63};
 static const short PO478[] = {0,0};
 static const char* const L479[] = {
 	"Turns a polyphonic signal into polyphonic gates and triggers, channel by channel",
@@ -10275,8 +10468,8 @@ static const short I479[] = {1};
 static const short O479[] = {2,3,4,5,6};
 static const signed char FI479[] = {2};
 static const signed char FO479[] = {2,2,2,2,2};
-static const short PR479[] = {31};
-static const short PO479[] = {52,52,0,0,0};
+static const short PR479[] = {53};
+static const short PO479[] = {123,123,0,0,0};
 static const char* const L480[] = {
 	"Lengthens or shortens polyphonic gates under voltage control; the number of channels on TRIGGER sets the number of output channels",
 	"The polyphonic gate or trigger that starts each channel's output gate; over 2V counts as high, and the STATUS matrix shows which channels are high",
@@ -10295,7 +10488,7 @@ static const short O480[] = {8,9};
 static const short P480[] = {4,5,6,7};
 static const signed char FI480[] = {1,2,2};
 static const signed char FO480[] = {2,2};
-static const short PR480[] = {27,31,31};
+static const short PR480[] = {63,53,53};
 static const short PO480[] = {0,0};
 static const char* const L481[] = {
 	"Boolean logic applied across the channels of one polyphonic input, with six monophonic gate outputs",
@@ -10314,7 +10507,7 @@ static const short O481[] = {2,3,4,5,6,7};
 static const short P481[] = {8};
 static const signed char FI481[] = {2};
 static const signed char FO481[] = {2,2,2,2,2,2};
-static const short PR481[] = {31};
+static const short PR481[] = {53};
 static const short PO481[] = {0,0,0,0,0,0};
 static const char* const L482[] = {
 	"Takes the lowest, highest and average voltage across the channels of a polyphonic signal, and offers those channels sorted by voltage",
@@ -10327,7 +10520,7 @@ static const char* const L482[] = {
 };
 static const short I482[] = {1};
 static const short O482[] = {2,3,4,5,6};
-static const short PR482[] = {27};
+static const short PR482[] = {63};
 static const char* const L483[] = {
 	"Mutes individual channels of a polyphonic signal, from buttons or from gates, with a master mute over all sixteen",
 	"Each press mutes and unmutes that numbered channel of the signal",
@@ -10342,7 +10535,7 @@ static const short I483[] = {5,3,4};
 static const short O483[] = {6};
 static const short P483[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,7};
 static const signed char FI483[] = {-1,2,2};
-static const short PR483[] = {29,31,28};
+static const short PR483[] = {38,53,82};
 static const char* const L484[] = {
 	"Inverts or scales a polyphonic signal under manual and voltage control, reaching twice the input level at the extremes, with a polarity CV per channel",
 	"Sets how much of the polarity CV is applied; at full, 5V gives unity gain and 10V gives twice the input level",
@@ -10356,7 +10549,7 @@ static const short I484[] = {4,3};
 static const short O484[] = {5};
 static const short P484[] = {1,2};
 static const signed char FI484[] = {1};
-static const short PR484[] = {27,27};
+static const short PR484[] = {63,63};
 static const char* const L485[] = {
 	"Two switches under one control: one input sent to either of two outputs, and either of two inputs sent to one output, each polyphonic channel switched on its own",
 	"Toggles both switch sections between the red position and the green position; with a cable in the CV input it has no effect",
@@ -10373,7 +10566,7 @@ static const short I485[] = {2,3,6,7};
 static const short O485[] = {4,5,8};
 static const short P485[] = {1};
 static const signed char FI485[] = {2};
-static const short PR485[] = {31,27,27,27};
+static const short PR485[] = {53,63,63,63};
 static const char* const L486[] = {
 	"Deprecated bank of eight voltage controlled clock dividers, kept only so that old patches go on loading; its browser name says do not use it, and Polyrhythmic Generator MkII replaces it",
 	"Sets what every channel output carries: T a trigger every Nth clock, G a gate high for N clocks then low for N, GC the clock passed for N clocks then muted for N, and C one clock pulse every N",
@@ -10396,7 +10589,7 @@ static const short O486[] = {13,13,13,13,13,13,13,13,6};
 static const short P486[] = {10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,4,2,1};
 static const signed char FI486[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2};
 static const signed char FO486[] = {2,2,2,2,2,2,2,2,2};
-static const short PR486[] = {28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,36,36,36,36,36,36,36,36,28,28};
+static const short PR486[] = {82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,86,86,86,86,86,86,86,86,82,82};
 static const short PO486[] = {0,0,0,0,0,0,0,0,-1};
 static const char* const L487[] = {
 	"Eight voltage controlled clock dividers side by side for building polyrhythms, each with its own clock, reset and division, and each normalled from the channel above",
@@ -10420,7 +10613,7 @@ static const short O487[] = {13,13,13,13,13,13,13,13,6};
 static const short P487[] = {10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,4,2,1};
 static const signed char FI487[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2};
 static const signed char FO487[] = {2,2,2,2,2,2,2,2,2};
-static const short PR487[] = {28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,36,36,36,36,36,36,36,36,28,28};
+static const short PR487[] = {82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,86,86,86,86,86,86,86,86,82,82};
 static const short PO487[] = {0,0,0,0,0,0,0,0,-1};
 static const char* const L488[] = {
 	"Decorative blank 5HP wide, drawn as the left-hand mounting bracket at the end of a Eurorack row, with two screw slots and no controls",
@@ -10449,7 +10642,7 @@ static const short O490[] = {5,5,5,5,5,5,5,5,6};
 static const short P490[] = {3,3,3,3,3,3,3,3,1};
 static const signed char FI490[] = {-1,2,2,2,2,2,2,2,2};
 static const signed char FO490[] = {-1,-1,-1,-1,-1,-1,-1,-1,2};
-static const short PR490[] = {36,28,28,28,28,28,28,28,28};
+static const short PR490[] = {86,82,82,82,82,82,82,82,82};
 static const short PO490[] = {-1,-1,-1,-1,-1,-1,-1,-1,0};
 static const char* const L491[] = {
 	"Sends any one of eight inputs to a single output, picked by a button press or a gate rather than by stepping in order",
@@ -10465,7 +10658,7 @@ static const short O491[] = {4,5};
 static const short P491[] = {2,2,2,2,2,2,2,2};
 static const signed char FI491[] = {-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2};
 static const signed char FO491[] = {-1,2};
-static const short PR491[] = {36,36,36,36,36,36,36,36,28,28,28,28,28,28,28,28};
+static const short PR491[] = {86,86,86,86,86,86,86,86,82,82,82,82,82,82,82,82};
 static const short PO491[] = {-1,0};
 static const char* const L492[] = {
 	"Precision rectifier giving full wave and both half wave rectifications of its input around a settable axis, each with a sign-flipped copy",
@@ -10484,7 +10677,7 @@ static const short I492[] = {3,4};
 static const short O492[] = {5,6,7,8,9,10};
 static const short P492[] = {2,1};
 static const signed char FI492[] = {-1,1};
-static const short PR492[] = {27,8};
+static const short PR492[] = {63,8};
 static const char* const L493[] = {
 	"Two independent Set/Reset flip flops, each latching its output high on a gate at S and low on a gate at R",
 	"A gate over 2V here latches that flip flop's Q output to 10V and its NOT Q output to 0V, as long as that flip flop is enabled",
@@ -10497,7 +10690,7 @@ static const short I493[] = {1,1,2,2,3,3};
 static const short O493[] = {4,4,5,5};
 static const signed char FI493[] = {2,2,2,2,2,2};
 static const signed char FO493[] = {2,2,2,2};
-static const short PR493[] = {28,28,28,28,28,28};
+static const short PR493[] = {82,82,82,82,82,82};
 static const short PO493[] = {0,0,0,0};
 static const char* const L494[] = {
 	"Sample and hold with track and hold and pass and hold modes, sampling every channel of a polyphonic cable on one trigger",
@@ -10513,7 +10706,7 @@ static const short O494[] = {5,6};
 static const short P494[] = {3};
 static const signed char FI494[] = {1,2,1};
 static const signed char FO494[] = {1,1};
-static const short PR494[] = {27,28,56};
+static const short PR494[] = {63,82,26};
 static const char* const L495[] = {
 	"Polyphonic sample and hold with track and hold and pass and hold modes, an internal noise source, and probability, level and offset controls",
 	"Drives the sampling, counting anything crossing 2V as high; nothing is produced until a cable is patched here, and the greater of this jack's channel count and INPUT's sets the output count",
@@ -10534,8 +10727,8 @@ static const short O495[] = {11,12};
 static const short P495[] = {2,4,5,8,9};
 static const signed char FI495[] = {1,2,1,1,1};
 static const signed char FO495[] = {1,1};
-static const short PR495[] = {27,31,56,29,29};
-static const short PO495[] = {57,-1};
+static const short PR495[] = {63,53,26,38,38};
+static const short PO495[] = {127,-1};
 static const char* const L496[] = {
 	"Sequencer engine with no outputs of its own, driving the 8 and 16 step sequencer channel, gate and trigger expanders placed to its right; four address inputs pick the step they play",
 	"The least significant bit of the step address: a level above 2V adds 1 to the step number, and leaving it unpatched shortens the addressed range",
@@ -10554,7 +10747,7 @@ static const char* const L496[] = {
 };
 static const short I496[] = {1,2,3,4,5};
 static const signed char FI496[] = {2,2,2,2,2};
-static const short PR496[] = {28,28,28,28,28};
+static const short PR496[] = {82,82,82,82,82};
 static const char* const L497[] = {
 	"A 16-step gate, trigger and CV sequencer with voltage control over sequence length and direction, one-shot modes, voltage addressing and a sample and hold on the CV outputs",
 	"Turns the trigger on for that step, so the TRIG output pulses there for as long as the clock pulse is high",
@@ -10589,7 +10782,7 @@ static const short O497[] = {15,16,17,18,19};
 static const short P497[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,5,6,7,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI497[] = {2,2,2,1,1,1};
 static const signed char FO497[] = {2,2,2,1,1};
-static const short PR497[] = {28,28,28,11,53,4};
+static const short PR497[] = {82,82,82,11,124,4};
 static const short PO497[] = {0,0,-1,-1,-1};
 static const char* const L498[] = {
 	"A 64-step gate, trigger and CV sequencer in eight rows of eight, with voltage control over sequence length and direction, one-shot modes, voltage addressing and a sample and hold on the CV outputs",
@@ -10623,7 +10816,7 @@ static const short O498[] = {14,15,16,17,18};
 static const short P498[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,4,5,6,7};
 static const signed char FI498[] = {2,2,2,1,1,1};
 static const signed char FO498[] = {2,2,2,1,1};
-static const short PR498[] = {28,28,28,11,53,4};
+static const short PR498[] = {82,82,82,11,124,4};
 static const short PO498[] = {0,0,-1,-1,-1};
 static const char* const L499[] = {
 	"An 8-step gate, trigger and CV sequencer with voltage control over sequence length and direction, one-shot modes, voltage addressing and a sample and hold on the CV outputs",
@@ -10659,7 +10852,7 @@ static const short O499[] = {15,16,17,18,19};
 static const short P499[] = {-1,-1,-1,-1,-1,-1,-1,-1,3,3,3,3,3,3,3,3,4,5,6,7,8,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2};
 static const signed char FI499[] = {2,2,2,1,1,1};
 static const signed char FO499[] = {2,2,2,1,1};
-static const short PR499[] = {28,28,28,11,53,4};
+static const short PR499[] = {82,82,82,11,124,4};
 static const short PO499[] = {0,0,-1,-1,-1};
 static const char* const L500[] = {
 	"An extra channel of gate, trigger and CV selection for the 16 Step Sequencer, placed immediately to its right, taking the active step, sequence length, clock and run state from that sequencer",
@@ -10827,7 +11020,7 @@ static const short P512[] = {2,3,4,5};
 static const signed char FI512[] = {1};
 static const signed char FO512[] = {3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,3,1};
 static const short PR512[] = {8};
-static const short PO512[] = {58,58,58,58,58,58,58,58,6,6,6,6,6,6,6,6,2,-1};
+static const short PO512[] = {98,98,98,98,98,98,98,98,6,6,6,6,6,6,6,6,2,-1};
 static const char* const L513[] = {
 	"Sixteen-place shift register for gates or control voltage, moving every stored value on one place with each shift pulse and taking a new value in",
 	"A rising edge shifts every stored value on by one place and takes a new value from IN",
@@ -10850,7 +11043,7 @@ static const short O513[] = {11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12}
 static const short P513[] = {5,9,3,7};
 static const signed char FI513[] = {1,2,2,2,1,1};
 static const signed char FO513[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR513[] = {36,28,28,28,59,8};
+static const short PR513[] = {86,82,82,82,128,8};
 static const char* const L514[] = {
 	"Thirty-two-place shift register for gates or control voltage, moving every stored value on one place with each shift pulse and taking a new value in",
 	"A rising edge shifts every stored value on by one place and takes a new value from IN",
@@ -10873,7 +11066,7 @@ static const short O514[] = {11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,
 static const short P514[] = {5,9,3,7};
 static const signed char FI514[] = {1,2,2,2,1,1};
 static const signed char FO514[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR514[] = {36,28,28,28,59,8};
+static const short PR514[] = {86,82,82,82,128,8};
 static const char* const L515[] = {
 	"A D type flip flop: it reads the level at D on each rising clock edge and holds it at the outputs, working as a sample and hold for gates",
 	"The level captured at the next rising edge at CLOCK; over 2V counts as high, and it counts as low again below 0.1V",
@@ -10886,7 +11079,7 @@ static const short I515[] = {1,2,3};
 static const short O515[] = {4,5};
 static const signed char FI515[] = {2,2,2};
 static const signed char FO515[] = {2,2};
-static const short PR515[] = {28,28,28};
+static const short PR515[] = {82,82,82};
 static const short PO515[] = {0,0};
 static const char* const L516[] = {
 	"A Set/Reset flip flop, latching its output high on a gate at S and low on a gate at R",
@@ -10900,7 +11093,7 @@ static const short I516[] = {1,2,3};
 static const short O516[] = {4,5};
 static const signed char FI516[] = {2,2,2};
 static const signed char FO516[] = {2,2};
-static const short PR516[] = {28,28,28};
+static const short PR516[] = {82,82,82};
 static const short PO516[] = {0,0};
 static const char* const L517[] = {
 	"A toggle flip flop, flipping its output between high and low on every rising edge it is given",
@@ -10914,7 +11107,7 @@ static const short I517[] = {1,2,3};
 static const short O517[] = {4,5};
 static const signed char FI517[] = {2,2,2};
 static const signed char FO517[] = {2,2};
-static const short PR517[] = {28,28,28};
+static const short PR517[] = {82,82,82};
 static const short PO517[] = {0,0};
 static const char* const L518[] = {
 	"Puts out gates according to whether a control voltage is rising, falling, steady or moving",
@@ -10932,7 +11125,7 @@ static const short O518[] = {4,5,6,7};
 static const short P518[] = {1,2};
 static const signed char FI518[] = {1};
 static const signed char FO518[] = {2,2,2,2};
-static const short PR518[] = {36};
+static const short PR518[] = {86};
 static const char* const L519[] = {
 	"Sixteen-place voltage stack, first in first out or last in first out, holding four control voltages in each place",
 	"A rising edge empties the stack, and while the level stays high nothing can be pushed on; the voltage outputs keep their last values unless the menu is set to clear them",
@@ -10953,7 +11146,7 @@ static const short I519[] = {3,2,1,4,4,4,4};
 static const short O519[] = {5,5,5,5,6,7,8,9};
 static const signed char FI519[] = {2,2,2,1,1,1,1};
 static const signed char FO519[] = {1,1,1,1,2,2,2,2};
-static const short PR519[] = {28,28,28,36,36,36,36};
+static const short PR519[] = {82,82,82,86,86,86,86};
 static const char* const L520[] = {
 	"Generates a gate and a trigger a set time after Rack starts or a patch is loaded, for modules that need a kick to begin cycling",
 	"Sets the length of the delay, from 1 second to 30 seconds",
@@ -11024,7 +11217,7 @@ static const short O521[] = {27,28,31,32,29,30,33,34,35,36,39,40,37,38,41,42};
 static const short P521[] = {14,15,14,15,14,15,14,15,14,15,14,15,14,15,14,15,16,17,16,17,16,17,16,17,16,17,16,17,16,17,16,17,13,13,13,13,13,13,13,13,18,18,18,18,18,18,18,18,19,19,19,19,19,19,19,19,-1,-1,-1,-1,-1,-1,-1,-1,9,9,-1,-1,20,21,22,23,24,-1,-1,-1,-1,-1,25,26,10,10};
 static const signed char FI521[] = {2,2,2,2,2,2,1,1,-1,-1,-1,-1,-1,-1,-1,-1,1,1};
 static const signed char FO521[] = {2,2,2,2,2,2,2,2,1,-1,1,1,1,-1,1,1};
-static const short PR521[] = {28,28,28,28,28,28,11,11,27,36,36,36,36,36,36,36,4,4};
+static const short PR521[] = {82,82,82,82,82,82,11,11,63,86,86,86,86,86,86,86,4,4};
 static const short PO521[] = {0,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1};
 static const char* const L522[] = {
 	"Divides an incoming waveform down into four square sub-harmonics and mixes them with the undivided signal",
@@ -11063,7 +11256,7 @@ static const short I523[] = {1,2,3,4,7,9,11,11,11,11,11,11,11,11,11,11,11,11,11,
 static const short O523[] = {12};
 static const short P523[] = {6,8,10,-1,5};
 static const signed char FI523[] = {2,2,2,1,1,1};
-static const short PR523[] = {28,28,28,11,59,4,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27};
+static const short PR523[] = {82,82,82,11,128,4,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63};
 static const char* const L524[] = {
 	"Sequential switch sending one input to whichever of sixteen outputs is currently selected, stepping forwards, backwards, at random or by an addressing voltage",
 	"A high gate lets the switch step on and a low gate holds it where it is, stepping resuming at the next clock; with nothing patched here the switch always runs",
@@ -11083,7 +11276,7 @@ static const short I524[] = {1,2,3,4,7,9,11};
 static const short O524[] = {12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12};
 static const short P524[] = {6,8,10,-1,5};
 static const signed char FI524[] = {2,2,2,1,1,1};
-static const short PR524[] = {28,28,28,11,59,4,27};
+static const short PR524[] = {82,82,82,11,128,4,63};
 static const char* const L525[] = {
 	"Sequential switch sending one input to whichever of eight outputs is currently selected, stepping forwards, backwards, at random or by an addressing voltage",
 	"A high gate lets the switch step on and a low gate holds it where it is, stepping resuming at the next clock; with nothing patched here the switch always runs",
@@ -11103,7 +11296,7 @@ static const short I525[] = {1,2,3,4,7,9,11};
 static const short O525[] = {12,12,12,12,12,12,12,12};
 static const short P525[] = {6,8,10,-1,5};
 static const signed char FI525[] = {2,2,2,1,1,1};
-static const short PR525[] = {28,28,28,11,59,4,27};
+static const short PR525[] = {82,82,82,11,128,4,63};
 static const char* const L526[] = {
 	"Manual double-pole switch, 4HP: one button moves two separate signal paths at once, each picking one of two inputs",
 	"Each press moves both paths to the other input, alternating between the first and the second",
@@ -11118,7 +11311,7 @@ static const char* const L526[] = {
 static const short I526[] = {2,3,5,6};
 static const short O526[] = {4,7};
 static const short P526[] = {1};
-static const short PR526[] = {36,36,36,36};
+static const short PR526[] = {86,86,86,86};
 static const char* const L527[] = {
 	"Manual switch, 4HP, sending one of three inputs to a single output",
 	"Each press moves to the next input, stepping through the three in turn and wrapping back to the first",
@@ -11131,7 +11324,7 @@ static const char* const L527[] = {
 static const short I527[] = {2,3,4};
 static const short O527[] = {5};
 static const short P527[] = {1};
-static const short PR527[] = {36,36,36};
+static const short PR527[] = {86,86,86};
 static const char* const L528[] = {
 	"Manual switch, 4HP, sending one of four inputs to a single output",
 	"Each press moves to the next input, stepping through the four in turn and wrapping back to the first",
@@ -11145,7 +11338,7 @@ static const char* const L528[] = {
 static const short I528[] = {2,3,4,5};
 static const short O528[] = {6};
 static const short P528[] = {1};
-static const short PR528[] = {36,36,36,36};
+static const short PR528[] = {86,86,86,86};
 static const char* const L529[] = {
 	"Sequential switch sending whichever of eight inputs is currently selected to a single output, stepping forwards, backwards, at random or by an addressing voltage",
 	"A high gate lets the switch step on and a low gate holds it where it is, stepping resuming at the next clock; with nothing patched here the switch always runs",
@@ -11165,7 +11358,7 @@ static const short I529[] = {1,2,3,4,7,9,11,11,11,11,11,11,11,11};
 static const short O529[] = {12};
 static const short P529[] = {6,8,10,-1,5};
 static const signed char FI529[] = {2,2,2,1,1,1};
-static const short PR529[] = {28,28,28,11,59,4,27,27,27,27,27,27,27,27};
+static const short PR529[] = {82,82,82,11,128,4,63,63,63,63,63,63,63,63};
 static const char* const L530[] = {
 	"Two independent toggle flip flops, each flipping its output between high and low on every rising edge it is given",
 	"Each rising edge over 2V here flips that flip flop's Q output between 10V and 0V, and its NOT Q output the other way, as long as that flip flop is enabled",
@@ -11178,7 +11371,7 @@ static const short I530[] = {1,1,2,2,3,3};
 static const short O530[] = {4,4,5,5};
 static const signed char FI530[] = {2,2,2,2,2,2};
 static const signed char FO530[] = {2,2,2,2};
-static const short PR530[] = {28,28,28,28,28,28};
+static const short PR530[] = {82,82,82,82,82,82};
 static const short PO530[] = {0,0,0,0};
 static const char* const L531[] = {
 	"Four 16-step trigger sequencers on one panel, each with its own clock, run and reset, and each driving two trigger outputs",
@@ -11199,7 +11392,7 @@ static const short O531[] = {8,8,8,8,8,8,8,8};
 static const short P531[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,-1,-1,-1,-1,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
 static const signed char FI531[] = {2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1};
 static const signed char FO531[] = {2,2,2,2,2,2,2,2};
-static const short PR531[] = {28,28,28,28,28,28,28,28,28,28,28,28,11,11,11,11};
+static const short PR531[] = {82,82,82,82,82,82,82,82,82,82,82,82,11,11,11,11};
 static const short PO531[] = {0,0,0,0,0,0,0,0};
 static const char* const L532[] = {
 	"Four 8-step trigger sequencers on one panel, each with its own clock, run and reset, and each driving two trigger outputs",
@@ -11225,7 +11418,7 @@ static const short O532[] = {8,8,8,8,8,8,8,8};
 static const short P532[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,-1,-1,-1,-1,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
 static const signed char FI532[] = {2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1};
 static const signed char FO532[] = {2,2,2,2,2,2,2,2};
-static const short PR532[] = {28,28,28,28,28,28,28,28,28,28,28,28,11,11,11,11};
+static const short PR532[] = {82,82,82,82,82,82,82,82,82,82,82,82,11,11,11,11};
 static const short PO532[] = {0,0,0,0,0,0,0,0};
 static const char* const L533[] = {
 	"Deprecated frequency divider, kept only so that old patches go on loading; its browser name says do not use it, and Voltage Controlled Frequency Divider MkII replaces it",
@@ -11241,7 +11434,7 @@ static const short I533[] = {1,4};
 static const short O533[] = {5,6};
 static const short P533[] = {2,3};
 static const signed char FI533[] = {1};
-static const short PR533[] = {8,28};
+static const short PR533[] = {8,82};
 static const char* const L534[] = {
 	"Frequency divider with a division ratio of 1 to 21, set by a switch and by voltage; on an oscillator it gives sub octaves, on a clock it gives slower clocks",
 	"Voltage that shifts the division ratio, added to the MANUAL setting once the CV knob has scaled it; 10V at full amount covers the whole range",
@@ -11257,7 +11450,7 @@ static const short I534[] = {1,4};
 static const short O534[] = {5,6};
 static const short P534[] = {2,3};
 static const signed char FI534[] = {1};
-static const short PR534[] = {8,28};
+static const short PR534[] = {8,82};
 static const char* const L535[] = {
 	"Two channels that invert or scale a signal under manual and voltage control, reaching twice the input level at the extremes",
 	"Sets how much of that channel's CV jack is added to the polarity; at full, 5V of CV gives unity gain and 10V gives twice the input level",
@@ -11271,7 +11464,7 @@ static const short I535[] = {4,3,4,3};
 static const short O535[] = {5,5};
 static const short P535[] = {1,2,1,2};
 static const signed char FI535[] = {1,-1,1};
-static const short PR535[] = {36,27,36,27};
+static const short PR535[] = {86,63,86,63};
 static const char* const L536[] = {
 	"Divider for clocks and gates with a ratio of 1 to 32, set by a switch and by voltage, passing on one pulse of every N it receives with the width of that pulse kept",
 	"A rising edge here sets the count back to the start, so that the next pulse received counts as the first",
@@ -11289,7 +11482,7 @@ static const short O536[] = {4,5};
 static const short P536[] = {7,6};
 static const signed char FI536[] = {1,2,2};
 static const signed char FO536[] = {2,2};
-static const short PR536[] = {8,28,28};
+static const short PR536[] = {8,82,82};
 static const short PO536[] = {0,0};
 static const char* const L537[] = {
 	"Two switches driven by one control voltage: one input sent to either of two outputs, and either of two inputs sent to one output",
@@ -11305,7 +11498,7 @@ static const char* const L537[] = {
 static const short I537[] = {1,2,5,6};
 static const short O537[] = {3,4,7};
 static const signed char FI537[] = {2};
-static const short PR537[] = {60,27,27,27};
+static const short PR537[] = {129,63,63,63};
 static const char* const L538[] = {
 	"Quad inverter, flipping a voltage around zero so that a positive voltage in gives a negative voltage out",
 	"The voltage to be inverted; polyphonic. With nothing patched here, the nearest patched input above is used instead",
@@ -11313,7 +11506,7 @@ static const char* const L538[] = {
 };
 static const short I538[] = {1,1,1,1};
 static const short O538[] = {2,2,2,2};
-static const short PR538[] = {29,27,27,27};
+static const short PR538[] = {38,63,63,63};
 static const char* const L539[] = {
 	"Maps one voltage range onto another, rescaling and offsetting a control voltage",
 	"Sets the bottom of the expected input range, -10V to +10V; an input at this voltage comes out at the lower of the two limits",
@@ -11332,7 +11525,7 @@ static const short O539[] = {8};
 static const short P539[] = {1,2,3,4};
 static const signed char FI539[] = {1,1,1};
 static const signed char FO539[] = {1};
-static const short PR539[] = {27,7,7};
+static const short PR539[] = {63,7,7};
 static const char* const L540[] = {
 	"Low frequency oscillator tracing a point around a circle whose radius bounces in and out, producing a pair of complex pulsing signals at its X and Y outputs",
 	"Sets how fast the point travels around the circle, -10 to 10 rotations per second, a negative value running the pattern the other way",
@@ -11361,7 +11554,7 @@ static const short O540[] = {17,18};
 static const short P540[] = {1,2,4,5,7,8,9,11,12,14,14,16,16};
 static const signed char FI540[] = {1,1,1,1,1,1};
 static const signed char FO540[] = {1,1};
-static const short PR540[] = {40,40,40,40,40,40};
+static const short PR540[] = {90,90,90,90,90,90};
 static const char* const L541[] = {
 	"Generates one envelope stage, with a CV input for each knob, a choice of J or S curves, and a button beside each control jack",
 	"Sets the voltage at which the generated stage ends, within the range chosen by the UNI/BI switch",
@@ -11392,7 +11585,7 @@ static const short O541[] = {16,18,15};
 static const short P541[] = {17,4,11,7,8,19,1,2,5,13};
 static const signed char FI541[] = {1,2,1,1,1,2};
 static const signed char FO541[] = {2,2,1};
-static const short PR541[] = {40,5,40,40,8,5};
+static const short PR541[] = {90,5,90,90,8,5};
 static const short PO541[] = {10,10,-1};
 static const char* const L542[] = {
 	"Eight latching buttons, each with a momentary negate button and an output",
@@ -11426,7 +11619,7 @@ static const short I543[] = {13,7,8,9,10,11,12};
 static const short O543[] = {14};
 static const short P543[] = {1,2,3,4,5,6};
 static const signed char FI543[] = {-1,1,1,1,1,1,1};
-static const short PR543[] = {8,40,40,40,40,40,40};
+static const short PR543[] = {8,90,90,90,90,90,90};
 static const char* const L544[] = {
 	"Generates a sequence of 16 envelope stages, each with its own mode, level, curve and duration; it is hidden from the module browser, and Sequencizer replaces it",
 	"Toggles the sequencer between running and paused; a sequence paused this way resumes from where it stopped",
@@ -11668,7 +11861,7 @@ static const short O552[] = {8,10,9};
 static const short P552[] = {2,3,1};
 static const signed char FI552[] = {2,1,1,2};
 static const signed char FO552[] = {2,1,2};
-static const short PR552[] = {5,40,8,5};
+static const short PR552[] = {5,90,8,5};
 static const short PO552[] = {10,-1,10};
 static const char* const L553[] = {
 	"A knob whose two end points are themselves knobs, giving any voltage between them",
@@ -11692,7 +11885,7 @@ static const short O553[] = {12};
 static const short P553[] = {1,2,4,5,7,8,9,11};
 static const signed char FI553[] = {1,1,1};
 static const signed char FO553[] = {1};
-static const short PR553[] = {40,40,40};
+static const short PR553[] = {90,90,90};
 static const char* const L554[] = {
 	"A scanned sequencer of 16 steps: a phase signal sweeps across the steps, and each step interpolates along a curve between two anchor voltages",
 	"Sets how many of the steps the sweep runs across",
@@ -11724,7 +11917,7 @@ static const short O554[] = {20,18,19};
 static const short P554[] = {1,2,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13};
 static const signed char FI554[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO554[] = {1,1,1};
-static const short PR554[] = {8,8,8,4,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40};
+static const short PR554[] = {8,8,8,4,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90};
 static const char* const L555[] = {
 	"A scanned sequencer of 4 steps: a phase signal sweeps across the steps, and each step interpolates along a curve between two anchor voltages",
 	"Sets how many of the steps the sweep runs across",
@@ -11756,7 +11949,7 @@ static const short O555[] = {20,18,19};
 static const short P555[] = {1,2,14,14,14,14,16,16,16,16,7,7,7,7,5,5,5,5,6,6,6,6,11,11,11,11,9,9,9,9,10,10,10,10,13,13,13,13};
 static const signed char FI555[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO555[] = {1,1,1};
-static const short PR555[] = {8,8,8,4,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40};
+static const short PR555[] = {8,8,8,4,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90};
 static const char* const L556[] = {
 	"A scanned sequencer of 8 steps: a phase signal sweeps across the steps, and each step interpolates along a curve between two anchor voltages",
 	"Sets how many of the steps the sweep runs across",
@@ -11788,7 +11981,7 @@ static const short O556[] = {20,18,19};
 static const short P556[] = {1,2,14,14,14,14,14,14,14,14,16,16,16,16,16,16,16,16,7,7,7,7,7,7,7,7,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,11,11,11,11,11,11,11,11,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,13,13,13,13,13,13,13,13};
 static const signed char FI556[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO556[] = {1,1,1};
-static const short PR556[] = {8,8,8,4,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40};
+static const short PR556[] = {8,8,8,4,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90};
 static const char* const L557[] = {
 	"A sequencer of 16 steps, each generating a curve between two anchor voltages, with its own trigger, interrupt, sustain, shape, curvature and duration settings",
 	"Toggles the sequencer between running and paused; a sequence paused this way resumes from where it stopped",
@@ -11837,7 +12030,7 @@ static const short O557[] = {19,20,23,22,21,18};
 static const short P557[] = {14,16,7,11,13,3,9,1,6,5,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24};
 static const signed char FI557[] = {1,2,1,1,1,1,2,2,2};
 static const signed char FO557[] = {2,2,1,2,2,1};
-static const short PR557[] = {40,5,8,8,8,40,5,5,5};
+static const short PR557[] = {90,5,8,8,8,90,5,5,5};
 static const short PO557[] = {-1,-1,-1,0,0,-1};
 static const char* const L558[] = {
 	"A sequencer of 4 steps, each generating a curve between two anchor voltages, with its own trigger, interrupt, sustain, shape, curvature and duration settings",
@@ -11887,7 +12080,7 @@ static const short O558[] = {19,20,23,22,21,18};
 static const short P558[] = {14,16,7,11,13,3,9,1,6,5,34,34,34,34,35,35,35,35,36,36,36,36,32,32,32,32,30,30,30,30,31,31,31,31,25,25,25,25,33,33,33,33,29,29,29,29,27,27,27,27,28,28,28,28,26,26,26,26,24,24,24,24};
 static const signed char FI558[] = {1,2,1,1,1,1,2,2,2};
 static const signed char FO558[] = {2,2,1,2,2,1};
-static const short PR558[] = {40,5,8,8,8,40,5,5,5};
+static const short PR558[] = {90,5,8,8,8,90,5,5,5};
 static const short PO558[] = {-1,-1,-1,0,0,-1};
 static const char* const L559[] = {
 	"A sequencer of 8 steps, each generating a curve between two anchor voltages, with its own trigger, interrupt, sustain, shape, curvature and duration settings",
@@ -11937,7 +12130,7 @@ static const short O559[] = {19,20,23,22,21,18};
 static const short P559[] = {14,16,7,11,13,3,9,1,6,5,34,34,34,34,34,34,34,34,35,35,35,35,35,35,35,35,36,36,36,36,36,36,36,36,32,32,32,32,32,32,32,32,30,30,30,30,30,30,30,30,31,31,31,31,31,31,31,31,25,25,25,25,25,25,25,25,33,33,33,33,33,33,33,33,29,29,29,29,29,29,29,29,27,27,27,27,27,27,27,27,28,28,28,28,28,28,28,28,26,26,26,26,26,26,26,26,24,24,24,24,24,24,24,24};
 static const signed char FI559[] = {1,2,1,1,1,1,2,2,2};
 static const signed char FO559[] = {2,2,1,2,2,1};
-static const short PR559[] = {40,5,8,8,8,40,5,5,5};
+static const short PR559[] = {90,5,8,8,8,90,5,5,5};
 static const short PO559[] = {-1,-1,-1,0,0,-1};
 static const char* const L560[] = {
 	"Generates one envelope stage: on a trigger it travels from the voltage at IN to the LEVEL voltage over the set duration",
@@ -11977,7 +12170,7 @@ static const short I561[] = {5,6};
 static const short O561[] = {7};
 static const short P561[] = {1,2,3,4};
 static const signed char FI561[] = {1};
-static const short PR561[] = {40,8};
+static const short PR561[] = {90,8};
 static const char* const L562[] = {
 	"Two knobs whose output follows an adjustable curve rather than a straight line",
 	"Picks a position along that taper's transfer function, which sets the output voltage",
@@ -11997,7 +12190,7 @@ static const short O562[] = {9,9};
 static const short P562[] = {1,2,8,4,5,7,1,2,8,4,5,7};
 static const signed char FI562[] = {1,1,1,1};
 static const signed char FO562[] = {1,1};
-static const short PR562[] = {40,40,40,40};
+static const short PR562[] = {90,90,90,90};
 static const char* const L563[] = {
 	"A truth table with 2 inputs, giving a chosen result for every combination of their states",
 	"One of the table's inputs; a voltage above 1V counts as high, despite the manual giving the threshold as 0.5V",
@@ -12082,7 +12275,7 @@ static const short O566[] = {8,9};
 static const short P566[] = {1,5,4,2};
 static const signed char FI566[] = {2,2,1};
 static const signed char FO566[] = {2,1};
-static const short PR566[] = {5,5,40};
+static const short PR566[] = {5,5,90};
 static const short PO566[] = {10,-1};
 static const char* const L567[] = {
 	"Low frequency oscillator tracing a fixed point on a circle rolling inside or outside another circle, producing a pair of complex pulsing signals at its X and Y outputs",
@@ -12113,7 +12306,7 @@ static const short O567[] = {18,19};
 static const short P567[] = {4,5,8,9,10,1,2,15,15,17,17,7,12,13};
 static const signed char FI567[] = {1,1,1,1,1,1};
 static const signed char FO567[] = {1,1};
-static const short PR567[] = {40,40,40,40,40,40};
+static const short PR567[] = {90,90,90,90,90,90};
 static const char* const L568[] = {
 	"A window mixer that passes one of five inputs to its output and steps to the next one on every trigger, with a slew across each change",
 	"Sets the slew between the old and the new channel, 0 to 120,000 samples; 441 samples is 10ms at a 44.1kHz sample rate, and 0 turns the slew off",
@@ -12132,7 +12325,7 @@ static const short O568[] = {7,8};
 static const short P568[] = {1,2,4};
 static const signed char FI568[] = {2,-1,-1,-1,-1,-1,1};
 static const signed char FO568[] = {-1,1};
-static const short PR568[] = {5,36,36,36,36,36,36};
+static const short PR568[] = {5,86,86,86,86,86,86};
 static const short PO568[] = {-1,6};
 static const char* const L569[] = {
 	"Five channels that generate a gate with shaped edges whenever their input rises above a threshold, plus combined AND and OR gates",
@@ -12165,7 +12358,7 @@ static const short O569[] = {15,15,15,15,15,17,16};
 static const short P569[] = {3,5,7,3,5,7,3,5,7,3,5,7,3,5,7,9,11,13};
 static const signed char FI569[] = {-1,2,1,1,1,-1,2,1,1,1,-1,2,1,1,1,-1,2,1,1,1,-1,2,1,1,1,1,1,1};
 static const signed char FO569[] = {2,2,2,2,2,2,2};
-static const short PR569[] = {36,9,36,36,36,36,9,36,36,36,36,9,36,36,36,-1,9,36,36,36,-1,9,36,36,36,36,36,36};
+static const short PR569[] = {86,9,86,86,86,86,9,86,86,86,86,9,86,86,86,-1,9,86,86,86,-1,9,86,86,86,86,86,86};
 static const short PO569[] = {0,0,0,0,0,0,0};
 static const char* const L570[] = {
 	"Takes over Rack's cable opacity and tension, room brightness, light bloom and spotlight settings and puts them under knob and CV control",
@@ -12198,7 +12391,7 @@ static const char* const L570[] = {
 static const short I570[] = {2,4,6,8,10,16,12,14};
 static const short P570[] = {1,3,5,7,9,15,11,13};
 static const signed char FI570[] = {2,1,1,1,1,2,1,1};
-static const short PR570[] = {5,36,36,36,36,5,36,36};
+static const short PR570[] = {5,86,86,86,86,5,86,86};
 static const char* const L571[] = {
 	"Eight polyphonic VCA channels opened and closed by a beat count taken from a divided clock, each with shaped rise and fall and an envelope output",
 	"The clock the module counts; a trigger or a gate works best, though any signal is counted",
@@ -12228,7 +12421,7 @@ static const short O571[] = {3,12,12,12,12,12,12,12,12,17,17,17,17,17,17,17,17,1
 static const short P571[] = {2,5,7,7,7,7,7,7,7,7,9,9,9,9,9,9,9,9,11,11,11,11,11,11,11,11,13,13,13,13,13,13,13,13,15,15,15,15,15,15,15,15,14,14,14,14,14,14,14,14,16,16,16,16,16,16,16,16};
 static const signed char FI571[] = {2,2,2};
 static const signed char FO571[] = {2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2};
-static const short PR571[] = {5,5,33,27,27,27,27,27,27,27,27};
+static const short PR571[] = {5,5,49,63,63,63,63,63,63,63,63};
 static const short PO571[] = {0,0,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0};
 static const char* const L572[] = {
 	"Sets the panel colour used by the plugin's Magical CV theme, with CV control over each part of it",
@@ -12248,7 +12441,7 @@ static const char* const L572[] = {
 static const short I572[] = {2,4,6,8};
 static const short P572[] = {1,3,5,7};
 static const signed char FI572[] = {1,1,1,1};
-static const short PR572[] = {36,36,36,36};
+static const short PR572[] = {86,86,86,86};
 static const char* const L573[] = {
 	"A blank panel in a colour of your choosing, resized by dragging either edge, which can also display text for streaming or video work",
 	"Note — drag either side edge of the panel to change its width",
@@ -12312,7 +12505,7 @@ static const short O574[] = {20,33,32,35,34};
 static const short P574[] = {13,4,2,3,6,11,9,10,6,11,9,10,6,11,9,10,6,11,9,10,19,36,21,30,25,28,23,27,22,15,16,18,-1,38};
 static const signed char FI574[] = {1,-1,2,2,-1,2,2,-1,2,2,-1,2,2,-1,2,2,-1,-1,2,2,1};
 static const signed char FO574[] = {1,2,2,2,2};
-static const short PR574[] = {36,27,33,33,27,33,33,27,33,33,27,33,33,27,33,33,27,27,33,33,36};
+static const short PR574[] = {86,63,49,49,63,49,49,63,49,49,63,49,49,63,49,49,63,63,49,49,86};
 static const short PO574[] = {-1,0,0,0,0};
 static const char* const L575[] = {
 	"A waveshaper that cuts a canal out of the middle of a waveform and multiplies what is left above and below it",
@@ -12341,7 +12534,7 @@ static const short O575[] = {12,13};
 static const short P575[] = {2,4,6,8,10};
 static const signed char FI575[] = {0,1,1,1,1,1};
 static const signed char FO575[] = {0,2};
-static const short PR575[] = {8,36,36,36,36,36};
+static const short PR575[] = {8,86,86,86,86,86};
 static const short PO575[] = {3,0};
 static const char* const L576[] = {
 	"A polyphonic voice that rebuilds an analysed sample from up to 256 sine waves and a noise residual, so pitch and speed can be set apart from each other",
@@ -12391,8 +12584,8 @@ static const short O576[] = {31,32};
 static const short P576[] = {5,7,8,10,12,14,16,18,20,22,24,26,28,1,3};
 static const signed char FI576[] = {3,2,1,1,1,1,1,1,1,1,1,1,1,2,2};
 static const signed char FO576[] = {0,2};
-static const short PR576[] = {32,33,36,36,36,36,36,36,36,36,36,36,9,5,16};
-static const short PO576[] = {46,16};
+static const short PR576[] = {23,49,86,86,86,86,86,86,86,86,86,86,9,5,16};
+static const short PO576[] = {57,16};
 static const char* const L577[] = {
 	"An experimental feedback distortion: the input is amplified, distorted, and fed back at a frequency of your choosing",
 	"The signal to be distorted",
@@ -12418,7 +12611,7 @@ static const short O577[] = {15};
 static const short P577[] = {12,2,4,6,8,10,14,13};
 static const signed char FI577[] = {0,1,1,1,1,3};
 static const signed char FO577[] = {0};
-static const short PR577[] = {8,36,36,36,36,14};
+static const short PR577[] = {8,86,86,86,86,14};
 static const short PO577[] = {2};
 static const char* const L578[] = {
 	"An experimental cowbell voice built from spread oscillators, a band filter, distortion and an internal envelope",
@@ -12447,7 +12640,7 @@ static const short O578[] = {17};
 static const short P578[] = {3,5,13,7,9,11,-1,15,1,16};
 static const signed char FI578[] = {1,1,1,1,1,1,-1,2};
 static const signed char FO578[] = {0};
-static const short PR578[] = {36,36,36,36,36,36,36,5};
+static const short PR578[] = {86,86,86,86,86,86,86,5};
 static const short PO578[] = {2};
 static const char* const L579[] = {
 	"A 16 channel polyphonic quantizer over a nine octave keyboard, with per-channel bend and portamento, octave transposes and 32 memory banks of note selections",
@@ -12478,8 +12671,8 @@ static const short O579[] = {15,16};
 static const short P579[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,7,5};
 static const signed char FI579[] = {1,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO579[] = {3,2};
-static const short PR579[] = {27,33,61,62,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,16,16};
-static const short PO579[] = {32,16};
+static const short PR579[] = {63,49,130,131,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,16,16};
+static const short PO579[] = {23,16};
 static const char* const L580[] = {
 	"A phase correlation meter for two signals, with the correlation offered as a CV signal and its inverse",
 	"Sets the length of the window over which the two signals are compared, in samples; short windows suit audio rate signals and long ones suit slow signals",
@@ -12501,7 +12694,7 @@ static const short O580[] = {4,5,6};
 static const short P580[] = {1,7,8};
 static const signed char FI580[] = {1,-1,-1,1,1};
 static const signed char FO580[] = {1,1,2};
-static const short PR580[] = {36,36,36,36,36};
+static const short PR580[] = {86,86,86,86,86};
 static const short PO580[] = {-1,-1,0};
 static const char* const L581[] = {
 	"Sixteen channels of fixed 1V/octave note voltages, with transposition and a polyphonic output, for setting out a chord or a scale by hand",
@@ -12524,8 +12717,8 @@ static const short O581[] = {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,7};
 static const short P581[] = {5,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,8,9,10};
 static const signed char FI581[] = {3,-1,1};
 static const signed char FO581[] = {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
-static const short PR581[] = {32,33,36};
-static const short PO581[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,29};
+static const short PR581[] = {23,49,86};
+static const short PO581[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,38};
 static const char* const L582[] = {
 	"A window mixer for a polyphonic input of up to 16 channels, stepping to the next channel on every trigger, with a slew of up to 5 seconds",
 	"The polyphonic input whose channels the window steps between; a channel with a signal lights green and the selected one lights brightly",
@@ -12555,7 +12748,7 @@ static const short O582[] = {16,17};
 static const short P582[] = {7,8,4,18,19,2,10,6,12,14};
 static const signed char FI582[] = {-1,2,2,1,1,1,1};
 static const signed char FO582[] = {1};
-static const short PR582[] = {27,5,5,36,36,36,36};
+static const short PR582[] = {63,5,5,86,86,86,86};
 static const char* const L583[] = {
 	"Draws a backdrop behind the whole rack: a colour or gradient, an image, and virtual skiffs around the modules, all set up in the Purf Stylee menu",
 	"Draws the backdrop while lit, and leaves the rack as it was when unlit",
@@ -12584,7 +12777,7 @@ static const char* const L584[] = {
 	"Menu — Poly inputs channel map: lists, for each of the five inputs, which polyphonic channel carries which Purfenator setting",
 };
 static const short I584[] = {1,2,3,4,5};
-static const short PR584[] = {27,27,27,27,27};
+static const short PR584[] = {63,63,63,63,63};
 static const char* const L585[] = {
 	"A sequencer over a grid of 64 steps, clocked at one rate across and another down, whose enabled steps are mutated and shifted as the active step moves",
 	"Sets the run direction: down for forwards, centred for stopped, up for backwards",
@@ -12634,8 +12827,8 @@ static const short O585[] = {31,32,33,33,33,33,33,33,33,33,34,34,34,34,34,34,34,
 static const short P585[] = {1,3,4,7,10,11,12,13,14,15,22,22,22,22,22,22,22,22,24,24,24,24,24,24,24,24,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,20,27};
 static const signed char FI585[] = {1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2};
 static const signed char FO585[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1};
-static const short PR585[] = {36,36,36,5,5,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,36,5,5,5,5,5};
-static const short PO585[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,64,64,65};
+static const short PR585[] = {86,86,86,5,5,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,132,86,5,5,5,5,5};
+static const short PO585[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133,133,134};
 static const char* const L586[] = {
 	"A generative sequencer that makes a new sequence every day from the date, with a step value, a step modulation, two rhythms and an end-of-sequence trigger",
 	"Sets how many steps of the generated sequence are played, 1 to 64",
@@ -12728,7 +12921,7 @@ static const short O588[] = {13,14};
 static const short P588[] = {1,1,1,1,1,1,3,3,3,3,3,3,5,9,7,8,12};
 static const signed char FI588[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,3};
 static const signed char FO588[] = {2,0};
-static const short PR588[] = {66,66,66,66,66,66,66,66,66,66,66,66,36,36,14};
+static const short PR588[] = {135,135,135,135,135,135,135,135,135,135,135,135,86,86,14};
 static const short PO588[] = {0,3};
 static const char* const L589[] = {
 	"Opens the demo transport, which plays a scripted demonstration over the top of the rack, moving the pointer and working the controls as a person would",
@@ -13738,8 +13931,8 @@ static const short O624[] = {23,24,25,26,27,28,29,30,31,32};
 static const short P624[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,4,5,6,7,8,9,10,11,12};
 static const signed char FI624[] = {1,2,2,1,1,2,2,2,1,1};
 static const signed char FO624[] = {2,2,2,2,2,3,3,2,1,1};
-static const short PR624[] = {-1,0,0,-1,-1,0,-1,0,-1,-1};
-static const short PO624[] = {0,0,0,-1,0,2,2,0,-1,-1};
+static const short PR624[] = {14,5,5,136,137,5,5,5,138,139};
+static const short PO624[] = {0,0,0,-1,0,2,2,87,-1,-1};
 static const char* const L625[] = {
 	"Clock divider and sequential gate, counting incoming clock pulses from 0 to 63 and then starting again; gates are 10V high and 0V low",
 	"A rising edge advances the count",
@@ -13757,8 +13950,8 @@ static const short I625[] = {1,2};
 static const short O625[] = {3,4,5,6,7,8,9,9,9,9,9,9,9,9};
 static const signed char FI625[] = {2,2};
 static const signed char FO625[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR625[] = {0,0};
-static const short PO625[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static const short PR625[] = {5,5};
+static const short PO625[] = {87,87,87,87,87,87,87,87,87,87,87,87,87,87};
 static const char* const L626[] = {
 	"Eight-step rhythm generator: each step lasts for a time of its own and fires a chosen number of gates while it lasts, free running or counting an external clock",
 	"Sets how long that step lasts, as a percentage of the global rate",
@@ -13782,8 +13975,8 @@ static const short O626[] = {12,12,12,12,12,12,12,12,13};
 static const short P626[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,5,6};
 static const signed char FI626[] = {1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2};
 static const signed char FO626[] = {2,2,2,2,2,2,2,2,2};
-static const short PR626[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0};
-static const short PO626[] = {0,0,0,0,0,0,0,0,0};
+static const short PR626[] = {99,99,99,99,99,99,99,99,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5};
+static const short PO626[] = {87,87,87,87,87,87,87,87,87};
 static const char* const L627[] = {
 	"Three-band crossover built from fourth-order Linkwitz-Riley filters, with a gain control on each band, a separate output for each and a combined output; polyphonic",
 	"Sets the level of the low band, silent at the bottom of its travel, 0dB at the middle and 6dB at the top",
@@ -13807,8 +14000,8 @@ static const short O627[] = {11,12,13,14};
 static const short P627[] = {1,2,3,4,4,4,5,6};
 static const signed char FI627[] = {1,1,1,1,1,0};
 static const signed char FO627[] = {0,0,0,0};
-static const short PR627[] = {-1,-1,-1,-1,-1,2};
-static const short PO627[] = {2,2,2,2};
+static const short PR627[] = {38,38,38,140,140,38};
+static const short PO627[] = {38,38,38,38};
 static const char* const L628[] = {
 	"CV recording sequencer: it samples a voltage as it moves from step to step while recording, then plays the stored voltages back in order; up to 32 steps and 16 polyphonic channels",
 	"Sets how many steps the sequence runs for, 1 to 32",
@@ -13839,7 +14032,8 @@ static const short O628[] = {19};
 static const short P628[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI628[] = {1,1,1,2,2,2,2};
 static const signed char FO628[] = {1};
-static const short PR628[] = {-1,-1,-1,0,0,0,0};
+static const short PR628[] = {141,34,38,5,5,5,5};
+static const short PO628[] = {38};
 static const char* const L629[] = {
 	"Clock pair: a gate called Alpha and a copy of it called Beta, shifted from it by anything up to a whole cycle, with a combined output as well",
 	"Sets the rate of both gates, 15 BPM at the bottom of its travel and 960 BPM at the top",
@@ -13856,7 +14050,8 @@ static const short O629[] = {6,7,8};
 static const short P629[] = {1,2,3};
 static const signed char FI629[] = {1,1};
 static const signed char FO629[] = {2,2,2};
-static const short PO629[] = {0,0,0};
+static const short PR629[] = {142,99};
+static const short PO629[] = {87,87,87};
 static const char* const L630[] = {
 	"Random clock and noise generator: a new random value is drawn on every tick of its own clock or of an external one",
 	"Sets how often a new random value is drawn, 5Hz at the bottom of its travel and about 20kHz at the top",
@@ -13873,8 +14068,8 @@ static const short O630[] = {6,7,8};
 static const short P630[] = {1,2};
 static const signed char FI630[] = {2,1,1};
 static const signed char FO630[] = {2,0,0};
-static const short PR630[] = {0,-1,-1};
-static const short PO630[] = {-1,2,3};
+static const short PR630[] = {5,143,34};
+static const short PO630[] = {0,3,3};
 static const char* const L631[] = {
 	"Probabilistic trigger sequencer: each step fires a gate only when it wins a random draw weighted by its own knob and CV",
 	"Sets the internal clock rate, 15 BPM at the bottom of its travel and 3840 BPM at the top",
@@ -13894,8 +14089,8 @@ static const short O631[] = {9,9,9,9,9,9,9,9,10};
 static const short P631[] = {1,2,3,3,3,3,3,3,3,3};
 static const signed char FI631[] = {1,2,1,2,1,1,1,1,1,1,1,1};
 static const signed char FO631[] = {2,2,2,2,2,2,2,2,2};
-static const short PR631[] = {-1,0,-1,0,-1,-1,-1,-1,-1,-1,-1,-1};
-static const short PO631[] = {0,0,0,0,0,0,0,0,0};
+static const short PR631[] = {34,5,141,5,99,99,99,99,99,99,99,99};
+static const short PO631[] = {87,87,87,87,87,87,87,87,87};
 static const char* const L632[] = {
 	"Sequenced sampler: eight slots record from the input one after another as an external clock steps through them, then play their slices back with their own gain, mute, skip and reverse settings",
 	"Runs and stops the sequencer",
@@ -13928,7 +14123,7 @@ static const short O632[] = {20,20,20,20,20,20,20,20,21};
 static const short P632[] = {1,2,3,4,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,10,11,12};
 static const signed char FI632[] = {0,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO632[] = {0,0,0,0,0,0,0,0,0};
-static const short PR632[] = {2,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static const short PR632[] = {8,5,5,5,5,5,5,5,5,5,5,5,5,5};
 static const short PO632[] = {2,2,2,2,2,2,2,2,2};
 static const char* const L633[] = {
 	"Four-operator FM percussion voice; every knob and CV is read at the instant a trigger arrives and held for the whole hit",
@@ -13969,7 +14164,7 @@ static const short O633[] = {26};
 static const short P633[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
 static const signed char FI633[] = {3,3,1,1,1,1,1,1,1,2,2,2};
 static const signed char FO633[] = {0};
-static const short PR633[] = {1,1,-1,-1,-1,-1,-1,-1,-1,0,0,0};
+static const short PR633[] = {144,144,11,11,141,99,99,8,99,82,82,82};
 static const short PO633[] = {2};
 static const char* const L634[] = {
 	"Bit depth reducer and sample rate decimator, polyphonic, with the depth reducer's output normalled to the decimator's input",
@@ -13987,8 +14182,8 @@ static const short O634[] = {7,8};
 static const short P634[] = {1,2};
 static const signed char FI634[] = {0,1,0,1};
 static const signed char FO634[] = {0,0};
-static const short PR634[] = {3,-1,2,-1};
-static const short PO634[] = {2,2};
+static const short PR634[] = {57,16,145,146};
+static const short PO634[] = {57,38};
 static const char* const L635[] = {
 	"Asymmetrical voltage processor: it cuts the signal at a threshold voltage and delays, shapes, folds and slews the part above it separately from the part below it",
 	"Sets the voltage that divides the signal into its two parts, -10V to 10V",
@@ -14025,7 +14220,7 @@ static const short O635[] = {25,26,27};
 static const short P635[] = {1,2,3,4,13,13,13,13,13,13,13,13,6,5,8,7,10,9,12,11};
 static const signed char FI635[] = {1,0,1,1,1,1,1,1,1,1,1};
 static const signed char FO635[] = {0,0,0};
-static const short PR635[] = {-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR635[] = {147,8,99,8,8,8,8,8,8,8,8};
 static const short PO635[] = {2,2,2};
 static const char* const L636[] = {
 	"Eight-step Markov gate sequencer: on every clock pulse the next step is drawn at random, weighted by the eight knobs belonging to the step it is on",
@@ -14042,8 +14237,8 @@ static const short O636[] = {5,5,5,5,5,5,5,5};
 static const short P636[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FI636[] = {2,2,2,2,2,2,2,2,2,2};
 static const signed char FO636[] = {2,2,2,2,2,2,2,2};
-static const short PR636[] = {0,0,0,0,0,0,0,0,0,0};
-static const short PO636[] = {0,0,0,0,0,0,0,0};
+static const short PR636[] = {5,5,5,5,5,5,5,5,5,5};
+static const short PO636[] = {87,87,87,87,87,87,87,87};
 static const char* const L637[] = {
 	"Adds a fixed whole number of volts to a signal, with eight outputs offset from four volts below to four volts above it; polyphonic",
 	"The signal every output adds its own offset to",
@@ -14058,6 +14253,8 @@ static const char* const L637[] = {
 };
 static const short I637[] = {1};
 static const short O637[] = {2,3,4,5,6,7,8,9};
+static const short PR637[] = {38};
+static const short PO637[] = {38,38,38,38,38,38,38,38};
 static const char* const L638[] = {
 	"A module that evaluates a typed formula once per sample per channel, with four input jacks, a knob and a three-way button as its variables",
 	"Sets the variable k in both formulas, -1 to 1",
@@ -14136,7 +14333,7 @@ static const short O640[] = {25};
 static const short P640[] = {3,5,7,-1,-1,-1,10,1,15,9,16,18,20,22};
 static const signed char FI640[] = {1,1,1,3,1,1,1,2,1,1,1,1,1};
 static const signed char FO640[] = {0};
-static const short PR640[] = {36,36,36,32,27,36,61,27,36,36,36,36,36};
+static const short PR640[] = {86,86,86,23,63,86,130,63,86,86,86,86,86};
 static const short PO640[] = {3};
 static const char* const L641[] = {
 	"Stereo filter morphed through a cube: each corner of the cube holds the settings of up to seven filters, and the three axis knobs move between the corners",
@@ -14168,8 +14365,8 @@ static const short O641[] = {19,20};
 static const short P641[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI641[] = {0,0,1,1,1,1,1,1,1};
 static const signed char FO641[] = {0,0};
-static const short PR641[] = {8,8,36,36,36,36,36,36,36};
-static const short PO641[] = {23,23};
+static const short PR641[] = {8,8,86,86,86,86,86,86,86};
+static const short PO641[] = {37,37};
 static const char* const L642[] = {
 	"Banded waveguide oscillator: an impulse is split into three bands, two of them ringing in short delay lines and the top one in a waveguide mesh",
 	"Picks the shape of the mesh: rectilinear, triangular or cubic",
@@ -14204,7 +14401,7 @@ static const short O642[] = {25};
 static const short P642[] = {1,2,3,4,5,6,7,8,9,-1,-1,10,11,-1,12};
 static const signed char FI642[] = {0,1,1,1,1,1,1,1,1,-1,-1,1,1,-1,1};
 static const signed char FO642[] = {0};
-static const short PR642[] = {8,36,36,36,36,36,36,36,36,-1,-1,36,36,-1,36};
+static const short PR642[] = {8,86,86,86,86,86,86,86,86,-1,-1,86,86,-1,86};
 static const short PO642[] = {2};
 static const char* const L643[] = {
 	"Spectral delay: the input is split into 128 frequency bands, and each band has its own level, delay time, feedback and stereo placement drawn on the grids",
@@ -14260,7 +14457,7 @@ static const short O643[] = {39,40,37};
 static const short P643[] = {-1,33,8,16,34,24,32,9,17,25,35,6,14,22,30,4,12,20,28};
 static const signed char FI643[] = {0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO643[] = {0,0,0};
-static const short PR643[] = {8,8,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36};
+static const short PR643[] = {8,8,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86};
 static const short PO643[] = {2,2,2};
 static const char* const L644[] = {
 	"Sample resynthesiser: a loaded sample is analysed frame by frame and played back by up to 32 oscillators, each with its own start, stop and speed",
@@ -14327,7 +14524,7 @@ static const short O644[] = {49,50,5};
 static const short P644[] = {-1,-1,8,6,10,12,14,16,-1,28,19,23,17,34,41,2,27,4};
 static const signed char FI644[] = {2,-1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2};
 static const signed char FO644[] = {0,0,2};
-static const short PR644[] = {5,-1,36,36,36,36,29,29,29,29,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,5};
+static const short PR644[] = {5,-1,86,86,86,86,38,38,38,38,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,5};
 static const short PO644[] = {2,2,0};
 static const char* const L645[] = {
 	"Granular synthesiser with 16 sample slots and 16 incoming-signal voices: grains are spawned from whichever of the 32 voices the weighting picks, each with its own size, pitch, envelope and position",
@@ -14399,7 +14596,7 @@ static const short O645[] = {52,53};
 static const short P645[] = {6,-1,8,-1,11,15,19,27,31,-1,23,5,47,38,45};
 static const signed char FI645[] = {0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,-1,3,3};
 static const signed char FO645[] = {0,0};
-static const short PR645[] = {29,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,5,27,27,27,-1,29,29};
+static const short PR645[] = {38,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,5,63,63,63,-1,38,38};
 static const short PO645[] = {2,2};
 static const char* const L646[] = {
 	"Resynthesiser: one or two incoming signals are analysed into frequency bands, and up to 36 oscillators are driven from the strongest of those bands",
@@ -14463,7 +14660,7 @@ static const short O646[] = {46,47};
 static const short P646[] = {-1,5,3,44,7,9,11,13,-1,36,20,18,37,-1,24,31,14,16,42};
 static const signed char FI646[] = {0,0,1,1,1,1,0,0,0,0,1,1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO646[] = {0,0};
-static const short PR646[] = {8,8,36,36,36,36,29,29,29,29,36,36,-1,-1,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36};
+static const short PR646[] = {8,8,86,86,86,86,38,38,38,38,86,86,-1,-1,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86};
 static const short PO646[] = {2,2};
 static const char* const L647[] = {
 	"Impulse generator: a burst of coloured noise shaped by a window function, started by a gate and repeated for as long as that gate is high",
@@ -14486,7 +14683,7 @@ static const short O647[] = {12};
 static const short P647[] = {1,2,3,4,5};
 static const signed char FI647[] = {1,1,1,1,1,2};
 static const signed char FO647[] = {0};
-static const short PR647[] = {36,36,36,36,36,5};
+static const short PR647[] = {86,86,86,86,86,5};
 static const short PO647[] = {2};
 static const char* const L648[] = {
 	"Spectral vocoder: two inputs are analysed into 1024 frequency bands and each band of one is multiplied by a band of the other, with the pairing and the stereo placement drawn on the grids",
@@ -14529,7 +14726,7 @@ static const short O648[] = {25,26};
 static const short P648[] = {-1,19,20,17,9,16,7,14,5,12,21,23};
 static const signed char FI648[] = {0,0,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO648[] = {0,0};
-static const short PR648[] = {8,8,36,36,36,36,36,36,36,36,36,36,36};
+static const short PR648[] = {8,8,86,86,86,86,86,86,86,86,86,86,86};
 static const short PO648[] = {2,2};
 static const char* const L649[] = {
 	"Clock-synced LFO: one cycle is the clock period multiplied and divided by whole numbers, with a sine, a triangle, a sawtooth and a square running from it.",
@@ -14561,8 +14758,8 @@ static const short O649[] = {18,19,20,21};
 static const short P649[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI649[] = {-1,1,1,1,2,2};
 static const signed char FO649[] = {1,1,1,1};
-static const short PR649[] = {36,8,8,8,5,5};
-static const short PO649[] = {36,36,36,36};
+static const short PR649[] = {86,8,8,8,5,5};
+static const short PO649[] = {86,86,86,86};
 static const char* const L650[] = {
 	"Clock-synced LFO with a shapeable wave, sent out at four points of the cycle at once.",
 	"Sets how many times faster than the clock the cycle runs, a whole number from 1 to 128.",
@@ -14600,8 +14797,8 @@ static const short O650[] = {25,26,27,28};
 static const short P650[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 static const signed char FI650[] = {-1,1,1,1,1,1,2,2};
 static const signed char FO650[] = {1,1,1,1};
-static const short PR650[] = {36,8,8,8,8,8,5,5};
-static const short PO650[] = {36,36,36,36};
+static const short PR650[] = {86,8,8,8,8,8,5,5};
+static const short PO650[] = {86,86,86,86};
 static const char* const L651[] = {
 	"Expander for BPM LFO and BPM LFO 2, going immediately to the right of one of them, or to the right of another PHASEX; it gives copies of that LFO's wave spread evenly around the cycle.",
 	"Sets how many equal parts the cycle is cut into, 3 to 12; that many outputs carry a copy of the wave, one per part.",
@@ -14617,7 +14814,7 @@ static const short P651[] = {1,2,3};
 static const signed char FI651[] = {1};
 static const signed char FO651[] = {1,1,1,1,1,1,1,1,1,1,1,1};
 static const short PR651[] = {8};
-static const short PO651[] = {36,36,36,36,36,36,36,36,36,36,36,36};
+static const short PO651[] = {86,86,86,86,86,86,86,86,86,86,86,86};
 static const char* const L652[] = {
 	"Seriously slow LFO on geological and cosmological time: one cycle runs from a year to far longer than the age of the universe.",
 	"Sets how many of the chosen time units make one cycle, 1 to 100.",
@@ -14637,7 +14834,7 @@ static const short P652[] = {3,1,2};
 static const signed char FI652[] = {1,2};
 static const signed char FO652[] = {1,1,1,1};
 static const short PR652[] = {8,11};
-static const short PO652[] = {66,66,66,66};
+static const short PO652[] = {135,135,135,135};
 static const char* const L653[] = {
 	"Voltage controlled quad crossover: one signal split into four frequency bands, each with a send and a return.",
 	"Sets the crossover between the LO and MID-LO bands, within a 15Hz to 8400Hz range, and stops where the next crossover up is set.",
@@ -14688,8 +14885,8 @@ static const short O654[] = {16,16,17,17,18,18,19,19,20,21,22};
 static const short P654[] = {1,1,2,2,3,3,4,4,5,5,6,6,7,8,8};
 static const signed char FI654[] = {1,1,2,2,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO654[] = {2,2,2,2,2,2,1,1,2,1,1};
-static const short PR654[] = {8,8,28,28,8,8,8,8,8,8,35,35,8,8};
-static const short PO654[] = {10,10,10,10,10,10,36,36,10,36,36};
+static const short PR654[] = {8,8,82,82,8,8,8,8,8,8,85,85,8,8};
+static const short PO654[] = {10,10,10,10,10,10,86,86,10,86,86};
 static const char* const L655[] = {
 	"Oscillator built on a Rosenberg model of the glottal pulse, with a noise component for breath.",
 	"Sets the pitch, four and a half octaves either side of C4 at 261.63Hz.",
@@ -14776,8 +14973,8 @@ static const short O657[] = {25,26,27,27,27,27,28,28,28,28};
 static const short P657[] = {4,1,3,2,5,9,6,9,7,9,8,9,10,15,11,15,12,15,13,10,15,11,15,12,15,14,10,15,11,15,12,15,13,10,15,11,15,12,15,14};
 static const signed char FI657[] = {3,1,1,2,1,1,1,1,1,1,1,-1,1,1,1,-1,1,1,1,-1,1,1,1};
 static const signed char FO657[] = {0,0,0,0,0,0,1,1,1,1};
-static const short PR657[] = {32,29,29,29,29,29,29,29,29,29,29,-1,29,29,29,-1,29,29,29,-1,29,29,29};
-static const short PO657[] = {29,29,29,29,29,29,67,67,67,67};
+static const short PR657[] = {23,38,38,38,38,38,38,38,38,38,38,-1,38,38,38,-1,38,38,38,-1,38,38,38};
+static const short PO657[] = {38,38,38,38,38,38,148,148,148,148};
 static const char* const L658[] = {
 	"Comb filter bank: 64 taps spread across one delay length by pattern, in stereo, with feedback.",
 	"Sets the comb length as a division of the clock, in 21 steps from a single clock period to 256 of them, taking in thirds, fifths, sevenths and elevenths on the way.",
@@ -14813,7 +15010,7 @@ static const short P658[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI658[] = {2,1,3,1,1,1,1,1,1,1,1,0,0};
 static const signed char FO658[] = {0,0,1};
 static const short PR658[] = {5,8,14,8,8,8,8,8,8,8,8,8,8};
-static const short PO658[] = {8,8,36};
+static const short PO658[] = {8,8,86};
 static const char* const L659[] = {
 	"Stereo phaser: a chain of swept allpass or notch filters, with a feedback loop and a wet/dry blend.",
 	"Steps the filter chain through 4, 8 and 12 stages; more stages put more notches in the sweep.",
@@ -14891,7 +15088,7 @@ static const short P660[] = {1,1,4,7,10,13,16,19,22,4,7,10,13,16,19,22,2,2,5,8,1
 static const signed char FI660[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO660[] = {1,1,1,1,1,1,1,1};
 static const short PR660[] = {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
-static const short PO660[] = {36,36,36,66,66,68,68,68};
+static const short PO660[] = {86,86,86,135,135,149,149,149};
 static const char* const L661[] = {
 	"Stereo compressor with CV over every control, peak or RMS detection, upward compression and mid-side working.",
 	"Sets the level the detector acts on, -50dB to 0dB; the default is -30dB.",
@@ -14938,7 +15135,7 @@ static const short P661[] = {1,21,5,21,7,21,9,21,10,21,3,21,11,21,17,21,19,21,29
 static const signed char FI661[] = {1,1,1,-1,-1,1,1,1,1,2,1,2,0,0,0,2,2,2,2,2,1,2};
 static const signed char FO661[] = {0,0,1};
 static const short PR661[] = {8,8,8,-1,-1,8,8,8,8,5,8,5,8,8,8,5,5,5,5,5,8,5};
-static const short PO661[] = {8,8,69};
+static const short PO661[] = {8,8,150};
 static const char* const L662[] = {
 	"Megalomanic Compression: five band compressor, each band with its own detector, threshold and gain, mixed back to stereo.",
 	"Switches that band in and out of the mix.",
@@ -14986,7 +15183,7 @@ static const short P662[] = {1,1,1,1,1,2,2,2,2,2,19,19,19,19,19,-1,4,4,4,-1,-1,1
 static const signed char FI662[] = {2,2,2,2,2,1,1,1,1,1,-1,1,1,1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,2,0,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0};
 static const signed char FO662[] = {0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const short PR662[] = {5,5,5,5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,5,5,5,5,5,5,5,5,5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,5,8,8,8,5,5,5,8,8,8,8,8,8,8,8,8,8};
-static const short PO662[] = {8,8,69,69,69,69,69,70,70,70,70,70,70,70,70,70,70,8,8,8,8,8};
+static const short PO662[] = {8,8,150,150,150,150,150,151,151,151,151,151,151,151,151,151,151,8,8,8,8,8};
 static const char* const L663[] = {
 	"Records incoming gates as MIDI note events and saves them to a MIDI file; each of the sixteen columns sets the note one gate channel plays.",
 	"Sets the MIDI note number that column records, 0 to 127.",
@@ -15017,7 +15214,7 @@ static const char* const L663[] = {
 static const short I663[] = {15,14,16,17,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12};
 static const short P663[] = {13,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6};
 static const signed char FI663[] = {1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR663[] = {71,5,72,72,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PR663[] = {152,5,24,24,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
 static const char* const L664[] = {
 	"Splits a polyphonic pitch CV into whole semitones and the leftover fraction, so a plug-in in Host can play microtonal scales.",
 	"The polyphonic pitch to be split; every channel patched in is carried through to both outputs.",
@@ -15029,8 +15226,8 @@ static const short I664[] = {1};
 static const short O664[] = {2,3};
 static const signed char FI664[] = {3};
 static const signed char FO664[] = {3,1};
-static const short PR664[] = {29};
-static const short PO664[] = {29,61};
+static const short PR664[] = {38};
+static const short PO664[] = {38,130};
 static const char* const L665[] = {
 	"Sixteen band vocoder: the band levels read from the modifier input are imposed on the matching bands of the carrier.",
 	"Sets how much of that band reaches the output, 0 to 2; the sixteen bands run from 125Hz to 6400Hz.",
@@ -15064,7 +15261,7 @@ static const short P665[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,6,8,10,12,20,21,2
 static const signed char FI665[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,2,2,1};
 static const signed char FO665[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0};
 static const short PR665[] = {13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,8,8,8,8,8,8,5,5,8};
-static const short PO665[] = {73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,8};
+static const short PO665[] = {153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,153,8};
 static const char* const L666[] = {
 	"PN-Chord expands Probably Not(e) and goes immediately to its right; while one voice is quantised, its QUANT CV then carries a four-note chord on the chosen note, from notes of the key and scale.",
 	"Sets the chance that the fifth of the chord is diminished or augmented, 0 to 100%.",
@@ -15175,7 +15372,7 @@ static const short P671[] = {2,4,5,16,9,10,11,12,13};
 static const signed char FI671[] = {3,1,0,0,1};
 static const signed char FO671[] = {0,0,1};
 static const short PR671[] = {14,8,9,8,8};
-static const short PO671[] = {8,8,36};
+static const short PO671[] = {8,8,86};
 static const char* const L672[] = {
 	"PORTLAND WEATHER — a 16-tap rhythmic stereo delay after the tap section of the Cylonix Rainmaker, with its own level, pan, filter, pitch shift and detune on every tap.",
 	"Multiplies the clock rate, 1 to 256, so a higher setting gives a shorter delay; it does nothing until a clock is patched. A patched voltage adds 25.6 per volt.",
@@ -15223,7 +15420,7 @@ static const short O672[] = {11,11,24,24};
 static const short P672[] = {2,3,-1,4,5,13,19,19,20,20,15,21,21,22,22,17,16,7,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,-1,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,6,18,18,18,18,26,1,8,14,12,12};
 static const signed char FI672[] = {2,1,1,1,-1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1};
 static const signed char FO672[] = {0,0,0,0};
-static const short PR672[] = {5,8,8,74,-1,8,8,8,8,8,8,8,8,11,11,11,11,8,8,11,11,8,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,29,29,8,8,8};
+static const short PR672[] = {5,8,8,154,-1,8,8,8,8,8,8,8,8,11,11,11,11,8,8,11,11,8,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,38,38,8,8,8};
 static const short PO672[] = {8,8,8,8};
 static const char* const L673[] = {
 	"Probably Not(e) is a probabilistic quantiser: the incoming pitch goes to the nearest of twelve notes, then a note near that one is chosen at random, weighted by the note weights of the key and scale.",
@@ -15270,8 +15467,8 @@ static const short O673[] = {31,32,33};
 static const short P673[] = {1,8,2,8,3,8,4,8,5,8,6,8,7,8,9,10,11,12,13,14,15,8,16,17,18,18,18,18,18,18,18,18,18,18,18,18,19,19,19,19,19,19,19,19,19,19,19,19,20,8,21};
 static const signed char FI673[] = {3,1,1,1,1,1,-1,1,2,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO673[] = {3,1,2};
-static const short PR673[] = {32,8,8,8,8,8,4,8,5,33,30,5,8,4,4,4,4,4,4,4,4,4,4,4,4,8};
-static const short PO673[] = {32,67,17};
+static const short PR673[] = {23,8,8,8,8,8,4,8,5,49,83,5,8,4,4,4,4,4,4,4,4,4,4,4,4,8};
+static const short PO673[] = {23,148,17};
 static const char* const L674[] = {
 	"Probably Not(e) Arabic is a probabilistic quantiser built on Arabic maqams, each of which is made from one or more jins, with the notes tuned to the intervals those ajnas use.",
 	"Sets how many notes either side of the quantised note can be chosen; at 0 the quantised note is the only candidate.",
@@ -15323,7 +15520,7 @@ static const short P674[] = {1,5,2,5,3,5,7,6,11,12,-1,-1,9,10,5,17,5,18,13,14,15
 static const signed char FI674[] = {3,1,1,1,1,1,-1,1,1,1,-1,2,1,1,-1,2,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO674[] = {3,1,2,1};
 static const short PR674[] = {8,8,8,8,4,4,-1,4,8,8,-1,5,4,4,-1,5,11,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,8};
-static const short PO674[] = {8,42,10,36};
+static const short PO674[] = {8,92,10,86};
 static const char* const L675[] = {
 	"Probably Not(e) Bohlen-Pierce is a probabilistic quantiser for Bohlen-Pierce tuning, where a 3:1 tritave replaces the octave and holds thirteen notes, lettered C through B with H and J among them.",
 	"Sets how many notes either side of the quantised note can be chosen, 0 to 6; at 0 the quantised note is the only candidate.",
@@ -15368,8 +15565,8 @@ static const short O675[] = {31,32,33};
 static const short P675[] = {1,8,2,8,3,8,4,8,5,8,6,8,7,8,9,10,11,12,13,14,15,16,8,17,18,19,19,19,19,19,19,19,19,19,19,19,19,19,20,20,20,20,20,20,20,20,20,20,20,20,20,21,8};
 static const signed char FI675[] = {3,1,1,1,1,1,-1,1,2,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO675[] = {3,1,2};
-static const short PR675[] = {29,8,8,8,8,8,4,8,5,33,30,5,8,4,4,4,4,4,4,4,4,4,4,4,4,4,8};
-static const short PO675[] = {29,67,17};
+static const short PR675[] = {38,8,8,8,8,8,4,8,5,49,83,5,8,4,4,4,4,4,4,4,4,4,4,4,4,4,8};
+static const short PO675[] = {38,148,17};
 static const char* const L676[] = {
 	"Probably Not(e) Math Nerd generates a scale from prime-number ratios, equal divisions of the octave and moments of symmetry, quantises the incoming pitch to it, then picks notes by weighted chance.",
 	"Sets how many pitches either side of the quantised pitch can be chosen, 0 to 10, or a share of the whole generated scale when spread is switched to percent.",
@@ -15422,8 +15619,8 @@ static const short O676[] = {37,38,39};
 static const short P676[] = {1,5,2,5,3,5,6,5,7,5,-1,-1,8,5,-1,9,-1,10,20,21,5,24,25,5,26,11,11,11,11,11,11,11,11,11,11,5,5,5,5,5,5,5,5,5,5,12,12,12,12,12,12,12,12,12,12,5,5,5,5,5,5,5,5,5,5,12,12,12,12,12,12,12,12,12,12,5,5,5,5,5,5,5,5,5,5,13,13,13,13,13,13,13,13,13,13,5,5,5,5,5,5,5,5,5,5,27,5,28,29,30,5,30,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,4,5,14,15,15,5,16,5,17,5,-1,18,5,18,5,18,5,18,5,22,23,5,23,5,1,19,19,31,32};
 static const signed char FI676[] = {3,1,1,1,1,1,-1,1,2,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,-1,1,1,1,1,1,1,1,2,1,1,2};
 static const signed char FO676[] = {3,1,2};
-static const short PR676[] = {32,8,8,8,8,8,-1,8,5,5,8,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,33,30,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,8,8,8,8,8,8,8,5,8,8,5};
-static const short PO676[] = {32,67,17};
+static const short PR676[] = {23,8,8,8,8,8,-1,8,5,5,8,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,49,83,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,8,8,8,8,8,8,8,5,8,8,5};
+static const short PO676[] = {23,148,17};
 static const char* const L677[] = {
 	"An expander for Quad Algorithmic Rhythm, placed immediately to its right, turning each of 18 steps into its own clock divider so a beat fires on some passes and not others.",
 	"Sets how many passes of that step go by between firings, 1 to 16; at 1 the beat fires every time the step comes round.",
@@ -15596,7 +15793,7 @@ static const short O684[] = {19,20,21,19,20,21,19,20,21,19,20,21,22,22,22,22};
 static const short P684[] = {1,3,5,7,9,11,13,17,1,3,5,7,9,11,13,17,1,3,5,7,9,11,13,17,1,3,5,7,9,11,13,17,15,15,15,15,32,34,35,36,31,27,29,37,37,37,37,37,37,37,37,38,25};
 static const signed char FI684[] = {1,1,1,1,1,1,2,2,1,1,1,1,1,1,2,2,1,1,1,1,1,1,2,2,1,1,1,1,1,1,2,2,2,2,2,1,1,3,2,2,2,2,2};
 static const signed char FO684[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR684[] = {8,8,8,8,8,8,5,5,8,8,8,8,8,8,5,5,8,8,8,8,8,8,5,5,8,8,8,8,8,8,5,5,5,5,5,8,11,70,5,5,5,5,5};
+static const short PR684[] = {8,8,8,8,8,8,5,5,8,8,8,8,8,8,5,5,8,8,8,8,8,8,5,5,8,8,8,8,8,8,5,5,5,5,5,8,11,151,5,5,5,5,5};
 static const short PO684[] = {11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11};
 static const char* const L685[] = {
 	"QUANTUSSY CELL — one cell of a Quantussy ring after Peter Blasser and Richard Brewster: an LFO whose rate is sampled and held from a neighbouring cell, giving slow chaotic voltages.",
@@ -15623,7 +15820,7 @@ static const short P685[] = {1,9,2,4};
 static const signed char FI685[] = {-1,1,1,3,3};
 static const signed char FO685[] = {-1,1,1,1,1};
 static const short PR685[] = {8,8,8,14,14};
-static const short PO685[] = {36,36,36,36,36};
+static const short PO685[] = {86,86,86,86,86};
 static const char* const L686[] = {
 	"LFO tracing a roulette curve, one ellipse rolling around another with a pen fixed to the rolling one; the pen's horizontal and vertical positions come out as two voltages.",
 	"Sets the size of the fixed shape against the rolling one, 1 to 10; the rolling shape turns that many times for each turn of the fixed one.",
@@ -15664,7 +15861,7 @@ static const short P686[] = {1,2,5,6,3,4,7,8,9,10,13,14,11,12,15,16,17,18,19,20}
 static const signed char FI686[] = {1,1,1,1,1,1,1,1,1};
 static const signed char FO686[] = {1,1};
 static const short PR686[] = {8,8,8,8,8,8,8,8,8};
-static const short PO686[] = {36,36};
+static const short PO686[] = {86,86};
 static const char* const L687[] = {
 	"Four random voltages and four random gates grown from a numbered seed, so the same seed replays the same sequence",
 	"Sets the seed, a whole number from 0 to 9999; a new number takes effect only when the reseed button is pressed or a trigger reaches the reseed input",
@@ -15694,7 +15891,7 @@ static const short O687[] = {18,18,18,18,19,19,19,19};
 static const short P687[] = {1,2,3,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,14,14,14,14};
 static const signed char FI687[] = {1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO687[] = {1,1,1,1,2,2,2,2};
-static const short PR687[] = {8,5,5,75,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PR687[] = {8,5,5,155,8,8,8,8,8,8,8,8,8,8,8,8};
 static const short PO687[] = {-1,-1,-1,-1,0,0,0,0};
 static const char* const L688[] = {
 	"Twelve more random voltages for Seeds of Change, drawn from its seed and its clock; it goes immediately to the right of Seeds of Change or of another of its expanders",
@@ -15769,7 +15966,7 @@ static const short P690[] = {2,2,2,2,2,2,1,5,5,5,5,5,5,4,7,8,9,11,11,11,11,11,11
 static const signed char FI690[] = {2,1,1,1,1,-1,1};
 static const signed char FO690[] = {1,2};
 static const short PR690[] = {5,8,8,8,8,-1,8};
-static const short PO690[] = {42,11};
+static const short PO690[] = {92,11};
 static const char* const L691[] = {
 	"Seriously slow LFO: one cycle lasts from a minute to a hundred months, with a sine, a triangle, a sawtooth and a square running from it.",
 	"Makes the duration number count in that unit, minutes, hours, days, weeks or months, and restarts the cycle; the lit one is the unit in use.",
@@ -15794,7 +15991,7 @@ static const short P691[] = {1,1,1,1,1,2,3,4,5,6,7,8};
 static const signed char FI691[] = {1,1,2};
 static const signed char FO691[] = {1,1,1,1};
 static const short PR691[] = {8,8,5};
-static const short PO691[] = {36,36,36,36};
+static const short PO691[] = {86,86,86,86};
 static const char* const L692[] = {
 	"SLICE OF LIFE — after the Future Sound Systems OSC Recombination Engine: a scissor oscillator whose square slices two more oscillators, one gated on its positive half, one on its negative.",
 	"Sets the pitch of the scissor oscillator in semitones, 54 either way from C4 at 261.63Hz; its square is what slices the other two.",
@@ -15842,8 +16039,8 @@ static const short O692[] = {27,28,29,30,31,32,33,34,17,18,16,39};
 static const short P692[] = {-1,-1,19,20,4,21,22,22,22,-1,-1,19,20,4,21,22,22,22,-1,1,2,4,3,4,3,5,6,7,8,9,10,35,38,36};
 static const signed char FI692[] = {3,-1,-1,1,1,1,3,-1,-1,1,1,1,3,-1,-1,1,-1,1,1};
 static const signed char FO692[] = {0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR692[] = {32,29,27,29,29,29,32,29,27,29,29,29,32,29,29,29,27,29,29};
-static const short PO692[] = {76,76,76,29,77,77,77,29,2,2,29,29};
+static const short PR692[] = {23,38,63,38,38,38,23,38,63,38,38,38,23,38,38,38,63,38,38};
+static const short PO692[] = {156,156,156,38,157,157,157,38,2,2,38,38};
 static const char* const L693[] = {
 	"STRING THEORY — a Karplus-Strong plucked string: a burst of noise or external audio is fed into a short delay line and recirculated, and the length of that line sets the pitch.",
 	"Sets the length of the delay line, 1ms to 500ms, which is the coarse pitch of the string. A patched voltage adds a tenth of the range per volt.",
@@ -15874,8 +16071,8 @@ static const short O693[] = {21,6};
 static const short P693[] = {1,2,3,4,5,11,16,15,8,9,10,12,13,17,14};
 static const signed char FI693[] = {1,1,1,3,1,1,1,0,2,0,1,1,1,1,0};
 static const signed char FO693[] = {0,0};
-static const short PR693[] = {8,8,8,14,8,8,8,8,5,49,8,8,8,8,8};
-static const short PO693[] = {8,29};
+static const short PR693[] = {8,8,8,14,8,8,8,8,5,97,8,8,8,8,8};
+static const short PO693[] = {8,38};
 static const char* const L694[] = {
 	"Master clock and seed manager for Seeds of Change: it counts clocks and sends reseed and new seed triggers at the divisions set here.",
 	"Sets how many clocks pass between reseed triggers, from 1 to 999.",
@@ -15899,8 +16096,8 @@ static const short O694[] = {10,11,12,13};
 static const short P694[] = {1,3,2,3,4,5};
 static const signed char FI694[] = {2,2,1,1,1};
 static const signed char FO694[] = {2,1,2,2};
-static const short PR694[] = {5,5,27,8,8};
-static const short PO694[] = {11,27,10,10};
+static const short PR694[] = {5,5,63,8,8};
+static const short PO694[] = {11,63,10,10};
 static const char* const L695[] = {
 	"Ring modulator built on a model of the four diode analogue circuit, with the diode response open to adjustment.",
 	"Sets the voltage the modelled diodes start conducting at, 0V to 10V; below it a diode puts out 0V.",
@@ -15980,7 +16177,7 @@ static const char* const L698[] = {
 static const short I698[] = {2,2,2,2,2,2,2,2};
 static const short O698[] = {3,3,3,3,3,3,3,3};
 static const short P698[] = {1,1,1,1,1,1,1,1};
-static const short PR698[] = {27,27,27,27,27,27,27,27};
+static const short PR698[] = {63,63,63,63,63,63,63,63};
 static const char* const L699[] = {
 	"Envelope generator, turning a gate into a four-stage control voltage running 0-10V",
 	"Sets how long the envelope takes to rise to 10V while the gate is high, from 1ms to 10 seconds",
@@ -16005,7 +16202,7 @@ static const short O699[] = {16};
 static const short P699[] = {1,2,3,4,5,6,7,8,13};
 static const signed char FI699[] = {-1,-1,-1,-1,2,2};
 static const signed char FO699[] = {1};
-static const short PR699[] = {29,29,29,29,33,33};
+static const short PR699[] = {38,38,38,38,49,49};
 static const short PO699[] = {6};
 static const char* const L700[] = {
 	"Sums three attenuverted control voltages into one",
@@ -16019,7 +16216,7 @@ static const short O700[] = {3};
 static const short P700[] = {1,1,1};
 static const signed char FI700[] = {1,1,1};
 static const signed char FO700[] = {1};
-static const short PR700[] = {27,27,27};
+static const short PR700[] = {63,63,63};
 static const char* const L701[] = {
 	"Compares two control voltages and reports the result eight ways",
 	"Adds a fixed voltage to B, over -10V to 10V; with the B input unpatched it sets B outright",
@@ -16039,7 +16236,7 @@ static const short O701[] = {4,5,6,7,8,9,10,11};
 static const short P701[] = {1};
 static const signed char FI701[] = {1,1};
 static const signed char FO701[] = {1,1,1,1,2,2,2,2};
-static const short PR701[] = {27,29};
+static const short PR701[] = {63,38};
 static const short PO701[] = {-1,-1,-1,-1,0,0,0,0};
 static const char* const L702[] = {
 	"Delay line with feedback, a tone control and a balance between dry and delayed signal",
@@ -16066,7 +16263,7 @@ static const short O702[] = {16,15};
 static const short P702[] = {1,2,3,4,5,6,7,8};
 static const signed char FI702[] = {-1,-1,-1,-1,0,2};
 static const signed char FO702[] = {0,0};
-static const short PR702[] = {8,8,8,8,29,28};
+static const short PR702[] = {8,8,8,8,38,82};
 static const short PO702[] = {2,2};
 static const char* const L703[] = {
 	"Crossfades two signals across two outputs, or pans one signal between them",
@@ -16083,7 +16280,7 @@ static const short I703[] = {3,4,5};
 static const short O703[] = {6,7};
 static const short P703[] = {1,2};
 static const signed char FI703[] = {1};
-static const short PR703[] = {29,27,27};
+static const short PR703[] = {38,63,63};
 static const char* const L704[] = {
 	"Gate and trigger processor: edge triggers, a flip-flop, a gate of fixed length and a delayed gate",
 	"Sets the gate length, from 1ms to 10 seconds",
@@ -16103,7 +16300,7 @@ static const short O704[] = {6,7,8,9,10,11};
 static const short P704[] = {1,3};
 static const signed char FI704[] = {1,2,2};
 static const signed char FO704[] = {2,2,2,2,2,2};
-static const short PR704[] = {29,31,31};
+static const short PR704[] = {38,53,53};
 static const short PO704[] = {0,0,0,0,0,0};
 static const char* const L705[] = {
 	"Low-frequency oscillator giving sine, triangle, sawtooth and square at once, meant for modulation rather than for listening",
@@ -16127,7 +16324,7 @@ static const short O705[] = {11,12,13,14};
 static const short P705[] = {5,4,1,3,-1,2,6};
 static const signed char FI705[] = {-1,-1,2,-1,2};
 static const signed char FO705[] = {1,1,1,1};
-static const short PR705[] = {29,-1,31,29,28};
+static const short PR705[] = {38,-1,53,38,82};
 static const char* const L706[] = {
 	"Low-frequency wavetable oscillator, playing one short recorded cycle over and over at modulation rates",
 	"Sets the rate, from one cycle every four minutes to about 1000Hz; with a clock patched it multiplies the clock rate instead, at 1x in the middle of its travel",
@@ -16152,7 +16349,7 @@ static const short O706[] = {11};
 static const short P706[] = {5,4,1,2,3,6};
 static const signed char FI706[] = {-1,2,-1,2};
 static const signed char FO706[] = {1};
-static const short PR706[] = {29,31,29,28};
+static const short PR706[] = {38,53,38,82};
 static const char* const L707[] = {
 	"Boolean logic on two gate signals, with eight results on their own outputs",
 	"Forces B high for as long as it is pressed, whatever the B input is doing",
@@ -16172,7 +16369,7 @@ static const short O707[] = {4,5,6,7,8,9,10,11};
 static const short P707[] = {1};
 static const signed char FI707[] = {2,2};
 static const signed char FO707[] = {2,2,2,2,2,2,2,2};
-static const short PR707[] = {33,33};
+static const short PR707[] = {49,49};
 static const short PO707[] = {0,0,0,0,0,0,0,0};
 static const char* const L708[] = {
 	"Gathers up to sixteen monophonic inputs into one polyphonic cable",
@@ -16183,7 +16380,7 @@ static const char* const L708[] = {
 };
 static const short I708[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short O708[] = {2};
-static const short PR708[] = {36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36};
+static const short PR708[] = {86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86};
 static const char* const L709[] = {
 	"Converts left and right stereo into mid and side, and back the other way",
 	"Sets the gain applied to the side channel during encoding, which widens or narrows the stereo image",
@@ -16204,7 +16401,7 @@ static const short O709[] = {5,6,11,12};
 static const short P709[] = {1,7};
 static const signed char FI709[] = {1,0,0,1,0,0};
 static const signed char FO709[] = {0,0,0,0};
-static const short PR709[] = {29,29,29,29,29,29};
+static const short PR709[] = {38,38,38,38,38,38};
 static const short PO709[] = {2,2,2,2};
 static const char* const L710[] = {
 	"Six-input mixer for audio or control voltage, summing at unity gain",
@@ -16217,7 +16414,7 @@ static const char* const L710[] = {
 static const short I710[] = {2,2,2,2,2,2};
 static const short O710[] = {3};
 static const short P710[] = {1};
-static const short PR710[] = {27,27,27,27,27,27};
+static const short PR710[] = {63,63,63,63,63,63};
 static const char* const L711[] = {
 	"Copies one signal to eight outputs",
 	"The signal to be copied",
@@ -16225,7 +16422,7 @@ static const char* const L711[] = {
 };
 static const short I711[] = {1};
 static const short O711[] = {2,2,2,2,2,2,2,2};
-static const short PR711[] = {27};
+static const short PR711[] = {63};
 static const char* const L712[] = {
 	"Ten signal paths, each with a button that silences it",
 	"Silences that row; click it again to let the signal through",
@@ -16237,7 +16434,7 @@ static const char* const L712[] = {
 static const short I712[] = {2,2,2,2,2,2,2,2,2,2};
 static const short O712[] = {3,3,3,3,3,3,3,3,3,3};
 static const short P712[] = {1,1,1,1,1,1,1,1,1,1};
-static const short PR712[] = {27,27,27,27,27,27,27,27,27,27};
+static const short PR712[] = {63,63,63,63,63,63,63,63,63,63};
 static const char* const L713[] = {
 	"Seven colours of noise, each on its own output",
 	"White noise, equal in intensity at every frequency, each voltage drawn from a normal distribution",
@@ -16263,7 +16460,7 @@ static const short O714[] = {4};
 static const short P714[] = {1};
 static const signed char FI714[] = {3,1};
 static const signed char FO714[] = {3};
-static const short PR714[] = {29,27};
+static const short PR714[] = {38,63};
 static const short PO714[] = {1};
 static const char* const L715[] = {
 	"Six ways of processing a voltage over time: two stages of sample and hold, track and hold both ways round, and two slew limiters",
@@ -16284,7 +16481,7 @@ static const short O715[] = {6,7,8,9,10,11};
 static const short P715[] = {1,3};
 static const signed char FI715[] = {1,1,2};
 static const signed char FO715[] = {1,1,1,1,1,1};
-static const short PR715[] = {29,27,31};
+static const short PR715[] = {38,63,53};
 static const char* const L716[] = {
 	"Ten rows of manual triggers and gates",
 	"Pressing this sends a 1ms pulse from that row's trigger output and holds that row's gate output at 10V until it is let go",
@@ -16326,7 +16523,7 @@ static const short O718[] = {3};
 static const short P718[] = {1};
 static const signed char FI718[] = {3};
 static const signed char FO718[] = {3};
-static const short PR718[] = {29};
+static const short PR718[] = {38};
 static const short PO718[] = {1};
 static const char* const L719[] = {
 	"Random voltage generator with an internal clock and four ways of travelling between values",
@@ -16356,7 +16553,7 @@ static const short O719[] = {17,18,20,19,16};
 static const short P719[] = {1,4,15,-1,2,3,5,8,6,7};
 static const signed char FI719[] = {-1,-1,2};
 static const signed char FO719[] = {1,1,1,1,2};
-static const short PR719[] = {8,8,28,27,8,8};
+static const short PR719[] = {8,8,82,63,8,8};
 static const short PO719[] = {-1,-1,-1,-1,0};
 static const char* const L720[] = {
 	"Seven fixed random voltages, drawn again on command",
@@ -16371,7 +16568,7 @@ static const short O720[] = {3,3,3,3,3,3,3};
 static const short P720[] = {1};
 static const signed char FI720[] = {2};
 static const signed char FO720[] = {1,1,1,1,1,1,1};
-static const short PR720[] = {33};
+static const short PR720[] = {49};
 static const char* const L721[] = {
 	"Scales, offsets and limits a signal, for turning one voltage range into another",
 	"Multiplies the input, from -100% to 100%, with negative settings flipping its polarity; the menu raises the multiplier for more than unity gain",
@@ -16387,7 +16584,7 @@ static const char* const L721[] = {
 static const short I721[] = {5};
 static const short O721[] = {6};
 static const short P721[] = {1,2,3,4};
-static const short PR721[] = {27};
+static const short PR721[] = {63};
 static const char* const L722[] = {
 	"Eight-step sequencer with three rows of control voltage and a row of triggers",
 	"Sets the rate of the internal clock, read out in beats per minute",
@@ -16424,7 +16621,7 @@ static const short O722[] = {21,18,19,20,17,17,17,17,17,17,17,17,22,23,24,25};
 static const short P722[] = {1,6,7,2,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,3,4,5};
 static const signed char FI722[] = {1,2,2,1,2};
 static const signed char FO722[] = {2,1,1,1,2,2,2,2,2,2,2,2,1,2,2,2};
-static const short PR722[] = {8,28,28,8,28};
+static const short PR722[] = {8,82,82,8,82};
 static const short PO722[] = {0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0};
 static const char* const L723[] = {
 	"Eight rows of sample and hold, wired so that voltages march down the rows as an analogue shift register",
@@ -16442,7 +16639,7 @@ static const short O723[] = {6,6,6,6,6,6,6,6};
 static const short P723[] = {1,2,3};
 static const signed char FI723[] = {-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2};
 static const signed char FO723[] = {1,1,1,1,1,1,1,1};
-static const short PR723[] = {36,36,36,36,36,36,36,36,5,5,5,5,5,5,5,5};
+static const short PR723[] = {86,86,86,86,86,86,86,86,5,5,5,5,5,5,5,5};
 static const char* const L724[] = {
 	"Two-channel oscilloscope, drawing voltage against time or one channel against the other",
 	"Switches between drawing both signals against time and drawing channel 1 horizontally against channel 2 vertically, which makes a Lissajous figure from two sine waves",
@@ -16464,7 +16661,7 @@ static const char* const L724[] = {
 static const short I724[] = {9,10,13};
 static const short O724[] = {11,12};
 static const short P724[] = {2,6,3,7,5,1,8,4};
-static const short PR724[] = {27,27,16};
+static const short PR724[] = {63,63,16};
 static const char* const L725[] = {
 	"Routes one input to two, three or four outputs in turn, moving on with each trigger",
 	"Picks whether two, three or four outputs are used; a red light marks the ones left out",
@@ -16479,7 +16676,7 @@ static const short I725[] = {2,3,4};
 static const short O725[] = {5,5,5,5};
 static const short P725[] = {1};
 static const signed char FI725[] = {2,2};
-static const short PR725[] = {28,28,27};
+static const short PR725[] = {82,82,63};
 static const char* const L726[] = {
 	"Routes one of two, three or four inputs to a single output, moving on with each trigger",
 	"Picks whether two, three or four inputs are used; a red light marks the ones left out",
@@ -16494,7 +16691,7 @@ static const short I726[] = {2,3,4,4,4,4};
 static const short O726[] = {5};
 static const short P726[] = {1};
 static const signed char FI726[] = {2,2};
-static const short PR726[] = {28,28,27,27,27,27};
+static const short PR726[] = {82,82,63,63,63,63};
 static const char* const L727[] = {
 	"Breaks a polyphonic cable into sixteen separate monophonic outputs",
 	"The polyphonic signal to be broken apart",
@@ -16503,7 +16700,7 @@ static const char* const L727[] = {
 };
 static const short I727[] = {1};
 static const short O727[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR727[] = {27};
+static const short PR727[] = {63};
 static const char* const L728[] = {
 	"Mixes every channel of a polyphonic cable down to one monophonic signal",
 	"Attenuates the summed output; mixing a four-voice signal can raise the peak level fourfold, so about 25% is a reasonable starting point",
@@ -16514,7 +16711,7 @@ static const char* const L728[] = {
 static const short I728[] = {2};
 static const short O728[] = {3};
 static const short P728[] = {1};
-static const short PR728[] = {27};
+static const short PR728[] = {63};
 static const char* const L729[] = {
 	"Two mixers, each summing up to six inputs, with a normal and an inverted output",
 	"Switches that section between adding its patched inputs together and averaging them",
@@ -16541,7 +16738,7 @@ static const short O730[] = {5,5};
 static const short P730[] = {1,1};
 static const signed char FI730[] = {1,1,0,1,1,0};
 static const signed char FO730[] = {0,0};
-static const short PR730[] = {30,30,29,30,30,29};
+static const short PR730[] = {83,83,38,83,83,38};
 static const short PO730[] = {2,2};
 static const char* const L731[] = {
 	"A single voltage-controlled amplifier, with a bar showing the gain in use",
@@ -16556,7 +16753,7 @@ static const short O731[] = {4};
 static const short P731[] = {1};
 static const signed char FI731[] = {1,0};
 static const signed char FO731[] = {0};
-static const short PR731[] = {29,29};
+static const short PR731[] = {38,38};
 static const short PO731[] = {2};
 static const char* const L732[] = {
 	"Filter modelled on a four-pole transistor ladder, with a lowpass and a highpass output",
@@ -16578,7 +16775,7 @@ static const short O732[] = {11,12};
 static const short P732[] = {1,-1,2,4,3,5,6};
 static const signed char FI732[] = {-1,-1,-1,0};
 static const signed char FO732[] = {0,0};
-static const short PR732[] = {29,29,29,29};
+static const short PR732[] = {38,38,38,38};
 static const short PO732[] = {2,2};
 static const char* const L733[] = {
 	"Four-channel mixer with a voltage-controlled amplifier on every channel and on the mix",
@@ -16596,7 +16793,7 @@ static const short I733[] = {3,5,5,5,5,4,4,4,4};
 static const short O733[] = {7,6,6,6,6};
 static const short P733[] = {2,1,1,1,1};
 static const signed char FI733[] = {1,-1,-1,-1,-1,1,1,1,1};
-static const short PR733[] = {29,27,27,27,27,30,30,30,30};
+static const short PR733[] = {38,63,63,63,63,83,83,83,83};
 static const char* const L734[] = {
 	"Oscillator producing sine, triangle, sawtooth and square waves at once, each on its own output",
 	"Sets the pitch over a range of nine octaves, giving C4 at 261.63Hz in the middle of its travel",
@@ -16619,7 +16816,7 @@ static const short O734[] = {11,12,13,14};
 static const short P734[] = {-1,5,1,-1,3,2,6,4};
 static const signed char FI734[] = {3};
 static const signed char FO734[] = {0,0,0,0};
-static const short PR734[] = {32,29,27,29};
+static const short PR734[] = {23,38,63,38};
 static const short PO734[] = {2,2,2,2};
 static const char* const L735[] = {
 	"Wavetable oscillator, playing one short recorded cycle over and over, with a control for moving through the table",
@@ -16645,14 +16842,14 @@ static const short O735[] = {11};
 static const short P735[] = {-1,6,1,2,3,5,4};
 static const signed char FI735[] = {-1,-1,-1,3};
 static const signed char FO735[] = {0};
-static const short PR735[] = {29,16,29,32};
+static const short PR735[] = {38,16,38,23};
 static const short PO735[] = {2};
 static const char* const L736[] = {
 	"Shows the voltage of every channel of a polyphonic cable",
 	"The polyphonic signal being shown; each active channel gets a white number, and its light reads green for a positive voltage, red for a negative one and yellow at audio rate",
 };
 static const short I736[] = {1};
-static const short PR736[] = {29};
+static const short PR736[] = {38};
 static const char* const L737[] = {
 	"Eight VCAs in two groups of four, each group also summed to a mix output at the centre of its black hole",
 	"Sets the level of that channel, silent at the centre, full clockwise and full with the phase inverted anticlockwise; with no cable in that channel's input it sends a fixed voltage instead, 10V at full",
@@ -16670,8 +16867,8 @@ static const short O737[] = {7,7,7,7,7,7,7,7,8,8};
 static const short P737[] = {1,1,1,1,1,1,1,1,2,2,3,4,4};
 static const signed char FI737[] = {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1};
 static const signed char FO737[] = {0,0,0,0,0,0,0,0,0,0};
-static const short PR737[] = {2,2,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1};
-static const short PO737[] = {2,2,2,2,2,2,2,2,2,2};
+static const short PR737[] = {158,158,158,158,159,159,159,159,121,121,121,121,121,121,121,121};
+static const short PO737[] = {38,38,38,38,38,38,38,38,88,88};
 static const char* const L738[] = {
 	"A blank panel printing the Geodesics name, its version and its authors, with no controls",
 	"Menu — Panel Theme — Use Rack global theme follows Rack's own light and dark setting, while White light edition and Dark matter edition pick one outright",
@@ -16685,7 +16882,7 @@ static const char* const L739[] = {
 static const short O739[] = {2};
 static const short P739[] = {1};
 static const signed char FO739[] = {3};
-static const short PO739[] = {1};
+static const short PO739[] = {160};
 static const char* const L740[] = {
 	"Fourteen sample and holds in two groups of seven, each with its own noise source, triggered by one input per group",
 	"Pink noise between minus 5V and 5V, sampled on each trigger of the top brane; the other pink hold of that brane is inverted while both are used",
@@ -16725,7 +16922,7 @@ static const short O740[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 static const short P740[] = {18,18,20,21};
 static const signed char FI740[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2};
 static const signed char FO740[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR740[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0};
+static const short PR740[] = {161,161,161,161,161,161,161,161,161,161,161,161,161,161,162,162,162,162,162,162};
 static const char* const L741[] = {
 	"A two-oscillator complex voice combining cross modulation, self modulation and ring modulation, with a ring output and one output per oscillator",
 	"Sets the pitch of that oscillator across plus or minus 3 octaves, added to the 1V/oct input and to the centre pitch knob",
@@ -16759,8 +16956,8 @@ static const short O741[] = {20,21,22};
 static const short P741[] = {2,2,1,1,3,7,6,6,10,9,9,12,16,14,17,18};
 static const signed char FI741[] = {3,3,3,1,1,1,1,2,2};
 static const signed char FO741[] = {0,0,0};
-static const short PR741[] = {1,1,1,-1,-1,-1,-1,0,0};
-static const short PO741[] = {2,2,2};
+static const short PR741[] = {23,23,23,163,55,38,38,162,162};
+static const short PO741[] = {38,38,38};
 static const char* const L742[] = {
 	"A ring modulation oscillator and synth voice: the M sine multiplied by the square of the C sine",
 	"Sets the pitch of that oscillator across plus or minus 3 octaves, added to the voltage at the 1V/oct input",
@@ -16783,8 +16980,8 @@ static const short O742[] = {11};
 static const short P742[] = {2,2,3,3,5,1,1,6,6,8};
 static const signed char FI742[] = {1,1,3,1,1,1};
 static const signed char FO742[] = {0};
-static const short PR742[] = {-1,-1,1,-1,-1,-1};
-static const short PO742[] = {2};
+static const short PR742[] = {38,38,23,163,38,38};
+static const short PO742[] = {38};
 static const char* const L743[] = {
 	"An eight-step sequencer holding a blue and a yellow value at every step, playing one of the two by chance, or both added together",
 	"Sets the blue value of that step: a voltage within the blue range with fixed CV chosen, the span of the blue random draw with random chosen, or the gain on the blue external signal",
@@ -16827,7 +17024,7 @@ static const short O743[] = {29};
 static const short P743[] = {23,27,25,28,18,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,6,6,8,8,16,14,9,9,11,11,10,10,4,22,12,12};
 static const signed char FI743[] = {2,2,1,2,2,2,2,1,1,-1,-1,-1,-1,1};
 static const signed char FO743[] = {1};
-static const short PR743[] = {0,0,-1,0,0,0,0,-1,-1,-1,-1,-1,-1,-1};
+static const short PR743[] = {162,162,10,162,162,162,162,11,11,8,8,-1,-1,8};
 static const char* const L744[] = {
 	"An event modifier that on each trigger may swap two signals between its outputs and add a random offset to each",
 	"Sets the chance that a trigger alters fate, never fully anticlockwise and every trigger fully clockwise",
@@ -16850,8 +17047,8 @@ static const short O744[] = {5,5,6};
 static const short P744[] = {1,7};
 static const signed char FI744[] = {1,2,1,1,1};
 static const signed char FO744[] = {1,1,2};
-static const short PR744[] = {-1,0,-1,-1,-1};
-static const short PO744[] = {-1,-1,0};
+static const short PR744[] = {140,164,165,165,88};
+static const short PO744[] = {38,38,17};
 static const char* const L745[] = {
 	"A dual CV sequencer whose fifteen step knobs form two eight-step rings sharing one knob, with either voice able to jump from one ring to the other",
 	"Sets the voltage of the first step of both rings, read by whichever voice has reached that step",
@@ -16888,8 +17085,8 @@ static const short O745[] = {23,24,25,25};
 static const short P745[] = {4,5,1,2,2,2,2,2,2,2,3,3,3,3,3,3,3,6,10,10,8,12,12,20,16,19,18,20};
 static const signed char FI745[] = {2,2,2,2,2,1,1,1,1,1,2,2};
 static const signed char FO745[] = {1,1,2,2};
-static const short PR745[] = {0,0,0,0,0,-1,-1,-1,-1,-1,0,0};
-static const short PO745[] = {-1,-1,0,0};
+static const short PR745[] = {162,162,162,162,162,99,11,11,11,11,162,162};
+static const short PO745[] = {-1,-1,87,87};
 static const char* const L746[] = {
 	"Two rotating crossfaders: the top one blends eight inputs down to one output, the bottom one spreads one input across eight outputs",
 	"One of the eight signals the top pulsar rotates through, crossfaded with the next one as the rotation passes between them",
@@ -16917,8 +17114,8 @@ static const short O746[] = {2,4,4,4,4,4,4,4,4};
 static const short P746[] = {7,7,9,9,11,11,12,12};
 static const signed char FI746[] = {0,0,0,0,0,0,0,0,0,1,1,2,2,2,2};
 static const signed char FO746[] = {0,0,0,0,0,0,0,0,0};
-static const short PR746[] = {2,2,2,2,2,2,2,2,2,-1,-1,0,0,0,0};
-static const short PO746[] = {2,2,2,2,2,2,2,2,2};
+static const short PR746[] = {38,38,38,38,38,38,38,38,166,8,167,162,162,162,162};
+static const short PO746[] = {38,38,38,38,38,38,38,38,38};
 static const char* const L747[] = {
 	"A mixer in which every output carries a blend of the patched inputs, each weighted by how far its jack is from that output",
 	"Steps through three ways an input reaches the outputs: falling away with distance, at full level on every output, or filtered, an output below an input low-passing it and one above it high-passing it",
@@ -16935,7 +17132,7 @@ static const short O747[] = {4,4,4,4,4,4,4};
 static const short P747[] = {2,1};
 static const signed char FI747[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const signed char FO747[] = {0,0,0,0,0,0,0};
-static const short PR747[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
+static const short PR747[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
 static const short PO747[] = {2,2,2,2,2,2,2};
 static const char* const L748[] = {
 	"A clock generator with two outputs that can run at different rates through a group of beats and always come back together at its end",
@@ -16981,8 +17178,8 @@ static const short O748[] = {18,19,26,23,20,7};
 static const short P748[] = {8,10,1,24,21,14,16,12,3,2,4,6};
 static const signed char FI748[] = {2,2,1,2,1,1,1,1};
 static const signed char FO748[] = {2,2,2,2,2,2};
-static const short PR748[] = {0,0,-1,0,-1,-1,-1,-1};
-static const short PO748[] = {0,0,0,0,0,0};
+static const short PR748[] = {162,162,8,162,99,99,141,141};
+static const short PO748[] = {87,87,87,87,87,0};
 static const char* const L749[] = {
 	"Master fader and VU meters for a bus chain, summing the three stereo buses to a stereo mix out and passing them on separately at the master level",
 	"Turns the output on and off at the FADE IN and FADE OUT times; ctrl-click skips the fade, and a press held for 0.7 seconds auditions this Bus Depot and mutes every other one in the patch",
@@ -17680,7 +17877,7 @@ static const short O786[] = {10,10,10,10,10,10,10,10,10,10,10,10,11,12,13};
 static const short P786[] = {1,2,3,4,5,6,7};
 static const signed char FI786[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1};
 static const signed char FO786[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2};
-static const short PR786[] = {27,27,27,27,27,27,27,27,27,27,27,27,36};
+static const short PR786[] = {63,63,63,63,63,63,63,63,63,63,63,63,86};
 static const short PO786[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0};
 static const char* const L787[] = {
 	"Looping random sequencer built on a 16-bit shift register, with a voltage sequence, a gate output for each of the first eight bits and white noise",
@@ -17704,7 +17901,7 @@ static const short O787[] = {10,11,12,12,12,12,12,12,12,12};
 static const short P787[] = {1,2,3,4,5};
 static const signed char FI787[] = {2,1,1,1};
 static const signed char FO787[] = {1,0,2,2,2,2,2,2,2,2};
-static const short PR787[] = {28,36,36,36};
+static const short PR787[] = {82,86,86,86};
 static const short PO787[] = {-1,2,0,0,0,0,0,0,0,0};
 static const char* const L788[] = {
 	"Looping random sequencer built on a 16-bit shift register, with a voltage sequence, an inverted copy of it, a gate output for each of the sixteen bits, white noise and a clock copy",
@@ -17734,7 +17931,7 @@ static const short O788[] = {14,15,16,17,18,18,18,18,18,18,18,18,18,18,18,18,18,
 static const short P788[] = {1,2,3,4,5,6,7};
 static const signed char FI788[] = {2,1,1,1,2,2};
 static const signed char FO788[] = {1,1,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR788[] = {28,36,36,36,28,28};
+static const short PR788[] = {82,86,86,86,82,82};
 static const short PO788[] = {-1,-1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const char* const L789[] = {
 	"Looping random sequencer built on a 16-bit shift register, with a voltage sequence and a gate output taken from the first bit",
@@ -17755,7 +17952,7 @@ static const short O789[] = {7,8};
 static const short P789[] = {1,2,3,4};
 static const signed char FI789[] = {2,1};
 static const signed char FO789[] = {1,2};
-static const short PR789[] = {28,36};
+static const short PR789[] = {82,86};
 static const short PO789[] = {-1,0};
 static const char* const L790[] = {
 	"Granular audio processor, an expanded version of Clouds by Mutable Instruments, with its own knob, CV input and attenuverter for each of nine parameters",
@@ -17801,7 +17998,7 @@ static const short O790[] = {28,29};
 static const short P790[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,18,18,18,18,18,18,18,18};
 static const signed char FI790[] = {1,1,2,2,3,1,0,0,1,1,1,1,1,1,1,1,1};
 static const signed char FO790[] = {0,0};
-static const short PR790[] = {36,36,11,28,14,36,29,29,36,36,36,36,36,36,36,36,36};
+static const short PR790[] = {86,86,11,82,14,86,38,38,86,86,86,86,86,86,86,86,86};
 static const short PO790[] = {2,2};
 static const char* const L791[] = {
 	"Expander for Permutation, placed immediately to its right, which mixes the first eight bits of Permutation's shift register into a positive and a negative voltage",
@@ -17820,7 +18017,7 @@ static const short O791[] = {7,6};
 static const short P791[] = {2,1,3,3,3,3,3,3,3,3};
 static const signed char FI791[] = {1,1};
 static const signed char FO791[] = {1,1};
-static const short PR791[] = {36,36};
+static const short PR791[] = {86,86};
 static const char* const L792[] = {
 	"An arpeggiator driven by a polyphonic keyboard: the notes whose gates are high make up the sequence, and one of them is played on each clock",
 	"Chooses the order the notes play in: Up, Down, Inclusive up and back with the end notes twice, Exclusive up and back with them once, Outside In from both ends inwards, Order as played, or Random",
@@ -17886,7 +18083,7 @@ static const char* const L794[] = {
 };
 static const short I794[] = {1,2};
 static const short O794[] = {3,4,5,6};
-static const short PR794[] = {29,29};
+static const short PR794[] = {38,38};
 static const char* const L795[] = {
 	"Analog shift register: a chain of four sample-and-holds, each clock edge passing every held voltage one stage further along",
 	"The voltage sampled on each clock edge",
@@ -17899,7 +18096,7 @@ static const char* const L795[] = {
 static const short I795[] = {1,2};
 static const short O795[] = {3,4,5,6};
 static const signed char FI795[] = {-1,2};
-static const short PR795[] = {29,33};
+static const short PR795[] = {38,49};
 static const char* const L796[] = {
 	"Splits a signal at zero and scales its positive and negative halves by separate amounts, with each half also available on its own output",
 	"Scales the part of the signal below zero, -1 to +1; below zero it folds that part above the line instead",
@@ -17924,7 +18121,7 @@ static const short O796[] = {12,13,14,15,16};
 static const short P796[] = {1,2,3,4,5,6,7};
 static const signed char FI796[] = {-1,1,1,1};
 static const signed char FO796[] = {-1,-1,-1,2,2};
-static const short PR796[] = {29,29,29,29};
+static const short PR796[] = {38,38,38,38};
 static const char* const L797[] = {
 	"Encodes a signal as an eight-bit number and puts each bit on its own gate output",
 	"Scales the input before encoding, -1 to +1, and starts at 0.2 so that a 5V signal fills the range",
@@ -17961,7 +18158,7 @@ static const short O798[] = {10,10,10,10,10,10,10,10,11};
 static const short P798[] = {2,3,4,1,1,1,1,1,1,1,1};
 static const signed char FI798[] = {2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO798[] = {2,2,2,2,2,2,2,2,2};
-static const short PR798[] = {5,5,5,5,5,5,5,5,5,5,5,33};
+static const short PR798[] = {5,5,5,5,5,5,5,5,5,5,5,49};
 static const char* const L799[] = {
 	"One gate output, switched on and off by triggers or by the buttons",
 	"Turns the output gate on",
@@ -17977,7 +18174,7 @@ static const short O799[] = {7};
 static const short P799[] = {1,2,3};
 static const signed char FI799[] = {2,2,2};
 static const signed char FO799[] = {2};
-static const short PR799[] = {33,33,33};
+static const short PR799[] = {49,49,49};
 static const short PO799[] = {0};
 static const char* const L800[] = {
 	"Random two-state generator: every new sample the output is drawn high or low, giving digital noise at audio rates and unpredictable gates at slow rates",
@@ -17998,7 +18195,7 @@ static const short I800[] = {8,9,10};
 static const short O800[] = {11};
 static const short P800[] = {1,2,3,4,5,6,7};
 static const signed char FI800[] = {2,1,1};
-static const short PR800[] = {33,46,46};
+static const short PR800[] = {49,57,57};
 static const char* const L801[] = {
 	"Harsh waveshaper that reads the signal as a 32-bit integer and shifts its bits, which turns a smooth voltage into rapid discontinuities",
 	"Sets the shift, -5V to 5V across 31 bits either way; clockwise shifts right, which mostly attenuates, counter-clockwise shifts left, which tears the signal up",
@@ -18011,7 +18208,7 @@ static const char* const L801[] = {
 static const short I801[] = {5,4};
 static const short O801[] = {6};
 static const short P801[] = {1,2,3};
-static const short PR801[] = {29,78};
+static const short PR801[] = {38,168};
 static const char* const L802[] = {
 	"A blank panel with no controls; right-click to choose between five pieces of HetrickCV artwork",
 	"Menu — Panel Art — chooses the artwork on the panel: Sideways Logo, Bleeding Edge, Hetrick Stack, Simple CV or Plain Jane",
@@ -18031,7 +18228,7 @@ static const short I803[] = {1,1,2};
 static const short O803[] = {3,4,5,6,7,8};
 static const signed char FI803[] = {2,2,2};
 static const signed char FO803[] = {2,2,2,2,2,2};
-static const short PR803[] = {33,33,33};
+static const short PR803[] = {49,49,49};
 static const char* const L804[] = {
 	"Chaotic signal generator running seven one-parameter maps, at audio rate, as modulation, or stepped from an external clock",
 	"Sets how often a new value is generated; these maps are not periodic, so this is a rate rather than a pitch",
@@ -18057,7 +18254,7 @@ static const short I804[] = {11,12,13,14,15};
 static const short O804[] = {16,17};
 static const short P804[] = {1,2,3,4,5,6,7,8,9,10};
 static const signed char FI804[] = {2,2,1,1,1};
-static const short PR804[] = {33,33,46,46,16};
+static const short PR804[] = {49,49,57,57,16};
 static const char* const L805[] = {
 	"Chaotic signal generator running five two-parameter maps, at audio rate, as modulation, or stepped from an external clock",
 	"Sets how often a new value is generated; these maps are not periodic, so this is a rate rather than a pitch",
@@ -18086,7 +18283,7 @@ static const short I805[] = {13,14,15,16,17,18};
 static const short O805[] = {19,20};
 static const short P805[] = {1,2,3,4,5,6,7,8,9,10,11,12};
 static const signed char FI805[] = {2,2,1,1,1,1};
-static const short PR805[] = {33,33,46,46,46,16};
+static const short PR805[] = {49,49,57,57,57,16};
 static const char* const L806[] = {
 	"Chaotic signal generator with three parameters and one output, running either a linear congruential map or a quadratic map",
 	"Sets how often a new value is generated; these maps are not periodic, so this is a rate rather than a pitch",
@@ -18115,7 +18312,7 @@ static const short I806[] = {14,15,16,17,18,19};
 static const short O806[] = {20};
 static const short P806[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
 static const signed char FI806[] = {2,2,1,1,1,1};
-static const short PR806[] = {33,33,46,46,46,46};
+static const short PR806[] = {49,49,57,57,57,57};
 static const char* const L807[] = {
 	"Chaotic signal generator running eight named attractors, each with four parameters, across X, Y and Z outputs",
 	"Sets how often a new value is generated; these attractors are not periodic, so this is a rate rather than a pitch",
@@ -18152,7 +18349,7 @@ static const short I807[] = {17,18,19,20,21,22,23,24};
 static const short O807[] = {25,26,27};
 static const short P807[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 static const signed char FI807[] = {2,2,1,1,1,1,1,1};
-static const short PR807[] = {33,33,46,46,46,46,46,16};
+static const short PR807[] = {49,49,57,57,57,57,57,16};
 static const char* const L808[] = {
 	"Turns an incoming clock into a 0-10V phasor, with one cycle of the ramp spread across a chosen number of clock pulses",
 	"Sets how many clock pulses make up one cycle of the ramp, 1 to 64 in whole numbers, and 4 from new",
@@ -18169,7 +18366,7 @@ static const short O808[] = {7,8};
 static const short P808[] = {1,2,3};
 static const signed char FI808[] = {1,2,2};
 static const signed char FO808[] = {-1,2};
-static const short PR808[] = {79,33,33};
+static const short PR808[] = {66,49,49};
 static const short PO808[] = {-1,0};
 static const char* const L809[] = {
 	"Noise generator whose sample rate you set, modulate or clock, with six noise types",
@@ -18194,7 +18391,7 @@ static const short O809[] = {14};
 static const short P809[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI809[] = {2,1,1,1};
 static const signed char FO809[] = {0};
-static const short PR809[] = {33,46,46,16};
+static const short PR809[] = {49,57,57,16};
 static const short PO809[] = {3};
 static const char* const L810[] = {
 	"Compares a signal against a threshold voltage and fires gates and triggers for each side of it",
@@ -18213,7 +18410,7 @@ static const short O810[] = {5,6,7,8,9};
 static const short P810[] = {1,2};
 static const signed char FI810[] = {-1,1};
 static const signed char FO810[] = {2,2,2,2,2};
-static const short PR810[] = {29,46};
+static const short PR810[] = {38,57};
 static const short PO810[] = {-1,0,-1,0,0};
 static const char* const L811[] = {
 	"Phase-distortion waveshaper that adds brightness and saturation; it colours the signal even with the Amount knob fully counter-clockwise",
@@ -18228,7 +18425,7 @@ static const short I811[] = {5,4};
 static const short O811[] = {6};
 static const short P811[] = {1,2,3};
 static const signed char FI811[] = {-1,1};
-static const short PR811[] = {29,79};
+static const short PR811[] = {38,66};
 static const char* const L812[] = {
 	"Chaotic noise source giving a vinyl-like hiss with occasional pops, ported from the SuperCollider Crackle generator",
 	"Sets the density of the crackling over a 0 to 2 range, 1.7 at startup; low settings die away into occasional ticks and high settings give continuous noise",
@@ -18241,7 +18438,7 @@ static const short O812[] = {4};
 static const short P812[] = {1,2};
 static const signed char FI812[] = {1};
 static const signed char FO812[] = {0};
-static const short PR812[] = {80};
+static const short PR812[] = {169};
 static const short PO812[] = {3};
 static const char* const L813[] = {
 	"Mu-law and A-law compansion, the coding once used to cut noise on transmitted telephone signals; a compression section above an expansion section, each with its own law",
@@ -18257,7 +18454,7 @@ static const char* const L813[] = {
 static const short I813[] = {7,7,5,5};
 static const short O813[] = {8,8,6,6};
 static const short P813[] = {1,2,3,4};
-static const short PR813[] = {29,29,29,29};
+static const short PR813[] = {38,38,38,38};
 static const char* const L814[] = {
 	"Extracts a signal's rate of change by comparing each sample against the one before it, with gates and triggers for the direction of travel",
 	"Multiplies the rate of change before it reaches the Delta output, from x1 to x8000; slow signals need a great deal of it and audio-rate signals almost none",
@@ -18276,7 +18473,7 @@ static const short O814[] = {6,7,8,9,10,5};
 static const short P814[] = {1,2};
 static const signed char FI814[] = {-1,1};
 static const signed char FO814[] = {2,2,2,2,2,1};
-static const short PR814[] = {29,79};
+static const short PR814[] = {38,66};
 static const short PO814[] = {-1,0,-1,0,0,-1};
 static const char* const L815[] = {
 	"Decodes eight gate inputs as an eight-bit number and puts out one voltage for it",
@@ -18293,7 +18490,7 @@ static const short I815[] = {5,5,5,5,5,5,5,5,6,7};
 static const short O815[] = {8};
 static const short P815[] = {1,2,3,4};
 static const signed char FI815[] = {2,2,2,2,2,2,2,2,2,2};
-static const short PR815[] = {5,5,5,5,5,5,5,5,5,33};
+static const short PR815[] = {5,5,5,5,5,5,5,5,5,49};
 static const char* const L816[] = {
 	"Randomly spaced impulses with random amplitudes, ported from the SuperCollider Dust generator; slow settings give random triggers, fast settings give white noise",
 	"Sets how often an impulse appears, from silence at the bottom of its 0 to 4 range to one impulse every sample at the top; the response is cubic, so most of the motion is near the top",
@@ -18305,7 +18502,7 @@ static const short I816[] = {3};
 static const short O816[] = {4};
 static const short P816[] = {1,2};
 static const signed char FI816[] = {1};
-static const short PR816[] = {81};
+static const short PR816[] = {170};
 static const char* const L817[] = {
 	"Waveshaper raising the input to a power, exponential one way and logarithmic the other; a mild effect on audio and a strong one on envelopes and LFOs",
 	"Sets the power, -5 to +5; clockwise bends the signal exponential, counter-clockwise bends it logarithmic, and noon passes it through unchanged",
@@ -18319,7 +18516,7 @@ static const short I817[] = {5,4};
 static const short O817[] = {6};
 static const short P817[] = {1,2,3};
 static const signed char FI817[] = {-1,1};
-static const short PR817[] = {29,46};
+static const short PR817[] = {38,57};
 static const char* const L818[] = {
 	"Chaotic generator built from a sine oscillator whose phase is multiplied, offset and fed back into itself, ported from SuperCollider",
 	"Sets how often a new value is generated",
@@ -18350,7 +18547,7 @@ static const short I818[] = {15,16,17,18,19,20};
 static const short O818[] = {21,22};
 static const short P818[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 static const signed char FI818[] = {2,1,1,1,1,1};
-static const short PR818[] = {33,46,46,46,46,46};
+static const short PR818[] = {49,57,57,57,57,57};
 static const char* const L819[] = {
 	"Two flip-flops on one clock: a toggle that flips on every gate, and a data latch that samples a second input",
 	"A rising gate here flips the toggle outputs and makes the data outputs sample In D",
@@ -18364,7 +18561,7 @@ static const short I819[] = {1,2};
 static const short O819[] = {3,4,5,6};
 static const signed char FI819[] = {2,2};
 static const signed char FO819[] = {2,2,2,2};
-static const short PR819[] = {33,33};
+static const short PR819[] = {49,49};
 static const short PO819[] = {0,0,-1,-1};
 static const char* const L820[] = {
 	"Stereo panner in which the two inputs travel in opposite directions across the outputs; also a crossfader or a VCA",
@@ -18382,7 +18579,7 @@ static const short I820[] = {4,5,8};
 static const short O820[] = {6,7};
 static const short P820[] = {1,2,3};
 static const signed char FI820[] = {-1,-1,1};
-static const short PR820[] = {29,29,79};
+static const short PR820[] = {38,38,66};
 static const char* const L821[] = {
 	"Delays an incoming gate and re-times it to a width you set",
 	"How long a gate is held back before it comes out, 0 to 5 seconds, at 0.1 seconds by default",
@@ -18400,7 +18597,7 @@ static const short O821[] = {9};
 static const short P821[] = {1,2,3,4,5};
 static const signed char FI821[] = {2,2,1,1};
 static const signed char FO821[] = {2};
-static const short PR821[] = {33,33,29,29};
+static const short PR821[] = {49,49,38,38};
 static const short PO821[] = {0};
 static const char* const L822[] = {
 	"Eight gate channels, each able to be muted or logically inverted",
@@ -18435,7 +18632,7 @@ static const short O823[] = {9,9,9,9,9,9,9,9,10};
 static const short P823[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2};
 static const signed char FI823[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO823[] = {2,2,2,2,2,2,2,2,2};
-static const short PR823[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,33,33,33};
+static const short PR823[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,49,49,49};
 static const short PO823[] = {0,0,0,0,0,0,0,0,0};
 static const char* const L824[] = {
 	"Chaos generator with no chaos parameter: the shape and sound of the Gingerbread Man map come from its starting values, which the Reseed button and input reroll",
@@ -18458,7 +18655,7 @@ static const short I824[] = {9,10,11,12};
 static const short O824[] = {13};
 static const short P824[] = {1,2,3,4,5,6,7,8};
 static const signed char FI824[] = {2,2,1,1};
-static const short PR824[] = {33,33,46,46};
+static const short PR824[] = {49,49,57,57};
 static const char* const L825[] = {
 	"Merges eight gate streams, and a polyphonic cable, into one gate stream",
 	"One of the gates being merged, counted as true at 1V or more",
@@ -18471,7 +18668,7 @@ static const short I825[] = {1,1,1,1,1,1,1,1,2};
 static const short O825[] = {3,4,5};
 static const signed char FI825[] = {2,2,2,2,2,2,2,2,2};
 static const signed char FO825[] = {2,2,2};
-static const short PR825[] = {5,5,5,5,5,5,5,5,33};
+static const short PR825[] = {5,5,5,5,5,5,5,5,49};
 static const short PO825[] = {-1,-1,0};
 static const char* const L826[] = {
 	"Encodes a stereo pair into mid and side signals and decodes mid and side back into a stereo pair",
@@ -18491,7 +18688,7 @@ static const short O826[] = {5,6,9,10};
 static const short P826[] = {1};
 static const signed char FI826[] = {0,0,0,0,1};
 static const signed char FO826[] = {0,0,0,0};
-static const short PR826[] = {29,29,29,29,46};
+static const short PR826[] = {38,38,38,38,57};
 static const short PO826[] = {2,2,2,2};
 static const char* const L827[] = {
 	"Outputs the highest and the lowest of four input voltages",
@@ -18503,7 +18700,7 @@ static const char* const L827[] = {
 };
 static const short I827[] = {1,2,2,2};
 static const short O827[] = {4,3};
-static const short PR827[] = {29,29,29,29};
+static const short PR827[] = {38,38,38,38};
 static const char* const L828[] = {
 	"Eight independent switched connections: each row passes its In jack to its Out jack until a cable in that row's Normal jack replaces it",
 	"The signal that reaches this row's output while the row's Normal jack is empty",
@@ -18512,7 +18709,7 @@ static const char* const L828[] = {
 };
 static const short I828[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2};
 static const short O828[] = {3,3,3,3,3,3,3,3};
-static const short PR828[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29};
+static const short PR828[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
 static const char* const L829[] = {
 	"Sixteen-step sequencer driven by an incoming phasor rather than a clock, with a voltage knob and a gate button for each step",
 	"Sets how many of the 16 steps the cycle runs through, 1 to 16 in whole numbers",
@@ -18539,7 +18736,7 @@ static const short O829[] = {12,13,14,15,16};
 static const short P829[] = {1,2,3,4,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
 static const signed char FI829[] = {-1,1,1,2};
 static const signed char FO829[] = {1,1,1,2,2};
-static const short PR829[] = {30,16,46,33};
+static const short PR829[] = {83,16,57,49};
 static const short PO829[] = {-1,-1,-1,0,0};
 static const char* const L830[] = {
 	"Thirty-two-step sequencer driven by an incoming phasor rather than a clock, with a voltage knob and a gate button for each step",
@@ -18567,7 +18764,7 @@ static const short O830[] = {12,13,14,15,16};
 static const short P830[] = {1,2,3,4,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
 static const signed char FI830[] = {-1,1,1,2};
 static const signed char FO830[] = {1,1,1,2,2};
-static const short PR830[] = {30,16,46,33};
+static const short PR830[] = {83,16,57,49};
 static const short PO830[] = {-1,-1,-1,0,0};
 static const char* const L831[] = {
 	"Reports the state of a phasor sample by sample: which way it is moving, whether it is moving at all, and where it resets",
@@ -18583,7 +18780,7 @@ static const char* const L831[] = {
 static const short I831[] = {1};
 static const short O831[] = {2,3,4,5,6};
 static const signed char FO831[] = {1,2,2,2,1};
-static const short PR831[] = {30};
+static const short PR831[] = {83};
 static const short PO831[] = {-1,-1,0,0,21};
 static const char* const L832[] = {
 	"Phasor generator that runs a set number of 0-10V cycles after a reset and then stops, for bursts",
@@ -18617,7 +18814,7 @@ static const short O832[] = {20,21,22,23};
 static const short P832[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI832[] = {1,1,1,1,2,2,2,-1,2};
 static const signed char FO832[] = {-1,2,2,2};
-static const short PR832[] = {29,46,79,32,33,33,33,33,33};
+static const short PR832[] = {38,57,66,23,49,49,49,49,49};
 static const short PO832[] = {-1,0,0,-1};
 static const char* const L833[] = {
 	"Takes a phasor in and puts out a phasor at a ratio of that speed, with three ways of keeping the two in phase",
@@ -18642,7 +18839,7 @@ static const short O833[] = {13,14};
 static const short P833[] = {1,2,3,4,5,6,7};
 static const signed char FI833[] = {-1,2,2};
 static const signed char FO833[] = {-1,2};
-static const short PR833[] = {30,33,33,29,29};
+static const short PR833[] = {83,49,49,38,38};
 static const short PO833[] = {-1,0};
 static const char* const L834[] = {
 	"Turns a phasor into a Euclidean rhythm set by steps, fill and rotation, with gates on the filled steps, a clock on every step and a ramp across each Euclidean beat",
@@ -18674,7 +18871,7 @@ static const short I834[] = {14,15,16,17,18,19};
 static const short O834[] = {20,21,22};
 static const short P834[] = {1,2,3,4,5,6,7,8,9,-1,10,11,12,13};
 static const signed char FO834[] = {-1,2,2};
-static const short PR834[] = {30,29,29,46,46,16};
+static const short PR834[] = {83,38,38,57,57,16};
 static const short PO834[] = {-1,0,0};
 static const char* const L835[] = {
 	"Holds an incoming phasor at its current position for as long as FREEZE is high, then carries on from that position",
@@ -18693,7 +18890,7 @@ static const short I835[] = {5,6,7,8};
 static const short O835[] = {9};
 static const short P835[] = {1,2,-1,3,4};
 static const signed char FI835[] = {-1,1,2,2};
-static const short PR835[] = {30,46,16,33};
+static const short PR835[] = {83,57,16,49};
 static const char* const L836[] = {
 	"Divides an incoming phasor into as many as eight steps and fires a gate on whichever steps are switched on",
 	"Sets how many of the eight steps the cycle is divided into, 1 to 8 in whole numbers",
@@ -18715,7 +18912,7 @@ static const short O836[] = {10,11};
 static const short P836[] = {1,2,3,4,5,6,6,6,6,6,6,6,6};
 static const signed char FI836[] = {-1,1,1};
 static const signed char FO836[] = {2,2};
-static const short PR836[] = {30,16,46};
+static const short PR836[] = {83,16,57};
 static const short PO836[] = {0,0};
 static const char* const L837[] = {
 	"Divides an incoming phasor into as many as thirty-two steps and fires a gate on whichever steps are switched on",
@@ -18741,7 +18938,7 @@ static const short O837[] = {11,12,13,14};
 static const short P837[] = {1,2,3,4,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6};
 static const signed char FI837[] = {-1,1,1,2};
 static const signed char FO837[] = {2,2,-1,2};
-static const short PR837[] = {30,16,46,33};
+static const short PR837[] = {83,16,57,49};
 static const short PO837[] = {0,0,-1,0};
 static const char* const L838[] = {
 	"Divides an incoming phasor into as many as sixty-four steps and fires a gate on whichever steps are switched on",
@@ -18767,7 +18964,7 @@ static const short O838[] = {11,12,13,14};
 static const short P838[] = {1,2,3,4,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6};
 static const signed char FI838[] = {-1,1,1,2};
 static const signed char FO838[] = {2,2,-1,2};
-static const short PR838[] = {30,16,46,33};
+static const short PR838[] = {83,16,57,49};
 static const short PO838[] = {0,0,-1,0};
 static const char* const L839[] = {
 	"Phasor generator: a 0-10V ramp repeating over and over, free-running or locked to a clock, with pulses, jitter and an end-of-cycle trigger",
@@ -18801,7 +18998,7 @@ static const short O839[] = {21,22,23,24};
 static const short P839[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI839[] = {1,1,1,1,1,1,2,2,2};
 static const signed char FO839[] = {-1,2,1,2};
-static const short PR839[] = {29,46,46,79,79,32,33,33,33};
+static const short PR839[] = {38,57,57,66,66,23,49,49,49};
 static const short PO839[] = {-1,0,21,0};
 static const char* const L840[] = {
 	"Turns one phasor into five variants: reversed, two triangles and two faster cycles",
@@ -18815,7 +19012,7 @@ static const char* const L840[] = {
 };
 static const short I840[] = {1};
 static const short O840[] = {2,3,4,5,6};
-static const short PR840[] = {30};
+static const short PR840[] = {83};
 static const char* const L841[] = {
 	"Pushes the steps of an incoming phasor early or late by a random amount, drawing a fresh set of nudges each cycle",
 	"How many steps the phasor cycle is cut into, 2 to 64, at 2 by default",
@@ -18832,7 +19029,7 @@ static const short I841[] = {5,6,7};
 static const short O841[] = {8};
 static const short P841[] = {1,2,3,4};
 static const signed char FI841[] = {-1,1,1};
-static const short PR841[] = {30,16,79};
+static const short PR841[] = {83,16,66};
 static const char* const L842[] = {
 	"Sums five phasors, with a gain control on each, and offers that sum wrapped or folded back into the phasor range",
 	"Sets the gain of that row's phasor in the sum, 0 to 1, at 1 when new",
@@ -18844,7 +19041,7 @@ static const char* const L842[] = {
 static const short I842[] = {2,2,2,2,2};
 static const short O842[] = {3,4};
 static const short P842[] = {1,1,1,1,1};
-static const short PR842[] = {30,30,30,30,30};
+static const short PR842[] = {83,83,83,83,83};
 static const char* const L843[] = {
 	"Produces eight copies of a phasor spaced an eighth of a cycle apart, plus two inverted copies",
 	"The phasor being copied and shifted, 0-10V; voltages outside that range wrap back into it",
@@ -18862,7 +19059,7 @@ static const char* const L843[] = {
 };
 static const short I843[] = {1};
 static const short O843[] = {2,3,4,5,6,7,8,9,10,11};
-static const short PR843[] = {30};
+static const short PR843[] = {83};
 static const char* const L844[] = {
 	"Sends an incoming phasor to side A or side B at random, re-choosing at the start of every cycle",
 	"The chance used at each phasor reset, 0 to 1, at 0.5 by default; the MODE setting fixes what that chance applies to",
@@ -18881,7 +19078,7 @@ static const short O844[] = {6,7,8,9};
 static const short P844[] = {1,2,3};
 static const signed char FI844[] = {-1,1};
 static const signed char FO844[] = {-1,2,-1,2};
-static const short PR844[] = {30,82};
+static const short PR844[] = {83,171};
 static const char* const L845[] = {
 	"Produces phase-shifted copies of a phasor, as ramps and as sine waves, each output a quarter cycle further on",
 	"The phasor being copied and shifted, 0-10V; voltages outside that range wrap back into it",
@@ -18899,7 +19096,7 @@ static const char* const L845[] = {
 };
 static const short I845[] = {1};
 static const short O845[] = {2,3,4,5,6,7,8,9,10,11};
-static const short PR845[] = {30};
+static const short PR845[] = {83};
 static const char* const L846[] = {
 	"Cuts an incoming phasor into steps and disrupts them at random, one step at a time",
 	"How many steps the phasor cycle is cut into, 1 to 64, at 1 by default",
@@ -18925,7 +19122,7 @@ static const short O846[] = {13,16,14,15};
 static const short P846[] = {1,2,3,4,5,6};
 static const signed char FI846[] = {-1,1,1,1,2,2};
 static const signed char FO846[] = {-1,-1,-1,2};
-static const short PR846[] = {30,16,79,16,33,33};
+static const short PR846[] = {83,16,66,16,49,49};
 static const char* const L847[] = {
 	"Rescales a 0-10V phasor into five other voltage ranges",
 	"The 0-10V phasor being rescaled; voltages outside that range wrap back into it",
@@ -18938,7 +19135,7 @@ static const char* const L847[] = {
 };
 static const short I847[] = {1};
 static const short O847[] = {2,3,4,5,6};
-static const short PR847[] = {30};
+static const short PR847[] = {83};
 static const char* const L848[] = {
 	"Puts out a phasor running at the slope of the one patched in, but resettable on its own, so two sequencers can run at one speed and be restarted separately",
 	"Sets the point in the cycle the output jumps to when a reset arrives; the knob's range covers one whole cycle either way",
@@ -18954,7 +19151,7 @@ static const short I848[] = {4,5,6};
 static const short O848[] = {7};
 static const short P848[] = {1,2,-1,3};
 static const signed char FI848[] = {-1,1,2};
-static const short PR848[] = {30,46,33};
+static const short PR848[] = {83,57,49};
 static const char* const L849[] = {
 	"Breaks one phasor into three nested rhythmic layers — steps, groups of steps and subgroups — each with a phasor output and a trigger output",
 	"Sets how many steps one cycle of the input phasor is split into, 1 to 64, 16 when new",
@@ -18980,7 +19177,7 @@ static const short I849[] = {7,8,9,10};
 static const short O849[] = {11,12,13,14,15,16};
 static const short P849[] = {1,2,3,4,5,6};
 static const signed char FO849[] = {-1,2,-1,2,-1,2};
-static const short PR849[] = {30,29,29,29};
+static const short PR849[] = {83,38,38,38};
 static const short PO849[] = {-1,0,-1,0,-1,0};
 static const char* const L850[] = {
 	"Reshapes a phasor, warping where in its cycle it runs fast and where it runs slow; ten shaping algorithms, for sequence warping or phase distortion synthesis",
@@ -18998,7 +19195,7 @@ static const short I850[] = {5,6,7};
 static const short O850[] = {8};
 static const short P850[] = {1,2,3,4};
 static const signed char FI850[] = {-1,1,1};
-static const short PR850[] = {30,46,16};
+static const short PR850[] = {83,57,16};
 static const char* const L851[] = {
 	"Moves a phasor's phase forwards or backwards, with the shift optionally snapped to a whole number of steps",
 	"Sets how many equal steps the cycle is divided into, 1 to 64; this is the grid the Quantize switch snaps the shift to",
@@ -19018,7 +19215,7 @@ static const short O851[] = {9,10};
 static const short P851[] = {1,2,3,4,5};
 static const signed char FI851[] = {-1,1,1};
 static const signed char FO851[] = {-1,2};
-static const short PR851[] = {30,16,46};
+static const short PR851[] = {83,16,57};
 static const char* const L852[] = {
 	"Sends a phasor to one of 64 outputs at a time, with the other 63 at 0V",
 	"Scan gives each step a slice of one input cycle; Divide + Scan gives each step a whole cycle; Step Forwards, Backwards and Random pass the phasor to one step and change step each cycle",
@@ -19038,7 +19235,7 @@ static const short I852[] = {6,7,8,9,10};
 static const short O852[] = {11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11};
 static const short P852[] = {3,4,1,2,5};
 static const signed char FI852[] = {-1,-1,-1,2,2};
-static const short PR852[] = {30,16,16,33,33};
+static const short PR852[] = {83,16,16,49,49};
 static const char* const L853[] = {
 	"Divides an incoming phasor into steps and repeats a shortened ramp several times inside each step",
 	"Sets how many steps the incoming cycle is divided into, 1 to 64 in whole numbers",
@@ -19059,7 +19256,7 @@ static const short O853[] = {9,10,11};
 static const short P853[] = {1,2,3,4};
 static const signed char FI853[] = {-1,2,1,1};
 static const signed char FO853[] = {-1,2};
-static const short PR853[] = {30,33,16,16};
+static const short PR853[] = {83,49,16,16};
 static const short PO853[] = {-1,0};
 static const char* const L854[] = {
 	"Divides a phasor into equal steps and applies a shaping algorithm inside each step, for step-by-step sequence warping or phase distortion",
@@ -19082,7 +19279,7 @@ static const short I854[] = {7,8,9,10,11};
 static const short O854[] = {12,13};
 static const short P854[] = {1,2,3,4,5,6};
 static const signed char FI854[] = {-1,1,1,1,2};
-static const short PR854[] = {30,16,46,16,33};
+static const short PR854[] = {83,16,57,16,49};
 static const char* const L855[] = {
 	"Swings an incoming phasor, pushing the steps within each group late or early",
 	"How many steps the phasor cycle is cut into, 1 to 64, at 4 by default",
@@ -19109,7 +19306,7 @@ static const short O855[] = {15,16,17};
 static const short P855[] = {1,2,3,4,5,6,7,8};
 static const signed char FI855[] = {-1,1,1,1,1,-1,2};
 static const signed char FO855[] = {-1,-1,2};
-static const short PR855[] = {30,16,16,46,79,16,33};
+static const short PR855[] = {83,16,16,57,66,16,49};
 static const char* const L856[] = {
 	"Puts out ten phasors locked to one input phasor: five slower divisions and five faster multiples",
 	"The phasor everything here is derived from, 0-10V",
@@ -19121,7 +19318,7 @@ static const char* const L856[] = {
 static const short I856[] = {1,2};
 static const short O856[] = {3,3,3,3,3,4,4,4,4,4};
 static const signed char FI856[] = {-1,2};
-static const short PR856[] = {30,33};
+static const short PR856[] = {83,49};
 static const char* const L857[] = {
 	"Turns a phasor into a clock, splitting each input cycle into a chosen number of evenly spaced pulses, with a ramp across each one",
 	"Sets how many pulses one cycle of the input phasor produces, 1 to 64, 16 when new",
@@ -19140,7 +19337,7 @@ static const short I857[] = {6,7,8};
 static const short O857[] = {9,10};
 static const short P857[] = {1,2,3,4,5};
 static const signed char FO857[] = {2};
-static const short PR857[] = {30,16,46};
+static const short PR857[] = {83,16,57};
 static const short PO857[] = {0};
 static const char* const L858[] = {
 	"Drives a triangle shaper, then a trapezoid shaper, then a sine shaper from an incoming phasor, to build cyclical modulation shapes; the outputs are not anti-aliased",
@@ -19167,7 +19364,7 @@ static const short I858[] = {10,11,12,13,14};
 static const short O858[] = {15,16,17};
 static const short P858[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI858[] = {-1,1,1,1,1};
-static const short PR858[] = {30,46,46,46,46};
+static const short PR858[] = {83,57,57,57,57};
 static const char* const L859[] = {
 	"Turns an incoming phasor into a stepped random voltage, with a fresh value arriving as each step comes round",
 	"How many steps the phasor cycle is cut into, 1 to 64, at 16 by default",
@@ -19187,7 +19384,7 @@ static const short O859[] = {9,10};
 static const short P859[] = {1,2,3,4,5};
 static const signed char FI859[] = {-1,1,1};
 static const signed char FO859[] = {1,1};
-static const short PR859[] = {30,16,46};
+static const short PR859[] = {83,16,57};
 static const char* const L860[] = {
 	"Turns a phasor into standard waveforms, unipolar in one column and bipolar in the other; nothing here is anti-aliased, so audio-rate use is for phase distortion",
 	"The phasor being converted, 0-10V; voltages outside that range wrap back into it",
@@ -19205,7 +19402,7 @@ static const char* const L860[] = {
 };
 static const short I860[] = {1};
 static const short O860[] = {2,3,4,5,6,7,8,9,10,11};
-static const short PR860[] = {30};
+static const short PR860[] = {83};
 static const char* const L861[] = {
 	"Reads a phasor as a bar of a set number of steps and gives three phasors, each spanning its own number of those steps, for polymetric parts from one clock",
 	"Sets how many steps one cycle of the input phasor counts as, 1 to 64, 4 when new",
@@ -19225,7 +19422,7 @@ static const short O861[] = {9,9,9,10,10,10};
 static const short P861[] = {1,2,3,3,3,4,4,4};
 static const signed char FI861[] = {-1,-1,-1,-1,-1,2,2,2};
 static const signed char FO861[] = {-1,-1,-1,2,2,2};
-static const short PR861[] = {79,79,79,79,30,33,33,33};
+static const short PR861[] = {66,66,66,66,83,49,49,49};
 static const short PO861[] = {-1,-1,-1,0,0,0};
 static const char* const L862[] = {
 	"Sends each incoming gate to output A or output B at random, with the odds set by a knob",
@@ -19243,7 +19440,7 @@ static const short O862[] = {7,8};
 static const short P862[] = {1,2,3,4};
 static const signed char FI862[] = {2,1};
 static const signed char FO862[] = {2,2};
-static const short PR862[] = {33,82};
+static const short PR862[] = {49,171};
 static const char* const L863[] = {
 	"Sends an incoming clock to one of eight gate outputs, picked at random every time the clock rises",
 	"The lowest-numbered output that can be picked, 1 to 8",
@@ -19259,7 +19456,7 @@ static const short O863[] = {7,7,7,7,7,7,7,7};
 static const short P863[] = {1,2,3};
 static const signed char FI863[] = {2,1,1};
 static const signed char FO863[] = {2,2,2,2,2,2,2,2};
-static const short PR863[] = {33,83,83};
+static const short PR863[] = {49,172,172};
 static const char* const L864[] = {
 	"Routes eight inputs to eight outputs and shifts which input arrives at which output",
 	"Shifts the inputs around the outputs in whole steps, 0 to 7",
@@ -19273,7 +19470,7 @@ static const short I864[] = {5,5,5,5,5,5,5,5,2,4};
 static const short O864[] = {6,6,6,6,6,6,6,6};
 static const short P864[] = {1,3};
 static const signed char FI864[] = {-1,-1,-1,-1,-1,-1,-1,-1,1,1};
-static const short PR864[] = {29,29,29,29,29,29,29,29,16,16};
+static const short PR864[] = {38,38,38,38,38,38,38,38,16,16};
 static const char* const L865[] = {
 	"Eight-bit shift register after Rob Hordijk's Benjolin and Blippoo Box, with a stepped voltage built from the last three bits",
 	"Sets the voltage the Data input is compared against, -5V to +5V; a data voltage above it writes a one into the first bit",
@@ -19295,7 +19492,7 @@ static const short O865[] = {11,11,11,11,11,11,11,11,12};
 static const short P865[] = {1,2,3,4,5,6};
 static const signed char FI865[] = {2,-1,1,1};
 static const signed char FO865[] = {2,2,2,2,2,2,2,2,1};
-static const short PR865[] = {33,29,46,46};
+static const short PR865[] = {49,38,57,57};
 static const char* const L866[] = {
 	"CV-controlled eight-way crossfader: a window of gain sweeps across eight inputs, each input on its own output plus a summed mix",
 	"Sweeps the window across the inputs, 0 to 5",
@@ -19317,7 +19514,7 @@ static const short I866[] = {11,11,11,11,11,11,11,11,2,4,6,8,12};
 static const short O866[] = {13,13,13,13,13,13,13,13,14};
 static const short P866[] = {1,3,5,7,9,10};
 static const signed char FI866[] = {-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1};
-static const short PR866[] = {29,29,29,29,29,29,29,29,79,84,79,79,29};
+static const short PR866[] = {38,38,38,38,38,38,38,38,66,173,66,66,38};
 static const char* const L867[] = {
 	"Waveshaper running the input through a trigonometric function, chosen from sine, cosine and tangent in regular, hyperbolic or inverse form",
 	"Picks sine, cosine or tangent, shown by the lamp beside it",
@@ -19334,7 +19531,7 @@ static const short I867[] = {8,6,7};
 static const short O867[] = {9};
 static const short P867[] = {1,2,3,4,5};
 static const signed char FI867[] = {-1,1,1};
-static const short PR867[] = {29,16,16};
+static const short PR867[] = {38,16,16};
 static const char* const L868[] = {
 	"Four-input mixer whose levels are set by a point on an X-Y plane, with each input also on its own output",
 	"Sets the level of that input before the X-Y position scales it, 0 to 1, fully open by default",
@@ -19354,7 +19551,7 @@ static const short I868[] = {7,7,7,7,8,9,10};
 static const short O868[] = {11,12,12,12,12};
 static const short P868[] = {1,1,1,1,2,3,4,5,6};
 static const signed char FI868[] = {-1,-1,-1,-1,1,1};
-static const short PR868[] = {29,29,29,29,79,79,29};
+static const short PR868[] = {38,38,38,38,66,66,38};
 static const char* const L869[] = {
 	"Hyperbolic waveshaper, the same curve as the SHAPE control in Unfiltered Audio's Dent",
 	"Sets the curve, -5 to +5; noon passes the signal through, clockwise drives it towards a square and counter-clockwise pulls it into needles",
@@ -19368,7 +19565,7 @@ static const short I869[] = {5,4};
 static const short O869[] = {6};
 static const short P869[] = {1,2,3};
 static const signed char FI869[] = {-1,1};
-static const short PR869[] = {29,46};
+static const short PR869[] = {38,57};
 static const char* const L870[] = {
 	"Converts a pair of voltages between cartesian and polar coordinates, with the polar outputs normalled into the polar inputs",
 	"The X coordinate of the point being converted to polar",
@@ -19382,7 +19579,7 @@ static const char* const L870[] = {
 };
 static const short I870[] = {1,2,5,6};
 static const short O870[] = {3,4,7,8};
-static const short PR870[] = {29,29,29,29};
+static const short PR870[] = {38,38,38,38};
 static const char* const L871[] = {
 	"Eight-step sequencer and addressable switch: a clock, or a voltage, picks one of eight inputs and sends it on to the CV output",
 	"The voltage this step passes to the CV output; with nothing patched the step passes a fixed 10V",
@@ -19595,7 +19792,7 @@ static const short O878[] = {22,24,26,25,27,28,29};
 static const short P878[] = {1,2,3,4,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,18,18,18,18,19,19,19,19,20,20,20,20,21};
 static const signed char FI878[] = {0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO878[] = {0,0,0,0,0,0,0};
-static const short PR878[] = {8,36,36,36,36,8,8,8,8,36,36,36,36,36,36,36,36,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36};
+static const short PR878[] = {8,86,86,86,86,8,8,8,8,86,86,86,86,86,86,86,86,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86};
 static const short PO878[] = {2,2,2,2,2,2,2};
 static const char* const L879[] = {
 	"Eight-channel stereo mixer with a pan, a mute, a solo and a level CV on every channel, and a master fader",
@@ -19616,7 +19813,7 @@ static const short O879[] = {8,9};
 static const short P879[] = {7,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4};
 static const signed char FI879[] = {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1};
 static const signed char FO879[] = {0,0};
-static const short PR879[] = {8,8,8,8,8,8,8,8,42,42,42,42,42,42,42,42};
+static const short PR879[] = {8,8,8,8,8,8,8,8,92,92,92,92,92,92,92,92};
 static const short PO879[] = {2,2};
 static const char* const L880[] = {
 	"Eight-channel stereo mixer with two aux sends and returns, two groups, voltage control of every level and pan, four scenes and a polyphonic insert",
@@ -19674,7 +19871,7 @@ static const short O880[] = {22,24,26,25,27,28,29};
 static const short P880[] = {1,2,3,4,5,6,6,6,6,6,6,6,6,7,7,8,8,9,9,10,10,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,13,13,13,13,13,13,13,13,14,14,14,14,14,14,14,14,15,15,15,15,15,15,15,15,16,16,16,16,16,16,16,16,17,17,17,17,17,17,17,17,18,18,19,19,20,20,20,20,21};
 static const signed char FI880[] = {0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO880[] = {0,0,0,0,0,0,0};
-static const short PR880[] = {8,36,36,36,36,8,8,8,8,36,36,36,36,8,8,8,8,8,8,8,8,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36};
+static const short PR880[] = {8,86,86,86,86,8,8,8,8,86,86,86,86,8,8,8,8,8,8,8,8,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86};
 static const short PO880[] = {2,2,2,2,2,2,2};
 static const char* const L881[] = {
 	"Analogue bass drum voice with a pitch envelope, a drive stage with three circuits, and a choke input",
@@ -19854,7 +20051,7 @@ static const short O886[] = {25,26,24};
 static const short P886[] = {10,7,8,6,11,4,2,1,3,9,5};
 static const signed char FI886[] = {3,2,3,2,2,2,1,1,2,1,1,1};
 static const signed char FO886[] = {3,2,3};
-static const short PR886[] = {85,5,85,5,5,5,11,10,5,10,12,12};
+static const short PR886[] = {100,5,100,5,5,5,11,10,5,10,12,12};
 static const short PO886[] = {2,0,2};
 static const char* const L887[] = {
 	"Six-channel trigger sequencer of 64 steps played in from one big button; it runs whenever its clock runs and has no run control of its own",
@@ -19889,7 +20086,7 @@ static const short O887[] = {22,22,22,22,22,22};
 static const short P887[] = {4,8,6,19,12,10,14,16,1,18,21};
 static const signed char FI887[] = {2,1,2,1,1,2,2,2,2,2};
 static const signed char FO887[] = {2,2,2,2,2,2};
-static const short PR887[] = {5,10,5,10,4,5,86,5,86,86};
+static const short PR887[] = {5,10,5,10,4,5,174,5,174,174};
 static const short PO887[] = {0,0,0,0,0,0};
 static const char* const L888[] = {
 	"Six-channel gate and CV sequencer of 128 steps played in from one big button; it runs whenever its clock runs and has no run control of its own",
@@ -19930,7 +20127,7 @@ static const short O888[] = {26,26,26,26,26,26,27,27,27,27,27,27};
 static const short P888[] = {5,9,7,22,16,12,14,18,1,20,24,25,4,11};
 static const signed char FI888[] = {2,1,2,1,1,2,2,2,2,2};
 static const signed char FO888[] = {2,2,2,2,2,2};
-static const short PR888[] = {5,10,5,10,4,5,5,5,86,86,14};
+static const short PR888[] = {5,10,5,10,4,5,5,5,174,174,14};
 static const short PO888[] = {0,0,0,0,0,0};
 static const char* const L889[] = {
 	"Blank panel, 9HP, carrying the Impromptu Modular artwork and no controls",
@@ -19962,7 +20159,7 @@ static const short O890[] = {9,9,9,9,10,10,10,10};
 static const short P890[] = {4,4,4,4,3,3,3,3,5,6,2,1};
 static const signed char FI890[] = {3,2};
 static const signed char FO890[] = {3,3,3,3,2,2,2,2};
-static const short PR890[] = {11,33};
+static const short PR890[] = {11,49};
 static const short PO890[] = {2,2,2,2,0,0,0,0};
 static const char* const L891[] = {
 	"Expander for Chord-Key, placed immediately to the right of it: four quantizers that snap incoming pitches to the notes of the chord selected in Chord-Key. On its own it quantizes chromatically",
@@ -19976,8 +20173,8 @@ static const short O891[] = {3,3,3,3};
 static const short P891[] = {2,2,2,2};
 static const signed char FI891[] = {3,3,3,3};
 static const signed char FO891[] = {3,3,3,3};
-static const short PR891[] = {87,87,87,87};
-static const short PO891[] = {32,32,32,32};
+static const short PR891[] = {175,175,175,175};
+static const short PO891[] = {23,23,23,23};
 static const char* const L892[] = {
 	"Master clock with three sub-clocks, each running at its own ratio of the master tempo; it can be chained with other clocks and locked to an external clock source",
 	"Sets the master tempo in whole BPM, 30 to 300",
@@ -20014,7 +20211,7 @@ static const short O892[] = {15,16,16,16,17,18,19};
 static const short P892[] = {1,8,8,8,6,9,9,9,7,10,10,10,2,3,-1,11,11,11,4,5};
 static const signed char FI892[] = {-1,-1,-1,-1,2,2,1};
 static const signed char FO892[] = {2,2,2,2,2,2,1};
-static const short PR892[] = {-1,-1,-1,-1,5,5,36};
+static const short PR892[] = {-1,-1,-1,-1,5,5,86};
 static const short PO892[] = {0,0,0,0,0,0,-1};
 static const char* const L893[] = {
 	"Master clock with three sub-clocks, each running at its own ratio of the master tempo; it can be chained with other clocks and locked to an external clock source",
@@ -20048,7 +20245,7 @@ static const short O893[] = {12,13,13,13,14,15,16};
 static const short P893[] = {8,8,8,3,1,2,6,7,4,5};
 static const signed char FI893[] = {2,2,1};
 static const signed char FO893[] = {2,2,2,2,2,2,1};
-static const short PR893[] = {5,5,36};
+static const short PR893[] = {5,5,86};
 static const short PO893[] = {0,0,0,0,0,0,-1};
 static const char* const L894[] = {
 	"Expander for Clocked, 4HP, placed immediately to the right of it; it adds CV inputs for the pulse width and swing settings of the master clock and the three sub-clocks",
@@ -20189,7 +20386,7 @@ static const short O898[] = {3,3,3,3};
 static const short P898[] = {1};
 static const signed char FI898[] = {3,3,3,3};
 static const signed char FO898[] = {3,3,3,3};
-static const short PR898[] = {32,14,14,14};
+static const short PR898[] = {23,14,14,14};
 static const short PO898[] = {2,2,2,2};
 static const char* const L899[] = {
 	"Gate sequencer of 64 steps, each step carrying a probability, arranged as four rows of 16, two of 32 or one of 64, with a song mode of 64 phrases",
@@ -20285,8 +20482,8 @@ static const short O902[] = {17,18,19};
 static const short P902[] = {1,1,1,1,2,2,2,2,5,5,5,5,4,4,4,4,6,9,8,7,11,10,3,3,3,3};
 static const signed char FI902[] = {3,2,1,2,2};
 static const signed char FO902[] = {3,2,1};
-static const short PR902[] = {32,33,29,11,5};
-static const short PO902[] = {29,16,27};
+static const short PR902[] = {23,49,38,11,5};
+static const short PO902[] = {38,16,63};
 static const char* const L903[] = {
 	"Drops a note from a polyphonic note stream when another channel is already sounding the same pitch, and can delay the gate input by a few samples",
 	"Delays the gate input by 0 to 5 samples, for when the CV from an upstream module arrives later than its gate",
@@ -20303,8 +20500,8 @@ static const short O903[] = {5,6,7};
 static const short P903[] = {1};
 static const signed char FI903[] = {3,2,1};
 static const signed char FO903[] = {3,2,1};
-static const short PR903[] = {32,33,29};
-static const short PO903[] = {29,16,27};
+static const short PR903[] = {23,49,38};
+static const short PO903[] = {38,16,63};
 static const char* const L904[] = {
 	"Looper for note events rather than audio, carrying pitch, gate and a second CV for velocity or panning, up to 16 channels",
 	"Sets the length of the loop in tempo steps, 1 to 32",
@@ -20331,8 +20528,8 @@ static const short O904[] = {11,12,13};
 static const short P904[] = {3,1,2,4};
 static const signed char FI904[] = {3,2,1,2,2,2};
 static const signed char FO904[] = {3,2,1};
-static const short PR904[] = {32,33,29,11,5,5};
-static const short PO904[] = {29,16,27};
+static const short PR904[] = {23,49,38,11,5,5};
+static const short PO904[] = {38,16,63};
 static const char* const L905[] = {
 	"Gate splitter, 6HP: each gate goes to one of two outputs according to whether its pitch is above or below a split point, channel by channel on a polyphonic cable",
 	"Shows the split point on the display as a voltage or as a note name",
@@ -20352,8 +20549,8 @@ static const short O905[] = {8,7,6};
 static const short P905[] = {2,1};
 static const signed char FI905[] = {3,2,1};
 static const signed char FO905[] = {2,2,3};
-static const short PR905[] = {32,29,7};
-static const short PO905[] = {16,16,32};
+static const short PR905[] = {23,38,7};
+static const short PO905[] = {16,16,23};
 static const char* const L906[] = {
 	"Sixteen sequences of up to 16 steps, each step holding a pitch, two gates, a tie and a slide; song mode chains sequences as a series of up to 16 phrases, 256 steps in all",
 	"In SEQ mode this selects that step for editing, and its light shows the edit head in red and the play head in green; in SONG mode it selects that phrase of the song",
@@ -20521,8 +20718,8 @@ static const short O909[] = {24,23};
 static const short P909[] = {6,11,10,14,9,8,3,4,5,7,12,13,1,2};
 static const signed char FI909[] = {3,1,1,1,1,2,2,1};
 static const signed char FO909[] = {2,3};
-static const short PR909[] = {11,11,4,38,30,33,33,30};
-static const short PO909[] = {87,29};
+static const short PR909[] = {11,11,4,88,83,49,49,83};
+static const short PO909[] = {175,38};
 static const char* const L910[] = {
 	"Passes or blocks four gate signals independently, 6HP, timing each change so that a pulse already under way is not cut short",
 	"Toggles that channel between passing its gate and blocking it; pressed while that gate is low the change is immediate, pressed while it is high it is held until the next pulse begins",
@@ -20647,8 +20844,8 @@ static const short O915[] = {9,8};
 static const short P915[] = {1,2,3};
 static const signed char FI915[] = {1,2,1,1};
 static const signed char FO915[] = {2,1};
-static const short PR915[] = {29,33,29,29};
-static const short PO915[] = {16,27};
+static const short PR915[] = {38,49,38,38};
+static const short PO915[] = {16,63};
 static const char* const L916[] = {
 	"A three-channel 32-step sequencer whose notes are written in from a CV input, with a fourth channel for staging a sequence while the other three play. All channels share one length",
 	"When on, a write advances the sequencer one step to the right",
@@ -20773,7 +20970,7 @@ static const char* const L919[] = {
 static const short I919[] = {3,4};
 static const short O919[] = {5};
 static const short P919[] = {1,2};
-static const short PR919[] = {36,36};
+static const short PR919[] = {86,86};
 static const char* const L920[] = {
 	"Two faders, each generating a manual DC voltage",
 	"Sets the voltage at the output of that channel",
@@ -20834,7 +21031,7 @@ static const short O921[] = {30,31,32,33,34,35,36,37,38,39,40};
 static const short P921[] = {1,2,3,4,1,2,6,5,7,8,9,10,11,10,11,12,13,14,15,16,17,18,19,17,18,19};
 static const signed char FI921[] = {3,1,3,1,0,0,1,1,1,2,2,1,1,1,1};
 static const signed char FO921[] = {0,0,0,0,0,0,0,0,0,0,0};
-static const short PR921[] = {14,36,14,36,8,8,36,36,36,88,28,36,36,36,36};
+static const short PR921[] = {14,86,14,86,8,8,86,86,86,176,82,86,86,86,86};
 static const short PO921[] = {2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L922[] = {
 	"Analogue wavefolder with symmetry bias, an overdrive stage and a strike input",
@@ -20855,7 +21052,7 @@ static const short O922[] = {11};
 static const short P922[] = {1,2,3,4,5,6};
 static const signed char FI922[] = {0,1,1,2};
 static const signed char FO922[] = {0};
-static const short PR922[] = {8,36,36,86};
+static const short PR922[] = {8,86,86,174};
 static const short PO922[] = {2};
 static const char* const L923[] = {
 	"Four channel utility mixer with panning into a stereo output, each channel built on a different gain stage",
@@ -20887,7 +21084,7 @@ static const short O923[] = {16,17,18,18,18,18};
 static const short P923[] = {1,2,3,3,3,3,4,5,6,7,8};
 static const signed char FI923[] = {1,1,1,1,0,0,0,0,0};
 static const signed char FO923[] = {0,0,0,0,0,0};
-static const short PR923[] = {36,36,36,36,8,8,8,8,8};
+static const short PR923[] = {86,86,86,86,8,8,8,8,8};
 static const short PO923[] = {2,2,2,2,2,2};
 static const char* const L924[] = {
 	"ADSR envelope generator with a gate output for each stage, a combined trigger output and a variable contour",
@@ -20910,7 +21107,7 @@ static const short O924[] = {11,12,13,13,13,13};
 static const short P924[] = {1,2,3,4,5,6,7};
 static const signed char FI924[] = {1,1,1,1,2};
 static const signed char FO924[] = {1,2,2,2,2,2};
-static const short PR924[] = {36,36,42,36,5};
+static const short PR924[] = {86,86,92,86,5};
 static const short PO924[] = {6,0,0,0,0,0};
 static const char* const L925[] = {
 	"ADSR envelope generator with a retrigger input, a hold mode for slew limiting and a gate output for each stage",
@@ -20934,7 +21131,7 @@ static const short O925[] = {12,13,14,14,14,14};
 static const short P925[] = {1,2,3,4,5,6,7};
 static const signed char FI925[] = {1,1,1,1,2,2};
 static const signed char FO925[] = {1,2,2,2,2,2};
-static const short PR925[] = {36,36,36,36,5,5};
+static const short PR925[] = {86,86,86,86,5,5};
 static const short PO925[] = {-1,0,0,0,0,0};
 static const char* const L926[] = {
 	"Two stage analogue function generator, working as an envelope, an LFO or a slew limiter",
@@ -20957,7 +21154,7 @@ static const short O926[] = {10,11,12,13};
 static const short P926[] = {1,2,3,4,5,6};
 static const signed char FI926[] = {-1,1,1};
 static const signed char FO926[] = {1,1,2,2};
-static const short PR926[] = {36,36,36};
+static const short PR926[] = {86,86,86};
 static const short PO926[] = {-1,6,0,0};
 static const char* const L927[] = {
 	"Analogue stereo oscillator: six phase-displaced sawtooth waves spread across a stereo pair",
@@ -20987,7 +21184,7 @@ static const short O927[] = {17,18,19};
 static const short P927[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI927[] = {3,1,1,1,1};
 static const signed char FO927[] = {0,0,0};
-static const short PR927[] = {14,36,36,36,36};
+static const short PR927[] = {14,86,86,86,86};
 static const short PO927[] = {2,2,2};
 static const char* const L928[] = {
 	"Expander for cruïnn, giving each of its six sawtooth waves its own output and its own phase modulation input; it goes immediately beside cruïnn, on either side of it",
@@ -21003,7 +21200,7 @@ static const short I928[] = {3,3,3,3,3};
 static const short O928[] = {1,2,2,4,2,5};
 static const signed char FI928[] = {1,1,1,1,1};
 static const signed char FO928[] = {0,0,0,0,0,0};
-static const short PR928[] = {36,36,36,36,36};
+static const short PR928[] = {86,86,86,86,86};
 static const short PO928[] = {2,2,2,2,2,2};
 static const char* const L929[] = {
 	"Output module converting modular level to balanced line level, with a headphone amplifier",
@@ -21023,7 +21220,7 @@ static const short P929[] = {1,2};
 static const signed char FI929[] = {0,0};
 static const signed char FO929[] = {0,0,0};
 static const short PR929[] = {8,8};
-static const short PO929[] = {29,29,29};
+static const short PO929[] = {38,38,38};
 static const char* const L930[] = {
 	"Seven logic gates in one module: AND, NAND, OR, NOR, XOR, XNOR and NOT",
 	"A gate signal into the AND gate, normalled to the other AND input so the gate works with one cable patched",
@@ -21045,7 +21242,7 @@ static const short I930[] = {1,2,3,4,5,6,7};
 static const short O930[] = {8,9,10,11,12,13,14};
 static const signed char FI930[] = {2,2,2,2,2,2,2};
 static const signed char FO930[] = {2,2,2,2,2,2,2};
-static const short PR930[] = {88,88,88,88,88,88,88};
+static const short PR930[] = {176,176,176,176,176,176,176};
 static const short PO930[] = {0,0,0,0,0,0,0};
 static const char* const L931[] = {
 	"Diatonic harmonic quantiser: it quantises one pitch voltage and builds a four note chord from it, one tone per output",
@@ -21077,8 +21274,8 @@ static const short O931[] = {15,16,17,18,19};
 static const short P931[] = {1,1,1,1,1,1,1,1,1,1,1,1,2,3,4,5,6,6,6,6,7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,9,-1,10,10,10,10};
 static const signed char FI931[] = {3,1,1,1};
 static const signed char FO931[] = {3,3,3,3,2};
-static const short PR931[] = {7,36,36,36};
-static const short PO931[] = {23,2,2,2,0};
+static const short PR931[] = {7,86,86,86};
+static const short PO931[] = {37,2,2,2,0};
 static const char* const L932[] = {
 	"Multimode filter and resonator with low pass, band pass, high pass and a sweepable notch, which self-oscillates as a sine wave",
 	"Sets the cutoff of the low pass and high pass and the centre frequency of the band pass and notch, roughly 16Hz to 16KHz",
@@ -21106,7 +21303,7 @@ static const short O932[] = {16,17,18,19};
 static const short P932[] = {1,3,4,2,5,6,7,8};
 static const signed char FI932[] = {0,0,2,3,1,1,1};
 static const signed char FO932[] = {0,0,0,0};
-static const short PR932[] = {8,8,5,14,36,36,36};
+static const short PR932[] = {8,8,5,14,86,86,86};
 static const short PO932[] = {2,2,2,2};
 static const char* const L933[] = {
 	"Input module bringing line level signals into the rack, with a waveshaping enhance stage, an envelope follower, a comparator and footswitch outputs",
@@ -21152,7 +21349,7 @@ static const char* const L934[] = {
 static const short I934[] = {2,2,2,2,2,2};
 static const short O934[] = {3,3,4,4,4,4};
 static const short P934[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR934[] = {36,36,36,36,36,36};
+static const short PR934[] = {86,86,86,86,86,86};
 static const char* const L935[] = {
 	"Through-zero analogue oscillator with a wavefolder, a shapeable sawtooth and two sync inputs",
 	"Sets the fundamental frequency of the oscillator, and so the pitch of every output",
@@ -21184,7 +21381,7 @@ static const short O935[] = {19,20,21,22,23};
 static const short P935[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
 static const signed char FI935[] = {3,1,2,2,1};
 static const signed char FO935[] = {0,0,0,0,0};
-static const short PR935[] = {14,36,11,11,36};
+static const short PR935[] = {14,86,11,11,86};
 static const short PO935[] = {2,2,2,2,2};
 static const char* const L936[] = {
 	"Eight free running analogue triangle LFOs under one rate control",
@@ -21206,7 +21403,7 @@ static const short O936[] = {4,5,6,7,8,9,10,11};
 static const short P936[] = {1,2};
 static const signed char FI936[] = {1};
 static const signed char FO936[] = {1,1,1,1,1,1,1,1};
-static const short PR936[] = {36};
+static const short PR936[] = {86};
 static const char* const L937[] = {
 	"Expander for øchd, taking its eight LFOs and deriving sixteen more outputs from them; it goes immediately beside øchd, on either side of it",
 	"A full wave rectified copy of øchd's LFO 1, unipolar positive at 0-5V and at twice that LFO's frequency",
@@ -21258,7 +21455,7 @@ static const short O938[] = {16};
 static const short P938[] = {1,2,3,4,5,5,5,6,7,8,9,10};
 static const signed char FI938[] = {3,3,3,3,1,1,1};
 static const signed char FO938[] = {0};
-static const short PR938[] = {14,14,14,14,36,36,36};
+static const short PR938[] = {14,14,14,14,86,86,86};
 static const short PO938[] = {2};
 static const char* const L939[] = {
 	"Sample and hold with an internal analogue noise source, an internal clock, and slew on its output",
@@ -21279,7 +21476,7 @@ static const short O939[] = {10,11};
 static const short P939[] = {1,2,3,4,5,6,7};
 static const signed char FI939[] = {-1,2};
 static const signed char FO939[] = {-1,0};
-static const short PR939[] = {36,11};
+static const short PR939[] = {86,11};
 static const short PO939[] = {-1,2};
 static const char* const L940[] = {
 	"Two analogue bidirectional switches, with a button, a control input and a manual reference voltage each",
@@ -21298,7 +21495,7 @@ static const short I940[] = {4,5,6,7,7};
 static const short O940[] = {8,9,10};
 static const short P940[] = {1,-1,-1,1,2,2,3};
 static const signed char FI940[] = {-1,-1,-1,2,2};
-static const short PR940[] = {36,36,36,89,89};
+static const short PR940[] = {86,86,86,177,177};
 static const char* const L941[] = {
 	"Three independent channels of hyperbolic tangent waveshaping, for soft clipping, overdrive and taming feedback",
 	"Sets the drive into that channel; clockwise increases the amount of waveshaping, rounding corners and then soft clipping",
@@ -21334,7 +21531,7 @@ static const short O942[] = {10,11,12,13,14};
 static const short P942[] = {1,2,3,4,5};
 static const signed char FI942[] = {3,1,2,1};
 static const signed char FO942[] = {0,0,0,0,0};
-static const short PR942[] = {14,36,88,36};
+static const short PR942[] = {14,86,176,86};
 static const short PO942[] = {2,2,2,2,2};
 static const char* const L943[] = {
 	"Three input mixer feeding a discrete transistor ladder low pass filter that self-oscillates",
@@ -21354,7 +21551,7 @@ static const short O943[] = {10};
 static const short P943[] = {1,2,2,2,3,4,5,6};
 static const signed char FI943[] = {0,0,0,3,1};
 static const signed char FO943[] = {0};
-static const short PR943[] = {8,8,8,14,36};
+static const short PR943[] = {8,8,8,14,86};
 static const short PO943[] = {2};
 static const char* const L944[] = {
 	"Three analogue oscillators, each blending between two waveforms, with individual outputs and a summed mix",
@@ -21385,7 +21582,7 @@ static const short O944[] = {20,20,20,21};
 static const short P944[] = {1,1,1,2,2,2,3,3,3,4,5,6,7,8,9,10,11,12,13,13,13,14,15};
 static const signed char FI944[] = {3,3,3,2,2,2,1,1,1,1};
 static const signed char FO944[] = {0,0,0,0};
-static const short PR944[] = {14,14,14,88,88,88,36,36,36,36};
+static const short PR944[] = {14,14,14,176,176,176,86,86,86,86};
 static const short PO944[] = {2,2,2,2};
 static const char* const L945[] = {
 	"Analogue oscillator with five outputs, a wavefolder and a pulse wave that morphs between two shapes",
@@ -21415,7 +21612,7 @@ static const short O945[] = {16,17,18,19,20};
 static const short P945[] = {1,2,3,4,5,6,7,8,9,10};
 static const signed char FI945[] = {3,2,1,1,1};
 static const signed char FO945[] = {0,0,0,0,0};
-static const short PR945[] = {14,28,36,36,36};
+static const short PR945[] = {14,82,86,86,86};
 static const short PO945[] = {2,2,2,2,2};
 static const char* const L946[] = {
 	"Two VCAs with different architectures, running side by side or one into the other",
@@ -21436,7 +21633,7 @@ static const short O946[] = {10,11};
 static const short P946[] = {1,2,3,4,5};
 static const signed char FI946[] = {0,-1,1,0};
 static const signed char FO946[] = {0,0};
-static const short PR946[] = {8,36,36,8};
+static const short PR946[] = {8,86,86,8};
 static const short PO946[] = {2,2};
 static const char* const L947[] = {
 	"A picture of a cat with a bowl, and nothing to patch",
@@ -21557,7 +21754,7 @@ static const short O950[] = {30,31,32,33,34,34,34,34,35,35,35,35,36,36,36,36,37}
 static const short P950[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,13,8,15,9,12,11,10,14,4,4,4,4,5,16,6,6,6,6,7,7,7,7,7,7,7,7};
 static const signed char FI950[] = {2,2,2,2,2,1,1,1,1,2,1,1,1,1,2,1};
 static const signed char FO950[] = {2,3,1,2,2,2,2,2,3,3,3,3,2,2,2,2,3};
-static const short PR950[] = {5,5,5,5,5,4,10,10,11,5,10,10,10,10,5,36};
+static const short PR950[] = {5,5,5,5,5,4,10,10,11,5,10,10,10,10,5,86};
 static const short PO950[] = {0,2,6,0,0,0,0,0,2,2,2,2,0,0,0,0,2};
 static const char* const L951[] = {
 	"Sixteen separate adders, each putting 5V onto whatever is patched into it",
@@ -21566,7 +21763,7 @@ static const char* const L951[] = {
 };
 static const short I951[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short O951[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR951[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29};
+static const short PR951[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
 static const char* const L952[] = {
 	"A grid of sixteen rows against a long run of steps, passing each input through to the matching output while that row's cell is turned on at the step now playing",
 	"Moves the step the sequence starts from",
@@ -21601,7 +21798,7 @@ static const short O952[] = {18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,21,
 static const short P952[] = {-1,2,3,4,5,8,6,7,1};
 static const signed char FI952[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,1,1,1,1};
 static const signed char FO952[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,1,1};
-static const short PR952[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,5,5,5,5,40,10,10,10};
+static const short PR952[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,5,5,5,5,90,10,10,10};
 static const short PO952[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,6,6};
 static const char* const L953[] = {
 	"A grid of sixteen rows against sixteen steps, passing each input through to the matching output while that row's cell is turned on at the step now playing",
@@ -21637,7 +21834,7 @@ static const short O953[] = {18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,21,
 static const short P953[] = {-1,2,3,4,5,8,6,7,1};
 static const signed char FI953[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,1,1,1,1};
 static const signed char FO953[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,1,1};
-static const short PR953[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,5,5,5,5,40,10,10,10};
+static const short PR953[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,5,5,5,5,90,10,10,10};
 static const short PO953[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,6,6};
 static const char* const L954[] = {
 	"A blank 1HP panel, with nothing to patch",
@@ -21870,7 +22067,7 @@ static const short O966[] = {33,34,35,36,37};
 static const short P966[] = {23,22,2,3,4,5,6,7,10,10,10,10,11,11,11,11,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,13,13,13,13,13,13,13,12,12,12,12,12,12,12,13,12,9,15,21,20,14,14,14,14,14,14,14,14,18,17,16,19,24};
 static const signed char FI966[] = {2,2,1,3,1,1,1,1,1,1,2,2,1};
 static const signed char FO966[] = {0,3,2,0,0};
-static const short PR966[] = {5,5,10,32,29,29,29,29,29,11,5,33,36};
+static const short PR966[] = {5,5,10,23,38,38,38,38,38,11,5,49,86};
 static const short PO966[] = {2,2,0,2,2};
 static const char* const L967[] = {
 	"Rolls a random four-operator FM voice and a random sequence to play it with",
@@ -21888,7 +22085,7 @@ static const short O967[] = {8};
 static const short P967[] = {1,2,3};
 static const signed char FI967[] = {1,2,2,1};
 static const signed char FO967[] = {0};
-static const short PR967[] = {10,5,5,36};
+static const short PR967[] = {10,5,5,86};
 static const short PO967[] = {2};
 static const char* const L968[] = {
 	"Delays a signal by a fraction of the time between two clock ticks",
@@ -21902,7 +22099,7 @@ static const short I968[] = {3,4};
 static const short O968[] = {5};
 static const short P968[] = {1,2};
 static const signed char FI968[] = {-1,2};
-static const short PR968[] = {29,5};
+static const short PR968[] = {38,5};
 static const char* const L969[] = {
 	"A scope drawn across the whole panel, plotting one input against the other",
 	"Multiplies the X input before it is drawn",
@@ -21921,7 +22118,7 @@ static const char* const L969[] = {
 };
 static const short I969[] = {7,8,-1,9,10,11};
 static const short P969[] = {1,2,3,4,5,-1,-1,-1,6};
-static const short PR969[] = {8,8,-1,90,8,4};
+static const short PR969[] = {8,8,-1,178,8,4};
 static const char* const L970[] = {
 	"A granular player that scatters short grains from a loaded or recorded sound",
 	"Sets where in the sound the grains are taken from",
@@ -21967,7 +22164,7 @@ static const short O970[] = {28,29};
 static const short P970[] = {3,4,6,2,10,7,8,12,11,1,9,14,5,13,15,16};
 static const signed char FI970[] = {1,3,1,1,1,1,2,0,2,1,1};
 static const signed char FO970[] = {0,0};
-static const short PR970[] = {4,14,4,4,4,4,86,8,5,4,4};
+static const short PR970[] = {4,14,4,4,4,4,174,8,5,4,4};
 static const short PO970[] = {2,2};
 static const char* const L971[] = {
 	"A sixteen-step sequencer laid out as a four-by-four grid, stepped by triggers that move the playhead in a chosen direction",
@@ -22019,7 +22216,7 @@ static const short O971[] = {34,35,36,37};
 static const short P971[] = {4,-1,5,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,18,12,13,16,6,7,8,9,10,11,15,14,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,17};
 static const signed char FI971[] = {-1,-1,2,2,2,2,2,2,2,2,2,1,1,1,1,2,1};
 static const signed char FO971[] = {2,3,2,3};
-static const short PR971[] = {-1,-1,5,5,5,5,5,5,5,5,5,4,10,10,11,5,36};
+static const short PR971[] = {-1,-1,5,5,5,5,5,5,5,5,5,4,10,10,11,5,86};
 static const short PO971[] = {0,2,0,2};
 static const char* const L972[] = {
 	"Shows the lowest and the highest voltage a signal has reached, in large figures",
@@ -22081,7 +22278,7 @@ static const short O973[] = {27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,28,
 static const short P973[] = {-1,3,4,5,6,7,8,9,10,11,12,13,14,15,18,19,25,23,24,-1,20,21,22,17,2,16};
 static const signed char FI973[] = {2,2,2,2,1,2,2,-1,-1,2,2,1,1,1,1,1,1,1,1,1,2,1};
 static const signed char FO973[] = {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,2,3,2,3,2,3,2,3,2,2};
-static const short PR973[] = {5,5,5,5,40,5,5,5,5,5,5,91,91,10,11,10,10,10,91,10,5,36};
+static const short PR973[] = {5,5,5,5,90,5,5,5,5,5,5,179,179,10,11,10,10,10,179,10,5,86};
 static const short PO973[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,2,0,2,0,2,0,2,0,0};
 static const char* const L974[] = {
 	"A sixteen-by-sixteen grid sequencer: each column is a step, each row a note, and the notes turned on in the column now playing are sent out together",
@@ -22118,7 +22315,7 @@ static const short O974[] = {18,19,20};
 static const short P974[] = {4,5,6,7,8,14,12,13,-1,15,3,16};
 static const signed char FI974[] = {2,2,2,2,2,2,1,1,1};
 static const signed char FO974[] = {3,2,2};
-static const short PR974[] = {5,5,5,5,5,5,10,10,36};
+static const short PR974[] = {5,5,5,5,5,5,10,10,86};
 static const short PO974[] = {2,0,0};
 static const char* const L975[] = {
 	"A grid sequencer with four playheads reading the same grid at their own lengths, divisions and octaves",
@@ -22168,7 +22365,7 @@ static const short O975[] = {32,32,32,32,33,33,33,33,34,34,34,34,30,31};
 static const short P975[] = {-1,4,5,6,7,8,11,12,9,10,13,14,17,18,3,2,-1,29,16,23,23,23,23,21,21,21,21,24,24,24,24,25,25,25,25,26,26,26,26,22,22,22,22,28,27,27,27,27,15,19,20};
 static const signed char FI975[] = {2,2,2,2,1,2,2,2,2,2,2,1,1,1,1,2,1,1,1};
 static const signed char FO975[] = {3,3,3,3,2,2,2,2,2,2,2,2,3,2};
-static const short PR975[] = {5,5,5,5,40,5,5,5,5,5,5,-1,-1,-1,91,5,91,91,36};
+static const short PR975[] = {5,5,5,5,90,5,5,5,5,5,5,-1,-1,-1,179,5,179,179,86};
 static const short PO975[] = {2,2,2,2,-1,-1,-1,-1,0,0,0,0,2,-1};
 static const char* const L976[] = {
 	"Sixteen rows of clock dividers, one to sixteen left to right, each row giving a trigger when the count lands on the divisions turned on in it",
@@ -22233,7 +22430,7 @@ static const short O979[] = {8};
 static const short P979[] = {1,2,3};
 static const signed char FI979[] = {1,1,3,1};
 static const signed char FO979[] = {3};
-static const short PR979[] = {10,10,32,91};
+static const short PR979[] = {10,10,23,179};
 static const short PO979[] = {2};
 static const char* const L980[] = {
 	"Builds a fresh sound from random settings each time it is asked, and plays it; up to sixteen of them sound at once",
@@ -22254,7 +22451,7 @@ static const short O980[] = {10};
 static const short P980[] = {1,2,3,4};
 static const signed char FI980[] = {2,2,2,1,1};
 static const signed char FO980[] = {0};
-static const short PR980[] = {33,33,33,30,36};
+static const short PR980[] = {49,49,49,83,86};
 static const short PO980[] = {2};
 static const char* const L981[] = {
 	"Sixteen sample players laid out as a four-by-four grid, stepped by triggers that move the playhead in a chosen direction",
@@ -22306,7 +22503,7 @@ static const short O981[] = {28};
 static const short P981[] = {1,-1,2,3,4,5,6,7,8,-1,9,11,10,12,13,14};
 static const signed char FI981[] = {-1,-1,2,2,2,2,2,2,2,-1,3,2,2,2,2,2};
 static const signed char FO981[] = {0};
-static const short PR981[] = {-1,-1,5,5,5,5,5,5,5,-1,85,5,5,5,5,5};
+static const short PR981[] = {-1,-1,5,5,5,5,5,5,5,-1,100,5,5,5,5,5};
 static const short PO981[] = {2};
 static const char* const L982[] = {
 	"Keeps the last few voltages that came in, and sends a handful of them picked at random out together",
@@ -22419,7 +22616,7 @@ static const char* const L987[] = {
 };
 static const short I987[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short O987[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR987[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29};
+static const short PR987[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
 static const char* const L988[] = {
 	"A chain of four jointed segments drawn on the panel, each bending by the voltage at its input",
 	"Sets how large the ball at each joint is drawn",
@@ -22495,7 +22692,7 @@ static const short O991[] = {10,10,10,10,14,11,12,13};
 static const short P991[] = {4,5,6,7,8,3};
 static const signed char FI991[] = {2,2,2,-1,-1,-1,1,1,1,1};
 static const signed char FO991[] = {2,2,2,2,2,2,2,2};
-static const short PR991[] = {33,33,33,-1,-1,-1,17,17,17,36};
+static const short PR991[] = {49,49,49,-1,-1,-1,17,17,17,86};
 static const short PO991[] = {0,0,0,0,0,0,0,0};
 static const char* const L992[] = {
 	"Four tracks of thirty-two steps, each cell carrying its own pitch, probability, division, ratchets and two spare voltages",
@@ -22551,7 +22748,7 @@ static const short O992[] = {26,26,26,26,27,27,27,27,30,30,30,30,28,28,28,28,29,
 static const short P992[] = {1,2,3,3,3,3,4,4,4,4,5,5,5,5,8,7,7,7,7,9,10,11,12,21,21,21,21,21,21,21,22,20,20,20,20,20,20,20,13,14,18,19,15,16,17,23,6,6,6,6,24};
 static const signed char FI992[] = {2,2,1,2,2,2,1,1,1};
 static const signed char FO992[] = {3,3,3,3,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,2};
-static const short PR992[] = {33,33,17,33,33,33,17,17,36};
+static const short PR992[] = {49,49,17,49,49,49,17,17,86};
 static const short PO992[] = {2,2,2,2,0,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,0};
 static const char* const L993[] = {
 	"A face that rides up and down the panel with the voltage put into it, and nothing else",
@@ -22562,7 +22759,7 @@ static const char* const L993[] = {
 };
 static const short I993[] = {1};
 static const signed char FI993[] = {1};
-static const short PR993[] = {29};
+static const short PR993[] = {38};
 static const char* const L994[] = {
 	"A pad whose path is drawn with the mouse, recorded, and played back as a pair of control voltages",
 	"Steps through built-in shapes, drawing a fresh random one each time",
@@ -22592,7 +22789,7 @@ static const short O994[] = {15,16,17,18,19};
 static const short P994[] = {-1,-1,-1,5,6,3,4,7,8,9,1,2};
 static const signed char FI994[] = {2,1,1,2,2};
 static const signed char FO994[] = {1,1,1,1,2};
-static const short PR994[] = {5,8,36,5,5};
+static const short PR994[] = {5,8,86,5,5};
 static const short PO994[] = {21,21,21,21,-1};
 static const char* const L995[] = {
 	"Synth voice: up to three phase-shaped sine oscillators, frequency-modulated by a chosen set of their own harmonics, with one envelope",
@@ -22635,8 +22832,8 @@ static const short O995[] = {31,30,32};
 static const short P995[] = {1,5,8,11,12,13,6,9,14,14,14,17,16,18,19,19,23,24,-1,21,22,25,26,27};
 static const signed char FI995[] = {3,3,3,1,1,1,1,1,1,1,1,2};
 static const signed char FO995[] = {0,1,0};
-static const short PR995[] = {1,2,2,-1,-1,-1,-1,-1,-1,-1,-1,0};
-static const short PO995[] = {3,6,3};
+static const short PR995[] = {14,14,14,8,8,8,8,8,8,8,8,5};
+static const short PO995[] = {3,98,3};
 static const char* const L996[] = {
 	"Eight-input sequential switch for triggers, with a burst clock of its own that replaces the output for a moment on command",
 	"Sets how many of the eight inputs are cycled through, 1 to 8",
@@ -22660,7 +22857,7 @@ static const short O996[] = {14};
 static const short P996[] = {1,2,2,2,2,2,2,2,2,8,9,10,11};
 static const signed char FI996[] = {2,2,2,2,2,2,2,2,2,2,-1,2,1,1,2};
 static const signed char FO996[] = {2};
-static const short PR996[] = {-1,-1,-1,-1,-1,-1,-1,-1,0,0,-1,0,-1,-1,0};
+static const short PR996[] = {8,8,8,8,8,8,8,8,5,5,-1,5,8,34,5};
 static const short PO996[] = {0};
 static const char* const L997[] = {
 	"Two phase-distorted sine oscillators, one modulating the phase of the other, with a mix between them and a clipper on the main output",
@@ -22696,7 +22893,7 @@ static const short O997[] = {24,25,26};
 static const short P997[] = {11,12,15,4,9,10,13,13,13,13,16,21,22,6,5,3,2,1,18,19};
 static const signed char FI997[] = {3,3,1,1,1,1,1,1,1};
 static const signed char FO997[] = {0,0,0};
-static const short PR997[] = {1,1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR997[] = {14,180,8,8,8,8,8,8,8};
 static const short PO997[] = {3,3,3};
 static const char* const L998[] = {
 	"Adds a slow random drift to a pitch voltage, on two independent channels",
@@ -22711,7 +22908,7 @@ static const short O998[] = {4,4};
 static const short P998[] = {2,3,2,3};
 static const signed char FI998[] = {3,3};
 static const signed char FO998[] = {3,3};
-static const short PR998[] = {2,2};
+static const short PR998[] = {8,8};
 static const short PO998[] = {2,2};
 static const char* const L999[] = {
 	"Eight-step trigger sequencer with two rows, each row also giving a copy of its triggers thinned by chance",
@@ -22734,8 +22931,8 @@ static const short O999[] = {9,10,-1,11,12};
 static const short P999[] = {-1,-1,3,4,5,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8};
 static const signed char FI999[] = {2,2,2,1};
 static const signed char FO999[] = {2,2,-1,2,2};
-static const short PR999[] = {0,0,0,-1};
-static const short PO999[] = {0,0,-1,0,0};
+static const short PR999[] = {5,5,5,8};
+static const short PO999[] = {87,87,-1,87,87};
 static const char* const L1000[] = {
 	"Percussion voice: one phase-shaped sine or white noise through a resonant filter, with a decay envelope, a pitch-bend envelope and an accent envelope",
 	"Sets the pitch of the voice in whole octaves, 4 to 12, where 8 gives C4 at 261.63Hz",
@@ -22782,8 +22979,8 @@ static const short O1000[] = {36,37,27,28,29};
 static const short P1000[] = {1,3,4,-1,5,-1,15,16,17,-1,9,8,7,10,21,22,23,20,18,19,30,33,33,32,35,31};
 static const signed char FI1000[] = {-1,3,-1,1,1,-1,-1,2,2,1,1,1,1,1,1};
 static const signed char FO1000[] = {0,0,1,1,1};
-static const short PR1000[] = {-1,1,-1,-1,-1,-1,-1,0,0,-1,-1,-1,-1,-1,-1};
-static const short PO1000[] = {3,3,6,6,6};
+static const short PR1000[] = {-1,14,-1,8,8,-1,-1,5,5,8,8,8,8,8,34};
+static const short PO1000[] = {3,3,98,98,98};
 static const char* const L1001[] = {
 	"Quantizer with twelve semitone buttons, its own random source for when nothing is patched in, and a sample and hold clocked from the trigger input",
 	"Picks the factor the pitch is multiplied by before quantizing: 0.1, 0.2 or 0.5. It always scales the internal random source, and scales a voltage at CV IN only while ON is engaged",
@@ -22814,8 +23011,8 @@ static const short O1001[] = {20};
 static const short P1001[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 static const signed char FI1001[] = {3,2,3,3,2};
 static const signed char FO1001[] = {3};
-static const short PR1001[] = {1,0,2,2,0};
-static const short PO1001[] = {2};
+static const short PR1001[] = {100,5,100,14,5};
+static const short PO1001[] = {1};
 static const char* const L1002[] = {
 	"Eight-input sequential switch for pitch voltages, with a scaler on the chosen input and a transposed variation of it triggered by hand or by gate",
 	"Sets how many of the eight inputs are cycled through, 1 to 8",
@@ -22840,7 +23037,7 @@ static const short O1002[] = {15};
 static const short P1002[] = {1,2,2,2,2,2,2,2,2,8,9,10,11,12,13,14};
 static const signed char FI1002[] = {3,3,3,3,3,3,3,3,2,2,-1,2,1};
 static const signed char FO1002[] = {3};
-static const short PR1002[] = {2,2,2,2,2,2,2,2,0,0,-1,0,-1};
+static const short PR1002[] = {8,8,8,8,8,8,8,8,5,5,-1,5,8};
 static const short PO1002[] = {2};
 static const char* const L1003[] = {
 	"Four LFOs drawn from one clock, each with its own division and skew, feeding two averaging mixes, with sampled copies of every wave",
@@ -22867,8 +23064,8 @@ static const short O1003[] = {10,10,10,10,13,13,11,11,11,11,14,14,16,16};
 static const short P1003[] = {1,5,7,8,5,7,8,5,7,8,5,7,8,12,12,12,12,12,12,12,12,-1,-1,-1,-1,-1,-1,-1,-1,6,6,6,6};
 static const signed char FI1003[] = {1,2,1,2,1,2,1,2,1,2,2};
 static const signed char FO1003[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1003[] = {-1,0,-1,0,-1,0,-1,0,-1,0,0};
-static const short PO1003[] = {6,6,6,6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR1003[] = {34,5,8,5,8,5,8,5,8,5,5};
+static const short PO1003[] = {98,98,98,98,98,98,87,87,87,87,87,87,87,87};
 static const char* const L1004[] = {
 	"Four channels of transposition for pitch voltages, one adding whole octaves and one adding semitones",
 	"Adds a whole number of volts to that channel's octave input, -5 to +5, an octave a step",
@@ -22885,8 +23082,8 @@ static const short O1004[] = {3,3,3,3,7,7,7,7};
 static const short P1004[] = {1,1,1,1,4,5,4,8,4,5,4,5};
 static const signed char FI1004[] = {3,3,3,3,3,3,3,3};
 static const signed char FO1004[] = {3,3,3,3,3,3,3,3};
-static const short PR1004[] = {2,2,2,2,2,2,2,2};
-static const short PO1004[] = {2,2,2,2,2,2,2,2};
+static const short PR1004[] = {14,14,14,14,14,14,14,14};
+static const short PO1004[] = {1,1,1,1,1,1,1,1};
 static const char* const L1005[] = {
 	"Four scalers, four two-input adders and four voltage-controlled amplifiers, in one panel",
 	"Picks the factor the voltage at that scaler's input is multiplied by: 0.1, 0.2 or 0.5",
@@ -22902,6 +23099,7 @@ static const short I1005[] = {4,4,4,4,4,4,4,4,2,2,2,2,6,7,6,7,6,7,6,7};
 static const short O1005[] = {5,5,5,5,3,3,3,3,8,8,8,8};
 static const short P1005[] = {1,1,1,1};
 static const signed char FI1005[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,-1,1,-1,1,-1,1};
+static const short PR1005[] = {8,8,8,8,8,8,8,8,8,8,8,8,8,34,8,34,8,34,8,34};
 static const char* const L1006[] = {
 	"Two eight-step sequencers, each with a row of pitch sliders, two rows of trigger buttons, and thinned copies of both trigger rows",
 	"Advances that sequencer by one step on each rising edge; its trigger outputs stay high for as long as this stays high",
@@ -22928,8 +23126,8 @@ static const short O1006[] = {10,11,-1,12,13,10,11,-1,12,13,14,14,17,17};
 static const short P1006[] = {-1,-1,-1,-1,-1,3,3,7,8,8,7,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,15,16,15,16};
 static const signed char FI1006[] = {2,2,2,2,2,2,1,1};
 static const signed char FO1006[] = {2,2,-1,2,2,2,2,-1,2,2,1,1,1,1};
-static const short PR1006[] = {0,0,0,0,0,0,-1,-1};
-static const short PO1006[] = {0,0,-1,0,0,0,0,-1,0,0,-1,-1,-1,-1};
+static const short PR1006[] = {5,5,5,5,5,5,8,8};
+static const short PO1006[] = {87,87,-1,87,87,87,87,-1,87,87,6,6,-1,-1};
 static const char* const L1007[] = {
 	"Clock generator with ten divisions from sixteenth notes to thirty-two bars, plus a run button, a reset button and a voltage copy of its rate setting",
 	"Sets the clock speed, from one pulse every 4 seconds counter-clockwise to 64 pulses a second clockwise, counted in sixteenth notes",
@@ -22954,7 +23152,7 @@ static const char* const L1007[] = {
 static const short O1007[] = {4,5,6,7,8,9,10,11,12,13,14,15};
 static const short P1007[] = {1,2,3};
 static const signed char FO1007[] = {2,2,2,2,2,2,2,2,2,2,2,1};
-static const short PO1007[] = {0,0,0,0,0,0,0,0,0,0,0,-1};
+static const short PO1007[] = {87,87,87,87,87,87,87,87,87,87,87,181};
 static const char* const L1008[] = {
 	"Expander for Time Diktat, placed immediately to the right of it: six clock divisions gated by chance, and six outputs carrying one division with another's pulses removed",
 	"Sets the chance that a pulse of that division reaches its output, none counter-clockwise to every pulse clockwise; it is drawn afresh on each pulse",
@@ -22980,7 +23178,8 @@ static const short O1008[] = {10,11,12,13,14,15,4,5,6,7,8,9};
 static const short P1008[] = {1,2,1,2,1,2,1,2,1,2,1,2};
 static const signed char FI1008[] = {1,1,1,1,1,1};
 static const signed char FO1008[] = {2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PO1008[] = {0,0,0,0,0,0,0,0,0,0,0,0};
+static const short PR1008[] = {99,99,99,99,99,99};
+static const short PO1008[] = {182,182,182,182,182,182,87,87,87,87,87,87};
 static const char* const L1009[] = {
 	"Two envelopes from one trigger: one opens an amplifier on a crossfade of two signals, the other reaches a jack as control voltage",
 	"A trigger here starts both envelopes",
@@ -23007,8 +23206,8 @@ static const short O1009[] = {17,16};
 static const short P1009[] = {-1,-1,2,3,4,5,9,15,13,8,10,11};
 static const signed char FI1009[] = {1,-1,-1,2,1};
 static const signed char FO1009[] = {1};
-static const short PR1009[] = {-1,-1,-1,0,-1};
-static const short PO1009[] = {6};
+static const short PR1009[] = {8,8,8,5,99};
+static const short PO1009[] = {98};
 static const char* const L1010[] = {
 	"Unfinished module the maker marks as work in progress: a mono looper that records while its control is held and can step back through earlier recordings",
 	"Records the input for as long as it is held down, and the recording plays back as a loop as soon as it is let go",
@@ -23025,7 +23224,7 @@ static const short O1010[] = {6};
 static const short P1010[] = {1,-1,3};
 static const signed char FI1010[] = {2,-1,2,0};
 static const signed char FO1010[] = {0};
-static const short PR1010[] = {63,-1,63,2};
+static const short PR1010[] = {132,-1,132,2};
 static const short PO1010[] = {2};
 static const char* const L1011[] = {
 	"Stereo looper played from one button: the first press records, the next closes the loop and plays it, and later presses add overdubs; each side carries up to sixteen polyphonic tracks",
@@ -23055,7 +23254,7 @@ static const short O1011[] = {11,12};
 static const short P1011[] = {1,5,-1,3,-1,-1,-1,7};
 static const signed char FI1011[] = {2,2,2,0,0,1};
 static const signed char FO1011[] = {0,0};
-static const short PR1011[] = {0,63,63,2,2,-1};
+static const short PR1011[] = {0,132,132,2,2,-1};
 static const short PO1011[] = {2,2};
 static const char* const L1012[] = {
 	"Expander for Looper, placed immediately to the right of it, which opens the loop's feedback path so that what is written back can be sent through effects first",
@@ -23111,7 +23310,7 @@ static const short O1013[] = {19,20,13,14,21,22};
 static const short P1013[] = {1,6,-1,4,8,10,-1,15};
 static const signed char FI1013[] = {2,2,2,0,0,1,2,-1,0,0,1};
 static const signed char FO1013[] = {0,0,0,0,2,1};
-static const short PR1013[] = {0,63,63,2,2,-1,-1,-1,2,2,-1};
+static const short PR1013[] = {0,132,132,2,2,-1,-1,-1,2,2,-1};
 static const short PO1013[] = {2,2,2,2,0,-1};
 static const char* const L1014[] = {
 	"Unfinished module the maker marks as work in progress: a gate records a take, the take then loops with a fade in and out and a crossfade at the loop point, and takes pile up until they are released",
@@ -23243,7 +23442,7 @@ static const short O1021[] = {19,20,21,22};
 static const short P1021[] = {1,17,18,4,5,2,3,6};
 static const signed char FI1021[] = {2,3,-1,-1,-1,2,1,1,1,2,2};
 static const signed char FO1021[] = {2,3};
-static const short PR1021[] = {33,32,29,29,-1,33,16,16,16,33,86};
+static const short PR1021[] = {49,23,38,38,-1,49,16,16,16,49,174};
 static const short PO1021[] = {0,1};
 static const char* const L1022[] = {
 	"Measures the tempo of a clock and gives back the rate voltages a Fundamental LFO, SEQ-3 and Delay expect, with three clock outputs of its own",
@@ -23287,7 +23486,7 @@ static const short I1023[] = {6,2,4};
 static const short O1023[] = {7};
 static const short P1023[] = {1,3,5};
 static const signed char FI1023[] = {-1,1,1};
-static const short PR1023[] = {29,16,8};
+static const short PR1023[] = {38,16,8};
 static const char* const L1024[] = {
 	"Fourteen fixed voltages, one for each of seven semitone intervals up and the same seven down, at a volt per octave",
 	"A constant 0.083V, one semitone up when it is added to a pitch at a volt per octave",
@@ -23352,7 +23551,7 @@ static const short I1026[] = {4,5,1,3,7,9,11};
 static const short O1026[] = {12,14};
 static const short P1026[] = {2,6,8,10,13};
 static const signed char FI1026[] = {-1,-1,2,1,1,1,1};
-static const short PR1026[] = {29,29,33,56,38,38,38};
+static const short PR1026[] = {38,38,49,26,88,88,88};
 static const char* const L1027[] = {
 	"A reverb, the Rack port of Freeverb, whose outputs carry the reverberated signal alone at full stereo separation",
 	"The signal fed into the reverb, clamped to -10V and 10V",
@@ -23370,7 +23569,7 @@ static const short O1027[] = {8,9};
 static const short P1027[] = {2,4,6};
 static const signed char FI1027[] = {0,1,1,2};
 static const signed char FO1027[] = {0,0};
-static const short PR1027[] = {7,92,92,5};
+static const short PR1027[] = {7,183,183,5};
 static const short PO1027[] = {2,2};
 static const char* const L1028[] = {
 	"Eight flip-flops, each toggling between 0V and 10V when triggered, pre-wired as a binary counter",
@@ -23395,7 +23594,7 @@ static const char* const L1029[] = {
 };
 static const short I1029[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2};
 static const short O1029[] = {3,3,3,3,3,3,3,3};
-static const short PR1029[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29};
+static const short PR1029[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
 static const char* const L1030[] = {
 	"Eight two-into-one switches, each passing A or B to its output according to whether that row's gate is under or over one shared threshold",
 	"While this is under the threshold that row passes A, and while it is over the threshold that row passes B",
@@ -23410,7 +23609,7 @@ static const short I1030[] = {6,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3}
 static const short O1030[] = {4,4,4,4,4,4,4,4};
 static const short P1030[] = {5};
 static const signed char FI1030[] = {1,2,2,2,2,2,2,2,2};
-static const short PR1030[] = {8,16,16,16,16,16,16,16,16,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29};
+static const short PR1030[] = {8,16,16,16,16,16,16,16,16,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
 static const char* const L1031[] = {
 	"Eight multipliers, each giving the product of the two signals patched into its row, with a summed output of all eight",
 	"One of the two signals multiplied together on that row; with nothing patched it takes the A signal of the nearest row above that has one, or 0V if there is none",
@@ -23423,7 +23622,7 @@ static const char* const L1031[] = {
 static const short I1031[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2};
 static const short O1031[] = {3,3,3,3,3,3,3,3,5};
 static const short P1031[] = {4};
-static const short PR1031[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29};
+static const short PR1031[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
 static const char* const L1032[] = {
 	"Eight gate-to-trigger converters, each giving a 1ms trigger on the rising edge of its gate, on the falling edge, or on both",
 	"The gate that row converts, counted as high above 1V",
@@ -23436,7 +23635,7 @@ static const short I1032[] = {1,1,1,1,1,1,1,1};
 static const short O1032[] = {2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4};
 static const signed char FI1032[] = {2,2,2,2,2,2,2,2};
 static const signed char FO1032[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1032[] = {33,33,33,33,33,33,33,33};
+static const short PR1032[] = {49,49,49,49,49,49,49,49};
 static const short PO1032[] = {19,19,19,19,19,19,19,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const char* const L1033[] = {
 	"Splits polyphonic cables in two, one output carrying the first channels and the other the rest, for four cables at once",
@@ -23449,7 +23648,7 @@ static const char* const L1033[] = {
 static const short I1033[] = {2,2,2,2};
 static const short O1033[] = {3,3,3,3,4,4,4,4};
 static const short P1033[] = {1};
-static const short PR1033[] = {29,29,29,29};
+static const short PR1033[] = {38,38,38,38};
 static const char* const L1034[] = {
 	"Two separate semitone quantizers, each rounding its input to the nearest semitone at a volt per octave",
 	"Mixes the untouched input back into the quantized note: none at noon, all of it fully clockwise, and counter-clockwise the distance to the note is subtracted, bending the pitch the other way",
@@ -23462,7 +23661,7 @@ static const short O1034[] = {3,3};
 static const short P1034[] = {1,1};
 static const signed char FI1034[] = {3,3};
 static const signed char FO1034[] = {3,3};
-static const short PR1034[] = {32,32};
+static const short PR1034[] = {23,23};
 static const short PO1034[] = {1,1};
 static const char* const L1035[] = {
 	"A scale quantizer with twelve semitone buttons setting which notes are allowed, plus a gate and a trigger reporting what it passes",
@@ -23485,7 +23684,7 @@ static const short O1035[] = {3,6,5};
 static const short P1035[] = {1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FI1035[] = {3,3,3,2,2};
 static const signed char FO1035[] = {3,2,2};
-static const short PR1035[] = {87,85,87,33,5};
+static const short PR1035[] = {175,100,175,49,5};
 static const short PO1035[] = {1,0,-1};
 static const char* const L1036[] = {
 	"Eight sample and hold circuits, each catching the voltage at its input when its trigger rises",
@@ -23497,7 +23696,7 @@ static const char* const L1036[] = {
 static const short I1036[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2};
 static const short O1036[] = {3,3,3,3,3,3,3,3};
 static const signed char FI1036[] = {-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2};
-static const short PR1036[] = {29,29,29,29,29,29,29,29,33,33,33,33,33,33,33,33};
+static const short PR1036[] = {38,38,38,38,38,38,38,38,49,49,49,49,49,49,49,49};
 static const char* const L1037[] = {
 	"A sequential switch passing one of eight inputs to a single output, stepped by triggers or placed directly by a voltage",
 	"Sets how many of the eight steps are cycled through, a whole number from 1 to 8",
@@ -23516,7 +23715,7 @@ static const short I1037[] = {9,9,9,9,9,9,9,9,8,4,5,7,2,6};
 static const short O1037[] = {10};
 static const short P1037[] = {1,3,3,3,3,3,3,3,3};
 static const signed char FI1037[] = {-1,-1,-1,-1,-1,-1,-1,-1,1,2,2,2,1,2};
-static const short PR1037[] = {29,29,29,29,29,29,29,29,11,5,5,5,93,5};
+static const short PR1037[] = {38,38,38,38,38,38,38,38,11,5,5,5,184,5};
 static const char* const L1038[] = {
 	"A sequential switch passing one input to one of eight outputs, stepped by triggers or placed directly by a voltage",
 	"Sets how many of the eight steps are cycled through, a whole number from 1 to 8",
@@ -23536,7 +23735,7 @@ static const short I1038[] = {9,4,5,7,2,8,6};
 static const short O1038[] = {10,10,10,10,10,10,10,10};
 static const short P1038[] = {1,3,3,3,3,3,3,3,3};
 static const signed char FI1038[] = {-1,2,2,2,1,1,2};
-static const short PR1038[] = {29,5,5,5,93,11,5};
+static const short PR1038[] = {38,5,5,5,184,11,5};
 static const char* const L1039[] = {
 	"A sample and hold feeding an eight-stage shift register: each trigger moves every held voltage on one stage",
 	"The voltage sampled into the first stage on each trigger",
@@ -23547,7 +23746,7 @@ static const char* const L1039[] = {
 static const short I1039[] = {1,2};
 static const short O1039[] = {3,3,3,3,3,3,3,3};
 static const signed char FI1039[] = {-1,2};
-static const short PR1039[] = {29,33};
+static const short PR1039[] = {38,49};
 static const char* const L1040[] = {
 	"An eight-input precision adder at unity gain",
 	"One of the eight signals added together; an unpatched jack adds nothing",
@@ -23556,7 +23755,7 @@ static const char* const L1040[] = {
 };
 static const short I1040[] = {1,1,1,1,1,1,1,1};
 static const short O1040[] = {2};
-static const short PR1040[] = {29,29,29,29,29,29,29,29};
+static const short PR1040[] = {38,38,38,38,38,38,38,38};
 static const char* const L1041[] = {
 	"An eight-input precision adder with a polarity switch on each input",
 	"One of the eight signals added into the sum, as the switch beside it sets; an unpatched jack adds nothing",
@@ -23567,7 +23766,7 @@ static const char* const L1041[] = {
 static const short I1041[] = {1,1,1,1,1,1,1,1};
 static const short O1041[] = {3};
 static const short P1041[] = {2,2,2,2,2,2,2,2};
-static const short PR1041[] = {29,29,29,29,29,29,29,29};
+static const short PR1041[] = {38,38,38,38,38,38,38,38};
 static const char* const L1042[] = {
 	"An eight-input precision adder with a three-way polarity switch on each input",
 	"One of the eight signals added into the sum, as the switch beside it sets; an unpatched jack adds nothing",
@@ -23578,7 +23777,7 @@ static const char* const L1042[] = {
 static const short I1042[] = {1,1,1,1,1,1,1,1};
 static const short O1042[] = {3};
 static const short P1042[] = {2,2,2,2,2,2,2,2};
-static const short PR1042[] = {29,29,29,29,29,29,29,29};
+static const short PR1042[] = {38,38,38,38,38,38,38,38};
 static const char* const L1043[] = {
 	"Two trigger buffers, each holding an arming until the next gate arrives and letting that one gate through",
 	"Arms that channel by hand, so the next gate at its input is passed on",
@@ -23597,7 +23796,7 @@ static const short O1043[] = {6,6};
 static const short P1043[] = {1,1};
 static const signed char FI1043[] = {2,2,2,2};
 static const signed char FO1043[] = {2,2};
-static const short PR1043[] = {33,33,33,33};
+static const short PR1043[] = {49,49,49,49};
 static const short PO1043[] = {0,0};
 static const char* const L1044[] = {
 	"Two trigger delays, each starting a gate of its own length a set time after its input rises",
@@ -23614,7 +23813,7 @@ static const short O1044[] = {6,6};
 static const short P1044[] = {1,1,3,3};
 static const signed char FI1044[] = {2,2,1,1,1,1};
 static const signed char FO1044[] = {2,2};
-static const short PR1044[] = {33,33,4,4,4,4};
+static const short PR1044[] = {49,49,4,4,4,4};
 static const short PO1044[] = {0,0};
 static const char* const L1045[] = {
 	"A switch passing one of eight inputs to a single output, with the input chosen by a trigger on its own row",
@@ -23627,7 +23826,7 @@ static const short I1045[] = {1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3};
 static const short O1045[] = {4};
 static const short P1045[] = {2,2,2,2,2,2,2,2};
 static const signed char FI1045[] = {2,2,2,2,2,2,2,2};
-static const short PR1045[] = {5,5,5,5,5,5,5,5,29,29,29,29,29,29,29,29};
+static const short PR1045[] = {5,5,5,5,5,5,5,5,38,38,38,38,38,38,38,38};
 static const char* const L1046[] = {
 	"A switch passing one input to one of eight outputs, with the output chosen by a trigger on its own row",
 	"A rising edge selects that row, so the In signal is sent to its output",
@@ -23640,7 +23839,7 @@ static const short I1046[] = {3,1,1,1,1,1,1,1,1};
 static const short O1046[] = {4,4,4,4,4,4,4,4};
 static const short P1046[] = {2,2,2,2,2,2,2,2};
 static const signed char FI1046[] = {-1,2,2,2,2,2,2,2,2};
-static const short PR1046[] = {29,5,5,5,5,5,5,5,5};
+static const short PR1046[] = {38,5,5,5,5,5,5,5,5};
 static const char* const L1047[] = {
 	"A switch passing one of eight rows of three inputs to three outputs, with the row chosen by a trigger on its own row",
 	"A rising edge selects that row, so its three inputs are the ones passed to the outputs",
@@ -23652,7 +23851,7 @@ static const short I1047[] = {1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
 static const short O1047[] = {4,4,4};
 static const short P1047[] = {2,2,2,2,2,2,2,2};
 static const signed char FI1047[] = {2,2,2,2,2,2,2,2};
-static const short PR1047[] = {5,5,5,5,5,5,5,5,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29};
+static const short PR1047[] = {5,5,5,5,5,5,5,5,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
 static const char* const L1048[] = {
 	"A switch passing three inputs to one of eight rows of three outputs, with the row chosen by a trigger on its own row",
 	"A rising edge selects that row, so the three In signals are sent to its outputs",
@@ -23665,7 +23864,7 @@ static const short I1048[] = {1,1,1,1,1,1,1,1,3,3,3};
 static const short O1048[] = {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
 static const short P1048[] = {2,2,2,2,2,2,2,2};
 static const signed char FI1048[] = {2,2,2,2,2,2,2,2};
-static const short PR1048[] = {5,5,5,5,5,5,5,5,29,29,29};
+static const short PR1048[] = {5,5,5,5,5,5,5,5,38,38,38};
 static const char* const L1049[] = {
 	"Four voltmeters, each showing the voltage at its input on a numeric display",
 	"The voltage read out on the display beneath it, smoothed so the reading settles rather than flickers; the display stays dark while nothing is patched",
@@ -23800,8 +23999,8 @@ static const short O1058[] = {15,16,11,12,13,14};
 static const short P1058[] = {1,2,3,4,5,5,5};
 static const signed char FI1058[] = {1,1,1,1,2,2,1};
 static const signed char FO1058[] = {1,1,2,2,2,2};
-static const short PR1058[] = {-1,-1,-1,-1,0,19,-1};
-static const short PO1058[] = {6,-1,0,0,0,0};
+static const short PR1058[] = {80,80,32,80,5,5,99};
+static const short PO1058[] = {4,4,10,10,10,10};
 static const char* const L1059[] = {
 	"Distortion that quantises the signal to a shorter word length and holds each sample for longer",
 	"Sets the word length the signal is quantised to, 8 bits down to 0 bits.",
@@ -23816,7 +24015,7 @@ static const short O1059[] = {6};
 static const short P1059[] = {1,4,3};
 static const signed char FI1059[] = {0,1};
 static const signed char FO1059[] = {0};
-static const short PR1059[] = {2,-1};
+static const short PR1059[] = {34,11};
 static const short PO1059[] = {2};
 static const char* const L1060[] = {
 	"A blank panel carrying the MSM logo, for filling a gap in the rack",
@@ -23836,6 +24035,7 @@ static const short I1061[] = {3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2};
 static const short O1061[] = {4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5};
 static const short P1061[] = {1,1,1,1,1,1,1,1};
 static const signed char FI1061[] = {-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1};
+static const short PR1061[] = {8,8,8,8,8,8,8,8,34,34,34,34,34,34,34,34};
 static const char* const L1062[] = {
 	"Two independent delay lines, each free-running or locked to a clock, with feedback, a high-pass and a low-pass filter on the delayed signal, and crossfeed from the other line",
 	"Chooses whether that delay line runs free, its time taken straight from the TIME knob, or locks to the clock at CLK IN and delays by a note division.",
@@ -23865,7 +24065,7 @@ static const short O1062[] = {19,19,20,20};
 static const short P1062[] = {1,1,2,2,4,4,6,7,6,7,10,10,12,12,13,14,15,15};
 static const signed char FI1062[] = {2,1,1,1,1,1,1,1,1,1,1,0,0,-1,-1,2,2};
 static const signed char FO1062[] = {0,0,0,0};
-static const short PR1062[] = {0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,-1,-1,0,0};
+static const short PR1062[] = {5,4,4,34,34,32,32,32,32,32,32,8,8,-1,-1,185,185};
 static const short PO1062[] = {2,2,2,2};
 static const char* const L1063[] = {
 	"Three crossfaders: one across IN 1 and IN 2, one across IN 3 and IN 4, and a third across the results of the other two",
@@ -23888,6 +24088,7 @@ static const short I1063[] = {4,5,6,7,8,9,10};
 static const short O1063[] = {11,12,13};
 static const short P1063[] = {1,2,3};
 static const signed char FI1063[] = {-1,-1,-1,-1,1,1,1};
+static const short PR1063[] = {8,8,8,8,32,32,32};
 static const char* const L1064[] = {
 	"Two low-frequency oscillators sharing one frequency knob, each morphing continuously between five waveforms, with a crossfade of the two on a third output",
 	"Sets the frequency of both oscillators, from about 0.002Hz to 128Hz.",
@@ -23915,7 +24116,7 @@ static const short O1064[] = {12,13,-1,-1,-1,-1,15,16,17,18,19,14};
 static const short P1064[] = {-1,1,4,6,-1,7,8,2,4,6,-1,7,8,2,9};
 static const signed char FI1064[] = {1,-1,2,1,1,-1,1,1};
 static const signed char FO1064[] = {1,1,-1,-1,-1,-1,1,1,1,1,1,1};
-static const short PR1064[] = {-1,-1,0,-1,-1,-1,-1,-1};
+static const short PR1064[] = {34,-1,186,187,34,-1,187,32};
 static const char* const L1065[] = {
 	"Crossfades a chain of two to eight inputs down to one output",
 	"Sets how many inputs take part, from two to eight; a lamp marks each input that is in the chain.",
@@ -23928,6 +24129,7 @@ static const short I1065[] = {4,4,4,4,4,4,4,4,3};
 static const short O1065[] = {5};
 static const short P1065[] = {2,1};
 static const signed char FI1065[] = {-1,-1,-1,-1,-1,-1,-1,-1,1};
+static const short PR1065[] = {8,8,8,8,8,8,8,8,99};
 static const char* const L1066[] = {
 	"Three separate sections, each adding or subtracting a pair of inputs and splitting the result to six outputs",
 	"Chooses whether that section adds its two inputs or subtracts the lower one from the upper one.",
@@ -23938,6 +24140,7 @@ static const char* const L1066[] = {
 static const short I1066[] = {2,3,2,3,2,3};
 static const short O1066[] = {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
 static const short P1066[] = {1,1,1};
+static const short PR1066[] = {8,8,8,8,8,8};
 static const char* const L1067[] = {
 	"Noise generator with a white, pink or brown output and a second output blending white noise with a filtered version of it",
 	"Picks white, pink or brown noise for the NOISE output.",
@@ -23953,6 +24156,7 @@ static const short O1067[] = {6,7};
 static const short P1067[] = {2,3,4,1};
 static const signed char FI1067[] = {1};
 static const signed char FO1067[] = {0,0};
+static const short PR1067[] = {80};
 static const short PO1067[] = {2,2};
 static const char* const L1068[] = {
 	"Two oscillators with linear and exponential FM, cross-modulation between them, hard sync in both directions, and a wave folder",
@@ -24000,7 +24204,7 @@ static const short O1068[] = {-1,-1,19,20,21,22,23,34};
 static const short P1068[] = {1,-1,-1,3,3,4,4,-1,-1,-1,-1,-1,-1,-1,6,8,6,8,-1,17,24,31,2,2,12,13,10,25,27,28,35};
 static const signed char FI1068[] = {3,3,-1,1,1,1,1,1,-1,-1,2,2,0,1,1,1,1,1,1,1};
 static const signed char FO1068[] = {-1,-1,0,0,0,0,0,0};
-static const short PR1068[] = {2,2,-1,-1,-1,-1,-1,-1,-1,-1,0,0,2,-1,-1,-1,-1,-1,-1,-1};
+static const short PR1068[] = {14,14,-1,99,34,188,34,188,-1,-1,186,186,8,32,9,9,34,8,32,32};
 static const short PO1068[] = {-1,-1,2,2,2,2,2,2};
 static const char* const L1069[] = {
 	"Two voltage-controlled amplifiers that either run as separate channels or feed a constant-power panner",
@@ -24024,7 +24228,7 @@ static const short O1069[] = {11,12,-1,-1,13,14};
 static const short P1069[] = {2,3,5,4,4,1};
 static const signed char FI1069[] = {0,0,-1,1,1,1};
 static const signed char FO1069[] = {0,0,-1,-1,0,0};
-static const short PR1069[] = {2,2,-1,-1,-1,-1};
+static const short PR1069[] = {8,8,-1,80,80,8};
 static const short PO1069[] = {2,2,-1,-1,2,2};
 static const char* const L1070[] = {
 	"Phaser of two to twenty all-pass stages swept by an internal LFO, with feedback around the network",
@@ -24048,7 +24252,7 @@ static const short O1070[] = {14};
 static const short P1070[] = {1,2,5,6,7,8,9,10,12};
 static const signed char FI1070[] = {1,1,1,0};
 static const signed char FO1070[] = {0};
-static const short PR1070[] = {-1,-1,-1,2};
+static const short PR1070[] = {32,32,32,34};
 static const short PO1070[] = {2};
 static const char* const L1071[] = {
 	"Sample and hold building staircase voltages out of whatever is patched into it, with a slew limiter on a second output",
@@ -24070,7 +24274,7 @@ static const short O1071[] = {10,11};
 static const short P1071[] = {1,2,4,5,7};
 static const signed char FI1071[] = {2,-1,1,1};
 static const signed char FO1071[] = {1,1};
-static const short PR1071[] = {0,-1,-1,-1};
+static const short PR1071[] = {5,189,34,34};
 static const char* const L1072[] = {
 	"Two independent ring modulators, each crossfading its carrier with the product of carrier and modulator",
 	"Crossfades that section's output from the plain carrier to the ring-modulated signal.",
@@ -24084,7 +24288,7 @@ static const short O1072[] = {5,5};
 static const short P1072[] = {-1,-1,1,1};
 static const signed char FI1072[] = {0,0,1,0,0,1};
 static const signed char FO1072[] = {0,0};
-static const short PR1072[] = {2,2,-1,2,2,-1};
+static const short PR1072[] = {34,34,32,34,34,32};
 static const short PO1072[] = {2,2};
 static const char* const L1073[] = {
 	"Single oscillator with seven fixed waveform outputs, running at audio rate or a hundred times slower as an LFO",
@@ -24113,7 +24317,7 @@ static const short O1073[] = {13,14,15,16,17,18,19};
 static const short P1073[] = {3,4,8,6,1,10,2};
 static const signed char FI1073[] = {2,3,1,1,1};
 static const signed char FO1073[] = {0,0,0,0,0,0,0};
-static const short PR1073[] = {0,2,-1,-1,-1};
+static const short PR1073[] = {186,14,34,188,99};
 static const short PO1073[] = {2,2,2,2,2,2,2};
 static const char* const L1074[] = {
 	"A slider that either crossfades two inputs or attenuates their sum",
@@ -24128,6 +24332,7 @@ static const short I1074[] = {3,4,5};
 static const short O1074[] = {6};
 static const short P1074[] = {1,2};
 static const signed char FI1074[] = {-1,-1,1};
+static const short PR1074[] = {8,8,32};
 static const char* const L1075[] = {
 	"Oscillator that reads a wavetable through three modulation algorithms, running at audio rate or a hundred times slower as an LFO",
 	"Switches the oscillator between audio rate and a rate one hundredth of it.",
@@ -24153,7 +24358,7 @@ static const short O1075[] = {16};
 static const short P1075[] = {1,2,3,4,12,5,7,9,9,9,10,10,10};
 static const signed char FI1075[] = {3,2,1,1,1,1,1,1};
 static const signed char FO1075[] = {0};
-static const short PR1075[] = {2,0,-1,-1,-1,-1,-1,-1};
+static const short PR1075[] = {14,186,141,99,99,99,99,34};
 static const short PO1075[] = {2};
 static const char* const L1076[] = {
 	"Three shaping stages fed from one common input plus an input of their own, mixed together and blended back with the dry signal",
@@ -24177,7 +24382,7 @@ static const short O1076[] = {14};
 static const short P1076[] = {1,2,3,4,4,4,8,9};
 static const signed char FI1076[] = {0,1,1,1,0,0,0};
 static const signed char FO1076[] = {0};
-static const short PR1076[] = {2,-1,-1,-1,2,2,2};
+static const short PR1076[] = {8,8,8,8,8,8,8};
 static const short PO1076[] = {2};
 static const char* const L1077[] = {
 	"Wave folder with two folding algorithms, an offset that makes the folding asymmetric, and separate depth for the two sides",
@@ -24203,7 +24408,7 @@ static const short O1077[] = {15};
 static const short P1077[] = {1,2,5,6,11,9,10,4,12};
 static const signed char FI1077[] = {0,1,1,1,1};
 static const signed char FO1077[] = {0};
-static const short PR1077[] = {2,-1,-1,-1,-1};
+static const short PR1077[] = {8,8,32,32,188};
 static const short PO1077[] = {2};
 static const char* const L1078[] = {
 	"Nine boolean logic gates wired into a fixed network driven by three clock inputs, each gate switchable between two functions",
@@ -24236,8 +24441,8 @@ static const short O1078[] = {18,19,16,-1,14,21,15,17,20,22};
 static const short P1078[] = {4,5,6,7,8,9,10,11,12};
 static const signed char FI1078[] = {2,2,2,1,1,1,1,1,1,1,1,1};
 static const signed char FO1078[] = {2,2,2,-1,2,2,2,2,2,2};
-static const short PR1078[] = {0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-static const short PO1078[] = {0,0,0,-1,0,0,0,0,0,0};
+static const short PR1078[] = {11,11,11,34,34,34,34,34,34,34,34,34};
+static const short PO1078[] = {10,10,10,10,10,10,10,10,10,0};
 static const char* const L1079[] = {
 	"Four aux send and return busses for MixMaster, placed immediately to the right of it, with a send level per track and per group, filters and panning on each return, and CV over nearly all of it",
 	"Sets how much of that track goes to that aux bus, -inf to 0dB, taken from the point in the track's signal path chosen in the mixer's aux sends menu",
@@ -24272,7 +24477,7 @@ static const short O1079[] = {11,11,11,11,12,12,12,12};
 static const short P1079[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,8,8,8,8,9,9,9,9,10,10,10,10,5,5,5,5,6,6,6,6,7,7,7,7};
 static const signed char FI1079[] = {0,0,0,0,0,0,0,0,1,1,1,1,2,1,2,1,2};
 static const signed char FO1079[] = {0,0,0,0,0,0,0,0};
-static const short PR1079[] = {7,7,7,7,7,7,7,7,30,30,30,30,33,30,33,29,33};
+static const short PR1079[] = {7,7,7,7,7,7,7,7,83,83,83,83,49,83,49,38,49};
 static const short PO1079[] = {2,2,2,2,2,2,2,2};
 static const char* const L1080[] = {
 	"Four aux send and return busses for MixMasterJr, placed immediately to the right of it, with a send level per track and per group, filters and panning on each return, and CV over nearly all of it",
@@ -24308,7 +24513,7 @@ static const short O1080[] = {11,11,11,11,12,12,12,12};
 static const short P1080[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,8,8,8,8,9,9,9,9,10,10,10,10,5,5,5,5,6,6,6,6,7,7,7,7};
 static const signed char FI1080[] = {0,0,0,0,0,0,0,0,1,1,2,1,-1,1,2};
 static const signed char FO1080[] = {0,0,0,0,0,0,0,0};
-static const short PR1080[] = {7,7,7,7,7,7,7,7,30,30,33,30,-1,29,33};
+static const short PR1080[] = {7,7,7,7,7,7,7,7,83,83,49,83,-1,38,49};
 static const short PO1080[] = {2,2,2,2,2,2,2,2};
 static const char* const L1081[] = {
 	"Dual band stereo width processor with VU meter: the input is split at a crossover frequency and the stereo width and level of the low and high bands are set separately",
@@ -24340,7 +24545,7 @@ static const short O1081[] = {12,13};
 static const short P1081[] = {1,2,3,4,5,6,7,8,9,14,15};
 static const signed char FI1081[] = {0,0,1,1};
 static const signed char FO1081[] = {0,0};
-static const short PR1081[] = {29,29,8,8};
+static const short PR1081[] = {38,38,8,8};
 static const short PO1081[] = {2,2};
 static const char* const L1082[] = {
 	"Dual band stereo width processor: the input is split at a crossover frequency and the stereo width and level of the low and high bands are set separately",
@@ -24366,7 +24571,7 @@ static const short O1082[] = {12,13};
 static const short P1082[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI1082[] = {0,0};
 static const signed char FO1082[] = {0,0};
-static const short PR1082[] = {29,29,8,8};
+static const short PR1082[] = {38,38,8,8};
 static const short PO1082[] = {2,2};
 static const char* const L1083[] = {
 	"CV expander for EqMaster, placed on either side of it, with polyphonic CV over the band controls and the active state of all 24 tracks",
@@ -24377,7 +24582,7 @@ static const char* const L1083[] = {
 };
 static const short I1083[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,3};
 static const signed char FI1083[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2};
-static const short PR1083[] = {27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,33,33};
+static const short PR1083[] = {63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,49,49};
 static const char* const L1084[] = {
 	"Four-band parametric EQ for all 24 tracks, groups and aux busses of a MixMaster, patched in through the mixer's polyphonic inserts, with one set of band controls showing the track that is selected",
 	"Selects which of the 24 tracks the band controls, the gain, the spectrum display and the meter belong to",
@@ -24416,7 +24621,7 @@ static const short O1084[] = {17,18,19};
 static const short P1084[] = {1,2,4,5,5,5,5,8,9,10,11,12,12,12,12,13,13,13,13,6,7,3};
 static const signed char FI1084[] = {0,0,0};
 static const signed char FO1084[] = {0,0,0};
-static const short PR1084[] = {29,29,29};
+static const short PR1084[] = {38,38,38};
 static const short PO1084[] = {2,2,2};
 static const char* const L1085[] = {
 	"Routing utility that spreads a MixMaster insert cable into separate left and right cables, so that VCV Mid/Side and EqMaster can process the mid and side of eight tracks at a time",
@@ -24431,7 +24636,7 @@ static const short I1085[] = {1,1,1,4,4,4,5,5,5};
 static const short O1085[] = {6,6,6,2,2,2,3,3,3};
 static const signed char FI1085[] = {0,0,0,0,0,0,0,0,0};
 static const signed char FO1085[] = {0,0,0,0,0,0,0,0,0};
-static const short PR1085[] = {29,29,29,29,29,29,29,29,29};
+static const short PR1085[] = {38,38,38,38,38,38,38,38,38};
 static const short PO1085[] = {2,2,2,2,2,2,2,2,2};
 static const char* const L1086[] = {
 	"Master output strip with fader, RMS and peak VU, mute with fade automation, dim, mono fold, soft clipping and a DC blocker",
@@ -24457,7 +24662,7 @@ static const short O1086[] = {7,8};
 static const short P1086[] = {1,2,3,4};
 static const signed char FI1086[] = {0,0};
 static const signed char FO1086[] = {0,0};
-static const short PR1086[] = {29,29};
+static const short PR1086[] = {38,38};
 static const short PO1086[] = {2,2};
 static const char* const L1087[] = {
 	"Poly merge for the MixMaster inserts and CV inputs: the poly input is normalled to the poly output, and each mono input replaces its channel there or adds to it when that channel is unused",
@@ -24474,7 +24679,7 @@ static const char* const L1087[] = {
 static const short I1087[] = {1,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4};
 static const short O1087[] = {2};
 static const short P1087[] = {5,5,5,5,5,5,5,5};
-static const short PR1087[] = {29,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PR1087[] = {38,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
 static const char* const L1088[] = {
 	"16-track stereo mixer with four group busses, polyphonic inserts and direct outs on every track and bus, filters and fade automation per track, and CV over volume, pan, mute and solo",
 	"Left input of that track, and the whole of it for a mono track; a polyphonic cable patched here is summed to one signal",
@@ -24545,7 +24750,7 @@ static const short O1088[] = {34,35,36,26,27,28,29,30,37};
 static const short P1088[] = {6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,15,15,15,15,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,14,14,14,14,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,16,16,16,16,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,17,17,17,17,21,22,23,20,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,18,18,18,18,19,19,19,19};
 static const signed char FI1088[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,2,2,2};
 static const signed char FO1088[] = {0,0,0,0,0,0,0,0,1};
-static const short PR1088[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,30,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,46,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,8,8,29,29,29,33,33,33};
+static const short PR1088[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,83,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,57,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,8,8,38,38,38,49,49,49};
 static const short PO1088[] = {2,2,2,2,2,2,2,2,6};
 static const char* const L1089[] = {
 	"8-track stereo mixer with two group busses, polyphonic inserts and direct outs on every track and bus, filters and fade automation per track, and CV over volume, pan, mute and solo",
@@ -24613,7 +24818,7 @@ static const short O1089[] = {32,33,26,27,28,29,34};
 static const short P1089[] = {6,6,6,6,6,6,6,6,15,15,5,5,5,5,5,5,5,5,14,14,7,7,7,7,7,7,7,7,16,16,8,8,8,8,8,8,8,8,17,17,21,22,23,20,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,18,18,19,19};
 static const signed char FI1089[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,2,-1,2};
 static const signed char FO1089[] = {0,0,0,0,0,0,1};
-static const short PR1089[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,30,4,4,4,4,4,4,4,4,4,46,12,12,12,12,12,12,12,12,12,8,8,29,29,33,-1,33};
+static const short PR1089[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,83,4,4,4,4,4,4,4,4,4,57,12,12,12,12,12,12,12,12,12,8,8,38,38,49,-1,49};
 static const short PO1089[] = {2,2,2,2,2,2,6};
 static const char* const L1090[] = {
 	"Performance controller: knobs, buttons and faders are added from its menus, given labels, and mapped to as many as four parameters each anywhere in the patch",
@@ -24651,7 +24856,7 @@ static const char* const L1092[] = {
 static const short I1092[] = {2};
 static const short O1092[] = {3,3,3,3,3};
 static const short P1092[] = {1,1,1,1,1};
-static const short PR1092[] = {29};
+static const short PR1092[] = {38};
 static const char* const L1093[] = {
 	"Five-into-one signal switcher: one selected input reaches the output, and the change crossfades over about 40ms",
 	"Selects that input as the one passed to the output, silencing the other four",
@@ -24665,7 +24870,7 @@ static const char* const L1093[] = {
 static const short I1093[] = {2,2,2,2,2};
 static const short O1093[] = {3};
 static const short P1093[] = {1,1,1,1,1};
-static const short PR1093[] = {29,29,29,29,29};
+static const short PR1093[] = {38,38,38,38,38};
 static const char* const L1094[] = {
 	"One-into-five stereo signal switcher: the input pair reaches one selected output pair, and the change crossfades over about 40ms",
 	"Selects that output pair as the one the input reaches, silencing the other four",
@@ -24680,7 +24885,7 @@ static const char* const L1094[] = {
 static const short I1094[] = {2,3};
 static const short O1094[] = {4,4,4,4,4,5,5,5,5,5};
 static const short P1094[] = {1,1,1,1,1};
-static const short PR1094[] = {29,29};
+static const short PR1094[] = {38,38};
 static const char* const L1095[] = {
 	"Five-into-one stereo signal switcher: one selected input pair reaches the outputs, and the change crossfades over about 40ms",
 	"Selects that stereo input as the one passed to the outputs, silencing the other four",
@@ -24696,7 +24901,7 @@ static const char* const L1095[] = {
 static const short I1095[] = {2,2,2,2,2,3,3,3,3,3};
 static const short O1095[] = {4,5};
 static const short P1095[] = {1,1,1,1,1};
-static const short PR1095[] = {29,29,29,29,29,29,29,29,29,29};
+static const short PR1095[] = {38,38,38,38,38,38,38,38,38,38};
 static const char* const L1096[] = {
 	"Eight-channel multi-stage envelope generator and complex LFO: each channel plays a shape you draw, with its own VCA, CV output, trigger modes, crossover and sidechain trigger detection",
 	"Sets the cycle length of that channel, 0.56ms to 30 minutes; right-clicking it takes a length typed in seconds",
@@ -24753,7 +24958,7 @@ static const short O1096[] = {33,33,33,33,33,33,33,33,34,34,34,34,34,34,34,34};
 static const short P1096[] = {1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27};
 static const signed char FI1096[] = {0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,-1,2,2,0};
 static const signed char FO1096[] = {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1};
-static const short PR1096[] = {30,30,30,30,30,30,30,30,11,11,11,11,11,11,11,11,-1,5,5,29};
+static const short PR1096[] = {83,83,83,83,83,83,83,83,11,11,11,11,11,11,11,11,-1,5,5,38};
 static const short PO1096[] = {2,2,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1};
 static const char* const L1097[] = {
 	"Poly split for the MixMaster inserts and direct outs, breaking a sixteen-channel cable into eight stereo pairs of mono outputs, with a thru output carrying the poly signal onward",
@@ -24766,7 +24971,7 @@ static const char* const L1097[] = {
 };
 static const short I1097[] = {1};
 static const short O1097[] = {2,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4};
-static const short PR1097[] = {29};
+static const short PR1097[] = {38};
 static const char* const L1098[] = {
 	"A blank 3HP panel carrying the Mockba Modular logo, for filling a gap in the rack",
 	"Menu — Background theme — Light, Dark or Aged; repaints this panel and is saved as the background every Mockba Modular module loads as it is added to the rack",
@@ -24951,7 +25156,7 @@ static const short I1109[] = {1,2};
 static const short O1109[] = {3,4,5,6,7};
 static const signed char FI1109[] = {2,2};
 static const signed char FO1109[] = {2,2,2,2,2};
-static const short PR1109[] = {63,63};
+static const short PR1109[] = {132,132};
 static const short PO1109[] = {0,0,0,0,0};
 static const char* const L1110[] = {
 	"A 3HP clock divider with five gate outputs, each running at half the rate of the one before; it counts downwards so that all five start together",
@@ -24968,7 +25173,7 @@ static const short I1110[] = {1,2};
 static const short O1110[] = {3,4,5,6,7};
 static const signed char FI1110[] = {2,2};
 static const signed char FO1110[] = {2,2,2,2,2};
-static const short PR1110[] = {63,63};
+static const short PR1110[] = {132,132};
 static const short PO1110[] = {0,0,0,0,0};
 static const char* const L1111[] = {
 	"Two AND gates in 3HP, each with two inputs",
@@ -24992,7 +25197,7 @@ static const short I1112[] = {1,1,1};
 static const short O1112[] = {2,2,2};
 static const signed char FI1112[] = {2,2,2};
 static const signed char FO1112[] = {2,2,2};
-static const short PR1112[] = {63,63,63};
+static const short PR1112[] = {132,132,132};
 static const short PO1112[] = {0,0,0};
 static const char* const L1113[] = {
 	"Two NAND gates in 3HP, each with two inputs",
@@ -25116,7 +25321,7 @@ static const short I1122[] = {1,2,1,2};
 static const short O1122[] = {3,3};
 static const signed char FI1122[] = {2,-1,2};
 static const signed char FO1122[] = {1,1};
-static const short PR1122[] = {63,-1,63};
+static const short PR1122[] = {132,-1,132};
 static const char* const L1123[] = {
 	"A 3HP oscillator carrying all seven of the Moog waveforms on one panel, switchable down to LFO speeds",
 	"A seven-position switch choosing the waveform: Triangle, Shark, Saw, Square 48%, Square 29%, Square 17% or InvSaw",
@@ -25278,7 +25483,7 @@ static const short I1133[] = {1,2,3};
 static const short O1133[] = {4};
 static const signed char FI1133[] = {2,2,2};
 static const signed char FO1133[] = {2};
-static const short PR1133[] = {63,63,0};
+static const short PR1133[] = {132,132,0};
 static const short PO1133[] = {0};
 static const char* const L1134[] = {
 	"A 3HP panner, splitting one signal between a left and a right output",
@@ -25344,7 +25549,7 @@ static const char* const L1138[] = {
 };
 static const short I1138[] = {1,2};
 static const signed char FI1138[] = {2,2};
-static const short PR1138[] = {63,63};
+static const short PR1138[] = {132,132};
 static const char* const L1139[] = {
 	"Named Slavah on the panel: it receives the clock and reset that Mastah broadcasts, as UDP messages on port 7000, and turns them back into pulses; one of these runs on each computer being synchronised",
 	"Closes and reopens the network socket, and sends a pulse from reset",
@@ -25374,7 +25579,7 @@ static const short O1140[] = {6,6,6,7};
 static const short P1140[] = {1,1,1,2,2,2};
 static const signed char FI1140[] = {0,0,0,0,1,1,1,1};
 static const signed char FO1140[] = {0,0,0,0};
-static const short PR1140[] = {2,2,2,2,-1,-1,-1,-1};
+static const short PR1140[] = {7,7,7,7,8,8,8,190};
 static const short PO1140[] = {2,2,2,2};
 static const char* const L1141[] = {
 	"Two analog function generators with a shared logic section, each working as an envelope, an oscillator, a slew limiter or an amplifier; rise and fall times run from 0.5ms to seven minutes",
@@ -25409,7 +25614,7 @@ static const short O1141[] = {18,19,20,18,19,20,21,22,23,24};
 static const short P1141[] = {1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10};
 static const signed char FI1141[] = {2,-1,1,1,1,2,1,2,-1,1,1,1,2,1};
 static const signed char FO1141[] = {2,1,2,2,1,2,2,1,1,1};
-static const short PR1141[] = {0,-1,-1,-1,-1,0,-1,0,-1,-1,-1,-1,0,-1};
+static const short PR1141[] = {174,7,8,8,8,5,7,174,7,8,8,8,5,7};
 static const short PO1141[] = {0,-1,0,0,-1,0,0,-1,-1,-1};
 static const char* const L1142[] = {
 	"A blank panel 12HP wide, for covering an empty space in the rack",
@@ -25442,7 +25647,7 @@ static const short O1147[] = {7,8};
 static const short P1147[] = {1,2,3,4};
 static const signed char FI1147[] = {0,0};
 static const signed char FO1147[] = {0,0};
-static const short PR1147[] = {2,2};
+static const short PR1147[] = {7,191};
 static const short PO1147[] = {2,2};
 static const char* const L1148[] = {
 	"Expander for the Performance Mixer, placed immediately to its left, adding a stereo direct output and a mute gate input for each channel, and an aux control voltage input for each stereo channel",
@@ -25456,7 +25661,7 @@ static const short I1148[] = {3,3,3,3,4,4};
 static const short O1148[] = {1,1,1,1,2,2,2,2};
 static const signed char FI1148[] = {2,2,2,2,1,1};
 static const signed char FO1148[] = {0,0,0,0,0,0,0,0};
-static const short PR1148[] = {0,0,0,0,-1,-1};
+static const short PR1148[] = {82,82,82,82,12,12};
 static const short PO1148[] = {2,2,2,2,2,2,2,2};
 static const char* const L1149[] = {
 	"Voltage-controlled filter on a V2164 core, with simultaneous two-pole low-pass and band-pass outputs; at high resonance it self-oscillates as a clean sine oscillator",
@@ -25477,7 +25682,7 @@ static const short O1149[] = {9,10};
 static const short P1149[] = {1,2,3,4};
 static const signed char FI1149[] = {1,3,1,0};
 static const signed char FO1149[] = {0,0};
-static const short PR1149[] = {-1,1,-1,2};
+static const short PR1149[] = {8,14,8,7};
 static const short PO1149[] = {2,2};
 static const char* const L1150[] = {
 	"Two mixers in one module: a four-input X mixer with a level knob on every input, and a four-input Y mixer with one knob on the sum; both are DC-coupled and mix signals between -10V and 10V",
@@ -25494,6 +25699,7 @@ static const char* const L1150[] = {
 static const short I1150[] = {4,5,3,3,4,4,3,3};
 static const short O1150[] = {7,9,8,6};
 static const short P1150[] = {1,2,2,2,2};
+static const short PR1150[] = {7,192,7,7,7,7,7,7};
 static const char* const L1151[] = {
 	"Four analog drum voices in the 808 tradition — kick, snare, closed hat and open hat — each with its own trigger, level control voltage and output, summed through a compressor and a tilt equaliser",
 	"Sets the level of that voice in the mix, saturating it as it opens; with a cable in that voice's control voltage input the knob attenuates that voltage instead",
@@ -25526,7 +25732,7 @@ static const short O1151[] = {18,19,20,21,22,23};
 static const short P1151[] = {1,1,1,1,2,2,2,2,3,4,5,6,7,8,9,10,11,12};
 static const signed char FI1151[] = {2,2,2,2,1,1,1,1};
 static const signed char FO1151[] = {0,0,0,0,1,0};
-static const short PR1151[] = {0,0,0,0,-1,-1,-1,-1};
+static const short PR1151[] = {5,5,5,5,8,8,8,8};
 static const short PO1151[] = {2,2,2,2,-1,2};
 static const char* const L1152[] = {
 	"Analog triangle-core oscillator on a 3340 chip, with sine, triangle, saw and pulse outputs, two waves mixed with the pulse, and two sub-octave squares, all at plus and minus 5V",
@@ -25555,7 +25761,7 @@ static const short O1152[] = {11,12,13,14,15,16,17,18};
 static const short P1152[] = {1,2,3,4,5,6};
 static const signed char FI1152[] = {3,1,2,1};
 static const signed char FO1152[] = {0,0,0,0,0,0,0,0};
-static const short PR1152[] = {1,-1,-1,-1};
+static const short PR1152[] = {14,8,46,13};
 static const short PO1152[] = {2,2,2,2,2,2,2,2};
 static const char* const L1153[] = {
 	"Four-channel stereo performance mixer, two mono and two stereo, each with a fader, panning, an aux send, a clickless mute and a cue switch, plus two aux returns, a master level and a headphone output",
@@ -25596,7 +25802,7 @@ static const short O1153[] = {27,28,25,26,29,30};
 static const short P1153[] = {1,1,1,1,2,2,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,8,9,10,11,12,13};
 static const signed char FI1153[] = {0,0,0,0,-1,-1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1153[] = {0,0,0,0,0,0};
-static const short PR1153[] = {2,2,2,2,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR1153[] = {7,7,7,7,-1,-1,193,193,7,7,194,195,196,196,196,196,12,12,12,12,12,12};
 static const short PO1153[] = {2,2,2,2,2,2};
 static const char* const L1154[] = {
 	"Four attack-decay envelope generators with an exponential shape, each free-running as a looping low-frequency oscillator while its trigger input is unpatched",
@@ -25612,7 +25818,7 @@ static const short O1154[] = {5,5,5,5};
 static const short P1154[] = {1,1,1,1,2,2,2,2,3,3,3,3};
 static const signed char FI1154[] = {2,2,2,2};
 static const signed char FO1154[] = {1,1,1,1};
-static const short PR1154[] = {0,0,0,0};
+static const short PR1154[] = {174,174,174,174};
 static const char* const L1155[] = {
 	"ADSR envelope generator with a slider and a control voltage input for each stage, and a separate signal path through an attenuverter and an offset",
 	"Attenuates and inverts the signal on its way to the OUT jack",
@@ -25641,7 +25847,7 @@ static const short O1155[] = {17,18,19};
 static const short P1155[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI1155[] = {2,2,-1,1,1,1,1};
 static const signed char FO1155[] = {1,2,1};
-static const short PR1155[] = {0,0,-1,-1,-1,-1,-1};
+static const short PR1155[] = {197,174,198,13,199,13,199};
 static const short PO1155[] = {-1,0,-1};
 static const char* const L1156[] = {
 	"Stereo liquid filter, a separate core per channel morphing between low-pass, band-pass and high-pass, with a soft-clipping drive stage and span controls that offset the right channel from the left",
@@ -25674,7 +25880,7 @@ static const short O1156[] = {22,23};
 static const short P1156[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI1156[] = {0,0,1,1,1,1,3,1,1,1};
 static const signed char FO1156[] = {0,0};
-static const short PR1156[] = {2,2,-1,-1,-1,-1,1,-1,-1,-1};
+static const short PR1156[] = {7,191,8,8,8,8,14,8,8,8};
 static const short PO1156[] = {2,2};
 static const char* const L1157[] = {
 	"Three-channel stereo mixer with a level knob, a mute switch and a level control voltage input on each channel, and a master level with clip and signal meters",
@@ -25692,7 +25898,7 @@ static const short O1157[] = {7,8};
 static const short P1157[] = {1,1,1,2,3,3,3};
 static const signed char FI1157[] = {0,0,0,0,0,0,1,1,1};
 static const signed char FO1157[] = {0,0};
-static const short PR1157[] = {2,2,2,2,2,2,-1,-1,-1};
+static const short PR1157[] = {7,193,7,193,7,193,200,200,200};
 static const short PO1157[] = {2,2};
 static const char* const L1158[] = {
 	"Random voltage generator with an internal clock, a probability control, and the same random value shaped four ways at four outputs; it is the hardware version of the VCV Random module",
@@ -25721,7 +25927,7 @@ static const short O1158[] = {13,14,15,16,17};
 static const short P1158[] = {1,2,3,4,5,6,6,6,6};
 static const signed char FI1158[] = {1,1,1,1,2,1};
 static const signed char FO1158[] = {2,1,1,1,1};
-static const short PR1158[] = {-1,-1,-1,-1,0,-1};
+static const short PR1158[] = {201,201,201,201,202,7};
 static const short PO1158[] = {0,-1,-1,-1,-1};
 static const char* const L1159[] = {
 	"Replays a CSV file logged by LOGAN20, putting each row of the file back out as twenty voltages",
@@ -25747,7 +25953,7 @@ static const short O1159[] = {12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12
 static const short P1159[] = {2,4,1,8,6};
 static const signed char FI1159[] = {2,2,2,-1,2,2,2};
 static const signed char FO1159[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1159[] = {9,9,0,-1,8,36,5};
+static const short PR1159[] = {9,9,5,-1,8,86,5};
 static const char* const L1160[] = {
 	"Four independent DC blocking high pass filters, for keeping direct current out of a signal. The filters follow the current sample rate, and one menu setting fixes the corner frequency of all four",
 	"The signal into one of the four filters",
@@ -25827,8 +26033,8 @@ static const short O1162[] = {11,11,11,11,11,11,11,11,-1,7,7,7,7,7,7,7,7,-1,8,8,
 static const short P1162[] = {14,15,4,4,4,4,4,4,4,4,-1,19,-1,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,6,6,6,6,6,6,6,-1,12,12,12,12,12,12,12,12,-1,1,1,1,1,1,1,1,1,-1,2,2,2,2,2,2,2,2,-1,3,3,3,3,3,3,3,3};
 static const signed char FI1162[] = {1,1,2,2,2,2,2,2,2,2,-1,2,0,0,0,0,0,0,0,0,-1,0};
 static const signed char FO1162[] = {1,1,1,1,1,1,1,1,-1,2,2,2,2,2,2,2,2,-1,2,2,2,2,2,2,2,2,-1,0,0,0,0,0,0,0,0,0,-1,0};
-static const short PR1162[] = {8,8,33,5,5,5,5,5,5,5,-1,5,29,8,8,8,8,8,8,8,-1,8};
-static const short PO1162[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,-1,37,37,37,37,37,37,37,37,-1,2,2,2,2,2,2,2,2,2,-1,2};
+static const short PR1162[] = {8,8,49,5,5,5,5,5,5,5,-1,5,38,8,8,8,8,8,8,8,-1,8};
+static const short PO1162[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,-1,87,87,87,87,87,87,87,87,-1,2,2,2,2,2,2,2,2,2,-1,2};
 static const char* const L1163[] = {
 	"A reverb built on Juhana Sadeharju's GigaVerb, working in stereo",
 	"The left input",
@@ -25871,7 +26077,7 @@ static const short O1163[] = {30,31};
 static const short P1163[] = {3,4,6,9,12,15,18,21,24,-1,27,29,-1,7,10,13,16,19,22,25};
 static const signed char FI1163[] = {0,0,-1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1163[] = {0,0};
-static const short PR1163[] = {29,29,-1,5,8,8,8,8,8,8,8,5};
+static const short PR1163[] = {38,38,-1,5,8,8,8,8,8,8,8,5};
 static const short PO1163[] = {2,2};
 static const char* const L1164[] = {
 	"An attack and decay envelope in 2HP, with a curve control, an output scale that can invert, and a loop switch",
@@ -25932,8 +26138,8 @@ static const short O1165[] = {29,28,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17
 static const short P1165[] = {19,21,25,24,23,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,-1,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,-1,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,-1,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,-1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,-1,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,-1,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,-1,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18};
 static const signed char FI1165[] = {1,1,2,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const signed char FO1165[] = {1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR1165[] = {8,8,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,33,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1,29,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
-static const short PO1165[] = {-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,-1,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
+static const short PR1165[] = {8,8,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,49,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1,38,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PO1165[] = {-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,-1,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L1166[] = {
 	"Four attack, sustain and release envelopes, each with a VCA of its own, a set of global controls driving all of them at once, and a mixed output carrying the envelopes switched into it",
 	"Sets the attack time of that envelope, 0 to 1",
@@ -25972,8 +26178,8 @@ static const short O1166[] = {29,28,17,17,17,17,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 static const short P1166[] = {19,21,25,24,23,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,3,3,3,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,6,6,6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,7,7,7,7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,9,9,9,9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,10,10,10,10,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,11,11,11,11,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,12,12,12,12,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,18,18,18};
 static const signed char FI1166[] = {1,1,2,0,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0};
 static const signed char FO1166[] = {1,0,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0};
-static const short PR1166[] = {8,8,5,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,33,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,29,8,8,8};
-static const short PO1166[] = {-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,37,37,37,37,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,37,37,37,37,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2};
+static const short PR1166[] = {8,8,5,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,49,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,38,8,8,8};
+static const short PO1166[] = {-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,87,87,87,87,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,87,87,87,87,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2};
 static const char* const L1167[] = {
 	"Eight attack, sustain and release envelopes, each with a VCA of its own, a set of global controls driving all of them at once, and a mixed output carrying the envelopes switched into it",
 	"Sets the attack time of that envelope, 0 to 1",
@@ -26012,8 +26218,8 @@ static const short O1167[] = {29,28,17,17,17,17,17,17,17,17,-1,-1,-1,-1,-1,-1,-1
 static const short P1167[] = {19,21,25,24,23,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,3,3,3,3,3,3,3,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,6,6,6,6,6,6,6,-1,-1,-1,-1,-1,-1,-1,-1,-1,7,7,7,7,7,7,7,7,-1,-1,-1,-1,-1,-1,-1,-1,-1,9,9,9,9,9,9,9,9,-1,-1,-1,-1,-1,-1,-1,-1,-1,10,10,10,10,10,10,10,10,-1,-1,-1,-1,-1,-1,-1,-1,-1,11,11,11,11,11,11,11,11,-1,-1,-1,-1,-1,-1,-1,-1,-1,12,12,12,12,12,12,12,12,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,18,18,18,18,18,18,18};
 static const signed char FI1167[] = {1,1,2,0,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0};
 static const signed char FO1167[] = {1,0,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0};
-static const short PR1167[] = {8,8,5,8,8,8,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,33,5,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,29,8,8,8,8,8,8,8};
-static const short PO1167[] = {-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,37,37,37,37,37,37,37,37,-1,-1,-1,-1,-1,-1,-1,-1,-1,37,37,37,37,37,37,37,37,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2};
+static const short PR1167[] = {8,8,5,8,8,8,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,49,5,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,38,8,8,8,8,8,8,8};
+static const short PO1167[] = {-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,87,87,87,87,87,87,87,87,-1,-1,-1,-1,-1,-1,-1,-1,-1,87,87,87,87,87,87,87,87,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2};
 static const char* const L1168[] = {
 	"Eight channels faded in and out together on a trigger, with the fade times set in seconds and a pulse at the end of each fade",
 	"The signal into one of the eight channels",
@@ -26042,7 +26248,7 @@ static const short P1168[] = {4,8,11,-1,13,15};
 static const signed char FI1168[] = {0,0,0,0,0,0,0,0,-1,2,2,2,-1,1,1};
 static const signed char FO1168[] = {0,0,0,0,0,0,0,0,-1,2,2,2,2};
 static const short PR1168[] = {8,8,8,8,8,8,8,8,-1,5,5,5,5,8,8};
-static const short PO1168[] = {2,2,2,2,2,2,2,2,-1,37,37,37,37,37,37};
+static const short PO1168[] = {2,2,2,2,2,2,2,2,-1,87,87,87,87,87,87};
 static const char* const L1169[] = {
 	"Two large buttons, each sending a pulse or holding a gate, and each passing a signal through while it is held. The menu sets each button to pulse or to gate",
 	"A pulse here counts as that button being pressed",
@@ -26101,7 +26307,7 @@ static const short O1171[] = {3};
 static const short P1171[] = {-1,-1,1,1,1,1,1};
 static const signed char FI1171[] = {1};
 static const signed char FO1171[] = {1};
-static const short PR1171[] = {27};
+static const short PR1171[] = {63};
 static const char* const L1172[] = {
 	"A right expander for BZ-MAPPER, going immediately to the right of it, which puts a CV input on the horizontal and vertical position of every node and control point of the Bezier curve",
 	"A voltage setting the horizontal position of that node of the curve",
@@ -26147,7 +26353,7 @@ static const short O1174[] = {7,6};
 static const short P1174[] = {-1,-1,4,3,2,1,1,1,1,1};
 static const signed char FI1174[] = {2};
 static const signed char FO1174[] = {1,2};
-static const short PR1174[] = {33};
+static const short PR1174[] = {49};
 static const short PO1174[] = {-1,0};
 static const char* const L1175[] = {
 	"A 256 bit shift register read out as voltages. The bits are clocked along in sixteen columns of sixteen, and each column has an output carrying the voltage of the bits it holds",
@@ -26177,7 +26383,7 @@ static const short O1175[] = {4,5,6,7,13,15,15,15,15,15,15,15,15,15,15,15,15,15,
 static const short P1175[] = {3,8,9,11,-1,16,17,18};
 static const signed char FI1175[] = {2,1,2,0,1,2};
 static const signed char FO1175[] = {2,2,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1175[] = {0,-1,0,2,-1,-1};
+static const short PR1175[] = {5,99,197,12,99,197};
 static const short PO1175[] = {0,0,-1,-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static const char* const L1176[] = {
 	"Three random path switches: two send one input to one of two outputs, and the third sends one of two inputs to a single output. A pulse switches the path, by a chance set on that section",
@@ -26206,7 +26412,7 @@ static const short O1176[] = {2,2,2,2,4,-1,7,7,7};
 static const short P1176[] = {8,8,8,-1,5,5,5,-1,10,10,10,-1,-1,12,12,12,-1,-1,14};
 static const signed char FI1176[] = {2,2,2,2,-1,-1,2,2,2,-1,1,1,1,-1,2,2,2,-1,-1,2,2,2,-1,-1,2};
 static const signed char FO1176[] = {2,2,2,2,2,-1,2,2,2};
-static const short PR1176[] = {8,8,8,8,-1,-1,5,5,5,-1,40,40,40,-1,5,5,5,-1,-1,5,5,5,-1,-1,5};
+static const short PR1176[] = {8,8,8,8,-1,-1,5,5,5,-1,90,90,90,-1,5,5,5,-1,-1,5,5,5,-1,-1,5};
 static const short PO1176[] = {-1,-1,-1,-1,-1,-1,0,0,0};
 static const char* const L1177[] = {
 	"Two gates that either pass a signal through or stop it, each opened by a gate voltage or by pulses, with one smoothing control shared by both to keep fast gating free of clicks",
@@ -26234,7 +26440,7 @@ static const short O1177[] = {2,2};
 static const short P1177[] = {3,6,4,8,3,6,4,8,16,10,10,-1,-1,-1,12,12,-1,-1,-1,14};
 static const signed char FI1177[] = {1,1,1,1,1,1,1,1,1,1,-1,-1,-1,1,1,-1,-1,-1,1};
 static const signed char FO1177[] = {1,1};
-static const short PR1177[] = {8,5,40,94,8,5,40,94,5,5,-1,-1,-1,5,5,-1,-1,-1,8};
+static const short PR1177[] = {8,5,90,203,8,5,90,203,5,5,-1,-1,-1,5,5,-1,-1,-1,8};
 static const char* const L1178[] = {
 	"A convolution reverb. An impulse response is loaded from a wav or aiff file and the incoming signal is convolved with it as it plays",
 	"The left input",
@@ -26263,7 +26469,7 @@ static const short O1178[] = {3,4};
 static const short P1178[] = {5,7,-1,-1,-1,-1,-1,7,7,8,10,9};
 static const signed char FI1178[] = {0,0,2,1};
 static const signed char FO1178[] = {0,0};
-static const short PR1178[] = {29,29,5,8};
+static const short PR1178[] = {38,38,5,8};
 static const short PO1178[] = {2,2};
 static const char* const L1179[] = {
 	"Six voltages spread out from one input, each a whole multiple of the gap between that input and an offset. A Serge-style utility taken from the CGS CV Spread",
@@ -26280,7 +26486,7 @@ static const short I1179[] = {7,8};
 static const short O1179[] = {1,2,3,6,5,4};
 static const signed char FI1179[] = {1,1};
 static const signed char FO1179[] = {1,1,1,1,1,1};
-static const short PR1179[] = {27,27};
+static const short PR1179[] = {63,63};
 static const char* const L1180[] = {
 	"Multiplies or divides one incoming clock by three independent factors at once. Each factor is a figure on the panel, with the resulting rate shown in Hz and in BPM",
 	"The clock that is multiplied or divided",
@@ -26355,7 +26561,7 @@ static const short I1182[] = {1,1,1,1,2,2,2,2,7,7,7,7};
 static const short O1182[] = {3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6};
 static const signed char FI1182[] = {1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1182[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1182[] = {27,27,27,27,27,27,27,27,5,5,5,5};
+static const short PR1182[] = {63,63,63,63,63,63,63,63,5,5,5,5};
 static const char* const L1183[] = {
 	"Two independent delay lines in 3HP, each mixing its delayed signal back with its input and each with its own feedback path",
 	"A signal into that delay line at full level",
@@ -26437,7 +26643,7 @@ static const short O1185[] = {16,15,15,13,17};
 static const short P1185[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI1185[] = {2,0,0};
 static const signed char FO1185[] = {1,0,0,2,1};
-static const short PR1185[] = {16,29,29};
+static const short PR1185[] = {16,38,38};
 static const short PO1185[] = {-1,2,2,0,-1};
 static const char* const L1186[] = {
 	"A stereo compressor, expander, hard limiter and ducking device, with a display of the compression curve and meters at four points in the chain",
@@ -26548,7 +26754,7 @@ static const short O1189[] = {2};
 static const short P1189[] = {3,-1,5};
 static const signed char FI1189[] = {0,1,1};
 static const signed char FO1189[] = {0};
-static const short PR1189[] = {29,8,8};
+static const short PR1189[] = {38,8,8};
 static const short PO1189[] = {2};
 static const char* const L1190[] = {
 	"A stereo plate reverb with two pitch shifters in its feedback loop, so the tail drifts away from the pitch of what went in. There is no room size control: the length of the tail is set by DECAY",
@@ -26583,7 +26789,7 @@ static const short O1190[] = {3,4};
 static const short P1190[] = {5,6,7,8,12,10,14,16,18,-1,20,22,24};
 static const signed char FI1190[] = {0,0,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1190[] = {0,0};
-static const short PR1190[] = {29,29,40,40,40,40,8,40,40,40,40,5};
+static const short PR1190[] = {38,38,90,90,90,90,8,90,90,90,90,5};
 static const short PO1190[] = {2,2};
 static const char* const L1191[] = {
 	"Two echoes in 2HP with feedback, differing in their delay range: ECHO1 runs from 0.05ms to 2000ms and ECHO2 from 0.01ms to 200ms",
@@ -26614,7 +26820,7 @@ static const short O1192[] = {4,4};
 static const short P1192[] = {1,2,2,2,1,2,2,2};
 static const signed char FI1192[] = {1,1,1,1,1,1};
 static const signed char FO1192[] = {1,1};
-static const short PR1192[] = {27,27,27,27,27,27};
+static const short PR1192[] = {63,63,63,63,63,63};
 static const char* const L1193[] = {
 	"Two independent delay lines in 2HP, each passing its input on after a delay of up to 2 seconds and nothing else. Modulating the time with a wave rather than a square turns the delay into a waveshaper",
 	"The signal into that delay line",
@@ -26627,7 +26833,7 @@ static const short O1193[] = {4,4};
 static const short P1193[] = {2,2};
 static const signed char FI1193[] = {0,0,-1,-1,1,1};
 static const signed char FO1193[] = {0,0};
-static const short PR1193[] = {2,2,-1,-1,-1,-1};
+static const short PR1193[] = {38,38,-1,-1,51,51};
 static const short PO1193[] = {2,2};
 static const char* const L1194[] = {
 	"A 1HP envelope generator that runs either as an ADSR or as an attack and release pair, with a VCA of its own built in",
@@ -26659,8 +26865,8 @@ static const short O1194[] = {15,17,18};
 static const short P1194[] = {1,2,13,14,5,7,9,11,3};
 static const signed char FI1194[] = {2,1,1,1,1,1};
 static const signed char FO1194[] = {1,1,1};
-static const short PR1194[] = {72,29,29,29,29,29};
-static const short PO1194[] = {27,27,27};
+static const short PR1194[] = {24,38,38,38,38,38};
+static const short PO1194[] = {63,63,63};
 static const char* const L1195[] = {
 	"A polyphonic quantizer that divides an interval into any number of equal steps instead of into twelve semitones, and snaps four independent voltages to that grid",
 	"The voltage that row quantizes",
@@ -26679,7 +26885,7 @@ static const short O1195[] = {2,2,2,2};
 static const short P1195[] = {4};
 static const signed char FI1195[] = {3,3,3,3,1,1};
 static const signed char FO1195[] = {3,3,3,3};
-static const short PR1195[] = {29,8,8,8,95,96};
+static const short PR1195[] = {38,8,8,8,204,205};
 static const short PO1195[] = {2,2,2,2};
 static const char* const L1196[] = {
 	"A large elapsed time display, readable from across the room, counting hours, minutes, seconds and milliseconds, with three alarms that fire a pulse at a set time",
@@ -26716,7 +26922,7 @@ static const short I1197[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 static const short O1197[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,-1,4};
 static const signed char FI1197[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,-1,2};
 static const signed char FO1197[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,1};
-static const short PR1197[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,97,97,97,97,97,97,97,97,97,97,97,97,97,97,97,97,-1,97};
+static const short PR1197[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,185,185,185,185,185,185,185,185,185,185,185,185,185,185,185,185,-1,185};
 static const char* const L1198[] = {
 	"Six flip flops and six trigger repeaters. A pulse into a flip flop turns its gate on and the next pulse turns it off, while a pulse into a repeater is passed straight out",
 	"A pulse flips that flip flop, turning its gate on if it was off and off if it was on",
@@ -26733,7 +26939,7 @@ static const short P1198[] = {2,2,2,2,2,2,6,6,6,6,6,6};
 static const signed char FI1198[] = {2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1198[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const short PR1198[] = {5,5,5,5,5,5,5,5,5,5,5,5};
-static const short PO1198[] = {37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37};
+static const short PO1198[] = {87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87};
 static const char* const L1199[] = {
 	"Four mergers, each combining four gates or triggers onto one output. Each section is an OR: its output is on while any of its four inputs is on",
 	"One of the four signals merged onto that section's output",
@@ -26744,7 +26950,7 @@ static const short O1199[] = {2,2,2,2};
 static const signed char FI1199[] = {-1,2,2,2,2,-1,2,2,2,2,-1,2,2,2,2,-1,2,2,2,2};
 static const signed char FO1199[] = {2,2,2,2};
 static const short PR1199[] = {-1,11,11,11,11,-1,11,11,11,11,-1,11,11,11,11,-1,11,11,11,11};
-static const short PO1199[] = {37,37,37,37};
+static const short PO1199[] = {87,87,87,87};
 static const char* const L1200[] = {
 	"A chromatic tuner with a large needle display, for reading from a distance. A red glow on the display means the detection is unreliable",
 	"The signal whose pitch is measured",
@@ -26775,7 +26981,7 @@ static const short I1201[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short O1201[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI1201[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const signed char FO1201[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR1201[] = {29,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PR1201[] = {38,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
 static const short PO1201[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L1202[] = {
 	"A chromatic tuner that reads either a signal or a pitch voltage, showing the note on a needle display and putting the detected frequency out as a voltage",
@@ -26796,7 +27002,7 @@ static const short O1202[] = {-1,4,2,10};
 static const short P1202[] = {5,6,7,-1,9,8};
 static const signed char FI1202[] = {0,3};
 static const signed char FO1202[] = {3,3,0,3};
-static const short PR1202[] = {29,8};
+static const short PR1202[] = {38,8};
 static const short PO1202[] = {2,2,2,2};
 static const char* const L1203[] = {
 	"A melody generator after the CGS Infinite Melody: one bit shift register feeding four analogue shift registers, whose bits are weighted and summed into voltages",
@@ -26830,7 +27036,7 @@ static const short O1203[] = {1,1,1,3,4};
 static const short P1203[] = {2,2,2,8,14,16,20,20,20,21,21,21,21,21,21,11,6,12};
 static const signed char FI1203[] = {1,1,1,3,1,2,2,2,2,2,2};
 static const signed char FO1203[] = {1,1,1,3,1};
-static const short PR1203[] = {8,8,8,12,75,75,5,5,75,75,75};
+static const short PR1203[] = {8,8,8,12,155,155,5,5,155,155,155};
 static const short PO1203[] = {-1,-1,-1,2,-1};
 static const char* const L1204[] = {
 	"Translates between one polyphonic cable carrying interleaved left and right channels and a pair of cables, one per side. Each side runs to eight channels",
@@ -26845,7 +27051,7 @@ static const short I1204[] = {1,4,5};
 static const short O1204[] = {2,3,6};
 static const signed char FI1204[] = {0,0,0};
 static const signed char FO1204[] = {0,0,0};
-static const short PR1204[] = {29,29,29};
+static const short PR1204[] = {38,38,38};
 static const short PO1204[] = {2,2,2};
 static const char* const L1205[] = {
 	"An echo modelled on the Binson Echorec, where the signal is written to a spinning magnetic disk and read back by six play heads at once",
@@ -26875,7 +27081,7 @@ static const short O1205[] = {5,13,13,13,13,13,13,-1,6};
 static const short P1205[] = {7,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,12,12,12,12,12,12,-1,4,-1,16,17,-1,8,-1,-1,-1,10,15,15,15,15,15,15,-1,-1,-1,18};
 static const signed char FI1205[] = {0,1,1,1,1,1,1,-1,1,1,1,1,1,1,-1,1,1,1,1,1,1,1};
 static const signed char FO1205[] = {0,0,0,0,0,0,0,-1,0};
-static const short PR1205[] = {8,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,-1,5,5,8,8,8,36,5};
+static const short PR1205[] = {8,5,5,5,5,5,5,-1,8,8,8,8,8,8,-1,5,5,8,8,8,86,5};
 static const short PO1205[] = {2,2,2,2,2,2,2,-1,2};
 static const char* const L1206[] = {
 	"A pulse sequencer that also directs other sequencers. Each scene holds a count of pulses, and the settings are stored as numbered scenes",
@@ -26993,7 +27199,7 @@ static const short O1208[] = {2,2,2,2,2,2,2,2,-1,2,2,2,2,2,2,2,2,-1,2,2,2,2,2,2,
 static const short P1208[] = {3,3,3,3,3,3,3,3,-1,5,5,5,5,5,5,5,5,-1,-1,-1,-1,-1,16,14,22,24,12,10,8,18,20};
 static const signed char FI1208[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,-1,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1208[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,-1,-1,2};
-static const short PR1208[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0};
+static const short PR1208[] = {38,38,38,38,38,38,38,38,-1,38,38,38,38,38,38,38,38,-1,38,38,38,38,38,38,38,38,-1,38,38,38,38,38,38,38,38,-1,5,5,5,5,5,5,5,5,-1,5,5,5,5,5,5,5,5,-1,11,11,5,11,11,11,5,5,5,5,5,5,5};
 static const char* const L1209[] = {
 	"An LFO with eight outputs at fixed phases 45 degrees apart and a ninth output whose phase is set by hand. Every output carries the same wave",
 	"The LFO frequency",
@@ -27036,7 +27242,7 @@ static const short O1209[] = {23,24,25,26,27,28,29,30,31};
 static const short P1209[] = {1,2,3,4,6,7,9,13,18,14,-1,10,11,16,19,21,22};
 static const signed char FI1209[] = {-1,1,1,1,1,1,2};
 static const signed char FO1209[] = {1,1,1,1,1,1,1,1,1};
-static const short PR1209[] = {-1,-1,-1,-1,-1,-1,0};
+static const short PR1209[] = {-1,34,99,34,206,207,208};
 static const char* const L1210[] = {
 	"An LFO with six outputs at fixed phases 60 degrees apart and a seventh output whose phase is set by hand. Every output carries the same wave",
 	"The LFO frequency",
@@ -27077,7 +27283,7 @@ static const short O1210[] = {23,24,25,26,27,28,29};
 static const short P1210[] = {1,2,3,4,6,7,9,13,18,14,-1,10,11,16,19,21,22};
 static const signed char FI1210[] = {-1,1,1,1,1,1,2};
 static const signed char FO1210[] = {1,1,1,1,1,1,1};
-static const short PR1210[] = {-1,-1,-1,-1,-1,-1,0};
+static const short PR1210[] = {-1,34,99,34,206,207,208};
 static const char* const L1211[] = {
 	"Logs voltages to a CSV file. Each pulse at the trigger input writes the voltages standing at the twenty value inputs as one row of the file",
 	"Starts logging",
@@ -27189,7 +27395,7 @@ static const short O1217[] = {3,4};
 static const short P1217[] = {5,10,7,13,12,9,15};
 static const signed char FI1217[] = {0,0,2,1,1,1};
 static const signed char FO1217[] = {0,0};
-static const short PR1217[] = {29,29,5,8,8,8};
+static const short PR1217[] = {38,38,5,8,8,8};
 static const short PO1217[] = {2,2};
 static const char* const L1218[] = {
 	"A stereo recorder. What arrives at its inputs is written to a wave, raw PCM or MP3 file, passing a level, phase and compressor stage on the way in",
@@ -27242,7 +27448,7 @@ static const short I1219[] = {1};
 static const short O1219[] = {2,3,4};
 static const signed char FI1219[] = {3};
 static const signed char FO1219[] = {3,1,1};
-static const short PR1219[] = {32};
+static const short PR1219[] = {23};
 static const short PO1219[] = {2,-1,-1};
 static const char* const L1220[] = {
 	"Four tap delay modelled on the Buchla 277. Patching an output back into an input builds a feedback loop, which overloads as the input level rises",
@@ -27261,7 +27467,7 @@ static const char* const L1220[] = {
 static const short I1220[] = {5,5,5,5,7,7,7,7,10};
 static const short O1220[] = {4,3,2,1};
 static const short P1220[] = {6,6,6,6,8,11,9};
-static const short PR1220[] = {29,29,29,29,4,4,4,4,7};
+static const short PR1220[] = {38,38,38,38,4,4,4,4,7};
 static const char* const L1221[] = {
 	"A voltage folder built on modulo arithmetic, after the CGS Modulo Magic. Each time the incoming voltage crosses a threshold, a fixed step is added to it or taken off it, for a set number of steps",
 	"The voltage to be folded",
@@ -27284,7 +27490,7 @@ static const short O1221[] = {2};
 static const short P1221[] = {4,5,7,8,12,10,13,14};
 static const signed char FI1221[] = {1,1,1,1,1};
 static const signed char FO1221[] = {1};
-static const short PR1221[] = {27,36,36,36,36};
+static const short PR1221[] = {63,86,86,86,86};
 static const char* const L1222[] = {
 	"Twelve trigger-to-gate lines, named ELSKER on the panel. A trigger on a line starts its DELAY, and at the end of that a gate lasting its DURATION",
 	"Triggers all twelve lines at once",
@@ -27306,7 +27512,7 @@ static const short O1222[] = {10,10,10,10,10,10,10,10,10,10,10,10};
 static const short P1222[] = {1,3,3,3,3,3,3,3,3,3,3,3,3,-1,5,5,5,5,5,5,5,5,5,5,5,5,-1,8,7};
 static const signed char FI1222[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,-1,1,1,1,1,1,1,1,1,1,1,1,1,-1,2,2};
 static const signed char FO1222[] = {2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1222[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,-1,5,5,5,5,5,5,5,5,5,5,5,5,-1,5,-1};
+static const short PR1222[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,-1,5,5,5,5,5,5,5,5,5,5,5,5,-1,5,5};
 static const short PO1222[] = {0,0,0,0,0,0,0,0,0,0,0,0};
 static const char* const L1223[] = {
 	"A sixteen row voltmeter. Each row reads out the voltage arriving at its input and passes that voltage on to the output on the same row",
@@ -27324,7 +27530,7 @@ static const short O1223[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const short P1223[] = {4,3};
 static const signed char FI1223[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,1};
 static const signed char FO1223[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1223[] = {27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,-1,5};
+static const short PR1223[] = {63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,-1,5};
 static const char* const L1224[] = {
 	"Eight sample players on one panel. Each row holds a bank of samples and plays one of them at a speed tracking one volt per octave, with its own level, pan and stereo outputs",
 	"Switches that row on and off",
@@ -27376,8 +27582,8 @@ static const short O1224[] = {22,22,22,22,22,22,22,22,23,23,23,23,23,23,23,23,18
 static const short P1224[] = {1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,7,7,7,7,7,7,7,7,9,9,9,9,9,9,9,9,11,11,11,11,11,11,11,11,14,14,14,14,14,14,14,14,15,15,15,15,15,15,15,15,16,16,16,16,16,16,16,16,20,20,20,20,20,20,20,20,21,21,21,21,21,21,21,21,24,24,24,24,24,24,24,24,28,28,28,28,28,28,28,28,26,26,26,26,26,26,26,26,30,31,33,34,35};
 static const signed char FI1224[] = {2,2,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1};
 static const signed char FO1224[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0};
-static const short PR1224[] = {5,5,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,14,14,14,14,14,14,14,14,8,8,8,8,8,8,8,8,85,85,85,85,85,85,85,85,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,8};
-static const short PO1224[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,37,37,37,37,37,37,37,37,2,2};
+static const short PR1224[] = {5,5,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,14,14,14,14,14,14,14,14,8,8,8,8,8,8,8,8,100,100,100,100,100,100,100,100,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,8};
+static const short PO1224[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,87,87,87,87,87,87,87,87,2,2};
 static const char* const L1225[] = {
 	"Sixteen stereo sample players on one panel. Each row holds a bank of samples and plays one of them at a speed tracking one volt per octave, with its own level, pan and outputs",
 	"Switches that row on and off",
@@ -27426,8 +27632,8 @@ static const short O1225[] = {18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,19
 static const short P1225[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,26,27,29,30,31};
 static const signed char FI1225[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1};
 static const signed char FO1225[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0};
-static const short PR1225[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,8};
-static const short PO1225[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,2,2};
+static const short PR1225[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,8};
+static const short PO1225[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,2,2};
 static const char* const L1226[] = {
 	"A delay modelled on the Binson Echorec: a spinning magnetic disc recorded by one head, read by six play heads in turn and then wiped by an erase head. Delays run from 4ms to 6583ms",
 	"Sets the speed of the disc in centimetres per second, which sets the delay of all six play heads together; 12 cm/s is about one turn of the disc per second",
@@ -27487,7 +27693,7 @@ static const short O1227[] = {9,11};
 static const short P1227[] = {2,4,5,7,6,8,10,13,14,12,3};
 static const signed char FI1227[] = {0};
 static const signed char FO1227[] = {1,0};
-static const short PR1227[] = {29};
+static const short PR1227[] = {38};
 static const short PO1227[] = {-1,2};
 static const char* const L1228[] = {
 	"A blank panel one unit wide, with no inputs or outputs",
@@ -27521,7 +27727,7 @@ static const short O1229[] = {18,19};
 static const short P1229[] = {4,6,8,10,12,3,14,16};
 static const signed char FI1229[] = {0,0,1,1,1,1,1,1,2};
 static const signed char FO1229[] = {0,0};
-static const short PR1229[] = {29,29,8,8,8,8,8,8,5};
+static const short PR1229[] = {38,38,8,8,8,8,8,8,5};
 static const short PO1229[] = {2,2};
 static const char* const L1230[] = {
 	"A stereo phaser of twelve or twenty four stages, of second or fourth order, with its own modulating oscillator and a jack for modulating it from elsewhere",
@@ -27553,7 +27759,7 @@ static const short O1230[] = {3,4};
 static const short P1230[] = {-1,11,13,15,17,19,21,5,6,10,7};
 static const signed char FI1230[] = {0,1,1,1,1,1,1,1,0,2};
 static const signed char FO1230[] = {0,0};
-static const short PR1230[] = {29,-1,8,8,8,8,8,8,29,5};
+static const short PR1230[] = {38,188,8,8,8,8,8,8,38,5};
 static const short PO1230[] = {2,2};
 static const char* const L1231[] = {
 	"Expander for the Programmer, adding nudge and CV controls for its four tracks; it works immediately to the left or immediately to the right of a Programmer",
@@ -27573,7 +27779,7 @@ static const char* const L1231[] = {
 static const short I1231[] = {10,10,10,10,7,7,7,7,8,8,8,8,12,12,12,12,9,5,6,11};
 static const short P1231[] = {3,3,3,3,4,4,4,4,1,2};
 static const signed char FI1231[] = {1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,1,2,2,1};
-static const short PR1231[] = {27,27,27,27,5,5,5,5,5,5,5,5,29,29,29,29,27,5,5,29};
+static const short PR1231[] = {63,63,63,63,5,5,5,5,5,5,5,5,38,38,38,38,63,5,5,38};
 static const char* const L1232[] = {
 	"A 1HP sine wave FM operator in the DX7 mould, with exponential and linear modulation inputs and self feedback",
 	"Shifts the pitch in octaves, -8 to +8",
@@ -27601,7 +27807,7 @@ static const short O1232[] = {14,6};
 static const short P1232[] = {1,2,7,10,13,12};
 static const signed char FI1232[] = {3,1,1,1,1,1,1,1};
 static const signed char FO1232[] = {0,3};
-static const short PR1232[] = {32,27,27,27,27,27,33,33};
+static const short PR1232[] = {23,63,63,63,63,63,49,49};
 static const short PO1232[] = {2,2};
 static const char* const L1233[] = {
 	"A notes panel to go with Jooper. Names are typed against eight inputs and eight outputs, stored as a numbered scene, and the scenes are stepped through with the commands along the bottom",
@@ -27741,7 +27947,7 @@ static const short O1236[] = {3,4};
 static const short P1236[] = {5,6,7,-1,-1,-1,-1,8,10,-1,12,14,16};
 static const signed char FI1236[] = {0,0,-1,-1,-1,-1,1,1,1,1,1,1};
 static const signed char FO1236[] = {0,0};
-static const short PR1236[] = {29,29,-1,-1,-1,-1,8,8,8,8,8,5};
+static const short PR1236[] = {38,38,-1,-1,-1,-1,8,8,8,8,8,5};
 static const short PO1236[] = {2,2};
 static const char* const L1237[] = {
 	"Polyphonic attack and decay envelope with some of the features of the Buchla 281. The number of voices is the smaller of the channels arriving at the trigger input and the count set in the menu",
@@ -27764,7 +27970,7 @@ static const short O1237[] = {11,10};
 static const short P1237[] = {1,3,7,6,5,9};
 static const signed char FI1237[] = {-1,1,1,2};
 static const signed char FO1237[] = {1,2};
-static const short PR1237[] = {-1,27,27,16};
+static const short PR1237[] = {-1,63,63,16};
 static const char* const L1238[] = {
 	"Polyphonic ADSR envelope. The number of voices follows the channels arriving at the gate input, two insert VCAs multiply a signal by the envelope, and each stage has its own pulse output",
 	"The rise time, 0 at the anticlockwise end; the menu sets whether the clockwise end is 1 second, 10 seconds or 100 seconds",
@@ -27807,7 +28013,7 @@ static const short O1238[] = {29,23,26,26,30,31,32,33,28};
 static const short P1238[] = {1,4,7,10,13,16,3,6,9,12,15,18,21,19,20,25,25};
 static const signed char FI1238[] = {1,1,1,1,1,1,2,-1,-1,0,0,1};
 static const signed char FO1238[] = {1,2,0,0,2,2,2,2,1};
-static const short PR1238[] = {27,27,27,27,27,27,16,-1,-1,29,29,27};
+static const short PR1238[] = {63,63,63,63,63,63,16,-1,-1,38,38,63};
 static const short PO1238[] = {-1,0,2,2,-1,-1,0,-1,-1};
 static const char* const L1239[] = {
 	"Polyphonic envelope with a delay before it starts, a rise, a hold at the top and a fall. Two insert VCAs multiply a signal by the envelope, and each stage has its own pulse output",
@@ -27845,7 +28051,7 @@ static const short O1239[] = {24,14,22,22,25,26,27,28};
 static const short P1239[] = {1,3,5,7,9,10,-1,12,15,17,19,20};
 static const signed char FI1239[] = {-1,1,1,1,1,1,2,2,2,0,0,1};
 static const signed char FO1239[] = {1,2,0,0,2,2,2,2};
-static const short PR1239[] = {-1,29,29,29,29,29,16,0,11,29,29,29};
+static const short PR1239[] = {-1,38,38,38,38,38,16,0,11,38,38,38};
 static const short PO1239[] = {-1,0,2,2,-1,-1,-1,-1};
 static const char* const L1240[] = {
 	"A polyphonic low pass gate modelled on the Buchla 208, working as a filter, as an amplifier, or as both at once",
@@ -27864,7 +28070,7 @@ static const short O1240[] = {9};
 static const short P1240[] = {1,2,4,5,6,7};
 static const signed char FI1240[] = {0,1};
 static const signed char FO1240[] = {0};
-static const short PR1240[] = {29,27};
+static const short PR1240[] = {38,63};
 static const short PO1240[] = {2};
 static const char* const L1241[] = {
 	"Records the channels of a polyphonic cable to disc as a multitrack file, from one channel up to sixteen",
@@ -27885,7 +28091,7 @@ static const char* const L1241[] = {
 static const short I1241[] = {1,-1,-1,-1,3,5};
 static const short P1241[] = {2,4};
 static const signed char FI1241[] = {0,-1,-1,-1,2,2};
-static const short PR1241[] = {29,-1,-1,-1,5,5};
+static const short PR1241[] = {38,-1,-1,-1,5,5};
 static const char* const L1242[] = {
 	"A sixty-four track recorder. Four polyphonic inputs of sixteen channels each carry the tracks, and what arrives is written to a file",
 	"The polyphonic input carrying tracks 1 to 16",
@@ -27907,7 +28113,7 @@ static const char* const L1242[] = {
 static const short I1242[] = {1,2,3,4,6,8};
 static const short P1242[] = {5,7};
 static const signed char FI1242[] = {0,0,0,0,2,2};
-static const short PR1242[] = {29,29,29,29,5,5};
+static const short PR1242[] = {38,38,38,38,5,5};
 static const char* const L1243[] = {
 	"A polyphonic wavetable oscillator. The table is navigated in two directions, by bank and by wave within the bank, and a swarm of detuned voices can be spread over both",
 	"The pitch, read at one volt per octave",
@@ -27956,7 +28162,7 @@ static const short O1243[] = {-1,-1,30,30};
 static const short P1243[] = {-1,3,5,7,29,-1,23,-1,27,-1,25,9,10,11,13,14,19,20,16,17,22,-1,2};
 static const signed char FI1243[] = {3,3,1,1,1,1,1,1,1,1,1,2,2};
 static const signed char FO1243[] = {-1,-1,0,0};
-static const short PR1243[] = {11,32,29,29,8,8,8,8,8,8,8,-1,-1};
+static const short PR1243[] = {11,23,38,38,8,8,8,8,8,8,8,5,12};
 static const short PO1243[] = {-1,-1,2,2};
 static const char* const L1244[] = {
 	"A polyphonic wavetable oscillator holding a cube of banks, waves and sample points, with morphing between them and a swarm mode that runs many detuned oscillators at once",
@@ -28007,7 +28213,7 @@ static const short O1244[] = {-1,-1,30,30};
 static const short P1244[] = {-1,8,4,6,29,-1,24,-1,28,-1,26,9,10,11,13,14,19,20,16,17,22,-1,2};
 static const signed char FI1244[] = {3,3,1,1,1,1,1,1,1,1,1,2,2};
 static const signed char FO1244[] = {-1,-1,0,0};
-static const short PR1244[] = {11,32,29,29,8,8,8,8,8,8,8,-1,-1};
+static const short PR1244[] = {11,23,38,38,8,8,8,8,8,8,8,5,12};
 static const short PO1244[] = {-1,-1,2,2};
 static const char* const L1245[] = {
 	"A voltmeter one unit wide, reading out the voltage on every channel of a polyphonic cable",
@@ -28015,7 +28221,7 @@ static const char* const L1245[] = {
 	"Menu — Voltage Meter Mode Selection — picks the voltage range the reading is shown against, a 0-10V scale or a -5V to 5V scale",
 };
 static const short I1245[] = {1};
-static const short PR1245[] = {27};
+static const short PR1245[] = {63};
 static const char* const L1246[] = {
 	"Sixteen stage programmer modelled on the CGS sixteen step Serge programmer. One stage is selected at a time, and the four voltages programmed into it appear at the A, B, C and D outputs",
 	"Switches that stage's pulses on and off; with it off the stage sends no pulse when it is selected",
@@ -28052,7 +28258,7 @@ static const short O1246[] = {14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,15
 static const short P1246[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9};
 static const signed char FI1246[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1};
 static const signed char FO1246[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2};
-static const short PR1246[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,85};
+static const short PR1246[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,100};
 static const short PO1246[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,-1,-1,0,0};
 static const char* const L1247[] = {
 	"One channel of a Buchla 227e: a mono signal placed anywhere in a quadraphonic field of four outputs, by dragging in the field, by X and Y, or by an angle and a distance",
@@ -28123,7 +28329,7 @@ static const short O1248[] = {12,12,12,12,-1,13,14,1,1,1,1};
 static const short P1248[] = {-1,-1,-1,-1,-1,2,2,2,2,-1,3,3,3,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,9,9,9,9,-1,11,11,11,11,-1,10,10,10,10,-1,6,6,6,6,-1,7,7,7,7,-1,15};
 static const signed char FI1248[] = {1,1,1,1,-1,2,2,2,2,-1,2,2,2,2,-1,0,0,2,2,2,2};
 static const signed char FO1248[] = {0,0,0,0,-1,0,0,2,2,2,2};
-static const short PR1248[] = {8,8,8,8,-1,5,5,5,5,-1,5,5,5,5,-1,8,8,4,4,-1,-1};
+static const short PR1248[] = {8,8,8,8,-1,5,5,5,5,-1,5,5,5,5,-1,8,8,4,4,4,4};
 static const short PO1248[] = {2,2,2,2,-1,2,2,0,0,0,0};
 static const char* const L1249[] = {
 	"Four independent quantizers that snap a voltage to a grid of equal slices, with 0V as the base of the grid. The number of slices is set as a figure on each row",
@@ -28136,7 +28342,7 @@ static const short I1249[] = {1,1,1,1};
 static const short O1249[] = {2,2,2,2};
 static const signed char FI1249[] = {1,1,1,1};
 static const signed char FO1249[] = {1,1,1,1};
-static const short PR1249[] = {29,29,29,29};
+static const short PR1249[] = {38,38,38,38};
 static const char* const L1250[] = {
 	"Twelve trigger-to-gate lines. A trigger on a line starts its DELAY in seconds, and at the end of that a gate lasting its DURATION, with a pulse at each end of the gate",
 	"Triggers all twelve lines at once",
@@ -28170,8 +28376,8 @@ static const short O1250[] = {12,12,12,12,12,12,12,12,12,12,12,12,13,13,13,13,13
 static const short P1250[] = {1,3,3,3,3,3,3,3,3,3,3,3,3,7,7,7,7,7,7,7,7,7,7,7,7,5,9,10,10,10,10,10,10,10,10,10,10,10,10,11};
 static const signed char FI1250[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1250[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1250[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1};
-static const short PO1250[] = {37,37,37,37,37,37,37,37,37,37,37,37,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,37,37,37};
+static const short PR1250[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5};
+static const short PO1250[] = {87,87,87,87,87,87,87,87,87,87,87,87,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,87,87,87};
 static const char* const L1251[] = {
 	"Stereo emulation of channel A of the Randall RG100 guitar preamp, ported from Valdemar Erlingsson's VST, with a CV input for every knob",
 	"The left side of the stereo input",
@@ -28207,7 +28413,7 @@ static const short O1251[] = {3,4};
 static const short P1251[] = {5,7,10,13,-1,-1,18,21,24,9,12,15,17,20,23,26};
 static const signed char FI1251[] = {0,0,2,-1,1,1,1,1,1,1,1};
 static const signed char FO1251[] = {0,0};
-static const short PR1251[] = {29,29,5,-1,8,8,8,8,8,8,8};
+static const short PR1251[] = {38,38,5,-1,8,8,8,8,8,8,8};
 static const short PO1251[] = {2,2};
 static const char* const L1252[] = {
 	"Stereo emulation of channel B of the Randall RG100 guitar preamp, ported from Valdemar Erlingsson's VST, with a CV input for every knob",
@@ -28246,7 +28452,7 @@ static const short O1252[] = {3,4};
 static const short P1252[] = {5,7,10,13,-1,27,18,21,24,9,12,15,17,20,23,26};
 static const signed char FI1252[] = {0,0,2,1,1,1,1,1,1,1,1};
 static const signed char FO1252[] = {0,0};
-static const short PR1252[] = {29,29,5,5,8,8,8,8,8,8,8};
+static const short PR1252[] = {38,38,5,5,8,8,8,8,8,8,8};
 static const short PO1252[] = {2,2};
 static const char* const L1253[] = {
 	"A pulse ratcheter: each incoming pulse comes back out as a burst of repeats, with the number of repeats picked at random between a minimum and a maximum",
@@ -28299,7 +28505,7 @@ static const short O1254[] = {3,4};
 static const short P1254[] = {5,10,7,13,12,9,15,18,22,16,20};
 static const signed char FI1254[] = {0,0,2,1,1,1,1,1,1,1};
 static const signed char FO1254[] = {0,0};
-static const short PR1254[] = {29,29,5,8,8,8,5,5,5,5};
+static const short PR1254[] = {38,38,5,8,8,8,5,5,5,5};
 static const short PO1254[] = {2,2};
 static const char* const L1255[] = {
 	"A port of S.A.M., the Software Automatic Mouth speech synthesiser written for the Commodore 64. Text typed into it is spoken at the output",
@@ -28336,7 +28542,7 @@ static const short O1255[] = {1,2};
 static const short P1255[] = {12,15,-1,-1,-1,22,14,17,19,21,24,-1,3,5,9,7,10};
 static const signed char FI1255[] = {1,1,1,1,1,-1,2,2,2,2};
 static const signed char FO1255[] = {0,2};
-static const short PR1255[] = {8,8,8,8,8,-1,5,5,5,5};
+static const short PR1255[] = {8,8,8,8,8,5,5,5,5,5};
 static const short PO1255[] = {2,0};
 static const char* const L1256[] = {
 	"Two slew limiters, each with its own rise time, fall time and curve",
@@ -28381,7 +28587,7 @@ static const short O1257[] = {6,6,10,10,13,13,13,13,-1,13,13,13,13};
 static const short P1257[] = {2,4,2,4,-1,-1,8,9,8,9};
 static const signed char FI1257[] = {1,1,1,1,1,1,-1,-1,-1,1,1,1,2,1,2};
 static const signed char FO1257[] = {1,1,1,1,1,1,1,1,-1,1,1,1,1};
-static const short PR1257[] = {27,27,27,27,27,27,-1,-1,-1,27,27,27,5,27,5};
+static const short PR1257[] = {63,63,63,63,63,63,-1,-1,-1,63,63,63,5,63,5};
 static const char* const L1258[] = {
 	"Sixteen step sequencer in the analogue style, with a clock of its own. Each step holds one voltage, and the run can be cut to fewer than sixteen steps",
 	"Starts and stops the sequencer",
@@ -28414,7 +28620,7 @@ static const short O1258[] = {6,18,19,20,21,4};
 static const short P1258[] = {1,3,16,9,11,5,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,-1,14};
 static const signed char FI1258[] = {2,-1,-1,1,1,-1,2,2,1,1};
 static const signed char FO1258[] = {2,2,2,1,2,2};
-static const short PR1258[] = {5,-1,-1,36,56,-1,5,5,8,56};
+static const short PR1258[] = {5,-1,-1,86,26,-1,5,5,8,26};
 static const short PO1258[] = {0,0,0,-1,0,0};
 static const char* const L1259[] = {
 	"A programmable sequencer in the manner of the Roland MC-4. A sequence is built stage by stage, and finished sequences are stored as patterns that can be played one after another",
@@ -28520,8 +28726,8 @@ static const short O1260[] = {26,27,28,29,30,31,32,19,11,11,11,11,11,11,11,11,11
 static const short P1260[] = {16,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,2,2,2,2,2,2,2,2,2,2,2,2,9,9,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,20,39,41,43,22,45,23,25};
 static const signed char FI1260[] = {1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,2,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1260[] = {1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1260[] = {85,5,5,5,5,5,5,11,11,11,11,11,11,11,11,11,11,11,11,36,36,36,36,36,11,11,36,36,36,36,36,36,36,36,36,36,36,36,8,8,8,8,8,8,8,8,8,8,8,8};
-static const short PO1260[] = {-1,-1,-1,-1,-1,0,37,0,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37,37};
+static const short PR1260[] = {100,5,5,5,5,5,5,11,11,11,11,11,11,11,11,11,11,11,11,86,86,86,86,86,11,11,86,86,86,86,86,86,86,86,86,86,86,86,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PO1260[] = {-1,-1,-1,-1,-1,0,87,0,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87,87};
 static const char* const L1261[] = {
 	"Stereo pitch shifter taken from the STK library",
 	"The left side of the stereo input",
@@ -28563,7 +28769,7 @@ static const short O1262[] = {2,7,7,7,7,7,7,7,7,7,7,7};
 static const short P1262[] = {-1,-1,-1,3};
 static const signed char FI1262[] = {3,1,3,3,3,3,3,3,3,3,3,3,3,-1,1};
 static const signed char FO1262[] = {3,3,3,3,3,3,3,3,3,3,3,3};
-static const short PR1262[] = {29,11,8,8,8,8,8,8,8,8,8,8,8,-1,4};
+static const short PR1262[] = {38,11,8,8,8,8,8,8,8,8,8,8,8,-1,4};
 static const short PO1262[] = {2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L1263[] = {
 	"Two polyphonic utilities on one panel: one multiplies a voltage by a settable amount, the other adds a settable voltage to it. Each takes CV over its setting",
@@ -28584,7 +28790,7 @@ static const short O1263[] = {9,10};
 static const short P1263[] = {1,3,2,4};
 static const signed char FI1263[] = {1,1,1,1};
 static const signed char FO1263[] = {1,1};
-static const short PR1263[] = {27,27,27,27};
+static const short PR1263[] = {63,63,63,63};
 static const char* const L1264[] = {
 	"Stereo wavetable oscillator with morphing between waves and a swarm mode that runs many oscillators at once",
 	"The pitch of the oscillator, one volt per octave",
@@ -28628,7 +28834,7 @@ static const short O1264[] = {27,28};
 static const short P1264[] = {-1,8,4,6,26,-1,12,-1,10,-1,14,15,16,18,20,22,25,24,2};
 static const signed char FI1264[] = {3,3,1,1,1,1,1,1,1,1,1};
 static const signed char FO1264[] = {0,0};
-static const short PR1264[] = {11,14,8,8,36,36,36,8,8,8,8};
+static const short PR1264[] = {11,14,8,8,86,86,86,8,8,8,8,5,12};
 static const short PO1264[] = {2,2};
 static const char* const L1265[] = {
 	"An expander for complex Simpler and slim Simpler that steps through the audio files in the folder the loaded sample came from",
@@ -28644,7 +28850,7 @@ static const char* const L1265[] = {
 static const short I1265[] = {4,2,5,7};
 static const short P1265[] = {3,1,6};
 static const signed char FI1265[] = {2,2,1,2};
-static const short PR1265[] = {5,5,36,5};
+static const short PR1265[] = {5,5,86,5};
 static const char* const L1266[] = {
 	"A reel to reel tape transport for the samplers. It works out a speed voltage so a sample starts, stops, changes direction and drifts the way tape does",
 	"A tap starts the machine, and the next one stops it",
@@ -28687,7 +28893,7 @@ static const short O1266[] = {28,27,26};
 static const short P1266[] = {1,4,6,14,18,16,8,12,10};
 static const signed char FI1266[] = {2,2,1,1,2,2,2,2,2,2,1,2,2,2,1,2};
 static const signed char FO1266[] = {1,2,0};
-static const short PR1266[] = {5,5,8,8,5,5,5,5,5,5,85,5,5,5,8,5};
+static const short PR1266[] = {5,5,8,8,5,5,5,5,5,5,100,5,5,5,8,5};
 static const short PO1266[] = {-1,0,2};
 static const char* const L1267[] = {
 	"A stereo sampler and sample oscillator. It records, plays a selection out of the sample at a speed you set, tracks 1V per octave, and can cut the sample into slices and play them in turn",
@@ -28885,8 +29091,8 @@ static const short O1268[] = {23,25,-1,24,22};
 static const short P1268[] = {11,16,65,-1,57,61,3,9,12,30,32,29,18,26,14,20,63,64,40,45,34,36,38,55,-1,48,46,5,27,28,8,7,50,52,60,43,42,-1,54,2};
 static const signed char FI1268[] = {0,2,1,3,2,2,2,1,1,2,2,1,1,-1,2,2,2,2,2,2,2,1,1,1,2,2};
 static const signed char FO1268[] = {0,2,2,1,1};
-static const short PR1268[] = {29,5,8,14,5,5,5,8,8,5,5,8,10,-1,5,5,5,5,5,5,5,10,8,8,5,5};
-static const short PO1268[] = {29,0,-1,-1,-1};
+static const short PR1268[] = {38,5,8,14,5,5,5,8,8,5,5,8,10,-1,5,5,5,5,5,5,5,10,8,8,5,5};
+static const short PO1268[] = {38,0,-1,-1,-1};
 static const char* const L1269[] = {
 	"Two fixed voltages, each typed or dragged into its display, each with a gate input that can switch it off",
 	"Carries the voltage set on that display",
@@ -28897,7 +29103,7 @@ static const short I1269[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 static const short O1269[] = {1,1};
 static const signed char FI1269[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2};
 static const signed char FO1269[] = {1,1};
-static const short PR1269[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,97,97};
+static const short PR1269[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,185,185};
 static const char* const L1270[] = {
 	"One fixed voltage, typed or dragged into its display, with a gate input that can switch it off",
 	"Carries the voltage set on the display",
@@ -28908,7 +29114,7 @@ static const short I1270[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 static const short O1270[] = {1};
 static const signed char FI1270[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2};
 static const signed char FO1270[] = {1};
-static const short PR1270[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,97};
+static const short PR1270[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,185};
 static const char* const L1271[] = {
 	"Reports whether a voltage is rising, holding steady or falling; the matching one of three gate outputs is high, with a lamp beside it. From the CGS Slope Detector",
 	"A gate while the input voltage is rising",
@@ -28954,7 +29160,7 @@ static const short O1272[] = {3,4};
 static const short P1272[] = {5,7,-1,12,-1,17,20,9,11,14,16,19,22};
 static const signed char FI1272[] = {0,0,2,1,1,1,1,1,1};
 static const signed char FO1272[] = {0,0};
-static const short PR1272[] = {29,29,5,8,8,8,8,8,8};
+static const short PR1272[] = {38,38,5,8,8,8,8,8,8};
 static const short PO1272[] = {2,2};
 static const char* const L1273[] = {
 	"A source of uncertainty in the manner of the Buchla 266: two sections of fluctuating random voltages, a section of quantized random voltages, a section of stored random voltages, and three flip-flops",
@@ -28981,7 +29187,7 @@ static const short O1273[] = {-1,-1,-1,-1,-1,-1,3,4,-1,-1,3,4,-1,-1,11,12,-1,-1,
 static const short P1273[] = {-1,1,-1,-1,-1,5,1,-1,-1,-1,-1,-1,7,10};
 static const signed char FI1273[] = {2,-1,1,-1,-1,1,2,1,1,-1,-1,1,2,1,2,1,2,2,2};
 static const signed char FO1273[] = {-1,-1,-1,-1,-1,-1,1,1,2,2,1,1,2,2,1,1,1,1,2,2,2};
-static const short PR1273[] = {36,-1,8,-1,-1,8,36,8,-1,-1,-1,8,5,11,5,36,5,5,5};
+static const short PR1273[] = {86,-1,8,-1,-1,8,86,8,32,-1,-1,8,5,11,5,86,5,5,5};
 static const short PO1273[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0};
 static const char* const L1274[] = {
 	"A spectrogram drawing the frequency content of its input as it arrives",
@@ -29025,7 +29231,7 @@ static const short O1275[] = {18,19};
 static const short P1275[] = {4,6,8,10,12,3,14,16,20};
 static const signed char FI1275[] = {0,0,1,1,1,1,1,1,2,1,1,1};
 static const signed char FO1275[] = {0,0};
-static const short PR1275[] = {29,29,8,8,8,8,8,8,5,36,8,36};
+static const short PR1275[] = {38,38,8,8,8,8,8,8,5,86,8,86};
 static const short PO1275[] = {2,2};
 static const char* const L1276[] = {
 	"Stereo phaser of four or six stages, first or second order, swept by a modulator of its own or by a voltage from outside",
@@ -29057,7 +29263,7 @@ static const short O1276[] = {3,4};
 static const short P1276[] = {-1,11,13,15,-1,18,20,7,8,10,5,22};
 static const signed char FI1276[] = {0,1,1,1,1,1,1,1,0,2};
 static const signed char FO1276[] = {0,0};
-static const short PR1276[] = {29,-1,8,8,8,8,8,8,29,5};
+static const short PR1276[] = {38,188,8,8,8,8,8,8,38,5};
 static const short PO1276[] = {2,2};
 static const char* const L1277[] = {
 	"Fires its six outputs one after another, a set time apart, in the manner of a guitar strum. The run can start from any of the six",
@@ -29082,7 +29288,7 @@ static const short O1277[] = {14,14,14,14,14,14,-1,11};
 static const short P1277[] = {5,3,13,13,13,13,13,13,-1,10,1,8};
 static const signed char FI1277[] = {2,2,2,2,2,2,2,2,-1,2,2,1};
 static const signed char FO1277[] = {2,2,2,2,2,2,-1,2};
-static const short PR1277[] = {11,5,5,0,0,0,0,5,-1,11,5,8};
+static const short PR1277[] = {11,5,5,5,5,5,5,5,-1,11,5,8};
 static const char* const L1278[] = {
 	"One knob driving ten outputs, each output with its own attenuverter, so a single movement can send ten different voltages at once",
 	"The voltage the ten outputs are scaled from, -5V to +5V or 0V to 10V depending on the range switch",
@@ -29093,7 +29299,7 @@ static const char* const L1278[] = {
 static const short O1278[] = {4,4,4,4,4,4,4,4,4,4};
 static const short P1278[] = {1,3,3,3,3,3,3,3,3,3,3,2};
 static const signed char FO1278[] = {1,1,1,1,1,1,1,1,1,1};
-static const short PR1278[] = {36};
+static const short PR1278[] = {86};
 static const char* const L1279[] = {
 	"A six headed sample player. One sample is loaded at a time and each of the six playheads plays its own selection out of it, with its own speed, pitch, volume, pan and stereo output",
 	"A tap switches that playhead on and off",
@@ -29161,8 +29367,8 @@ static const short O1279[] = {22,22,22,22,22,22,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,22
 static const short P1279[] = {15,15,15,15,15,15,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,14,14,14,14,14,14,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,16,16,16,16,16,16,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,4,4,4,4,4,4,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,6,6,6,6,6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,3,3,3,3,3,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,10,10,10,10,10,10,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,12,12,12,12,12,12,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,20,20,20,20,20,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,21,21,21,21,21,21,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,23,23,23,23,23,23,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,24,25,36,38,40,42,-1,44,46,48,50,52,29,28,27,-1,35,33};
 static const signed char FI1279[] = {1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,3,3,3,3,3,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,1,1,1,2,2};
 static const signed char FO1279[] = {0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0};
-static const short PR1279[] = {8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,14,14,14,14,14,14,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,5,5,36,8,85,5,5};
-static const short PO1279[] = {2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,37,37,37,37,37,37,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2};
+static const short PR1279[] = {8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,14,14,14,14,14,14,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5,5,5,5,5,5,5,5,86,8,100,5,5};
+static const short PO1279[] = {2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,87,87,87,87,87,87,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2};
 static const char* const L1280[] = {
 	"A timer with two alarms and two counters. The timer counts elapsed hours, minutes, seconds and tenths of a second",
 	"Switches that alarm on and off",
@@ -29184,7 +29390,7 @@ static const short P1280[] = {1,1,5,5};
 static const signed char FI1280[] = {2,2,2,2,2,2};
 static const signed char FO1280[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2};
 static const short PR1280[] = {5,5,5,5,5,5};
-static const short PO1280[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,37,37,37,37,37,37,58,58};
+static const short PO1280[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,87,87,87,87,87,87,98,98};
 static const char* const L1281[] = {
 	"A calibration tool for external CV gear. It sends a series of voltages out, measures the pitch that comes back, and builds a map that corrects the pitch voltages you send through it afterwards",
 	"The voltage sent out to the device being calibrated",
@@ -29241,7 +29447,7 @@ static const short O1282[] = {24,-1,22,22,-1,-1,-1,-1,23};
 static const short P1282[] = {6,9,12,15,5,18,7,10,13,16,-1,19,1,-1,-1,-1,-1,3,4};
 static const signed char FI1282[] = {1,1,1,1,-1,1,2,-1,-1,0,0};
 static const signed char FO1282[] = {1,-1,0,0,-1,-1,-1,-1,1};
-static const short PR1282[] = {27,27,27,27,-1,27,16,-1,-1,29,29};
+static const short PR1282[] = {63,63,63,63,-1,63,16,-1,-1,38,38};
 static const short PO1282[] = {-1,-1,2,2,-1,-1,-1,-1,-1};
 static const char* const L1283[] = {
 	"A polyphonic six input mixer for composing DX7 style FM algorithms, summing the outputs of six operators into one signal",
@@ -29255,7 +29461,7 @@ static const short O1283[] = {4};
 static const short P1283[] = {2,2,2,2,2,2,3};
 static const signed char FI1283[] = {0,0,0,0,0,0};
 static const signed char FO1283[] = {0};
-static const short PR1283[] = {29,29,29,29,29,29};
+static const short PR1283[] = {38,38,38,38,38,38};
 static const short PO1283[] = {2};
 static const char* const L1284[] = {
 	"A pure sine oscillator built for FM, sixteen voices polyphonic, with every parameter of a DX7 style operator on the panel. A blue lamp marks it as a modulator, a purple lamp as a carrier",
@@ -29296,7 +29502,7 @@ static const short O1284[] = {24};
 static const short P1284[] = {1,2,3,4,11,9,13,14,16,18,20,23,22,5};
 static const signed char FI1284[] = {3,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1284[] = {0};
-static const short PR1284[] = {32,27,33,33,27,27,27,27,27,27,27,27,27};
+static const short PR1284[] = {23,63,49,49,63,63,63,63,63,63,63,63,63};
 static const short PO1284[] = {2};
 static const char* const L1285[] = {
 	"Two needle meters in the style of the EMS Synthi's VU meter, each reading one signal against a dial marked -5 to +5 and 0 to 10",
@@ -29343,7 +29549,7 @@ static const short O1286[] = {16,16,16,16,16,16,16,16,16,16,16,16,19,19,19,19,19
 static const short P1286[] = {13,13,13,13,13,13,13,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14,14,14,5,-1,7,9,-1,11,11,11,11,11,11,11,11,11,11,11,11};
 static const signed char FI1286[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,3,2,2,1};
 static const signed char FO1286[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,2};
-static const short PR1286[] = {8,8,8,8,8,8,8,8,8,8,8,8,5,5,5,5,5,5,5,5,5,5,5,5,5,8,29,8,5,5};
+static const short PR1286[] = {8,8,8,8,8,8,8,8,8,8,8,8,5,5,5,5,5,5,5,5,5,5,5,5,5,8,38,8,5,5};
 static const short PO1286[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,2,0};
 static const char* const L1287[] = {
 	"A waterfall spectrograph: the frequency content of the input is drawn as a line and the older lines run down the display",
@@ -29367,7 +29573,7 @@ static const short O1288[] = {3,3};
 static const short P1288[] = {2,2};
 static const signed char FI1288[] = {0,0};
 static const signed char FO1288[] = {0,0};
-static const short PR1288[] = {29,29};
+static const short PR1288[] = {38,38};
 static const short PO1288[] = {2,2};
 static const char* const L1289[] = {
 	"A meter with a VCA: the signal passes through it to the output and the bar shows its level",
@@ -29441,7 +29647,7 @@ static const short O1291[] = {2,2,-1,-1,-1,-1,3,4,5};
 static const short P1291[] = {9,10,12,13,15,16,18,19,-1,20,32,31,24,26,28,30,22,6,7};
 static const signed char FI1291[] = {0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,-1,1};
 static const signed char FO1291[] = {0,0,0,0,0,0,1,1,2};
-static const short PR1291[] = {29,29,29,29,4,4,4,4,29,29,29,29,5,5,5,5,-1,5};
+static const short PR1291[] = {38,38,38,38,4,4,4,4,38,38,38,38,5,5,5,5,-1,5};
 static const short PO1291[] = {2,2,2,2,2,2,-1,-1,0};
 static const char* const L1292[] = {
 	"A stereo delay effect built from a swarm of delay lines, each set to a different uncorrelated delay time",
@@ -29502,7 +29708,7 @@ static const char* const L1293[] = {
 static const short I1293[] = {1,2,-1,-1,-1,15,17,16,18,19};
 static const short P1293[] = {3,4,5,6,7,8,10,11,12,13,14,9};
 static const signed char FI1293[] = {1,1,1,1,1,1,1,1,1,1};
-static const short PR1293[] = {8,8,-1,-1,-1,8,8,8,8,8};
+static const short PR1293[] = {8,8,4,4,4,8,8,8,8,8};
 static const char* const L1294[] = {
 	"Four delays set in milliseconds to two decimal places, from 0.01ms to 9999.99ms, working on audio or on CV. A delay time can be taken from a clock instead, with a multiplier applied to it",
 	"The main signal into that delay",
@@ -29521,7 +29727,7 @@ static const short O1294[] = {8,8,8,8};
 static const short P1294[] = {3,3,3,3,-1,4,4,4,4,-1,6,6,6,6};
 static const signed char FI1294[] = {0,0,0,0,-1,0,0,0,0,-1,1,1,1,1,-1,1,1,1,1};
 static const signed char FO1294[] = {0,0,0,0};
-static const short PR1294[] = {8,8,8,8,-1,8,8,8,8,-1,-1,-1,-1,-1,-1,8,8,8,8};
+static const short PR1294[] = {8,8,8,8,-1,8,8,8,8,-1,5,5,5,5,-1,8,8,8,8};
 static const short PO1294[] = {2,2,2,2};
 static const char* const L1295[] = {
 	"A visualiser whose drawing is driven by the voltage at its input",
@@ -29663,7 +29869,7 @@ static const short O1301[] = {26,26,21};
 static const short P1301[] = {6,7,8,12,13,14,2,16,18,19,23,24,25,11,27,15,-1,-1,-1,-1,5};
 static const signed char FI1301[] = {0,0,2,1,3,2,2,1,-1,-1,-1,-1,1};
 static const signed char FO1301[] = {0,0,2};
-static const short PR1301[] = {2,2,0,-1,1,0,0,-1,-1,-1,-1,-1,-1};
+static const short PR1301[] = {57,12,197,34,14,197,197,4,-1,-1,-1,-1,121};
 static const short PO1301[] = {2,2,0};
 static const char* const L1302[] = {
 	"An interactive stereo sampler. It records, plays a selection out of the sample at a speed you set, tracks 1V per octave, and can cut the sample into slices and play them in turn",
@@ -29735,12 +29941,12 @@ static const char* const L1302[] = {
 	"Menu — ADD Slice — stores the current selection as a new slice",
 	"Menu — UPDATE Current Slice — replaces the current stored slice with the current selection",
 };
-static const short I1302[] = {1,1,3,16,12,27,29,31,33,20,19,23,38,-1,44,41,42,43,48,46,51,49,6,10,37,40};
+static const short I1302[] = {1,1,3,16,12,27,29,31,33,20,19,23,38,-1,44,42,41,43,48,46,51,49,6,10,37,40};
 static const short O1302[] = {53,53,30};
 static const short P1302[] = {8,9,15,-1,21,22,2,-1,26,28,32,34,35,11,52,24,25,18,17,36,39,-1,-1,-1,-1,-1,47,45,-1,7,13,14,5,4,50};
 static const signed char FI1302[] = {0,0,2,1,3,2,2,1,1,2,1,1,1,-1,2,2,2,2,2,2,2,1,1,1,2,2};
 static const signed char FO1302[] = {0,0,2};
-static const short PR1302[] = {2,2,0,-1,1,0,0,-1,-1,0,-1,-1,6,-1,0,0,0,0,0,0,0,6,-1,-1,0,0};
+static const short PR1302[] = {8,8,5,34,14,5,209,4,4,5,5,34,10,-1,5,5,5,5,5,5,5,10,210,8,5,5};
 static const short PO1302[] = {2,2,0};
 static const char* const L1303[] = {
 	"A clock, LFO, sample and hold and noise source in one, after the RVG cell in Warren Burt's Aardvark IV. A simulated R-2R converter of 1 to 10 bits picks values out of 10V",
@@ -29778,7 +29984,7 @@ static const short O1303[] = {1,2,3,4,17,20,19,10};
 static const short P1303[] = {-1,-1,6,-1,-1,-1,12,-1,16,-1,-1,14,18,8};
 static const signed char FI1303[] = {-1,-1,2,1,-1,1,1,-1,1,2};
 static const signed char FO1303[] = {2,2,1,1,1,1,2,2};
-static const short PR1303[] = {-1,-1,5,8,-1,98,8,-1,8,5};
+static const short PR1303[] = {-1,-1,5,8,-1,211,8,-1,8,5};
 static const short PO1303[] = {0,0,-1,-1,-1,-1,0,0};
 static const char* const L1304[] = {
 	"Sixteen channel stereo mixer. Every channel has a level, a pan, a solo and a mute, each with a control voltage or trigger input, and the master has its own level and mute and a stereo chain input",
@@ -29817,7 +30023,7 @@ static const short O1304[] = {13,14,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,-1,4,4,4,4,4
 static const short P1304[] = {9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,-1,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,-1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,-1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,17,16,21,22};
 static const signed char FI1304[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,-1,1,2,0,0};
 static const signed char FO1304[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR1304[] = {29,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,29,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,29,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,29,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,33,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1,33,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1,8,5,8,8};
+static const short PR1304[] = {38,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,38,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,38,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,38,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,-1,49,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1,49,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,-1,8,5,8,8};
 static const short PO1304[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L1305[] = {
 	"Four channel stereo mixer. Every channel has a level, a pan, a solo and a mute, each with a control voltage or trigger input, and the master has its own level and mute and a stereo chain input",
@@ -29856,7 +30062,7 @@ static const short O1305[] = {13,14,3,3,3,3,-1,4,4,4,4};
 static const short P1305[] = {9,9,9,9,-1,11,11,11,11,-1,6,6,6,6,-1,8,8,8,8,-1,17,16,21,22};
 static const signed char FI1305[] = {0,0,0,0,-1,0,0,0,0,-1,1,1,1,1,-1,1,1,1,1,-1,2,2,2,2,-1,2,2,2,2,-1,1,2,0,0};
 static const signed char FO1305[] = {0,0,0,0,0,0,-1,0,0,0,0};
-static const short PR1305[] = {29,8,8,8,-1,29,8,8,8,-1,29,8,8,8,-1,29,8,8,8,-1,33,5,5,5,-1,33,5,5,5,-1,8,5,8,8};
+static const short PR1305[] = {38,8,8,8,-1,38,8,8,8,-1,38,8,8,8,-1,38,8,8,8,-1,49,5,5,5,-1,49,5,5,5,-1,8,5,8,8};
 static const short PO1305[] = {2,2,2,2,2,2,-1,2,2,2,2};
 static const char* const L1306[] = {
 	"Eight channel stereo mixer. Every channel has a level, a pan, a solo and a mute, each with a control voltage or trigger input, and the master has its own level and mute and a stereo chain input",
@@ -29895,7 +30101,7 @@ static const short O1306[] = {13,14,3,3,3,3,3,3,3,3,-1,4,4,4,4,4,4,4,4};
 static const short P1306[] = {9,9,9,9,9,9,9,9,-1,11,11,11,11,11,11,11,11,-1,6,6,6,6,6,6,6,6,-1,8,8,8,8,8,8,8,8,-1,17,16,21,22};
 static const signed char FI1306[] = {0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,-1,1,1,1,1,1,1,1,1,-1,1,1,1,1,1,1,1,1,-1,2,2,2,2,2,2,2,2,-1,2,2,2,2,2,2,2,2,-1,1,2,0,0};
 static const signed char FO1306[] = {0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0};
-static const short PR1306[] = {29,8,8,8,8,8,8,8,-1,29,8,8,8,8,8,8,8,-1,29,8,8,8,8,8,8,8,-1,29,8,8,8,8,8,8,8,-1,33,5,5,5,5,5,5,5,-1,33,5,5,5,5,5,5,5,-1,8,5,8,8};
+static const short PR1306[] = {38,8,8,8,8,8,8,8,-1,38,8,8,8,8,8,8,8,-1,38,8,8,8,8,8,8,8,-1,38,8,8,8,8,8,8,8,-1,49,5,5,5,5,5,5,5,-1,49,5,5,5,5,5,5,5,-1,8,5,8,8};
 static const short PO1306[] = {2,2,2,2,2,2,2,2,2,2,-1,2,2,2,2,2,2,2,2};
 static const char* const L1307[] = {
 	"A sample player one module wide. It plays a selection out of the loaded sample, once or in a loop, and every audio file in the same directory as that one is listed so any of them can be picked",
@@ -29924,7 +30130,7 @@ static const short O1307[] = {13,13,12};
 static const short P1307[] = {3,-1,1,-1,-1,-1,-1,4,6,8,-1,-1,-1,-1,-1,5,-1,-1,-1,-1,-1,10};
 static const signed char FI1307[] = {-1,-1,-1,1,-1,2,2,-1,-1,-1,-1,-1,-1,1};
 static const signed char FO1307[] = {0,0,2};
-static const short PR1307[] = {-1,-1,-1,8,-1,9,9,-1,27,-1,-1,-1,-1,-1};
+static const short PR1307[] = {-1,-1,-1,8,-1,9,9,-1,63,-1,-1,-1,-1,7};
 static const short PO1307[] = {2,2,0};
 static const char* const L1308[] = {
 	"Six clock dividers, each adding a fixed voltage to the output while it is in the first half of its division",
@@ -29941,8 +30147,8 @@ static const short O1308[] = {5};
 static const short P1308[] = {3,3,3,3,3,3,4,4,4,4,4,4};
 static const signed char FI1308[] = {2,2};
 static const signed char FO1308[] = {1};
-static const short PR1308[] = {99,0};
-static const short PO1308[] = {100};
+static const short PR1308[] = {212,0};
+static const short PO1308[] = {213};
 static const char* const L1309[] = {
 	"Eight-step trigger sequencer in which every second step takes a random jump to one of the odd steps",
 	"A rising edge moves the sequencer on one step",
@@ -29973,7 +30179,7 @@ static const short I1310[] = {1,2,3,1,2,3,1,2,3};
 static const short O1310[] = {4,4,4,5,5,5};
 static const signed char FI1310[] = {2,2,2,2,2,2,2,2,2};
 static const signed char FO1310[] = {2,2,2,2,2,2};
-static const short PR1310[] = {24,24,24,24,24,24,24,24,24};
+static const short PR1310[] = {50,50,50,50,50,50,50,50,50};
 static const short PO1310[] = {0,0,0,0,0,0};
 static const char* const L1311[] = {
 	"Counter with a comparator and a clock divider, for adding step repeats to a sequencer",
@@ -30125,7 +30331,7 @@ static const short O1316[] = {25,26,28,27};
 static const short P1316[] = {1,2,3,3,3,3,4,4,4,4,5,5,5,5,6,7,8,9,10,11,12};
 static const signed char FI1316[] = {2,2,1,1,1,2,1,1,1,1,1,1};
 static const signed char FO1316[] = {1,2,2,1};
-static const short PR1316[] = {0,0,-1,-1,-1,0,-1,-1,-1,-1,101,101};
+static const short PR1316[] = {0,0,-1,-1,-1,0,-1,-1,-1,-1,214,214};
 static const short PO1316[] = {-1,0,0,-1};
 static const char* const L1317[] = {
 	"Brings a CV into a chosen range by adding or subtracting a step until it fits, with a raw mode, a semitone quantized mode and an audio shaper mode",
@@ -30191,7 +30397,7 @@ static const short I1319[] = {2,3,3,3,3,3,3,3,3,3,3};
 static const short O1319[] = {4,4,4,4,4,4,4,4,4,4};
 static const short P1319[] = {1};
 static const signed char FI1319[] = {2};
-static const short PR1319[] = {41};
+static const short PR1319[] = {91};
 static const char* const L1320[] = {
 	"Polyphonic gate and CV looper with turing machine behaviour, replacing steps of its loop from source inputs or from an internal random generator; the maker marks it deprecated in favour of Morpheus",
 	"Sets the chance that the gate at the current step is left alone, 0% replacing the gate at every step and 100% replacing none",
@@ -30288,7 +30494,7 @@ static const short O1321[] = {36,37,38};
 static const short P1321[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
 static const signed char FI1321[] = {1,1,1,2,2,2,2,2,1,2,1,1,1,1,2,2,2,2};
 static const signed char FO1321[] = {1,2,1};
-static const short PR1321[] = {6,6,-1,63,63,63,63,63,-1,41,-1,-1,-1,-1,63,63,0,0};
+static const short PR1321[] = {6,6,-1,132,132,132,132,132,-1,91,-1,-1,-1,-1,132,132,0,0};
 static const short PO1321[] = {-1,0,-1};
 static const char* const L1322[] = {
 	"Probabilistic quantizer holding twelve scales, each with a weight per note, choosing a neighbouring note by weight rather than always the nearest one",
@@ -30573,7 +30779,7 @@ static const short O1326[] = {3,6,-1,26,94,69,129,143,93,144,128,68,29,27,30,31,
 static const short P1326[] = {1,4,9,11,13,15,18,32,32,32,32,32,32,32,32,32,32,32,32,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,71,73,83,75,77,79,81,96,98,100,102,104,106,108,40,-1,42,44,46,48,50,52,62,110,112,114,120,122,124,116,131,135,139,133,137,141,87,89,54,56,58,85,118,126,38,146,147,60,64,66,7};
 static const signed char FI1326[] = {2,2,1,1,1,1,1,2,1,2,2,1,2,1,1,1,1,2,1,1,1,1,2,2,2,-1,1,1,1,1,1,1,1,2,1,1,2,2,2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,1,2,3,2,2,2,2};
 static const signed char FO1326[] = {2,2,-1,2,2,2,2,1,3,1,3,3,2,2,2,2,2,-1,-1,-1,1,1,1,1,-1,3,3,1,1,2,1};
-static const short PR1326[] = {0,63,-1,102,102,102,102,0,103,0,0,6,0,102,102,102,102,0,102,102,102,102,0,0,0,-1,6,102,102,102,102,102,102,0,6,102,0,0,0,102,102,102,-1,102,102,102,0,0,0,0,0,0,0,0,63,103,0,2,0,0,0,0};
+static const short PR1326[] = {0,132,-1,215,215,215,215,0,216,0,0,6,0,215,215,215,215,0,215,215,215,215,0,0,0,-1,6,215,215,215,215,215,215,0,6,215,0,0,0,215,215,215,-1,215,215,215,0,0,0,0,0,0,0,0,132,216,0,2,0,0,0,0};
 static const short PO1326[] = {0,0,-1,0,0,0,0,6,1,6,1,1,0,0,0,0,0,-1,-1,-1,6,6,6,6,-1,2,1,-1,-1,0,-1};
 static const char* const L1327[] = {
 	"ModeScaleProgressions: a chord progression player that steps around a diatonic circle of fifths in any of the seven modes, with its own clock, a polyphonic chord output and a scale quantizer.",
@@ -30657,7 +30863,7 @@ static const short O1327[] = {3,6,-1,26,69,68,29,27,30,31,28,-1,70,24,22,17,20,3
 static const short P1327[] = {1,4,9,11,13,15,18,32,32,32,32,32,32,32,32,32,32,32,32,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,40,-1,42,44,46,48,50,52,62,54,56,58,38,60,64,66,7};
 static const signed char FI1327[] = {2,2,1,1,1,1,1,2,1,2,2,-1,1,1,1,1,1,1,1,2,2,2,2,3,2,2,2,2};
 static const signed char FO1327[] = {2,2,-1,2,2,3,2,2,2,2,2,-1,1,-1,3,3,1,1,2,1};
-static const short PR1327[] = {0,63,-1,102,102,102,102,0,103,0,0,-1,6,102,102,102,102,102,102,0,0,0,63,2,0,0,0,0};
+static const short PR1327[] = {0,132,-1,215,215,215,215,0,216,0,0,-1,6,215,215,215,215,215,215,0,0,0,132,2,0,0,0,0};
 static const short PO1327[] = {0,0,-1,0,0,1,0,0,0,0,0,-1,6,-1,2,1,-1,-1,0,-1};
 static const char* const L1328[] = {
 	"ModeScaleQuant: a polyphonic quantizer that snaps pitches to one of the seven modern modes at any root, showing the scale on a circle of fifths, a stave and a piano keyboard.",
@@ -30682,7 +30888,7 @@ static const short O1328[] = {13,12,10,8,3,6,9};
 static const short P1328[] = {1,4,11,11,11,11,11,11,11,11,11,11,11,11};
 static const signed char FI1328[] = {1,1,3};
 static const signed char FO1328[] = {2,3,-1,3,3,1,2};
-static const short PR1328[] = {102,102,2};
+static const short PR1328[] = {215,215,2};
 static const short PO1328[] = {0,1,-1,2,1,-1,0};
 static const char* const L1329[] = {
 	"Three orbiters, each a stereo oscillator or LFO whose waveform comes from a randomly generated planetary signature",
@@ -30712,7 +30918,7 @@ static const short O1329[] = {15,16,17,17,17,18,18,18};
 static const short P1329[] = {1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7};
 static const signed char FI1329[] = {2,2,2,2,2,2,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1329[] = {0,0,0,0,0,0,0,0};
-static const short PR1329[] = {0,0,0,0,0,0,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR1329[] = {53,53,53,53,217,217,23,218,218,55,219,219,57,220,220,66,66,66,66,66,66};
 static const short PO1329[] = {2,2,2,2,2,2,2,2};
 static const char* const L1330[] = {
 	"Network sequencer of sixteen nodes, where the patch cables between nodes set which step follows which, allowing branches, loops and ratchets",
@@ -30744,7 +30950,7 @@ static const short O1330[] = {3,4,10,11,12,10,11,12,10,11,12,10,11,12,10,11,12,1
 static const short P1330[] = {7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9};
 static const signed char FI1330[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1330[] = {2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1330[] = {0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static const short PR1330[] = {82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82};
 static const short PO1330[] = {0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static const char* const L1331[] = {
 	"Speed shifter and six tape delays, called ice cubes, each keeping its last recording until it is recorded over",
@@ -30783,7 +30989,7 @@ static const short O1331[] = {24,25};
 static const short P1331[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,13,13,13,13,13};
 static const signed char FI1331[] = {0,2,2,1,-1,1,1,1,1,0};
 static const signed char FO1331[] = {0,0};
-static const short PR1331[] = {2,0,0,-1,-1,-1,-1,-1,-1,2};
+static const short PR1331[] = {38,82,82,11,-1,221,139,4,4,38};
 static const short PO1331[] = {2,2};
 static const char* const L1332[] = {
 	"Modulation source giving five CV values that hold steady until a nudge moves them to new ones",
@@ -30813,7 +31019,7 @@ static const short O1332[] = {18,18,18,18,18};
 static const short P1332[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI1332[] = {1,1,1,1,1,1,1,1,1,2};
 static const signed char FO1332[] = {1,1,1,1,1};
-static const short PR1332[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,0};
+static const short PR1332[] = {222,223,224,225,226,8,8,8,12,82};
 static const char* const L1333[] = {
 	"One-shot sequencer of four values that interrupts the sequencer patched through it and plays a short sequence of its own",
 	"Sets one of the four values this sequencer plays; the knobs span -1V to 1V until the range is changed on the menu",
@@ -30839,7 +31045,7 @@ static const short O1333[] = {11,12,13,14};
 static const short P1333[] = {1,1,1,1,2,3,4,5,6};
 static const signed char FI1333[] = {2,2,2,1};
 static const signed char FO1333[] = {2,2,2,1};
-static const short PR1333[] = {0,0,0,-1};
+static const short PR1333[] = {82,227,8,8};
 static const short PO1333[] = {-1,0,0,-1};
 static const char* const L1334[] = {
 	"Eight-node expander for Glass Pane, placed immediately to the left or the right of it, adding its nodes to the same network; several can be chained",
@@ -30864,7 +31070,7 @@ static const short O1334[] = {6,7,8,6,7,8,6,7,8,6,7,8,6,7,8,6,7,8,6,7,8,6,7,8};
 static const short P1334[] = {3,3,3,3,3,3,3,3,5,5,5,5,5,5,5,5};
 static const signed char FI1334[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1334[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1334[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static const short PR1334[] = {82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82};
 static const char* const L1335[] = {
 	"Expander for Shifty, sitting immediately to the right of it, with a CV input and an attenuverter for the clock, ramp, sample and hold, echo and mute settings",
 	"Attenuates and inverts the clock rate CV; at full, 10V adds 5000 beats per minute to Shifty's clock rate",
@@ -30885,6 +31091,7 @@ static const char* const L1335[] = {
 static const short I1335[] = {7,8,9,10,11,11,11,11,11,11,11,12,12,12,12,12,12,12};
 static const short P1335[] = {1,2,3,4,5,5,5,5,5,5,5,6,6,6,6,6,6,6};
 static const signed char FI1335[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+static const short PR1335[] = {7,228,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
 static const char* const L1336[] = {
 	"Shift register for gates with a controllable delay on each of its seven rows, turning one clock or trigger into seven varied gate patterns",
 	"Spreads the rows in time: at 0 all seven rows hit on the same beat, at 1 each row hits one beat later than the row above it, and at 2 two beats later",
@@ -30906,7 +31113,7 @@ static const short O1336[] = {11,11,11,11,11,11,11};
 static const short P1336[] = {1,2,3,8,8,8,8,8,8,8,9,9,9,9,9,9,9,10,10,10,10,10,10,10,4};
 static const signed char FI1336[] = {2,2,1,1,1,1,1,1,1};
 static const signed char FO1336[] = {2,2,2,2,2,2,2};
-static const short PR1336[] = {24,0,-1,-1,-1,-1,-1,-1,-1};
+static const short PR1336[] = {229,230,231,231,231,231,231,231,231};
 static const short PO1336[] = {0,0,0,0,0,0,0};
 static const char* const L1337[] = {
 	"Modulation and gate source for a whole song: a head that sets the length of the song and moves eight arms, each arm turning that movement into modulation or into drum gates",
@@ -31085,7 +31292,7 @@ static const short I1341[] = {1,1,1,1,2,2,2,2};
 static const short O1341[] = {3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7};
 static const signed char FI1341[] = {2,2,2,2,2,2,2,2};
 static const signed char FO1341[] = {3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1341[] = {0,0,0,0,-1,-1,-1,-1};
+static const short PR1341[] = {82,82,82,82,82,82,82,82};
 static const short PO1341[] = {2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const char* const L1342[] = {
 	"Sequencer of four rows of notes, with bridges between the rows that skip, mute, ratchet, borrow, swap or jump between them",
@@ -31123,7 +31330,7 @@ static const short O1342[] = {3,4,5,6,7};
 static const short P1342[] = {10,10,10,10,11,11,11,11,13,13,13,14,14,14,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,16,17};
 static const signed char FI1342[] = {1,1,1,1,1,1,1,2,2,1};
 static const signed char FO1342[] = {2,3,2,2,2};
-static const short PR1342[] = {-1,-1,-1,-1,-1,-1,-1,0,-1,-1};
+static const short PR1342[] = {8,8,8,8,8,8,8,82,82,8};
 static const short PO1342[] = {0,2,0,0,0};
 static const char* const L1343[] = {
 	"Sequencer over a field of notes with an intersection between every four of them, each intersection steering, muting or ratcheting the playhead",
@@ -31164,7 +31371,7 @@ static const short O1343[] = {3,4,5,6,7};
 static const short P1343[] = {10,11,13,14,16,17,19,20,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9};
 static const signed char FI1343[] = {2,2,1,1,1,1};
 static const signed char FO1343[] = {2,3,2,2,2};
-static const short PR1343[] = {0,-1,-1,-1,-1,-1};
+static const short PR1343[] = {82,82,8,-1,8,8};
 static const short PO1343[] = {0,2,0,0,0};
 static const char* const L1344[] = {
 	"Sequencer that draws its sequence from a grid of nine notes, with knobs biasing which part of the grid the playhead favours",
@@ -31218,7 +31425,7 @@ static const short O1344[] = {3,4};
 static const short P1344[] = {9,10,15,16,12,13,18,19,21,22,24,25,27,28,33,34,30,31,8,8,8,8,8,8,8,8,8};
 static const signed char FI1344[] = {2,2,1,1,1,1,1,1,1,1,1};
 static const signed char FO1344[] = {2,3};
-static const short PR1344[] = {0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR1344[] = {82,82,8,8,8,8,8,8,8,8,8};
 static const short PO1344[] = {0,2};
 static const char* const L1345[] = {
 	"Sequencer of four concentric rings of notes read as four eight-step lines, with jump points between the lines and rotations that shift the notes",
@@ -31264,7 +31471,7 @@ static const short O1345[] = {26,26,26,26,3,4,5,6,7};
 static const short P1345[] = {21,21,21,21,22,22,22,22,9,9,9,9,10,10,10,10,12,12,12,12,13,13,13,13,15,15,15,15,16,16,16,16,18,18,18,18,18,18,18,18,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,19,19,19,19,19,19,19,19};
 static const signed char FI1345[] = {1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1};
 static const signed char FO1345[] = {2,2,2,2,2,3,2,2,2};
-static const short PR1345[] = {-1,-1,-1,-1,0,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR1345[] = {8,8,8,8,82,82,82,82,82,82,82,82,8,8,8,8,8,8,8,8,8,8,8,8,82,82,8,8,8,8,8,8,8,8};
 static const short PO1345[] = {0,0,0,0,0,2,0,0,0};
 static const char* const L1346[] = {
 	"Randomizer expander for any Rainbow sequencer, placed immediately to the right of it, with four buttons and triggers that randomize notes on it",
@@ -31276,7 +31483,7 @@ static const char* const L1346[] = {
 static const short I1346[] = {2,2,2,2};
 static const short P1346[] = {1,1,1,1};
 static const signed char FI1346[] = {2,2,2,2};
-static const short PR1346[] = {0,0,0,0};
+static const short PR1346[] = {82,82,82,82};
 static const char* const L1347[] = {
 	"Physical model of a human vocal tract: a glottal source driving a tube shaped by the tongue, a throat constriction and a nasal branch, so it speaks vowels and consonants rather than playing waveforms",
 	"Moves the tongue along the tract from front to back, which is the movement that turns one vowel into another",
@@ -31329,7 +31536,7 @@ static const short P1347[] = {1,2,9,5,6,3,4,7,8,10,11,12,13,14,15,16,17,18,19,20
 static const signed char FI1347[] = {1,1,1,1,1,1,1,1,3,1,1};
 static const signed char FO1347[] = {0};
 static const short PR1347[] = {-1,-1,-1,-1,-1,-1,-1,-1,1,-1,-1};
-static const short PO1347[] = {23};
+static const short PO1347[] = {37};
 static const char* const L1348[] = {
 	"Sample and hold built on a stack: each push samples the input and puts it on top of the pile, each pop throws the top one away, and the output carries whatever is on top",
 	"A rising edge samples In and pushes that voltage onto the stack; it is ignored once seven values are held, although the maker's README describes eight frames",
@@ -31357,7 +31564,7 @@ static const short I1349[] = {1,2,3};
 static const short O1349[] = {4,7,6,5};
 static const signed char FI1349[] = {3,2,3};
 static const signed char FO1349[] = {3,3,2,3};
-static const short PR1349[] = {2,24,2};
+static const short PR1349[] = {2,50,2};
 static const short PO1349[] = {1,2,-1,2};
 static const char* const L1350[] = {
 	"Expander for randomchordrecorder, placed immediately to its right, reporting which slot is playing",
@@ -31389,7 +31596,7 @@ static const short O1351[] = {10,11};
 static const short P1351[] = {1,1,1,1,1,1,3,2,1,1,1,1,4,4,4,4,4,4,4,4,4,4,4,4,5};
 static const signed char FI1351[] = {3,2,2,2};
 static const signed char FO1351[] = {3,2};
-static const short PR1351[] = {2,41,0,41};
+static const short PR1351[] = {2,91,0,91};
 static const short PO1351[] = {1,-1};
 static const char* const L1352[] = {
 	"Two effects loops wired in series, with a switch that swaps which of them comes first",
@@ -31674,7 +31881,7 @@ static const short O1369[] = {21,22};
 static const short P1369[] = {1,2,3,4,5,6,7,8,-1,8,9,10,11};
 static const signed char FI1369[] = {0,0,2,1,1,1,1,1,-1,1,1,1};
 static const signed char FO1369[] = {0,0};
-static const short PR1369[] = {2,2,24,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR1369[] = {2,2,50,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static const short PO1369[] = {2,2};
 static const char* const L1370[] = {
 	"Three independent normalled switches, each choosing between two inputs and passing one of them to its output.",
@@ -31882,7 +32089,7 @@ static const short O1379[] = {6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10};
 static const short P1379[] = {2,3,3,3,1};
 static const signed char FI1379[] = {1,1,1,1,2,2,2,2};
 static const signed char FO1379[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1379[] = {-1,-1,-1,-1,24,24,24,24};
+static const short PR1379[] = {-1,-1,-1,-1,50,50,50,50};
 static const char* const L1380[] = {
 	"A second order state variable filter modelled on the analogue circuit, giving low pass, high pass, band pass and band stop versions of one input.",
 	"Sets the corner frequency of the filter, 20Hz to 20480Hz, starting at 261.63Hz.",
@@ -32137,7 +32344,7 @@ static const short I1389[] = {1,2,3,4,5,5,5};
 static const short O1389[] = {6,7,8,8,8};
 static const signed char FI1389[] = {2,2,2,2,1,1,1};
 static const signed char FO1389[] = {2,2,1,1,1};
-static const short PR1389[] = {19,19,63,19,-1,-1,-1};
+static const short PR1389[] = {19,19,132,19,-1,-1,-1};
 static const short PO1389[] = {0,-1,-1,-1,-1};
 static const char* const L1390[] = {
 	"An eight-state sequencer driven by a Markov chain: every clock draws the next state at random from the probabilities set for the current one, and the output carries that state's value and input",
@@ -32191,7 +32398,7 @@ static const short P1391[] = {1,2,3,4,5,6};
 static const signed char FI1391[] = {3,1,1,1};
 static const signed char FO1391[] = {0,0};
 static const short PR1391[] = {1,-1,-1,-1};
-static const short PO1391[] = {23,23};
+static const short PO1391[] = {37,37};
 static const char* const L1392[] = {
 	"A delay line read with third-order Lagrange interpolation, built for waveguide and Karplus-Strong voices, flanging and chorus, with a second output tapped part way along the line",
 	"Shortens the delay by 0 to 16 sample periods, which compensates for the one sample every patch cable in the feedback loop adds",
@@ -32217,7 +32424,7 @@ static const short P1392[] = {1,2,3,4,5,6,7};
 static const signed char FI1392[] = {3,1,0,0};
 static const signed char FO1392[] = {0,0};
 static const short PR1392[] = {1,-1,2,2};
-static const short PO1392[] = {2,104};
+static const short PO1392[] = {2,232};
 static const char* const L1393[] = {
 	"A blank panel drawn as the hydrogen absorption spectrum, with no controls and no jacks",
 };
@@ -32431,7 +32638,7 @@ static const short O1402[] = {5,11,17,23};
 static const short P1402[] = {1,2,6,7,12,13,18,19,8,14,20};
 static const signed char FI1402[] = {2,1,1,1,1,1,1,1};
 static const signed char FO1402[] = {2,2,2,2};
-static const short PR1402[] = {0,-1,105,105,105,105,105,105};
+static const short PR1402[] = {0,-1,233,233,233,233,233,233};
 static const short PO1402[] = {0,0,0,0};
 static const char* const L1403[] = {
 	"A bit crusher and downsampler with modulation inputs and triggers that throw new rates at random",
@@ -32663,8 +32870,8 @@ static const short O1412[] = {13,13,13,13,13,13,13,14,14,14,15,-1,16,17,18};
 static const short P1412[] = {1,1,1,1,1,2,3,4,-1,5,6,8,7};
 static const signed char FI1412[] = {2,2,1,1};
 static const signed char FO1412[] = {2,2,2,2,2,2,2,2,2,2,2,-1,1,0,1};
-static const short PR1412[] = {41,0,-1,-1};
-static const short PO1412[] = {0,0,0,0,0,0,0,0,0,0,0,-1,-1,106,6};
+static const short PR1412[] = {91,0,-1,-1};
+static const short PO1412[] = {0,0,0,0,0,0,0,0,0,0,0,-1,-1,234,6};
 static const char* const L1413[] = {
 	"Runs a program written in a BASIC-like language, reading nine input jacks, driving six output jacks and printing Tipsy text; the program is typed into the window on the panel",
 	"Pressing it starts the program under the two trigger styles of STYLE, and under the gate style the program runs for as long as the button is held down",
@@ -33045,8 +33252,8 @@ static const char* const L1427[] = {
 static const short I1427[] = {2};
 static const short O1427[] = {3};
 static const short P1427[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1427[] = {29};
-static const short PO1427[] = {27};
+static const short PR1427[] = {38};
+static const short PO1427[] = {63};
 static const char* const L1428[] = {
 	"Adds a voltage offset to each channel of a polyphonic cable, one knob per channel, eight channels in all.",
 	"Sets the offset added to that channel, as an exact voltage, in semitone steps of a twelfth of a volt, or in whole volts, as set on the menu.",
@@ -33058,8 +33265,8 @@ static const char* const L1428[] = {
 static const short I1428[] = {2};
 static const short O1428[] = {3};
 static const short P1428[] = {1,1,1,1,1,1,1,1};
-static const short PR1428[] = {29};
-static const short PO1428[] = {27};
+static const short PR1428[] = {38};
+static const short PO1428[] = {63};
 static const char* const L1429[] = {
 	"A livecoding sequencer running the ORCA language: letters typed into the grid are operators that build patterns and send MIDI and CV as the frame counter advances.",
 	"A trigger advances the simulation by one frame, in place of the internal clock.",
@@ -33138,7 +33345,7 @@ static const short I1431[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 static const short O1431[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI1431[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const signed char FO1431[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR1431[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
+static const short PR1431[] = {88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88,88};
 static const short PO1431[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L1432[] = {
 	"Applies a boolean function to up to four inputs across sixteen polyphonic channels, with the function selectable by CV and a sample and hold on the result.",
@@ -33155,7 +33362,7 @@ static const short O1432[] = {5};
 static const short P1432[] = {1};
 static const signed char FI1432[] = {2,1,2,2,2,2};
 static const signed char FO1432[] = {2};
-static const short PR1432[] = {33,11,33,33,33,33};
+static const short PR1432[] = {49,11,49,49,49,49};
 static const short PO1432[] = {17};
 static const char* const L1433[] = {
 	"Adds CV control to up to 32 parameters of any modules, taking the voltages from two polyphonic inputs.",
@@ -33176,7 +33383,7 @@ static const char* const L1433[] = {
 };
 static const short I1433[] = {1,2};
 static const signed char FI1433[] = {1,1};
-static const short PR1433[] = {29,29};
+static const short PR1433[] = {38,38};
 static const char* const L1434[] = {
 	"Expander for CV-MAP, placed immediately to the right of it, giving that CV-MAP a name of up to eight characters which a parameter's own context menu can address.",
 	"Note — the name lets a parameter be mapped or re-mapped to a chosen input channel from the parameter's own context menu.",
@@ -33235,8 +33442,8 @@ static const short O1437[] = {8};
 static const short P1437[] = {1,2,3,4,5,6};
 static const signed char FI1437[] = {0};
 static const signed char FO1437[] = {0};
-static const short PR1437[] = {29};
-static const short PO1437[] = {29};
+static const short PR1437[] = {38};
+static const short PO1437[] = {38};
 static const char* const L1438[] = {
 	"Stores, recalls and sequences eight presets of one module, placed immediately to the right of the module it manages.",
 	"Short-press applies this preset to the managed module, or in write mode stores that module's current preset into it; long-press clears it, or sets the sequence length in read mode.",
@@ -33350,7 +33557,7 @@ static const char* const L1444[] = {
 static const short I1444[] = {2};
 static const short P1444[] = {1,1,1,1,1,1,1,1,1,1};
 static const signed char FI1444[] = {2};
-static const short PR1444[] = {33};
+static const short PR1444[] = {49};
 static const char* const L1445[] = {
 	"Holds up to 32 parameters of other modules at fixed values, so they cannot be changed by mouse or by the Randomize menu item.",
 	"Starts binding: press it, then click a knob, fader, switch or button to lock it at its current value.",
@@ -33389,7 +33596,7 @@ static const short O1446[] = {11,11,11,11,12,12,12,12};
 static const signed char FI1446[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1446[] = {2,2,2,2,1,1,1,1};
 static const short PR1446[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5};
-static const short PO1446[] = {10,10,10,10,107,107,107,107};
+static const short PO1446[] = {10,10,10,10,235,235,235,235};
 static const char* const L1447[] = {
 	"Replaces or adds individual channels inside a polyphonic cable, using monophonic cables for up to sixteen of them.",
 	"The polyphonic signal passed through to the output.",
@@ -33398,8 +33605,8 @@ static const char* const L1447[] = {
 };
 static const short I1447[] = {1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const short O1447[] = {3};
-static const short PR1447[] = {29,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
-static const short PO1447[] = {27};
+static const short PR1447[] = {38,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PO1447[] = {63};
 static const char* const L1448[] = {
 	"Replaces or adds individual channels inside a polyphonic cable, using monophonic cables for up to eight of them.",
 	"The polyphonic signal passed through to the output.",
@@ -33408,8 +33615,8 @@ static const char* const L1448[] = {
 };
 static const short I1448[] = {1,2,2,2,2,2,2,2,2};
 static const short O1448[] = {3};
-static const short PR1448[] = {29,8,8,8,8,8,8,8,8};
-static const short PO1448[] = {27};
+static const short PR1448[] = {38,8,8,8,8,8,8,8,8};
+static const short PO1448[] = {63};
 static const char* const L1449[] = {
 	"An eight by eight matrix mixer: each pad routes one input into one output, with an attenuverter on every output and eight scenes that crossfade into one another.",
 	"Routes that input into that output while it is lit, fading in and out over the times set by the two fade trimpots.",
@@ -33438,7 +33645,7 @@ static const short I1449[] = {9,9,9,9,9,9,9,9,10,11};
 static const short O1449[] = {12,12,12,12,12,12,12,12};
 static const short P1449[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,6,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8};
 static const signed char FI1449[] = {-1,-1,-1,-1,-1,-1,-1,-1,2,2};
-static const short PR1449[] = {29,29,29,29,29,29,29,29,10,5};
+static const short PR1449[] = {38,38,38,38,38,38,38,38,10,5};
 static const char* const L1450[] = {
 	"Expander for INTERMIX, placed immediately to the right of it, turning the fades of one selected input column into envelopes.",
 	"Carries a 0-10V envelope following the fade of the selected input column into that output, or a plain gate where that input is not set to linear fade.",
@@ -33510,7 +33717,7 @@ static const short O1454[] = {9,9,9,9,10,10,10,10};
 static const signed char FI1454[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1454[] = {2,2,2,2,1,1,1,1};
 static const short PR1454[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5};
-static const short PO1454[] = {10,10,10,10,107,107,107,107};
+static const short PO1454[] = {10,10,10,10,235,235,235,235};
 static const char* const L1455[] = {
 	"Replaces Rack's module browser with the browser from Rack v0.6, or with modified versions of the v1 and v2 browsers carrying favourites, custom tags, width filtering and a preview loupe.",
 	"Menu — Auto-generate custom tags — assigns tags from a curated rule set by matching keywords against module names and descriptions; Delete custom tag removes one.",
@@ -33695,8 +33902,8 @@ static const short O1469[] = {8,9};
 static const short P1469[] = {1,3,7};
 static const signed char FI1469[] = {1,1,0,2};
 static const signed char FO1469[] = {0,0};
-static const short PR1469[] = {4,46,29,33};
-static const short PO1469[] = {29,29};
+static const short PR1469[] = {4,57,38,49};
+static const short PO1469[] = {38,38};
 static const char* const L1470[] = {
 	"Restricts patching to a learned area of the rack: a module moved outside that area is disabled, and enabled again when it is moved back inside.",
 	"Menu — Learn — drag across the rack to mark the usable area; Size sets it as a width in HP and a height in rows, Size Presets offer set sizes, and Reset removes the restriction.",
@@ -33737,8 +33944,8 @@ static const short O1472[] = {8};
 static const short P1472[] = {1,2};
 static const signed char FI1472[] = {1,2,2,2,1};
 static const signed char FO1472[] = {1};
-static const short PR1472[] = {13,33,33,33,29};
-static const short PO1472[] = {27};
+static const short PR1472[] = {13,49,49,49,38};
+static const short PO1472[] = {63};
 static const char* const L1473[] = {
 	"A digital distortion built on a bistable resonator: audio drives a resonant filter whose feedback path is nonlinear, and which can be pushed into self-oscillation.",
 	"Sets the gain before the resonator, -20dB to 20dB; higher settings give more saturation and push the resonator towards self-oscillation.",
@@ -33757,8 +33964,8 @@ static const short O1473[] = {8};
 static const short P1473[] = {1,2,3,4,5,6};
 static const signed char FI1473[] = {0};
 static const signed char FO1473[] = {0};
-static const short PR1473[] = {29};
-static const short PO1473[] = {29};
+static const short PR1473[] = {38};
+static const short PO1473[] = {38};
 static const char* const L1474[] = {
 	"Records the movements of one mapped parameter into up to eight sequences and plays them back, with direct phase control and several recording modes.",
 	"Starts and stops recording of the mapped parameter; in touch and move modes it arms recording, which then begins on the first move of the parameter.",
@@ -33811,8 +34018,8 @@ static const short I1475[] = {1,2,3};
 static const short O1475[] = {6};
 static const short P1475[] = {4,5};
 static const signed char FI1475[] = {1};
-static const short PR1475[] = {4,8,29};
-static const short PO1475[] = {27};
+static const short PR1475[] = {4,8,38};
+static const short PO1475[] = {63};
 static const char* const L1476[] = {
 	"Controls whatever parameter the mouse pointer is over, by voltage, by triggers or from a MIDI control.",
 	"While this gate is high, changes made to the hovered parameter are ten times finer; holding Shift does the same.",
@@ -33850,7 +34057,7 @@ static const short O1477[] = {7};
 static const short P1477[] = {2,4};
 static const signed char FI1477[] = {-1,2,1,1};
 static const short PR1477[] = {8,5,10,10};
-static const short PO1477[] = {27};
+static const short PO1477[] = {63};
 static const char* const L1478[] = {
 	"Audio file browser and player: it streams WAV, FLAC and MP3 from disk, previews them with trim points and looping, and drags a sample onto a sampler module.",
 	"The left channel of the file being previewed.",
@@ -33914,8 +34121,8 @@ static const char* const L1481[] = {
 };
 static const short I1481[] = {1,1,1,1};
 static const short O1481[] = {2,2,2,2};
-static const short PR1481[] = {27,27,27,27};
-static const short PO1481[] = {27,27,27,27};
+static const short PR1481[] = {63,63,63,63};
+static const short PO1481[] = {63,63,63,63};
 static const char* const L1482[] = {
 	"Imports a Rack selection file or the clipboard into the patch, keeping parameter mappings and GLUE labels intact.",
 	"Menu — Import — reads a .vcvs selection file and shows the selection under the pointer, where a left-click places it and a right-click cancels; Ctrl, Shift and B does the same.",
@@ -33970,7 +34177,7 @@ static const short O1484[] = {8};
 static const short P1484[] = {1,1,1,1,1,1,1,1,1,1,1,1,2,3,4};
 static const signed char FI1484[] = {2,2,1};
 static const signed char FO1484[] = {2};
-static const short PR1484[] = {37,5,8};
+static const short PR1484[] = {87,5,8};
 static const short PO1484[] = {0};
 static const char* const L1485[] = {
 	"Expander adding twelve more snapshot slots to TRANSIT, placed immediately to the right of it or of another +T.",
@@ -34498,7 +34705,7 @@ static const short O1509[] = {5};
 static const short P1509[] = {1,2};
 static const signed char FI1509[] = {1,1};
 static const signed char FO1509[] = {1};
-static const short PR1509[] = {29,29};
+static const short PR1509[] = {38,38};
 static const char* const L1510[] = {
 	"A grid of 6 arithmetic blocks, each taking an X value from its left and a Y value from above, and passing its results on to the right and downwards.",
 	"Picks the algorithm that block applies to its X and Y values and its constant; touch and drag to change it. With none picked, the X value passes to the right and the Y value passes down.",
@@ -34518,7 +34725,7 @@ static const short O1510[] = {5,5,5,5,5,5,6};
 static const short P1510[] = {1,1,1,1,1,1,2,2,2,2,2,2};
 static const signed char FI1510[] = {1,1,1,1,1,1,1};
 static const signed char FO1510[] = {1,1,1,1,1,1,1};
-static const short PR1510[] = {29,29,29,29,29,29,29};
+static const short PR1510[] = {38,38,38,38,38,38,38};
 static const char* const L1511[] = {
 	"A grid of 12 arithmetic blocks, each taking an X value from its left and a Y value from above, and passing its results on to the right and downwards.",
 	"Picks the algorithm that block applies to its X and Y values and its constant; touch and drag to change it. With none picked, the X value passes to the right and the Y value passes down.",
@@ -34538,7 +34745,7 @@ static const short O1511[] = {5,5,5,5,5,5,6,6};
 static const short P1511[] = {1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI1511[] = {1,1,1,1,1,1,1,1};
 static const signed char FO1511[] = {1,1,1,1,1,1,1,1};
-static const short PR1511[] = {29,29,29,29,29,29,29,29};
+static const short PR1511[] = {38,38,38,38,38,38,38,38};
 static const char* const L1512[] = {
 	"A grid of 18 arithmetic blocks, each taking an X value from its left and a Y value from above, and passing its results on to the right and downwards.",
 	"Picks the algorithm that block applies to its X and Y values and its constant; touch and drag to change it. With none picked, the X value passes to the right and the Y value passes down.",
@@ -34558,7 +34765,7 @@ static const short O1512[] = {5,5,5,5,5,5,6,6,6};
 static const short P1512[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI1512[] = {1,1,1,1,1,1,1,1,1};
 static const signed char FO1512[] = {1,1,1,1,1,1,1,1,1};
-static const short PR1512[] = {29,29,29,29,29,29,29,29,29};
+static const short PR1512[] = {38,38,38,38,38,38,38,38,38};
 static const char* const L1513[] = {
 	"A grid of 24 arithmetic blocks, each taking an X value from its left and a Y value from above, and passing its results on to the right and downwards.",
 	"Picks the algorithm that block applies to its X and Y values and its constant; touch and drag to change it. With none picked, the X value passes to the right and the Y value passes down.",
@@ -34578,7 +34785,7 @@ static const short O1513[] = {5,5,5,5,5,5,6,6,6,6};
 static const short P1513[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI1513[] = {1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1513[] = {1,1,1,1,1,1,1,1,1,1};
-static const short PR1513[] = {29,29,29,29,29,29,29,29,29,29};
+static const short PR1513[] = {38,38,38,38,38,38,38,38,38,38};
 static const char* const L1514[] = {
 	"A grid of 36 arithmetic blocks, each taking an X value from its left and a Y value from above, and passing its results on to the right and downwards.",
 	"Picks the algorithm that block applies to its X and Y values and its constant; touch and drag to change it. With none picked, the X value passes to the right and the Y value passes down.",
@@ -34598,7 +34805,7 @@ static const short O1514[] = {5,5,5,5,5,5,6,6,6,6,6,6};
 static const short P1514[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI1514[] = {1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1514[] = {1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1514[] = {29,29,29,29,29,29,29,29,29,29,29,29};
+static const short PR1514[] = {38,38,38,38,38,38,38,38,38,38,38,38};
 static const char* const L1515[] = {
 	"Four two-input AND gates built for digital signals, which also accept analog ones.",
 	"One of the two inputs into that gate; an input with nothing patched into it is ignored.",
@@ -34815,7 +35022,7 @@ static const short O1534[] = {9,9,9,9};
 static const short P1534[] = {1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5};
 static const signed char FI1534[] = {2,2,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1534[] = {0,0,0,0};
-static const short PR1534[] = {88,86,8,8,8,8,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40};
+static const short PR1534[] = {176,174,8,8,8,8,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90};
 static const short PO1534[] = {2,2,2,2};
 static const char* const L1535[] = {
 	"A two-channel oscilloscope built for envelopes, with movable indices for measuring a time span and a voltage.",
@@ -34926,8 +35133,8 @@ static const short O1540[] = {9};
 static const short P1540[] = {1,2,3,4,5,6};
 static const signed char FI1540[] = {-1,2};
 static const signed char FO1540[] = {2};
-static const short PR1540[] = {8,88};
-static const short PO1540[] = {37};
+static const short PR1540[] = {8,176};
+static const short PO1540[] = {87};
 static const char* const L1541[] = {
 	"An eight-channel logic analyser tracing digital signals together on one screen.",
 	"Picks which of the eight signal inputs or the external trigger input synchronises the display; a small blue light beside the chosen input comes on.",
@@ -34969,7 +35176,7 @@ static const char* const L1542[] = {
 static const short I1542[] = {8,8,9};
 static const short P1542[] = {1,2,3,4,4,5,6,7};
 static const signed char FI1542[] = {2,2,2};
-static const short PR1542[] = {29,29,16};
+static const short PR1542[] = {38,38,16};
 static const char* const L1543[] = {
 	"Three Schmitt trigger line drivers, turning analog signals into clean digital ones.",
 	"Sets the midpoint of the input range for that driver, -10V to +10V; an input above it reads high and an input below it reads low.",
@@ -35023,8 +35230,8 @@ static const char* const L1545[] = {
 static const short I1545[] = {3};
 static const short O1545[] = {4};
 static const short P1545[] = {1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1545[] = {29};
-static const short PO1545[] = {27};
+static const short PR1545[] = {38};
+static const short PO1545[] = {63};
 static const char* const L1546[] = {
 	"A masterizer, which passes its polyphonic input to its output unchanged.",
 	"A two-position switch marked On and More On; nothing in the module reads it beyond the rate at which the button's light pulses, and neither position changes the signal.",
@@ -35035,8 +35242,8 @@ static const char* const L1546[] = {
 static const short I1546[] = {2};
 static const short O1546[] = {3};
 static const short P1546[] = {1};
-static const short PR1546[] = {29};
-static const short PO1546[] = {27};
+static const short PR1546[] = {38};
+static const short PO1546[] = {63};
 static const char* const L1547[] = {
 	"Six NOT gates built for digital signals, which also accept analog ones.",
 	"The signal inverted at that gate's output; with nothing patched in the gate reads 0V, which the default 0-10V range treats as low.",
@@ -35090,7 +35297,7 @@ static const short I1550[] = {1,2,3,3,3,4,4,4};
 static const short O1550[] = {5,5,5};
 static const signed char FI1550[] = {1,1,1,1,1,1,1,1};
 static const signed char FO1550[] = {2,2,2};
-static const short PR1550[] = {8,8,36,36,36,36,36,36};
+static const short PR1550[] = {8,8,86,86,86,86,86,86};
 static const char* const L1551[] = {
 	"Five comparators sharing one positive and one negative rail.",
 	"Sets the voltage every output takes while its non-inverting input is the higher of the two; with nothing patched in, the high value of the digital voltage range is used.",
@@ -35105,7 +35312,7 @@ static const short I1551[] = {1,2,3,3,3,3,3,4,4,4,4,4};
 static const short O1551[] = {5,5,5,5,5};
 static const signed char FI1551[] = {1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1551[] = {2,2,2,2,2};
-static const short PR1551[] = {8,8,36,36,36,36,36,36,36,36,36,36};
+static const short PR1551[] = {8,8,86,86,86,86,86,86,86,86,86,86};
 static const char* const L1552[] = {
 	"Four two-input OR gates built for digital signals, which also accept analog ones.",
 	"One of the two inputs into that gate; an input with nothing patched into it is ignored.",
@@ -35192,7 +35399,7 @@ static const short O1557[] = {7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,8,8,8,8};
 static const short P1557[] = {1,2,3,5,5,5,5};
 static const signed char FI1557[] = {3,1,1,1,1};
 static const signed char FO1557[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR1557[] = {14,43,43,43,43};
+static const short PR1557[] = {14,34,34,34,34};
 static const short PO1557[] = {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
 static const char* const L1558[] = {
 	"A digital low frequency oscillator with a choice of five waveforms, giving 16 outputs at fixed phases around the cycle and four more at phases you set.",
@@ -35211,7 +35418,7 @@ static const short O1558[] = {7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,8,8,8,8};
 static const short P1558[] = {1,2,3,5,5,5,5};
 static const signed char FI1558[] = {1,1,1,1,1};
 static const signed char FO1558[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1558[] = {14,43,43,43,43};
+static const short PR1558[] = {14,34,34,34,34};
 static const short PO1558[] = {21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21};
 static const char* const L1559[] = {
 	"One oscillator driving four outputs, each with its own waveform, phase and whole-number frequency multiple, for building Yamaha-style phase modulation.",
@@ -35232,7 +35439,7 @@ static const short O1559[] = {10,10,10,10};
 static const short P1559[] = {1,2,3,3,3,3,4,4,4,4,5,5,5,5};
 static const signed char FI1559[] = {3,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1559[] = {0,0,0,0};
-static const short PR1559[] = {14,4,4,4,4,43,43,43,43,10,10,10,10};
+static const short PR1559[] = {14,4,4,4,4,34,34,34,34,10,10,10,10};
 static const short PO1559[] = {3,3,3,3};
 static const char* const L1560[] = {
 	"An oscillator producing a smooth random waveform, with a cycle length you set and a rate at which the waveform mutates.",
@@ -35250,7 +35457,7 @@ static const short O1560[] = {7};
 static const short P1560[] = {1,2,3,4,4,4,4,4};
 static const signed char FI1560[] = {3,1};
 static const signed char FO1560[] = {0};
-static const short PR1560[] = {14,40};
+static const short PR1560[] = {14,90};
 static const short PO1560[] = {2};
 static const char* const L1561[] = {
 	"Twelve input sockets that do nothing, giving somewhere to plug a cable that another module needs connected before it will behave.",
@@ -35520,7 +35727,7 @@ static const short I1571[] = {8,9,10,11,12,13,14};
 static const short O1571[] = {15};
 static const short P1571[] = {1,2,3,4,5,6,7};
 static const signed char FI1571[] = {1,1,1,1,1,1,1};
-static const short PR1571[] = {40,40,40,40,40,40,8};
+static const short PR1571[] = {90,90,90,90,90,90,8};
 static const char* const L1572[] = {
 	"A format controller for the TD text displays with no knobs, setting text colour, background colour and text size from CV alone.",
 	"Sets the red part of the text colour, a tenth of its range per volt.",
@@ -35538,7 +35745,7 @@ static const char* const L1572[] = {
 static const short I1572[] = {1,2,3,4,5,6,7};
 static const short O1572[] = {8};
 static const signed char FI1572[] = {1,1,1,1,1,1,1};
-static const short PR1572[] = {40,40,40,40,40,40,8};
+static const short PR1572[] = {90,90,90,90,90,90,8};
 static const char* const L1573[] = {
 	"An obsolete module that does nothing, kept so that patches built with the Torpedo Merge TM-105 load.",
 	"A port kept from an earlier version of the module; nothing is read from it or sent to it.",
@@ -35557,7 +35764,7 @@ static const char* const L1574[] = {
 static const short I1574[] = {2};
 static const short P1574[] = {-1,1};
 static const signed char FI1574[] = {0};
-static const short PR1574[] = {29};
+static const short PR1574[] = {38};
 static const char* const L1575[] = {
 	"A two-channel VU meter reading the smoothed RMS of its input in volume units, to the ANSI C16.5-1942 standard, shown on two OLED strips.",
 	"Sets how much the signal is attenuated before the meter, 0.25x to 16x; at 4x a signal four times as large reads the same on the scale.",
@@ -35569,7 +35776,7 @@ static const char* const L1575[] = {
 static const short I1575[] = {2};
 static const short P1575[] = {-1,1};
 static const signed char FI1575[] = {0};
-static const short PR1575[] = {29};
+static const short PR1575[] = {38};
 static const char* const L1576[] = {
 	"A four-channel VU meter reading the smoothed RMS of its input in volume units, to the ANSI C16.5-1942 standard, shown on four OLED strips.",
 	"Sets how much the signal is attenuated before the meter, 0.25x to 16x; at 4x a signal four times as large reads the same on the scale.",
@@ -35581,7 +35788,7 @@ static const char* const L1576[] = {
 static const short I1576[] = {2};
 static const short P1576[] = {-1,1};
 static const signed char FI1576[] = {0};
-static const short PR1576[] = {29};
+static const short PR1576[] = {38};
 static const char* const L1577[] = {
 	"A single VU meter reading the smoothed RMS of its input in volume units, to the ANSI C16.5-1942 standard, shown on a moving needle.",
 	"Sets how much the signal is attenuated before the meter, 0.25x to 16x; at 4x a signal four times as large reads the same on the scale.",
@@ -35594,7 +35801,7 @@ static const char* const L1577[] = {
 static const short I1577[] = {2};
 static const short P1577[] = {-1,1};
 static const signed char FI1577[] = {0};
-static const short PR1577[] = {29};
+static const short PR1577[] = {38};
 static const char* const L1578[] = {
 	"A two-channel VU meter reading the smoothed RMS of its inputs in volume units, to the ANSI C16.5-1942 standard, shown on two moving needles.",
 	"Sets how much the signal is attenuated before the meter, 0.25x to 16x; at 4x a signal four times as large reads the same on the scale.",
@@ -35608,7 +35815,7 @@ static const char* const L1578[] = {
 static const short I1578[] = {2,3};
 static const short P1578[] = {-1,1};
 static const signed char FI1578[] = {0,0};
-static const short PR1578[] = {29,8};
+static const short PR1578[] = {38,8};
 static const char* const L1579[] = {
 	"A four-channel VU meter reading the smoothed RMS of its input in volume units, to the ANSI C16.5-1942 standard, shown on four moving needles.",
 	"Sets how much the signal is attenuated before the meter, 0.25x to 16x; at 4x a signal four times as large reads the same on the scale.",
@@ -35621,7 +35828,7 @@ static const char* const L1579[] = {
 static const short I1579[] = {2};
 static const short P1579[] = {-1,1};
 static const signed char FI1579[] = {0};
-static const short PR1579[] = {29};
+static const short PR1579[] = {38};
 static const char* const L1580[] = {
 	"A quantiser for unequal temperaments: it quantises a note CV to the 12-tone equal tempered chromatic scale and then detunes each of the twelve pitches by the amount you set.",
 	"Shifts every note quantised to C away from equal temperament, -50 to +50 cents, with the amount shown in cents.",
@@ -35651,7 +35858,7 @@ static const short O1580[] = {14,15};
 static const short P1580[] = {1,2,3,4,5,6,7,8,9,10,11,12};
 static const signed char FI1580[] = {3};
 static const signed char FO1580[] = {3};
-static const short PR1580[] = {85};
+static const short PR1580[] = {100};
 static const short PO1580[] = {1};
 static const char* const L1581[] = {
 	"Five quantisers sharing one set of unequal temperament tunings, with the tunings taken from the menu presets or from a WK-101.",
@@ -35668,7 +35875,7 @@ static const short I1581[] = {1,1,1,1,1,3};
 static const short O1581[] = {2,2,2,2,2};
 static const signed char FI1581[] = {3,3,3,3,3};
 static const signed char FO1581[] = {3,3,3,3,3};
-static const short PR1581[] = {85,85,85,85,85};
+static const short PR1581[] = {100,100,100,100,100};
 static const short PO1581[] = {1,1,1,1,1};
 static const char* const L1582[] = {
 	"A patch cable colour manager, giving new cables colours from a list you choose and offering highlighting for tracing cables around a patch.",
@@ -35894,8 +36101,8 @@ static const short O1594[] = {19};
 static const short P1594[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI1594[] = {2,2,1,1,1,1,1};
 static const signed char FO1594[] = {1};
-static const short PR1594[] = {33,33,108,108,108,108,8};
-static const short PO1594[] = {67};
+static const short PR1594[] = {49,49,121,121,121,121,8};
+static const short PO1594[] = {148};
 static const char* const L1595[] = {
 	"Polyphonic single biquad stage from the Surge filter bank, with nine filter types and a cutoff that tracks a volt per octave.",
 	"Picks the filter: LP and LP2B low-pass, HP high-pass, BP and BP2A band-pass, PKA peak, NOTCH, peakEQ and APF allpass.",
@@ -35919,8 +36126,8 @@ static const short O1595[] = {12,13};
 static const short P1595[] = {1,2,3,4,5,6};
 static const signed char FI1595[] = {0,0,3,1,1};
 static const signed char FO1595[] = {0,0};
-static const short PR1595[] = {46,46,32,46,46};
-static const short PO1595[] = {46,46};
+static const short PR1595[] = {57,57,23,57,57};
+static const short PO1595[] = {57,57};
 static const char* const L1596[] = {
 	"Four-voice chorus from Surge: four delay taps around a common base delay, moved by an LFO, with feedback and a high and low cut.",
 	"Sets the base delay the four chorus voices are spread around, 0.0005 to 0.125 seconds.",
@@ -35956,7 +36163,7 @@ static const short O1596[] = {21,22};
 static const short P1596[] = {1,2,3,4,5,6,7,8,-1,-1,-1,-1,20,23,-1,17};
 static const signed char FI1596[] = {0,0,1,1,1,1,1,1,1,1,-1,-1,-1,-1,1};
 static const signed char FO1596[] = {0,0};
-static const short PR1596[] = {46,46,43,43,43,43,43,43,43,43,-1,-1,-1,-1,8};
+static const short PR1596[] = {57,57,34,34,34,34,34,34,34,34,-1,-1,-1,-1,8};
 static const short PO1596[] = {3,3};
 static const char* const L1597[] = {
 	"Clock generator putting out a tempo as a control voltage and as a gate, for the bpm cv and clock cv inputs of the other Surge modules.",
@@ -36009,7 +36216,7 @@ static const short O1598[] = {20,21};
 static const short P1598[] = {1,2,3,4,5,6,7,8,23,23,23,23,19,22};
 static const signed char FI1598[] = {0,0,1,1,1,1,1,1,1,1};
 static const signed char FO1598[] = {0,0};
-static const short PR1598[] = {46,46,43,43,43,43,43,43,43,43,43,43,43,43,8};
+static const short PR1598[] = {57,57,34,34,34,34,34,34,34,34,34,34,34,34,8};
 static const short PO1598[] = {3,3};
 static const char* const L1599[] = {
 	"Stereo delay from Surge, with an independent time per channel, cross-feed between the two lines, a filtered feedback path and an LFO over both times.",
@@ -36057,7 +36264,7 @@ static const short O1599[] = {29,30};
 static const short P1599[] = {1,2,3,4,5,6,7,8,9,10,11,33,28,31,-1,23,24,-1,-1,-1,-1,25};
 static const signed char FI1599[] = {0,0,1,1,1,1,1,1,1,1,1,1,1,-1,1};
 static const signed char FO1599[] = {0,0};
-static const short PR1599[] = {46,46,43,43,43,43,43,43,43,43,43,43,43,43,8};
+static const short PR1599[] = {57,57,34,34,34,34,34,34,34,34,34,34,34,34,8};
 static const short PO1599[] = {3,3};
 static const char* const L1600[] = {
 	"Distortion from Surge: a waveshaper with its own feedback loop, a parametric band and a low-pass filter before it and another pair after it.",
@@ -36101,7 +36308,7 @@ static const short O1600[] = {28,29};
 static const short P1600[] = {1,2,3,4,5,6,7,8,9,10,11,12,27,30};
 static const signed char FI1600[] = {0,0,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1600[] = {0,0};
-static const short PR1600[] = {46,46,43,43,43,43,43,43,43,43,43,43,43,43,8};
+static const short PR1600[] = {57,57,34,34,34,34,34,34,34,34,34,34,34,34,8};
 static const short PO1600[] = {3,3};
 static const char* const L1601[] = {
 	"Three-band parametric equalizer from Surge, each band with a gain, a centre frequency and a bandwidth, and a master gain over the three.",
@@ -36141,7 +36348,7 @@ static const short O1601[] = {24,25};
 static const short P1601[] = {1,2,3,4,5,6,7,8,9,10,-1,-1,23,26};
 static const signed char FI1601[] = {0,0,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1601[] = {0,0};
-static const short PR1601[] = {46,46,43,43,43,43,43,43,43,43,43,43};
+static const short PR1601[] = {57,57,34,34,34,34,34,34,34,34,34,34};
 static const short PO1601[] = {3,3};
 static const char* const L1602[] = {
 	"Flanger from Surge: up to four tuned comb filters per channel, moved by an LFO, with a damped feedback path and an arpeggiating mode.",
@@ -36186,7 +36393,7 @@ static const short O1602[] = {27,28};
 static const short P1602[] = {1,2,3,4,5,6,7,8,9,10,11,31,26,29,-1,-1,23};
 static const signed char FI1602[] = {0,0,1,1,1,1,1,1,1,1,1,1,1,-1,1};
 static const signed char FO1602[] = {0,0};
-static const short PR1602[] = {46,46,43,43,43,43,43,43,43,43,43,43,43,43,8};
+static const short PR1602[] = {57,57,34,34,34,34,34,34,34,34,34,34,34,34,8};
 static const short PO1602[] = {3,3};
 static const char* const L1603[] = {
 	"Frequency shifter from Surge: the whole spectrum moved up or down by a fixed number of hertz, with a delayed feedback path.",
@@ -36215,7 +36422,7 @@ static const short O1603[] = {14,15};
 static const short P1603[] = {1,2,3,4,5,-1,-1,-1,-1,-1,-1,-1,13,16};
 static const signed char FI1603[] = {0,0,1,1,1,1,1};
 static const signed char FO1603[] = {0,0};
-static const short PR1603[] = {46,46,43,43,43,43,43};
+static const short PR1603[] = {57,57,34,34,34,34,34};
 static const short PO1603[] = {3,3};
 static const char* const L1604[] = {
 	"Polyphonic LFO from Surge: seven waveforms with a delay-attack-hold-decay-sustain-release envelope over them, and tempo-sync on every time.",
@@ -36259,8 +36466,8 @@ static const short O1604[] = {31};
 static const short P1604[] = {1,2,3,4,5,-1,6,7,8,9,10,11,12,13,14,15,16,17,18};
 static const signed char FI1604[] = {2,-1,1,-1,1,1,1,-1,-1,1,1,1,1,1,1,1};
 static const signed char FO1604[] = {1};
-static const short PR1604[] = {33,-1,108,-1,108,108,108,-1,-1,108,108,108,108,108,108,8};
-static const short PO1604[] = {27};
+static const short PR1604[] = {49,-1,121,-1,121,121,121,-1,-1,121,121,121,121,121,121,8};
+static const short PO1604[] = {63};
 static const char* const L1605[] = {
 	"The correlated noise source from the Surge mixer, as a single generator.",
 	"Sets the colour of the noise: negative values feed each sample back with the same sign and darken it, positive values feed it back inverted and brighten it, -100% to 100%.",
@@ -36318,8 +36525,8 @@ static const short O1606[] = {27,28};
 static const short P1606[] = {1,2,3,4,5,6,7,8,9,10,11,29,29,12,13,14,29,29,30,15,30,30,16,17,18};
 static const signed char FI1606[] = {3,1,1,1,1,1,1,1};
 static const signed char FO1606[] = {0,0};
-static const short PR1606[] = {32,108,108,108,108,108,108,108};
-static const short PO1606[] = {46,46};
+static const short PR1606[] = {23,121,121,121,121,121,121,121};
+static const short PO1606[] = {57,57};
 static const char* const L1607[] = {
 	"A whole Surge synthesizer in one module, playing the patches installed with the plugin from a polyphonic gate and a volt-per-octave pitch input.",
 	"Scales both outputs, from silence to unity gain.",
@@ -36358,7 +36565,7 @@ static const short O1607[] = {25,26};
 static const short P1607[] = {1,2,3,4,5};
 static const signed char FI1607[] = {0,0,3,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1607[] = {0,0};
-static const short PR1607[] = {12,12,32,30,33,12,4,12,46,46,4,4,4,4,4,4,4,4,8};
+static const short PR1607[] = {12,12,23,83,49,12,4,12,57,57,4,4,4,4,4,4,4,4,8};
 static const short PO1607[] = {3,3};
 static const char* const L1608[] = {
 	"Stereo phaser from Surge: a chain of allpass filters swept by an LFO, with feedback and a stereo offset between the two channels.",
@@ -36396,7 +36603,7 @@ static const short O1608[] = {19,20};
 static const short P1608[] = {1,2,3,4,5,6,7,23,23,23,23,23,18,21,-1,-1,-1,15};
 static const signed char FI1608[] = {0,0,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,1};
 static const signed char FO1608[] = {0,0};
-static const short PR1608[] = {46,46,43,43,43,43,43,43,43,43,43,43,43,43,8};
+static const short PR1608[] = {57,57,34,34,34,34,34,34,34,34,34,34,34,34,8};
 static const short PO1608[] = {3,3};
 static const char* const L1609[] = {
 	"The first Surge reverb: a pre-delay into one of four room models, with a three-band equalizer on the tail.",
@@ -36441,7 +36648,7 @@ static const short O1609[] = {27,28};
 static const short P1609[] = {1,2,3,4,5,6,7,8,9,10,11,31,26,29,23};
 static const signed char FI1609[] = {0,0,1,1,1,1,1,1,1,1,1,1,1,-1,1};
 static const signed char FO1609[] = {0,0};
-static const short PR1609[] = {46,46,43,43,43,43,43,43,43,43,43,43,43,43,8};
+static const short PR1609[] = {57,57,34,34,34,34,34,34,34,34,34,34,34,34,8};
 static const short PO1609[] = {3,3};
 static const char* const L1610[] = {
 	"The second Surge reverb: a pre-delay into a diffusing tail with its own modulation and separate damping of high and low frequencies.",
@@ -36484,7 +36691,7 @@ static const short O1610[] = {25,26};
 static const short P1610[] = {1,2,3,4,5,6,7,8,9,10,29,29,24,27,21};
 static const signed char FI1610[] = {0,0,1,1,1,1,1,1,1,1,1,1,-1,-1,1};
 static const signed char FO1610[] = {0,0};
-static const short PR1610[] = {46,46,43,43,43,43,43,43,43,43,43,43,43,43,8};
+static const short PR1610[] = {57,57,34,34,34,34,34,34,34,34,34,34,34,34,8};
 static const short PO1610[] = {3,3};
 static const char* const L1611[] = {
 	"Ring modulator from Surge: a modelled diode ring driven by a unison carrier oscillator, with a high and low cut on the result.",
@@ -36524,7 +36731,7 @@ static const short O1611[] = {22,23};
 static const short P1611[] = {1,2,3,4,5,6,7,8,9,25,25,25,21,24};
 static const signed char FI1611[] = {0,0,1,1,1,1,1,1,1,1,1};
 static const signed char FO1611[] = {0,0};
-static const short PR1611[] = {46,46,43,43,43,43,43,43,43,43,43,43,43,43,8};
+static const short PR1611[] = {57,57,34,34,34,34,34,34,34,34,34,34,34,34,8};
 static const short PO1611[] = {3,3};
 static const char* const L1612[] = {
 	"Rotary speaker from Surge: a horn and a bass rotor turning at their own rates through a modelled tube amp, giving pitch shift and tremolo.",
@@ -36563,7 +36770,7 @@ static const short O1612[] = {22,23};
 static const short P1612[] = {1,2,3,4,5,6,7,8,-1,-1,-1,-1,21,24,17,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18};
 static const signed char FI1612[] = {0,0,1,1,1,1,1,1,1,1,-1,-1,-1,-1,1};
 static const signed char FO1612[] = {0,0};
-static const short PR1612[] = {46,46,43,43,43,43,43,43,43,43,-1,-1,-1,-1,8};
+static const short PR1612[] = {57,57,34,34,34,34,34,34,34,34,-1,-1,-1,-1,8};
 static const short PO1612[] = {3,3};
 static const char* const L1613[] = {
 	"A panel of text from the Surge Synth Team saying that Surge XT replaced these modules in late 2022 and that the old ones are now hidden in the browser. It carries no controls.",
@@ -36597,7 +36804,7 @@ static const short O1614[] = {15,16};
 static const short P1614[] = {1,2,3,4,-1,-1,-1,-1,-1,-1,-1,-1,13,17,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,14};
 static const signed char FI1614[] = {0,0,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0};
 static const signed char FO1614[] = {0,0};
-static const short PR1614[] = {46,46,43,43,43,43,-1,-1,-1,-1,-1,-1,-1,-1,-1,29,29};
+static const short PR1614[] = {57,57,34,34,34,34,-1,-1,-1,-1,-1,-1,-1,-1,-1,38,38};
 static const short PO1614[] = {3,3};
 static const char* const L1615[] = {
 	"Polyphonic wavetable oscillator from Surge, with two interpolation algorithms and a browser over the wavetables shipped with the plugin and any of your own in the Surge documents folder.",
@@ -36640,8 +36847,8 @@ static const short O1615[] = {26,27};
 static const short P1615[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,28,28,28,15,16,28,28,29,29,29,29,29,17,29};
 static const signed char FI1615[] = {3,1,1,1,1,1,1,1};
 static const signed char FO1615[] = {0,0};
-static const short PR1615[] = {32,108,108,108,108,108,108,108};
-static const short PO1615[] = {46,46};
+static const short PR1615[] = {23,121,121,121,121,121,121,121};
+static const short PO1615[] = {57,57};
 static const char* const L1616[] = {
 	"Polyphonic waveshaper carrying the five shaping curves from the Surge filter section.",
 	"Picks the shaping curve: none passes the signal through untouched, and the rest are tanh, hard, asym, sinus and digi.",
@@ -36658,8 +36865,8 @@ static const short O1616[] = {5};
 static const short P1616[] = {1,2};
 static const signed char FI1616[] = {1,0};
 static const signed char FO1616[] = {0};
-static const short PR1616[] = {29,46};
-static const short PO1616[] = {46};
+static const short PR1616[] = {38,57};
+static const short PO1616[] = {57};
 static const char* const L1617[] = {
 	"Delay: a monophonic stereo delay of up to 10 seconds a side, with crossfeed, filters and a modulation LFO",
 	"Sets the delay time of the left channel, from 10ms to 10 seconds, and can be tempo-synced.",
@@ -36696,7 +36903,7 @@ static const short O1617[] = {16,17};
 static const short P1617[] = {1,2,3,4,5,6,7,8,9,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11};
 static const signed char FI1617[] = {0,0,1,1,1,1,1};
 static const signed char FO1617[] = {0,0};
-static const short PR1617[] = {46,46,36,7,7,7,7};
+static const short PR1617[] = {57,57,86,7,7,7,7};
 static const short PO1617[] = {3,3};
 static const char* const L1618[] = {
 	"Tuned Delay Line by Frequency: a very short stereo delay whose length is one cycle of the pitch at its V/Oct input, for Karplus-Strong and flanging patches",
@@ -36718,8 +36925,8 @@ static const short O1618[] = {6,7};
 static const short P1618[] = {1,2};
 static const signed char FI1618[] = {0,0,3};
 static const signed char FO1618[] = {0,0};
-static const short PR1618[] = {29,29,32};
-static const short PO1618[] = {29,29};
+static const short PR1618[] = {38,38,23};
+static const short PO1618[] = {38,38};
 static const char* const L1619[] = {
 	"Tuned Delay +: the tuned delay line with a feedback path, feedback filters and a noise exciter built in, for Karplus-Strong patches",
 	"Shortens the delay by a whole number of samples, from 0 to 20, to make up for the one sample each patch cable in the feedback loop adds.",
@@ -36758,7 +36965,7 @@ static const short O1619[] = {20,21};
 static const short P1619[] = {3,2,4,10,5,6,7,8,9,1,11,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16};
 static const signed char FI1619[] = {0,0,3,0,0,1,1,1,1,1};
 static const signed char FO1619[] = {0,0};
-static const short PR1619[] = {29,29,32,29,29,30,38,38,38,38};
+static const short PR1619[] = {38,38,23,38,38,83,88,88,88,88};
 static const short PO1619[] = {2,2};
 static const char* const L1620[] = {
 	"CXOR: two independent digital combining circuits, each multiplying or otherwise combining a pair of stereo signals",
@@ -36789,8 +36996,8 @@ static const short O1620[] = {12,13,14,15};
 static const short P1620[] = {1,2,3};
 static const signed char FI1620[] = {0,0,0,0,0,0,0,0};
 static const signed char FO1620[] = {0,0,0,0};
-static const short PR1620[] = {29,29,29,29,29,29,29,29};
-static const short PO1620[] = {29,29,29,29};
+static const short PR1620[] = {38,38,38,38,38,38,38,38};
+static const short PO1620[] = {38,38,38,38};
 static const char* const L1621[] = {
 	"EG x VCA: an envelope generator and a stereo VCA in one module, with a pan control",
 	"Sets how long the envelope takes to climb to full.",
@@ -36833,8 +37040,8 @@ static const short O1621[] = {20,21,22,23};
 static const short P1621[] = {7,5,6,1,2,3,4,12,9,10,11,8,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,-1,13};
 static const signed char FI1621[] = {0,0,2,1,1,1,1,1};
 static const signed char FO1621[] = {0,0,1,2};
-static const short PR1621[] = {29,29,31,36,38,38,38,38};
-static const short PO1621[] = {29,29,67,17};
+static const short PR1621[] = {38,38,53,86,88,88,88,88};
+static const short PO1621[] = {38,38,148,17};
 static const char* const L1622[] = {
 	"Bonsai: a tape model with a non-linear bass boost, an emphasis-filtered saturator and noise",
 	"Chooses the filter curve applied before saturation and undone after it: Tilt or Pull Mids.",
@@ -36871,8 +37078,8 @@ static const short O1622[] = {16,17};
 static const short P1622[] = {9,5,6,1,2,3,7,8,4,10,11,-1,12,12,12,12,12,12,12,12,12,12,12,12,-1,-1,-1,-1,-1,-1,-1,-1,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12};
 static const signed char FI1622[] = {0,0,-1,-1,-1,1,1,1,1};
 static const signed char FO1622[] = {0,0};
-static const short PR1622[] = {46,46,-1,-1,-1,38,38,38,38};
-static const short PO1622[] = {46,46};
+static const short PR1622[] = {57,57,-1,-1,-1,88,88,88,88};
+static const short PO1622[] = {57,57};
 static const char* const L1623[] = {
 	"Chorus: a clean four-stage digital chorus with its own equaliser",
 	"Sets the rate of the modulation, and can be tempo-synced.",
@@ -36910,8 +37117,8 @@ static const short O1623[] = {15,16};
 static const short P1623[] = {3,1,2,4,5,6,8,7,-1,-1,-1,-1,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,9,10};
 static const signed char FI1623[] = {0,0,-1,-1,1,1,1,1,1};
 static const signed char FO1623[] = {0,0};
-static const short PR1623[] = {46,46,-1,-1,36,38,38,38,38};
-static const short PO1623[] = {46,46};
+static const short PR1623[] = {57,57,-1,-1,86,88,88,88,88};
+static const short PO1623[] = {57,57};
 static const char* const L1624[] = {
 	"Chow: a half-wave rectifier distortion with a threshold and a ratio, after a compressor's controls",
 	"Sets the level above which rectification starts, from -96dB to 0dB.",
@@ -36941,8 +37148,8 @@ static const short O1624[] = {10,11};
 static const short P1624[] = {1,2,-1,3,-1,-1,-1,-1,-1,-1,-1,-1,6,6,6,6,6,6,6,6,-1,-1,-1,-1,6,6,6,6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,4};
 static const signed char FI1624[] = {0,0,-1,-1,-1,1,1,1,1,2};
 static const signed char FO1624[] = {0,0};
-static const short PR1624[] = {46,46,-1,-1,-1,38,38,38,38,109};
-static const short PO1624[] = {46,46};
+static const short PR1624[] = {57,57,-1,-1,-1,88,88,88,88,236};
+static const short PO1624[] = {57,57};
 static const char* const L1625[] = {
 	"Combulator: three comb filters tuned around a common centre, with feedback and an envelope-driven noise source",
 	"Sets how much noise is added into the comb filters, following the envelope of the input.",
@@ -36980,8 +37187,8 @@ static const short O1625[] = {18,19};
 static const short P1625[] = {1,2,3,4,5,9,6,7,8,10,11,12,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,13};
 static const signed char FI1625[] = {0,0,-1,-1,-1,1,1,1,1};
 static const signed char FO1625[] = {0,0};
-static const short PR1625[] = {46,46,-1,-1,-1,38,38,38,38};
-static const short PO1625[] = {46,46};
+static const short PR1625[] = {57,57,-1,-1,-1,88,88,88,88};
+static const short PO1625[] = {57,57};
 static const char* const L1626[] = {
 	"Distortion: a clipping stage with a feedback loop, wrapped in a parametric equaliser before and after",
 	"Chooses the waveshaper used for clipping: soft, hard, asymmetric, sine or digital.",
@@ -37020,8 +37227,8 @@ static const short O1626[] = {18,19};
 static const short P1626[] = {4,5,6,7,2,3,8,9,10,11,-1,1,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,-1,-1,-1,-1,-1,-1,-1,-1,12,13};
 static const signed char FI1626[] = {0,0,-1,-1,-1,1,1,1,1};
 static const signed char FO1626[] = {0,0};
-static const short PR1626[] = {46,46,-1,-1,-1,38,38,38,38};
-static const short PO1626[] = {46,46};
+static const short PR1626[] = {57,57,-1,-1,-1,88,88,88,88};
+static const short PO1626[] = {57,57};
 static const char* const L1627[] = {
 	"Ensemble: a chorus built on a model of a bucket-brigade delay chain, as used in string machines",
 	"Chooses the delay line: a bucket-brigade chain of 128 to 4096 stages, or a clean digital delay.",
@@ -37058,8 +37265,8 @@ static const short O1627[] = {16,17};
 static const short P1627[] = {4,2,6,3,7,1,5,9,8,10,11,-1,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,-1,-1,-1,-1,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12};
 static const signed char FI1627[] = {0,0,-1,-1,-1,1,1,1,1};
 static const signed char FO1627[] = {0,0};
-static const short PR1627[] = {46,46,-1,-1,-1,38,38,38,38};
-static const short PO1627[] = {46,46};
+static const short PR1627[] = {57,57,-1,-1,-1,88,88,88,88};
+static const short PO1627[] = {57,57};
 static const char* const L1628[] = {
 	"Exciter: a harmonic exciter after the Aphex Aural Exciter, adding generated harmonics to the signal",
 	"Sets how much harmonic content is generated.",
@@ -37089,8 +37296,8 @@ static const short O1628[] = {10,11};
 static const short P1628[] = {1,4,2,3,5,-1,-1,-1,-1,-1,-1,-1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6};
 static const signed char FI1628[] = {0,0,-1,-1,-1,1,1,1,1};
 static const signed char FO1628[] = {0,0};
-static const short PR1628[] = {46,46,-1,-1,-1,38,38,38,38};
-static const short PO1628[] = {46,46};
+static const short PR1628[] = {57,57,-1,-1,-1,88,88,88,88};
+static const short PO1628[] = {57,57};
 static const char* const L1629[] = {
 	"Flanger: a bank of up to four tuned comb filters swept by an LFO",
 	"Chooses what is mixed: dry signal with combs, combs alone, or either with the combs arpeggiated.",
@@ -37130,8 +37337,8 @@ static const short O1629[] = {16,17};
 static const short P1629[] = {1,2,3,4,5,6,7,8,9,10,11,-1,-1,-1,-1,-1,-1,-1,-1,-1,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12};
 static const signed char FI1629[] = {0,0,-1,-1,1,1,1,1,1};
 static const signed char FO1629[] = {0,0};
-static const short PR1629[] = {46,46,-1,-1,36,38,38,38,38};
-static const short PO1629[] = {46,46};
+static const short PR1629[] = {57,57,-1,-1,86,88,88,88,88};
+static const short PO1629[] = {57,57};
 static const char* const L1630[] = {
 	"FrequencyShifter: a Bode-style frequency shifter with a delay and feedback loop after it",
 	"Sets the frequency shift applied to the left channel, over 10Hz either way or 1kHz when extended.",
@@ -37165,8 +37372,8 @@ static const short O1630[] = {11,12};
 static const short P1630[] = {1,2,3,4,5,-1,-1,-1,-1,-1,-1,-1,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6};
 static const signed char FI1630[] = {0,0,-1,-1,1,1,1,1,1};
 static const signed char FO1630[] = {0,0};
-static const short PR1630[] = {46,46,-1,-1,36,38,38,38,38};
-static const short PO1630[] = {46,46};
+static const short PR1630[] = {57,57,-1,-1,86,88,88,88,88};
+static const short PO1630[] = {57,57};
 static const char* const L1631[] = {
 	"Neuron: a saturator built from a gated recurrent unit, with a comb filter and an LFO after it",
 	"Chooses the shape of the comb filter modulation.",
@@ -37207,8 +37414,8 @@ static const short O1631[] = {17,18};
 static const short P1631[] = {2,3,4,5,8,9,10,1,6,7,11,12,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,-1,-1,-1,-1,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13};
 static const signed char FI1631[] = {0,0,-1,-1,1,1,1,1,1};
 static const signed char FO1631[] = {0,0};
-static const short PR1631[] = {46,46,-1,-1,36,38,38,38,38};
-static const short PO1631[] = {46,46};
+static const short PR1631[] = {57,57,-1,-1,86,88,88,88,88};
+static const short PO1631[] = {57,57};
 static const char* const L1632[] = {
 	"Nimbus: the Surge XT port of a granular texture processor, with several playback modes",
 	"Chooses the processing mode, which also changes what the knobs below do.",
@@ -37249,8 +37456,8 @@ static const short O1632[] = {19,20};
 static const short P1632[] = {1,2,3,4,5,6,8,9,-1,7,10,11,-1,-1,-1,-1,-1,-1,-1,-1,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,-1,-1,-1,-1,15,15,15,15,15,15,15,15,15,15,15,15,12};
 static const signed char FI1632[] = {0,0,-1,-1,-1,1,1,1,1,2,2};
 static const signed char FO1632[] = {0,0};
-static const short PR1632[] = {46,46,-1,-1,-1,38,38,38,38,109,33};
-static const short PO1632[] = {46,46};
+static const short PR1632[] = {57,57,-1,-1,-1,88,88,88,88,236,49};
+static const short PO1632[] = {57,57};
 static const char* const L1633[] = {
 	"Phaser: an all-pass phaser with an adjustable number of stages and its own modulation LFO",
 	"Chooses the shape of the modulation: sine, triangle, sawtooth, noise, sample and hold or square.",
@@ -37292,8 +37499,8 @@ static const short O1633[] = {18,19};
 static const short P1633[] = {8,10,9,3,4,5,12,11,2,7,1,6,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,-1,-1,-1,-1,14,14,14,14,-1,-1,-1,-1,14,14,14,14,13};
 static const signed char FI1633[] = {0,0,-1,-1,1,1,1,1,1};
 static const signed char FO1633[] = {0,0};
-static const short PR1633[] = {46,46,-1,-1,36,38,38,38,38};
-static const short PO1633[] = {46,46};
+static const short PR1633[] = {57,57,-1,-1,86,88,88,88,88};
+static const short PO1633[] = {57,57};
 static const char* const L1634[] = {
 	"Resonator: three tuned filter bands with their own resonance and gain, after a classic resonator circuit",
 	"Chooses the filter type used by all three bands: lowpass, bandpass, bandpass plus notch or highpass.",
@@ -37334,8 +37541,8 @@ static const short O1634[] = {20,21};
 static const short P1634[] = {2,3,4,5,6,7,8,9,10,1,11,12,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,-1,-1,-1,-1,16,16,16,16,16,16,16,16,13,14,15};
 static const signed char FI1634[] = {0,0,-1,-1,-1,1,1,1,1};
 static const signed char FO1634[] = {0,0};
-static const short PR1634[] = {46,46,-1,-1,-1,38,38,38,38};
-static const short PO1634[] = {46,46};
+static const short PR1634[] = {57,57,-1,-1,-1,88,88,88,88};
+static const short PO1634[] = {57,57};
 static const char* const L1635[] = {
 	"Reverb 1: the older, more digital of the two Surge XT reverbs, with a post-reverb equaliser",
 	"Changes the apparent size of the simulated room; moving it interrupts the tail.",
@@ -37373,8 +37580,8 @@ static const short O1635[] = {18,19};
 static const short P1635[] = {8,2,1,3,9,4,5,6,7,11,10,-1,14,14,14,14,-1,-1,-1,-1,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,-1,-1,-1,-1,12,13};
 static const signed char FI1635[] = {0,0,-1,-1,-1,1,1,1,1};
 static const signed char FO1635[] = {0,0};
-static const short PR1635[] = {46,46,-1,-1,-1,38,38,38,38};
-static const short PO1635[] = {46,46};
+static const short PR1635[] = {57,57,-1,-1,-1,88,88,88,88};
+static const short PO1635[] = {57,57};
 static const char* const L1636[] = {
 	"Reverb 2: the lusher of the two Surge XT reverbs, with fewer digital artefacts",
 	"Changes the apparent size of the simulated room.",
@@ -37409,8 +37616,8 @@ static const short O1636[] = {15,16};
 static const short P1636[] = {7,1,2,3,8,4,5,6,9,10,-1,-1,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11};
 static const signed char FI1636[] = {0,0,-1,-1,-1,1,1,1,1};
 static const signed char FO1636[] = {0,0};
-static const short PR1636[] = {46,46,-1,-1,-1,38,38,38,38};
-static const short PO1636[] = {46,46};
+static const short PR1636[] = {57,57,-1,-1,-1,88,88,88,88};
+static const short PO1636[] = {57,57};
 static const char* const L1637[] = {
 	"RingMod: a model of an analogue diode ring modulator, with a multi-shape unison carrier of its own",
 	"Chooses the waveform of the internal carrier oscillator, one of 24 shapes.",
@@ -37449,8 +37656,8 @@ static const short O1637[] = {16,17};
 static const short P1637[] = {1,3,8,2,4,5,6,7,9,-1,-1,-1,-1,-1,-1,-1,12,12,12,12,12,12,12,12,-1,-1,-1,-1,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,10,11};
 static const signed char FI1637[] = {0,0,0,0,-1,1,1,1,1};
 static const signed char FO1637[] = {0,0};
-static const short PR1637[] = {46,46,29,29,-1,38,38,38,38};
-static const short PO1637[] = {46,46};
+static const short PR1637[] = {57,57,38,38,-1,88,88,88,88};
+static const short PO1637[] = {57,57};
 static const char* const L1638[] = {
 	"RotarySpeaker: a rotating horn and rotor cabinet with an overdrive stage",
 	"Chooses the waveshaper used by the drive stage: soft, hard, asymmetric, sine or digital.",
@@ -37488,8 +37695,8 @@ static const short O1638[] = {14,15};
 static const short P1638[] = {2,5,6,3,4,1,7,8,-1,-1,-1,-1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,-1,-1,-1,-1,10,10,10,10,10,10,10,10,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,9};
 static const signed char FI1638[] = {0,0,-1,-1,1,1,1,1,1};
 static const signed char FO1638[] = {0,0};
-static const short PR1638[] = {46,46,-1,-1,36,38,38,38,38};
-static const short PO1638[] = {46,46};
+static const short PR1638[] = {57,57,-1,-1,86,88,88,88,88};
+static const short PO1638[] = {57,57};
 static const char* const L1639[] = {
 	"Spring Reverb: a model of a spring reverb tank, including the knock and the chaos of the real thing",
 	"Sets the size of the springs being modelled.",
@@ -37523,8 +37730,8 @@ static const short O1639[] = {14,15};
 static const short P1639[] = {1,2,3,6,4,5,-1,7,-1,-1,-1,-1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,-1,-1,-1,-1,10,10,10,10,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8};
 static const signed char FI1639[] = {0,0,-1,-1,-1,1,1,1,1,2};
 static const signed char FO1639[] = {0,0};
-static const short PR1639[] = {46,46,-1,-1,-1,38,38,38,38,33};
-static const short PO1639[] = {46,46};
+static const short PR1639[] = {57,57,-1,-1,-1,88,88,88,88,49};
+static const short PO1639[] = {57,57};
 static const char* const L1640[] = {
 	"TreeMonster: it tracks the pitch of the input, runs a sine oscillator at that pitch and ring modulates the two together",
 	"Transposes the sine oscillator away from the detected pitch.",
@@ -37561,8 +37768,8 @@ static const short O1640[] = {17,18,11,12};
 static const short P1640[] = {3,4,5,6,1,2,7,8,-1,-1,-1,-1,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,9,10};
 static const signed char FI1640[] = {0,0,-1,-1,-1,1,1,1,1};
 static const signed char FO1640[] = {0,0,3,1};
-static const short PR1640[] = {46,46,-1,-1,-1,38,38,38,38};
-static const short PO1640[] = {46,46,32,67};
+static const short PR1640[] = {57,57,-1,-1,-1,88,88,88,88};
+static const short PO1640[] = {57,57,23,148};
 static const char* const L1641[] = {
 	"Vocoder: a filter bank of up to 20 bands that imposes the spectrum of one signal on another",
 	"Sets how many vocoder bands are used, from 4 to 20.",
@@ -37600,8 +37807,8 @@ static const short O1641[] = {15,16};
 static const short P1641[] = {2,3,8,9,-1,1,4,5,-1,6,7,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,-1,-1,-1,-1,-1,-1,-1,-1,11,11,11,11,11,11,11,11,-1,-1,-1,-1,11,11,11,11,11,11,11,11,11,11,11,11};
 static const signed char FI1641[] = {0,0,0,0,-1,1,1,1,1};
 static const signed char FO1641[] = {0,0};
-static const short PR1641[] = {46,46,29,29,-1,38,38,38,38};
-static const short PO1641[] = {46,46};
+static const short PR1641[] = {57,57,38,38,-1,88,88,88,88};
+static const short PO1641[] = {57,57};
 static const char* const L1642[] = {
 	"LFO x EG: the Surge XT modulator, an LFO with eight shapes including two random modes and a step sequencer, scaled by a six-stage envelope",
 	"Sets the rate of the LFO, and can be tempo-synced; in step sequencer mode one cycle covers the whole sequence.",
@@ -37656,8 +37863,8 @@ static const short O1642[] = {25,23,24,28,26,27};
 static const short P1642[] = {1,2,3,4,5,6,7,8,9,10,11,12,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,15,16};
 static const signed char FI1642[] = {2,2,1,1,1,1,1,1};
 static const signed char FO1642[] = {1,1,1,2,2,2};
-static const short PR1642[] = {31,31,36,30,38,38,38,38};
-static const short PO1642[] = {27,67,27,17,17,17};
+static const short PR1642[] = {53,53,86,83,88,88,88,88};
+static const short PO1642[] = {63,148,63,17,17,17};
 static const char* const L1643[] = {
 	"Mixer: the Surge XT mixer section, three stereo inputs with two ring modulators and a filtered noise source, mixed with knobs",
 	"Sets the level of the first stereo input.",
@@ -37689,8 +37896,8 @@ static const short O1643[] = {13,14};
 static const short P1643[] = {1,2,3,4,5,6,7,8,15,15,15,15,15,15,16,16,16,16,16,16,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9};
 static const signed char FI1643[] = {0,0,0,0,0,0,1,1,1,1};
 static const signed char FO1643[] = {0,0};
-static const short PR1643[] = {46,46,46,46,46,46,38,38,38,38};
-static const short PO1643[] = {46,46};
+static const short PR1643[] = {57,57,57,57,57,57,88,88,88,88};
+static const short PO1643[] = {57,57};
 static const char* const L1644[] = {
 	"Mixer with Sliders: the Surge XT mixer section, three stereo inputs with two ring modulators and a filtered noise source, mixed with sliders",
 	"Sets the level of the first stereo input.",
@@ -37722,8 +37929,8 @@ static const short O1644[] = {13,14};
 static const short P1644[] = {1,2,3,4,5,6,7,8,15,15,15,15,15,15,16,16,16,16,16,16,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9};
 static const signed char FI1644[] = {0,0,0,0,0,0,1,1,1,1};
 static const signed char FO1644[] = {0,0};
-static const short PR1644[] = {46,46,46,46,46,46,38,38,38,38};
-static const short PO1644[] = {46,46};
+static const short PR1644[] = {57,57,57,57,57,57,88,88,88,88};
+static const short PO1644[] = {57,57};
 static const char* const L1645[] = {
 	"Mod Matrix: eight knobs that each output a fixed voltage, so the Surge XT modulation matrix can be used to mix four modulation sources into eight outputs",
 	"Sets the voltage at the output of the same number, 10V either way, before any modulation is added.",
@@ -37741,8 +37948,8 @@ static const short O1645[] = {4,4,4,4,4,4,4,4};
 static const short P1645[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI1645[] = {1,1,1,1};
 static const signed char FO1645[] = {1,1,1,1,1,1,1,1};
-static const short PR1645[] = {38,38,38,38};
-static const short PO1645[] = {27,27,27,27,27,27,27,27};
+static const short PR1645[] = {88,88,88,88};
+static const short PO1645[] = {63,63,63,63,63,63,63,63};
 static const char* const L1646[] = {
 	"Alias VCO: the Surge XT deliberately aliasing oscillator, with bit masking, wrapping and bitcrushing",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -37785,8 +37992,8 @@ static const short O1646[] = {17,18};
 static const short P1646[] = {1,3,4,5,9,10,7,6,12,12,12,12,-1,-1,-1,-1,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,-1,-1,-1,-1,2,-1,-1,-1,-1,-1,8};
 static const signed char FI1646[] = {3,2,1,1,1,1,0};
 static const signed char FO1646[] = {0,0};
-static const short PR1646[] = {32,33,38,38,38,38,12};
-static const short PO1646[] = {46,46};
+static const short PR1646[] = {23,49,88,88,88,88,12};
+static const short PO1646[] = {57,57};
 static const char* const L1647[] = {
 	"Classic VCO: the Surge XT analogue-style oscillator, sweeping from pulse through saw to dual saw, with a sub-oscillator and hard sync",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -37826,8 +38033,8 @@ static const short O1647[] = {16,17};
 static const short P1647[] = {1,3,4,5,9,10,7,6,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,-1,-1,-1,-1,2,-1,-1,-1,-1,-1,8};
 static const signed char FI1647[] = {3,2,1,1,1,1};
 static const signed char FO1647[] = {0,0};
-static const short PR1647[] = {32,33,38,38,38,38};
-static const short PO1647[] = {46,46};
+static const short PR1647[] = {23,49,88,88,88,88};
+static const short PO1647[] = {57,57};
 static const char* const L1648[] = {
 	"FM2 VCO: the Surge XT three-operator FM oscillator, a sine carrier modulated by two sine operators at whole-number ratios",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -37866,8 +38073,8 @@ static const short O1648[] = {17,18};
 static const short P1648[] = {1,4,5,8,9,6,7,3,12,12,12,12,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,2,11,10};
 static const signed char FI1648[] = {3,2,1,1,1,1};
 static const signed char FO1648[] = {0,0};
-static const short PR1648[] = {32,33,38,38,38,38};
-static const short PO1648[] = {46,46};
+static const short PR1648[] = {23,49,88,88,88,88};
+static const short PO1648[] = {57,57};
 static const char* const L1649[] = {
 	"FM3 VCO: the Surge XT four-operator FM oscillator, with two ratio modulators and a third at a fixed frequency",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -37908,8 +38115,8 @@ static const short O1649[] = {17,18};
 static const short P1649[] = {1,4,5,6,7,8,9,3,12,12,12,12,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,2,-1,-1,11,10};
 static const signed char FI1649[] = {3,2,1,1,1,1};
 static const signed char FO1649[] = {0,0};
-static const short PR1649[] = {32,33,38,38,38,38};
-static const short PO1649[] = {46,46};
+static const short PR1649[] = {23,49,88,88,88,88};
+static const short PO1649[] = {57,57};
 static const char* const L1650[] = {
 	"Modern VCO: the Surge XT multi-shape oscillator, mixing saw, pulse and a third wave with very low aliasing",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -37954,8 +38161,8 @@ static const short O1650[] = {16,17};
 static const short P1650[] = {1,3,4,5,9,10,7,6,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,-1,-1,-1,-1,2,-1,-1,-1,-1,-1,8};
 static const signed char FI1650[] = {3,2,1,1,1,1};
 static const signed char FO1650[] = {0,0};
-static const short PR1650[] = {32,33,38,38,38,38};
-static const short PO1650[] = {46,46};
+static const short PR1650[] = {23,49,88,88,88,88};
+static const short PO1650[] = {57,57};
 static const char* const L1651[] = {
 	"S&H Noise VCO: the Surge XT tuned noise oscillator, a pulse whose levels are drawn at random rather than fixed",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -37997,8 +38204,8 @@ static const short O1651[] = {18,19};
 static const short P1651[] = {1,3,4,9,10,5,7,6,13,13,13,13,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,-1,-1,-1,-1,2,11,12,-1,-1,-1,8};
 static const signed char FI1651[] = {3,2,1,1,1,1};
 static const signed char FO1651[] = {0,0};
-static const short PR1651[] = {32,33,38,38,38,38};
-static const short PO1651[] = {46,46};
+static const short PR1651[] = {23,49,88,88,88,88};
+static const short PO1651[] = {57,57};
 static const char* const L1652[] = {
 	"Sine VCO: the Surge XT sine oscillator, with 28 shaping variants, FM feedback and its own filters",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -38040,8 +38247,8 @@ static const short O1652[] = {18,19};
 static const short P1652[] = {1,3,4,-1,8,9,6,5,13,13,13,13,-1,-1,-1,-1,14,14,14,14,-1,-1,-1,-1,14,14,14,14,14,14,14,14,14,14,14,14,-1,-1,-1,-1,2,10,11,12,-1,-1,7};
 static const signed char FI1652[] = {3,2,1,1,1,1};
 static const signed char FO1652[] = {0,0};
-static const short PR1652[] = {32,33,38,38,38,38};
-static const short PO1652[] = {46,46};
+static const short PR1652[] = {23,49,88,88,88,88};
+static const short PO1652[] = {57,57};
 static const char* const L1653[] = {
 	"String VCO: the Surge XT Karplus-Strong oscillator, two excited delay lines with damping, detune and stiffness",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -38080,8 +38287,8 @@ static const short O1653[] = {17,18};
 static const short P1653[] = {1,3,4,5,6,7,8,9,12,12,12,12,-1,-1,-1,-1,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,2,10};
 static const signed char FI1653[] = {3,2,1,1,1,1,0};
 static const signed char FO1653[] = {0,0};
-static const short PR1653[] = {32,33,38,38,38,38,12};
-static const short PO1653[] = {46,46};
+static const short PR1653[] = {23,49,88,88,88,88,12};
+static const short PO1653[] = {57,57};
 static const char* const L1654[] = {
 	"Twist VCO: the Surge XT version of a well-known Eurorack macro oscillator, with sixteen engines and a low pass gate",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -38121,8 +38328,8 @@ static const short O1654[] = {16,17};
 static const short P1654[] = {1,3,4,5,6,7,8,9,11,11,11,11,-1,-1,-1,-1,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,2,10};
 static const signed char FI1654[] = {3,2,1,1,1,1};
 static const signed char FO1654[] = {0,0};
-static const short PR1654[] = {32,33,38,38,38,38};
-static const short PO1654[] = {46,46};
+static const short PR1654[] = {23,49,88,88,88,88};
+static const short PO1654[] = {57,57};
 static const char* const L1655[] = {
 	"Wavetable VCO: the Surge XT wavetable oscillator, morphing through a table of single-cycle waves with skew, saturation and formant shift",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -38170,8 +38377,8 @@ static const short O1655[] = {16,17};
 static const short P1655[] = {1,3,9,4,5,10,7,6,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,-1,-1,-1,-1,2,-1,-1,-1,-1,-1,8};
 static const signed char FI1655[] = {3,2,1,1,1,1};
 static const signed char FO1655[] = {0,0};
-static const short PR1655[] = {32,33,38,38,38,38};
-static const short PO1655[] = {46,46};
+static const short PR1655[] = {23,49,88,88,88,88};
+static const short PO1655[] = {57,57};
 static const char* const L1656[] = {
 	"Window VCO: the Surge XT windowed wavetable oscillator, multiplying a wavetable frame by one of nine window shapes",
 	"Sets the pitch in volts, added to the voltage at V/OCT; 0V gives middle C at 261.63Hz.",
@@ -38221,8 +38428,8 @@ static const short O1656[] = {18,19};
 static const short P1656[] = {1,3,4,5,9,10,7,6,13,13,13,13,14,14,14,14,14,14,14,14,-1,-1,-1,-1,14,14,14,14,14,14,14,14,14,14,14,14,-1,-1,-1,-1,2,11,12,-1,-1,-1,8};
 static const signed char FI1656[] = {3,2,1,1,1,1};
 static const signed char FO1656[] = {0,0};
-static const short PR1656[] = {32,33,38,38,38,38};
-static const short PO1656[] = {46,46};
+static const short PR1656[] = {23,49,88,88,88,88};
+static const short PO1656[] = {57,57};
 static const char* const L1657[] = {
 	"Quad AD: four attack-decay envelope generators that can be chained into one another, built for percussive sounds",
 	"Sets how long that envelope takes to climb to full.",
@@ -38250,8 +38457,8 @@ static const short O1657[] = {12,12,12,12};
 static const short P1657[] = {1,1,1,1,2,2,2,2,4,4,4,4,5,5,5,5,6,6,6,6,3,3,3,3,7,7,7,7,8,8,8,-1,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9};
 static const signed char FI1657[] = {2,2,2,2,1,1,1,1};
 static const signed char FO1657[] = {1,1,1,1};
-static const short PR1657[] = {33,33,33,33,38,38,38,38};
-static const short PO1657[] = {67,67,67,67};
+static const short PR1657[] = {49,49,49,49,88,88,88,88};
+static const short PO1657[] = {148,148,148,148};
 static const char* const L1658[] = {
 	"Quad LFO: four simple LFOs that can run free or be locked to one another by ratio, quadrature, phase or spread",
 	"Chooses how the four LFOs relate: Independent, Rate Ratio, Quadrature, Phase Offset or Entangled.",
@@ -38279,8 +38486,8 @@ static const short O1658[] = {10,10,10,10};
 static const short P1658[] = {2,2,2,2,3,3,3,3,-1,-1,-1,-1,-1,-1,-1,-1,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1};
 static const signed char FI1658[] = {2,2,2,2,1,1,1,1};
 static const signed char FO1658[] = {1,1,1,1};
-static const short PR1658[] = {16,16,16,16,38,38,38,38};
-static const short PO1658[] = {67,67,67,67};
+static const short PR1658[] = {16,16,16,16,88,88,88,88};
+static const short PO1658[] = {148,148,148,148};
 static const char* const L1659[] = {
 	"Unison Helper: it spreads one V/Oct signal into a detuned polyphonic one for other makers' oscillators, then collects their audio back into a stereo unison",
 	"Sets how many unison voices the V/Oct input is spread into, 1 to 9.",
@@ -38312,8 +38519,8 @@ static const short O1659[] = {15,16,13,13,13,13};
 static const short P1659[] = {2,4,5,6,1,3,9,7,8,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10};
 static const signed char FI1659[] = {3,0,0,0,0,1,1,1,1};
 static const signed char FO1659[] = {0,0,3,3,3,3};
-static const short PR1659[] = {32,29,29,29,29,38,38,38,38};
-static const short PO1659[] = {29,29,32,32,32,32};
+static const short PR1659[] = {23,38,38,38,38,88,88,88,88};
+static const short PO1659[] = {38,38,23,23,23,23};
 static const char* const L1660[] = {
 	"Unison CV Expander: it spreads two more control signals along the same voice layout as a Unison Helper, and goes immediately to the right of it",
 	"Takes a control signal to be spread across the unison voices the parent Unison Helper has laid out.",
@@ -38326,8 +38533,8 @@ static const char* const L1660[] = {
 };
 static const short I1660[] = {1,1};
 static const short O1660[] = {2,2,2,2,2,2,2,2};
-static const short PR1660[] = {29,29};
-static const short PO1660[] = {27,27,27,27,27,27,27,27};
+static const short PR1660[] = {38,38};
+static const short PO1660[] = {63,63,63,63,63,63,63,63};
 static const char* const L1661[] = {
 	"VCF: every Surge XT filter model and subtype in one polyphonic stereo filter",
 	"Sets the cutoff frequency, marked in volts; 0V is middle C at 261.63Hz. There is no V/Oct jack, so to track a keyboard patch it into a modulation input and set that depth to 1.",
@@ -38357,8 +38564,8 @@ static const short O1661[] = {13,14};
 static const short P1661[] = {1,2,3,4,5,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,6,7};
 static const signed char FI1661[] = {0,0,1,1,1,1};
 static const signed char FO1661[] = {0,0};
-static const short PR1661[] = {29,29,38,38,38,38};
-static const short PO1661[] = {29,29};
+static const short PR1661[] = {38,38,88,88,88,88};
+static const short PO1661[] = {38,38};
 static const char* const L1662[] = {
 	"Waveshaper: every Surge XT waveshaper model in one polyphonic stereo module, with filters either side of the shaping stage",
 	"Sets how hard the signal is driven into the waveshaper, from -24dB to +24dB.",
@@ -38391,8 +38598,8 @@ static const short O1662[] = {13,14};
 static const short P1662[] = {1,2,3,4,5,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,8,6,7};
 static const signed char FI1662[] = {0,0,1,1,1,1};
 static const signed char FO1662[] = {0,0};
-static const short PR1662[] = {29,29,38,38,38,38};
-static const short PO1662[] = {29,29};
+static const short PR1662[] = {38,38,88,88,88,88};
+static const short PO1662[] = {38,38};
 static const char* const L1663[] = {
 	"Splitter taking one input and copying it, unchanged, to eight outputs",
 	"The voltage copied to every output, read once per sample",
@@ -38582,7 +38789,7 @@ static const short O1676[] = {9,8};
 static const short P1676[] = {2,3,1,5};
 static const signed char FI1676[] = {1,2,2};
 static const signed char FO1676[] = {1,2};
-static const short PR1676[] = {-1,110,24};
+static const short PR1676[] = {-1,237,50};
 static const short PO1676[] = {6,-1};
 static const char* const L1677[] = {
 	"Sequencer modelling liquid running down a leaky pipe of eight cells, moving liquid from cell to cell on each clock tick and firing a gate wherever a cell empties",
@@ -38604,7 +38811,7 @@ static const short O1677[] = {8,9};
 static const short P1677[] = {1,2,4,5};
 static const signed char FI1677[] = {1,1,2};
 static const signed char FO1677[] = {2,1};
-static const short PR1677[] = {-1,-1,24};
+static const short PR1677[] = {-1,-1,50};
 static const short PO1677[] = {-1,6};
 static const char* const L1678[] = {
 	"Sequencer running a sixteen-bit linear feedback shift register that can be split into two independently clocked registers, with the bits also read across a four by four grid, superseded by LFSR16 Poly",
@@ -38630,8 +38837,8 @@ static const short O1678[] = {7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,12};
 static const short P1678[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,3,4};
 static const signed char FI1678[] = {2,2};
 static const signed char FO1678[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2};
-static const short PR1678[] = {24,24};
-static const short PO1678[] = {111,111,111,111,111,111,111,111,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR1678[] = {50,50};
+static const short PO1678[] = {238,238,238,238,238,238,238,238,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static const char* const L1679[] = {
 	"Sequencer running a sixteen-bit linear feedback shift register that can be split into two independently clocked registers, with gate and CV outputs for each",
 	"Sets all sixteen feedback coefficients at once, as a whole number from 0 to 65535 read as sixteen bits",
@@ -38660,7 +38867,7 @@ static const short O1679[] = {12,13,14,15,16,17};
 static const short P1679[] = {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,4,6,7};
 static const signed char FI1679[] = {1,1,2,2,2,2};
 static const signed char FO1679[] = {2,2,2,1,1,1};
-static const short PR1679[] = {-1,-1,24,24,0,0};
+static const short PR1679[] = {-1,-1,50,50,0,0};
 static const short PO1679[] = {-1,-1,-1,6,6,6};
 static const char* const L1680[] = {
 	"Sequencer running an eight-bit linear feedback shift register, with a gate output for every register bit and four CV outputs summed from weighted bits, superseded by LFSR8 Poly",
@@ -38683,7 +38890,7 @@ static const short O1680[] = {7,7,7,7,7,7,7,7,9,9,9,9};
 static const short P1680[] = {2,2,2,2,2,2,2,2,4,6,8,8,8,8};
 static const signed char FI1680[] = {2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1680[] = {2,2,2,2,2,2,2,2,1,1,1,1};
-static const short PR1680[] = {24,0,0,0,0,0,0,0,0,0};
+static const short PR1680[] = {50,0,0,0,0,0,0,0,0,0};
 static const short PO1680[] = {0,0,0,0,0,0,0,0,-1,-1,-1,-1};
 static const char* const L1681[] = {
 	"Sequencer running an eight-bit linear feedback shift register, sending the register bits out as polyphonic gates and as one weighted CV",
@@ -38708,7 +38915,7 @@ static const short O1681[] = {11,12};
 static const short P1681[] = {1,3,3,3,3,3,3,3,3,9,9,9,9,9,9,9,9,4,6};
 static const signed char FI1681[] = {1,1,2,2,1};
 static const signed char FO1681[] = {2,1};
-static const short PR1681[] = {-1,-1,0,24,-1};
+static const short PR1681[] = {-1,-1,0,50,-1};
 static const short PO1681[] = {0,-1};
 static const char* const L1682[] = {
 	"Chaotic oscillator built on the logistic map, sweeping the map's coefficient between two settings at an audio rate to make scratching and glitching tones",
@@ -38788,7 +38995,7 @@ static const short O1684[] = {21};
 static const short P1684[] = {1,3,5,6,8,9,11,12,14,15,17,18};
 static const signed char FI1684[] = {2,3,1,1,1,1,1,0};
 static const signed char FO1684[] = {0};
-static const short PR1684[] = {24,1,-1,-1,-1,-1,-1,2};
+static const short PR1684[] = {50,1,-1,-1,-1,-1,-1,2};
 static const short PO1684[] = {2};
 static const char* const L1685[] = {
 	"Records up to 65536 samples of a signal, splits the recording into chunks and plays one chunk back with feedback overdubbing and a dry and wet mix",
@@ -38823,7 +39030,7 @@ static const short O1685[] = {18,19,20};
 static const short P1685[] = {1,3,5,6,8,9,11,12,14,15};
 static const signed char FI1685[] = {0,2,1,1,1,1,1};
 static const signed char FO1685[] = {0,0,2};
-static const short PR1685[] = {2,63,-1,-1,-1,-1,-1};
+static const short PR1685[] = {2,132,-1,-1,-1,-1,-1};
 static const short PO1685[] = {2,2,-1};
 static const char* const L1686[] = {
 	"Turns one 1V/oct pitch into a four-note chord, with a list of stored chords stepped by trigger or picked by voltage",
@@ -38868,7 +39075,7 @@ static const short O1687[] = {13};
 static const short P1687[] = {1,2,3,4,5,6};
 static const signed char FI1687[] = {2,1,1,2,1,1};
 static const signed char FO1687[] = {0};
-static const short PR1687[] = {11,42,42,11,42,42};
+static const short PR1687[] = {11,92,92,11,92,92};
 static const short PO1687[] = {2};
 static const char* const L1688[] = {
 	"Closed hi-hat built by modelling an analogue circuit, running from noise through to a ringing metallic cymbal",
@@ -38892,7 +39099,7 @@ static const short O1688[] = {13};
 static const short P1688[] = {1,2,3,4,5,6};
 static const signed char FI1688[] = {2,1,1,2,2,1};
 static const signed char FO1688[] = {0};
-static const short PR1688[] = {11,42,42,11,10,42};
+static const short PR1688[] = {11,92,92,11,10,92};
 static const short PO1688[] = {2};
 static const char* const L1689[] = {
 	"Crash cymbal built by modelling an analogue circuit, running from noise through to a ringing metallic cymbal",
@@ -38916,7 +39123,7 @@ static const short O1689[] = {13};
 static const short P1689[] = {1,2,3,4,5,6};
 static const signed char FI1689[] = {2,1,1,2,1,1};
 static const signed char FO1689[] = {0};
-static const short PR1689[] = {11,42,42,11,42,42};
+static const short PR1689[] = {11,92,92,11,92,92};
 static const short PO1689[] = {2};
 static const char* const L1690[] = {
 	"All nine drums in one module, with two toms, a CV input for every parameter, and a stereo mixer",
@@ -38968,7 +39175,7 @@ static const short O1690[] = {38,39};
 static const short P1690[] = {1,3,4,11,13,16,17,18,1,6,7,13,16,17,18,1,3,5,11,13,16,17,18,1,3,5,11,13,16,17,18,1,8,12,15,16,17,18,2,8,9,14,16,17,18,1,10,11,13,16,17,18,1,10,11,13,16,17,18,1,10,11,13,16,17,18,1,10,11,13,16,17,18,19,20,21};
 static const signed char FI1690[] = {2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1};
 static const signed char FO1690[] = {0,0};
-static const short PR1690[] = {11,36,36,36,42,11,42,42,42,42,11,42,42,42,42,11,42,42,42,42,11,42,42,42,42,11,42,42,42,42,11,42,42,42,42,11,42,42,42,-1,11,42,42,42,42,11,42,42,42,42,11,36};
+static const short PR1690[] = {11,86,86,86,92,11,92,92,92,92,11,92,92,92,92,11,92,92,92,92,11,92,92,92,92,11,92,92,92,92,11,92,92,92,92,11,92,92,92,-1,11,92,92,92,92,11,92,92,92,92,11,86};
 static const short PO1690[] = {2,2};
 static const char* const L1691[] = {
 	"Kick drum built by modelling an analogue circuit, either an 808-like or a 909-like one",
@@ -38993,7 +39200,7 @@ static const short O1691[] = {13};
 static const short P1691[] = {1,2,3,4,5,6};
 static const signed char FI1691[] = {2,1,1,2,1,1};
 static const signed char FO1691[] = {0};
-static const short PR1691[] = {11,42,42,11,42,42};
+static const short PR1691[] = {11,92,92,11,92,92};
 static const short PO1691[] = {2};
 static const char* const L1692[] = {
 	"Open hi-hat built by modelling an analogue circuit, running from noise through to a ringing metallic cymbal",
@@ -39017,7 +39224,7 @@ static const short O1692[] = {13};
 static const short P1692[] = {1,2,3,4,5,6};
 static const signed char FI1692[] = {2,1,1,2,2,1};
 static const signed char FO1692[] = {0};
-static const short PR1692[] = {11,42,42,11,10,42};
+static const short PR1692[] = {11,92,92,11,10,92};
 static const short PO1692[] = {2};
 static const char* const L1693[] = {
 	"Ride cymbal built by modelling an analogue circuit, running from noise through to a ringing metallic cymbal",
@@ -39041,7 +39248,7 @@ static const short O1693[] = {13};
 static const short P1693[] = {1,2,3,4,5,6};
 static const signed char FI1693[] = {2,1,1,2,1,1};
 static const signed char FO1693[] = {0};
-static const short PR1693[] = {11,42,42,11,42,42};
+static const short PR1693[] = {11,92,92,11,92,92};
 static const short PO1693[] = {2};
 static const char* const L1694[] = {
 	"Rimshot built by modelling a 909-like analogue circuit",
@@ -39065,7 +39272,7 @@ static const short O1694[] = {13};
 static const short P1694[] = {1,2,3,4,5,6};
 static const signed char FI1694[] = {2,1,1,2,1,1};
 static const signed char FO1694[] = {0};
-static const short PR1694[] = {11,42,42,11,42,42};
+static const short PR1694[] = {11,92,92,11,92,92};
 static const short PO1694[] = {2};
 static const char* const L1695[] = {
 	"Snare drum built by modelling a 909-like analogue circuit: a drum tone plus a noise band standing in for the snare wires",
@@ -39089,7 +39296,7 @@ static const short O1695[] = {13};
 static const short P1695[] = {1,2,3,4,5,6};
 static const signed char FI1695[] = {2,1,1,2,1,1};
 static const signed char FO1695[] = {0};
-static const short PR1695[] = {11,42,42,11,42,42};
+static const short PR1695[] = {11,92,92,11,92,92};
 static const short PO1695[] = {2};
 static const char* const L1696[] = {
 	"Tom built by modelling an analogue circuit, in a low, mid or high model",
@@ -39114,7 +39321,7 @@ static const short O1696[] = {13};
 static const short P1696[] = {1,2,3,4,5,6};
 static const signed char FI1696[] = {2,1,1,2,1,1};
 static const signed char FO1696[] = {0};
-static const short PR1696[] = {11,42,42,11,42,42};
+static const short PR1696[] = {11,92,92,11,92,92};
 static const short PO1696[] = {2};
 static const char* const L1697[] = {
 	"Hosts a 64-bit VST 2 or VST 3 instrument inside Rack: pitch and gate become MIDI notes, 16 of the plugin's parameters take CV, and its audio comes back out",
@@ -39262,7 +39469,7 @@ static const short O1703[] = {19,20};
 static const short P1703[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI1703[] = {1,1,1,1,1,1,1,0,0};
 static const signed char FO1703[] = {0,0};
-static const short PR1703[] = {27,27,27,27,27,27,27,29,29};
+static const short PR1703[] = {63,63,63,63,63,63,63,38,38};
 static const short PO1703[] = {2,2};
 static const char* const L1704[] = {
 	"Stereo compressor with an optional sidechain, six models drawn from digital and analogue hardware, and metering of input, sidechain, gain reduction and output",
@@ -39293,7 +39500,7 @@ static const short O1704[] = {17,18,19};
 static const short P1704[] = {10,2,3,5,4,6,7,8,9,11,1};
 static const signed char FI1704[] = {0,0,1,0,0};
 static const signed char FO1704[] = {1,0,0};
-static const short PR1704[] = {29,29,36,29,29};
+static const short PR1704[] = {38,38,86,38,38};
 static const short PO1704[] = {-1,2,2};
 static const char* const L1705[] = {
 	"Convolution processor: the input is convolved with an impulse response, a recording of a space or of any other sound, loaded from a WAV file of as much as 60 seconds or recorded on the spot",
@@ -39333,7 +39540,7 @@ static const short O1705[] = {24,25};
 static const short P1705[] = {2,3,4,1,5,6,7,8,9,10,11,12,13,14};
 static const signed char FI1705[] = {1,1,1,1,1,1,0,0,2};
 static const signed char FO1705[] = {0,0};
-static const short PR1705[] = {36,36,36,36,36,36,29,29,28};
+static const short PR1705[] = {86,86,86,86,86,86,38,38,82};
 static const short PO1705[] = {2,2};
 static const char* const L1706[] = {
 	"Flanger: each channel runs through a short delay line swept by an internal sine LFO, with feedback round the delay, and the result is mixed with the dry signal to make a moving comb filter",
@@ -39364,7 +39571,7 @@ static const short O1706[] = {19,20};
 static const short P1706[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI1706[] = {1,1,1,1,3,1,1,0,0};
 static const signed char FO1706[] = {0,0};
-static const short PR1706[] = {27,27,27,27,32,27,27,29,29};
+static const short PR1706[] = {63,63,63,63,23,63,63,38,38};
 static const short PO1706[] = {2,2};
 static const char* const L1707[] = {
 	"Phaser: each channel runs through a chain of all-pass filters whose cutoff is swept by an internal sine LFO, and mixing that with the dry signal puts moving notches through the spectrum",
@@ -39395,7 +39602,7 @@ static const short O1707[] = {19,20};
 static const short P1707[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI1707[] = {1,1,1,1,3,1,1,0,0};
 static const signed char FO1707[] = {0,0};
-static const short PR1707[] = {27,27,27,27,32,27,27,29,29};
+static const short PR1707[] = {63,63,63,63,23,63,63,38,38};
 static const short PO1707[] = {2,2};
 static const char* const L1708[] = {
 	"Algorithmic reverb built from a chain of delays, filters and feedback loops. The display plots its impulse response: time left to right, frequency front to back, amplitude as the height of each line",
@@ -39430,7 +39637,7 @@ static const short O1708[] = {24,25};
 static const short P1708[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 static const signed char FI1708[] = {1,1,1,1,1,1,0,0,2};
 static const signed char FO1708[] = {0,0};
-static const short PR1708[] = {36,36,36,36,36,36,29,29,5};
+static const short PR1708[] = {86,86,86,86,86,86,38,38,5};
 static const short PO1708[] = {2,2};
 static const char* const L1709[] = {
 	"Records mono or stereo audio, or the Rack window as video, to a file on disk",
@@ -39532,7 +39739,7 @@ static const short O1711[] = {21,22,23,24,25,26,27,28,29,30,31,32};
 static const short P1711[] = {1,2,3,4,5,6,6,7,8,9,9,10,10,11};
 static const signed char FI1711[] = {0,0,0,0,1,1,-1,1,1,1,1,1,1};
 static const signed char FO1711[] = {0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR1711[] = {2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static const short PR1711[] = {239,240,241,242,79,79,-1,243,243,79,79,79,79};
 static const short PO1711[] = {2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L1712[] = {
 	"Four-operator FM oscillator whose operators read wavetables and shape their own phase, playing a chord voice and a second independently tuned voice at the same time",
@@ -39610,7 +39817,7 @@ static const short O1712[] = {58,59,60,61,62,63,64};
 static const short P1712[] = {1,2,3,5,6,7,8,9,10,11,13,12,14,15,16,17,18,19,20,21,-1,-1,22,23,24,25,26,27,28,29,30,31,32,33,34,36,37,38,-1,65,35,24,25,26,27,28,29,30,31,32,33,34,36,37,38,-1,65,35,24,25,26,27,28,29,30,31,32,33,34,36,37,38,-1,65,35,24,25,26,27,28,29,30,31,32,33,34,36,37,38,-1,65,35,39,39,39,39,40,41,42,43,40,41,42,43,39,39,39,39,40,41,42,43,40,41,42,43,39,39,39,39,40,41,42,43,40,41,42,43,39,39,39,39,40,41,42,43,40,41,42,43,4};
 static const signed char FI1712[] = {1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,3,1,1,1,1,1,1,1,3,1,1,1,3,1,1,1,1,1,1,1,3,1,1,1,3,1,1,1,1,1,1,1,3,1,1,1,3,1,1,1};
 static const signed char FO1712[] = {0,0,0,0,0,0,0};
-static const short PR1712[] = {-1,-1,-1,-1,-1,-1,-1,1,1,-1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1};
+static const short PR1712[] = {243,228,79,243,99,7,7,14,14,7,7,7,7,14,79,7,79,14,79,7,79,7,7,7,7,14,79,7,79,14,79,7,79,7,7,7,7,14,79,7,79,14,79,7,79,7,7,7,7,14,79,7,79,14,79,7,79};
 static const short PO1712[] = {2,2,2,2,2,2,2};
 static const char* const L1713[] = {
 	"Stereo state-variable filter with a drive stage, a spread between the two channels' cutoffs and ten CV inputs",
@@ -39643,7 +39850,7 @@ static const short O1713[] = {20,21,22};
 static const short P1713[] = {1,2,5,6,3,4,7,8,9,10,11,12,8,9,10,11,12};
 static const signed char FI1713[] = {0,0,3,1,1,1,-1,3,1,1,1};
 static const signed char FO1713[] = {0,0,0};
-static const short PR1713[] = {2,2,1,-1,-1,-1,-1,1,-1,-1,-1};
+static const short PR1713[] = {244,56,245,246,79,7,-1,245,246,79,7};
 static const short PO1713[] = {2,2,2};
 static const char* const L1714[] = {
 	"Virtual-analogue synth voice: one oscillator with a sub and noise, a mixer, a state-variable filter, an LFO and an ADSR envelope, polyphonic from the channel count at its V/Oct inputs",
@@ -39722,7 +39929,7 @@ static const short O1714[] = {54,55,56,57,58,59,60,61,62,63,64,65,66,67,68};
 static const short P1714[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,29,30,31,32,33,34,35,36,37,38,39,40,41,42};
 static const signed char FI1714[] = {3,3,1,2,2,0,3,3,1,-1,1,2,2,1};
 static const signed char FO1714[] = {0,0,0,0,0,0,1,1,1,1,1,1,0,1,1};
-static const short PR1714[] = {1,1,-1,19,19,2,1,1,-1,-1,-1,0,0,-1};
+static const short PR1714[] = {23,23,38,49,49,38,247,247,248,-1,14,249,249,55};
 static const short PO1714[] = {2,2,2,2,2,2,-1,-1,-1,-1,-1,-1,2,6,-1};
 static const char* const L1715[] = {
 	"Plate reverb after the Dattorro 1997 algorithm, able to run from a huge hall down to a short, tuneable resonant box",
@@ -39784,7 +39991,7 @@ static const short O1715[] = {48,49};
 static const short P1715[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,-1,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
 static const signed char FI1715[] = {0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2};
 static const signed char FO1715[] = {0,0};
-static const short PR1715[] = {2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,112,112};
+static const short PR1715[] = {250,251,252,252,8,246,246,4,246,4,246,246,79,79,79,174,174};
 static const short PO1715[] = {2,2};
 static const char* const L1716[] = {
 	"Wavetable oscillator with a phase shaper, an output mangler, a low-pass gate, a sub oscillator and two FM channels, playing 64 built-in wavetables or eight banks of your own",
@@ -39860,7 +40067,7 @@ static const short O1716[] = {52,53,54,55,56,57,58,59};
 static const short P1716[] = {1,2,3,5,6,9,10,13,14,17,18,21,22,23,4,4,7,7,8,8,11,11,12,12,15,15,16,16,19,19,20,20,28,29,29,28,29,29,24,25,26,27,31,30,30,32,33,35,36,34,37};
 static const signed char FI1716[] = {3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,2,2,1,1,1,1,2,2,1};
 static const signed char FO1716[] = {0,2,0,0,0,1,0,0};
-static const short PR1716[] = {1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,-1,2,2,0,0,-1,-1,-1,-1,0,0,-1};
+static const short PR1716[] = {23,23,243,243,83,83,243,243,83,83,243,243,83,83,38,38,38,38,38,38,24,24,83,83,83,83,17,17,253};
 static const short PO1716[] = {3,0,2,2,2,6,2,2};
 static const char* const L1717[] = {
 	"Drum pattern generator, a port of Mutable Instruments Grids: three trigger channels whose rhythms are read out of a map of ready-made patterns",
@@ -39903,7 +40110,7 @@ static const short O1717[] = {21,22,23,24,25,26};
 static const short P1717[] = {1,2,3,4,5,6,7,8,9,10};
 static const signed char FI1717[] = {2,2,1,1,1,1,1,1,1,2};
 static const signed char FO1717[] = {2,2,2,2,2,2};
-static const short PR1717[] = {0,0,-1,-1,-1,-1,-1,-1,-1,0};
+static const short PR1717[] = {5,5,79,79,79,79,79,79,254,5};
 static const short PO1717[] = {0,0,0,0,0,0};
 static const char* const L1718[] = {
 	"Compact drum pattern generator, a port of Mutable Instruments Grids: three trigger channels whose rhythms are read out of a map of ready-made patterns",
@@ -39945,7 +40152,7 @@ static const short O1718[] = {21,22,23,24,25,26};
 static const short P1718[] = {1,2,3,4,5,6,7,8,9,10};
 static const signed char FI1718[] = {2,2,1,1,1,1,1,1,1,2};
 static const signed char FO1718[] = {2,2,2,2,2,2};
-static const short PR1718[] = {0,0,-1,-1,-1,-1,-1,-1,-1,0};
+static const short PR1718[] = {5,5,79,79,79,79,79,79,254,5};
 static const short PO1718[] = {0,0,0,0,0,0};
 static const char* const L1719[] = {
 	"Envelope generator making an AD envelope from a trigger and an ASR envelope from a gate, with stage gate outputs, looping modes and wide voltage control of stage times",
@@ -39975,7 +40182,7 @@ static const short O1719[] = {12,14,16,18};
 static const short P1719[] = {1,2,3,4,5,6,6,7,7,8,8,13,15,17,19};
 static const signed char FI1719[] = {3,3,2,2};
 static const signed char FO1719[] = {2,2,2,1};
-static const short PR1719[] = {29,29,16,16};
+static const short PR1719[] = {38,38,16,16};
 static const short PO1719[] = {0,0,0,-1};
 static const char* const L1720[] = {
 	"Auxilliary Clone Expander: adds four more cloned polyphonic input and output pairs to a Clone Merge, Poly Clone or Poly Unison, and goes immediately to the right of it",
@@ -39987,7 +40194,7 @@ static const char* const L1720[] = {
 static const short I1720[] = {2,2,2,2};
 static const short O1720[] = {3,3,3,3};
 static const short P1720[] = {1,1,1,1};
-static const short PR1720[] = {27,27,27,27};
+static const short PR1720[] = {63,63,63,63};
 static const char* const L1721[] = {
 	"Bay Input: a transmitter that carries eight polyphonic signals to Bay Output and Bay Norm modules anywhere in the patch, with no cable and no sample delay",
 	"One of eight signals carried to every Bay Output and Bay Norm linked to this module; a name given to the port in its context menu appears as a label above it",
@@ -39996,7 +40203,7 @@ static const char* const L1721[] = {
 	"Note — renaming the module later does not break a link, because the link is held by module id rather than by name",
 };
 static const short I1721[] = {1,1,1,1,1,1,1,1};
-static const short PR1721[] = {27,27,27,27,27,27,27,27};
+static const short PR1721[] = {63,63,63,63,63,63,63,63};
 static const char* const L1722[] = {
 	"Bay Norm: a receiver that carries the eight signals of one Bay Input module anywhere in the patch, falling back to its own input where the source is unpatched",
 	"Feeds the output of the same number whenever the port of the same number on the linked Bay Input is unpatched, or no source is linked",
@@ -40008,7 +40215,7 @@ static const char* const L1722[] = {
 };
 static const short I1722[] = {1,1,1,1,1,1,1,1};
 static const short O1722[] = {2,2,2,2,2,2,2,2};
-static const short PR1722[] = {27,27,27,27,27,27,27,27};
+static const short PR1722[] = {63,63,63,63,63,63,63,63};
 static const char* const L1723[] = {
 	"Bay Output: a receiver that carries the eight signals of one Bay Input module anywhere in the patch, with no cable and no sample delay",
 	"Carries the port of the same number on the linked Bay Input; monophonic 0V while no source is linked or that source port is unpatched",
@@ -40069,7 +40276,7 @@ static const short O1725[] = {16,17,18,19,20,21,22};
 static const short P1725[] = {7,1,2,3,4,5,6,8,9,10};
 static const signed char FI1725[] = {1,1,2,2,2};
 static const signed char FO1725[] = {0,0,0,0,0,0,1};
-static const short PR1725[] = {8,8,28,28,5};
+static const short PR1725[] = {8,8,82,82,5};
 static const short PO1725[] = {2,2,2,2,2,2,-1};
 static const char* const L1726[] = {
 	"Expands the Benjolin Oscillator with a rungler CV output you weight bit by bit; place it immediately to the right of the oscillator, or in an unbroken chain of expanders running right from it",
@@ -40113,7 +40320,7 @@ static const short I1727[] = {8,9,12,13};
 static const short O1727[] = {10,11};
 static const short P1727[] = {1,2,3,4,5,6,6,7,7,14};
 static const signed char FI1727[] = {-1,-1,2,1};
-static const short PR1727[] = {29,29,33,30};
+static const short PR1727[] = {38,38,49,83};
 static const char* const L1728[] = {
 	"Adds a CV input for every Bernoulli Switch parameter; place it immediately to the right of a Bernoulli Switch",
 	"Sets the routing mode and overrides the switch on the Bernoulli Switch while patched: -1V and below is TOGGLE, between -1V and 1V is SWAP, 1V and above is GATE",
@@ -40130,7 +40337,7 @@ static const char* const L1728[] = {
 static const short I1728[] = {1,4,5,6,7,8,9};
 static const short P1728[] = {2,3,3,3,3,3,3};
 static const signed char FI1728[] = {1,1,1,1,1,1,1};
-static const short PR1728[] = {113,8,8,8,8,8,8};
+static const short PR1728[] = {255,8,8,8,8,8,8};
 static const char* const L1729[] = {
 	"Blocker: a 1HP module that breaks the run of neighbours Venom Bypass and Stoermelder Strip work along, so they stop at it. It blocks while bypassed too, and doubles as a near-free blank",
 };
@@ -40151,7 +40358,7 @@ static const short I1730[] = {4,5,5,5};
 static const short O1730[] = {7,7,7};
 static const short P1730[] = {1,3,6,6,6,8,8,8,2};
 static const signed char FI1730[] = {2};
-static const short PR1730[] = {28,27,27,27};
+static const short PR1730[] = {82,63,63,63};
 static const char* const L1731[] = {
 	"Clone Merge: copies each of up to eight monophonic inputs a chosen number of times and merges every copy into one polyphonic output",
 	"Sets how many copies are made of each input, from 1 to 16",
@@ -40163,7 +40370,7 @@ static const char* const L1731[] = {
 static const short I1731[] = {2,2,2,2,2,2,2,2};
 static const short O1731[] = {4};
 static const short P1731[] = {1,3};
-static const short PR1731[] = {36,36,36,36,36,36,36,36};
+static const short PR1731[] = {86,86,86,86,86,86,86,86};
 static const char* const L1732[] = {
 	"Two windowed comparators, each gating on whether its input is above, within or below a voltage window, with those gates combined by logic and flip flops",
 	"Sets the centre of that comparator's window, -10V to 10V, summed with its SHIFT CV input",
@@ -40203,7 +40410,7 @@ static const short O1732[] = {11,14,14,11,12,15,15,12,13,16,16,13,17,20,23,26,18
 static const short P1732[] = {1,2,2,1,7,8};
 static const signed char FI1732[] = {1,1,1,1};
 static const signed char FO1732[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1732[] = {29,29,29,29,29,29};
+static const short PR1732[] = {38,38,38,38,38,38};
 static const short PO1732[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const char* const L1733[] = {
 	"Eight inputs placed at the corners of a cube and crossfaded into one output, with X, Y and Z faders blending between opposite faces",
@@ -40233,7 +40440,7 @@ static const short I1733[] = {9,10,11,12,13,14,15,16,17,18,19};
 static const short O1733[] = {20};
 static const short P1733[] = {1,2,3,4,5,6,8,7};
 static const signed char FI1733[] = {1,1,1};
-static const short PR1733[] = {38,38,38,27,27,27,27,27,27,27,27};
+static const short PR1733[] = {88,88,88,63,63,63,63,63,63,63,63};
 static const char* const L1734[] = {
 	"Builds a harmonic or subharmonic partial above a root pitch, or quantizes an incoming pitch to the nearest partial of that root",
 	"Picks which partials are available: A for all of them, O for odd ones, E for even ones plus the fundamental",
@@ -40253,7 +40460,7 @@ static const short O1734[] = {9};
 static const short P1734[] = {2,1,3,5,6};
 static const signed char FI1734[] = {1,3,3};
 static const signed char FO1734[] = {3};
-static const short PR1734[] = {29,32,32};
+static const short PR1734[] = {38,23,23};
 static const short PO1734[] = {2};
 static const char* const L1735[] = {
 	"Knob 5: five knobs, each putting out a constant voltage on its own jack",
@@ -40283,7 +40490,7 @@ static const short O1736[] = {4,4,4,4,4,4,4,4,4};
 static const short P1736[] = {1,1,1,1,1,1,1,1,1};
 static const signed char FI1736[] = {2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1736[] = {2,2,2,2,2,2,2,2,2};
-static const short PR1736[] = {33,33,33,33,33,33,33,33,33,5};
+static const short PR1736[] = {49,49,49,49,49,49,49,49,49,5};
 static const short PO1736[] = {0,0,0,0,0,0,0,0,0};
 static const char* const L1737[] = {
 	"Linear Beats Expander: adds mutes and a disable switch to a Linear Beats module, immediately to its left or its right. On the left it mutes the inputs, on the right the outputs",
@@ -40330,7 +40537,7 @@ static const char* const L1739[] = {
 };
 static const short I1739[] = {1,1,1,1,1,1,1,1};
 static const short O1739[] = {2,3};
-static const short PR1739[] = {27,27,27,27,27,27,27,27};
+static const short PR1739[] = {63,63,63,63,63,63,63,63};
 static const char* const L1740[] = {
 	"Merge Split: a merge section combining up to four inputs into one polyphonic output, and beneath it a split section breaking one polyphonic input back out across four outputs",
 	"One of the four signals merged into the merge output; the lamp beside it glows red when its channels did not fit within the 16 that output can carry",
@@ -40342,7 +40549,7 @@ static const char* const L1740[] = {
 };
 static const short I1740[] = {1,1,1,1,3};
 static const short O1740[] = {2,4,4,4,4};
-static const short PR1740[] = {27,27,27,27,27};
+static const short PR1740[] = {63,63,63,63,63};
 static const char* const L1741[] = {
 	"Four-channel polyphonic mixer for audio or CV, with a level knob per input and options to clip the mix or strip DC from it",
 	"Attenuates, inverts or amplifies that numbered input before it reaches the mix; the M button sets what the knob's range means",
@@ -40360,7 +40567,7 @@ static const char* const L1741[] = {
 static const short I1741[] = {6,6,6,6};
 static const short O1741[] = {7};
 static const short P1741[] = {1,1,1,1,2,3,5,4};
-static const short PR1741[] = {27,27,27,27};
+static const short PR1741[] = {63,63,63,63};
 static const char* const L1742[] = {
 	"Four-channel polyphonic stereo mixer for audio or CV, one level knob per stereo pair, with options to clip the mix or strip DC from it",
 	"Attenuates, inverts or amplifies both sides of that numbered stereo input before the mix; the MODE button sets what the knob's range means",
@@ -40381,7 +40588,7 @@ static const char* const L1742[] = {
 static const short I1742[] = {6,6,6,6,7,7,7,7};
 static const short O1742[] = {8,9};
 static const short P1742[] = {1,1,1,1,2,3,5,4};
-static const short PR1742[] = {27,27,27,27,27,27,27,27};
+static const short PR1742[] = {63,63,63,63,63,63,63,63};
 static const char* const L1743[] = {
 	"Expander for the MIX MUTE and MIX SOLO expanders, turning their mute and unmute switches into timed fades; it goes immediately to the right of a MIX MUTE or MIX SOLO expander",
 	"Sets how long that numbered channel takes to fade in and how long it takes to fade out, from 0 to 30 seconds",
@@ -40454,7 +40661,7 @@ static const char* const L1747[] = {
 static const short I1747[] = {3,3,3,3};
 static const short P1747[] = {1,1,1,1,2,2,2,2};
 static const signed char FI1747[] = {1,1,1,1};
-static const short PR1747[] = {46,46,46,46};
+static const short PR1747[] = {57,57,57,57};
 static const char* const L1748[] = {
 	"Expander for MIX 4, MIX 4 STEREO, VCA MIX 4 and VCA MIX 4 STEREO, making a second mix of the four channels to feed an effect and bring back; it goes to the right of the mix module",
 	"Sets how much of that numbered channel goes into the send mix, from 0% to 100%, and starts at 0%",
@@ -40472,7 +40679,7 @@ static const char* const L1748[] = {
 static const short I1748[] = {7,8};
 static const short O1748[] = {4,5};
 static const short P1748[] = {1,1,1,1,2,3,6};
-static const short PR1748[] = {27,27};
+static const short PR1748[] = {63,63};
 static const char* const L1749[] = {
 	"Expander for MIX 4, MIX 4 STEREO, VCA MIX 4 and VCA MIX 4 STEREO, soloing numbered channels; it goes to the right of the mix module, in the chain of expanders there",
 	"Solos that numbered channel; while any solo button glows bright green, every channel whose button is unlit is muted",
@@ -40514,7 +40721,7 @@ static const char* const L1751[] = {
 };
 static const short I1751[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short O1751[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1751[] = {27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27};
+static const short PR1751[] = {63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63};
 static const char* const L1752[] = {
 	"Multi Split: splits up to sixteen polyphonic inputs across sixteen outputs, in as many separate groups as you patch inputs for",
 	"Shares its channels across the output of its own row and of every row below it, down to the next patched input. Patching it regroups the module, and its lamp glows red when the channels cannot fit",
@@ -40524,7 +40731,7 @@ static const char* const L1752[] = {
 };
 static const short I1752[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short O1752[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1752[] = {27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27};
+static const short PR1752[] = {63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63};
 static const char* const L1753[] = {
 	"Turns a polyphonic chord into the control voltages that set up a scale on the Non-Octave-Repeating Scale Intervallic Quantizer",
 	"When on, a note an octave multiple above the root is added as the last note of the scale; when off, the highest note of the chord ends the scale",
@@ -40541,7 +40748,7 @@ static const short O1753[] = {4,5,6,7};
 static const short P1753[] = {1};
 static const signed char FI1753[] = {2,3};
 static const signed char FO1753[] = {2,3,1,1};
-static const short PR1753[] = {28,32};
+static const short PR1753[] = {82,23};
 static const short PO1753[] = {0,2,-1,-1};
 static const char* const L1754[] = {
 	"Quantizer for a scale built from a run of up to 13 intervals, where the run need not add up to an octave",
@@ -40574,7 +40781,7 @@ static const short O1754[] = {19,20,22,21};
 static const short P1754[] = {1,3,5,7,9,11,12,13,14,14,14,14,14,14,14,14,14,14,14,14,14,2};
 static const signed char FI1754[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,3,3,2,1};
 static const signed char FO1754[] = {3,2,3,1};
-static const short PR1754[] = {36,36,36,36,36,36,36,36,36,36,36,36,36,114,10,11,115,32,33,27};
+static const short PR1754[] = {86,86,86,86,86,86,86,86,86,86,86,86,86,256,10,11,257,23,49,63};
 static const short PO1754[] = {2,0,2,-1};
 static const char* const L1755[] = {
 	"Null Cable: three independent sections, each either passing a polyphonic signal through or giving its output no channels at all, which a destination treats as no cable rather than as silence",
@@ -40588,7 +40795,7 @@ static const short I1755[] = {2,2,2,3,3,3};
 static const short O1755[] = {4,4,4};
 static const short P1755[] = {1,1,1};
 static const signed char FI1755[] = {2,2,2};
-static const short PR1755[] = {28,28,28,27,27,27};
+static const short PR1755[] = {82,82,82,63,63,63};
 static const char* const L1756[] = {
 	"Octave effect in the style of the Pearl OC-7 and Boss OC-2 pedals, mixing the input with one octave up, one octave down and two octaves down",
 	"Chooses how the sub-octaves are generated, by the Pearl inversion method or the Boss square method, each with its own sound",
@@ -40610,7 +40817,7 @@ static const short O1756[] = {13};
 static const short P1756[] = {3,4,5,6,8,7,7,7,7,9,1,2};
 static const signed char FI1756[] = {1,1,1,1,1,0};
 static const signed char FO1756[] = {0};
-static const short PR1756[] = {38,38,38,38,30,29};
+static const short PR1756[] = {88,88,88,88,83,38};
 static const short PO1756[] = {2};
 static const char* const L1757[] = {
 	"Polyphonic oscillator with sine, triangle, square and saw outputs running at once plus a configurable mix, each wave having its own shape, phase, offset and level",
@@ -40667,7 +40874,7 @@ static const short O1757[] = {34,34,34,34,35};
 static const short P1757[] = {1,2,17,18,3,5,6,4,7,8,19,19,20,19,21,32,32,32,32,32,23,23,23,23,24,32,32,32,32,32,26,26,26,26,27,32,32,32,32,32,29,29,29,29,30,32,32,32,32,32,33,33,33,33,16,16,16};
 static const signed char FI1757[] = {1,1,1,1,3,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2};
 static const signed char FO1757[] = {0,0,0,0,0};
-static const short PR1757[] = {29,29,46,46,32,16,29,29,29,29,29,29,29,29,29,29,46,46,46,46,46,29,29,29,29,29,16};
+static const short PR1757[] = {38,38,57,57,23,16,38,38,38,38,38,38,38,38,38,38,57,57,57,57,57,38,38,38,38,38,16};
 static const short PO1757[] = {2,2,2,2,2};
 static const char* const L1758[] = {
 	"Pans one input across eight outputs placed at the corners of a virtual cube, using three independent panners",
@@ -40685,7 +40892,7 @@ static const short O1758[] = {7,7,7,7,7,7,7,7};
 static const short P1758[] = {1,1,1,2,2,2,5,6};
 static const signed char FI1758[] = {1,1,1,0};
 static const signed char FO1758[] = {0,0,0,0,0,0,0,0};
-static const short PR1758[] = {38,38,38,29};
+static const short PR1758[] = {88,88,88,38};
 static const short PO1758[] = {2,2,2,2,2,2,2,2};
 static const char* const L1759[] = {
 	"Poly Clone: copies each channel of a polyphonic input a chosen number of times and merges every copy into one polyphonic output",
@@ -40698,7 +40905,7 @@ static const char* const L1759[] = {
 static const short I1759[] = {2};
 static const short O1759[] = {4};
 static const short P1759[] = {1,3};
-static const short PR1759[] = {27};
+static const short PR1759[] = {63};
 static const char* const L1760[] = {
 	"Crossfades between the channels of a polyphonic input, a phasor sweeping an envelope across the channels one after another",
 	"Curves the rising ramp of each channel envelope between -100% and 100%, 0% linear, negative bending toward exponential and positive toward logarithmic",
@@ -40744,7 +40951,7 @@ static const short O1760[] = {33,35,31,32,34};
 static const short P1760[] = {1,2,3,4,7,8,9,10,11,12,13,14,15,16,5,6,17};
 static const signed char FI1760[] = {1,1,1,1,1,1,1,1,1,1,-1,2,1};
 static const signed char FO1760[] = {2,-1,-1,1,1};
-static const short PR1760[] = {12,12,8,13,13,14,116,117,11,4,27,28,4};
+static const short PR1760[] = {12,12,8,13,13,14,29,258,11,4,63,82,4};
 static const short PO1760[] = {0,-1,-1,-1,-1};
 static const char* const L1761[] = {
 	"Poly Mute: mutes individual channels of two polyphonic inputs, by button or by polyphonic gate",
@@ -40760,7 +40967,7 @@ static const short I1761[] = {2,5,5};
 static const short O1761[] = {6,6};
 static const short P1761[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,3};
 static const signed char FI1761[] = {2};
-static const short PR1761[] = {31,27,27};
+static const short PR1761[] = {53,63,63};
 static const char* const L1762[] = {
 	"Poly Offset: adds a separate voltage to each channel of a polyphonic signal",
 	"The voltage added to the input channel of the same number, covering -10V to 10V until the menu is told otherwise; a knob numbered above the output channel count is ignored",
@@ -40774,7 +40981,7 @@ static const char* const L1762[] = {
 static const short I1762[] = {2};
 static const short O1762[] = {3};
 static const short P1762[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1762[] = {27};
+static const short PR1762[] = {63};
 static const char* const L1763[] = {
 	"Poly Prune: removes channels from a polyphonic input and closes the gaps, by gates, by a start and count, or by both, with optional sorting by voltage",
 	"A high gate keeps that channel and a low gate removes it, read as Schmitt triggers going high at 2V and low at 0.2V. It is normalled to 10V, so every channel is kept while it is unpatched",
@@ -40791,7 +40998,7 @@ static const short I1763[] = {1,4,6,7};
 static const short O1763[] = {8};
 static const short P1763[] = {2,3,5};
 static const signed char FI1763[] = {2,1,1};
-static const short PR1763[] = {31,11,11,27};
+static const short PR1763[] = {53,11,11,63};
 static const char* const L1764[] = {
 	"Ten polyphonic sample and hold rows, normalled so that consecutive rows work together as an analogue shift register",
 	"Triggers a sample on the first row",
@@ -40812,7 +41019,7 @@ static const short O1764[] = {9,9,9,9,9,9,9,9,9,9};
 static const short P1764[] = {2,3,1,4};
 static const signed char FI1764[] = {2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1764[] = {1,1,1,1,1,1,1,1,1,1};
-static const short PR1764[] = {31,31,31,31,31,31,31,31,31,31,29,29,29,29,29,29,29,29,29,29};
+static const short PR1764[] = {53,53,53,53,53,53,53,53,53,53,38,38,38,38,38,38,38,38,38,38};
 static const char* const L1765[] = {
 	"Gives every channel of a polyphonic signal its own level control, scaling each channel's voltage before passing it to the output",
 	"Sets the scale factor for that polyphonic channel, 0 to 1x by default and 1x when the module is initialised; knobs above the output channel count do nothing",
@@ -40825,7 +41032,7 @@ static const char* const L1765[] = {
 static const short I1765[] = {2};
 static const short O1765[] = {3};
 static const short P1765[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1765[] = {27};
+static const short PR1765[] = {63};
 static const char* const L1766[] = {
 	"Poly Unison: turns each channel of a polyphonic pitch input into a detuned unison spread and merges the result into one polyphonic output",
 	"Sets how many unison voices each input channel becomes, from 1 to 16",
@@ -40845,7 +41052,7 @@ static const short O1766[] = {9};
 static const short P1766[] = {1,3,5,6,8};
 static const signed char FI1766[] = {1,1,3};
 static const signed char FO1766[] = {3};
-static const short PR1766[] = {11,8,32};
+static const short PR1766[] = {11,8,23};
 static const short PO1766[] = {2};
 static const char* const L1767[] = {
 	"Push 5: five buttons, each putting out a voltage on its own jack",
@@ -40880,7 +41087,7 @@ static const short I1768[] = {8,8,8,8,9,9,9,9};
 static const short O1768[] = {10,10,10,10};
 static const short P1768[] = {2,3,4,5,6,6,6,6,7,7,7,7,1};
 static const signed char FI1768[] = {1,1,1,1};
-static const short PR1768[] = {29,29,29,29,29,29,29,29};
+static const short PR1768[] = {38,38,38,38,38,38,38,38};
 static const char* const L1769[] = {
 	"Rhythm Explorer CV Expander: adds three channels of stepped random CV for each of the eight divisions of a Rhythm Explorer, and goes immediately to its left or right",
 	"Sets which side the parent Rhythm Explorer is on, yellow for left and orange for right; the corner lamp on that side glows yellow when the connection was made and red when it was not",
@@ -40895,7 +41102,7 @@ static const short O1769[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5};
 static const short P1769[] = {2,3,2,3,2,3,1};
 static const signed char FI1769[] = {1,1,1};
 static const signed char FO1769[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1769[] = {27,27,27};
+static const short PR1769[] = {63,63,63};
 static const char* const L1770[] = {
 	"Recurse: passes a signal out and back through an effect up to 16 times in one go, giving each pass its own polyphony channel",
 	"Sets how many times each input channel goes round the send and return loop, 1 to 16. Its display is yellow while every input channel fits within 16 channels and red while channels are dropped",
@@ -40914,7 +41121,7 @@ static const short I1770[] = {3,5,8,9};
 static const short O1770[] = {7,10};
 static const short P1770[] = {1,2,4,6};
 static const signed char FI1770[] = {1,1};
-static const short PR1770[] = {29,29,27,27};
+static const short PR1770[] = {38,38,63,63};
 static const char* const L1771[] = {
 	"Recurse Stereo: passes a stereo pair out and back through an effect up to 16 times in one go, giving each pass its own polyphony channel",
 	"Sets how many times each input channel goes round the send and return loop, 1 to 16, alike on both sides. Its display is yellow while every channel fits within 16 and red while channels are dropped",
@@ -40934,7 +41141,7 @@ static const short I1771[] = {3,5,8,8,9,10};
 static const short O1771[] = {7,7,11,11};
 static const short P1771[] = {1,2,4,6};
 static const signed char FI1771[] = {1,1};
-static const short PR1771[] = {29,29,27,27,27,27};
+static const short PR1771[] = {38,38,63,63,63,63};
 static const char* const L1772[] = {
 	"Reformation remaps five way point voltages of an incoming signal to new values and interpolates everything in between, then drives, clips and attenuates the result",
 	"Amplifies the remapped signal before clipping, from 1 for no amplification to 10, with a default of 2; the Drive input adds to it and the total is clamped to that range",
@@ -40956,7 +41163,7 @@ static const short I1772[] = {9,9,9,9,9,9,9,9,9,9,10,11,12};
 static const short O1772[] = {13};
 static const short P1772[] = {1,2,3,4,5,6,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8};
 static const signed char FI1772[] = {1,1,1,1,1,1,1,1,1,1,-1,1,1};
-static const short PR1772[] = {30,30,30,30,30,30,30,30,30,30,30,30,30};
+static const short PR1772[] = {83,83,83,83,83,83,83,83,83,83,83,83,83};
 static const char* const L1773[] = {
 	"Rhythm Explorer: a trigger sequencer that makes repeating patterns from a seeded random number generator, with eight clock divisions each given its own density",
 	"Draws a fresh seed, and so a fresh pattern, which takes effect at the start of the next phrase; the button stays brightly lit until it does. Trigger RESET at the same time to hear it at once",
@@ -41012,7 +41219,7 @@ static const short O1773[] = {26,26,26,26,26,26,26,26,25,25,25,25,25,25,25,25,17
 static const short P1773[] = {20,20,20,20,20,20,20,20,1,10,19,19,19,19,19,19,19,19,3,22,22,22,22,22,22,22,22,6,11,21,21,21,21,21,21,21,21,27,28,33,35,34,9};
 static const signed char FI1773[] = {2,1,1,2,1,1,1,1,1,1,1,1,-1,1,1,1,1,1,1,1,1,1,2,2,1,1};
 static const signed char FO1773[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,-1,2,2,2,2,2};
-static const short PR1773[] = {28,4,30,28,4,4,4,4,4,4,4,4,-1,56,56,56,56,56,56,56,29,16,28,28,11,11};
+static const short PR1773[] = {82,4,83,82,4,4,4,4,4,4,4,4,-1,26,26,26,26,26,26,26,38,16,82,82,11,11};
 static const short PO1773[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,-1,-1,-1,0,0,-1};
 static const char* const L1774[] = {
 	"State variable filter with low pass, high pass, band pass, notch and a morph output all running at once, in stereo",
@@ -41061,7 +41268,7 @@ static const short O1774[] = {29,30,31,32,33,34,35,36,37,38};
 static const short P1774[] = {1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,8,19};
 static const signed char FI1774[] = {3,3,1,1,3,1,1,0,0};
 static const signed char FO1774[] = {0,0,0,0,0,0,0,0,0,0};
-static const short PR1774[] = {32,32,30,30,32,29,30,29,29};
+static const short PR1774[] = {23,23,83,83,23,38,83,38,38};
 static const short PO1774[] = {2,2,2,2,2,2,2,2,2,2};
 static const char* const L1775[] = {
 	"Shaped VCA is a stereo polyphonic amplifier with a variable response curve, plus ring and amplitude modulation, output offset, clipping and oversampling",
@@ -41087,7 +41294,7 @@ static const short O1775[] = {12,13};
 static const short P1775[] = {1,2,3,4,14,5,7,8};
 static const signed char FI1775[] = {1,1,0,0};
 static const signed char FO1775[] = {0,0};
-static const short PR1775[] = {30,30,29,29};
+static const short PR1775[] = {83,83,38,38};
 static const short PO1775[] = {2,2};
 static const char* const L1776[] = {
 	"Polyphonic slew limiter that caps how fast the input can change, with separate rise and fall times and shapes, plus gates reporting the slope",
@@ -41120,7 +41327,7 @@ static const short O1776[] = {18,19,20,21};
 static const short P1776[] = {1,2,3,4,5,6,7,8,9,10,11};
 static const signed char FI1776[] = {1,1,1,1,-1,3};
 static const signed char FO1776[] = {2,2,2};
-static const short PR1776[] = {29,29,30,30,29,32};
+static const short PR1776[] = {38,38,83,83,38,23};
 static const short PO1776[] = {0,0,0};
 static const char* const L1777[] = {
 	"Converts the spherical coordinates r, theta and phi into the cartesian coordinates X, Y and Z; at audio rates the effect resembles ring modulation",
@@ -41139,7 +41346,7 @@ static const short O1777[] = {6,7,8};
 static const short P1777[] = {2,1};
 static const signed char FI1777[] = {1,1,1};
 static const signed char FO1777[] = {1,1,1};
-static const short PR1777[] = {29,29,29};
+static const short PR1777[] = {38,38,38};
 static const char* const L1778[] = {
 	"Split 4x2: two independent sections, each splitting one polyphonic input across four outputs",
 	"The polyphonic signal split across the four outputs of the upper section, and across all eight when the lower input is unpatched; its lamp glows red when a channel could not be placed",
@@ -41150,7 +41357,7 @@ static const char* const L1778[] = {
 };
 static const short I1778[] = {1,2};
 static const short O1778[] = {3,3,3,3,3,3,3,3};
-static const short PR1778[] = {27,27};
+static const short PR1778[] = {63,63};
 static const char* const L1779[] = {
 	"Thru: five polyphonic input and output pairs, for summing stacked cables at unity and for adding sample delays",
 	"Everything patched here, including several stacked cables summed at unity, appears at the first output",
@@ -41159,7 +41366,7 @@ static const char* const L1779[] = {
 };
 static const short I1779[] = {1,2,2,2,2};
 static const short O1779[] = {3,3,3,3,3};
-static const short PR1779[] = {27,27,27,27,27};
+static const short PR1779[] = {63,63,63,63,63};
 static const char* const L1780[] = {
 	"Four-channel polyphonic VCA mixer for audio or CV, each channel with a level CV input and its own output, plus a chain input, clipping and DC blocking",
 	"Sets the base level of that channel's VCA, which its CV input then scales; the M button sets what the knob's range means",
@@ -41184,7 +41391,7 @@ static const short I1780[] = {8,8,8,8,9,10,10,10,10,12};
 static const short O1780[] = {11,11,11,11,13};
 static const short P1780[] = {1,1,1,1,2,3,6,5,4,7};
 static const signed char FI1780[] = {1,1,1,1,1};
-static const short PR1780[] = {30,30,30,30,30,27,27,27,27,27};
+static const short PR1780[] = {83,83,83,83,83,63,63,63,63,63};
 static const char* const L1781[] = {
 	"Four-channel polyphonic stereo VCA mixer for audio or CV, each stereo pair with one level knob and one CV input, plus stereo channel outputs, a stereo chain input, clipping and DC blocking",
 	"Sets the base level of that stereo pair's VCA, which its CV input then scales; the MODE button sets what the knob's range means",
@@ -41214,7 +41421,7 @@ static const short I1781[] = {10,10,10,10,11,11,11,11,14,15,8,8,8,8,9};
 static const short O1781[] = {12,12,12,12,13,13,13,13,16,17};
 static const short P1781[] = {1,1,1,1,2,3,6,5,4,7};
 static const signed char FI1781[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1};
-static const short PR1781[] = {27,27,27,27,27,27,27,27,27,27,30,30,30,30,30};
+static const short PR1781[] = {63,63,63,63,63,63,63,63,63,63,83,83,83,83,83};
 static const char* const L1782[] = {
 	"Polyphonic oscillator with one selectable waveform, carrying shape, phase, offset and level controls each with its own CV input and attenuverter",
 	"Picks the overall mode: audio, low frequency, 0Hz carrier for linear FM, or a triggered, retriggered or gated one shot that fires from the HARD SYNC input",
@@ -41261,7 +41468,7 @@ static const short O1782[] = {27};
 static const short P1782[] = {1,2,3,4,5,6,7,8,9,10,11,15,12,15,13,15,14,15};
 static const signed char FI1782[] = {1,1,1,1,3,2,2,1,1,1,1};
 static const signed char FO1782[] = {0};
-static const short PR1782[] = {29,29,46,46,32,16,16,46,29,46,29};
+static const short PR1782[] = {38,38,57,57,23,16,16,57,38,57,38};
 static const short PO1782[] = {2};
 static const char* const L1783[] = {
 	"Venom Blank: a 3HP blank panel",
@@ -41290,7 +41497,7 @@ static const short O1784[] = {13};
 static const short P1784[] = {1,2,3,4,5,6,7,8};
 static const signed char FI1784[] = {1,1,1,0};
 static const signed char FO1784[] = {0};
-static const short PR1784[] = {29,29,29,29};
+static const short PR1784[] = {38,38,38,38};
 static const short PO1784[] = {2};
 static const char* const L1785[] = {
 	"Wave Mangler splits a bipolar input at a high and a low threshold and amplifies the three regions separately, summing them into a new wave",
@@ -41329,7 +41536,7 @@ static const short O1785[] = {28};
 static const short P1785[] = {1,2,3,4,6,5,9,8,12,11,15,14,18,19,17,22,21,25,24};
 static const signed char FI1785[] = {1,1,1,1,1,1,1,0};
 static const signed char FO1785[] = {0};
-static const short PR1785[] = {29,29,29,29,29,29,29,46};
+static const short PR1785[] = {38,38,38,38,38,38,38,57};
 static const short PO1785[] = {2};
 static const char* const L1786[] = {
 	"Wave Multiplier mixes four shifted copies of the input wave with the original, each copy shifted against its own threshold, with four triangle LFOs built in to modulate them",
@@ -41362,7 +41569,7 @@ static const short O1786[] = {4,4,4,4,11,11,11,11,12,12,12,12,21};
 static const short P1786[] = {1,3,3,3,3,7,6,9,9,9,9,10,10,10,10,13,14,15,15,15,15,16,19,20};
 static const signed char FI1786[] = {3,1,1,1,1,1,0,1};
 static const signed char FO1786[] = {1,1,1,1,0,0,0,0,0,0,0,0,0};
-static const short PR1786[] = {32,29,29,29,29,29,29,29};
+static const short PR1786[] = {23,38,38,38,38,38,38,38};
 static const short PO1786[] = {-1,-1,-1,-1,2,2,2,2,2,2,2,2,2};
 static const char* const L1787[] = {
 	"Widget Menu Extender: adds custom names and custom default values to the context menus of modules from other makers",
@@ -41403,7 +41610,7 @@ static const short O1788[] = {7,8,9,10,11,12,13,14,15,16};
 static const short P1788[] = {1,2,3};
 static const signed char FI1788[] = {-1,-1,1};
 static const signed char FO1788[] = {-1,-1,-1,-1,2,2,2,2,2,2};
-static const short PR1788[] = {29,29,29};
+static const short PR1788[] = {38,38,38};
 static const short PO1788[] = {-1,-1,-1,-1,0,0,0,0,0,0};
 static const char* const L1789[] = {
 	"Polyphonic synth voice: an oscillator with selectable waveform and integer frequency ratios, an ADSR envelope, a VCA, and selectable external and feedback modulation types",
@@ -41449,7 +41656,7 @@ static const short O1789[] = {32,33};
 static const short P1789[] = {1,2,3,4,5,6,7,8,9,9,9,9,11,12,13,15,15,15,17,17,17,18,19,20,21,22,22,22,23,24,14};
 static const signed char FI1789[] = {1,1,2,1,1,1,2,3,0};
 static const signed char FO1789[] = {1,0};
-static const short PR1789[] = {29,29,31,30,30,30,31,32,29};
+static const short PR1789[] = {38,38,53,83,83,83,53,23,38};
 static const short PO1789[] = {6,2};
 static const char* const L1790[] = {
 	"Chaotic voltage source simulating a multi-segment pendulum, running the same code as the Vult hardware module, with eight simulation models and eight interrelated outputs",
@@ -41663,7 +41870,7 @@ static const short O1794[] = {21};
 static const short P1794[] = {3,1,4,2,7,5,6,8,10,11,12,13,9};
 static const signed char FI1794[] = {1,1,1,1,2,3,1};
 static const signed char FO1794[] = {0};
-static const short PR1794[] = {-1,-1,-1,-1,24,2,-1};
+static const short PR1794[] = {-1,-1,-1,-1,50,2,-1};
 static const short PO1794[] = {2};
 static const char* const L1795[] = {
 	"Filter on a modernised transconductance-amplifier version of the MS-20 circuit, switchable between lowpass and highpass",
@@ -41969,7 +42176,7 @@ static const short O1805[] = {10};
 static const short P1805[] = {1,2,3,4,5,6};
 static const signed char FI1805[] = {3,1,1};
 static const signed char FO1805[] = {0};
-static const short PR1805[] = {32,27,27};
+static const short PR1805[] = {23,63,63};
 static const short PO1805[] = {2};
 static const char* const L1806[] = {
 	"Blank 6HP panel carrying the Vult logo, with no function beyond filling a gap in the rack",
@@ -42008,7 +42215,7 @@ static const short O1809[] = {10};
 static const short P1809[] = {1,2,3,4,5,6};
 static const signed char FI1809[] = {3,1,1};
 static const signed char FO1809[] = {0};
-static const short PR1809[] = {32,27,27};
+static const short PR1809[] = {23,63,63};
 static const short PO1809[] = {2};
 static const char* const L1810[] = {
 	"Two pole lowpass filter on the Sallen-Key topology, with the saturation of the feedback path modelled, so the resonant peak compresses and dirties instead of ringing cleanly",
@@ -42027,7 +42234,7 @@ static const short O1810[] = {9};
 static const short P1810[] = {1,2,3,4,5};
 static const signed char FI1810[] = {1,1,0};
 static const signed char FO1810[] = {0};
-static const short PR1810[] = {27,27,29};
+static const short PR1810[] = {63,63,38};
 static const short PO1810[] = {2};
 static const char* const L1811[] = {
 	"Chaotic voltage source running a simulation of four coupled bodies, with the position and the angle of each of them on its outputs",
@@ -42056,7 +42263,7 @@ static const short O1811[] = {16,17,18,16,17,18,16,17,18,16,17,18};
 static const short P1811[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI1811[] = {1,1,2,2,2,2};
 static const signed char FO1811[] = {1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR1811[] = {27,27,16,16,16,16};
+static const short PR1811[] = {63,63,16,16,16,16};
 static const short PO1811[] = {21,21,21,21,21,21,21,21,21,21,21,21};
 static const char* const L1812[] = {
 	"Chain of four distortions in stereo, each with its own attenuverter and CV input: wavefolding, bit crushing, asymmetric clipping and hard clipping",
@@ -42082,7 +42289,7 @@ static const short O1812[] = {15,16};
 static const short P1812[] = {1,2,3,4,5,6,7,8};
 static const signed char FI1812[] = {0,1,1,1,1,0};
 static const signed char FO1812[] = {0,0};
-static const short PR1812[] = {29,27,27,27,27,29};
+static const short PR1812[] = {38,63,63,63,63,38};
 static const short PO1812[] = {2,2};
 static const char* const L1813[] = {
 	"Stereo equalizer with a high shelf, a low shelf and two peak filters",
@@ -42105,7 +42312,7 @@ static const short O1813[] = {11,12};
 static const short P1813[] = {1,2,3,4,5,6,7,5,6,7,8};
 static const signed char FI1813[] = {0,0};
 static const signed char FO1813[] = {0,0};
-static const short PR1813[] = {29,29};
+static const short PR1813[] = {38,38};
 static const short PO1813[] = {2,2};
 static const char* const L1814[] = {
 	"Stereo DJ style filter on one bipolar knob: counter-clockwise sweeps a four pole lowpass down, clockwise sweeps a four pole highpass up, and at the centre the signal passes untouched",
@@ -42125,7 +42332,7 @@ static const short O1814[] = {9,10};
 static const short P1814[] = {1,2,3,4};
 static const signed char FI1814[] = {1,1,0,0};
 static const signed char FO1814[] = {0,0};
-static const short PR1814[] = {27,27,29,29};
+static const short PR1814[] = {63,63,38,38};
 static const short PO1814[] = {2,2};
 static const char* const L1815[] = {
 	"Four voltage processors: each one attenuates and offsets its input, can sample and hold it or compare it against zero on a clock, then slews it linearly, exponentially or as an envelope follower",
@@ -42146,7 +42353,7 @@ static const short I1815[] = {6,6,6,6,7,7,7,7,10,10,10,10,10,10};
 static const short O1815[] = {8,8,8,8};
 static const short P1815[] = {1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,-1,9,9,9,9,9,9,11,11,11,11,11,11};
 static const signed char FI1815[] = {-1,-1,-1,-1,2,2,2,2,1,1,1,1,1,1,2};
-static const short PR1815[] = {27,27,27,27,16,16,16,16,27,27,27,27,27,27,27};
+static const short PR1815[] = {63,63,63,63,16,16,16,16,63,63,63,63,63,63,63};
 static const char* const L1816[] = {
 	"Six channel mixer for audio and control voltages, with separate sums of the odd and the even channels, mixed through a saturation stage that compresses levels above the rails instead of clipping them",
 	"Sets how much of the input of the same number goes into the mix, from silence to unity gain",
@@ -42158,7 +42365,7 @@ static const char* const L1816[] = {
 static const short I1816[] = {2,2,2,2,2,2};
 static const short O1816[] = {3,4,5};
 static const short P1816[] = {1,1,1,1,1,1};
-static const short PR1816[] = {27,27,27,27,27,27};
+static const short PR1816[] = {63,63,63,63,63,63};
 static const char* const L1817[] = {
 	"Analog chorus modelled on the Juno circuit through a guitar pedal version of it, using four bucket brigade delay lines, with a modulation rate control the original did not have",
 	"Sets the dry to wet balance and the depth of the modulation together, from no effect to full chorus",
@@ -42180,7 +42387,7 @@ static const short O1817[] = {12,13};
 static const short P1817[] = {1,2,3,4,5,6};
 static const signed char FI1817[] = {0,0,1,1,1};
 static const signed char FO1817[] = {0,0};
-static const short PR1817[] = {29,29,27,27,27};
+static const short PR1817[] = {38,38,63,63,63};
 static const short PO1817[] = {2,2};
 static const char* const L1818[] = {
 	"Low pass gate on the Buchla model published by Parker and D'Angelo, with extra controls for shaping the gate signal before it reaches the vactrol",
@@ -42206,7 +42413,7 @@ static const short O1818[] = {16};
 static const short P1818[] = {2,3,7,8,4,9,1,6,5};
 static const signed char FI1818[] = {1,0,1,1,1,1};
 static const signed char FO1818[] = {0};
-static const short PR1818[] = {27,29,27,27,27,27};
+static const short PR1818[] = {63,38,63,63,63,63};
 static const short PO1818[] = {2};
 static const char* const L1819[] = {
 	"Diode ladder filter with the filtered signal brought out at four slopes and a choice of two simulation models",
@@ -42231,7 +42438,7 @@ static const short O1819[] = {13,15,12,14};
 static const short P1819[] = {1,2,4,5,3,6,7};
 static const signed char FI1819[] = {0,3,1,1};
 static const signed char FO1819[] = {0,0,0,0};
-static const short PR1819[] = {29,32,27,27};
+static const short PR1819[] = {38,23,63,63};
 static const short PO1819[] = {2,2,2,2};
 static const char* const L1820[] = {
 	"Single voltage processor that attenuates, offsets, samples, slews or follows the envelope of a signal, and generates noise when its input is unpatched",
@@ -42251,7 +42458,7 @@ static const short I1820[] = {7,8,9,10};
 static const short O1820[] = {11};
 static const short P1820[] = {1,2,3,4,5,6};
 static const signed char FI1820[] = {1,1,-1,2};
-static const short PR1820[] = {27,27,27,16};
+static const short PR1820[] = {63,63,63,16};
 static const char* const L1821[] = {
 	"Model of the TB-303 filter, a four pole diode ladder whose effective attenuation is 18dB per octave",
 	"Sets the frequency where the attenuation starts to take effect",
@@ -42269,7 +42476,7 @@ static const short O1821[] = {9};
 static const short P1821[] = {1,2,3,4,5};
 static const signed char FI1821[] = {0,1,1};
 static const signed char FO1821[] = {0};
-static const short PR1821[] = {29,27,27};
+static const short PR1821[] = {38,63,63};
 static const short PO1821[] = {2};
 static const char* const L1822[] = {
 	"Flip-flop octaver that generates signals one and two octaves below the input and mixes them back in, added or multiplied, keeping the unstable behaviour of the circuit it came from",
@@ -42295,7 +42502,7 @@ static const short O1822[] = {15,16};
 static const short P1822[] = {1,2,3,4,5,6,7,8};
 static const signed char FI1822[] = {0,0,1,1,1,1};
 static const signed char FO1822[] = {0,0};
-static const short PR1822[] = {29,29,27,27,27,27};
+static const short PR1822[] = {38,38,63,63,63,63};
 static const short PO1822[] = {2,2};
 static const char* const L1823[] = {
 	"Recreation of the Yamaha OPL2 FM chip: two oscillators, the first modulating the second or the two summed, with eight wavetables, feedback, a reverb, velocity and four sound slots to morph between",
@@ -42349,7 +42556,7 @@ static const short O1823[] = {23,24};
 static const short P1823[] = {1,1,2,3,4,6,7,8,9,5,6,7,8,9,10,11,10,11,12,13,13,14,15,14,15,-1,-1,-1,-1,16,17,17,17,17};
 static const signed char FI1823[] = {2,3,1,1,1,1};
 static const signed char FO1823[] = {0,1};
-static const short PR1823[] = {16,32,27,118,27,27};
+static const short PR1823[] = {16,23,63,259,63,63};
 static const short PO1823[] = {2,-1};
 static const char* const L1824[] = {
 	"Compact version of Opulus on the same FM engine: a button that makes a new sound at random, four slots to keep sounds in, and morphing between them",
@@ -42368,7 +42575,7 @@ static const short O1824[] = {8};
 static const short P1824[] = {1,1,1,1,2,3};
 static const signed char FI1824[] = {1,3,2,1};
 static const signed char FO1824[] = {0};
-static const short PR1824[] = {118,32,16,27};
+static const short PR1824[] = {259,23,16,63};
 static const short PO1824[] = {2};
 static const char* const L1825[] = {
 	"Stereo VCA with two amplifier models, a transistor pair and an operational transconductance amplifier, neither of them a clean multiplier and both saturating when the signal is pushed",
@@ -42386,7 +42593,7 @@ static const short O1825[] = {7,8};
 static const short P1825[] = {1,2,3};
 static const signed char FI1825[] = {0,0,1};
 static const signed char FO1825[] = {0,0};
-static const short PR1825[] = {29,29,27};
+static const short PR1825[] = {38,38,63};
 static const short PO1825[] = {2,2};
 static const char* const L1826[] = {
 	"Resonant comb filter, a series of evenly spaced notches tuned by a 1V/octave input, which rings when the feedback is high",
@@ -42408,7 +42615,7 @@ static const short O1826[] = {11,12};
 static const short P1826[] = {1,2,3,4,5};
 static const signed char FI1826[] = {3,0,1,1,0};
 static const signed char FO1826[] = {0,0};
-static const short PR1826[] = {32,29,27,27,29};
+static const short PR1826[] = {23,38,63,63,38};
 static const short PO1826[] = {2,2};
 static const char* const L1827[] = {
 	"ADSR envelope generator taken from a circuit in a book of electronics for music, with a stereo VCA the envelope controls",
@@ -42437,7 +42644,7 @@ static const short O1827[] = {17,19,18};
 static const short P1827[] = {1,2,3,4,5,6,7,8,9};
 static const signed char FI1827[] = {2,1,1,1,1,0,0};
 static const signed char FO1827[] = {0,1,0};
-static const short PR1827[] = {31,27,27,27,27,29,29};
+static const short PR1827[] = {53,63,63,63,63,38,38};
 static const short PO1827[] = {2,-1,2};
 static const char* const L1828[] = {
 	"Attack, hold and decay envelope generator with exponential transitions, the envelope that makes the snappy sounds of the Trummor drums, with a stereo VCA the envelope controls",
@@ -42464,7 +42671,7 @@ static const short O1828[] = {14,16,15};
 static const short P1828[] = {1,2,3,4,5,6,7};
 static const signed char FI1828[] = {2,1,1,1,0,0};
 static const signed char FO1828[] = {0,1,0};
-static const short PR1828[] = {31,27,27,27,29,29};
+static const short PR1828[] = {53,63,63,63,38,38};
 static const short PO1828[] = {2,-1,2};
 static const char* const L1829[] = {
 	"Dual buffered multiple: one signal copied to three outputs, twice over, so a signal that has to reach several modules is moved by repatching one cable",
@@ -42473,7 +42680,7 @@ static const char* const L1829[] = {
 };
 static const short I1829[] = {1,1};
 static const short O1829[] = {2,2,2,2,2,2};
-static const short PR1829[] = {27,27};
+static const short PR1829[] = {63,63};
 static const char* const L1830[] = {
 	"State variable filter with lowpass, bandpass and highpass outputs and a fourth output that imitates the SEM filter",
 	"Sets the frequency at which the filter starts to act: fully counter-clockwise it is closed, fully clockwise it is open",
@@ -42496,7 +42703,7 @@ static const short O1830[] = {11,12,13,14};
 static const short P1830[] = {1,2,4,5,3,6};
 static const signed char FI1830[] = {0,3,1,1};
 static const signed char FO1830[] = {0,0,0,0};
-static const short PR1830[] = {29,32,27,27};
+static const short PR1830[] = {38,23,63,63};
 static const short PO1830[] = {2,2,2,2};
 static const char* const L1831[] = {
 	"Test signal generator whose output keeps changing shape, amplitude and character on its own, written for stress-testing modules and usable as a source of unpredictable modulation or of harsh audio",
@@ -42529,7 +42736,7 @@ static const short O1832[] = {14};
 static const short P1832[] = {1,2,4,5,3,6,7};
 static const signed char FI1832[] = {0,0,0,3,1,1};
 static const signed char FO1832[] = {0};
-static const short PR1832[] = {29,29,29,32,27,27};
+static const short PR1832[] = {38,38,38,23,63,63};
 static const short PO1832[] = {2};
 static const char* const L1833[] = {
 	"Tone control for a stereo signal, balancing the high against the low frequencies",
@@ -42547,7 +42754,7 @@ static const short O1833[] = {7,8};
 static const short P1833[] = {1,2,3};
 static const signed char FI1833[] = {0,1,0};
 static const signed char FO1833[] = {0,0};
-static const short PR1833[] = {29,27,29};
+static const short PR1833[] = {38,63,38};
 static const short PO1833[] = {2,2};
 static const char* const L1834[] = {
 	"Drum synthesizer for 909 style kicks, and for toms, simple snares and hats, with an oscillator section and a noise section, each with its own envelope, level and modulation slot",
@@ -42587,7 +42794,7 @@ static const short O1834[] = {27,28,29,30};
 static const short P1834[] = {9,19,4,5,6,14,15,16,1,2,3,12,8,18,7,17,13,10,20,11,21};
 static const signed char FI1834[] = {2,0,0,1,1};
 static const signed char FO1834[] = {0,3,1,1};
-static const short PR1834[] = {31,29,29,27,27};
+static const short PR1834[] = {53,38,38,63,63};
 static const short PO1834[] = {2,2,-1,-1};
 static const char* const L1835[] = {
 	"Percussion synthesizer with an oscillator section, a noise section built around a comb filter and a multimode filter, and a modulation router with four slots that can reach any control",
@@ -42639,7 +42846,7 @@ static const short O1835[] = {33,34,35,36,37,38};
 static const short P1835[] = {1,2,3,4,5,6,7,8,9,10,11,12,14,15,13,16,17,18,19,20,21,22,23,24,-1,25,25,25,25,26,26,26,26};
 static const signed char FI1835[] = {2,0,0,1,1,1,1,2,2};
 static const signed char FO1835[] = {0,3,1,1,0,0};
-static const short PR1835[] = {31,29,29,-1,-1,-1,-1,16,16};
+static const short PR1835[] = {53,38,38,-1,-1,-1,-1,16,16};
 static const short PO1835[] = {2,2,-1,-1,2,2};
 static const char* const L1836[] = {
 	"Percussion synthesizer joining the FM engine of Opulus to the drum envelopes of Trummor 2: an oscillator section and a noise section, each a carrier and a modulator with its own pitch and gate input",
@@ -42680,7 +42887,7 @@ static const short O1836[] = {24,25,26};
 static const short P1836[] = {1,2,3,4,5,6,7,8,9,10,11,1,14,15,4,5,6,7,8,9,10,11,12,12,13,13,16,16,16,16,17,17,17,17};
 static const signed char FI1836[] = {2,3,3,1,1,1,1,2,2};
 static const signed char FO1836[] = {0,0,0};
-static const short PR1836[] = {16,32,32,-1,-1,-1,-1,16,16};
+static const short PR1836[] = {16,23,23,-1,-1,-1,-1,16,16};
 static const short PO1836[] = {2,2,2};
 static const char* const L1837[] = {
 	"State variable filter remade with the nonlinearities that appear when the circuit is fed a low voltage, so it distorts heavily and can self-oscillate, with lowpass, bandpass, highpass and SEM outputs",
@@ -42707,7 +42914,7 @@ static const short O1837[] = {14,15,16,17};
 static const short P1837[] = {1,2,5,6,4,8,3,7};
 static const signed char FI1837[] = {0,3,1,1,1};
 static const signed char FO1837[] = {0,0,0,0};
-static const short PR1837[] = {29,32,27,27,27};
+static const short PR1837[] = {38,23,63,63,63};
 static const short PO1837[] = {2,2,2,2};
 static const char* const L1838[] = {
 	"Send and return pair for a stereo channel with a switch that takes the effect in or out of the path, which turns any effect into a stompbox",
@@ -42729,7 +42936,7 @@ static const short O1838[] = {10,11,8,9};
 static const short P1838[] = {1,2};
 static const signed char FI1838[] = {2,0,0,0,0};
 static const signed char FO1838[] = {0,0,0,0};
-static const short PR1838[] = {16,29,29,29,29};
+static const short PR1838[] = {16,38,38,38,38};
 static const short PO1838[] = {2,2,2,2};
 static const char* const L1839[] = {
 	"Two sections, each one a large offset knob and four attenuverted inputs summed into a single output, for blending modulation signals, mixing audio or putting out a constant voltage",
@@ -42742,7 +42949,7 @@ static const char* const L1839[] = {
 static const short I1839[] = {4,4,4,4,4,4,4,4};
 static const short O1839[] = {5,5};
 static const short P1839[] = {1,3,3,3,3,2,1,3,3,3,3,2};
-static const short PR1839[] = {27,27,27,27,27,27,27,27};
+static const short PR1839[] = {63,63,63,63,63,63,63,63};
 static const char* const L1840[] = {
 	"Send and return for one stereo channel, with a blend between the unprocessed signal and the one that comes back from the effect",
 	"Sets the balance between the unprocessed signal and the signal coming back from the effect",
@@ -42763,7 +42970,7 @@ static const short O1840[] = {10,11,8,9};
 static const short P1840[] = {1,2};
 static const signed char FI1840[] = {1,0,0,0,0};
 static const signed char FO1840[] = {0,0,0,0};
-static const short PR1840[] = {27,29,29,29,29};
+static const short PR1840[] = {63,38,38,38,38};
 static const short PO1840[] = {2,2,2,2};
 static const char* const L1841[] = {
 	"Complex analog oscillator: two oscillators with FM, AM and sync between them, a shaper on the mix, glide, a fade envelope and a modulation router with six slots",
@@ -42797,7 +43004,7 @@ static const short O1841[] = {22,-1,23};
 static const short P1841[] = {1,2,3,4,5,1,2,3,4,5,6,7,8,9,10,11,12,13,14,-1,-1,15,15,15,15,15,15,16,16,16,16,16,16,17};
 static const signed char FI1841[] = {3,2,-1,1,1,1,1,1,1};
 static const signed char FO1841[] = {0,-1,1};
-static const short PR1841[] = {32,16,27,27,27,27,27,27,27};
+static const short PR1841[] = {23,16,63,63,63,63,63,63,63};
 static const short PO1841[] = {2,-1,-1};
 static const char* const L1842[] = {
 	"Model of the Atari Punk Console, two 555 timers where the second stretches the pulses of the first and skips its cycles as it is stretched, with the capacitor charge curves brought out as saw waves",
@@ -42824,7 +43031,7 @@ static const short O1842[] = {13,14,15,16};
 static const short P1842[] = {1,2,3,4,5,6,7,8};
 static const signed char FI1842[] = {1,1,1,1};
 static const signed char FO1842[] = {0,0,0,0};
-static const short PR1842[] = {27,27,27,27};
+static const short PR1842[] = {63,63,63,63};
 static const short PO1842[] = {2,2,2,2};
 static const char* const L1843[] = {
 	"Waveshaper that chops the wave at a point you set and fills the gap with a folded copy, giving a PWM-like effect and a gradual change to the odd and even harmonics",
@@ -42845,7 +43052,7 @@ static const short O1843[] = {10,11};
 static const short P1843[] = {1,2,3,4,5,6};
 static const signed char FI1843[] = {0,1,1};
 static const signed char FO1843[] = {0,0};
-static const short PR1843[] = {29,27,27};
+static const short PR1843[] = {38,63,63};
 static const short PO1843[] = {2,2};
 static const char* const L1844[] = {
 	"A 6HP blank panel carrying the alef's bits logo",
@@ -42879,7 +43086,7 @@ static const char* const L1846[] = {
 };
 static const short I1846[] = {1,1,1,1,1,1,1,1};
 static const signed char FI1846[] = {2,2,2,2,2,2,2,2};
-static const short PR1846[] = {41,41,41,41,41,41,41,41};
+static const short PR1846[] = {91,91,91,91,91,91,91,91};
 static const char* const L1847[] = {
 	"Six logic outputs comparing two inputs, each input counting as high above 0V",
 	"One of the two signals compared, taken as A, and counting as high above 0V",
@@ -42895,7 +43102,7 @@ static const short I1847[] = {1,2};
 static const short O1847[] = {3,4,5,6,7,8};
 static const signed char FI1847[] = {2,2};
 static const signed char FO1847[] = {2,2,2,2,2,2};
-static const short PR1847[] = {63,63};
+static const short PR1847[] = {132,132};
 static const short PO1847[] = {0,0,0,0,0,0};
 static const char* const L1848[] = {
 	"Clock divider with five outputs, each firing at a Lucas number of clock pulses",
@@ -43505,7 +43712,7 @@ static const short O1880[] = {6};
 static const short P1880[] = {2,1};
 static const signed char FI1880[] = {-1,1,1};
 static const signed char FO1880[] = {0};
-static const short PR1880[] = {8,40,40};
+static const short PR1880[] = {8,90,90};
 static const short PO1880[] = {2};
 static const char* const L1881[] = {
 	"A divider for METRO's stream of twelve pulses a beat: it passes the stream and the start pulse on, and gives one pulse out of every so many",
@@ -43885,7 +44092,7 @@ static const short O1901[] = {8,9};
 static const short P1901[] = {1,2,3,4};
 static const signed char FI1901[] = {-1,2,2};
 static const signed char FO1901[] = {2,2};
-static const short PR1901[] = {-1,0,0};
+static const short PR1901[] = {92,5,5};
 static const short PO1901[] = {0,0};
 static const char* const L1902[] = {
 	"Sixteen buttons sent out as one polyphonic cable, each button choosing between an off voltage and an on voltage.",
@@ -43903,6 +44110,7 @@ static const short O1902[] = {5};
 static const short P1902[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2};
 static const signed char FI1902[] = {-1,1,1};
 static const signed char FO1902[] = {1};
+static const short PR1902[] = {-1,260,261};
 static const char* const L1903[] = {
 	"Polyphonic voltmeter, sample and hold and random voltage source: sixteen values are shown on the display and sent out of one polyphonic cable.",
 	"Acts as one clock event for the active clock mode, updating the values by hand.",
@@ -43928,7 +44136,7 @@ static const short O1903[] = {10};
 static const short P1903[] = {1,2,3,4,5,6};
 static const signed char FI1903[] = {-1,2,2};
 static const signed char FO1903[] = {1};
-static const short PR1903[] = {-1,0,0};
+static const short PR1903[] = {38,49,82};
 static const char* const L1904[] = {
 	"A ten by ten patch matrix holding sixteen scenes, a clock stepping through whole sets of connections.",
 	"Sets how many scenes the sequence steps through, 1 to 16.",
@@ -43952,7 +44160,7 @@ static const short I1904[] = {7,8,8,8,8,8,8,8,8,8,8,9,10};
 static const short O1904[] = {11,11,11,11,11,11,11,11,11,11};
 static const short P1904[] = {1,2,3,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6};
 static const signed char FI1904[] = {2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2};
-static const short PR1904[] = {0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0};
+static const short PR1904[] = {82,63,63,63,63,63,63,63,63,63,63,82,82};
 static const char* const L1905[] = {
 	"Draws a face from the voltages of a polyphonic input, one feature per channel.",
 	"Attenuates and inverts the input before it is drawn, -2 to +2.",
@@ -43963,6 +44171,7 @@ static const char* const L1905[] = {
 };
 static const short I1905[] = {4};
 static const short P1905[] = {-1,1,2,3};
+static const short PR1905[] = {38};
 static const char* const L1906[] = {
 	"Generates a constant polyphonic voltage, the channels following one of five shapes across the polyphony.",
 	"Steps the shape through Linear, Sigmoid, Hump, Sinusoid and Pseudo-Random.",
@@ -44013,8 +44222,8 @@ static const short O1907[] = {19,20,21,22};
 static const short P1907[] = {1,2,3,4,5,6,-1,-1,7,8,9,10,11,12,13};
 static const signed char FI1907[] = {2,2,1,1,1};
 static const signed char FO1907[] = {2,2,1,1};
-static const short PR1907[] = {0,0,-1,-1,-1};
-static const short PO1907[] = {0,0,-1,-1};
+static const short PR1907[] = {49,49,38,16,140};
+static const short PO1907[] = {17,17,-1,-1};
 static const char* const L1908[] = {
 	"Six CV sequencers programmed as text, each step of a row naming one of twenty-six knobs, one of twenty-six inputs, or an exact voltage.",
 	"Sets the voltage sent when a row's pattern reaches its lowercase letter, 0-10V.",
@@ -44041,8 +44250,8 @@ static const short O1908[] = {10,10,10,10,10,10,11,11,11,11,11,11};
 static const short P1908[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,3,4,4,4,4,4,4};
 static const signed char FI1908[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1908[] = {1,1,1,1,1,1,2,2,2,2,2,2};
-static const short PR1908[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PO1908[] = {-1,-1,-1,-1,-1,-1,0,0,0,0,0,0};
+static const short PR1908[] = {5,82,5,5,5,5,5,5,82,82,82,82,82,82,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63};
+static const short PO1908[] = {-1,-1,-1,-1,-1,-1,10,10,10,10,10,10};
 static const char* const L1909[] = {
 	"Sixteen knobs sent out as one polyphonic cable, with a scale knob and an offset knob acting on every channel.",
 	"Sets the voltage of that channel of the output, 0-10V, or -10V to +10V when the menu sets the knobs bipolar.",
@@ -44079,8 +44288,8 @@ static const short O1910[] = {8,8,8,8,8,8,9,9,9,9,9,9};
 static const short P1910[] = {1,2,3,3,3,3,3,3};
 static const signed char FI1910[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO1910[] = {2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1910[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PO1910[] = {-1,-1,-1,-1,-1,-1,0,0,0,0,0,0};
+static const short PR1910[] = {5,82,5,5,5,5,5,5,82,82,82,82,82,82};
+static const short PO1910[] = {17,17,17,17,17,17,17,17,17,17,17,17};
 static const char* const L1911[] = {
 	"Runs one polyphonic signal through sixteen insert channels, each channel adding to it, replacing it, crossfading, multiplying, comparing or limiting it.",
 	"Attenuates and inverts the main input before the inserts, -2 to +2.",
@@ -44100,6 +44309,7 @@ static const char* const L1911[] = {
 static const short I1911[] = {6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
 static const short O1911[] = {8};
 static const short P1911[] = {1,2,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5};
+static const short PR1911[] = {38,262,262,262,262,262,262,262,262,262,262,262,262,262,262,262,262};
 static const char* const L1912[] = {
 	"A sixteen by sixteen matrix mixer for one polyphonic cable, every input channel given its own level into every output channel.",
 	"Sets how much of that input channel reaches that output channel, -2 to +2.",
@@ -44125,6 +44335,7 @@ static const short I1912[] = {9,-1,-1,10,-1,11};
 static const short O1912[] = {12};
 static const short P1912[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,5,6,7,8};
 static const signed char FI1912[] = {-1,-1,-1,1,-1,1};
+static const short PR1912[] = {38,-1,-1,38,-1,38};
 static const char* const L1913[] = {
 	"Four channels of attenuversion, offset and microtonal quantisation, each with an unquantised and a quantised output.",
 	"Shifts the quantised output by whole scale steps, from an octave down to an octave up.",
@@ -44149,6 +44360,7 @@ static const short O1913[] = {10,10,10,10,11,11,11,11};
 static const short P1913[] = {1,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6};
 static const signed char FI1913[] = {1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1913[] = {1,1,1,1,3,3,3,3};
+static const short PR1913[] = {38,38,38,38,38,38,38,38,38,38,38,38};
 static const short PO1913[] = {-1,-1,-1,-1,2,2,2,2};
 static const char* const L1914[] = {
 	"Captures the Rack window or another visual source, blends two of them, transforms the result geometrically and in colour, and draws it back into its own display.",
@@ -44187,7 +44399,7 @@ static const char* const L1914[] = {
 static const short I1914[] = {16,16,16,16,16,16,16,17,17,17,17,17,17,17,16,-1,16,17,-1,17,14,15};
 static const short P1914[] = {1,2,3,5,4,3,6,4,3,7,4,3,8,4,3,9,4,3,10,4,3,11,4,3,12,4,-1,-1,-1,3,13,4};
 static const signed char FI1914[] = {2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,-1,2,1,-1,1,2,1};
-static const short PR1914[] = {0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,0,-1,0,-1,-1,-1,0,-1};
+static const short PR1914[] = {263,263,263,263,263,263,263,38,121,121,121,63,121,121,263,-1,263,121,-1,121,264,34};
 static const char* const L1915[] = {
 	"Re-routes the channels of a polyphonic cable, each output channel taking whichever input channel is chosen for it.",
 	"Picks which input channel that output channel carries, 1 to 16; a channel above the input's channel count gives 0V.",
@@ -44202,6 +44414,7 @@ static const short I1915[] = {3,4};
 static const short O1915[] = {5};
 static const short P1915[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2};
 static const signed char FI1915[] = {-1,1};
+static const short PR1915[] = {63,16};
 static const char* const L1916[] = {
 	"Splits a polyphonic input across sixteen outputs, each output monophonic, polyphonic or silent according to the routing mode.",
 	"Steps the routing mode through Single, Dynamic Below, Dynamic Above and Custom.",
@@ -44225,7 +44438,7 @@ static const short I1916[] = {2,3};
 static const short O1916[] = {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
 static const short P1916[] = {1};
 static const signed char FI1916[] = {-1,2};
-static const short PR1916[] = {-1,0};
+static const short PR1916[] = {63,53};
 static const char* const L1917[] = {
 	"Steps through the channels of a polyphonic input one channel at a time, a polyphonic clock giving several independent sequences at once.",
 	"Advances every sequence by one channel.",
@@ -44242,8 +44455,8 @@ static const short O1917[] = {7,8};
 static const short P1917[] = {-1,1,2,-1,-1,3};
 static const signed char FI1917[] = {-1,2,2};
 static const signed char FO1917[] = {-1,2};
-static const short PR1917[] = {-1,0,0};
-static const short PO1917[] = {-1,0};
+static const short PR1917[] = {63,49,49};
+static const short PO1917[] = {-1,17};
 static const char* const L1918[] = {
 	"Draws a stick figure from the voltages of a polyphonic input, one limb per channel.",
 	"Attenuates and inverts the input before it is drawn, -2 to +2.",
@@ -44254,6 +44467,7 @@ static const char* const L1918[] = {
 };
 static const short I1918[] = {4};
 static const short P1918[] = {-1,1,2,3};
+static const short PR1918[] = {38};
 static const char* const L1919[] = {
 	"Rotates the channels of a polyphonic cable and sets how many channels come out, with a display and a CV output of the input's channel count. Superseded by Toly Pools v2.",
 	"Rotates the channels of the input, 0 to 15, so a setting of 1 sends input channel 2 out on channel 1 and so on round the sixteen channels.",
@@ -44269,6 +44483,8 @@ static const short O1919[] = {6,7};
 static const short P1919[] = {1,2};
 static const signed char FI1919[] = {-1,1,1};
 static const signed char FO1919[] = {-1,1};
+static const short PR1919[] = {63,11,11};
+static const short PO1919[] = {-1,10};
 static const char* const L1920[] = {
 	"Rotates the channels of a polyphonic cable and sets how many channels come out, with a display and a CV output of the input's channel count.",
 	"Rotates the channels of the input, -16 to +16, so a setting of 1 sends input channel 2 out on channel 1 and so on; the rotation CV is added to it.",
@@ -44285,6 +44501,8 @@ static const short O1920[] = {6,7};
 static const short P1920[] = {1,2};
 static const signed char FI1920[] = {-1,1,1};
 static const signed char FO1920[] = {-1,1};
+static const short PR1920[] = {63,11,11};
+static const short PO1920[] = {-1,10};
 static const char* const L1921[] = {
 	"A bench of small utilities: two attenuating mults, an LFO, four levelled channels, two crossfaders and two signal swappers",
 	"The signal the upper mult copies, scaled by the MULT slider on its way out",
@@ -44338,7 +44556,7 @@ static const short O1921[] = {2,2,3,35,35,36,31,32,39,40,43,12,15,18,21,28,6};
 static const short P1921[] = {4,37,44,41,10,7,13,16,26,19,22,33,25,8,9,27,23,24};
 static const signed char FI1921[] = {-1,-1,-1,-1,-1,-1,-1,-1,2};
 static const signed char FO1921[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1};
-static const short PR1921[] = {8,8,8,8,8,8,8,8,24,-1,-1,8,8,8,8};
+static const short PR1921[] = {8,8,8,8,8,8,8,8,50,-1,-1,8,8,8,8};
 static const char* const L1922[] = {
 	"A 4-by-4 grid sequencer: two clocks walk a cursor over the grid, and the knob it lands on is quantised to the root note and scale on the display",
 	"A rising edge steps the cursor one cell across, and at the end of the row it wraps and moves to the next row unless the X lock is on",
@@ -44373,7 +44591,7 @@ static const short O1922[] = {18,17,19,20,20,20,20,21,21,21,21};
 static const short P1922[] = {13,15,7,9,5,22,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12};
 static const signed char FI1922[] = {1,1,2,2,2,2,-1,2,2,2};
 static const signed char FO1922[] = {2,3,2,3,3,3,3,3,3,3,3};
-static const short PR1922[] = {42,42,5,5,11,11,11,11,5,5};
+static const short PR1922[] = {92,92,5,5,11,11,11,11,5,5};
 static const short PO1922[] = {0,2,0,2,2,2,2,2,2,2,2};
 static const char* const L1923[] = {
 	"Sixteen pads that pick a cell on a Bene, and goes immediately to the right of it",
@@ -44401,7 +44619,7 @@ static const short O1924[] = {12,12,12};
 static const short P1924[] = {9,10,11,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,2,2,2,2,2,2,2,2};
 static const signed char FI1924[] = {1,2,2,1,2,2,2,2,2,2,2,2};
 static const signed char FO1924[] = {3,3,3};
-static const short PR1924[] = {9,5,5,91,11,11,11,11,11,11,11,11};
+static const short PR1924[] = {9,5,5,179,11,11,11,11,11,11,11,11};
 static const short PO1924[] = {2,2,2};
 static const char* const L1925[] = {
 	"Builds a four note chord from one pitch, with root, third, fifth and seventh on their own outputs and four voices arranged by an inversion and a voicing control",
@@ -44474,7 +44692,7 @@ static const short O1926[] = {12,12,12,12};
 static const short P1926[] = {1,1,1,1,5,5,5,5,7,7,7,7,2,2,2,2,3,3,3,3,4,4,4,4};
 static const signed char FI1926[] = {2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1926[] = {1,1,1,1};
-static const short PR1926[] = {28,28,28,28,11,11,11,11,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PR1926[] = {82,82,82,82,11,11,11,11,8,8,8,8,8,8,8,8,8,8,8,8};
 static const char* const L1927[] = {
 	"Two sine oscillators, each with an even and an odd harmonic bank, a wavefolder and a distortion stage, and both mixed at a summed output",
 	"Sets that oscillator's pitch in semitones, four and a half octaves either side of C4 at 261.63Hz",
@@ -44501,7 +44719,7 @@ static const short O1927[] = {15,16,17};
 static const short P1927[] = {1,-1,11,13,7,9,3,5,1,-1,11,13,7,9,3,5};
 static const signed char FI1927[] = {1,1,1,1,3,1,1,1,1,1,1,3,1,1};
 static const signed char FO1927[] = {0,0,0};
-static const short PR1927[] = {29,29,7,7,32,90,12,29,29,7,7,32,12,90};
+static const short PR1927[] = {38,38,7,7,23,178,12,38,38,7,7,23,12,178};
 static const short PO1927[] = {2,2,2};
 static const char* const L1928[] = {
 	"Two polyphonic oscillators, each fading through four waves, with two FM inputs, pulse width control and sync, and both mixed at a master output",
@@ -44531,7 +44749,7 @@ static const short O1928[] = {16,17,19,18,20};
 static const short P1928[] = {13,13,14,14,1,1,15,15,3,5,3,5,7,7,8,8,10,10};
 static const signed char FI1928[] = {3,3,1,1,1,1,2,2,1,1,1,1};
 static const signed char FO1928[] = {0,0,0,0,0};
-static const short PR1928[] = {32,32,29,29,29,29,27,27,29,29,30,30};
+static const short PR1928[] = {23,23,38,38,38,38,63,63,38,38,83,83};
 static const short PO1928[] = {2,2,2,2,2};
 static const char* const L1929[] = {
 	"Two clock dividers, each counting its own clock into four divisions and combining them at three outputs",
@@ -44550,7 +44768,7 @@ static const short O1929[] = {8,6,7,8,6,7};
 static const short P1929[] = {5,5,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4};
 static const signed char FI1929[] = {2,2,1,1,1,1,1,1,1,1};
 static const signed char FO1929[] = {2,2,2,2,2,2};
-static const short PR1929[] = {5,5,119,119,119,119,119,119,119,119};
+static const short PR1929[] = {5,5,265,265,265,265,265,265,265,265};
 static const char* const L1930[] = {
 	"A six channel mixer with a level, a pan trimmer and a mute on each channel, and a stereo output",
 	"The signal that channel mixes",
@@ -44595,7 +44813,7 @@ static const short O1931[] = {14,15,18};
 static const short P1931[] = {4,9,5,7,11,4,9,5,7,11,16,3,3,13,13};
 static const signed char FI1931[] = {1,1,1,1,0,0,1,1,1,1,1};
 static const signed char FO1931[] = {0,0,0};
-static const short PR1931[] = {8,8,8,12,43,43,8,8,8,12,40};
+static const short PR1931[] = {8,8,8,12,34,34,8,8,8,12,90};
 static const short PO1931[] = {2,2,2};
 static const char* const L1932[] = {
 	"Two five into four matrix mixers side by side, sharing five stereo input pairs, with a level and a mute over each bus of the pair",
@@ -44712,7 +44930,7 @@ static const short O1936[] = {26,27,14,15,17,18};
 static const short P1936[] = {25,19,22,13,16,3,3,3,3,3,3,3,3,5,5,5,5,5,5,5,5,9,9,9,9,9,9,9,9,11,11,11,11,11,11,11,11,7,7,7,7,7,7,7,7};
 static const signed char FI1936[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0};
 static const signed char FO1936[] = {0,0,0,0,0,0};
-static const short PR1936[] = {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,11,11,11,11,11,11,11,11,43,43,43,43,43,43,43,43,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PR1936[] = {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,11,11,11,11,11,11,11,11,34,34,34,34,34,34,34,34,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
 static const short PO1936[] = {2,2,2,2,2,2};
 static const char* const L1937[] = {
 	"A four channel stereo performance mixer with pan, mute, two aux sends and two aux returns on every channel",
@@ -44749,7 +44967,7 @@ static const short O1937[] = {26,27,14,15,17,18};
 static const short P1937[] = {25,19,22,13,16,3,3,3,3,5,5,5,5,9,9,9,9,11,11,11,11,7,7,7,7};
 static const signed char FI1937[] = {0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0};
 static const signed char FO1937[] = {0,0,0,0,0,0};
-static const short PR1937[] = {8,8,8,8,8,8,8,8,8,8,8,8,11,11,11,11,43,43,43,43,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PR1937[] = {8,8,8,8,8,8,8,8,8,8,8,8,11,11,11,11,34,34,34,34,8,8,8,8,8,8,8,8,8,8,8,8};
 static const short PO1937[] = {2,2,2,2,2,2};
 static const char* const L1938[] = {
 	"A stereo filter built from three multimode filters on each side, tuned apart from one another by a spread control, with low pass, band pass and high pass outputs",
@@ -44785,7 +45003,7 @@ static const short O1938[] = {19,20,23,24,21,22};
 static const short P1938[] = {4,3,5,8,9,11,15,12,16};
 static const signed char FI1938[] = {0,0,-1,1,1,2,2,1,1,1};
 static const signed char FO1938[] = {0,0,0,0,0,0};
-static const short PR1938[] = {43,43,-1,8,8,5,5,8,8,8};
+static const short PR1938[] = {34,34,-1,8,8,5,5,8,8,8};
 static const short PO1938[] = {2,2,2,2,2,2};
 static const char* const L1939[] = {
 	"A six channel scanning mixer: a window is slid across the inputs and what falls under it is mixed to three outputs",
@@ -44834,7 +45052,7 @@ static const short O1940[] = {11,12};
 static const short P1940[] = {3,5,3,5,7};
 static const signed char FI1940[] = {0,0,1,0,0,1,1,1,0,0,1};
 static const signed char FO1940[] = {0,0};
-static const short PR1940[] = {8,8,43,8,8,43,43,43,8,8,8};
+static const short PR1940[] = {8,8,34,8,8,34,34,34,8,8,8};
 static const short PO1940[] = {2,2};
 static const char* const L1941[] = {
 	"An eight channel mixer into three buses, with a clock that walks a cursor over the channels so that the ones inside the step range are heard only as the cursor reaches them",
@@ -44884,7 +45102,7 @@ static const short O1942[] = {12,12,12};
 static const short P1942[] = {9,10,11,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,2,2,2,2};
 static const signed char FI1942[] = {1,2,2,1,2,2,2,2};
 static const signed char FO1942[] = {3,3,3};
-static const short PR1942[] = {9,5,5,91,11,11,11,11};
+static const short PR1942[] = {9,5,5,179,11,11,11,11};
 static const short PO1942[] = {2,2,2};
 static const char* const L1943[] = {
 	"Two sawtooth oscillators, each with two sub oscillators dividing its frequency by a whole number, and one summed output",
@@ -44906,7 +45124,7 @@ static const short O1943[] = {11,8,8,9,9,9,9};
 static const short P1943[] = {10,1,1,2,2,4,4,4,4,6,6,7,7,7,7};
 static const signed char FI1943[] = {3,3,1,1,1,1};
 static const signed char FO1943[] = {0,0,0,0,0,0,0};
-static const short PR1943[] = {1,1,119,119,119,119};
+static const short PR1943[] = {1,1,265,265,265,265};
 static const short PO1943[] = {2,2,2,2,2,2,2};
 static const char* const L1944[] = {
 	"Two oscillators, each with two sub oscillators dividing its frequency by a whole number, switchable between sawtooth and square waves, and one summed output",
@@ -44929,7 +45147,7 @@ static const short O1944[] = {12,9,9,10,10,10,10};
 static const short P1944[] = {11,1,1,2,2,5,5,5,5,7,7,4,4,8,8,8,8};
 static const signed char FI1944[] = {3,3,1,1,1,1};
 static const signed char FO1944[] = {0,0,0,0,0,0,0};
-static const short PR1944[] = {1,1,119,119,119,119};
+static const short PR1944[] = {1,1,265,265,265,265};
 static const short PO1944[] = {2,2,2,2,2,2,2};
 static const char* const L1945[] = {
 	"Three oscillators, each fading between four waves and carrying its own level and output, with all three mixed at the main output",
@@ -44964,7 +45182,7 @@ static const short O1945[] = {16,16,16,17};
 static const short P1945[] = {20,21,4,6,4,6,4,6,11,11,12,1,2,1,2,1,2,7,7,7,14,14,14,9,10,9,10,9,18};
 static const signed char FI1945[] = {3,3,3,2,2,-1,1,1,1,1,-1,1,1,1,1,1};
 static const signed char FO1945[] = {0,0,0,0};
-static const short PR1945[] = {32,32,32,27,27,-1,29,29,29,4,-1,4,7,7,7,29};
+static const short PR1945[] = {23,23,23,63,63,-1,38,38,38,4,-1,4,7,7,7,38};
 static const short PO1945[] = {2,2,2,2};
 static const char* const L1946[] = {
 	"Three oscillators, each fading through four waves into its own wavefolder, with three separate outputs and a master mix",
@@ -45072,7 +45290,7 @@ static const short O1949[] = {8,8,8};
 static const short P1949[] = {9,10,11,12,1,1,1,2,2,2,3,3,3};
 static const signed char FI1949[] = {1,1,3,3,3,1,1,1,1,1,1,1,1,1};
 static const signed char FO1949[] = {3,3,3};
-static const short PR1949[] = {42,42,14,14,14,11,11,11,11,11,11,8,8,8};
+static const short PR1949[] = {92,92,14,14,14,11,11,11,11,11,11,8,8,8};
 static const short PO1949[] = {2,2,2};
 static const char* const L1950[] = {
 	"A four by four matrix mixer with a voltage controlled level at every crosspoint",
@@ -45142,7 +45360,7 @@ static const short O1952[] = {9,6,8,7,12,12,12,12,12,12,12,12};
 static const short P1952[] = {19,1,2,21,13,14,16,17,5,10,10,10,10,10,10,10,10};
 static const signed char FI1952[] = {1,3,-1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1952[] = {0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR1952[] = {13,32,-1,8,8,29,8,8,8,8,8,8,8,8};
+static const short PR1952[] = {13,23,-1,8,8,38,8,8,8,8,8,8,8,8};
 static const short PO1952[] = {2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L1953[] = {
 	"Evaluates a script you type on the panel once per sample and for every polyphonic channel, sending the result out as a voltage",
@@ -45194,8 +45412,8 @@ static const short O1955[] = {11,10};
 static const short P1955[] = {6,4,3,8};
 static const signed char FI1955[] = {2,2,1,1,1};
 static const signed char FO1955[] = {1,2};
-static const short PR1955[] = {33,33,49,29,29};
-static const short PO1955[] = {27,17};
+static const short PR1955[] = {49,49,97,38,38};
+static const short PO1955[] = {63,17};
 static const char* const L1956[] = {
 	"Converts an input voltage to eight bits and puts each bit out as a gate",
 	"The voltage that is converted, 0-10V spanning the eight bit range, or -5V to 5V when BiPolar is on; voltages outside the range are clamped",
@@ -45233,7 +45451,7 @@ static const short O1957[] = {8};
 static const short P1957[] = {1,3,4,5,6,7};
 static const signed char FI1957[] = {1};
 static const signed char FO1957[] = {2};
-static const short PR1957[] = {120};
+static const short PR1957[] = {266};
 static const short PO1957[] = {16};
 static const char* const L1958[] = {
 	"Sixteen step sequencer built to be re-rolled: one button scatters the whole sequence, another varies which steps play, a third changes a few of the voltages",
@@ -45270,7 +45488,7 @@ static const short P1958[] = {6,11,8,10,9,12,14,15,16,18,5,3,19,1,1,1,1,1,1,1,1,
 static const signed char FI1958[] = {2,2,2,2,2,2};
 static const signed char FO1958[] = {2,1};
 static const short PR1958[] = {5,5,5,5,5,5};
-static const short PO1958[] = {11,36};
+static const short PO1958[] = {11,86};
 static const char* const L1959[] = {
 	"Langton's Ant on a 32 by 32 grid: each ant turns by the rule for the colour it stands on, repaints that cell and walks on, with its position and cell colour put out as voltages",
 	"Moves every ant on by the number of steps set by Steps",
@@ -45306,8 +45524,8 @@ static const short O1959[] = {14,15,22,21};
 static const short P1959[] = {1,3,7,4,-1,10,9,16,18,12,20};
 static const signed char FI1959[] = {2,1,2,2,1,1,2,1};
 static const signed char FO1959[] = {1,1,1,2};
-static const short PR1959[] = {33,121,5,5,27,27,5,29};
-static const short PO1959[] = {67,67,27,16};
+static const short PR1959[] = {49,267,5,5,63,63,5,38};
+static const short PO1959[] = {148,148,63,16};
 static const char* const L1960[] = {
 	"Binary counter with eight bit outputs, counting up or down by a step amount taken from a polyphonic input",
 	"A trigger here adds the step amount to the count, which wraps around after 255",
@@ -45321,7 +45539,7 @@ static const short I1960[] = {1,2,3,4};
 static const short O1960[] = {5,5,5,5,5,5,5,5,6};
 static const signed char FI1960[] = {2,2,2,2};
 static const signed char FO1960[] = {2,2,2,2,2,2,2,2,2};
-static const short PR1960[] = {5,5,5,33};
+static const short PR1960[] = {5,5,5,49};
 static const short PO1960[] = {-1,-1,-1,-1,-1,-1,-1,-1,17};
 static const char* const L1961[] = {
 	"Sequencer built on a grid of cells that are on or off running Conway-style cellular automaton rules, read by up to sixteen play heads that count the cells that are on around them",
@@ -45371,8 +45589,8 @@ static const short O1961[] = {34,26,28,24,30,23,25,29,31,27,32,33};
 static const short P1961[] = {13,17,1,3,5,9,11,21,15,19};
 static const signed char FI1961[] = {1,1,2,2,2,1,1,2,2,2,2,2};
 static const signed char FO1961[] = {2,1,1,1,1,1,1,1,1,1,2,2};
-static const short PR1961[] = {16,16,5,5,5,8,8,5,5,5,72,72};
-static const short PO1961[] = {16,27,27,27,27,27,27,27,27,27,27,27};
+static const short PR1961[] = {16,16,5,5,5,8,8,5,5,5,24,24};
+static const short PO1961[] = {16,63,63,63,63,63,63,63,63,63,63,63};
 static const char* const L1962[] = {
 	"Expander adding ten more CV outputs built from the cell counts C42 makes; it goes immediately to the right of C42",
 	"The row-left and row-right counts added together, one channel per play head",
@@ -45388,7 +45606,7 @@ static const char* const L1962[] = {
 };
 static const short O1962[] = {1,2,3,4,5,6,7,8,9,10};
 static const signed char FO1962[] = {1,1,1,1,1,1,1,1,1,1};
-static const short PO1962[] = {27,27,27,27,27,27,27,27,27,27};
+static const short PO1962[] = {63,63,63,63,63,63,63,63,63,63};
 static const char* const L1963[] = {
 	"Continuous cellular automaton sequencer: 32 starting values are run through a rule 32 times, and the picture that makes is read by up to sixteen play heads",
 	"Sets the first sixteen starting values, one channel per value, 0-10V read as 0 to 1",
@@ -45416,8 +45634,8 @@ static const short O1963[] = {17,16};
 static const short P1963[] = {5,7,9,11,13,3,15};
 static const signed char FI1963[] = {1,1,1,1,1,1,1,1};
 static const signed char FO1963[] = {1,2};
-static const short PR1963[] = {30,30,16,16,27,27,8,8};
-static const short PO1963[] = {27,27};
+static const short PR1963[] = {83,83,16,16,63,63,8,8};
+static const short PO1963[] = {63,63};
 static const char* const L1964[] = {
 	"Two dimensional continuous cellular automaton on a 32 by 32 grid, where each cell holds a value from 0 to 1, read by up to sixteen play heads",
 	"Runs one generation of the automaton",
@@ -45453,8 +45671,8 @@ static const short O1964[] = {23,22};
 static const short P1964[] = {13,15,17,19,21,11,10,1,3,7,4,5};
 static const signed char FI1964[] = {1,1,1,1,2,2,-1,-1,2,1,2};
 static const signed char FO1964[] = {1,2};
-static const short PR1964[] = {16,16,27,27,5,5,5,8,5,8,5};
-static const short PO1964[] = {27,27};
+static const short PR1964[] = {16,16,63,63,5,5,5,8,5,8,5};
+static const short PO1964[] = {63,63};
 static const char* const L1965[] = {
 	"Three clock dividers with divisions of 1 to 99 that stay in step with each other while the division is changed",
 	"Each rising edge advances the count all three dividers work from",
@@ -45470,7 +45688,7 @@ static const short O1965[] = {5,5,5};
 static const short P1965[] = {3,3,3};
 static const signed char FI1965[] = {2,2,1,1,1};
 static const signed char FO1965[] = {2,2,2};
-static const short PR1965[] = {5,5,120,120,120};
+static const short PR1965[] = {5,5,266,266,266};
 static const short PO1965[] = {11,11,11};
 static const char* const L1966[] = {
 	"Sixteen value shift register: every clock moves the stored voltages along by one and reads a new one in",
@@ -45487,8 +45705,8 @@ static const short O1966[] = {7,6};
 static const short P1966[] = {5};
 static const signed char FI1966[] = {2,2,1,1};
 static const signed char FO1966[] = {1,1};
-static const short PR1966[] = {5,5,36,27};
-static const short PO1966[] = {27,36};
+static const short PR1966[] = {5,5,86,63};
+static const short PO1966[] = {63,86};
 static const char* const L1967[] = {
 	"Discrete CV source: a number from -12 to 12 is picked by button and multiplied by a level voltage",
 	"Picks the number, -12 to 12, that is multiplied by the level",
@@ -45535,8 +45753,8 @@ static const short O1968[] = {18,18,18,18,18,18,19,19,19,19,19,19};
 static const short P1968[] = {7,7,7,7,7,7,10,10,10,10,10,10,8,8,8,8,8,8,12,12,12,12,12,12,14,14,14,14,14,14,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FI1968[] = {2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2};
 static const signed char FO1968[] = {1,1,1,1,1,1,2,2,2,2,2,2};
-static const short PR1968[] = {5,5,5,5,5,5,5,5,5,5,5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,29,29,36,5,5,5,5,5,5};
-static const short PO1968[] = {36,36,36,36,36,36,11,11,11,11,11,11};
+static const short PR1968[] = {5,5,5,5,5,5,5,5,5,5,5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,38,38,86,5,5,5,5,5,5};
+static const short PO1968[] = {86,86,86,86,86,86,11,11,11,11,11,11};
 static const char* const L1969[] = {
 	"Billiard simulation for sequencing: balls bounce around a table, and their positions and collisions come out as polyphonic voltages",
 	"Sets how many balls are in play, 1 to 16; changing it starts the scene again",
@@ -45560,8 +45778,8 @@ static const short O1969[] = {14,15,12,13};
 static const short P1969[] = {1,2,3};
 static const signed char FI1969[] = {2,2,1,1,1,1,1,1};
 static const signed char FO1969[] = {2,2,1,1};
-static const short PR1969[] = {11,11,8,30,30,30,30,122};
-static const short PO1969[] = {17,17,62,62};
+static const short PR1969[] = {11,11,8,83,83,83,83,268};
+static const short PO1969[] = {17,17,131,131};
 static const char* const L1970[] = {
 	"Holds 100 chords of semitone notes from C0 to C8 and plays the selected one as polyphonic pitch and gate",
 	"Moves every note of the current chord one semitone up",
@@ -45591,8 +45809,8 @@ static const short O1970[] = {10,11,12};
 static const short P1970[] = {1,2,3,4,5,6,7,8};
 static const signed char FI1970[] = {1};
 static const signed char FO1970[] = {3,2,2};
-static const short PR1970[] = {123};
-static const short PO1970[] = {32,27,17};
+static const short PR1970[] = {269};
+static const short PO1970[] = {23,63,17};
 static const char* const L1971[] = {
 	"Turns one voltage into 32 gates, taken from the bits of that voltage or from a random number seeded by it",
 	"The voltage the gates are made from, 0-10V, or -5V to 5V when BiPolar is on",
@@ -45646,7 +45864,7 @@ static const short O1972[] = {13,14,15,16,17};
 static const short P1972[] = {4,5,6,7,8,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12};
 static const signed char FI1972[] = {2,2,1};
 static const signed char FO1972[] = {2,2,2,2,2};
-static const short PR1972[] = {5,5,120};
+static const short PR1972[] = {5,5,266};
 static const short PO1972[] = {17,17,17,17,17};
 static const char* const L1973[] = {
 	"Holds 100 chords drawn from a 31-note scale tuned in whole number ratios and plays the selected one as polyphonic pitch and gate",
@@ -45679,8 +45897,8 @@ static const short O1973[] = {11,12,13};
 static const short P1973[] = {1,2,4,3,5,6,7,8,9};
 static const signed char FI1973[] = {1};
 static const signed char FO1973[] = {3,2,2};
-static const short PR1973[] = {120};
-static const short PO1973[] = {29,27,17};
+static const short PR1973[] = {266};
+static const short PO1973[] = {38,63,17};
 static const char* const L1974[] = {
 	"Klee style sequencer: a sixteen place shift register of bits circulates on every clock, and the steps whose bit is set add their knob voltages together and fire three gate buses",
 	"Sets the voltage its step adds to its sum while its bit is set, within the range picked in the menu",
@@ -45732,8 +45950,8 @@ static const short O1974[] = {24,25,26,27,28,29,30,31,32,33,33,33,34,34,34,35,35
 static const short P1974[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,7,9,10,12,13,17,15,18,6,-1,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5};
 static const signed char FI1974[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1,2,1,2,1,2,2};
 static const signed char FO1974[] = {1,1,1,1,1,2,2,2,1,2,2,2,2,2,2,2,2,2};
-static const short PR1974[] = {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,33,5,36,72,17,75,29,33,75};
-static const short PO1974[] = {36,36,124,124,124,27,17,16,27,36,36,36,11,11,11,10,10,10};
+static const short PR1974[] = {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,49,5,86,24,17,155,38,49,155};
+static const short PO1974[] = {86,86,270,270,270,63,17,16,63,86,86,86,11,11,11,10,10,10};
 static const char* const L1975[] = {
 	"Merges sixteen mono inputs into one polyphonic output, in 2HP",
 	"Feeds one channel of the polyphonic output; an input with no cable puts 0V on its channel",
@@ -45741,8 +45959,8 @@ static const char* const L1975[] = {
 };
 static const short I1975[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short O1975[] = {2};
-static const short PR1975[] = {36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36};
-static const short PO1975[] = {27};
+static const short PR1975[] = {86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86};
+static const short PO1975[] = {63};
 static const char* const L1976[] = {
 	"Merges sixteen stereo pairs into a left and a right polyphonic output, in 2HP",
 	"The left side of its pair, and with nothing patched into the right side of that pair it feeds both outputs",
@@ -45753,8 +45971,8 @@ static const char* const L1976[] = {
 };
 static const short I1976[] = {1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2};
 static const short O1976[] = {3,4};
-static const short PR1976[] = {27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27};
-static const short PO1976[] = {27,27};
+static const short PR1976[] = {63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63};
+static const short PO1976[] = {63,63};
 static const char* const L1977[] = {
 	"Eight step sequencer where each step can repeat, with a gate pattern per step, portamento and five play orders",
 	"Sets the voltage its step puts out, within the range picked in the menu",
@@ -45784,8 +46002,8 @@ static const short O1977[] = {15,14};
 static const short P1977[] = {1,1,1,1,1,1,1,1,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,11,-1,12,13};
 static const signed char FI1977[] = {2,2,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1977[] = {1,2};
-static const short PR1977[] = {5,5,8,8,8,8,8,8,8,8,8,29};
-static const short PO1977[] = {36,11};
+static const short PR1977[] = {5,5,8,8,8,8,8,8,8,8,8,38};
+static const short PO1977[] = {86,11};
 static const char* const L1978[] = {
 	"A slider played by the mouse that records the movement and plays it back",
 	"Plays the last recorded movement back from its start, holding the gate high until it ends",
@@ -45800,7 +46018,7 @@ static const short P1978[] = {1};
 static const signed char FI1978[] = {2};
 static const signed char FO1978[] = {1,2};
 static const short PR1978[] = {5};
-static const short PO1978[] = {36,10};
+static const short PO1978[] = {86,10};
 static const char* const L1979[] = {
 	"Sequencer on a four column, 32 row grid of typed characters, read by up to sixteen play heads that turn each character into a voltage",
 	"Fills the grid, or the selected block, with random characters between the two Range knobs",
@@ -45831,8 +46049,8 @@ static const short O1979[] = {17,16,15};
 static const short P1979[] = {7,9,3,1,11,5,6};
 static const signed char FI1979[] = {1,1,1,1,2,2,3};
 static const signed char FO1979[] = {1,2,2};
-static const short PR1979[] = {16,16,8,82,5,5,14};
-static const short PO1979[] = {27,27,17};
+static const short PR1979[] = {16,16,8,171,5,5,14};
+static const short PO1979[] = {63,63,17};
 static const char* const L1980[] = {
 	"Maps an eight bit input to an eight bit output through a 256-value table, with twenty banks of tables to scan",
 	"Scans through the tables of the selected bank, crossfading between neighbouring tables, 0 to 100%",
@@ -45853,7 +46071,7 @@ static const short O1980[] = {9,9,9,9,9,9,9,9,10};
 static const short P1980[] = {5,1,3};
 static const signed char FI1980[] = {2,2,2,2,2,2,2,2,2,1,1,1};
 static const signed char FO1980[] = {2,2,2,2,2,2,2,2,2};
-static const short PR1980[] = {5,5,5,5,5,5,5,5,33,8,8,8};
+static const short PR1980[] = {5,5,5,5,5,5,5,5,49,8,8,8};
 static const short PO1980[] = {-1,-1,-1,-1,-1,-1,-1,-1,17};
 static const char* const L1981[] = {
 	"Reads sixteen values carried on one polyphonic cable at addresses given by another, one read per address channel",
@@ -45867,8 +46085,8 @@ static const short I1981[] = {1,2};
 static const short O1981[] = {4,3};
 static const signed char FI1981[] = {1,1};
 static const signed char FO1981[] = {1,2};
-static const short PR1981[] = {17,29};
-static const short PO1981[] = {27,17};
+static const short PR1981[] = {17,38};
+static const short PO1981[] = {63,17};
 static const char* const L1982[] = {
 	"Polyphonic source of chaotic sequences from four iterated maps: logistic, tent, circle and sawtooth",
 	"Sets how fast the map iterates while nothing is patched into Clk, -10V to 6V read as one octave per volt",
@@ -45888,8 +46106,8 @@ static const short O1982[] = {11};
 static const short P1982[] = {1,8,10,6,5};
 static const signed char FI1982[] = {3,1,2,2,1};
 static const signed char FO1982[] = {1};
-static const short PR1982[] = {32,29,33,5,29};
-static const short PO1982[] = {62};
+static const short PR1982[] = {23,38,49,5,38};
+static const short PO1982[] = {131};
 static const char* const L1983[] = {
 	"Eight channel polyphonic CV mixer, also usable as a digital to analogue converter for eight bits",
 	"Scales its channel from -100% to 100% before that channel is added to the mix",
@@ -45901,8 +46119,8 @@ static const short O1983[] = {3};
 static const short P1983[] = {1,1,1,1,1,1,1,1};
 static const signed char FI1983[] = {1,1,1,1,1,1,1,1};
 static const signed char FO1983[] = {1};
-static const short PR1983[] = {29,29,29,29,29,29,29,29};
-static const short PO1983[] = {27};
+static const short PR1983[] = {38,38,38,38,38,38,38,38};
+static const short PO1983[] = {63};
 static const char* const L1984[] = {
 	"Sequencer played by dragging the mouse over a 32 by 32 pad, recording what is played into one of 100 patterns and playing it back on a clock",
 	"Picks which of the four clock inputs drives the module",
@@ -45935,8 +46153,8 @@ static const short O1984[] = {19,20,21,22};
 static const short P1984[] = {6,4,1,15,17,11,8,10};
 static const signed char FI1984[] = {2,2,2,2,1,1,1,1,2,2,1,1,1};
 static const signed char FO1984[] = {3,1,2,2};
-static const short PR1984[] = {5,5,5,5,11,11,125,125,75,5,11,11,120};
-static const short PO1984[] = {8,42,36,10};
+static const short PR1984[] = {5,5,5,5,11,11,271,271,155,5,11,11,266};
+static const short PO1984[] = {8,92,86,10};
 static const char* const L1985[] = {
 	"Eight polygon sequencers on a shared circle: a pointer steps around by a fixed angle and each polygon fires when the pointer passes one of its corners",
 	"Each rising edge turns the pointer on by the angle set by Degree",
@@ -45987,8 +46205,8 @@ static const short O1986[] = {10};
 static const short P1986[] = {5,3,7,9};
 static const signed char FI1986[] = {2,2,1,1,1};
 static const signed char FO1986[] = {1};
-static const short PR1986[] = {5,5,120,120,75};
-static const short PO1986[] = {42};
+static const short PR1986[] = {5,5,266,266,155};
+static const short PO1986[] = {92};
 static const char* const L1987[] = {
 	"Address sequencer holding 100 editable sixteen-step patterns, each step a number from 1 to 16 put out as a voltage",
 	"Sets the address this step of the pattern points at, by clicking one of the sixteen cells in its column; the row marked 1 is address zero",
@@ -46020,8 +46238,8 @@ static const short O1987[] = {17,18};
 static const short P1987[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,11,15,13,16,5,7,8,10,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,9};
 static const signed char FI1987[] = {2,-1,2,1,2,1};
 static const signed char FO1987[] = {1,1};
-static const short PR1987[] = {5,-1,5,120,5,8};
-static const short PO1987[] = {36,27};
+static const short PR1987[] = {5,-1,5,266,5,8};
+static const short PO1987[] = {86,63};
 static const char* const L1988[] = {
 	"Builds an address voltage from four clock dividers read as the bits of a number, with a gate output for each bit",
 	"Picks what the ones bit of the number follows: OFF, ON, or one of the sixteen clock dividers C1 to C16",
@@ -46056,7 +46274,7 @@ static const short P1988[] = {1,2,3,4,18,-1,16,5,6,7,8,9};
 static const signed char FI1988[] = {2,2,1,1,1,1,1};
 static const signed char FO1988[] = {1,2,2,2,2,2,2};
 static const short PR1988[] = {5,5,-1,8,8,8,8};
-static const short PO1988[] = {36,11,10,10,10,10,17};
+static const short PO1988[] = {86,11,10,10,10,10,17};
 static const char* const L1989[] = {
 	"Sequential switch stepping through the channels of a polyphonic input and putting one of them out at a time",
 	"Each rising edge moves on to the next channel, in the order set by the Dir switch",
@@ -46069,8 +46287,8 @@ static const short I1989[] = {1,2,3};
 static const short O1989[] = {5};
 static const short P1989[] = {4};
 static const signed char FI1989[] = {2,2};
-static const short PR1989[] = {5,5,29};
-static const short PO1989[] = {36};
+static const short PR1989[] = {5,5,38};
+static const short PO1989[] = {86};
 static const char* const L1990[] = {
 	"Address generator that walks a four-step permutation inside an address space of 2 to 32 steps",
 	"Each rising edge moves on to the next step of the permutation",
@@ -46090,8 +46308,8 @@ static const short O1990[] = {10};
 static const short P1990[] = {3,5,7,9};
 static const signed char FI1990[] = {2,2,1,1,1};
 static const signed char FO1990[] = {1};
-static const short PR1990[] = {5,5,120,120,120};
-static const short PO1990[] = {42};
+static const short PR1990[] = {5,5,266,266,266};
+static const short PO1990[] = {92};
 static const char* const L1991[] = {
 	"Address generator that walks sixteen steps as a Markov chain, with the chance of every move taken from polyphonic inputs",
 	"The chances of moving from that step to each of the sixteen steps, one channel per destination, 0-10V weighting each; the sixteen weights are scaled so they add up to one",
@@ -46111,8 +46329,8 @@ static const short O1991[] = {10,9,8,7};
 static const short P1991[] = {4,6};
 static const signed char FI1991[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1};
 static const signed char FO1991[] = {1,2,2,2};
-static const short PR1991[] = {30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,5,5,8};
-static const short PO1991[] = {42,17,16,17};
+static const short PR1991[] = {83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,5,5,8};
+static const short PO1991[] = {92,17,16,17};
 static const char* const L1992[] = {
 	"Address generator that multiplies a running step count and takes the remainder, giving sequences that skip through the address space",
 	"Each rising edge advances the step count",
@@ -46131,8 +46349,8 @@ static const short O1992[] = {10};
 static const short P1992[] = {9,5,7,3};
 static const signed char FI1992[] = {2,2,1,1,1};
 static const signed char FO1992[] = {1};
-static const short PR1992[] = {5,5,120,120,120};
-static const short PO1992[] = {42};
+static const short PR1992[] = {5,5,266,266,266};
+static const short PO1992[] = {92};
 static const char* const L1993[] = {
 	"Two dimensional walker: four trigger inputs move a point around a grid, and its position is put out as address voltages",
 	"A trigger moves the point one place towards lower X, wrapping around to the far end of the X length",
@@ -46156,8 +46374,8 @@ static const short O1993[] = {15,13,14};
 static const short P1993[] = {6,7,10,11,12};
 static const signed char FI1993[] = {2,2,2,2,2,1,1};
 static const signed char FO1993[] = {1,1,1};
-static const short PR1993[] = {5,5,5,5,5,120,120};
-static const short PO1993[] = {42,42,42};
+static const short PR1993[] = {5,5,5,5,5,266,266};
+static const short PO1993[] = {92,92,92};
 static const char* const L1994[] = {
 	"Shows the user and factory presets of the module immediately to its left and loads them by click or by voltage; it goes immediately to the right of that module",
 	"Selects a preset within the open folder, 0.1V per preset, and loads it whenever the selection changes",
@@ -46195,8 +46413,8 @@ static const short O1995[] = {6,9,14,14,14,14,14,14,14,14,14,3};
 static const short P1995[] = {1,4,7,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12};
 static const signed char FI1995[] = {2,2,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1995[] = {2,2,2,2,2,2,2,2,2,2,2,1};
-static const short PR1995[] = {9,5,126,8,8,8,8,8,8,8,8,8};
-static const short PO1995[] = {10,10,11,11,11,11,11,11,11,11,11,36};
+static const short PR1995[] = {9,5,272,8,8,8,8,8,8,8,8,8};
+static const short PO1995[] = {10,10,11,11,11,11,11,11,11,11,11,86};
 static const char* const L1996[] = {
 	"Splits a polyphonic input into sixteen mono outputs, in 2HP",
 	"The polyphonic cable that is split across the outputs, one channel to each",
@@ -46204,7 +46422,7 @@ static const char* const L1996[] = {
 };
 static const short I1996[] = {1};
 static const short O1996[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR1996[] = {27};
+static const short PR1996[] = {63};
 static const char* const L1997[] = {
 	"Expander that makes a second sum from the twelve inputs patched into Sum; it goes immediately to the right of Sum, and another SE can be chained to its right",
 	"Three way switch: minus subtracts that input of Sum from this sum, 0 leaves it out, plus adds it; it starts on 0",
@@ -46213,7 +46431,7 @@ static const char* const L1997[] = {
 static const short O1997[] = {2};
 static const short P1997[] = {1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1997[] = {1};
-static const short PO1997[] = {27};
+static const short PO1997[] = {63};
 static const char* const L1998[] = {
 	"Stochastic sequencer: sixteen sliders weight how often each of sixteen voltages is picked, and a clock draws one of them at random each time",
 	"Sets how often its voltage is picked against the others, 0 to 100; a slider at zero takes its voltage out of the draw",
@@ -46237,8 +46455,8 @@ static const short O1998[] = {11,12,13};
 static const short P1998[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,9};
 static const signed char FI1998[] = {2,2,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1998[] = {-1,2,2};
-static const short PR1998[] = {33,5,27,8,30,29,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
-static const short PO1998[] = {27,16,17};
+static const short PR1998[] = {49,5,63,8,83,38,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+static const short PO1998[] = {63,16,17};
 static const char* const L1999[] = {
 	"Scrambles a signal through a sixteen value shift register: on each clock either the input or a value already in the register is read in, decided by three comparators",
 	"Picks which stored value the first comparator looks at, position 0 to 15",
@@ -46274,8 +46492,8 @@ static const short O1999[] = {23,22};
 static const short P1999[] = {1,5,9,3,7,11,17,19,15};
 static const signed char FI1999[] = {2,2,-1,1,1,1,1,1,1,1,1,1};
 static const signed char FO1999[] = {1,1};
-static const short PR1999[] = {5,5,36,8,8,8,8,8,8,8,8,8};
-static const short PO1999[] = {36,27};
+static const short PR1999[] = {5,5,86,8,8,8,8,8,8,8,8,8};
+static const short PO1999[] = {86,63};
 static const char* const L2000[] = {
 	"Adds twelve polyphonic inputs, each one switched to add, to subtract or to be left out",
 	"One of the twelve inputs; the switch beside it sets whether it is added, subtracted or left out",
@@ -46287,8 +46505,8 @@ static const short O2000[] = {3};
 static const short P2000[] = {2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI2000[] = {1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO2000[] = {1};
-static const short PR2000[] = {29,29,29,29,29,29,29,29,29,29,29,29};
-static const short PO2000[] = {27};
+static const short PR2000[] = {38,38,38,38,38,38,38,38,38,38,38,38};
+static const short PO2000[] = {63};
 static const char* const L2001[] = {
 	"Reads the raw bits of an input voltage as four step counts and walks them north, east, south and west over a four by eight grid, putting every cell out as its own voltage",
 	"Sets where the walk starts, 0 to 32 cells counted across the grid",
@@ -46313,7 +46531,7 @@ static const short P2001[] = {10,11,12,13,3,5,9,14,1};
 static const signed char FI2001[] = {-1,1,1,2,1};
 static const signed char FO2001[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const short PR2001[] = {8,4,12,11,8};
-static const short PO2001[] = {36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36};
+static const short PO2001[] = {86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86};
 static const char* const L2002[] = {
 	"Sixteen tracks reading one 4x4 grid of sixteen CV knobs, each track addressed by its own voltage",
 	"Sets which of the sixteen knobs its track reads, 10/16V per step over 0-10V, wrapping around outside that range",
@@ -46335,8 +46553,8 @@ static const short O2002[] = {6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,3,3,3,3,3,3,3,3,3,
 static const short P2002[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FI2002[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1};
 static const signed char FO2002[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,1};
-static const short PR2002[] = {11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,33,29,16};
-static const short PO2002[] = {36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,27,17,27};
+static const short PR2002[] = {11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,38,16};
+static const short PO2002[] = {86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,63,17,63};
 static const char* const L2003[] = {
 	"Triadex Muse emulator: a 31 bit shift register clocked into a repeating pattern, with four sliders picking the note and four picking how the pattern grows",
 	"Picks what the ones bit of the note number follows: OFF, ON, one of the counter divisions C1/2 to C8, or one of the 31 register bits B1 to B31",
@@ -46364,8 +46582,8 @@ static const short O2003[] = {15,16,18};
 static const short P2003[] = {1,2,3,4,5,6,7,8,13,11,17};
 static const signed char FI2003[] = {2,2,1,1,1,1,1,1,1,1,1};
 static const signed char FO2003[] = {3,2,1};
-static const short PR2003[] = {5,5,127,8,8,8,8,8,8,8,8};
-static const short PO2003[] = {8,10,36};
+static const short PR2003[] = {5,5,273,8,8,8,8,8,8,8,8};
+static const short PO2003[] = {8,10,86};
 static const char* const L2004[] = {
 	"Polyphonic truth table: four gate inputs pick one of sixteen cells, and that cell's state becomes the output",
 	"Read as the ones bit of the cell number, a voltage above 1V counting as a one",
@@ -46381,7 +46599,7 @@ static const short I2004[] = {1,2,3,4,5};
 static const short O2004[] = {6};
 static const signed char FI2004[] = {2,2,2,2,2};
 static const signed char FO2004[] = {2};
-static const short PR2004[] = {33,33,33,33,33};
+static const short PR2004[] = {49,49,49,49,49};
 static const short PO2004[] = {17};
 static const char* const L2005[] = {
 	"Sixteen step switch and sequencer: a clock or an address voltage picks one of sixteen stages, each with its own output, gate and level",
@@ -46406,8 +46624,8 @@ static const short O2005[] = {13,11,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,10,10,10,10,
 static const short P2005[] = {-1,-1,6,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
 static const signed char FI2005[] = {2,2,2,1,2};
 static const signed char FO2005[] = {-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1};
-static const short PR2005[] = {5,5,5,4,5,27};
-static const short PO2005[] = {27,10,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36};
+static const short PR2005[] = {5,5,5,4,5,63};
+static const short PO2005[] = {63,10,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,86};
 static const char* const L2006[] = {
 	"Sequencer on a 32 by 32 grid of typed characters, read by up to sixteen play heads that turn each character into a voltage",
 	"Fills the grid, or the selected block, with random characters between the two Range knobs",
@@ -46438,8 +46656,8 @@ static const short O2006[] = {17,16,15};
 static const short P2006[] = {7,9,3,1,11,5,6};
 static const signed char FI2006[] = {1,1,1,1,2,2,3};
 static const signed char FO2006[] = {1,2,2};
-static const short PR2006[] = {16,16,8,82,5,5,14};
-static const short PO2006[] = {27,27,17};
+static const short PR2006[] = {16,16,8,171,5,5,14};
+static const short PO2006[] = {63,63,17};
 static const char* const L2007[] = {
 	"Eight step sequencer where every step carries a probability of being skipped, with glide and reset per step",
 	"Each rising edge moves on, skipping any step the probabilities skip over",
@@ -46466,7 +46684,7 @@ static const short O2007[] = {13,14,15};
 static const short P2007[] = {6,6,6,6,6,6,6,6,8,8,8,8,8,8,8,8,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,4};
 static const signed char FI2007[] = {2,2,2,1,1,2,2,2,2,2,2,2,2,1};
 static const signed char FO2007[] = {1,2,2};
-static const short PR2007[] = {5,5,11,29,29,5,5,5,5,5,5,5,5,8};
+static const short PR2007[] = {5,5,11,38,38,5,5,5,5,5,5,5,5,8};
 static const short PO2007[] = {-1,0,0};
 static const char* const L2008[] = {
 	"Sixteen step address sequencer where each step can be skipped at random, with per-step probability and sequence reset from polyphonic inputs",
@@ -46485,8 +46703,8 @@ static const short O2008[] = {9};
 static const short P2008[] = {5,3,8};
 static const signed char FI2008[] = {2,2,1,1,2};
 static const signed char FO2008[] = {1};
-static const short PR2008[] = {5,5,8,122,33};
-static const short PO2008[] = {42};
+static const short PR2008[] = {5,5,8,268,49};
+static const short PO2008[] = {92};
 static const char* const L2009[] = {
 	"Expander that plays the step voltages, probabilities, glides and resets of the Uno to its left on its own clock; it goes immediately to the right of Uno, and another UnoE can be chained to its right",
 	"Each rising edge moves on, skipping any step the probabilities of the module to the left skip over",
@@ -46519,8 +46737,8 @@ static const short O2010[] = {3,3,3,3,3,3,3,3,7};
 static const short P2010[] = {2,2,2,2,2,2,2,2,5,5,5,5,5,5,5,5,6};
 static const signed char FI2010[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO2010[] = {1,1,1,1,1,1,1,1,1};
-static const short PR2010[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29};
-static const short PO2010[] = {27,27,27,27,27,27,27,27,27};
+static const short PR2010[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
+static const short PO2010[] = {63,63,63,63,63,63,63,63,63};
 static const char* const L2011[] = {
 	"Seven-note arpeggiator with sixteen patterns, three sub-steps per note, note lengths from a whole note down to a thirty-second, and glide and legato per note",
 	"The clock the arpeggio runs from; with nothing patched here the trigger output stays at 0V and the pattern does not advance",
@@ -46557,7 +46775,7 @@ static const short I2012[] = {3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5};
 static const short O2012[] = {6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7};
 static const short P2012[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2};
 static const signed char FI2012[] = {2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR2012[] = {128,128,128,128,128,128,128,128,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29};
+static const short PR2012[] = {186,186,186,186,186,186,186,186,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38};
 static const char* const L2013[] = {
 	"Two oscillators built from a 32-bit seed, one stepping through a bit pattern and one through a note sequence, each filtered by its own modulation shapes",
 	"Sets how fast the modulation shapes run, in nine steps from a hundredth of their built-in rate to eight times it",
@@ -46597,7 +46815,7 @@ static const short O2014[] = {11,12};
 static const short P2014[] = {1,2,3,4,5,6,-1,7};
 static const signed char FI2014[] = {0,0,0};
 static const signed char FO2014[] = {0,0};
-static const short PR2014[] = {129,129,130};
+static const short PR2014[] = {274,274,275};
 static const short PO2014[] = {2,2};
 static const char* const L2015[] = {
 	"Three morphing oscillators whose waveforms, detuning and modulation shapes are all built from a 32-bit seed, filtered and reverberated into a stereo pair",
@@ -46614,7 +46832,7 @@ static const short O2015[] = {4,5};
 static const short P2015[] = {1};
 static const signed char FI2015[] = {3,2};
 static const signed char FO2015[] = {0,0};
-static const short PR2015[] = {92,5};
+static const short PR2015[] = {183,5};
 static const short PO2015[] = {2,2};
 static const char* const L2016[] = {
 	"Lorenz attractor run at audio rate, with its three coordinates mixed into one output through a multimode filter, and a display of the path it traces",
@@ -46663,7 +46881,7 @@ static const short O2017[] = {5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,
 static const short P2017[] = {1,2,2,2,2,8};
 static const signed char FI2017[] = {2,2,2,2,1};
 static const signed char FO2017[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1};
-static const short PR2017[] = {5,5,5,5,36};
+static const short PR2017[] = {5,5,5,5,86};
 static const short PO2017[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1};
 static const char* const L2018[] = {
 	"Clips, rectifies and combines two signals with one of five operations, then rectifies the result again and applies gain and a DC offset",
@@ -46726,7 +46944,7 @@ static const short O2019[] = {2,3,23,23,23,23,24,24,24,24,20,20,20,20,21,21,21,2
 static const short P2019[] = {1,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,25,25,25,25,22,22,22,22,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,19,19,19,19};
 static const signed char FI2019[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,-1,-1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO2019[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR2019[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,4,4};
+static const short PR2019[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,4,4};
 static const short PO2019[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L2020[] = {
 	"24-channel stereo mixer with three-band EQ, pan and four aux sends on every channel, 4 stereo groups fed by any channel, four aux returns, and an X/Y crossfade across the groups",
@@ -46767,7 +46985,7 @@ static const short O2020[] = {2,3,23,23,23,23,24,24,24,24,20,20,20,20,21,21,21,2
 static const short P2020[] = {1,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,25,25,25,25,22,22,22,22,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,19,19,19,19};
 static const signed char FI2020[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,-1,-1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO2020[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR2020[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,4,4};
+static const short PR2020[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,4,4};
 static const short PO2020[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L2021[] = {
 	"4-channel stereo mixer with three-band EQ, pan and four aux sends on every channel, four aux returns and a stereo main output",
@@ -46802,7 +47020,7 @@ static const short O2021[] = {2,3,20,20,20,20,21,21,21,21};
 static const short P2021[] = {1,16,16,16,16,22,22,22,22,15,15,15,15,15,15,15,15,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,19,19,19,19};
 static const signed char FI2021[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1};
 static const signed char FO2021[] = {0,0,0,0,0,0,0,0,0,0};
-static const short PR2021[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,4,4,4,4,12,12,12,12};
+static const short PR2021[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,4,4,4,4,12,12,12,12};
 static const short PO2021[] = {2,2,2,2,2,2,2,2,2,2};
 static const char* const L2022[] = {
 	"9-channel stereo mixer with three-band EQ, pan and four aux sends on every channel, 3 stereo groups fed by any channel, four aux returns, and an X/Y crossfade across the groups",
@@ -46843,7 +47061,7 @@ static const short O2022[] = {2,3,23,23,23,24,24,24,20,20,20,20,21,21,21,21};
 static const short P2022[] = {1,16,16,16,16,16,16,16,16,16,25,25,25,22,22,22,22,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,6,7,8,9,19,19,19,19};
 static const signed char FI2022[] = {0,0,0,0,0,0,0,0,0,-1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,-1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO2022[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR2022[] = {29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,4,4,4,4,4,4,4,4,4,12,12,12,12,12,12,12,12,12,4,4};
+static const short PR2022[] = {38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,38,4,4,4,4,4,4,4,4,4,12,12,12,12,12,12,12,12,12,4,4};
 static const short PO2022[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L2023[] = {
 	"Turns typed text into morse code, played out as gates once a trigger starts it",
@@ -46889,7 +47107,7 @@ static const short O2024[] = {12};
 static const short P2024[] = {1,5,2,3,4};
 static const signed char FI2024[] = {3,1,1,1,1,2};
 static const signed char FO2024[] = {0};
-static const short PR2024[] = {92,12,4,4,4,5};
+static const short PR2024[] = {183,12,4,4,4,5};
 static const short PO2024[] = {2};
 static const char* const L2025[] = {
 	"Three synth voices in one module, each stacking up to seven detuned copies of one waveform through an envelope and a multimode filter into a stereo pair",
@@ -46919,7 +47137,7 @@ static const short O2025[] = {16,17,16,17,16,17};
 static const short P2025[] = {2,2,2,1,1,1,3,3,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,7,7,7,8,8,8,10,10,10,9,9,9,4,4,4,6,6,6,5,5,5};
 static const signed char FI2025[] = {3,3,3,2,2,2,1,1,1,1,1,1,1,1,1};
 static const signed char FO2025[] = {0,0,0,0,0,0};
-static const short PR2025[] = {92,92,92,5,5,5,4,4,4,-1,-1,-1,40,40,40};
+static const short PR2025[] = {183,183,183,5,5,5,4,4,4,-1,-1,-1,90,90,90};
 static const short PO2025[] = {2,2,2,2,2,2};
 static const char* const L2026[] = {
 	"Stereo delay of up to 4 seconds a side, with feedback in both directions, a multimode filter across the input and a switch that plays the buffer backwards",
@@ -46946,7 +47164,7 @@ static const short O2026[] = {15,16};
 static const short P2026[] = {1,2,4,3,5,6,7,8,10,9};
 static const signed char FI2026[] = {0,0,2,2};
 static const signed char FO2026[] = {0,0};
-static const short PR2026[] = {29,29,5,5};
+static const short PR2026[] = {38,38,5,5};
 static const short PO2026[] = {2,2};
 static const char* const L2027[] = {
 	"Nine envelope generators sharing one drawable editor, each timed from the patched clock and each with its own trigger and hold input",
@@ -46974,7 +47192,7 @@ static const short O2027[] = {7,7,7,7,7,7,7,7,7};
 static const short P2027[] = {1};
 static const signed char FI2027[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const signed char FO2027[] = {1,1,1,1,1,1,1,1,1};
-static const short PR2027[] = {5,5,5,88,88,88,88,88,88,88,88,88,5,5,5,5,5,5,5,5,5};
+static const short PR2027[] = {5,5,5,176,176,176,176,176,176,176,176,176,5,5,5,5,5,5,5,5,5};
 static const char* const L2028[] = {
 	"Six trigger sequencers of up to 32 steps, each with sixteen patterns and five level knobs a step can draw its CV from",
 	"Sets the voltage that row's CV output takes on a step drawn at the lowest of the five levels",
@@ -47485,8 +47703,8 @@ static const short O2051[] = {11};
 static const short P2051[] = {1,2,3,6,5,7,4};
 static const signed char FI2051[] = {3,1,1};
 static const signed char FO2051[] = {0};
-static const short PR2051[] = {32,29,29};
-static const short PO2051[] = {29};
+static const short PR2051[] = {23,38,38};
+static const short PO2051[] = {38};
 static const char* const L2052[] = {
 	"A blank panel with no controls and no jacks, which the maker ships as the starting point for building a new module",
 };
@@ -47521,7 +47739,7 @@ static const short O2054[] = {4};
 static const short P2054[] = {1,2};
 static const signed char FI2054[] = {1};
 static const signed char FO2054[] = {0};
-static const short PR2054[] = {91};
+static const short PR2054[] = {179};
 static const short PO2054[] = {2};
 static const char* const L2055[] = {
 	"Feed-forward compressor and limiter with two polyphonic channels, fixed ratios and knee shapes, makeup gain and a wet-dry mix for parallel compression; every channel shares the one set of settings",
@@ -47542,8 +47760,8 @@ static const short O2055[] = {9,9};
 static const short P2055[] = {4,5,2,1,3,7,6};
 static const signed char FI2055[] = {0,0};
 static const signed char FO2055[] = {0,0};
-static const short PR2055[] = {29,29};
-static const short PO2055[] = {29,29};
+static const short PR2055[] = {38,38};
+static const short PO2055[] = {38,38};
 static const char* const L2056[] = {
 	"Sixteen channel feed-forward compressor and limiter for a polyphonic cable, with its own settings per channel, a side-chain input, makeup gain and a wet-dry mix for parallel compression",
 	"Picks which of the channels the panel controls are editing; the other channels keep their own settings",
@@ -47573,8 +47791,8 @@ static const short O2056[] = {12};
 static const short P2056[] = {4,5,3,2,8,7,6,1,-1,-1,9};
 static const signed char FI2056[] = {0,0};
 static const signed char FO2056[] = {0};
-static const short PR2056[] = {29,29};
-static const short PO2056[] = {29};
+static const short PR2056[] = {38,38};
+static const short PO2056[] = {38};
 static const char* const L2057[] = {
 	"Turns a polyphonic CV and gate pair into eight separate gates, one for each semitone from C4 to G4, for driving drum modules or gating mixer channels from a sequencer",
 	"The pitch CV, quantised to semitones; a channel whose pitch lands on one of the eight semitones from 0V upwards raises that gate",
@@ -47586,7 +47804,7 @@ static const short I2057[] = {1,2};
 static const short O2057[] = {3,3,3,3,3,3,3,3};
 static const signed char FI2057[] = {3,2};
 static const signed char FO2057[] = {2,2,2,2,2,2,2,2};
-static const short PR2057[] = {87,33};
+static const short PR2057[] = {175,49};
 static const short PO2057[] = {10,10,10,10,10,10,10,10};
 static const char* const L2058[] = {
 	"Three VCOs on one panel, each with its own pitch offsets, waveform and mixing level, with separate outputs and a mixed output, and hard sync from VCO 1 to either of the others",
@@ -47640,8 +47858,8 @@ static const short O2059[] = {15};
 static const short P2059[] = {4,1,3,2,5,6,8,-1,7,-1,9,10};
 static const signed char FI2059[] = {0,3,1,1};
 static const signed char FO2059[] = {0};
-static const short PR2059[] = {29,30,30,30};
-static const short PO2059[] = {29};
+static const short PR2059[] = {38,83,83,83};
+static const short PO2059[] = {38};
 static const char* const L2060[] = {
 	"Transistor ladder filter with fifteen responses, five distortion voicings and a variable slope, plus control over where in the ladder the distortion happens; stereo, or sixteen polyphonic channels",
 	"Sets the cutoff frequency, 20Hz fully counter-clockwise to 20480Hz fully clockwise",
@@ -47678,7 +47896,7 @@ static const short O2060[] = {24,25};
 static const short P2060[] = {1,13,14,2,15,7,3,16,8,5,9,11,12,10,4,6};
 static const signed char FI2060[] = {0,0,3,3,1,1,1,1};
 static const signed char FO2060[] = {0,0};
-static const short PR2060[] = {29,29,46,46,12,46,46,46};
+static const short PR2060[] = {38,38,57,57,12,57,57,57};
 static const short PO2060[] = {2,2};
 static const char* const L2061[] = {
 	"Stereo frequency shifter after the Moog and Bode module: every frequency moves by the same number of Hz rather than by an interval, so harmonics land out of tune",
@@ -47725,7 +47943,7 @@ static const short O2062[] = {12,13,14,15};
 static const short P2062[] = {1,2,3,4,5,6,7};
 static const signed char FI2062[] = {3,1,2,1};
 static const signed char FO2062[] = {0,0,0,0};
-static const short PR2062[] = {14,8,128,8};
+static const short PR2062[] = {14,8,186,8};
 static const short PO2062[] = {12,12,12,12};
 static const char* const L2063[] = {
 	"Clock divider that counts in gray code, so that only one output changes at each clock, with eight bit outputs and a weighted sum of them",
@@ -47740,7 +47958,7 @@ static const short O2063[] = {4,3,3,3,3,3,3,3,3};
 static const short P2063[] = {1};
 static const signed char FI2063[] = {2};
 static const signed char FO2063[] = {1,2,2,2,2,2,2,2,2};
-static const short PR2063[] = {131};
+static const short PR2063[] = {276};
 static const short PO2063[] = {-1,10,10,10,10,10,10,10,10};
 static const char* const L2064[] = {
 	"Random voltage source made from white noise run through a five band graphic equaliser at extremely low frequencies, so the mix of slow and less slow wandering is set band by band",
@@ -47800,7 +48018,7 @@ static const short O2066[] = {11,11,11,11};
 static const short P2066[] = {1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,-1,5,5,5,5,6,6,6,6};
 static const signed char FI2066[] = {0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2};
 static const signed char FO2066[] = {0,0,0,0};
-static const short PR2066[] = {29,29,29,29,4,4,4,4,12,12,12,12,131,131,131,131};
+static const short PR2066[] = {38,38,38,38,4,4,4,4,12,12,12,12,276,276,276,276};
 static const short PO2066[] = {2,2,2,2};
 static const char* const L2067[] = {
 	"Eight channel stereo mixer with pan, mute, solo and an aux send on every channel, a stereo aux bus, and an expansion input for chaining a second mixer into the output",
@@ -47829,7 +48047,7 @@ static const short O2067[] = {15,15,16,16,16,16,16,16,16,16,17,17};
 static const short P2067[] = {1,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,8};
 static const signed char FI2067[] = {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,0,0,0,0};
 static const signed char FO2067[] = {0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR2067[] = {8,8,8,8,8,8,8,8,4,4,4,4,4,4,4,4,12,12,12,12,12,12,12,12,131,131,131,131,131,131,131,131,8,8,8,8};
+static const short PR2067[] = {8,8,8,8,8,8,8,8,4,4,4,4,4,4,4,4,12,12,12,12,12,12,12,12,276,276,276,276,276,276,276,276,8,8,8,8};
 static const short PO2067[] = {2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L2068[] = {
 	"Expander adding two stereo channels to the Form mixer, placed to its left, carrying the main stereo bus, both aux buses and the solo bus without patch cables",
@@ -47858,7 +48076,7 @@ static const short O2068[] = {12,13,12,13};
 static const short P2068[] = {1,1,2,2,3,3,4,4,-1,5,5,6,6};
 static const signed char FI2068[] = {0,0,0,0,1,1,1,1,2,2};
 static const signed char FO2068[] = {0,0,0,0};
-static const short PR2068[] = {8,8,8,8,4,4,12,12,131,131};
+static const short PR2068[] = {8,8,8,8,4,4,12,12,276,276};
 static const short PO2068[] = {2,2,2,2};
 static const char* const L2069[] = {
 	"Four channel stereo mixer with pan, mute, solo, two stereo aux buses and CV over level, pan and mute, expandable with ExFor and ExTwo modules placed to its left",
@@ -47893,7 +48111,7 @@ static const short O2069[] = {17,17,18,18,18,18,19,19,20,20};
 static const short P2069[] = {1,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,-1,7,7,7,7,8,8,8,8,-1,-1,9,10};
 static const signed char FI2069[] = {0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,0,0,0,0};
 static const signed char FO2069[] = {0,0,0,0,0,0,0,0,0,0};
-static const short PR2069[] = {29,29,29,29,4,4,4,4,12,12,12,12,131,131,131,131,8,8,8,8};
+static const short PR2069[] = {38,38,38,38,4,4,4,4,12,12,12,12,276,276,276,276,8,8,8,8};
 static const short PO2069[] = {2,2,2,2,2,2,2,2,2,2};
 static const char* const L2070[] = {
 	"Sampler that plays SFZ instruments, polyphonic, with velocity, exponential pitch modulation and through-zero linear FM using the samples as the carrier; an instrument is loaded from the context menu",
@@ -47920,8 +48138,8 @@ static const short O2070[] = {12};
 static const short P2070[] = {-1,1,2,3,4,-1,-1,5};
 static const signed char FI2070[] = {3,1,2,1,0,1};
 static const signed char FO2070[] = {0};
-static const short PR2070[] = {87,17,31,29,29,30};
-static const short PO2070[] = {29};
+static const short PR2070[] = {175,17,53,38,38,83};
+static const short PO2070[] = {38};
 static const char* const L2071[] = {
 	"Polyphonic piano-roll sequencer of unlimited length, edited by mouse, computer keyboard or MIDI keyboard while it plays, with unlimited undo, MIDI file import and export and an end-of-cycle trigger",
 	"Tells the sequencer how to read the clock input, from x1 for one pulse a quarter note up to x96; it should match the ratio on the clock module, and it changes playback only, never the editing grid",
@@ -47966,8 +48184,8 @@ static const short O2071[] = {11,12,13};
 static const short P2071[] = {1,-1,-1,4,3,2,-1,5};
 static const signed char FI2071[] = {2,2,2,2,3};
 static const signed char FO2071[] = {3,2,2};
-static const short PR2071[] = {131,131,131,132,32};
-static const short PO2071[] = {32,17,10};
+static const short PR2071[] = {276,276,276,277,23};
+static const short PO2071[] = {23,17,10};
 static const char* const L2072[] = {
 	"Four track clip player: sixteen pads, a row per track and a column per section, each holding a clip that repeats a set number of times before the track moves on; clips come from Seq++ or the clipboard",
 	"Tells the player how to read the clock input, from x1 for one pulse a quarter note up to x96; it should match the ratio set on the clock module",
@@ -47999,8 +48217,8 @@ static const short O2072[] = {12,12,12,12,13,13,13,13};
 static const short P2072[] = {1,2,2,2,2,5,-1,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,3,3,3,3};
 static const signed char FI2072[] = {2,2,2,1,1,1,1,3,2};
 static const signed char FO2072[] = {3,3,3,3,2,2,2,2};
-static const short PR2072[] = {131,131,131,16,16,16,16,87,31};
-static const short PO2072[] = {32,32,32,32,17,17,17,17};
+static const short PR2072[] = {276,276,276,16,16,16,16,175,53};
+static const short PO2072[] = {23,23,23,23,17,17,17,17};
 static const char* const L2073[] = {
 	"Polyphonic stereo waveshaper with eight shapes, from gentle overdrive to wave folding and bit crushing, oversampled to keep aliasing out and switchable between AC and DC coupled outputs",
 	"Picks the shape: Smooth for a tube-like asymmetric curve, Clip for hard clipping, Emitter Coupled for 3080 chip saturation, Full Wave and Half Wave rectifiers, Fold and Fold 2 folders, and Crush",
@@ -48058,8 +48276,8 @@ static const short O2074[] = {21};
 static const short P2074[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 static const signed char FI2074[] = {3,2,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO2074[] = {0};
-static const short PR2074[] = {32,33,4,4,4,4,4,4,4,4,4,7,7};
-static const short PO2074[] = {29};
+static const short PR2074[] = {23,49,4,4,4,4,4,4,4,4,4,7,7};
+static const short PO2074[] = {38};
 static const char* const L2075[] = {
 	"Eight lag generators each with a VCA, for smoothing gates so that they do not click or for using a gate as an attack-release envelope, with a mixing scheme that groups any run of channels together",
 	"Sets the rise time shared by all eight lag generators",
@@ -48108,8 +48326,8 @@ static const short O2076[] = {18};
 static const short P2076[] = {1,1,3,3,9,9,10,10,15,15,15,15,5,5,6,6,7,7,4,4,12,2,2,8,8,11,11};
 static const signed char FI2076[] = {3,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FO2076[] = {0};
-static const short PR2076[] = {32,133,133,133,133,30,30,30,30,30,30,46,46};
-static const short PO2076[] = {29};
+static const short PR2076[] = {23,278,278,278,278,83,83,83,83,83,83,57,57};
+static const short PO2076[] = {38};
 static const char* const L2077[] = {
 	"Emulation of the Roland JP-8000 Super Saw: seven saw oscillators tracking one pitch, with control over how far they spread and how loud the detuned ones are, polyphonic and optionally stereo",
 	"Transposes the pitch in octaves, five down to four up, with the setting shown above the knob",
@@ -48136,8 +48354,8 @@ static const short O2077[] = {15,16};
 static const short P2077[] = {1,2,3,5,6,7,8,4,9};
 static const signed char FI2077[] = {3,2,1,1,1};
 static const signed char FO2077[] = {0,0};
-static const short PR2077[] = {32,134,46,46,29};
-static const short PO2077[] = {29,29};
+static const short PR2077[] = {23,279,57,57,38};
+static const short PO2077[] = {38,38};
 static const char* const L2078[] = {
 	"Tremolo built around an LFO that can be locked to an external clock and multiplied from it, with the raw and shaped LFO brought out to jacks of their own",
 	"Sets the speed of the internal LFO, which is used when the Clock knob is set to int",
@@ -48166,7 +48384,7 @@ static const short O2078[] = {17,18,19};
 static const short P2078[] = {1,3,5,7,9,2,4,6,8,10};
 static const signed char FI2078[] = {0,2,1,1,1,1};
 static const signed char FO2078[] = {0,1,1};
-static const short PR2078[] = {8,131,12,12,12,12};
+static const short PR2078[] = {8,276,12,12,12,12};
 static const short PO2078[] = {2,-1,-1};
 static const char* const L2079[] = {
 	"Recreation of Bernie Hutchins's Vocal Animator: four bandpass filters at vocal formant frequencies, three swept by a bank of slow triangle LFOs, which morphs a rich input into vocal tones",
@@ -48260,8 +48478,8 @@ static const short O2081[] = {27};
 static const short P2081[] = {1,2,3,18,6,8,4,7,5,14,15,16,17,12,11,9,10,13};
 static const signed char FI2081[] = {3,1,0,2,0,1,1,1};
 static const signed char FO2081[] = {0};
-static const short PR2081[] = {32,29,29,33,45,30,30,30};
-static const short PO2081[] = {29};
+static const short PR2081[] = {23,38,38,49,94,83,83,83};
+static const short PO2081[] = {38};
 static const char* const L2082[] = {
 	"Breakbeat player with six sixteen-step sequencers driving position, sample choice, volume, pan, reverse and ratcheting, and sixteen memory slots holding those sequences",
 	"Selects that memory slot, loading its six sequences; with COPY armed, pressing a slot copies the sequences of the current slot into it",
@@ -48298,7 +48516,7 @@ static const short O2082[] = {20,21,22,22,22,22,22,22,22,22,23,23,23,23,23,23,23
 static const short P2082[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,3};
 static const signed char FI2082[] = {2,2,2,1,1,1,1,1,1,1};
 static const signed char FO2082[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1};
-static const short PR2082[] = {0,0,0,6,6,6,6,-1,-1,-1};
+static const short PR2082[] = {82,82,82,280,281,282,283,284,285,286};
 static const short PO2082[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,6,6,6,6,6,6};
 static const char* const L2083[] = {
 	"Granular sample player: grains are cut from one of five loaded samples at a chosen position and spawned at a rate of their own or on an external clock",
@@ -48334,7 +48552,7 @@ static const short O2083[] = {23,24};
 static const short P2083[] = {4,5,15,16,10,-1,22,18,7,8,1,2,12,13};
 static const signed char FI2083[] = {1,1,1,3,2,1,1,1,1};
 static const signed char FO2083[] = {0,0};
-static const short PR2083[] = {-1,6,6,1,0,-1,6,6,6};
+static const short PR2083[] = {287,7,79,14,82,4,280,80,243};
 static const short PO2083[] = {2,2};
 static const char* const L2084[] = {
 	"Recorder for Grain Engine MK2, placed immediately to the right of it, that captures incoming audio to a WAV file and hands it to one of that module's five sample slots",
@@ -48356,7 +48574,7 @@ static const short O2084[] = {9,10};
 static const short P2084[] = {1,2,3};
 static const signed char FI2084[] = {2,2,0,0,1};
 static const signed char FO2084[] = {0,0};
-static const short PR2084[] = {0,0,2,2,-1};
+static const short PR2084[] = {82,82,8,8,141};
 static const short PO2084[] = {2,2};
 static const char* const L2085[] = {
 	"Mixer and gate expander for Groove Box, placed immediately to the left of it, adding mute, solo, level, pan and pitch per track and a trigger output per track",
@@ -48377,6 +48595,7 @@ static const short O2085[] = {7,7,7,7,7,7,7,7};
 static const short P2085[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5};
 static const signed char FI2085[] = {1,1,1,1,1,1,1,1};
 static const signed char FO2085[] = {2,2,2,2,2,2,2,2};
+static const short PR2085[] = {11,11,11,11,11,11,11,11};
 static const short PO2085[] = {0,0,0,0,0,0,0,0};
 static const char* const L2086[] = {
 	"Arpeggiator and step sequencer in one: held polyphonic notes are arpeggiated on an incoming clock, while four drawn sequences add gate length, transposition and two modulation outputs",
@@ -48417,7 +48636,7 @@ static const short O2086[] = {14,15,16,17,18,19};
 static const short P2086[] = {1,2,3,4,5,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
 static const signed char FI2086[] = {3,2,2,2,1,1};
 static const signed char FO2086[] = {3,2,1,1,2,2};
-static const short PR2086[] = {1,0,0,0,-1,-1};
+static const short PR2086[] = {23,24,82,82,288,141};
 static const short PO2086[] = {1,0,-1,-1,0,0};
 static const char* const L2087[] = {
 	"Breakbeat player: a loaded drum loop is split into sixteen slices and played in an order set by a voltage, in time with an incoming clock",
@@ -48441,7 +48660,7 @@ static const short O2087[] = {9,10};
 static const short P2087[] = {1,2};
 static const signed char FI2087[] = {2,2,1,1,2,1};
 static const signed char FO2087[] = {0,0};
-static const short PR2087[] = {0,0,6,6,0,-1};
+static const short PR2087[] = {82,82,280,243,82,155};
 static const short PO2087[] = {2,2};
 static const char* const L2088[] = {
 	"Plays one of nine bytebeat equations, an integer expression over a running time counter heard as audio",
@@ -48460,7 +48679,7 @@ static const short O2088[] = {8};
 static const short P2088[] = {3,1,5,5,5,6,6,6};
 static const signed char FI2088[] = {1,1,1,1,1};
 static const signed char FO2088[] = {0};
-static const short PR2088[] = {6,6,6,6,6};
+static const short PR2088[] = {243,243,243,10,280};
 static const short PO2088[] = {3};
 static const char* const L2089[] = {
 	"Sample player with 32 cue markers: markers are placed on the waveform and each fires its own trigger output as playback passes it",
@@ -48495,7 +48714,7 @@ static const short O2089[] = {8,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,1
 static const short P2089[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,3,4};
 static const signed char FI2089[] = {2,2,2};
 static const signed char FO2089[] = {0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-static const short PR2089[] = {0,0,0};
+static const short PR2089[] = {82,82,82};
 static const short PO2089[] = {3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const char* const L2090[] = {
 	"Sixteen sliders held in twenty-four banks, each slider sent to its own output and to a polyphonic output",
@@ -48523,7 +48742,8 @@ static const short O2090[] = {12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,13
 static const short P2090[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,3,4,5,6};
 static const signed char FI2090[] = {1,2,2,2,1};
 static const signed char FO2090[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-static const short PR2090[] = {-1,0,0,0,-1};
+static const short PR2090[] = {280,82,82,82,38};
+static const short PO2090[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,63};
 static const char* const L2091[] = {
 	"Six sequencers in one module, each drawing a voltage sequence and a gate sequence of up to 32 steps, with its own length, clock and pair of outputs",
 	"Selects that sequencer for editing, so the display draws its voltage and gate steps",
@@ -48548,7 +48768,7 @@ static const short O2091[] = {-1,-1,6,6,6,6,6,6,7,7,7,7,7,7};
 static const short P2091[] = {-1,2,2,2,2,2,2,-1,1,1,1,1,1,1};
 static const signed char FI2091[] = {-1,2,2,2,2,2,2,2,2};
 static const signed char FO2091[] = {-1,-1,1,1,1,1,1,1,2,2,2,2,2,2};
-static const short PR2091[] = {-1,0,0,0,0,0,0,0,0};
+static const short PR2091[] = {-1,82,82,289,289,289,289,289,289};
 static const short PO2091[] = {-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0};
 static const char* const L2092[] = {
 	"Sixteen sequencers in one module, each drawing a voltage sequence and a gate sequence of up to 32 steps, with all sixteen reaching the outside on polyphonic cables",
@@ -48574,7 +48794,7 @@ static const short O2092[] = {5,6};
 static const short P2092[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 static const signed char FI2092[] = {2,1,2};
 static const signed char FO2092[] = {1,2};
-static const short PR2092[] = {-1,6,0};
+static const short PR2092[] = {53,290,82};
 static const short PO2092[] = {-1,0};
 static const char* const L2093[] = {
 	"Passes a sixteen-channel polyphonic gate signal through, dropping gates step by step at a probability set per channel and per step",
@@ -48591,7 +48811,8 @@ static const short I2093[] = {4,5,6};
 static const short O2093[] = {7};
 static const short P2093[] = {1,2,3};
 static const signed char FI2093[] = {-1,2,2};
-static const short PR2093[] = {-1,0,0};
+static const short PR2093[] = {63,82,82};
+static const short PO2093[] = {63};
 static const char* const L2094[] = {
 	"Granular sample player: short looping grains are spawned from one position in a loaded sample and pile up into a cloud",
 	"Sets how long each grain is, from a five hundredth of a second to half a second",
@@ -48624,7 +48845,7 @@ static const short O2094[] = {20,21};
 static const short P2094[] = {1,2,4,5,7,8,10,11,13,-1,15,19,17};
 static const signed char FI2094[] = {2,1,1,1,1,1,3};
 static const signed char FO2094[] = {0,0};
-static const short PR2094[] = {0,-1,6,6,6,6,1};
+static const short PR2094[] = {82,291,246,243,246,4,14};
 static const short PO2094[] = {2,2};
 static const char* const L2095[] = {
 	"Gate sequencer driven by a cellular automaton: a drawn seed pattern runs Conway's rules one generation per clock, and a cell coming to life fires the trigger groups that mark it",
@@ -48641,7 +48862,7 @@ static const short O2095[] = {5,5,5,5,5,5,5,5};
 static const short P2095[] = {1,2,2,2,2,2,2,2,2};
 static const signed char FI2095[] = {2,2};
 static const signed char FO2095[] = {2,2,2,2,2,2,2,2};
-static const short PR2095[] = {0,0};
+static const short PR2095[] = {82,82};
 static const short PO2095[] = {0,0,0,0,0,0,0,0};
 static const char* const L2096[] = {
 	"Granular effect on incoming audio: the sound is written to a four second buffer and grains are cut from a position in it, moved by a built-in LFO or by CV",
@@ -48691,7 +48912,7 @@ static const short O2096[] = {23,24,38};
 static const short P2096[] = {8,9,25,26,11,12,22,14,16,18,5,6,-1,1,2,31,32,34,35,28,29,37};
 static const signed char FI2096[] = {1,1,1,1,2,-1,1,1,1,0,0,1,1,1,1};
 static const signed char FO2096[] = {0,0,1};
-static const short PR2096[] = {-1,22,6,-1,0,-1,-1,-1,6,2,2,6,6,6,6};
+static const short PR2096[] = {287,7,292,8,82,-1,8,293,280,8,8,80,80,80,280};
 static const short PO2096[] = {2,2,-1};
 static const char* const L2097[] = {
 	"Eight-track sample-based drum machine: sixteen steps per track, a knob per step for any of sixteen parameters, and sixteen memory slots holding whole patterns",
@@ -48747,7 +48968,7 @@ static const short O2097[] = {26,27,28,29,28,29,28,29,28,29,28,29,28,29,28,29,28
 static const short P2097[] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,-1,-1,-1,-1,-1,-1,-1,-1,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,20,21,22};
 static const signed char FI2097[] = {2,2,1};
 static const signed char FO2097[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR2097[] = {0,0,6};
+static const short PR2097[] = {82,82,280};
 static const short PO2097[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L2098[] = {
 	"Bouncing-ball sequencer: eight columns, each with a ball that travels up and down its column one row per clock and fires a trigger at the end of its travel",
@@ -48763,7 +48984,7 @@ static const short I2098[] = {1,2};
 static const short O2098[] = {3,3,3,3,3,3,3,3};
 static const signed char FI2098[] = {2,2};
 static const signed char FO2098[] = {2,2,2,2,2,2,2,2};
-static const short PR2098[] = {0,0};
+static const short PR2098[] = {82,82};
 static const short PO2098[] = {0,0,0,0,0,0,0,0};
 static const char* const L2099[] = {
 	"Eight-track sample player driven over OSC: another program loads the files and sets volume, pitch and triggers, and the tracks are time-stretched to a master clock",
@@ -48785,7 +49006,7 @@ static const short I2099[] = {3,1,2};
 static const short O2099[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,4,5,6,7,8};
 static const signed char FI2099[] = {2,2,2};
 static const signed char FO2099[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,2};
-static const short PR2099[] = {0,0,0};
+static const short PR2099[] = {5,5,5};
 static const short PO2099[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,2,2,2,0};
 static const char* const L2100[] = {
 	"Plays one loaded WAV file over and over, with a volume slider and a stereo pair of outputs",
@@ -48804,7 +49025,7 @@ static const short O2100[] = {3,4};
 static const short P2100[] = {1};
 static const signed char FI2100[] = {2};
 static const signed char FO2100[] = {0,0};
-static const short PR2100[] = {0};
+static const short PR2100[] = {82};
 static const short PO2100[] = {2,2};
 static const char* const L2101[] = {
 	"Word player holding ten banks of spoken words, with the bank and the word chosen by knob or CV and a word spoken on each trigger",
@@ -48829,7 +49050,7 @@ static const short O2101[] = {9,10};
 static const short P2101[] = {3,4,1,2};
 static const signed char FI2101[] = {2,1,1,1};
 static const signed char FO2101[] = {0,0};
-static const short PR2101[] = {0,6,-1,21};
+static const short PR2101[] = {82,243,294,12};
 static const short PO2101[] = {2,2};
 static const char* const L2102[] = {
 	"Puts out a trigger or a gate when the voltage at CV IN matches a chosen note",
@@ -48848,7 +49069,7 @@ static const short O2102[] = {5};
 static const short P2102[] = {1,2};
 static const signed char FI2102[] = {3,2};
 static const signed char FO2102[] = {2};
-static const short PR2102[] = {2,0};
+static const short PR2102[] = {14,82};
 static const short PO2102[] = {0};
 static const char* const L2103[] = {
 	"CV sequencer that reads its sequences from a text file, one comma-separated line of voltages per sequence",
@@ -48872,7 +49093,7 @@ static const short O2103[] = {11,12};
 static const short P2103[] = {3,4,5,10};
 static const signed char FI2103[] = {2,2,2,2,2,1};
 static const signed char FO2103[] = {1,2};
-static const short PR2103[] = {0,0,0,0,0,21};
+static const short PR2103[] = {82,82,82,82,82,179};
 static const short PO2103[] = {-1,0};
 static const char* const L2104[] = {
 	"Gate sequencer that reads its patterns from a text file, one line of ones and zeros per sequence",
@@ -48896,7 +49117,7 @@ static const short O2104[] = {11,12};
 static const short P2104[] = {3,4,5,10};
 static const signed char FI2104[] = {2,2,2,2,2,1};
 static const signed char FO2104[] = {2,2};
-static const short PR2104[] = {0,0,0,0,0,21};
+static const short PR2104[] = {82,82,82,82,82,179};
 static const short PO2104[] = {0,0};
 static const char* const L2105[] = {
 	"Stuttering sample player: a fast clock restarts one of five loaded samples from a chosen position, so the sample skips and repeats",
@@ -48925,7 +49146,7 @@ static const short O2105[] = {14,15};
 static const short P2105[] = {1,2,3,4,5,6,7,-1,8};
 static const signed char FI2105[] = {2,1,1,1,3};
 static const signed char FO2105[] = {0,2};
-static const short PR2105[] = {0,6,6,6,1};
+static const short PR2105[] = {82,79,243,243,14};
 static const short PO2105[] = {2,0};
 static const char* const L2106[] = {
 	"Plays sixteen loaded WAV files, each fired by one channel of a polyphonic trigger input, and mixes them to one stereo pair",
@@ -48941,7 +49162,7 @@ static const short I2106[] = {1};
 static const short O2106[] = {2,3};
 static const signed char FI2106[] = {2};
 static const signed char FO2106[] = {0,0};
-static const short PR2106[] = {0};
+static const short PR2106[] = {53};
 static const short PO2106[] = {2,2};
 static const char* const L2107[] = {
 	"Eight stereo sample players in one module, each with its own trigger, start position, level, pan, on switch and pair of outputs, plus a stereo mix",
@@ -48964,7 +49185,7 @@ static const short O2107[] = {6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,8,9};
 static const short P2107[] = {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,5,5,5,5,5,5,5,5};
 static const signed char FI2107[] = {2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1};
 static const signed char FO2107[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static const short PR2107[] = {0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6};
+static const short PR2107[] = {82,82,82,82,82,82,82,82,4,4,4,4,4,4,4,4};
 static const short PO2107[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 static const char* const L2108[] = {
 	"Audio mangler: incoming sound is written to a short buffer and read back through one of fourteen glitching effects, among them bit-crushing bytebeat equations, delays, slice repeats and wave folding",
@@ -48990,7 +49211,7 @@ static const short O2108[] = {13,14};
 static const short P2108[] = {-1,2,3,1,4,5};
 static const signed char FI2108[] = {0,0,1,1,1,1,1};
 static const signed char FO2108[] = {0,0};
-static const short PR2108[] = {2,2,-1,-1,-1,-1,-1};
+static const short PR2108[] = {8,8,295,280,80,80,80};
 static const short PO2108[] = {2,2};
 static const char* const L2109[] = {
 	"Blank panel carrying the Satanonaut artwork, with no controls and no jacks",
@@ -49052,7 +49273,7 @@ static const short O2111[] = {9,10,11};
 static const short P2111[] = {1,2,3};
 static const signed char FI2111[] = {1,1,1,1,1};
 static const signed char FO2111[] = {1,1,1};
-static const short PR2111[] = {-1,-1,-1,21,21};
+static const short PR2111[] = {8,8,8,12,12};
 static const short PO2111[] = {21,21,21};
 static const char* const L2112[] = {
 	"Sample player holding every WAV file in a chosen folder, with one of them selected by knob or CV",
@@ -49076,7 +49297,7 @@ static const short O2112[] = {7,8,9};
 static const short P2112[] = {1,2,3};
 static const signed char FI2112[] = {2,1,3};
 static const signed char FO2112[] = {0,0};
-static const short PR2112[] = {0,6,1};
+static const short PR2112[] = {11,243,14};
 static const short PO2112[] = {2,2};
 static const char* const L2113[] = {
 	"Sample player for a folder of WAV files, playing every channel of a multi-channel file at once through a polyphonic output",
@@ -49123,7 +49344,7 @@ static const short O2113[] = {29,30,31,32};
 static const short P2113[] = {13,14,11,7,9,1,16,17,19,20,22,23,25,26,3,5,28};
 static const signed char FI2113[] = {2,1,1,3,2,2,1,1,1,1,1};
 static const signed char FO2113[] = {0,0,0,2};
-static const short PR2113[] = {0,6,-1,1,0,0,6,6,6,6,-1};
+static const short PR2113[] = {82,243,83,23,82,82,79,79,79,79,5};
 static const short PO2113[] = {3,2,3,0};
 static const char* const L2114[] = {
 	"X/Y pad: drag in the grid to put out a pair of voltages, and the gesture is recorded and played back a step per clock",
@@ -49143,7 +49364,7 @@ static const short O2114[] = {5,6};
 static const short P2114[] = {1,2};
 static const signed char FI2114[] = {2,2};
 static const signed char FO2114[] = {1,1};
-static const short PR2114[] = {0,0};
+static const short PR2114[] = {82,82};
 
 /** Sorted by plugin then model, so it can be searched rather than walked. */
 const HelpEntry HELP[] = {
@@ -49230,10 +49451,10 @@ const HelpEntry HELP[] = {
 	{"AmalgamatedHarmonics", "Generative", L80, 31, I80, 8, O80, 5, P80, 14, FI80, 8, FO80, 5, PR80, 8, PO80, 5},
 	{"AmalgamatedHarmonics", "Imp", L81, 12, I81, 1, O81, 1, P81, 6, FI81, 1, FO81, 1, PR81, 1, PO81, 1},
 	{"AmalgamatedHarmonics", "Imperfect2", L82, 14, I82, 20, O82, 4, P82, 20, FI82, 20, FO82, 4, PR82, 20, PO82, 4},
-	{"AmalgamatedHarmonics", "MuxDeMux", L83, 8, I83, 18, O83, 18, P83, 1, FI83, 18, NULL, 0, NULL, 0, NULL, 0},
-	{"AmalgamatedHarmonics", "PolyProbe", L84, 4, I84, 2, O84, 1, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
-	{"AmalgamatedHarmonics", "PolyScope", L85, 10, I85, 1, NULL, 0, P85, 4, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
-	{"AmalgamatedHarmonics", "PolyUtils", L86, 8, I86, 2, O86, 3, P86, 2, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
+	{"AmalgamatedHarmonics", "MuxDeMux", L83, 8, I83, 18, O83, 18, P83, 1, FI83, 18, NULL, 0, PR83, 18, NULL, 0},
+	{"AmalgamatedHarmonics", "PolyProbe", L84, 4, I84, 2, O84, 1, NULL, 0, NULL, 0, NULL, 0, PR84, 2, NULL, 0},
+	{"AmalgamatedHarmonics", "PolyScope", L85, 10, I85, 1, NULL, 0, P85, 4, NULL, 0, NULL, 0, PR85, 1, NULL, 0},
+	{"AmalgamatedHarmonics", "PolyUtils", L86, 8, I86, 2, O86, 3, P86, 2, NULL, 0, NULL, 0, PR86, 2, NULL, 0},
 	{"AmalgamatedHarmonics", "PolyVolt", L87, 5, NULL, 0, O87, 1, P87, 17, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
 	{"AmalgamatedHarmonics", "Progress", L88, 20, I88, 6, O88, 15, P88, 36, FI88, 6, FO88, 15, PR88, 6, PO88, 15},
 	{"AmalgamatedHarmonics", "Progress2", L89, 27, I89, 8, O89, 10, P89, 17, FI89, 8, FO89, 10, PR89, 8, PO89, 10},
@@ -49243,25 +49464,25 @@ const HelpEntry HELP[] = {
 	{"AmalgamatedHarmonics", "ScaleQuantizer2", L93, 13, I93, 19, O93, 16, P93, 11, FI93, 19, FO93, 16, PR93, 19, PO93, 16},
 	{"AnimatedCircuits", "ACFolding", L94, 12, I94, 3, O94, 1, P94, 7, FI94, 3, FO94, 1, PR94, 3, PO94, 1},
 	{"AnimatedCircuits", "ACLFold", L95, 11, I95, 2, O95, 2, P95, 10, FI95, 2, FO95, 1, PR95, 2, NULL, 0},
-	{"AudibleInstruments", "Blinds", L96, 7, I96, 8, O96, 4, P96, 8, FI96, 8, NULL, 0, NULL, 0, NULL, 0},
+	{"AudibleInstruments", "Blinds", L96, 7, I96, 8, O96, 4, P96, 8, FI96, 8, NULL, 0, PR96, 8, NULL, 0},
 	{"AudibleInstruments", "Braids", L97, 21, I97, 5, O97, 1, P97, 7, FI97, 5, FO97, 1, PR97, 5, PO97, 1},
 	{"AudibleInstruments", "Branches", L98, 10, I98, 4, O98, 4, P98, 4, FI98, 4, FO98, 4, PR98, 4, PO98, 4},
 	{"AudibleInstruments", "Clouds", L99, 31, I99, 10, O99, 2, P99, 13, FI99, 10, FO99, 2, PR99, 10, PO99, 2},
 	{"AudibleInstruments", "Elements", L100, 50, I100, 16, O100, 2, P100, 28, FI100, 16, FO100, 2, PR100, 16, PO100, 2},
-	{"AudibleInstruments", "Frames", L101, 25, I101, 6, O101, 6, P101, 9, FI101, 6, NULL, 0, NULL, 0, NULL, 0},
+	{"AudibleInstruments", "Frames", L101, 25, I101, 6, O101, 6, P101, 9, FI101, 6, NULL, 0, PR101, 6, NULL, 0},
 	{"AudibleInstruments", "Kinks", L102, 14, I102, 5, O102, 7, NULL, 0, FI102, 5, FO102, 7, PR102, 5, PO102, 7},
-	{"AudibleInstruments", "Links", L103, 9, I103, 6, O103, 6, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
+	{"AudibleInstruments", "Links", L103, 9, I103, 6, O103, 6, NULL, 0, NULL, 0, NULL, 0, PR103, 6, NULL, 0},
 	{"AudibleInstruments", "Marbles", L104, 37, I104, 9, O104, 7, P104, 15, FI104, 9, FO104, 7, PR104, 9, PO104, 7},
 	{"AudibleInstruments", "Plaits", L105, 28, I105, 8, O105, 2, P105, 11, FI105, 8, FO105, 2, PR105, 8, PO105, 2},
 	{"AudibleInstruments", "Rings", L106, 28, I106, 8, O106, 2, P106, 12, FI106, 8, FO106, 2, PR106, 8, PO106, 2},
 	{"AudibleInstruments", "Ripples", L107, 14, I107, 5, O107, 4, P107, 3, FI107, 5, FO107, 4, PR107, 5, PO107, 4},
-	{"AudibleInstruments", "Shades", L108, 6, I108, 3, O108, 3, P108, 6, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
+	{"AudibleInstruments", "Shades", L108, 6, I108, 3, O108, 3, P108, 6, NULL, 0, NULL, 0, PR108, 3, NULL, 0},
 	{"AudibleInstruments", "Shelves", L109, 33, I109, 13, O109, 7, P109, 10, FI109, 13, FO109, 7, PR109, 13, PO109, 7},
 	{"AudibleInstruments", "Stages", L110, 11, I110, 12, O110, 6, P110, 18, FI110, 12, FO110, 6, PR110, 12, NULL, 0},
 	{"AudibleInstruments", "Streams", L111, 16, I111, 6, O111, 2, P111, 11, FI111, 6, FO111, 2, PR111, 6, PO111, 2},
 	{"AudibleInstruments", "Tides", L112, 23, I112, 9, O112, 4, P112, 7, FI112, 9, FO112, 4, PR112, 9, PO112, 4},
 	{"AudibleInstruments", "Tides2", L113, 25, I113, 8, O113, 4, P113, 13, FI113, 8, FO113, 4, PR113, 8, NULL, 0},
-	{"AudibleInstruments", "Veils", L114, 7, I114, 8, O114, 4, P114, 8, FI114, 8, NULL, 0, NULL, 0, NULL, 0},
+	{"AudibleInstruments", "Veils", L114, 7, I114, 8, O114, 4, P114, 8, FI114, 8, NULL, 0, PR114, 8, NULL, 0},
 	{"AudibleInstruments", "Warps", L115, 18, I115, 6, O115, 2, P115, 5, FI115, 6, FO115, 2, PR115, 6, PO115, 2},
 	{"Autodafe-DrumKit", "DrumsClaps", L116, 6, I116, 1, O116, 1, P116, 1, FI116, 1, FO116, 1, PR116, 1, PO116, 1},
 	{"Autodafe-DrumKit", "DrumsCymbals", L117, 6, I117, 1, O117, 1, P117, 1, FI117, 1, FO117, 1, PR117, 1, PO117, 1},
@@ -49492,8 +49713,8 @@ const HelpEntry HELP[] = {
 	{"Bogaudio", "Bogaudio-Walk2", L342, 15, I342, 7, O342, 3, P342, 7, FI342, 7, FO342, 3, PR342, 7, PO342, 3},
 	{"Bogaudio", "Bogaudio-XCO", L343, 18, I343, 16, O343, 5, P343, 17, FI343, 16, FO343, 5, PR343, 16, PO343, 5},
 	{"Bogaudio", "Bogaudio-XFade", L344, 7, I344, 3, O344, 1, P344, 3, FI344, 1, NULL, 0, PR344, 3, NULL, 0},
-	{"CharredDesert", "CV", L345, 5, NULL, 0, O345, 2, P345, 4, NULL, 0, FO345, 2, NULL, 0, NULL, 0},
-	{"CharredDesert", "CVSequencer", L346, 6, I346, 5, O346, 1, P346, 4, FI346, 5, FO346, 1, PR346, 5, NULL, 0},
+	{"CharredDesert", "CV", L345, 5, NULL, 0, O345, 2, P345, 4, NULL, 0, FO345, 2, NULL, 0, PO345, 2},
+	{"CharredDesert", "CVSequencer", L346, 6, I346, 5, O346, 1, P346, 4, FI346, 5, FO346, 1, PR346, 5, PO346, 1},
 	{"CharredDesert", "Carbon", L347, 8, I347, 3, O347, 1, P347, 2, FI347, 3, FO347, 1, PR347, 3, PO347, 1},
 	{"CharredDesert", "DTMF", L348, 6, I348, 2, O348, 1, NULL, 0, FI348, 2, FO348, 1, PR348, 2, PO348, 1},
 	{"CharredDesert", "Eq", L349, 8, I349, 3, O349, 1, P349, 3, FI349, 3, FO349, 1, PR349, 3, PO349, 1},
@@ -49501,12 +49722,12 @@ const HelpEntry HELP[] = {
 	{"CharredDesert", "M", L351, 5, I351, 4, O351, 2, P351, 2, FI351, 4, FO351, 2, PR351, 4, PO351, 2},
 	{"CharredDesert", "Mixer", L352, 14, I352, 8, O352, 2, P352, 36, FI352, 8, FO352, 2, PR352, 8, PO352, 2},
 	{"CharredDesert", "MixerCV", L353, 33, I353, 62, O353, 12, P353, 46, FI353, 62, FO353, 12, PR353, 62, PO353, 12},
-	{"CharredDesert", "Noise", L354, 5, I354, 1, O354, 1, P354, 1, FI354, 1, FO354, 1, NULL, 0, PO354, 1},
-	{"CharredDesert", "Not", L355, 5, I355, 1, O355, 1, P355, 1, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
+	{"CharredDesert", "Noise", L354, 5, I354, 1, O354, 1, P354, 1, FI354, 1, FO354, 1, PR354, 1, PO354, 1},
+	{"CharredDesert", "Not", L355, 5, I355, 1, O355, 1, P355, 1, NULL, 0, NULL, 0, PR355, 1, NULL, 0},
 	{"CharredDesert", "Oscar2", L356, 18, I356, 12, O356, 1, P356, 13, FI356, 12, FO356, 1, PR356, 12, PO356, 1},
 	{"CharredDesert", "Pan", L357, 6, I357, 2, O357, 2, P357, 1, FI357, 2, FO357, 2, PR357, 2, PO357, 2},
-	{"CharredDesert", "Shift", L358, 7, I358, 2, O358, 1, P358, 2, FI358, 1, NULL, 0, NULL, 0, NULL, 0},
-	{"CharredDesert", "Tine", L359, 13, I359, 5, O359, 2, P359, 4, FI359, 5, NULL, 0, NULL, 0, NULL, 0},
+	{"CharredDesert", "Shift", L358, 7, I358, 2, O358, 1, P358, 2, FI358, 1, NULL, 0, PR358, 2, NULL, 0},
+	{"CharredDesert", "Tine", L359, 13, I359, 5, O359, 2, P359, 4, FI359, 5, NULL, 0, PR359, 5, NULL, 0},
 	{"CharredDesert", "Tsunami", L360, 9, I360, 17, O360, 10, P360, 17, FI360, 17, FO360, 10, PR360, 17, PO360, 10},
 	{"CharredDesert", "X", L361, 5, I361, 4, O361, 2, P361, 2, FI361, 4, FO361, 2, PR361, 4, PO361, 2},
 	{"Comfortzone", "kickbaba", L362, 19, I362, 3, O362, 5, P362, 8, FI362, 3, FO362, 5, PR362, 3, PO362, 5},
@@ -49525,32 +49746,32 @@ const HelpEntry HELP[] = {
 	{"Core", "Notes", L375, 2, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
 	{"CosineKitty-Sapphire", "Chaops", L376, 20, I376, 6, NULL, 0, P376, 10, FI376, 6, NULL, 0, PR376, 6, NULL, 0},
 	{"CosineKitty-Sapphire", "Echo", L377, 59, I377, 13, O377, 3, P377, 26, FI377, 13, FO377, 3, PR377, 13, PO377, 3},
-	{"CosineKitty-Sapphire", "EchoOut", L378, 13, I378, 2, O378, 2, P378, 4, FI378, 2, FO378, 2, NULL, 0, PO378, 2},
+	{"CosineKitty-Sapphire", "EchoOut", L378, 13, I378, 2, O378, 2, P378, 4, FI378, 2, FO378, 2, PR378, 2, PO378, 2},
 	{"CosineKitty-Sapphire", "EchoTap", L379, 32, I379, 7, O379, 3, P379, 15, FI379, 7, FO379, 3, PR379, 7, PO379, 3},
 	{"CosineKitty-Sapphire", "Elastika", L380, 43, I380, 10, O380, 2, P380, 21, FI380, 10, FO380, 2, PR380, 10, PO380, 2},
 	{"CosineKitty-Sapphire", "Empath", L381, 30, I381, 6, NULL, 0, P381, 16, FI381, 6, NULL, 0, PR381, 6, NULL, 0},
 	{"CosineKitty-Sapphire", "EmpathFilter", L382, 32, I382, 7, O382, 3, P382, 15, FI382, 7, FO382, 3, PR382, 7, PO382, 3},
-	{"CosineKitty-Sapphire", "EmpathOutput", L383, 16, I383, 2, O383, 2, P383, 7, FI383, 2, FO383, 2, NULL, 0, PO383, 2},
+	{"CosineKitty-Sapphire", "EmpathOutput", L383, 16, I383, 2, O383, 2, P383, 7, FI383, 2, FO383, 2, PR383, 2, PO383, 2},
 	{"CosineKitty-Sapphire", "Env", L384, 25, I384, 6, O384, 3, P384, 10, FI384, 6, FO384, 3, PR384, 6, PO384, 3},
-	{"CosineKitty-Sapphire", "Frolic", L385, 21, I385, 2, O385, 4, P385, 10, FI385, 2, FO385, 4, NULL, 0, NULL, 0},
+	{"CosineKitty-Sapphire", "Frolic", L385, 21, I385, 2, O385, 4, P385, 10, FI385, 2, FO385, 4, PR385, 2, PO385, 4},
 	{"CosineKitty-Sapphire", "Galaxy", L386, 29, I386, 8, O386, 2, P386, 13, FI386, 8, FO386, 2, PR386, 8, PO386, 2},
-	{"CosineKitty-Sapphire", "Glee", L387, 23, I387, 2, O387, 4, P387, 10, FI387, 2, FO387, 4, NULL, 0, NULL, 0},
+	{"CosineKitty-Sapphire", "Glee", L387, 23, I387, 2, O387, 4, P387, 10, FI387, 2, FO387, 4, PR387, 2, PO387, 4},
 	{"CosineKitty-Sapphire", "Gravy", L388, 28, I388, 6, O388, 2, P388, 12, FI388, 6, FO388, 2, PR388, 6, PO388, 2},
 	{"CosineKitty-Sapphire", "Hiss", L389, 3, NULL, 0, O389, 10, NULL, 0, NULL, 0, FO389, 10, NULL, 0, PO389, 10},
-	{"CosineKitty-Sapphire", "Lark", L390, 22, I390, 2, O390, 4, P390, 10, FI390, 2, FO390, 4, NULL, 0, NULL, 0},
-	{"CosineKitty-Sapphire", "Moots", L391, 8, I391, 10, O391, 5, P391, 5, FI391, 10, NULL, 0, PR391, 10, NULL, 0},
-	{"CosineKitty-Sapphire", "Nucleus", L392, 42, I392, 8, O392, 12, P392, 11, FI392, 8, NULL, 0, NULL, 0, NULL, 0},
-	{"CosineKitty-Sapphire", "Pivot", L393, 14, I393, 2, O393, 4, P393, 3, FI393, 2, FO393, 4, NULL, 0, NULL, 0},
-	{"CosineKitty-Sapphire", "Polynucleus", L394, 31, I394, 6, O394, 4, P394, 18, FI394, 6, NULL, 0, NULL, 0, NULL, 0},
+	{"CosineKitty-Sapphire", "Lark", L390, 22, I390, 2, O390, 4, P390, 10, FI390, 2, FO390, 4, PR390, 2, PO390, 4},
+	{"CosineKitty-Sapphire", "Moots", L391, 8, I391, 10, O391, 5, P391, 5, FI391, 10, NULL, 0, PR391, 10, PO391, 5},
+	{"CosineKitty-Sapphire", "Nucleus", L392, 42, I392, 8, O392, 12, P392, 11, FI392, 8, NULL, 0, PR392, 8, NULL, 0},
+	{"CosineKitty-Sapphire", "Pivot", L393, 14, I393, 2, O393, 4, P393, 3, FI393, 2, FO393, 4, PR393, 2, NULL, 0},
+	{"CosineKitty-Sapphire", "Polynucleus", L394, 31, I394, 6, O394, 4, P394, 18, FI394, 6, NULL, 0, PR394, 6, NULL, 0},
 	{"CosineKitty-Sapphire", "Pop", L395, 19, I395, 3, O395, 1, P395, 8, FI395, 3, FO395, 1, PR395, 3, PO395, 1},
-	{"CosineKitty-Sapphire", "Rotini", L396, 10, I396, 2, O396, 4, P396, 1, FI396, 2, FO396, 4, NULL, 0, NULL, 0},
+	{"CosineKitty-Sapphire", "Rotini", L396, 10, I396, 2, O396, 4, P396, 1, FI396, 2, FO396, 4, PR396, 2, NULL, 0},
 	{"CosineKitty-Sapphire", "Sauce", L397, 27, I397, 5, O397, 4, P397, 10, FI397, 5, FO397, 4, PR397, 5, PO397, 4},
-	{"CosineKitty-Sapphire", "SplitAddMerge", L398, 13, I398, 4, O398, 4, P398, 2, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
+	{"CosineKitty-Sapphire", "SplitAddMerge", L398, 13, I398, 4, O398, 4, P398, 2, NULL, 0, NULL, 0, PR398, 4, NULL, 0},
 	{"CosineKitty-Sapphire", "Tin", L399, 14, I399, 6, NULL, 0, P399, 3, FI399, 6, NULL, 0, PR399, 6, NULL, 0},
-	{"CosineKitty-Sapphire", "Tout", L400, 15, I400, 1, O400, 5, P400, 3, FI400, 1, FO400, 5, NULL, 0, PO400, 5},
+	{"CosineKitty-Sapphire", "Tout", L400, 15, I400, 1, O400, 5, P400, 3, FI400, 1, FO400, 5, PR400, 1, PO400, 5},
 	{"CosineKitty-Sapphire", "Tricorder", L401, 9, NULL, 0, NULL, 0, P401, 3, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
 	{"CosineKitty-Sapphire", "TubeUnit", L402, 38, I402, 11, O402, 2, P402, 17, FI402, 11, FO402, 2, PR402, 11, PO402, 2},
-	{"CosineKitty-Sapphire", "Zoo", L403, 29, I403, 2, O403, 4, P403, 10, FI403, 2, FO403, 4, NULL, 0, NULL, 0},
+	{"CosineKitty-Sapphire", "Zoo", L403, 29, I403, 2, O403, 4, P403, 10, FI403, 2, FO403, 4, PR403, 2, PO403, 4},
 	{"CountModula", "AnalogueShiftRegister", L404, 6, I404, 4, O404, 8, NULL, 0, FI404, 4, FO404, 8, PR404, 4, NULL, 0},
 	{"CountModula", "Arpeggiator", L405, 22, I405, 5, O405, 3, P405, 7, FI405, 5, FO405, 3, PR405, 5, PO405, 3},
 	{"CountModula", "Attenuator", L406, 8, I406, 2, O406, 2, P406, 3, NULL, 0, NULL, 0, PR406, 2, NULL, 0},
@@ -49775,8 +49996,8 @@ const HelpEntry HELP[] = {
 	{"FehlerFabrik-Suite", "Aspect", L625, 11, I625, 2, O625, 14, NULL, 0, FI625, 2, FO625, 14, PR625, 2, PO625, 14},
 	{"FehlerFabrik-Suite", "Botzinger", L626, 16, I626, 28, O626, 9, P626, 27, FI626, 28, FO626, 9, PR626, 28, PO626, 9},
 	{"FehlerFabrik-Suite", "Chi", L627, 16, I627, 6, O627, 4, P627, 8, FI627, 6, FO627, 4, PR627, 6, PO627, 4},
-	{"FehlerFabrik-Suite", "Fax", L628, 23, I628, 7, O628, 1, P628, 11, FI628, 7, FO628, 1, PR628, 7, NULL, 0},
-	{"FehlerFabrik-Suite", "Lilt", L629, 9, I629, 2, O629, 3, P629, 3, FI629, 2, FO629, 3, NULL, 0, PO629, 3},
+	{"FehlerFabrik-Suite", "Fax", L628, 23, I628, 7, O628, 1, P628, 11, FI628, 7, FO628, 1, PR628, 7, PO628, 1},
+	{"FehlerFabrik-Suite", "Lilt", L629, 9, I629, 2, O629, 3, P629, 3, FI629, 2, FO629, 3, PR629, 2, PO629, 3},
 	{"FehlerFabrik-Suite", "Luigi", L630, 9, I630, 3, O630, 3, P630, 2, FI630, 3, FO630, 3, PR630, 3, PO630, 3},
 	{"FehlerFabrik-Suite", "Monte", L631, 12, I631, 12, O631, 9, P631, 10, FI631, 12, FO631, 9, PR631, 12, PO631, 9},
 	{"FehlerFabrik-Suite", "Nova", L632, 25, I632, 14, O632, 9, P632, 47, FI632, 14, FO632, 9, PR632, 14, PO632, 9},
@@ -49784,7 +50005,7 @@ const HelpEntry HELP[] = {
 	{"FehlerFabrik-Suite", "Planck", L634, 9, I634, 4, O634, 2, P634, 2, FI634, 4, FO634, 2, PR634, 4, PO634, 2},
 	{"FehlerFabrik-Suite", "Rasoir", L635, 29, I635, 11, O635, 3, P635, 20, FI635, 11, FO635, 3, PR635, 11, PO635, 3},
 	{"FehlerFabrik-Suite", "Shaney", L636, 8, I636, 10, O636, 8, P636, 64, FI636, 10, FO636, 8, PR636, 10, PO636, 8},
-	{"FehlerFabrik-Suite", "Sigma", L637, 10, I637, 1, O637, 8, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
+	{"FehlerFabrik-Suite", "Sigma", L637, 10, I637, 1, O637, 8, NULL, 0, NULL, 0, NULL, 0, PR637, 1, PO637, 8},
 	{"FrankBuss", "Formula", L638, 17, I638, 4, O638, 1, P638, 8, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
 	{"FrankBuss", "Shaker", L639, 9, I639, 5, NULL, 0, P639, 1, FI639, 5, NULL, 0, NULL, 0, NULL, 0},
 	{"FrequencyDomain", "BallOfConfusion", L640, 35, I640, 13, O640, 1, P640, 14, FI640, 13, FO640, 1, PR640, 13, PO640, 1},
@@ -50152,10 +50373,10 @@ const HelpEntry HELP[] = {
 	{"LifeFormModular", "PitchIntegrator", L1002, 17, I1002, 13, O1002, 1, P1002, 16, FI1002, 13, FO1002, 1, PR1002, 13, PO1002, 1},
 	{"LifeFormModular", "QuadModulator", L1003, 18, I1003, 11, O1003, 14, P1003, 33, FI1003, 11, FO1003, 14, PR1003, 11, PO1003, 14},
 	{"LifeFormModular", "QuadSteppedOffset", L1004, 9, I1004, 8, O1004, 8, P1004, 12, FI1004, 8, FO1004, 8, PR1004, 8, PO1004, 8},
-	{"LifeFormModular", "QuadUtility", L1005, 9, I1005, 20, O1005, 12, P1005, 4, FI1005, 20, NULL, 0, NULL, 0, NULL, 0},
+	{"LifeFormModular", "QuadUtility", L1005, 9, I1005, 20, O1005, 12, P1005, 4, FI1005, 20, NULL, 0, PR1005, 20, NULL, 0},
 	{"LifeFormModular", "SequenceModeler", L1006, 19, I1006, 8, O1006, 14, P1006, 63, FI1006, 8, FO1006, 14, PR1006, 8, PO1006, 14},
 	{"LifeFormModular", "TimeDiktat", L1007, 19, NULL, 0, O1007, 12, P1007, 3, NULL, 0, FO1007, 12, NULL, 0, PO1007, 12},
-	{"LifeFormModular", "TimeExpansion", L1008, 18, I1008, 6, O1008, 12, P1008, 12, FI1008, 6, FO1008, 12, NULL, 0, PO1008, 12},
+	{"LifeFormModular", "TimeExpansion", L1008, 18, I1008, 6, O1008, 12, P1008, 12, FI1008, 6, FO1008, 12, PR1008, 6, PO1008, 12},
 	{"LifeFormModular", "TornArtery", L1009, 19, I1009, 5, O1009, 2, P1009, 12, FI1009, 5, FO1009, 1, PR1009, 5, PO1009, 1},
 	{"LilacLoop", "LoopMutator", L1010, 9, I1010, 4, O1010, 1, P1010, 3, FI1010, 4, FO1010, 1, PR1010, 4, PO1010, 1},
 	{"LilacLoop", "Looper", L1011, 21, I1011, 6, O1011, 2, P1011, 8, FI1011, 6, FO1011, 2, PR1011, 6, PO1011, 2},
@@ -50208,20 +50429,20 @@ const HelpEntry HELP[] = {
 	{"MSM", "ADSR", L1058, 18, I1058, 7, O1058, 6, P1058, 7, FI1058, 7, FO1058, 6, PR1058, 7, PO1058, 6},
 	{"MSM", "Bitcrusher", L1059, 7, I1059, 2, O1059, 1, P1059, 3, FI1059, 2, FO1059, 1, PR1059, 2, PO1059, 1},
 	{"MSM", "BlankPanel", L1060, 2, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
-	{"MSM", "CrazyMult", L1061, 8, I1061, 16, O1061, 16, P1061, 8, FI1061, 16, NULL, 0, NULL, 0, NULL, 0},
+	{"MSM", "CrazyMult", L1061, 8, I1061, 16, O1061, 16, P1061, 8, FI1061, 16, NULL, 0, PR1061, 16, NULL, 0},
 	{"MSM", "DualDelay", L1062, 22, I1062, 17, O1062, 4, P1062, 18, FI1062, 17, FO1062, 4, PR1062, 17, PO1062, 4},
-	{"MSM", "Fade", L1063, 15, I1063, 7, O1063, 3, P1063, 3, FI1063, 7, NULL, 0, NULL, 0, NULL, 0},
+	{"MSM", "Fade", L1063, 15, I1063, 7, O1063, 3, P1063, 3, FI1063, 7, NULL, 0, PR1063, 7, NULL, 0},
 	{"MSM", "MLFO", L1064, 20, I1064, 8, O1064, 12, P1064, 15, FI1064, 8, FO1064, 12, PR1064, 8, NULL, 0},
-	{"MSM", "Morph", L1065, 6, I1065, 9, O1065, 1, P1065, 2, FI1065, 9, NULL, 0, NULL, 0, NULL, 0},
-	{"MSM", "Mult", L1066, 5, I1066, 6, O1066, 18, P1066, 3, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
-	{"MSM", "Noise", L1067, 8, I1067, 1, O1067, 2, P1067, 4, FI1067, 1, FO1067, 2, NULL, 0, PO1067, 2},
+	{"MSM", "Morph", L1065, 6, I1065, 9, O1065, 1, P1065, 2, FI1065, 9, NULL, 0, PR1065, 9, NULL, 0},
+	{"MSM", "Mult", L1066, 5, I1066, 6, O1066, 18, P1066, 3, NULL, 0, NULL, 0, PR1066, 6, NULL, 0},
+	{"MSM", "Noise", L1067, 8, I1067, 1, O1067, 2, P1067, 4, FI1067, 1, FO1067, 2, PR1067, 1, PO1067, 2},
 	{"MSM", "OSCiX", L1068, 39, I1068, 20, O1068, 8, P1068, 31, FI1068, 20, FO1068, 8, PR1068, 20, PO1068, 8},
 	{"MSM", "PAN-VCA", L1069, 15, I1069, 6, O1069, 6, P1069, 6, FI1069, 6, FO1069, 6, PR1069, 6, PO1069, 6},
 	{"MSM", "Phaser", L1070, 15, I1070, 4, O1070, 1, P1070, 9, FI1070, 4, FO1070, 1, PR1070, 4, PO1070, 1},
 	{"MSM", "RandomSource", L1071, 13, I1071, 4, O1071, 2, P1071, 5, FI1071, 4, FO1071, 2, PR1071, 4, NULL, 0},
 	{"MSM", "Ring", L1072, 6, I1072, 6, O1072, 2, P1072, 4, FI1072, 6, FO1072, 2, PR1072, 6, PO1072, 2},
 	{"MSM", "Rogue", L1073, 20, I1073, 5, O1073, 7, P1073, 7, FI1073, 5, FO1073, 7, PR1073, 5, PO1073, 7},
-	{"MSM", "SimpleSlider", L1074, 7, I1074, 3, O1074, 1, P1074, 2, FI1074, 3, NULL, 0, NULL, 0, NULL, 0},
+	{"MSM", "SimpleSlider", L1074, 7, I1074, 3, O1074, 1, P1074, 2, FI1074, 3, NULL, 0, PR1074, 3, NULL, 0},
 	{"MSM", "TreasureVCO", L1075, 18, I1075, 8, O1075, 1, P1075, 13, FI1075, 8, FO1075, 1, PR1075, 8, PO1075, 1},
 	{"MSM", "WaveShaper", L1076, 15, I1076, 7, O1076, 1, P1076, 8, FI1076, 7, FO1076, 1, PR1076, 7, PO1076, 1},
 	{"MSM", "Wavefolder", L1077, 17, I1077, 5, O1077, 1, P1077, 9, FI1077, 5, FO1077, 1, PR1077, 5, PO1077, 1},
@@ -50297,7 +50518,7 @@ const HelpEntry HELP[] = {
 	{"NANOModules", "CEQ", L1147, 9, I1147, 2, O1147, 2, P1147, 4, FI1147, 2, FO1147, 2, PR1147, 2, PO1147, 2},
 	{"NANOModules", "EXP4", L1148, 6, I1148, 6, O1148, 8, NULL, 0, FI1148, 6, FO1148, 8, PR1148, 6, PO1148, 8},
 	{"NANOModules", "FONT", L1149, 12, I1149, 4, O1149, 2, P1149, 4, FI1149, 4, FO1149, 2, PR1149, 4, PO1149, 2},
-	{"NANOModules", "MAR", L1150, 10, I1150, 8, O1150, 4, P1150, 5, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
+	{"NANOModules", "MAR", L1150, 10, I1150, 8, O1150, 4, P1150, 5, NULL, 0, NULL, 0, PR1150, 8, NULL, 0},
 	{"NANOModules", "OCTA", L1151, 25, I1151, 8, O1151, 6, P1151, 18, FI1151, 8, FO1151, 6, PR1151, 8, PO1151, 6},
 	{"NANOModules", "ONA", L1152, 20, I1152, 4, O1152, 8, P1152, 6, FI1152, 4, FO1152, 8, PR1152, 4, PO1152, 8},
 	{"NANOModules", "PerformanceMixer", L1153, 32, I1153, 22, O1153, 6, P1153, 27, FI1153, 22, FO1153, 6, PR1153, 22, PO1153, 6},
@@ -50411,7 +50632,7 @@ const HelpEntry HELP[] = {
 	{"NYSTHI", "STKPitchShifter", L1261, 11, I1261, 4, O1261, 2, P1261, 3, FI1261, 4, FO1261, 2, PR1261, 4, PO1261, 2},
 	{"NYSTHI", "ScalaQuantizer", L1262, 14, I1262, 15, O1262, 12, P1262, 4, FI1262, 15, FO1262, 12, PR1262, 15, PO1262, 12},
 	{"NYSTHI", "ScaleOffset", L1263, 12, I1263, 4, O1263, 2, P1263, 4, FI1263, 4, FO1263, 2, PR1263, 4, NULL, 0},
-	{"NYSTHI", "SevenSeas", L1264, 36, I1264, 11, O1264, 2, P1264, 19, FI1264, 11, FO1264, 2, PR1264, 11, PO1264, 2},
+	{"NYSTHI", "SevenSeas", L1264, 36, I1264, 11, O1264, 2, P1264, 19, FI1264, 11, FO1264, 2, PR1264, 13, PO1264, 2},
 	{"NYSTHI", "SimplerFileControlExpander", L1265, 9, I1265, 4, NULL, 0, P1265, 3, FI1265, 4, NULL, 0, PR1265, 4, NULL, 0},
 	{"NYSTHI", "SimplerTapeControl", L1266, 35, I1266, 16, O1266, 3, P1266, 9, FI1266, 16, FO1266, 3, PR1266, 16, PO1266, 3},
 	{"NYSTHI", "Simpliciter", L1267, 93, I1267, 27, O1267, 6, P1267, 40, FI1267, 27, FO1267, 6, PR1267, 27, PO1267, 6},
@@ -50482,7 +50703,7 @@ const HelpEntry HELP[] = {
 	{"PathSet", "Nudge", L1332, 21, I1332, 10, O1332, 5, P1332, 11, FI1332, 10, FO1332, 5, PR1332, 10, NULL, 0},
 	{"PathSet", "OneShot", L1333, 18, I1333, 4, O1333, 4, P1333, 9, FI1333, 4, FO1333, 4, PR1333, 4, PO1333, 4},
 	{"PathSet", "PlusPane", L1334, 16, I1334, 24, O1334, 24, P1334, 16, FI1334, 24, FO1334, 24, PR1334, 24, NULL, 0},
-	{"PathSet", "ShiftyExpander", L1335, 15, I1335, 18, NULL, 0, P1335, 18, FI1335, 18, NULL, 0, NULL, 0, NULL, 0},
+	{"PathSet", "ShiftyExpander", L1335, 15, I1335, 18, NULL, 0, P1335, 18, FI1335, 18, NULL, 0, PR1335, 18, NULL, 0},
 	{"PathSet", "ShiftyMod", L1336, 14, I1336, 9, O1336, 7, P1336, 25, FI1336, 9, FO1336, 7, PR1336, 9, PO1336, 7},
 	{"PathSet-Infinity", "Orchestrator", L1337, 24, I1337, 11, O1337, 25, P1337, 85, FI1337, 11, FO1337, 25, PR1337, 11, NULL, 0},
 	{"PathSet-Infinity", "QuantumCompass", L1338, 42, I1338, 8, O1338, 6, P1338, 31, FI1338, 8, FO1338, 6, PR1338, 8, PO1338, 6},
@@ -51049,25 +51270,25 @@ const HelpEntry HELP[] = {
 	{"cf", "trSEQ", L1899, 16, I1899, 22, O1899, 1, P1899, 37, FI1899, 22, FO1899, 1, PR1899, 22, PO1899, 1},
 	{"computerscare", "computerscare-blank", L1900, 15, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
 	{"computerscare", "computerscare-blank-expander", L1901, 12, I1901, 3, O1901, 2, P1901, 4, FI1901, 3, FO1901, 2, PR1901, 3, PO1901, 2},
-	{"computerscare", "computerscare-bolyputtons", L1902, 9, I1902, 3, O1902, 1, P1902, 17, FI1902, 3, FO1902, 1, NULL, 0, NULL, 0},
+	{"computerscare", "computerscare-bolyputtons", L1902, 9, I1902, 3, O1902, 1, P1902, 17, FI1902, 3, FO1902, 1, PR1902, 3, NULL, 0},
 	{"computerscare", "computerscare-debug", L1903, 18, I1903, 3, O1903, 1, P1903, 6, FI1903, 3, FO1903, 1, PR1903, 3, NULL, 0},
 	{"computerscare", "computerscare-fatherandson", L1904, 17, I1904, 13, O1904, 10, P1904, 105, FI1904, 13, NULL, 0, PR1904, 13, NULL, 0},
-	{"computerscare", "computerscare-foly-pace", L1905, 6, I1905, 1, NULL, 0, P1905, 4, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
+	{"computerscare", "computerscare-foly-pace", L1905, 6, I1905, 1, NULL, 0, P1905, 4, NULL, 0, NULL, 0, PR1905, 1, NULL, 0},
 	{"computerscare", "computerscare-goly-penerator", L1906, 10, NULL, 0, O1906, 1, P1906, 6, NULL, 0, FO1906, 1, NULL, 0, NULL, 0},
 	{"computerscare", "computerscare-horse-a-doodle-doo", L1907, 28, I1907, 5, O1907, 4, P1907, 15, FI1907, 5, FO1907, 4, PR1907, 5, PO1907, 4},
-	{"computerscare", "computerscare-i-love-cookies", L1908, 19, I1908, 40, O1908, 12, P1908, 34, FI1908, 14, FO1908, 12, PR1908, 14, PO1908, 12},
+	{"computerscare", "computerscare-i-love-cookies", L1908, 19, I1908, 40, O1908, 12, P1908, 34, FI1908, 14, FO1908, 12, PR1908, 40, PO1908, 12},
 	{"computerscare", "computerscare-knolypobs", L1909, 7, NULL, 0, O1909, 1, P1909, 35, NULL, 0, FO1909, 1, NULL, 0, NULL, 0},
 	{"computerscare", "computerscare-laundry-soup", L1910, 17, I1910, 14, O1910, 12, P1910, 8, FI1910, 14, FO1910, 12, PR1910, 14, PO1910, 12},
-	{"computerscare", "computerscare-mely-porge", L1911, 14, I1911, 17, O1911, 1, P1911, 35, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
-	{"computerscare", "computerscare-moly-patrix", L1912, 19, I1912, 6, O1912, 1, P1912, 293, FI1912, 6, NULL, 0, NULL, 0, NULL, 0},
-	{"computerscare", "computerscare-ohpeas", L1913, 17, I1913, 12, O1913, 8, P1913, 18, FI1913, 12, FO1913, 8, NULL, 0, PO1913, 8},
+	{"computerscare", "computerscare-mely-porge", L1911, 14, I1911, 17, O1911, 1, P1911, 35, NULL, 0, NULL, 0, PR1911, 17, NULL, 0},
+	{"computerscare", "computerscare-moly-patrix", L1912, 19, I1912, 6, O1912, 1, P1912, 293, FI1912, 6, NULL, 0, PR1912, 6, NULL, 0},
+	{"computerscare", "computerscare-ohpeas", L1913, 17, I1913, 12, O1913, 8, P1913, 18, FI1913, 12, FO1913, 8, PR1913, 12, PO1913, 8},
 	{"computerscare", "computerscare-portaloof", L1914, 32, I1914, 22, NULL, 0, P1914, 32, FI1914, 22, NULL, 0, PR1914, 22, NULL, 0},
-	{"computerscare", "computerscare-roly-pouter", L1915, 8, I1915, 2, O1915, 1, P1915, 17, FI1915, 2, NULL, 0, NULL, 0, NULL, 0},
+	{"computerscare", "computerscare-roly-pouter", L1915, 8, I1915, 2, O1915, 1, P1915, 17, FI1915, 2, NULL, 0, PR1915, 2, NULL, 0},
 	{"computerscare", "computerscare-sloly-pit", L1916, 17, I1916, 2, O1916, 16, P1916, 1, FI1916, 2, NULL, 0, PR1916, 2, NULL, 0},
 	{"computerscare", "computerscare-soly-pequencer", L1917, 9, I1917, 3, O1917, 2, P1917, 6, FI1917, 3, FO1917, 2, PR1917, 3, PO1917, 2},
-	{"computerscare", "computerscare-stoly-fick-pigure", L1918, 6, I1918, 1, NULL, 0, P1918, 4, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
-	{"computerscare", "computerscare-toly-pools", L1919, 8, I1919, 3, O1919, 2, P1919, 2, FI1919, 3, FO1919, 2, NULL, 0, NULL, 0},
-	{"computerscare", "computerscare-toly-pools-v2", L1920, 9, I1920, 3, O1920, 2, P1920, 2, FI1920, 3, FO1920, 2, NULL, 0, NULL, 0},
+	{"computerscare", "computerscare-stoly-fick-pigure", L1918, 6, I1918, 1, NULL, 0, P1918, 4, NULL, 0, NULL, 0, PR1918, 1, NULL, 0},
+	{"computerscare", "computerscare-toly-pools", L1919, 8, I1919, 3, O1919, 2, P1919, 2, FI1919, 3, FO1919, 2, PR1919, 3, PO1919, 2},
+	{"computerscare", "computerscare-toly-pools-v2", L1920, 9, I1920, 3, O1920, 2, P1920, 2, FI1920, 3, FO1920, 2, PR1920, 3, PO1920, 2},
 	{"dBiz", "Bench", L1921, 46, I1921, 15, O1921, 17, P1921, 18, FI1921, 9, FO1921, 17, PR1921, 15, NULL, 0},
 	{"dBiz", "Bene", L1922, 27, I1922, 10, O1922, 11, P1922, 38, FI1922, 10, FO1922, 11, PR1922, 10, PO1922, 11},
 	{"dBiz", "BenePads", L1923, 3, NULL, 0, NULL, 0, P1923, 16, NULL, 0, NULL, 0, NULL, 0, NULL, 0},
@@ -51232,15 +51453,15 @@ const HelpEntry HELP[] = {
 	{"voxglitch", "AutobreakStudio", L2082, 29, I2082, 10, O2082, 24, P2082, 18, FI2082, 10, FO2082, 24, PR2082, 10, PO2082, 24},
 	{"voxglitch", "GrainEngineMK2", L2083, 27, I2083, 9, O2083, 2, P2083, 14, FI2083, 9, FO2083, 2, PR2083, 9, PO2083, 2},
 	{"voxglitch", "GrainEngineMK2Expander", L2084, 13, I2084, 5, O2084, 2, P2084, 3, FI2084, 5, FO2084, 2, PR2084, 5, PO2084, 2},
-	{"voxglitch", "GrooveBoxExpander", L2085, 12, I2085, 8, O2085, 8, P2085, 40, FI2085, 8, FO2085, 8, NULL, 0, PO2085, 8},
+	{"voxglitch", "GrooveBoxExpander", L2085, 12, I2085, 8, O2085, 8, P2085, 40, FI2085, 8, FO2085, 8, PR2085, 8, PO2085, 8},
 	{"voxglitch", "arpseq", L2086, 32, I2086, 6, O2086, 6, P2086, 70, FI2086, 6, FO2086, 6, PR2086, 6, PO2086, 6},
 	{"voxglitch", "autobreak", L2087, 15, I2087, 6, O2087, 2, P2087, 2, FI2087, 6, FO2087, 2, PR2087, 6, PO2087, 2},
 	{"voxglitch", "bytebeat", L2088, 10, I2088, 5, O2088, 1, P2088, 8, FI2088, 5, FO2088, 1, PR2088, 5, PO2088, 1},
 	{"voxglitch", "cue_research", L2089, 26, I2089, 3, O2089, 34, P2089, 35, FI2089, 3, FO2089, 34, PR2089, 3, PO2089, 34},
-	{"voxglitch", "digitalprogrammer", L2090, 19, I2090, 5, O2090, 17, P2090, 29, FI2090, 5, FO2090, 17, PR2090, 5, NULL, 0},
+	{"voxglitch", "digitalprogrammer", L2090, 19, I2090, 5, O2090, 17, P2090, 29, FI2090, 5, FO2090, 17, PR2090, 5, PO2090, 17},
 	{"voxglitch", "digitalsequencer", L2091, 17, I2091, 9, O2091, 14, P2091, 14, FI2091, 9, FO2091, 14, PR2091, 9, PO2091, 14},
 	{"voxglitch", "digitalsequencerxp", L2092, 17, I2092, 3, O2092, 2, P2092, 16, FI2092, 3, FO2092, 2, PR2092, 3, PO2092, 2},
-	{"voxglitch", "drumrandomizer", L2093, 9, I2093, 3, O2093, 1, P2093, 3, FI2093, 3, NULL, 0, PR2093, 3, NULL, 0},
+	{"voxglitch", "drumrandomizer", L2093, 9, I2093, 3, O2093, 1, P2093, 3, FI2093, 3, NULL, 0, PR2093, 3, PO2093, 1},
 	{"voxglitch", "ghosts", L2094, 25, I2094, 7, O2094, 2, P2094, 13, FI2094, 7, FO2094, 2, PR2094, 7, PO2094, 2},
 	{"voxglitch", "glitchsequencer", L2095, 8, I2095, 2, O2095, 8, P2095, 9, FI2095, 2, FO2095, 8, PR2095, 2, PO2095, 8},
 	{"voxglitch", "grainfx", L2096, 41, I2096, 15, O2096, 3, P2096, 22, FI2096, 15, FO2096, 3, PR2096, 15, PO2096, 3},

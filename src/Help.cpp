@@ -578,8 +578,43 @@ struct HelpPopup : widget::OpaqueWidget {
 
 static HelpPopup* gPopup = NULL;
 
+/** IS THE NOTE STILL THERE, asked without touching it.
+
+The note is a child of the scene, and the scene OWNS its children: Rack deletes a child that has
+requested deletion, and clearChildren deletes the lot. This global is a raw pointer to something
+somebody else may free, and on 14 September it was — an option-click on a title band wrote the
+note's height successfully and then faulted on the first VIRTUAL call, which is a freed object
+whose memory has been handed out again and whose vtable pointer is now somebody else's data.
+
+Which path freed it was never found. This does not need to know. The scene's child list is the
+authority on whether the note exists, and a POINTER COMPARISON against that list touches nothing
+the pointer points at — which matters, because reading even `gPopup->parent` to ask the question
+would be the very thing that crashes. The list is a handful of widgets, so this is cheap enough
+to ask on every frame and before every use.
+
+A note found missing is forgotten rather than used, and helpCatcherStep builds a fresh one on the
+next frame. The cost of being wrong is one click that does not answer; the cost of not asking was
+taking Rack down. */
+static bool helpPopupAlive() {
+	if (!gPopup || !APP->scene)
+		return false;
+	for (widget::Widget* w : APP->scene->children) {
+		if (w == gPopup)
+			return true;
+	}
+	// SAID ONCE, AND SAID LOUDLY. Nobody has yet found what frees the note — the crash of 14
+	// September proved only that something does. This is the evidence for next time: if this line
+	// ever appears in the log, the note was taken away by somebody else, and whatever else is in
+	// the log beside it is the culprit. If a crash happens again and this line never appeared, the
+	// theory is wrong and the fault is somewhere else entirely.
+	WARN("Help: the note was removed from the scene by something other than this plugin; "
+		"rebuilding it");
+	gPopup = NULL;
+	return false;
+}
+
 static void helpPopupHide() {
-	if (gPopup)
+	if (helpPopupAlive())
 		gPopup->hide();
 }
 
@@ -595,7 +630,7 @@ The note keeps a constant size at any zoom, which is what you want of something 
 BESIDE, NEVER OVER. To the right of the control where there is room and to the left where there
 is not, so it never covers the thing being asked about. */
 static void helpPopupPlace() {
-	if (!gPopup || !gPopup->isVisible() || !APP->scene || !APP->scene->rack)
+	if (!helpPopupAlive() || !gPopup->isVisible() || !APP->scene || !APP->scene->rack)
 		return;
 	widget::Widget* rack = APP->scene->rack;
 	const float zoom = rack->getAbsoluteZoom();
@@ -642,7 +677,7 @@ static int gPolyFlag = -1;
 static void helpPopupShow(app::ModuleWidget* mw, math::Rect controlBox,
 		const std::string& title, const std::string& line, bool missing,
 		const std::string& what = "", bool fromMaker = false) {
-	if (!gPopup)
+	if (!helpPopupAlive())
 		return;
 	gPopup->plugin = mw->model && mw->model->plugin ? mw->model->plugin->slug : "";
 	gPopup->model = mw->model ? mw->model->slug : "";
@@ -1080,7 +1115,7 @@ bool helpClickAt(math::Vec rackPos) {
 
 /** Puts the note away, for any ordinary click elsewhere. */
 void helpDismissNote() {
-	if (gPopup && gPopup->isVisible()) {
+	if (helpPopupAlive() && gPopup->isVisible()) {
 		helpPopupHide();
 		helpSilence();
 	}
@@ -1101,7 +1136,7 @@ zooms — see helpPopupPlace. */
 static void helpCatcherStep() {
 	if (!APP->scene || !APP->window)
 		return;
-	if (!gPopup) {
+	if (!helpPopupAlive()) {
 		gPopup = new HelpPopup;
 		gPopup->box.size = math::Vec(290.f, 40.f);
 		gPopup->hide();

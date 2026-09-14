@@ -250,12 +250,37 @@ def props_of(entry, kind='in'):
         # one thing twice and spends a third of the line doing it; the word earns its place
         # exactly when no range could be pinned down.
         rng = got.get('range')
-        polar = got.get('polarity') or polarity_of(rng)
+        # A NEGATIVE VOLTAGE SWINGING THROUGH IS WHAT BIPOLAR MEANS, so these two fields are one
+        # fact asked twice, and `negative` is the better half: it tells a jack that ignores a
+        # negative voltage apart from one that subtracts it from a knob, where "unipolar" would
+        # cover both.
+        neg = got.get('negative')
+        polar = got.get('polarity') or (
+            'bipolar' if neg == 'swings' else 'unipolar' if neg == 'ignored' else None
+        ) or polarity_of(rng)
         parts = [rng, None if rng else polar, got.get('step'),
                  None if poly is None else ('polyphonic' if poly else 'one channel only')]
         parts = [p for p in parts if p]
-        if parts:
-            out[int(port)] = ' · '.join(parts)
+        if not parts:
+            continue
+        # THE QUICK LINE STAYS QUICK. Four facts in a fixed order is what makes a column of these
+        # scannable, so anything more goes on a second line underneath, in plain words — its own
+        # paragraph, so it can be clicked and heard on its own and skipped by somebody who only
+        # wanted the first.
+        more = []
+        if got.get('normal'):
+            more.append('unpatched it reads %s' % got['normal'])
+        if neg == 'ignored':
+            more.append('a negative voltage does nothing here')
+        elif neg == 'subtracts':
+            more.append('a negative voltage subtracts from the knob')
+        if got.get('sumRange'):
+            more.append('the knob and this input are summed and the total held to %s'
+                        % got['sumRange'])
+        text = ' · '.join(parts)
+        if more:
+            text += '\n\n' + '; '.join(more) + '.'
+        out[int(port)] = text
     return out if any(out) else []
 
 
