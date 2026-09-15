@@ -39,7 +39,21 @@ Beware the input that is polyphonic **only in one mode**, and the module that re
 
 ## Range and shape
 
-- `range` only where the source or the manual states it, or where the code clamps or maps explicitly — `clamp(v, 0.f, 10.f)`, `rescale(v, 0.f, 10.f, ...)`. A knob's range is not the jack's range.
+**`range` answers one question: what voltage moves this jack over its full travel?**
+
+Not what the jack will physically accept — nothing in Rack bounds a cable, `Port::setVoltage` stores a float and clamps nothing, so any jack "accepts" anything and saying so tells a reader nothing. And not what other modules conventionally send, which is a fact about them. The useful fact, and the one a person patching needs, is the span over which this jack does its work: below it the control is not fully swept, above it nothing more happens.
+
+Three shapes of evidence settle it, and they agree far more often than not:
+
+- **A clamp on the jack**, `clamp(v, 0.f, 10.f)` or an explicit `rescale` — the clamp is the span.
+- **A scaling into a bounded destination.** `v * 0.1f` added to a knob that runs 0 to 1 is swept end to end by 10V, so the range is `0 to 10V`, even though nothing clamps the jack itself. This is the case that used to be left blank, and it is the commonest jack in the library.
+- **A clamp on the total** where the jack enters unscaled — then `sumRange` carries the clamp and `range` carries the span that reaches it.
+
+Where the two readings genuinely differ — a jack clamped to ±10V but scaled so that ±1V already covers the control — **`range` is the span, ±1V**, and the wider clamp belongs in `notes` if it is worth saying at all.
+
+A knob's range is still not the jack's range. The knob tells you the size of the destination; the scaling tells you how much voltage crosses it.
+
+**The convention this settles.** Two readings were in the `sumRange` column at once: one writer converted a parameter-unit clamp back into the voltage span that reaches it (`0..0.9` after a divide by ten became `0 to 9V`), another wrote the raw clamp numbers with a V appended (`±3.5` after a divide by five became `±3.5V`, which is the span of nothing the jack ever sees). **The first is right.** Every figure in these fields is volts at the jack.
 - `step: "stepped"` where the code quantises the input — `std::floor(v)`, `std::round(v * 12.f)`, an index into a table. `"continuous"` where it is used as a value.
 - A threshold comparison, `v >= 1.f`, means the jack is a gate or trigger: **stepped**, and `"high above 1V"` is the range spelling for it.
 

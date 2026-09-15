@@ -139,7 +139,23 @@ def check(path):
                     if not isinstance(one, dict):
                         problems.append('%s: not an object' % at)
                         continue
-                    for key, value in one.items():
+                    for rawkey, value in one.items():
+                        # THE MANUAL-CHECK PASS adds a doc-prefixed twin beside a field wherever
+                        # the maker's own documentation states something else — docRange beside
+                        # range, docPoly beside poly. The measured value is never touched, so both
+                        # figures sit in the data and the twin is held to the same spellings.
+                        key = rawkey
+                        if (rawkey.startswith('doc') and len(rawkey) > 3
+                                and rawkey[3].isupper()):
+                            key = rawkey[3].lower() + rawkey[4:]
+                            if key not in ('poly', 'step', 'range', 'negative', 'normal',
+                                           'sumRange', 'polarity'):
+                                problems.append('%s: "%s" is not a field here' % (at, rawkey))
+                                continue
+                            if key not in one:
+                                problems.append('%s: "%s" with no %s beside it'
+                                                % (at, rawkey, key))
+                                continue
                         if key == 'poly':
                             if not isinstance(value, bool):
                                 problems.append('%s: poly is %r, not true or false' % (at, value))
@@ -184,6 +200,15 @@ def check(path):
                         # shipped fabricated constants once; a figure with no source beside it is
                         # exactly what that looked like.
                         problems.append('%s: no "why" saying where this was established' % at)
+                    # A THRESHOLD IS NOT A CONTINUOUS QUANTITY. "high above 2V" says the jack is
+                    # read as a state, and `continuous` says the voltage itself is the value; the
+                    # pair cannot both be right. A verifier found seventy of these, and none of
+                    # them was caught by anything that reads the prose, because their lines never
+                    # used the word gate — the contradiction was entirely inside the fields.
+                    if (str(one.get('range', '')).startswith('high above')
+                            and one.get('step') == 'continuous'):
+                        problems.append('%s: range is a threshold but step says continuous; '
+                                        'a jack read as a state is stepped' % at)
 
     for model, entry in sorted(entries.items()):
         where = '%s/%s' % (name, model)

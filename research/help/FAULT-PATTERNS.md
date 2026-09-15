@@ -68,3 +68,20 @@ Say in your report which commit you used and how you settled it.
 ## A caution about `check_numbers.py`
 
 A low rate is not by itself evidence against a manual. Small constants — a 0.1V trigger floor, a 2V threshold — are materialised by the compiler inside instructions as a `mov`/`movk` pair or an `fmov` immediate, and never appear as stored literals. Say what the rate was and which misses are of that kind.
+
+## A hazard of reading the binary rather than the source
+
+**A bipolar CV can compile to look unipolar.** Moffenzeef writes the same idiom in twenty-five places:
+
+```
+normalizedCV = (cvInput + 5.0f) / 10.0f;   // Map -5V -> 0.0 and 5V -> 1.0
+knobValue = knobParam + (normalizedCV - 0.5f);
+```
+
+The compiler folds the re-centring away, because `(v + 5)/10 - 0.5` is just `v * 0.1`. What survives into the binary is a multiply, an add and a clamp — which is indistinguishable from a jack that takes 0 to 10V and adds a tenth of its voltage to the knob. Every one of those twenty-five was read as `0 to 10V` from the binary, and every one is `±5V`.
+
+The entry was rebuilt from source when the source was found, and the maker's own manual had been right all along — the disagreement recorded against it was ours.
+
+**What to do about it.** When a range is settled from a binary and comes out `0 to 10V` with `negative: subtracts`, that is the shape this mistake makes. The tell in the disassembly is the *absence* of anything: no `fmaxnm` against zero, no rectify, no clamp of the jack before it reaches the knob — just a scale and an add. A genuinely unipolar jack usually clamps or rectifies somewhere, because its author had to decide what a negative voltage does. If nothing decides, suspect that the decision was compiled away.
+
+Where it cannot be settled, say so in the `why` rather than picking the shape that looks simpler.

@@ -1,5 +1,5 @@
 #include "Palette.hpp"
-#include "Help.hpp"
+#include "PortFamilies.hpp"
 #include "PortMap.hpp"
 
 #include <osdialog.h>
@@ -1020,7 +1020,7 @@ int paletteFamilyForPort(app::PortWidget* port) {
 		const std::string& plug = port->module->model->plugin->slug;
 		const std::string& mod = port->module->model->slug;
 		const bool isOut = port->type == engine::Port::OUTPUT;
-		const int written = helpFamilyFor(plug, mod, isOut, port->portId);
+		const int written = portFamilyFor(plug, mod, isOut, port->portId);
 		if (written >= 0)
 			return written;
 		const int mapped = portMapFamily(plug, mod, isOut, port->portId);

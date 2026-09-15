@@ -1,0 +1,180 @@
+# Hora-Mixers — what the manual says
+
+Author: Hora
+Declared manual: http://hora-music.wifeo.com/manuals.php
+Source published: none
+
+Read `research/help/MANUAL-CHECK-BRIEF.md` before starting.
+
+170 ports below were settled from the binary. For each, record agrees / differs / silent.
+
+- StereoMixer-16-2 in0 — poly=False
+- StereoMixer-16-2 in1 — poly=False
+- StereoMixer-16-2 in2 — poly=False
+- StereoMixer-16-2 in3 — poly=False
+- StereoMixer-16-2 in4 — poly=False
+- StereoMixer-16-2 in5 — poly=False
+- StereoMixer-16-2 in6 — poly=False
+- StereoMixer-16-2 in7 — poly=False
+- StereoMixer-16-2 in8 — poly=False
+- StereoMixer-16-2 in9 — poly=False
+- StereoMixer-16-2 in10 — poly=False
+- StereoMixer-16-2 in11 — poly=False
+- StereoMixer-16-2 in12 — poly=False
+- StereoMixer-16-2 in13 — poly=False
+- StereoMixer-16-2 in14 — poly=False
+- StereoMixer-16-2 in15 — poly=False
+- StereoMixer-16-2 in16 — poly=False
+- StereoMixer-16-2 in17 — poly=False
+- StereoMixer-16-2 in18 — poly=False
+- StereoMixer-16-2 in19 — poly=False
+- StereoMixer-16-2 in20 — poly=False
+- StereoMixer-16-2 in21 — poly=False
+- StereoMixer-16-2 in22 — poly=False
+- StereoMixer-16-2 in23 — poly=False
+- StereoMixer-16-2 in24 — poly=False
+- StereoMixer-16-2 in25 — poly=False
+- StereoMixer-16-2 in26 — poly=False
+- StereoMixer-16-2 in27 — poly=False
+- StereoMixer-16-2 in28 — poly=False
+- StereoMixer-16-2 in29 — poly=False
+- StereoMixer-16-2 in30 — poly=False
+- StereoMixer-16-2 in31 — poly=False
+- StereoMixer-16-2 in32 — poly=False
+- StereoMixer-16-2 in33 — poly=False
+- StereoMixer-16-2 in34 — poly=False
+- StereoMixer-16-2 in35 — poly=False
+- StereoMixer-16-2 in36 — poly=False
+- StereoMixer-16-2 in37 — poly=False
+- StereoMixer-16-2 in38 — poly=False
+- StereoMixer-16-2 in39 — poly=False
+- StereoMixer-16-2 in40 — poly=False
+- StereoMixer-16-2 in41 — poly=False
+- StereoMixer-16-2 in42 — poly=False
+- StereoMixer-16-2 in43 — poly=False
+- StereoMixer-16-2 in44 — poly=False
+- StereoMixer-16-2 in45 — poly=False
+- StereoMixer-16-2 in46 — poly=False
+- StereoMixer-16-2 in47 — poly=False
+- StereoMixer-16-2 in48 — poly=False
+- StereoMixer-16-2 in49 — poly=False
+- StereoMixer-16-2 in50 — poly=False
+- StereoMixer-16-2 in51 — poly=False
+- StereoMixer-16-2 in52 — poly=False
+- StereoMixer-16-2 in53 — poly=False
+- StereoMixer-16-2 in54 — poly=False
+- StereoMixer-16-2 in55 — poly=False
+- StereoMixer-16-2 in56 — poly=False
+- StereoMixer-16-2 in57 — poly=False
+- StereoMixer-16-2 in58 — poly=False
+- StereoMixer-16-2 in59 — poly=False
+- StereoMixer-16-2 in60 — poly=False
+- StereoMixer-16-2 in61 — poly=False
+- StereoMixer-16-2 in62 — poly=False
+- StereoMixer-16-2 in63 — poly=False
+- StereoMixer-16-2 in64 — poly=False
+- StereoMixer-16-2 in65 — poly=False
+- StereoMixer-16-2 in66 — poly=False
+- StereoMixer-16-2 in67 — poly=False
+- StereoMixer-16-2 in68 — poly=False
+- StereoMixer-16-2 in69 — poly=False
+- StereoMixer-16-2 in70 — poly=False
+- StereoMixer-16-2 in71 — poly=False
+- StereoMixer-16-2 in72 — poly=False
+- StereoMixer-16-2 in73 — poly=False
+- StereoMixer-16-2 in74 — poly=False
+- StereoMixer-16-2 in75 — poly=False
+- StereoMixer-16-2 in76 — poly=False
+- StereoMixer-16-2 in77 — poly=False
+- StereoMixer-16-2 in78 — poly=False
+- StereoMixer-16-2 in79 — poly=False
+- StereoMixer-16-2 in80 — poly=False
+- StereoMixer-16-2 in81 — poly=False
+- StereoMixer-16-2 in82 — poly=False
+- StereoMixer-16-2 in83 — poly=False
+- StereoMixer-16-2 in84 — poly=False
+- StereoMixer-16-2 in85 — poly=False
+- StereoMixer-16-2 in86 — poly=False
+- StereoMixer-16-2 in87 — poly=False
+- StereoMixer-16-2 in88 — poly=False
+- StereoMixer-16-2 in89 — poly=False
+- StereoMixer-16-2 in90 — poly=False
+- StereoMixer-16-2 in91 — poly=False
+- StereoMixer-16-2 in92 — poly=False
+- StereoMixer-16-2 in93 — poly=False
+- StereoMixer-16-2 in94 — poly=False
+- StereoMixer-16-2 in95 — poly=False
+- StereoMixer-16-2 in96 — poly=False
+- StereoMixer-16-2 in97 — poly=False
+- StereoMixer-16-2 in98 — poly=False
+- StereoMixer-16-2 in99 — poly=False
+- StereoMixer-16-2 in100 — poly=False
+- StereoMixer-8 in0 — poly=False
+- StereoMixer-8 in1 — poly=False
+- StereoMixer-8 in2 — poly=False
+- StereoMixer-8 in3 — poly=False
+- StereoMixer-8 in4 — poly=False
+- StereoMixer-8 in5 — poly=False
+- StereoMixer-8 in6 — poly=False
+- StereoMixer-8 in7 — poly=False
+- StereoMixer-8 in8 — poly=False, range=0 to 10V
+- StereoMixer-8 in9 — poly=False, range=0 to 10V
+- StereoMixer-8 in10 — poly=False, range=0 to 10V
+- StereoMixer-8 in11 — poly=False, range=0 to 10V
+- StereoMixer-8 in12 — poly=False, range=0 to 10V
+- StereoMixer-8 in13 — poly=False, range=0 to 10V
+- StereoMixer-8 in14 — poly=False, range=0 to 10V
+- StereoMixer-8 in15 — poly=False, range=0 to 10V
+- StereoMixer-8-2 in0 — poly=False
+- StereoMixer-8-2 in1 — poly=False
+- StereoMixer-8-2 in2 — poly=False
+- StereoMixer-8-2 in3 — poly=False
+- StereoMixer-8-2 in4 — poly=False
+- StereoMixer-8-2 in5 — poly=False
+- StereoMixer-8-2 in6 — poly=False
+- StereoMixer-8-2 in7 — poly=False
+- StereoMixer-8-2 in8 — poly=False
+- StereoMixer-8-2 in9 — poly=False
+- StereoMixer-8-2 in10 — poly=False
+- StereoMixer-8-2 in11 — poly=False
+- StereoMixer-8-2 in12 — poly=False
+- StereoMixer-8-2 in13 — poly=False
+- StereoMixer-8-2 in14 — poly=False
+- StereoMixer-8-2 in15 — poly=False
+- StereoMixer-8-2 in16 — poly=False
+- StereoMixer-8-2 in17 — poly=False
+- StereoMixer-8-2 in18 — poly=False
+- StereoMixer-8-2 in19 — poly=False
+- StereoMixer-8-2 in20 — poly=False
+- StereoMixer-8-2 in21 — poly=False
+- StereoMixer-8-2 in22 — poly=False
+- StereoMixer-8-2 in23 — poly=False
+- StereoMixer-8-2 in24 — poly=False
+- StereoMixer-8-2 in25 — poly=False
+- StereoMixer-8-2 in26 — poly=False
+- StereoMixer-8-2 in27 — poly=False
+- StereoMixer-8-2 in28 — poly=False
+- StereoMixer-8-2 in29 — poly=False
+- StereoMixer-8-2 in30 — poly=False
+- StereoMixer-8-2 in31 — poly=False
+- StereoMixer-8-2 in32 — poly=False
+- StereoMixer-8-2 in33 — poly=False
+- StereoMixer-8-2 in34 — poly=False
+- StereoMixer-8-2 in35 — poly=False
+- StereoMixer-8-2 in36 — poly=False
+- StereoMixer-8-2 in37 — poly=False
+- StereoMixer-8-2 in38 — poly=False
+- StereoMixer-8-2 in39 — poly=False
+- StereoMixer-8-2 in40 — poly=False
+- StereoMixer-8-2 in41 — poly=False
+- StereoMixer-8-2 in42 — poly=False
+- StereoMixer-8-2 in43 — poly=False
+- StereoMixer-8-2 in44 — poly=False
+- StereoMixer-8-2 in45 — poly=False
+- StereoMixer-8-2 in46 — poly=False
+- StereoMixer-8-2 in47 — poly=False
+- StereoMixer-8-2 in48 — poly=False
+- StereoMixer-8-2 in49 — poly=False
+- StereoMixer-8-2 in50 — poly=False
+- StereoMixer-8-2 in51 — poly=False
+- StereoMixer-8-2 in52 — poly=False

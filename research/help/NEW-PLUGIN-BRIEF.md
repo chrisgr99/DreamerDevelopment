@@ -36,6 +36,8 @@ Then **remove `"partial": true`** from the top of the file. That is what says th
 
    **When several commits carry the same version, the installed binary settles it.** Makers often leave the version string alone while they keep working: 4ms's ProducerPack gained polyphony and bypass across a dozen commits all labelled 2.0.1. Pick something those commits changed, look for it in the installed `plugin.dylib` — a channel loop, a `setChannels`, a menu string — and you know which side of the change shipped. `nm` and `strings` answer most of these without a full disassembly. Say in your report how you settled it.
 2. **The compiled binary**, where there is no source. Every one examined so far has been unstripped: `otool -tvV`, one `Class::process` per model. Rack's ABI is the same in every plugin — `inputs` at Module+0x38, `outputs` at +0x50, port stride 0x50, the `channels` byte at Port+0x40. **The decisive test**: a read of the channels byte followed by a compare against zero is `isConnected()` and means nothing; a read that becomes a loop bound, or any read of `voltages[1]` and beyond, is real polyphony.
+
+   **On the output side there is a decisive test too, and it is easier.** `Output::setChannels` compiles to one fixed idiom: an `ldrb` of the channels byte, a `cbz` past it (the "if nothing is patched, leave it at zero" early return), a zero-fill loop over the abandoned channels, then a `strb` of the new count. The `Port` stride is 80 and the channels byte sits at +64, so **a `strb` to an address congruent to 64 modulo 80, under that idiom, is a `setChannels` and nothing else is.** The count being stored is almost always lifted straight from an input's channels byte a few instructions earlier, which tells you which input governs the width. An agent read 350 output ports across two closed plugins this way and cited the instruction address of the store for every one.
 3. **Manuals, READMEs, library pages.** `pypdf` is installed and reads PDF manuals; `pdftotext` is not.
 4. **The census slice**, `research/help/census/<Plugin>.json` — port names, knob names, positions.
 
@@ -54,6 +56,10 @@ Where the manual is silent, **claim nothing**. A stripped binary cannot settle p
 ## Never run `git checkout`, `git restore` or `git stash`
 
 The tree holds uncommitted work. If you make a mess of a file, fix it forwards. Never reach for git to undo anything.
+
+## Clone into `/tmp`, never into this repository
+
+You will clone a dozen makers' repositories to read their source. Put them somewhere temporary — `/tmp/<something>/` — and never inside this tree. A run that cloned into `research/` and into `scratchpad/` left sixty-six megabytes of other people's source sitting untracked in the project, one `git add -A` away from being committed as ours. Nothing you clone belongs here: the citation in a `why` field is what we keep, and anyone can fetch the repository again from the URL in `source`.
 
 ## Do the work yourself
 

@@ -84,7 +84,7 @@
       "step": "stepped",
       "negative": "ignored",
       "normal": "every note let through",
-      "why": "src/NoteClassifier.cpp lines 74-78 and 88: ignoreGate when unpatched, otherwise gate[i] >= 1.0f per channel"
+      "why": "src/NoteClassifier.cpp:74 sets ignoreGate when nothing is patched, or when a one-channel cable reads 1V or more; otherwise :88 lets channel i's note through only where gate[i] is 1V or more"
      }
     },
     "out": {
@@ -302,7 +302,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the green offset knob",
-      "why": "src/RGBMatrix.cpp line 123 with applyScaleOffset in src/Utility.cpp line 6"
+      "why": "src/RGBMatrix.cpp:123 applyScaleOffset (src/Utility.cpp:6) makes the green value the Green Offset knob plus the Green CV Scale knob times this channel's voltage over ten, which :126-136 writes to the pixel being scanned"
      },
      "2": {
       "poly": true,
@@ -310,7 +310,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the blue offset knob",
-      "why": "src/RGBMatrix.cpp line 124 with applyScaleOffset in src/Utility.cpp line 6"
+      "why": "src/RGBMatrix.cpp:124 applyScaleOffset (src/Utility.cpp:6) makes the blue value the Blue Offset knob plus the Blue CV Scale knob times this channel's voltage over ten, which :126-136 writes to the pixel being scanned"
      },
      "3": {
       "poly": false,
@@ -440,7 +440,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the green offset knob",
-      "why": "src/RGBMatrix.cpp line 123 with applyScaleOffset in src/Utility.cpp line 6"
+      "why": "src/RGBMatrix.cpp:123 applyScaleOffset (src/Utility.cpp:6) makes the green value the Green Offset knob plus the Green CV Scale knob times this channel's voltage over ten, which :126-136 writes to the pixel being scanned"
      },
      "2": {
       "poly": true,
@@ -448,7 +448,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the blue offset knob",
-      "why": "src/RGBMatrix.cpp line 124 with applyScaleOffset in src/Utility.cpp line 6"
+      "why": "src/RGBMatrix.cpp:124 applyScaleOffset (src/Utility.cpp:6) makes the blue value the Blue Offset knob plus the Blue CV Scale knob times this channel's voltage over ten, which :126-136 writes to the pixel being scanned"
      },
      "3": {
       "poly": false,
@@ -578,7 +578,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the green offset knob",
-      "why": "src/RGBMatrix.cpp line 123 with applyScaleOffset in src/Utility.cpp line 6"
+      "why": "src/RGBMatrix.cpp:123 applyScaleOffset (src/Utility.cpp:6) makes the green value the Green Offset knob plus the Green CV Scale knob times this channel's voltage over ten, which :126-136 writes to the pixel being scanned"
      },
      "2": {
       "poly": true,
@@ -586,7 +586,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the blue offset knob",
-      "why": "src/RGBMatrix.cpp line 124 with applyScaleOffset in src/Utility.cpp line 6"
+      "why": "src/RGBMatrix.cpp:124 applyScaleOffset (src/Utility.cpp:6) makes the blue value the Blue Offset knob plus the Blue CV Scale knob times this channel's voltage over ten, which :126-136 writes to the pixel being scanned"
      },
      "3": {
       "poly": false,
@@ -696,7 +696,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the saturation offset trimpot",
-      "why": "src/HSV2RGB.cpp lines 77-80 with applyScaleOffset in src/Utility.cpp line 6"
+      "why": "src/HSV2RGB.cpp:78 applyScaleOffset (src/Utility.cpp:6) makes the saturation the Saturation Offset trimpot plus the Saturation CV Scale trimpot times this channel's voltage over ten; :80 uses the offset trimpot alone when the jack is unpatched"
      },
      "2": {
       "poly": true,
@@ -704,7 +704,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the value offset trimpot",
-      "why": "src/HSV2RGB.cpp lines 81-84 with applyScaleOffset in src/Utility.cpp line 6"
+      "why": "src/HSV2RGB.cpp:82 applyScaleOffset (src/Utility.cpp:6) makes the value the Value Offset trimpot plus the Value CV Scale trimpot times this channel's voltage over ten; :84 uses the offset trimpot alone when the jack is unpatched"
      }
     },
     "out": {
@@ -970,11 +970,10 @@
     "in": {
      "0": {
       "poly": false,
-      "range": "±5V",
       "step": "continuous",
       "negative": "swings",
       "normal": "1V",
-      "why": "src/Integrator.cpp line 136, sampleTime * deltaScale * (delta_connected ? getVoltage() : 1.f); no channel argument"
+      "why": "src/Integrator.cpp:136 multiplies this voltage by the Delta Scale A knob and the sample time to give the increment added to the ramp each sample, reading 1V in its place when unpatched; nothing clamps the jack, so no voltage range applies"
      },
      "1": {
       "poly": false,
@@ -994,11 +993,10 @@
      },
      "3": {
       "poly": false,
-      "range": "±5V",
       "step": "continuous",
       "negative": "swings",
       "normal": "1V",
-      "why": "src/Integrator.cpp line 136 through processOne, called for the second ramp at line 162"
+      "why": "src/Integrator.cpp:136 multiplies this voltage by the Delta Scale B knob and the sample time to give the increment added to the ramp each sample, reading 1V in its place when unpatched; nothing clamps the jack, so no voltage range applies"
      },
      "4": {
       "poly": false,
@@ -1006,7 +1004,7 @@
       "step": "stepped",
       "negative": "ignored",
       "normal": "the delta jack being patched",
-      "why": "src/Integrator.cpp line 125 through processOne, called for the second ramp at line 162"
+      "why": "src/Integrator.cpp:125 reads this jack as a level, gate_status holding true while it sits at 1V or more, and :135 integrates only then; unpatched it falls back to whether Delta B is patched"
      },
      "5": {
       "poly": false,
@@ -1014,7 +1012,7 @@
       "step": "stepped",
       "negative": "ignored",
       "normal": "0V",
-      "why": "src/Integrator.cpp line 132 through processOne, called for the second ramp at line 162"
+      "why": "src/Integrator.cpp:132 reset_triggers[1].process crosses a dsp::SchmittTrigger's 1V threshold and :133 sets the ramp to 0V, or to Min Value B or Max Value B if 0V falls outside them"
      }
     },
     "out": {
@@ -1289,7 +1287,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the alpha offset trimpot of that row",
-      "why": "src/ColorMixer.cpp lines 146-147 with applyPolyScaleOffset in src/Utility.cpp line 12"
+      "why": "src/ColorMixer.cpp:146 readVoltagesOrZero fills this jack's channels, zeros when unpatched, and :147 applyPolyScaleOffset (src/Utility.cpp:12) makes each channel's alpha that layer's Alpha Offset trimpot plus its Alpha Scale trimpot times the voltage over ten"
      },
      "7": {
       "poly": true,
@@ -1321,7 +1319,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the alpha offset trimpot of that row",
-      "why": "src/ColorMixer.cpp lines 146-147 with applyPolyScaleOffset in src/Utility.cpp line 12"
+      "why": "src/ColorMixer.cpp:146 readVoltagesOrZero fills this jack's channels, zeros when unpatched, and :147 applyPolyScaleOffset (src/Utility.cpp:12) makes each channel's alpha that layer's Alpha Offset trimpot plus its Alpha Scale trimpot times the voltage over ten"
      },
      "11": {
       "poly": true,
@@ -1353,7 +1351,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the alpha offset trimpot of that row",
-      "why": "src/ColorMixer.cpp lines 146-147 with applyPolyScaleOffset in src/Utility.cpp line 12"
+      "why": "src/ColorMixer.cpp:146 readVoltagesOrZero fills this jack's channels, zeros when unpatched, and :147 applyPolyScaleOffset (src/Utility.cpp:12) makes each channel's alpha that layer's Alpha Offset trimpot plus its Alpha Scale trimpot times the voltage over ten"
      },
      "15": {
       "poly": true,
@@ -1385,7 +1383,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the alpha offset trimpot of that row",
-      "why": "src/ColorMixer.cpp lines 146-147 with applyPolyScaleOffset in src/Utility.cpp line 12"
+      "why": "src/ColorMixer.cpp:146 readVoltagesOrZero fills this jack's channels, zeros when unpatched, and :147 applyPolyScaleOffset (src/Utility.cpp:12) makes each channel's alpha that layer's Alpha Offset trimpot plus its Alpha Scale trimpot times the voltage over ten"
      },
      "19": {
       "poly": true,
@@ -1417,7 +1415,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the alpha offset trimpot of that row",
-      "why": "src/ColorMixer.cpp lines 146-147 with applyPolyScaleOffset in src/Utility.cpp line 12"
+      "why": "src/ColorMixer.cpp:146 readVoltagesOrZero fills this jack's channels, zeros when unpatched, and :147 applyPolyScaleOffset (src/Utility.cpp:12) makes each channel's alpha that layer's Alpha Offset trimpot plus its Alpha Scale trimpot times the voltage over ten"
      },
      "23": {
       "poly": true,
@@ -1449,7 +1447,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the alpha offset trimpot of that row",
-      "why": "src/ColorMixer.cpp lines 146-147 with applyPolyScaleOffset in src/Utility.cpp line 12"
+      "why": "src/ColorMixer.cpp:146 readVoltagesOrZero fills this jack's channels, zeros when unpatched, and :147 applyPolyScaleOffset (src/Utility.cpp:12) makes each channel's alpha that layer's Alpha Offset trimpot plus its Alpha Scale trimpot times the voltage over ten"
      },
      "27": {
       "poly": true,
@@ -1481,7 +1479,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "the alpha offset trimpot of that row",
-      "why": "src/ColorMixer.cpp lines 146-147 with applyPolyScaleOffset in src/Utility.cpp line 12"
+      "why": "src/ColorMixer.cpp:146 readVoltagesOrZero fills this jack's channels, zeros when unpatched, and :147 applyPolyScaleOffset (src/Utility.cpp:12) makes each channel's alpha that layer's Alpha Offset trimpot plus its Alpha Scale trimpot times the voltage over ten"
      }
     },
     "out": {
@@ -1894,7 +1892,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "ten times the plane trimpot",
-      "why": "src/RAM40964.cpp lines 276-300 and 310, to_write[j][i] times the plane trimpot, falling back to 10 times the trimpot"
+      "why": "src/RAM40964.cpp:277 readVoltages takes this jack's channels and :310 multiplies channel i by the Plane 0 value trimpot to give what is written to the addressed cell; :300 writes ten times that trimpot instead for channels the jack does not carry"
      },
      "5": {
       "poly": true,
@@ -1902,7 +1900,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "ten times the plane trimpot",
-      "why": "src/RAM40964.cpp lines 278-300 and 310"
+      "why": "src/RAM40964.cpp:279 readVoltages takes this jack's channels and :310 multiplies channel i by the Plane 1 value trimpot to give what is written to the addressed cell; :300 writes ten times that trimpot instead for channels the jack does not carry"
      },
      "6": {
       "poly": true,
@@ -1910,7 +1908,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "ten times the plane trimpot",
-      "why": "src/RAM40964.cpp lines 280-300 and 310"
+      "why": "src/RAM40964.cpp:281 readVoltages takes this jack's channels and :310 multiplies channel i by the Plane 2 value trimpot to give what is written to the addressed cell; :300 writes ten times that trimpot instead for channels the jack does not carry"
      },
      "7": {
       "poly": true,
@@ -1918,7 +1916,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "ten times the plane trimpot",
-      "why": "src/RAM40964.cpp lines 282-300 and 310"
+      "why": "src/RAM40964.cpp:283 readVoltages takes this jack's channels and :310 multiplies channel i by the Plane 3 value trimpot to give what is written to the addressed cell; :300 writes ten times that trimpot instead for channels the jack does not carry"
      },
      "8": {
       "poly": true,
@@ -3125,7 +3123,7 @@
       "step": "stepped",
       "negative": "subtracts",
       "normal": "cell 0",
-      "why": "src/Accessor.cpp lines 141-166 with fillAddressArray in src/Utility.cpp line 82"
+      "why": "src/Accessor.cpp:141 takes this jack's channel count and :166 hands its voltages to fillAddressArray (src/Utility.cpp:82), where :88 truncates the voltage over ten times the matrix width into the column, or :91 over ten times the whole cell count while Y is unpatched"
      },
      "1": {
       "poly": true,
@@ -3133,7 +3131,7 @@
       "step": "stepped",
       "negative": "subtracts",
       "normal": "cell 0",
-      "why": "src/Accessor.cpp lines 142-166 with fillAddressArray in src/Utility.cpp line 82"
+      "why": "src/Accessor.cpp:142 takes this jack's channel count and :166 hands its voltages to fillAddressArray (src/Utility.cpp:82), where :86 truncates the voltage over ten times the matrix height into the row; leaving it unpatched switches X at :91 to addressing the whole matrix"
      },
      "2": {
       "poly": true,

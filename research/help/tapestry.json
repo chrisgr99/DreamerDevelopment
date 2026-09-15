@@ -195,8 +195,8 @@
       "step": "stepped",
       "range": "high above 2.5V",
       "negative": "ignored",
-      "normal": "0V",
-      "why": "Tapestry.cpp:473-478 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V, defined at dsp/tapestry-core.h:58"
+      "normal": "free-running, not clock-synced",
+      "why": "Tapestry.cpp:476 clkTrigger.process crosses kGateTriggerThreshold, 2.5V at dsp/tapestry-core.h:58, and :479 onClockRising resyncs the grain engine; :484 with nothing patched onClockDisconnected lets it free-run"
      },
      "10": {
       "poly": false,
@@ -204,7 +204,7 @@
       "range": "high above 2.5V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Tapestry.cpp:503-508 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V"
+      "why": "Tapestry.cpp:501 recInputTrigger.process crosses 2.5V and :505 toggles recording, stopping it if it is running and otherwise clearing the reel and starting fresh"
      },
      "11": {
       "poly": false,
@@ -212,7 +212,7 @@
       "range": "high above 2.5V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Tapestry.cpp:527-532 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V"
+      "why": "Tapestry.cpp:522 spliceInputTrigger.process crosses 2.5V and :525 onSpliceTrigger adds a marker at the playhead"
      },
      "12": {
       "poly": false,
@@ -220,7 +220,7 @@
       "range": "high above 2.5V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Tapestry.cpp:539-544 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V"
+      "why": "Tapestry.cpp:533 shiftInputTrigger.process crosses 2.5V and :536 onShiftTrigger moves playback to the next marker"
      },
      "13": {
       "poly": false,
@@ -228,7 +228,7 @@
       "range": "high above 2.5V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Tapestry.cpp:551-556 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V"
+      "why": "Tapestry.cpp:543 clearSplicesInputTrigger.process crosses 2.5V and :546 deleteAllMarkers removes every marker and resets Select to 0"
      },
      "14": {
       "poly": false,
@@ -236,7 +236,7 @@
       "range": "high above 2.5V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Tapestry.cpp:563-568 runs a SchmittTrigger on it against kGateTriggerThreshold of 2.5V"
+      "why": "Tapestry.cpp:556 spliceCountToggleInputTrigger.process crosses 2.5V and :560 spreads the current auto-marker count across the reel, then :561 cycles it through 4, 8 and 16"
      },
      "9": {
       "poly": false,
@@ -728,8 +728,8 @@
       "step": "stepped",
       "range": "high above 1.5V",
       "negative": "ignored",
-      "normal": "high",
-      "why": "wyrd-dsp.h:423 treats 1.5V and above as high, and lines 422-430 hold the gesture at zero when the jack is patched and low"
+      "normal": "a free-running cycle",
+      "why": "wyrd-dsp.h:423 reads 1.5V and above as high and runs the gesture once from zero, :424 holding it at zero while the jack is patched and low; :443 with nothing patched the gesture cycles on its own"
      },
      "2": {
       "poly": false,

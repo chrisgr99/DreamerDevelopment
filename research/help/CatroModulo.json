@@ -969,7 +969,7 @@
       "range": "high above 0V",
       "step": "stepped",
       "negative": "swings",
-      "why": "CatroModulo_CM-3.cpp:147 turns the voltage into 1.0 or 0.0 with ||, and line 144 replaces it with the internal clock whenever the bpm jack is patched"
+      "why": "CatroModulo_CM-3.cpp:147 reads this jack with getVoltage, channel 0 only, and ORs it with the STEP button through C++ ||, so any voltage other than exactly 0V, negative included, becomes 1.0 and 0V becomes 0.0. That 1.0 or 0.0 goes to CM_SelSeq::step at CatroModulo.hpp:62, whose dsp::SchmittTrigger fires when the value reaches 1 and rearms when it drops to 0, advancing the sequence one place. Line 143 tests the bpm jack first: with a cable in bpm, lines 144 and 145 step the sequence from the internal clock and this jack is never read."
      },
      "18": {
       "poly": false,
@@ -983,7 +983,7 @@
       "range": "high above 0V",
       "step": "stepped",
       "negative": "swings",
-      "why": "CatroModulo_CM-3.cpp:130 and :141 turn the voltage into 1.0 or 0.0 with || before two SchmittTriggers"
+      "why": "CatroModulo_CM-3.cpp:130 reads this jack with getVoltage, channel 0 only, and ORs it with the RESET button through C++ ||, so any voltage other than exactly 0V, negative included, becomes 1.0 and 0V becomes 0.0. That value is handed to CM_SelSeq::reset at CatroModulo.hpp:55, and line 141 hands the same value to CM_BpmClock::setReset; each holds its own dsp::SchmittTrigger firing on the value reaching 1 and rearming at 0, so one edge rewinds the sequence and zeroes the internal clock's phase together."
      },
      "20": {
       "poly": false,
@@ -1114,7 +1114,7 @@
       "range": "high above 1V",
       "step": "stepped",
       "negative": "ignored",
-      "why": "CatroModulo_CM-4.cpp:65 passes the raw voltage to CM_BpmClock::exttrack, which at CatroModulo.hpp:646 puts it through a SchmittTrigger at Rack's default thresholds of 0V and 1V"
+      "why": "CatroModulo_CM-4.cpp:65 reads this jack with getVoltage, channel 0 only, and passes the voltage unscaled to CM_BpmClock::exttrack, where CatroModulo.hpp:646 puts it through a dsp::SchmittTrigger left at Rack's defaults of 1V high and 0V low. exttrack times the gap between firings and turns it into a rate, locking to it only once two consecutive gaps agree to within 1ms. Line 64 wraps the call in isConnected, so with no cable the jack is not read at all and the BPM knob alone sets the tempo."
      },
      "1": {
       "poly": false,
@@ -1257,7 +1257,7 @@
       "range": "high above 0V",
       "step": "stepped",
       "negative": "swings",
-      "why": "CatroModulo_CM-5.cpp:82-86 turn the voltage into 1.0 or 0.0 with || before each clock's SchmittTrigger"
+      "why": "CatroModulo_CM-5.cpp:82-86 read this jack with getVoltage, channel 0 only, and OR it with the RST button through C++ ||, so any voltage other than exactly 0V, negative included, becomes 1.0 and 0V becomes 0.0. The same 1.0 or 0.0 goes to CM_BpmClock::setReset on all five clocks, and each clock's own dsp::SchmittTrigger fires when it reaches 1 and rearms at 0; a firing zeroes that clock's phase, clears its three tracking triggers and forces its clock outputs high for one frame, so all five restart on the same sample."
      }
     },
     "out": {
@@ -1411,7 +1411,7 @@
       "range": "high above 0V",
       "step": "stepped",
       "negative": "swings",
-      "why": "CatroModulo_CM-7.cpp:82-86 turn the voltage into 1.0 or 0.0 with || before each clock's SchmittTrigger"
+      "why": "CatroModulo_CM-7.cpp:82-86 read this jack with getVoltage, channel 0 only, and OR it with the RST button through C++ ||, so any voltage other than exactly 0V, negative included, becomes 1.0 and 0V becomes 0.0. The same 1.0 or 0.0 goes to CM_BpmClock::setReset on all five clocks, and each clock's own dsp::SchmittTrigger fires when it reaches 1 and rearms at 0; a firing zeroes that clock's phase, clears its three tracking triggers and forces its clock outputs high for one frame, so all five restart on the same sample."
      }
     },
     "out": {
@@ -1607,7 +1607,7 @@
       "range": "high above 1V",
       "step": "stepped",
       "negative": "ignored",
-      "why": "CatroModulo_CM-8.cpp:134 passes the raw voltage to a SchmittTrigger at Rack's default thresholds of 0V and 1V"
+      "why": "CatroModulo_CM-8.cpp:134 reads this jack with getVoltage, channel 0 only, and passes the voltage unscaled to a dsp::SchmittTrigger left at Rack's defaults of 1V high and 0V low; a firing copies the current a and b values into the held pair. Line 132 wraps the whole block in isConnected, and lines 138 and 139 then overwrite a and b with the held pair on every sample, so a cable in this jack freezes the module to whatever the last trigger captured and an empty jack leaves it running live."
      }
     },
     "out": {
@@ -1751,7 +1751,7 @@
       "range": "high above 1V",
       "step": "stepped",
       "negative": "ignored",
-      "why": "CatroModulo_CM-9.cpp:101 passes the raw voltage to a SchmittTrigger at Rack's default thresholds, inside a branch that runs only when the clk jack is patched"
+      "why": "CatroModulo_CM-9.cpp:101 reads this jack with getVoltage, channel 0 only, and passes the voltage unscaled to a dsp::SchmittTrigger left at Rack's defaults of 1V high and 0V low; a firing sends the stepper back to its first position. It sits behind two guards: line 99 runs the stepper only while the clk jack has a cable in it, and line 100 tests this jack's own isConnected, so with clk empty this jack does nothing."
      },
      "3": {
       "poly": false,
@@ -1843,14 +1843,14 @@
       "range": "high above 1V",
       "step": "stepped",
       "negative": "ignored",
-      "why": "CatroModulo_CM-10.cpp:54 passes the raw voltage to a SchmittTrigger at Rack's default thresholds of 0V and 1V"
+      "why": "CatroModulo_CM-10.cpp:54 reads this jack with getVoltage, channel 0 only, and passes the voltage unscaled to a dsp::SchmittTrigger left at Rack's defaults of 1V high and 0V low. Each firing shifts the held bit out to the output and takes a new one in: the stored capture if override is armed, otherwise whether the in jack is above 0V at that instant. There is no isConnected guard, so an unpatched jack rests at 0V and the register simply never moves."
      },
      "3": {
       "poly": false,
       "range": "high above 1V",
       "step": "stepped",
       "negative": "ignored",
-      "why": "CatroModulo_CM-10.cpp:54 passes the raw voltage to a SchmittTrigger at Rack's default thresholds of 0V and 1V"
+      "why": "CatroModulo_CM-10.cpp:54 reads this jack with getVoltage, channel 0 only, and passes the voltage unscaled to a dsp::SchmittTrigger left at Rack's defaults of 1V high and 0V low. Each firing shifts the held bit out to the output and takes a new one in: the stored capture if override is armed, otherwise whether the in jack is above 0V at that instant. There is no isConnected guard, so an unpatched jack rests at 0V and the register simply never moves."
      },
      "4": {
       "poly": false,

@@ -1,7 +1,7 @@
 {
  "plugin": "FrequencyDomain",
- "source": "https://github.com/almostEric/Frequency-Domain/blob/master/README.md",
- "read": "2026-09-13",
+ "source": "https://github.com/almostEric/Frequency-Domain",
+ "read": "2026-09-14",
  "modules": {
   "HeatOfTheMoment": {
    "lines": [
@@ -55,29 +55,51 @@
     "in": {
      "0": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HeatOfTheMomentModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/HeatOfTheMoment.cpp:78 hands this jack to paramValue(), defined at src/controller/HeatOfTheMoment.cpp:63: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 6, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is cast to a NoiseColor, so it steps through the seven colours."
      },
      "1": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HeatOfTheMomentModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/HeatOfTheMoment.cpp:80 hands this jack to paramValue(), defined at src/controller/HeatOfTheMoment.cpp:63: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 7, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is stored in an int, so it steps through the eight window functions."
      },
      "2": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HeatOfTheMomentModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/HeatOfTheMoment.cpp:87 hands this jack to paramValue(), defined at src/controller/HeatOfTheMoment.cpp:63: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0.1 to 100, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "3": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HeatOfTheMomentModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/HeatOfTheMoment.cpp:85 hands this jack to paramValue(), defined at src/controller/HeatOfTheMoment.cpp:63: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 1 to 4, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is stored in an int, so it steps 1, 2, 3, 4."
      },
      "4": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HeatOfTheMomentModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/HeatOfTheMoment.cpp:89 hands this jack to paramValue(), defined at src/controller/HeatOfTheMoment.cpp:63: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 1 to 1000, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "5": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HeatOfTheMomentModule::process reads this port at voltages[0] behind an isConnected test; it compares that voltage against 1V with a Schmitt trigger",
+      "range": "high above 1V",
       "step": "stepped",
-      "range": "high above 1V"
+      "negative": "ignored",
+      "why": "src/controller/HeatOfTheMoment.cpp:96 passes the jack to a dsp::SchmittTrigger, whose Rack defaults fire above 1V and reset below 0V; line 101 then tests the same voltage for greater than 0 to keep repeating while the gate is held. getVoltage() reads channel 1 only."
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/controller/HeatOfTheMoment.cpp:122 sets one voltage with setVoltage() and never calls setChannels(), so the jack stays monophonic. The value is raw noise times two window values and is not clamped, so no range can be stated."
      }
     }
    }
@@ -155,39 +177,79 @@
     "in": {
      "0": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BoxOfRevelationModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/BoxOfRevelation.cpp:596 reads this jack as getVoltage()/5.0, so 5V is full scale into the filter chain, and line 639 multiplies the result back by 5 on the way out. getVoltage() reads channel 1 only."
      },
      "1": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BoxOfRevelationModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "normal": "0V",
+      "why": "src/controller/BoxOfRevelation.cpp:597 reads this jack as getVoltage()/5.0 with no isConnected test and nothing normalled to it, so an unpatched jack feeds 0V into the second filter chain. getVoltage() reads channel 1 only."
      },
      "2": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BoxOfRevelationModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/BoxOfRevelation.cpp:338 hands this jack to paramValue(), defined at src/controller/BoxOfRevelation.cpp:99: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to the number of cubes in the loaded file minus one, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is stored in an int, so it steps cube by cube."
      },
      "3": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BoxOfRevelationModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BoxOfRevelation.cpp:368 hands this jack to paramValue(), defined at src/controller/BoxOfRevelation.cpp:99: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "4": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BoxOfRevelationModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BoxOfRevelation.cpp:373 hands this jack to paramValue(), defined at src/controller/BoxOfRevelation.cpp:99: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "5": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BoxOfRevelationModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BoxOfRevelation.cpp:375 hands this jack to paramValue(), defined at src/controller/BoxOfRevelation.cpp:99: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "6": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BoxOfRevelationModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BoxOfRevelation.cpp:387 hands this jack to paramValue(), defined at src/controller/BoxOfRevelation.cpp:99: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. Line 378 skips this call while LINK is on, so the jack does nothing in that mode."
      },
      "7": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BoxOfRevelationModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BoxOfRevelation.cpp:392 hands this jack to paramValue(), defined at src/controller/BoxOfRevelation.cpp:99: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. Line 378 skips this call while LINK is on, so the jack does nothing in that mode."
      },
      "8": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BoxOfRevelationModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BoxOfRevelation.cpp:394 hands this jack to paramValue(), defined at src/controller/BoxOfRevelation.cpp:99: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. Line 378 skips this call while LINK is on, so the jack does nothing in that mode."
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/controller/BoxOfRevelation.cpp:639 writes clamp(out * 5, -10, 10), so the jack is held inside ±10V. setChannels() is never called, so it stays monophonic."
+     },
+     "1": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/controller/BoxOfRevelation.cpp:640 writes clamp(out * 5, -10, 10), so the jack is held inside ±10V. setChannels() is never called, so it stays monophonic."
      }
     }
    }
@@ -277,51 +339,93 @@
     "in": {
      "0": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/DanceThisMeshAround.cpp:214 reads this jack as getVoltage()/5.0 before the group feedback is added, so 5V is full scale into the mesh; line 215 then hard limits the sum to ±1. getVoltage() reads channel 1 only."
      },
      "1": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:125 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 2 to 5, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is stored in an int, so it steps 2, 3, 4, 5."
      },
      "2": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:207 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 1 to 5, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "3": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:173 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0.05 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. Line 174 then pushes a band up if it comes within 20 per cent of the band below it."
      },
      "4": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:173 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0.05 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. Line 174 then pushes a band up if it comes within 20 per cent of the band below it."
      },
      "5": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:173 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0.05 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. Line 174 then pushes a band up if it comes within 20 per cent of the band below it."
      },
      "6": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:226 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 1 to 500, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is stored in an int array of delay times in samples, so it steps by one sample."
      },
      "7": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:226 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 1 to 500, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is stored in an int array of delay times in samples, so it steps by one sample."
      },
      "8": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:237 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 1 to 500, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is doubled and stored in an int, so it steps by two samples."
      },
      "11": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:238 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 0.95, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "12": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:239 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 1 to 5, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "14": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DanceThisMeshAroundModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DanceThisMeshAround.cpp:210 hands this jack to paramValue(), defined at src/controller/DanceThisMeshAround.cpp:108: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/controller/DanceThisMeshAround.cpp:429 writes the waveguide and mesh sum times 5 with no clamp, so no range can be stated. setChannels() is never called, so the jack stays monophonic."
      }
     }
    }
@@ -421,55 +525,99 @@
     "in": {
      "0": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "why": "src/controller/Morphology.cpp:210 reads this jack with a bare getVoltage() and line 397 multiplies it by the window value before the FFT, with no scaling or clamp, so no range can be stated. getVoltage() reads channel 1 only."
      },
      "1": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "normal": "0V",
+      "why": "src/controller/Morphology.cpp:211 reads this jack with a bare getVoltage() and line 398 multiplies it by the window value before the second FFT. Nothing is normalled to it and there is no scaling or clamp. getVoltage() reads channel 1 only."
      },
      "2": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/Morphology.cpp:381 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "3": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/Morphology.cpp:382 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "4": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/Morphology.cpp:386 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "5": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/Morphology.cpp:387 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "6": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/Morphology.cpp:377 hands this jack to paramValue(), defined at src/controller/Morphology.cpp:197: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans minus the band count to plus the band count, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The band count follows the frame size, so the span this jack covers changes with it."
      },
      "7": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/Morphology.cpp:294 hands this jack to paramValue(), defined at src/controller/Morphology.cpp:197: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "8": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/Morphology.cpp:332 hands this jack to paramValue(), defined at src/controller/Morphology.cpp:197: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "9": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/Morphology.cpp:296 hands this jack to paramValue(), defined at src/controller/Morphology.cpp:197: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -1 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "10": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/Morphology.cpp:334 hands this jack to paramValue(), defined at src/controller/Morphology.cpp:197: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -1 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "11": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/Morphology.cpp:371 hands this jack to paramValue(), defined at src/controller/Morphology.cpp:197: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 50, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "12": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: MorphologyModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/Morphology.cpp:373 hands this jack to paramValue(), defined at src/controller/Morphology.cpp:197: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 50, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/controller/Morphology.cpp:491 writes the summed inverse FFT frames with no clamp and no scaling, so no range can be stated. setChannels() is never called."
+     },
+     "1": {
+      "poly": false,
+      "why": "src/controller/Morphology.cpp:492 writes the summed inverse FFT frames with no clamp and no scaling, so no range can be stated. setChannels() is never called."
      }
     }
    }
@@ -603,79 +751,146 @@
     "in": {
      "0": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "why": "src/controller/DelayedReaction.cpp:290 reads this jack with a bare getVoltage() and line 666 multiplies it by the window value before the FFT, with no scaling or clamp, so no range can be stated. getVoltage() reads channel 1 only."
      },
      "1": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "normal": "the FB SEND output",
+      "why": "src/controller/DelayedReaction.cpp:764 tests isConnected() and takes the jack’s raw voltage as the feedback when a cable is in; line 767 uses the FB SEND value instead when it is not, and that value is clamped to ±10V at line 761. getVoltage() reads channel 1 only."
      },
      "2": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/DelayedReaction.cpp:644 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "3": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/DelayedReaction.cpp:645 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "4": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/DelayedReaction.cpp:649 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "5": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/DelayedReaction.cpp:650 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "6": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/DelayedReaction.cpp:654 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "7": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/DelayedReaction.cpp:655 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "8": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/DelayedReaction.cpp:659 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "9": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/DelayedReaction.cpp:660 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "10": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DelayedReaction.cpp:740 hands this jack to paramValue(), defined at src/controller/DelayedReaction.cpp:277: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "11": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DelayedReaction.cpp:391 hands this jack to paramValue(), defined at src/controller/DelayedReaction.cpp:277: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "12": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DelayedReaction.cpp:429 hands this jack to paramValue(), defined at src/controller/DelayedReaction.cpp:277: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "13": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DelayedReaction.cpp:467 hands this jack to paramValue(), defined at src/controller/DelayedReaction.cpp:277: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "14": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DelayedReaction.cpp:505 hands this jack to paramValue(), defined at src/controller/DelayedReaction.cpp:277: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "15": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DelayedReaction.cpp:393 hands this jack to paramValue(), defined at src/controller/DelayedReaction.cpp:277: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -1 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "16": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DelayedReaction.cpp:431 hands this jack to paramValue(), defined at src/controller/DelayedReaction.cpp:277: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -1 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "17": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DelayedReaction.cpp:469 hands this jack to paramValue(), defined at src/controller/DelayedReaction.cpp:277: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -1 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "18": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: DelayedReactionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/DelayedReaction.cpp:507 hands this jack to paramValue(), defined at src/controller/DelayedReaction.cpp:277: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -1 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/controller/DelayedReaction.cpp:775 and 782 mix the wet sum with the delayed dry signal and write it with no clamp, so no range can be stated. setChannels() is never called."
+     },
+     "1": {
+      "poly": false,
+      "why": "src/controller/DelayedReaction.cpp:783 mixes the wet right sum with the delayed dry signal and writes it with no clamp. Line 771 tests this jack for isConnected() and sends the mono mix to the left jack alone when nothing is patched here."
+     },
+     "2": {
+      "poly": false,
+      "range": "±10V",
+      "why": "src/controller/DelayedReaction.cpp:761 clamps the feedback sum to ±10V before line 763 writes it. setChannels() is never called."
      }
     }
    }
@@ -706,7 +921,7 @@
     "Adds to the fold amount, 10V covering 1 to 4",
     "Chooses what happens to the part of the wave past the fold: it is turned back on itself, or decimated",
     "Adds an offset to every level drawn on the HARMONICS grid, 5V covering the whole range; the grid acts in the two spectral morph modes",
-    "Slides the HARMONICS drawing across the first sixteen harmonics, 5V covering the whole height of the grid",
+    "Slides the HARMONICS drawing across the sixteen harmonics, 5V covering all sixteen",
     "The oscillator, ±5V, with as many channels as the V/Oct input",
     "Note — the sphere is empty when the module is placed and the outputs stay at 0V; a wavetable has to be read in with Load WaveTable, Add WaveTable or Load Directory first",
     "Note — the harmonic grid is drawn on by dragging across it, and holding shift while dragging keeps the drag on the harmonic it started on",
@@ -743,8 +958,8 @@
     "8": 17,
     "9": 19,
     "10": 21,
-    "11": 23,
-    "12": 24
+    "11": 24,
+    "12": 23
    },
    "out": {
     "0": 25
@@ -769,60 +984,104 @@
      "0": "audio"
     }
    },
-   "notes": "Three quantize parameters and two outputs are declared with no widget on the panel, so they can never be clicked and are left untagged.",
+   "notes": "The two harmonic shift jacks are crossed over in the code: the X jack moves the drawing along the harmonics and the Y jack raises and lowers the levels, the opposite way round to every other grid on the plugin. The maker did that on purpose — BallOfConfusion.cpp:587 carries the comment “Axis are reversed” — because this grid alone is drawn as vertical bars, so its harmonics run across the screen where the others run down it. Read against the panel the two jacks are right; read against the shared grid code they look swapped. Three quantize parameters and two outputs are declared with no widget on the panel, so they can never be clicked and are left untagged.",
    "props": {
     "in": {
      "0": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BallOfConfusion.cpp:571 hands this jack to paramValue(), defined at src/controller/BallOfConfusion.cpp:186: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -1 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "1": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BallOfConfusion.cpp:573 hands this jack to paramValue(), defined at src/controller/BallOfConfusion.cpp:186: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -1 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "2": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BallOfConfusion.cpp:575 hands this jack to paramValue(), defined at src/controller/BallOfConfusion.cpp:186: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -1 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "3": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/BallOfConfusion.cpp:716 takes this jack’s getChannels() as the channel count for the whole oscillator, line 728 adds getVoltageSimd() to the pitch, and src/model/Oscillator.hpp:111 raises 2 to that pitch, so a volt is an octave. Line 755 sets the output to the same channel count."
      },
      "4": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "1V per octave",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/BallOfConfusion.cpp:729 adds getPolyVoltageSimd() times the FM AMT setting to the pitch, which src/model/Oscillator.hpp:111 raises 2 to, so at FM AMT full a volt is an octave and less at any lower setting. getPolyVoltageSimd() reads every channel, spreading a monophonic cable across them all."
      },
      "5": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BallOfConfusion.cpp:710 hands this jack to paramValue(), defined at src/controller/BallOfConfusion.cpp:186: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "6": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/controller/BallOfConfusion.cpp:733 reads getPolyVoltageSimd()/5.0 and clamps it to 0 through 1, so 5V is the whole cycle and anything below 0V reads as 0."
      },
      "7": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "step": "stepped",
+      "why": "src/controller/BallOfConfusion.cpp:738 hands getPolyVoltageSimd() to the oscillator, and src/model/Oscillator.hpp:146 detects a sync on the upward crossing of 0V rather than against a threshold. Line 737 turns syncing on only while a cable is patched."
      },
      "8": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BallOfConfusion.cpp:713 hands this jack to paramValue(), defined at src/controller/BallOfConfusion.cpp:186: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "9": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BallOfConfusion.cpp:579 hands this jack to paramValue(), defined at src/controller/BallOfConfusion.cpp:186: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -64 to 64, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "10": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/BallOfConfusion.cpp:582 hands this jack to paramValue(), defined at src/controller/BallOfConfusion.cpp:186: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 1 to 4, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "11": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/BallOfConfusion.cpp:585 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The maker crosses the two jacks over here, commenting “Axis are reversed”, because the harmonic grid is a CellVerticalBarGrid whose bands run across the screen."
      },
      "12": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: BallOfConfusionModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/BallOfConfusion.cpp:586 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The maker crosses the two jacks over here, commenting “Axis are reversed”, because the harmonic grid is a CellVerticalBarGrid whose values run up the screen."
+     }
+    },
+    "out": {
+     "0": {
+      "poly": true,
+      "range": "±5V",
+      "why": "src/controller/BallOfConfusion.cpp:750 writes 5 times an interpolated wavetable value held in 0 to 1 by src/model/Interpolate.hpp, and line 755 sets the channel count from the V/Oct jack."
      }
     }
    }
@@ -980,119 +1239,211 @@
     "in": {
      "0": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "why": "src/controller/HarmonicConvergence.cpp:275 reads this jack with a bare getVoltage(); line 315 adds the feedback and multiplies by the window value before the FFT, with no scaling or clamp. Line 272 tests isConnected() to decide whether this side is morphed with the other."
      },
      "1": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "normal": "0V",
+      "why": "src/controller/HarmonicConvergence.cpp:276 reads this jack with a bare getVoltage() and line 316 feeds it to the second FFT. Nothing is normalled to it; line 273 tests isConnected() to decide whether this side is morphed with the other."
      },
      "2": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:464 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "3": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:465 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "4": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:469 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "5": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:470 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "6": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:545 loops to this jack’s getChannels() and reads getVoltage(i) per channel; the README at line 154 says the frequency modulation inputs are polyphonic and that the two jacks together carry up to 32. Line 547 multiplies each channel by 2000, the maker’s comment giving ±5V as ±10000Hz."
      },
      "7": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:550 loops to this jack’s getChannels() and reads getVoltage(i) per channel; the README at line 154 says the frequency modulation inputs are polyphonic and that the two jacks together carry up to 32. Line 552 multiplies each channel by 2000, the maker’s comment giving ±5V as ±10000Hz. Its channels are counted on from the first FM jack’s."
      },
      "8": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/controller/HarmonicConvergence.cpp:558 loops to this jack’s getChannels() and reads getVoltage(i) per channel; the README at line 157 says the RM/AM inputs are polyphonic and that the two jacks together carry up to 32. src/model/OscillatorBank.hpp:66 divides each channel by 5, and line 180 drops anything below 0 before multiplying, so a negative voltage silences rather than inverts."
      },
      "9": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/controller/HarmonicConvergence.cpp:563 loops to this jack’s getChannels() and reads getVoltage(i) per channel; the README at line 157 says the RM/AM inputs are polyphonic and that the two jacks together carry up to 32. src/model/OscillatorBank.hpp:66 divides each channel by 5, and line 180 drops anything below 0 before multiplying. Its channels are counted on from the first AM/RM jack’s."
      },
      "10": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:450 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 1 to 36, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is cast to a uint8_t, so it steps voice by voice."
      },
      "11": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:575 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 4, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is cast to a uint8_t, so it steps through the five waveforms."
      },
      "14": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:455 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -3 to 3, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "15": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:493 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "16": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:494 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "17": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:581 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 100, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "18": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:475 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "19": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:476 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "20": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:480 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "21": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:481 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "22": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:571 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -35 to 35, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is cast to an int8_t, so it steps voice by voice."
      },
      "23": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:458 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "24": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:459 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "25": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:487 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "26": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/HarmonicConvergence.cpp:488 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "27": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:389 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 3, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is cast to a uint8_t sort mode, so it steps through the four modes. It is only read when a frame has just been analysed."
      },
      "28": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:497 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "29": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:500 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "30": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: HarmonicConvergenceModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/HarmonicConvergence.cpp:269 hands this jack to paramValue(), defined at src/controller/HarmonicConvergence.cpp:253: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/controller/HarmonicConvergence.cpp:591 and 595 write the oscillator bank sum interpolated against the delayed dry signal by MIX, with no clamp, so no range can be stated. setChannels() is never called."
+     },
+     "1": {
+      "poly": false,
+      "why": "src/controller/HarmonicConvergence.cpp:588 tests this jack for isConnected(): with nothing patched here the module sums to mono on the left jack alone, and only when a cable is in does line 596 write the right side. There is no clamp."
      }
     }
    }
@@ -1260,135 +1611,243 @@
     "in": {
      "0": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test; it compares that voltage against 1V with a Schmitt trigger",
+      "range": "high above 1V",
       "step": "stepped",
-      "range": "high above 1V"
+      "negative": "ignored",
+      "why": "src/controller/FreudianSlip.cpp:517 passes the jack to a dsp::SchmittTrigger, whose Rack defaults fire above 1V and reset below 0V, and a rising edge starts playback. getVoltage() reads channel 1 only."
      },
      "2": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:552 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "3": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:553 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "4": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:557 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "5": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:558 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "6": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:765 loops to this jack’s getChannels() and reads getVoltage(i) per channel; the README at line 90 says the frequency modulation inputs are polyphonic and that the two jacks together carry up to 32. Line 767 multiplies each channel by 2000, the maker’s comment giving ±5V as ±10000Hz."
      },
      "7": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:770 loops to this jack’s getChannels() and reads getVoltage(i) per channel; the README at line 90 says the frequency modulation inputs are polyphonic and that the two jacks together carry up to 32. Line 772 multiplies each channel by 2000, the maker’s comment giving ±5V as ±10000Hz. Its channels are counted on from the first FM jack’s."
      },
      "8": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/controller/FreudianSlip.cpp:779 loops to this jack’s getChannels() and reads getVoltage(i) per channel; the README at line 94 says the RM/AM inputs are polyphonic and that the two jacks together carry up to 32. src/model/OscillatorBank.hpp:66 divides each channel by 5, and line 180 drops anything below 0 before multiplying, so a negative voltage silences rather than inverts."
      },
      "9": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "0 to 5V",
+      "step": "continuous",
+      "negative": "ignored",
+      "why": "src/controller/FreudianSlip.cpp:784 loops to this jack’s getChannels() and reads getVoltage(i) per channel; the README at line 94 says the RM/AM inputs are polyphonic and that the two jacks together carry up to 32. src/model/OscillatorBank.hpp:66 divides each channel by 5, and line 180 drops anything below 0 before multiplying. Its channels are counted on from the first AM/RM jack’s."
      },
      "10": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/FreudianSlip.cpp:536 hands this jack to paramValue(), defined at src/controller/FreudianSlip.cpp:309: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 1 to 32, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is cast to a uint8_t, so it steps voice by voice."
      },
      "11": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "stepped",
+      "negative": "subtracts",
+      "why": "src/controller/FreudianSlip.cpp:546 hands this jack to paramValue(), defined at src/controller/FreudianSlip.cpp:309: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 4, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. The result is cast to a uint8_t, so it steps through the five waveforms."
      },
      "12": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/FreudianSlip.cpp:541 hands this jack to paramValue(), defined at src/controller/FreudianSlip.cpp:309: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans -3 to 3, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels. Line 543 then turns that figure into a rate multiplier of 1 plus it above zero and one over 1 minus it below, which matches an octave only at 1 and −1."
      },
      "13": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/FreudianSlip.cpp:626 hands this jack to paramValue(), defined at src/controller/FreudianSlip.cpp:309: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "14": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/FreudianSlip.cpp:627 hands this jack to paramValue(), defined at src/controller/FreudianSlip.cpp:309: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "15": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:563 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "16": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:564 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "17": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:568 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "18": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:569 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "19": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/FreudianSlip.cpp:623 hands this jack to paramValue(), defined at src/controller/FreudianSlip.cpp:309: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "20": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:598 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "21": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:599 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "22": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:600 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "23": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:590 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "24": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:591 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "25": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:592 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "26": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:574 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "27": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:575 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "28": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:576 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "29": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:582 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "30": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:583 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "31": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/FreudianSlip.cpp:584 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "32": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: FreudianSlipModule::process reads this port at voltages[0] behind an isConnected test; it compares that voltage against 1V with a Schmitt trigger",
+      "range": "high above 1V",
       "step": "stepped",
-      "range": "high above 1V"
+      "negative": "ignored",
+      "why": "src/controller/FreudianSlip.cpp:496 adds this jack’s voltage to the LOOP button and passes the total to a dsp::SchmittTrigger, whose Rack defaults fire above 1V and reset below 0V. Because the button is added rather than tested separately, a cable held above 1V keeps the trigger high and the button then cannot toggle. getVoltage() reads channel 1 only."
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/controller/FreudianSlip.cpp:804 and 807 write the oscillator bank sum with no clamp, so no range can be stated. setChannels() is never called."
+     },
+     "1": {
+      "poly": false,
+      "why": "src/controller/FreudianSlip.cpp:803 tests this jack for isConnected(): with nothing patched here the module sums to mono on the left jack alone, and only when a cable is in do lines 808 and 811 write the right side."
+     },
+     "2": {
+      "poly": false,
+      "range": "0 to 10V",
+      "step": "stepped",
+      "why": "src/controller/FreudianSlip.cpp:816 writes 10V while a pulse triggered at line 693 for 1ms is running and 0V otherwise. setChannels() is never called."
      }
     }
    }
@@ -1414,7 +1873,7 @@
     "Adds an offset to every stop point on the STOP grid, 5V covering the whole sample",
     "Slides the STOP drawing across the voices, 5V covering the whole height of the grid",
     "Adds to the rotation of the STOP grid, 5V being 180 degrees",
-    "Adds six times its own setting to every speed drawn on the SPEED grid, so past half a unit every voice is pinned to the ±3 limit; at a speed of 0 grains are taken from the start point instead",
+    "Adds to every speed drawn on the SPEED grid, -3 to 3, where a negative speed plays that slot backward; at a speed of 0 grains are taken from the start point instead",
     "Adds an offset to every speed on the SPEED grid, 5V covering the whole -3 to 3 range",
     "Slides the SPEED drawing across the voices, 5V covering the whole height of the grid",
     "Adds to the rotation of the SPEED grid, 5V being 180 degrees",
@@ -1565,166 +2024,286 @@
      "1": "audio"
     }
    },
-   "notes": "Thirty-one inputs, a reset input, two parameters and a third output are declared with no widget on the panel and are left untagged. The two V/OCT inputs match a volt per octave only at one volt either side of zero; past that the code adds the voltage to a rate multiplier rather than scaling exponentially.",
+   "notes": "The two REVERSE jacks are numbered the other way round from the way they sit on the panel: index 66, named Reverese Live Grains, is the right-hand jack and index 67, Reverse Sample Grains, the left-hand one. The README describes them left to right, “the first for samples, the second for live inputs”, and that agrees with the panel; the code settles it at GrainsOfWrath.cpp:678 and 695, where the samples jack is read per sample slot and the live jack per live voice. Thirty-one inputs, a reset input, two parameters and a third output are declared with no widget on the panel and are left untagged; the reset input is never read in process either. A monophonic cable in FREEZE or either REVERSE jack acts on every voice at once, because the code only indexes by voice when the cable carries more than one channel. The two V/OCT inputs match a volt per octave only at one volt either side of zero; past that the code adds the voltage to a rate multiplier rather than scaling exponentially.",
    "props": {
     "in": {
      "0": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "why": "src/controller/GrainsOfWrath.cpp:693 loops to this jack’s getChannels() and line 716 writes getVoltage(liveInputIndex) into that channel’s own buffer; the README at line 112 says up to 16 live inputs can be used. Line 663 divides the signal by a density dependent figure before it is recorded, and nothing clamps it, so no range can be stated."
      },
      "32": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:540 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "33": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:541 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "34": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:542 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "35": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:548 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "36": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:549 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "37": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:550 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "38": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:556 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "39": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:557 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "40": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:558 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "41": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:566 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "42": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:567 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "43": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:568 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "44": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:583 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "45": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:584 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "46": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:585 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "47": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:591 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "48": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:592 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "49": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:593 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "50": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:594 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftEX, and src/model/Cells.hpp:441 adds that figure to the extended value of every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "51": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:595 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftEY, and src/model/Cells.hpp:417 adds that figure times the grid’s height to the extended band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "52": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:596 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateEX, and src/model/Cells.hpp:446 takes the cosine of pi times that figure and tilts the extended values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "53": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:573 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "54": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:574 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "55": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:575 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "56": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:608 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftX, and src/model/Cells.hpp:334 adds that figure times the grid’s full value range to every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "57": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:609 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftY, and src/model/Cells.hpp:309 adds that figure times the grid’s height to every band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "58": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:610 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateX, and src/model/Cells.hpp:353 takes the cosine of pi times that figure and tilts the drawn values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "59": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:611 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftEX, and src/model/Cells.hpp:441 adds that figure to the extended value of every band. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "60": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:612 reads this jack as getVoltage()/5.0 and stores it as the grid’s shiftEY, and src/model/Cells.hpp:417 adds that figure times the grid’s height to the extended band position. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "61": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "±5V",
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:613 reads this jack as getVoltage()/5.0 and stores it as the grid’s rotateEX, and src/model/Cells.hpp:446 takes the cosine of pi times that figure and tilts the extended values by it. Nothing clamps it, so 5V is the whole sweep and a negative voltage moves the other way. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "62": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/GrainsOfWrath.cpp:662 hands this jack to paramValue(), defined at src/controller/GrainsOfWrath.cpp:290: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0.1 to 1000, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "63": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test, with no channel loop anywhere in the plugin for it"
+      "range": "0 to 10V",
+      "step": "continuous",
+      "negative": "subtracts",
+      "why": "src/controller/GrainsOfWrath.cpp:667 hands this jack to paramValue(), defined at src/controller/GrainsOfWrath.cpp:290: the jack’s voltage divided by 10 and multiplied by the knob’s full span is added to the knob, and the total is clamped to the knob’s own limits. This call spans 0 to 1, so 10V covers the whole span and a negative voltage subtracts. getVoltage() reads channel 1, and nothing loops over this jack’s channels."
      },
      "64": {
       "poly": false,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads this port at voltages[0] behind an isConnected test; it compares that voltage against 1V with a Schmitt trigger",
+      "range": "high above 1V",
       "step": "stepped",
-      "range": "high above 1V"
+      "negative": "ignored",
+      "why": "src/controller/GrainsOfWrath.cpp:724 passes the jack to a dsp::SchmittTrigger, whose Rack defaults fire above 1V and reset below 0V, and each rising edge spawns a grain. Line 723 tests isConnected() and runs the internal density timer instead when nothing is patched. getVoltage() reads channel 1 only."
      },
      "65": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/controller/GrainsOfWrath.cpp:694 reads getVoltage(liveInputIndex) when this jack’s getChannels() is other than 1, giving one channel per live voice, and the README at line 124 says the FREEZE input is polyphonic. In trigger mode line 708 passes it to a dsp::SchmittTrigger firing above 1V; in gate mode line 697 tests it for greater than 0 instead, so 1V is high either way."
      },
      "66": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/controller/GrainsOfWrath.cpp:695 reads getVoltage(liveInputIndex) when this jack’s getChannels() is other than 1, giving one channel per live voice, and the README at line 126 says both REVERSE inputs are polyphonic. In trigger mode line 711 passes it to a dsp::SchmittTrigger firing above 1V; in gate mode line 702 tests it for greater than 0 instead, so 1V is high either way."
      },
      "67": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "range": "high above 1V",
+      "step": "stepped",
+      "negative": "ignored",
+      "why": "src/controller/GrainsOfWrath.cpp:678 reads getVoltage(sampleIndex) when this jack’s getChannels() is other than 1, giving one channel per sample slot, and the README at line 126 says both REVERSE inputs are polyphonic. In trigger mode line 686 passes it to a dsp::SchmittTrigger firing above 1V; in gate mode line 680 tests it for greater than 0 instead, so 1V is high either way."
      },
      "69": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:745 reads getVoltage(voice) with the grain’s own sample slot as the channel index, so each of the sixteen slots takes its own channel. Line 746 turns the voltage into a rate multiplier of 1 plus it above zero and one over 1 minus it below, which matches an octave only at 1 and −1, so no range in volts per octave can be stated."
      },
      "70": {
       "poly": true,
-      "why": "FrequencyDomain 2.0.3 binary: GrainsOfWrathModule::process reads every channel of this port, its channels byte serving as the loop bound"
+      "step": "continuous",
+      "negative": "swings",
+      "why": "src/controller/GrainsOfWrath.cpp:745 reads getVoltage(voice minus 16) with the grain’s own live voice as the channel index, so each live voice takes its own channel. Line 746 turns the voltage into a rate multiplier of 1 plus it above zero and one over 1 minus it below, which matches an octave only at 1 and −1."
+     }
+    },
+    "out": {
+     "0": {
+      "poly": false,
+      "why": "src/controller/GrainsOfWrath.cpp:763 writes the sum of every live grain panned left, with no clamp, so no range can be stated. setChannels() is never called."
+     },
+     "1": {
+      "poly": false,
+      "why": "src/controller/GrainsOfWrath.cpp:764 writes the sum of every live grain panned right, with no clamp, so no range can be stated. setChannels() is never called."
      }
     }
    }

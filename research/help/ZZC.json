@@ -117,9 +117,10 @@
      "3": {
       "poly": false,
       "range": "high above 1V",
+      "step": "stepped",
       "negative": "ignored",
       "normal": "no external clock",
-      "why": "Clock.cpp:356, 386, 433"
+      "why": "Clock.cpp:112 detectMode switches the module to external-clock mode as soon as a cable is here; :206 clockTracker.process counts this jack's rises past 1V (shared.hpp:79-98) and sets the BPM from the period once three have passed; :236 oscillator.adjustPhase pulls the internal phase onto each rise"
      },
      "4": {
       "poly": false,
@@ -424,7 +425,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "silence",
-      "why": "SC-VCA.cpp:69-73, the same processChannel on SIG2_INPUT"
+      "why": "SC-VCA.cpp:209-215 hands this jack to processChannel, which at :74-77 loads every one of its polyphonic channels, :83-112 multiplies them by the GAIN knob and CV, :156 soft-clips them to the CLIP ceiling, and :169-171 writes the same channel count to SIG 2 OUT"
      },
      "3": {
       "poly": true,
@@ -1194,16 +1195,17 @@
      "5": {
       "poly": false,
       "range": "high above 1V",
+      "step": "stepped",
       "negative": "ignored",
       "normal": "no trigger",
-      "why": "Phaseque.cpp:97+ goToInputTrigger, processPatternNav"
+      "why": "Phaseque.cpp:157 goToInputTrigger.process crosses 1V and jumps to the pattern PTRN names at :160, or to the first non-empty pattern at :165 where PTRN is unpatched; :167 a level held above 1V jumps again each time PTRN names a different pattern"
      },
      "6": {
       "poly": false,
       "step": "stepped",
       "negative": "swings",
       "normal": "pattern 1",
-      "why": "Phaseque.hpp:439 configInput 'Pattern Select, V/12P'; one twelfth of a volt per pattern, as the PTRN output at Phaseque.cpp:989"
+      "why": "Phaseque.cpp:155 floors this jack's voltage times 12 and wraps it over the 32 patterns, so it is one twelfth of a volt per pattern and not per octave; :151 reads it only while GOTO has a cable in it"
      },
      "7": {
       "poly": false,

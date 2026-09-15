@@ -177,7 +177,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Igc.cpp:248 puts this input through a Schmitt trigger at its default 1V threshold"
+      "why": "Igc.cpp:245 tests this jack with isConnected, and a cable in it switches the delay away from the time the DELAY knob sets on its own into clock mode. Line 249 then reads the jack with getVoltage, channel 0 only, into a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low; each edge divides the samples counted since the previous edge by the sample rate, multiplies by the PPQN setting and makes that the target delay time, capped at 10 seconds, which the running delay time then creeps toward at one part in ten thousand per sample. Every PPQN-th edge also zeroes the writing phase."
      },
      "4": {
       "poly": true,
@@ -297,7 +297,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Igc.cpp:305 puts this input through a Schmitt trigger at its default 1V threshold, in Phase beat mode only"
+      "why": "Igc.cpp:301 reaches this jack only while the module is in Phase beat mode. Inside that branch line 305 reads it with getVoltage, channel 0 only, into a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and an edge sets the writing phase to zero. In every other mode nothing in process reads this jack at all."
      }
     },
     "out": {
@@ -1738,7 +1738,7 @@
       "range": "high above 5V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "TrackerControl.cpp:103 treats 5V and above as run in gate mode; line 114 puts the same jack through a Schmitt trigger at its default 1V threshold in trigger mode"
+      "why": "TrackerControl.cpp:102 reads this jack with getVoltage, channel 0 only, and compares the level itself: 5V or more starts the timeline and anything below stops it, so in gate mode this is a level and not an edge, and a patched cable resting at 0V holds the tracker stopped. With the run switch set to trigger instead, line 113 puts the same jack through a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low and each edge toggles between running and stopped."
      },
      "1": {
       "poly": false,
@@ -1751,7 +1751,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "TrackerControl.cpp:172 puts this input through a Schmitt trigger at its default 1V threshold"
+      "why": "TrackerControl.cpp:172 reads this jack with getVoltage, channel 0 only, into a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. An edge calls the timeline's stop and then resets the clock, so it halts playback and puts the clock back to zero rather than restarting the song."
      },
      "3": {
       "poly": false,
@@ -1904,7 +1904,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Regex.cpp:90 puts this input through a Schmitt trigger at its default 1V threshold"
+      "why": "Regex.cpp:90 reads this jack with getVoltage, channel 0 only, into a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. Every sequence starts its own reset from that edge, at RegexSeq-process.cpp:33 in clock mode and :94 in pitch mode, and a sequence's own reset jack is added on top rather than replacing it. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "1": {
       "poly": false,
@@ -1912,7 +1912,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Regex.cpp:89 puts this input through a Schmitt trigger at its default 1V threshold"
+      "why": "Regex.cpp:89 reads this jack with getVoltage, channel 0 only, into a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. RegexSeq-process.cpp:30 in clock mode and :93 in pitch mode give that edge to a sequence only while that sequence's own 1 jack is empty, so a cable in a sequence's 1 jack cuts this jack out of that sequence entirely. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "38": {
       "poly": false,
@@ -1928,7 +1928,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "14": {
       "poly": false,
@@ -1936,7 +1936,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "26": {
       "poly": false,
@@ -1949,7 +1949,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "15": {
       "poly": false,
@@ -1957,7 +1957,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "27": {
       "poly": false,
@@ -1970,7 +1970,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "16": {
       "poly": false,
@@ -1978,7 +1978,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "28": {
       "poly": false,
@@ -1991,7 +1991,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "17": {
       "poly": false,
@@ -1999,7 +1999,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "29": {
       "poly": false,
@@ -2012,7 +2012,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "18": {
       "poly": false,
@@ -2020,7 +2020,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "30": {
       "poly": false,
@@ -2033,7 +2033,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "19": {
       "poly": false,
@@ -2041,7 +2041,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "31": {
       "poly": false,
@@ -2054,7 +2054,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "20": {
       "poly": false,
@@ -2062,7 +2062,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "32": {
       "poly": false,
@@ -2075,7 +2075,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "21": {
       "poly": false,
@@ -2083,7 +2083,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "33": {
       "poly": false,
@@ -2327,7 +2327,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Regex.cpp:90 puts this input through a Schmitt trigger at its default 1V threshold"
+      "why": "Regex.cpp:90 reads this jack with getVoltage, channel 0 only, into a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. Every sequence starts its own reset from that edge, at RegexSeq-process.cpp:33 in clock mode and :94 in pitch mode, and a sequence's own reset jack is added on top rather than replacing it. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "1": {
       "poly": false,
@@ -2335,7 +2335,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Regex.cpp:89 puts this input through a Schmitt trigger at its default 1V threshold"
+      "why": "Regex.cpp:89 reads this jack with getVoltage, channel 0 only, into a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. RegexSeq-process.cpp:30 in clock mode and :93 in pitch mode give that edge to a sequence only while that sequence's own 1 jack is empty, so a cable in a sequence's 1 jack cuts this jack out of that sequence entirely. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "38": {
       "poly": false,
@@ -2351,7 +2351,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "14": {
       "poly": false,
@@ -2359,7 +2359,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "26": {
       "poly": false,
@@ -2372,7 +2372,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "15": {
       "poly": false,
@@ -2380,7 +2380,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "27": {
       "poly": false,
@@ -2393,7 +2393,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "16": {
       "poly": false,
@@ -2401,7 +2401,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "28": {
       "poly": false,
@@ -2414,7 +2414,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "17": {
       "poly": false,
@@ -2422,7 +2422,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "29": {
       "poly": false,
@@ -2435,7 +2435,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "18": {
       "poly": false,
@@ -2443,7 +2443,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "30": {
       "poly": false,
@@ -2456,7 +2456,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "19": {
       "poly": false,
@@ -2464,7 +2464,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "31": {
       "poly": false,
@@ -2477,7 +2477,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "20": {
       "poly": false,
@@ -2485,7 +2485,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "32": {
       "poly": false,
@@ -2498,7 +2498,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "21": {
       "poly": false,
@@ -2506,7 +2506,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "33": {
       "poly": false,
@@ -2519,7 +2519,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "22": {
       "poly": false,
@@ -2527,7 +2527,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "34": {
       "poly": false,
@@ -2540,7 +2540,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "23": {
       "poly": false,
@@ -2548,7 +2548,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "35": {
       "poly": false,
@@ -2561,7 +2561,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "24": {
       "poly": false,
@@ -2569,7 +2569,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "36": {
       "poly": false,
@@ -2582,7 +2582,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "RegexSeq-process.cpp:33 and :92 put this input through a Schmitt trigger at its default 1V threshold"
+      "why": "RegexSeq-process.cpp:34 in clock mode and :95 in pitch mode test this jack with isConnected and, while a cable is in it, lines 35 and 96 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. The result is added to the master reset already taken at :33 and :94, so this jack resets its own sequence on top of the master rather than in place of it, and an edge here leaves the other sequences alone. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "25": {
       "poly": false,
@@ -2590,7 +2590,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "the master clock jack",
-      "why": "RegexSeq-process.cpp:26 and :86 put this input through a Schmitt trigger at its default 1V threshold when it is connected, and fall back to the master clock when it is not"
+      "why": "RegexSeq-process.cpp:27 in clock mode and :90 in pitch mode test this jack with isConnected; while a cable is in it, lines 28 and 91 read it with getVoltage, channel 0 only, into that sequence's own dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low, and with the jack empty lines 30 and 93 clock that sequence from the master clock jack instead. Regex.cpp:70 returns from process on any sample whose frame number is not a multiple of eight, so this jack is only looked at once every eight samples and a pulse shorter than that can pass unseen."
      },
      "37": {
       "poly": false,
@@ -2864,7 +2864,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Tree.cpp:104 puts this input through a Schmitt trigger at its default 1V threshold"
+      "why": "Tree.cpp:107 reads this jack with getVoltage, channel 0 only, into a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. An edge discards the whole tree: the branch count goes back to one and that branch is re-initialised, so growth starts again from nothing."
      },
      "1": {
       "poly": false,
@@ -2872,7 +2872,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Tree.cpp:109 puts this input through a Schmitt trigger at its default 1V threshold"
+      "why": "Tree.cpp:112 reads this jack with getVoltage, channel 0 only, into a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. An edge sets the sequence read position back to zero and leaves the tree itself standing."
      },
      "2": {
       "poly": false,
@@ -2880,7 +2880,7 @@
       "range": "high above 1V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "Tree.cpp:112 puts this input through a Schmitt trigger at its default 1V threshold"
+      "why": "Tree.cpp:115 reads this jack with getVoltage, channel 0 only, into a dsp::TSchmittTrigger left at Rack's defaults of 1V high and 0V low. An edge here is the only thing that advances the read position, and the five outputs are written at line 173 inside that same branch, so with nothing patched they never change; the same edge is also what gives the branch just read its chance to mutate."
      },
      "3": {
       "poly": false,

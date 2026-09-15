@@ -379,7 +379,7 @@
      "5": {
       "poly": true,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
       "why": "Tf303VoiceCore.cpp:222 tests isConnected to enable the envelope and line 248 passes the gate voltage to the articulation"
      },
@@ -475,9 +475,9 @@
      "1": {
       "poly": true,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "Tf303Oscillator.cpp:179 processes it through a Schmitt trigger with thresholds of 0.1V and 1V"
+      "why": "Tf303Oscillator.cpp:179 slideTriggers.process crosses 1V and falls back below 0.1V; :180 isHigh makes the pitch glide for as long as it stays high"
      },
      "2": {
       "poly": true,
@@ -513,9 +513,9 @@
      "6": {
       "poly": true,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "Tf303Oscillator.cpp:181 passes the jack to a fractional Schmitt trigger that reports the crossing position"
+      "why": "Tf303Oscillator.cpp:181 syncTriggers.Process crosses 1V and control.hpp:52 returns the sub-sample position of the crossing, which :183 hands the oscillator as a hard sync"
      }
     }
    }
@@ -670,16 +670,16 @@
      "6": {
       "poly": true,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "Tf4072VoiceCore.cpp:405 passes the jack to ArpEnvelope::Step, whose GateHighVolts is 1.0 and GateLowVolts 0.1"
+      "why": "Tf4072VoiceCore.cpp:405 reads getPolyVoltage into ArpEnvelope::Step, whose ArpEnvelope.hpp:89 opens both envelopes at 1V and :90 releases them below 0.1V"
      },
      "7": {
       "poly": true,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "the gate input",
-      "why": "Tf4072VoiceCore.cpp:385 sets autoGateTrigger when the jack is unpatched, which makes the gate retrigger the envelopes"
+      "why": "Tf4072VoiceCore.cpp:406 reads getPolyVoltage(channel) into ArpEnvelope::Step, whose ArpEnvelope.hpp:92 tests it against TriggerHighVolts 1.0 and :99 against TriggerLowVolts 0.1, so only its rising edge is read; :385 sets autoGateTrigger when the jack is unpatched, which makes the gate retrigger the envelopes"
      }
     }
    }
@@ -781,9 +781,9 @@
      "1": {
       "poly": true,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "TfElectricPiano.cpp:325 treats a gate of 1V or more as a strike"
+      "why": "TfElectricPiano.cpp:325 strikes the key when this reads 1V or more and the voice is not already held; ElectricPiano.hpp:509 holds the note for as long as it stays there"
      },
      "2": {
       "poly": true,
@@ -803,16 +803,16 @@
      "4": {
       "poly": true,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "TfElectricPiano.cpp:321 treats 1V or more as a retrigger and line 323 acts on its rising edge"
+      "why": "TfElectricPiano.cpp:321 reads 1V or more as high and :323 takes its rising edge, which :326 uses to strike the key again while the gate is still up"
      },
      "5": {
       "poly": true,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "TfElectricPiano.cpp:320 treats 1V or more as the sustain pedal being down"
+      "why": "TfElectricPiano.cpp:320 reads 1V or more as the pedal down and passes it to ElectricPiano.hpp:586, which leaves the string undamped after the gate falls"
      }
     },
     "out": {
@@ -1556,24 +1556,24 @@
     "in": {
      "0": {
       "poly": false,
-      "range": "high above 1V",
-      "step": "continuous",
+      "range": "high above 2V",
+      "step": "stepped",
       "normal": "0V",
-      "why": "TfProgSequencer.cpp:913 reads getVoltage with no channel argument"
+      "why": "TfProgSequencer.cpp:913 reads getVoltage with no channel argument and :915 passes it to clockTrigger.process(v, 0.1f, 2.f), a dsp::SchmittTrigger declared at :184"
      },
      "1": {
       "poly": false,
       "range": "high above 2V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
       "why": "TfProgSequencer.cpp:891 processes getVoltage through a Schmitt trigger with thresholds of 0.1V and 2V"
      },
      "2": {
       "poly": false,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "high",
-      "why": "TfProgSequencer.cpp:911 treats an unpatched jack as running and otherwise requires 1V or more"
+      "why": "TfProgSequencer.cpp:911 counts an unpatched jack as running and otherwise reads 1V or more as running; :926 stops the score advancing while it is below that"
      }
     },
     "out": {

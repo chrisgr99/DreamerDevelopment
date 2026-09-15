@@ -26,8 +26,28 @@ SOURCES += $(wildcard src/*.cpp)
 # Windows or Linux compiler handed one either refuses it or wants an Objective-C runtime that
 # is not installed. On those platforms src/pinch_other.cpp supplies the same three functions.
 ifneq (,$(findstring -darwin,$(TARGET_MACHINE)))
-	SOURCES += $(wildcard src/*.mm)
+    SOURCES += $(wildcard src/*.mm)
 endif
+
+# CLARITY'S PORT COLOURS COME FROM THE HELP DATABASE, which lives in the DreamerHelp repository
+# and is edited there. src/PortFamilies.cpp is generated from it and committed, so an ordinary
+# build needs neither that repository nor the network.
+#
+# WHERE A CHECKOUT IS PRESENT, the table is refreshed automatically whenever a database file is
+# newer than it, so the only thing to remember is to pull DreamerHelp. The echo means a
+# regeneration is never silent — it leaves an uncommitted change to a tracked file, and a build
+# that quietly did that would be a build you could ship without noticing.
+HELP_REPO ?= ../DreamerHelp
+
+ifneq ($(wildcard $(HELP_REPO)/data/plugins),)
+src/PortFamilies.cpp: $(wildcard $(HELP_REPO)/data/plugins/*.yaml) tools/families.py
+	@echo "regenerating src/PortFamilies.cpp from $(HELP_REPO)"
+	@python3 tools/families.py $(HELP_REPO)
+endif
+
+.PHONY: families
+families:
+	@python3 tools/families.py $(HELP_REPO)
 
 # NO res DIRECTORY. Every panel and every face is drawn in code, so the plugin ships no
 # artwork. Listing res here worked on this machine, where an empty res/ happened to exist, and

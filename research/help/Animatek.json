@@ -239,19 +239,19 @@
       "poly": false,
       "range": "high above 1V",
       "step": "stepped",
-      "why": "UZZ.cpp:660 capiTrig.process(getVoltage()) with Rack's default SchmittTrigger thresholds"
+      "why": "UZZ.cpp:663 runs capiTrig.process on this jack's voltage at Rack's default 0V and 1V thresholds, advancing the sequence one step on a rising edge past 1V"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
       "step": "stepped",
-      "why": "UZZ.cpp:750 rstTrig.process(getVoltage())"
+      "why": "UZZ.cpp:753 runs rstTrig.process on this jack's voltage at Rack's default 0V and 1V thresholds, restarting the sequence on a rising edge past 1V"
      },
      "2": {
       "poly": false,
       "range": "high above 1V",
       "step": "stepped",
-      "why": "UZZ.cpp:694 one SchmittTrigger per row input"
+      "why": "UZZ.cpp:697 runs rndCvTrig[r], one dsp::SchmittTrigger per randomize row, on this jack's voltage at Rack's default 0V and 1V thresholds; the row is picked from rndInputIds at :684, so a rising edge past 1V rerolls that row alone"
      },
      "8": {
       "poly": false,
@@ -367,7 +367,7 @@
      },
      "6": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -657,7 +657,7 @@
     "out": {
      "0": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "why": "a 0-10V conversion multiplied by an attenuverter of -1 to +1, per the manual's attenuverter section"
      },
      "19": {
@@ -740,7 +740,7 @@
      },
      "1": {
       "poly": true,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -763,7 +763,7 @@
       "step": "continuous",
       "negative": "ignored",
       "normal": "the full ceiling",
-      "why": "unipolar and linear, 0V closing and 10V passing the ceiling, negative treated as 0V, per the manual's VCA section"
+      "why": "SideChain.cpp:234 divides this jack's channel voltage by 10 and clamps the result to 0 to 1, then multiplies the ceiling knob by it (:223-230), so 0V closes the VCA, 10V reaches the ceiling the knob sets, and a negative voltage clamps to 0"
      }
     },
     "out": {
@@ -871,7 +871,7 @@
      },
      "3": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -1022,14 +1022,14 @@
       "range": "1V per octave",
       "step": "continuous",
       "normal": "the attached sequencer, or 0V",
-      "why": "monophonic voice; pitch defaults to 0V with neither a cable nor an expander, per the manual's expander priority section"
+      "why": "Atek303.cpp:364-365 read this jack with getVoltage() while it is patched and fall back to the expander's pitch, then to 0V, when it is not; :347-348 round the volts times twelve to a MIDI note and :341-342 keep the remainder as a micro-bend"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
       "step": "stepped",
       "normal": "the attached sequencer",
-      "why": "gate hysteresis of 1V rising and 0.1V falling, per the manual's GATE section"
+      "why": "Atek303.cpp:378 tests this jack against 1V while the gate is low and 0.1V while it is high, a hand-rolled hysteresis rather than a dsp::SchmittTrigger; :372-373 fall back to the expander's gate when the jack is empty"
      },
      "2": {
       "poly": false,
@@ -1043,7 +1043,7 @@
       "range": "high above 1V",
       "step": "stepped",
       "normal": "the attached sequencer",
-      "why": "the same 1V and 0.1V hysteresis as the gate, per the manual's SLIDE section"
+      "why": "Atek303.cpp:379 tests this jack against 1V while slide is low and 0.1V while it is high, a hand-rolled hysteresis rather than a dsp::SchmittTrigger; :374-375 fall back to the expander's slide when the jack is empty"
      },
      "4": {
       "poly": false,
@@ -1057,7 +1057,7 @@
     "out": {
      "0": {
       "poly": false,
-      "range": "-12 to 12V",
+      "range": "±12V",
       "why": "the output is clamped at ±12V, per the manual's OUT section"
      }
     }
@@ -1158,19 +1158,19 @@
       "poly": false,
       "range": "high above 1V",
       "step": "stepped",
-      "why": "clock and trigger detection uses Schmitt thresholds around 0.1V and 1V, per the manual's CLOCK section"
+      "why": "Atek303Seq.cpp:487 runs clockTrig.process(getVoltage(), 0.1f, 1.f), so a rising edge past 1V advances the sequencer one step"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
       "step": "stepped",
-      "why": "the same trigger detection as the clock, per the manual's RESET section"
+      "why": "Atek303Seq.cpp:479 runs resetTrig.process(getVoltage(), 0.1f, 1.f), so a rising edge past 1V restarts the pattern"
      },
      "2": {
       "poly": false,
       "range": "high above 1V",
       "step": "stepped",
-      "why": "the same trigger detection as the clock, per the manual's GEN section"
+      "why": "Atek303Seq.cpp:444 runs genTrig.process(getVoltage(), 0.1f, 1.f), so a rising edge past 1V generates a fresh pattern"
      }
     },
     "out": {

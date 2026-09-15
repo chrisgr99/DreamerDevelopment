@@ -392,7 +392,7 @@
      "1": "trigger",
      "2": "trigger",
      "3": "trigger",
-     "4": "pitch",
+     "4": "cv",
      "5": "cv",
      "6": "cv",
      "7": "cv",
@@ -414,7 +414,7 @@
      "0": {
       "poly": false,
       "step": "stepped",
-      "why": "fugue.cpp declares Clock A; a rise advances voice A one step"
+      "why": "fugue.cpp:467 getClockVoltage returns this jack for voice A, and for B and C while theirs are unpatched; :655 voice.clockTrigger.process crosses 1V to advance that voice one step"
      },
      "1": {
       "poly": false,
@@ -431,15 +431,14 @@
      "3": {
       "poly": false,
       "step": "stepped",
-      "why": "fugue.cpp declares the reset, which returns all three voices to step one"
+      "why": "fugue.cpp:632 resetTrigger.process crosses 1V, zeroes every voice's currentStep and stepCounter and re-reads each voice's step"
      },
      "4": {
       "poly": false,
       "step": "stepped",
-      "range": "1V per octave",
       "negative": "swings",
       "normal": "0V",
-      "why": "fugue.cpp declares the root CV at one volt per semitone, wrapping round"
+      "why": "fugue.cpp:553 adds round(getVoltage()) to the root knob — one volt per SEMITONE, not per octave — and :555 wraps the total mod 12; no range spelling fits a per-semitone law, so the field is dropped"
      },
      "5": {
       "poly": true,
@@ -461,7 +460,7 @@
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "why": "fugue.cpp declares the slew CV, ±5V across the whole slew range"
+      "why": "fugue.cpp:572 adds getVoltage()/5 to the slew knob and :574 clamps the total to 0 to 1, so ±5V covers the whole travel"
      },
      "8": {
       "poly": false,
@@ -633,14 +632,14 @@
       "poly": false,
       "step": "continuous",
       "range": "±5V",
-      "why": "phase.cpp declares this as the audio recorded into the first buffer"
+      "why": "phase.cpp:1520 reads it with getVoltage, so only channel 1; :851 processRecording divides by 5 before writing the buffer, so ±5V is full scale, and :1521 normals the jack to REC B IN"
      },
      "15": {
       "poly": false,
       "step": "stepped",
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "phase.cpp declares this as the record gate; while it is high the buffer is being written, and it replaces the panel button while patched"
+      "why": "phase.cpp:1528 ORs getVoltage() >= 1V with the armed REC A button rather than replacing it, and :1535 normals the same jack to REC B's gate"
      },
      "16": {
       "poly": false,
@@ -839,7 +838,7 @@
       "range": "1V per octave",
       "negative": "swings",
       "normal": "0V",
-      "why": "intone.cpp:225 declares this as the volt per octave input, the pitch of the internal oscillator or the transposition of the formants"
+      "why": "intone.cpp:263 reads it with getVoltage, so only channel 1; :286 it is the oscillator pitch as FREQ_C4 * 2^V in the default mode and :290 the formant transpose ratio 2^V in the other two"
      },
      "1": {
       "poly": false,
@@ -867,9 +866,9 @@
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
-      "negative": "ignored",
+      "negative": "subtracts",
       "normal": "0V",
-      "why": "intone.cpp:233 declares this as the vowel morph CV, 0-10V across the whole sweep"
+      "why": "intone.cpp:268 adds getVoltage()/10 to the vowel knob and :269 clamps the total to 0 to 1, so 0 to 10V covers the whole sweep and a negative subtracts from the knob"
      },
      "13": {
       "poly": false,
@@ -1093,7 +1092,7 @@
      "0": {
       "poly": false,
       "step": "stepped",
-      "why": "fugue-expander.cpp:82 declares the randomize trigger, which rolls a fresh sequence"
+      "why": "fugue-expander.cpp:135 randSeqTrigger.process crosses 1V and :136 sets randomizeRequested, which :146 hands to Fugue over the expander message to reroll its faders"
      },
      "1": {
       "poly": false,
@@ -1310,7 +1309,7 @@
      "1": "trigger",
      "2": "trigger",
      "3": "trigger",
-     "4": "pitch",
+     "4": "cv",
      "5": "cv",
      "6": "cv",
      "7": "cv",
@@ -1372,7 +1371,7 @@
      "0": {
       "poly": false,
       "step": "stepped",
-      "why": "metafugue.cpp declares Clock A; a rise advances voice A one step"
+      "why": "metafugue.cpp:589 getClockVoltage returns this jack for voice A, and for B and C while theirs are unpatched; :841 voice.clockTrigger.process crosses 1V to advance that voice one step"
      },
      "1": {
       "poly": false,
@@ -1389,15 +1388,14 @@
      "3": {
       "poly": false,
       "step": "stepped",
-      "why": "metafugue.cpp declares the reset, which returns all three voices to step one"
+      "why": "metafugue.cpp:803 resetTrigger.process crosses 1V and zeroes every voice's currentStep and stepCounter"
      },
      "4": {
       "poly": false,
       "step": "stepped",
-      "range": "1V per octave",
       "negative": "swings",
       "normal": "0V",
-      "why": "metafugue.cpp declares the root CV at one volt per semitone, wrapping round"
+      "why": "metafugue.cpp:679 adds round(getVoltage()) to the root knob — one volt per SEMITONE, not per octave — and :681 wraps the total mod 12; no range spelling fits a per-semitone law, so the field is dropped"
      },
      "5": {
       "poly": true,
@@ -1419,7 +1417,7 @@
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "why": "metafugue.cpp declares the slew CV, ±5V across the whole slew range"
+      "why": "metafugue.cpp:698 adds getVoltage()/5 to the slew knob and :700 clamps the total to 0 to 1, so ±5V covers the whole travel"
      },
      "8": {
       "poly": false,
@@ -1432,7 +1430,7 @@
      "11": {
       "poly": false,
       "step": "stepped",
-      "why": "metafugue.cpp declares the randomize trigger, which rolls a fresh sequence"
+      "why": "metafugue.cpp:795 randSeqTrigger.process crosses 1V and :798 rolls every step fader to random::uniform()"
      },
      "12": {
       "poly": false,
@@ -1601,12 +1599,12 @@
       "step": "stepped",
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "meter.cpp:325 names it a run gate, which stands in for the run button"
+      "why": "meter.cpp:505 sets effectiveRunning from getVoltage() >= 1V outright while the jack is patched, so it overrides the RUN button rather than ORing with it; :515 a rise also fires doReset when Reset on play is set"
      },
      "4": {
       "poly": false,
       "step": "stepped",
-      "why": "meter.cpp:326 names it the external clock; the tempo is measured from the time between its rises"
+      "why": "meter.cpp:560 extClockTrigger.process crosses 1V and :565 turns the samples since the last rise into a tempo, using the PPQN menu setting"
      },
      "6": {
       "poly": false,
@@ -1618,7 +1616,7 @@
      "11": {
       "poly": false,
       "step": "stepped",
-      "why": "meter.cpp:327 names it the reset, which restarts the bar and is forwarded to the reset output"
+      "why": "meter.cpp:525 resetInputTrigger.process crosses 1V, calls doReset and :530 fires the Reset output pulse so downstream modules restart with it"
      }
     },
     "out": {
@@ -2285,7 +2283,7 @@
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "why": "wave.cpp:211 declares this as the velocity CV, ±5V for the whole velocity travel"
+      "why": "wave.cpp:510 adds getVoltage()*0.2 (the cv lambda at :433) to the velocity knob and clamps the total to -1 to 1, so ±5V covers the whole travel"
      },
      "4": {
       "poly": false,
@@ -2893,7 +2891,7 @@
     "out": {
      "0": {
       "poly": false,
-      "range": "-12 to 12V",
+      "range": "±12V",
       "why": "band.cpp:264 writes one channel with setVoltage, clamped to -12 to 12V"
      },
      "1": {
@@ -3011,17 +3009,17 @@
      "0": {
       "poly": false,
       "step": "stepped",
-      "why": "cycle.cpp:136 names it the optional clock, one step of the staircase and stepped-random grid per pulse"
+      "why": "cycle.cpp:175 clockTrig.process crosses 1V and measures the beat interval; :204 that sets the staircase and stepped-random step count, and only while BAR is patched and locked (:199)"
      },
      "1": {
       "poly": false,
       "step": "stepped",
-      "why": "cycle.cpp:137 names it the downbeat sync; the bar length is measured from the time between its rises"
+      "why": "cycle.cpp:210 barTrig.process crosses 1V and measures the bar length from the time between rises, which hard-aligns the cycle to the bar grid"
      },
      "2": {
       "poly": false,
       "step": "stepped",
-      "why": "cycle.cpp:138 names it the reset, which restarts the cycle"
+      "why": "cycle.cpp:161 resetTrig.process crosses 1V and :165 zeroes phase and freePhase, sets barCounter to -1 and rerolls the random values"
      },
      "3": {
       "poly": false,
@@ -3049,7 +3047,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "0V",
-      "why": "cycle.cpp:131 names it that channel's shape CV, which rotates it around the shape ring"
+      "why": "cycle.cpp:260 adds getVoltage()/10 to that channel's shape knob, left unwrapped so the total rotates around the shape ring after the link offset"
      },
      "10": {
       "poly": false,
@@ -3162,15 +3160,15 @@
      "1": {
       "poly": true,
       "step": "stepped",
-      "why": "bell.cpp:177 names this input polyphonic; a rise on a channel starts that voice and a fall releases it"
+      "why": "bell.cpp:253 getChannels sizes the voice count and :267 reads each channel with getVoltage(ch); a rise past 1V latches that channel's note and velocity and a fall below 0.1V releases it"
      },
      "2": {
       "poly": true,
       "step": "continuous",
       "range": "0 to 10V",
       "negative": "ignored",
-      "normal": "10V",
-      "why": "bell.cpp:178 names this input polyphonic; it is sampled at note-on and applied through the patch's velocity sensitivity"
+      "normal": "velocity 100 of 127",
+      "why": "bell.cpp:272 reads it per channel with getVoltage(ch) at the gate's rising edge only, scaling 0 to 10V to 1 to 127; unpatched the note takes a fixed 100 of 127"
      },
      "3": {
       "poly": false,
@@ -3201,15 +3199,15 @@
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "why": "bell.cpp:182 names it ±5V over the whole brightness range"
+      "why": "bell.cpp:310 adds getVoltage()/5 to the brightness knob and clamps the total to -1 to 1, so ±5V covers the whole travel; read once per 64-sample block"
      },
      "7": {
       "poly": false,
-      "step": "continuous",
+      "step": "stepped",
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "why": "bell.cpp:188 names it ±5V over the whole feedback range"
+      "why": "bell.cpp:338 adds getVoltage()/5*7 to the feedback knob, rounds the total to a whole number and clamps it to -7 to 7, so ±5V covers the whole travel in whole steps"
      }
     },
     "out": {
@@ -3324,70 +3322,70 @@
      "0": {
       "poly": false,
       "step": "stepped",
-      "why": "op_env.cpp declares the gate input; a rise fires the attack and a fall starts the release"
+      "why": "op_env.cpp:161 reads it with getVoltage, so only channel 1; a rise past 1V calls engine.gate(true) and a fall below 0.1V calls engine.gate(false)"
      },
      "1": {
       "poly": false,
       "step": "stepped",
       "range": "0 to 10V",
-      "negative": "ignored",
+      "negative": "subtracts",
       "normal": "0V",
-      "why": "op_env.cpp declares this as the voice select CV, 0-10V across the voice slots"
+      "why": "op_env.cpp:154 adds round(getVoltage()/10*31) to the voice knob and :155 clamps the total to the bank's voice count, so 0 to 10V spans all 32 slots and a negative subtracts from the knob"
      },
      "2": {
       "poly": false,
       "step": "stepped",
-      "negative": "ignored",
+      "negative": "subtracts",
       "normal": "0V",
-      "why": "op_env.cpp declares this as the bank select CV, one volt per bank"
+      "why": "op_env.cpp:143 adds round(getVoltage()) to the bank knob and :144 clamps the total to the loaded bank count — one volt per bank, which no range spelling fits, and a negative subtracts from the knob"
      },
      "3": {
       "poly": false,
-      "step": "continuous",
+      "step": "stepped",
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "why": "op_env.cpp declares this as that stage's rate CV, ±5V over the whole offset range"
+      "why": "op_env.cpp:180 adds getVoltage()/5*99 to that stage's rate knob, rounds the total and clamps it to -99 to 99, so ±5V covers the whole offset range"
      },
      "7": {
       "poly": false,
-      "step": "continuous",
+      "step": "stepped",
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "why": "op_env.cpp declares this as that stage's level CV, ±5V over the whole offset range"
+      "why": "op_env.cpp:182 adds getVoltage()/5*99 to that stage's level knob, rounds the total and clamps it to -99 to 99, so ±5V covers the whole offset range"
      },
      "11": {
       "poly": false,
-      "step": "continuous",
+      "step": "stepped",
       "range": "1V per octave",
       "negative": "swings",
-      "normal": "0V",
-      "why": "op_env.cpp declares this as the rate-scaling pitch input, which speeds the envelope up as the note rises"
+      "normal": "no rate scaling",
+      "why": "op_env.cpp:189 rounds getVoltage()*12+60 to a whole MIDI note, so a volt is an octave; :190 engine.setNote switches the rate scaling on only while the jack is patched, and unpatched it passes note 60 with the scaling off"
      },
      "12": {
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
-      "negative": "ignored",
+      "negative": "subtracts",
       "normal": "0V",
-      "why": "op_env.cpp declares this as the output level CV, 0-10V"
+      "why": "op_env.cpp:221 adds getVoltage()/10 to the output-level knob and clamps the total to 0 to 2, so 0 to 10V adds a whole unit on top of the knob and a negative subtracts from it"
      },
      "13": {
       "poly": false,
-      "step": "continuous",
+      "step": "stepped",
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "why": "op_env.cpp declares this as the LFO rate CV, ±5V"
+      "why": "op_env.cpp:194 adds getVoltage()/5*99 to the LFO rate knob, rounds the total and clamps it to -99 to 99, so ±5V covers the whole offset range"
      },
      "14": {
       "poly": false,
-      "step": "continuous",
+      "step": "stepped",
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "why": "op_env.cpp declares this as the LFO depth CV, ±5V"
+      "why": "op_env.cpp:196 adds getVoltage()/5*99 to the LFO depth knob, rounds the total and clamps it to -99 to 99, so ±5V covers the whole offset range"
      }
     },
     "out": {
@@ -3523,12 +3521,12 @@
      "1": {
       "poly": false,
       "step": "stepped",
-      "why": "chance.cpp declares the reset, which returns to the first active pattern"
+      "why": "chance.cpp:520 resetTrigIn.process crosses 1V and :521 zeroes curStep, drops back to the first active pattern and closes the gate"
      },
      "2": {
       "poly": false,
       "step": "stepped",
-      "why": "chance.cpp declares the randomize trigger, which rolls a fresh skeleton"
+      "why": "chance.cpp:516 randTrigIn.process crosses 1V and :517 gives the playing pattern a fresh random::u32 seed, then recomputes its cycle"
      },
      "3": {
       "poly": false,
@@ -3543,7 +3541,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "0V",
-      "sumRange": "-1 to 1V",
+      "sumRange": "±1V",
       "why": "chance.cpp:389 divides it by 10 and clamps the knob-plus-input total to the knob's own range"
      },
      "5": {
@@ -3606,14 +3604,14 @@
       "step": "stepped",
       "negative": "swings",
       "normal": "0V",
-      "why": "chance.cpp names it one volt per step, offsetting the start trimmer"
+      "why": "chance.cpp:287 adds getVoltage() to the start trimmer, rounds the total and clamps it to the node count — one volt per step, which no range spelling fits"
      },
      "13": {
       "poly": false,
       "step": "stepped",
       "negative": "swings",
       "normal": "0V",
-      "why": "chance.cpp names it one volt per step, offsetting the end trimmer; an end before the start plays the window backwards"
+      "why": "chance.cpp:288 adds getVoltage() to the end trimmer, rounds the total and clamps it to the node count — one volt per step; an end below the start plays the window backwards"
      }
     },
     "out": {
@@ -3719,12 +3717,14 @@
      "0": {
       "poly": false,
       "step": "continuous",
-      "why": "record.cpp:155 declares the left audio return, which is the signal recorded"
+      "range": "±10V",
+      "why": "record.cpp:264 divides it by 10 and clamps to ±1 as the signal measured for each capture, and :265 normals it to the right channel while R is unpatched"
      },
      "1": {
       "poly": false,
       "step": "continuous",
-      "why": "record.cpp:156 declares the right audio return, which is the signal recorded"
+      "range": "±10V",
+      "why": "record.cpp:265 divides it by 10 and clamps to ±1 as the right channel of each capture, falling back to the left jack while unpatched"
      }
     },
     "out": {
@@ -3819,7 +3819,7 @@
      "1": {
       "poly": true,
       "step": "stepped",
-      "why": "play.cpp:679 names this input polyphonic; a rise on a channel starts that voice and a fall releases it"
+      "why": "play.cpp:764 getChannels sizes the voice count and :766 reads each channel with getVoltage(ch); a rise past 1V calls noteOn with the pitch and velocity read at that instant, and a fall clears that channel's hold"
      },
      "2": {
       "poly": true,
@@ -3937,7 +3937,7 @@
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "sumRange": "-1 to 1V",
+      "sumRange": "±1V",
       "why": "ratio.cpp:70 reads it with getVoltage, so only channel 1, divides by 5 and clamps the knob-plus-input total to -1 to 1"
      },
      "6": {
@@ -4116,7 +4116,7 @@
      "0": {
       "poly": false,
       "step": "stepped",
-      "why": "arrange.cpp declares the bar input; one pulse per bar advances the arrangement"
+      "why": "arrange.cpp:148 barTrig.process crosses 1V and :152 advances barInPhase, moving to the next active phrase once the phrase's bar count is reached"
      },
      "1": {
       "poly": false,
@@ -4126,7 +4126,7 @@
      "2": {
       "poly": false,
       "step": "stepped",
-      "why": "arrange.cpp declares the reset, which returns to the first active phrase"
+      "why": "arrange.cpp:144 resetTrigIn.process crosses 1V and calls doReset, which returns to the first active phrase"
      }
     },
     "out": {
@@ -4339,7 +4339,7 @@
      "0": {
       "poly": false,
       "step": "stepped",
-      "why": "fill.cpp declares the clock input; steps fire on its edges and the module has no timebase of its own"
+      "why": "fill.cpp:1004 clockTrig.process crosses 1V — the edge is consumed every sample — and :1006 measures the interval used for swing and ratchet timing; steps fire on it, the module has no timebase of its own"
      },
      "1": {
       "poly": false,
@@ -4349,12 +4349,12 @@
      "2": {
       "poly": false,
       "step": "stepped",
-      "why": "fill.cpp declares the reset input"
+      "why": "fill.cpp:991 resetTrig.process crosses 1V and calls onReset"
      },
      "3": {
       "poly": false,
       "step": "stepped",
-      "why": "fill.cpp declares the reseed input, which rolls a fresh variation layer"
+      "why": "fill.cpp:998 reseedTrig.process crosses 1V and :1000 gives reseedBase a fresh random::u32, rolling a new variation layer"
      },
      "4": {
       "poly": false,
@@ -4620,7 +4620,7 @@
      "6": {
       "poly": false,
       "step": "stepped",
-      "why": "chime.cpp names it the clock, which syncs the rotations; the rate knob then picks how many clocks make one rotation"
+      "why": "chime.cpp:213 clockTrig.process crosses 1V and averages the interval between rises; :230 the RATE knob then picks how many of those clocks make one rotation"
      },
      "15": {
       "poly": false,
@@ -4642,9 +4642,9 @@
       "poly": false,
       "step": "stepped",
       "range": "0 to 10V",
-      "negative": "ignored",
+      "negative": "subtracts",
       "normal": "0V",
-      "why": "chime.cpp names it 0-10V across the four relate modes"
+      "why": "chime.cpp:237 adds getVoltage()*0.3 to the relate knob, rounds the total and clamps it to 0 to 3, so 0 to 10V covers all four modes and a negative subtracts from the knob"
      },
      "18": {
       "poly": false,
@@ -4788,7 +4788,7 @@
      "0": {
       "poly": false,
       "step": "continuous",
-      "why": "crystal.cpp declares this as the audio or CV entering at the first emitter"
+      "why": "crystal.cpp:1016 scales it by 0.2 and sums it with the internal exciter into emitter A of the mesh"
      },
      "1": {
       "poly": false,
@@ -4811,7 +4811,7 @@
       "step": "stepped",
       "negative": "swings",
       "normal": "0V",
-      "why": "crystal.cpp names it one volt per material, from simple to complex"
+      "why": "crystal.cpp:859 adds getVoltage() (the pv helper at :841) to the material knob, rounds the total and clamps it to the material count — one volt per material, which no range spelling fits"
      },
      "4": {
       "poly": false,
@@ -4824,7 +4824,7 @@
      "6": {
       "poly": false,
       "step": "stepped",
-      "why": "crystal.cpp declares the ping trigger, which strikes the crystal"
+      "why": "crystal.cpp:979 pingTrig.process crosses 1V and :987 restrikes the exciter, reading V/OCT at that instant"
      },
      "7": {
       "poly": false,
@@ -4832,7 +4832,7 @@
       "range": "1V per octave",
       "negative": "swings",
       "normal": "0V",
-      "why": "crystal.cpp names it the ping's volt per octave pitch"
+      "why": "crystal.cpp:987 sets the strike frequency to 261.63 * 2^V, clamped to 8 to 12000Hz, and reads the jack only at the moment of a ping"
      },
      "8": {
       "poly": false,
@@ -4845,7 +4845,7 @@
      "9": {
       "poly": false,
       "step": "continuous",
-      "why": "crystal.cpp:777 names this the audio entering at the second emitter, which is where a stereo pair's other side goes"
+      "why": "crystal.cpp:1017 scales it by 0.2 and sums it with the internal exciter into emitter B of the mesh"
      },
      "14": {
       "poly": false,
@@ -5083,12 +5083,12 @@
       "range": "1V per octave",
       "negative": "swings",
       "normal": "0V",
-      "why": "loom.cpp names it the volt per octave that transposes the whole instrument"
+      "why": "loom.cpp:571 adds getVoltage() to the octave and root offsets as basePitch, the volts every string's frequency is derived from"
      },
      "9": {
       "poly": false,
       "step": "stepped",
-      "why": "loom.cpp declares the gate input, which strums every switched-on string"
+      "why": "loom.cpp:580 gateTrig.process crosses 1V and calls strum; :626 the level is held too, so every switched-on string stays gated while it is above 1V"
      },
      "10": {
       "poly": true,
@@ -5101,12 +5101,12 @@
      "11": {
       "poly": false,
       "step": "stepped",
-      "why": "loom.cpp declares the clock, which advances the auto-player"
+      "why": "loom.cpp:588 clockTrig.process crosses 1V and :594 calls autoStep, but only while the AUTO switch is on (:585)"
      },
      "12": {
       "poly": false,
       "step": "stepped",
-      "why": "loom.cpp declares the reset, which returns the auto-player's pattern to its start"
+      "why": "loom.cpp:574 resetTrig.process crosses 1V and :576 zeroes autoIdx, autoWalk and the internal phase, restarting the auto-player's pattern"
      },
      "13": {
       "poly": false,
@@ -5126,7 +5126,7 @@
      "15": {
       "poly": false,
       "step": "stepped",
-      "why": "loom.cpp declares that string's own gate input"
+      "why": "loom.cpp:625 strTrig[i].process crosses 1V and plucks that string; :626 while the level stays above 1V the string is held gated"
      },
      "23": {
       "poly": true,
@@ -5242,7 +5242,7 @@
      "2": {
       "poly": true,
       "step": "stepped",
-      "why": "key.cpp:312 names it a polyphonic sample-and-hold trigger, one channel per output channel"
+      "why": "key.cpp:500 gives each channel its own Schmitt on getPolyVoltage(c), so a rise past 1V samples that channel; :499 with nothing patched every channel samples on every sample instead"
      },
      "3": {
       "poly": true,
@@ -5426,7 +5426,7 @@
       "step": "continuous",
       "range": "1V per octave",
       "negative": "swings",
-      "why": "slide.cpp names it a volt per octave that places the bar, after which the position knob transposes it in key"
+      "why": "slide.cpp:585 multiplies it by 12 so a volt is an octave, snaps that to the nearest scale degree (snapBar at :265) and transposes it by the position knob's degrees; :588 unpatched, the knob alone is the position"
      },
      "1": {
       "poly": false,
@@ -5479,7 +5479,7 @@
      "7": {
       "poly": true,
       "step": "stepped",
-      "why": "slide.cpp names this input polyphonic, channel N picking string N, with a single-channel cable picking every string"
+      "why": "slide.cpp:890 gives each gate channel its own Schmitt at 1V and picks the Nth NOTE, not the Nth string — the solver chooses the string; :873 a single-channel cable is one stroke, the melody string or one roll step, never a strum"
      },
      "8": {
       "poly": true,
@@ -5487,20 +5487,20 @@
       "range": "0 to 10V",
       "negative": "ignored",
       "normal": "10V",
-      "why": "slide.cpp names this input polyphonic and 0-10V"
+      "why": "slide.cpp:874 divides it by 10 and clamps to 0.03 to 1 as that stroke's velocity, read per gate channel with getPolyVoltage at :892; unpatched every stroke is full"
      },
      "9": {
       "poly": false,
       "step": "stepped",
-      "why": "slide.cpp declares the clock, which advances the roll"
+      "why": "slide.cpp:916 clockTrig.process crosses 1V and :921 calls rollStep, but only while the AUTO switch is on (:913)"
      },
      "11": {
       "poly": false,
-      "step": "continuous",
+      "step": "stepped",
       "range": "±5V",
       "negative": "swings",
       "normal": "0V",
-      "why": "slide.cpp names it ±5V sweeping all sixteen rolls"
+      "why": "slide.cpp:529 adds getVoltage()*0.1*16 to the pattern knob, rounds the total and clamps it to the sixteen rolls, so a ±5V swing sweeps the whole list"
      },
      "12": {
       "poly": false,
@@ -5620,12 +5620,12 @@
      "2": {
       "poly": false,
       "step": "stepped",
-      "why": "opmorph.cpp:132 names it the clock, which steps to the next slot"
+      "why": "opmorph.cpp:234 clockTrig.process crosses 1V and :235 advances stepIdx to the next slot, but only while the STEP switch is on (:233); :261 the shape also snaps on each rise"
      },
      "3": {
       "poly": false,
       "step": "stepped",
-      "why": "opmorph.cpp:133 names it the return to the first slot"
+      "why": "opmorph.cpp:228 resetTrig.process crosses 1V and :229 returns to slot one, zeroing the position, heading, phase and trail"
      },
      "5": {
       "poly": false,
@@ -5729,7 +5729,7 @@
      "0": {
       "poly": false,
       "step": "stepped",
-      "why": "slidex.cpp declares that string's own gate input"
+      "why": "slidex.cpp:86 copies that string's raw voltage into the expander message, and slide.cpp:907 runs it through a per-string Schmitt at 1V to pluck string 1"
      },
      "9": {
       "poly": false,
@@ -5842,7 +5842,7 @@
      "0": {
       "poly": false,
       "step": "continuous",
-      "why": "slice.cpp:354 declares the left audio input, which is written into the circular buffer"
+      "why": "slice.cpp:566 reads it with getVoltage and :569 writes it into the circular buffer unless FREEZE is high; :567 normals it to the right channel while R is unpatched"
      },
      "1": {
       "poly": false,
@@ -5858,12 +5858,12 @@
      "3": {
       "poly": false,
       "step": "stepped",
-      "why": "slice.cpp:357 declares the bar input, which turns REACH from slices into bars"
+      "why": "slice.cpp:526 barTrig.process crosses 1V and :527 measures barLen from the time between rises, which is what makes REACH count bars instead of slices (:416)"
      },
      "4": {
       "poly": false,
       "step": "stepped",
-      "why": "slice.cpp:358 declares the reset, which returns the grid and the pattern to their start"
+      "why": "slice.cpp:532 resetTrig.process crosses 1V and :533 zeroes sliceIdx and slicePos and cancels the crossfade"
      },
      "5": {
       "poly": false,
@@ -5875,7 +5875,7 @@
      "6": {
       "poly": false,
       "step": "stepped",
-      "why": "slice.cpp:360 declares the reseed trigger, which rolls fresh choices"
+      "why": "slice.cpp:547 reseedTrig.process crosses 1V and :548 rehashes the seed, rolling fresh choices"
      },
      "7": {
       "poly": false,
@@ -5895,10 +5895,10 @@
      },
      "9": {
       "poly": false,
-      "step": "stepped",
+      "step": "continuous",
       "negative": "swings",
       "normal": "0V",
-      "why": "slice.cpp:363 names it the effect CV at one volt per effect, summed with the effect switch"
+      "why": "slice.cpp:680 adds a fifth of this jack's voltage to the DEPTH knob and clamps the total to 0 to 1 as the wet-dry mix, with no rounding"
      },
      "10": {
       "poly": false,
@@ -6045,15 +6045,15 @@
      "0": {
       "poly": false,
       "step": "stepped",
-      "why": "kit.cpp declares the gate input; a rising edge strikes the drum"
+      "why": "kit.cpp:269 gateTrig.process crosses 1V and strikes the drum on the rise"
      },
      "1": {
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
       "negative": "ignored",
-      "normal": "10V",
-      "why": "kit.cpp names it velocity, 0-10V"
+      "normal": "7V",
+      "why": "kit.cpp:271 multiplies it by 0.1 and clamps to 0.02 to 1 as the strike velocity, read at the gate's rise; unpatched every strike takes 0.7, which is what 7V would give"
      },
      "2": {
       "poly": false,
@@ -6061,7 +6061,7 @@
       "range": "1V per octave",
       "negative": "swings",
       "normal": "0V",
-      "why": "kit.cpp names it a volt per octave"
+      "why": "kit.cpp:225 multiplies the drum's base frequency by 2^V, so a volt is an octave; :224 unpatched the frequency is left alone"
      },
      "3": {
       "poly": false,
@@ -6248,7 +6248,7 @@
      "5": {
       "poly": false,
       "step": "stepped",
-      "why": "trace.cpp declares the clock input, which advances the paper"
+      "why": "trace.cpp:447 clockTrig.process crosses 2V, not 1V, and :453 measures samplesPerClock from the time between rises; :481 that sets how fast the paper scrolls"
      },
      "6": {
       "poly": false,
@@ -6281,19 +6281,19 @@
       "step": "stepped",
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "trace.cpp declares the run gate, which stands in for the run button"
+      "why": "trace.cpp:422 sets running from getVoltage() >= 1V outright while the jack is patched, so it overrides the RUN button rather than ORing with it"
      },
      "11": {
       "poly": false,
       "step": "stepped",
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "trace.cpp declares the reverse gate, which stands in for the reverse button"
+      "why": "trace.cpp:524 inverts the scroll direction while getVoltage() >= 1V, on top of whatever the REV button has set"
      },
      "12": {
       "poly": false,
       "step": "stepped",
-      "why": "trace.cpp declares the reset input"
+      "why": "trace.cpp:432 resetTrigIn.process crosses 2V, not 1V, and :538 zeroes paperPos and barCount"
      },
      "13": {
       "poly": false,
@@ -6305,9 +6305,10 @@
      "17": {
       "poly": false,
       "step": "continuous",
+      "range": "0 to 10V",
       "negative": "ignored",
       "normal": "0V",
-      "why": "trace.cpp declares that lane's thickness input, which is also its velocity"
+      "why": "trace.cpp:777 clamps getVoltage()*0.1 to 0 to 1 and SETS that lane's ink to it, replacing the INK knob's accumulation while the jack is patched"
      },
      "21": {
       "poly": false,
@@ -6470,7 +6471,7 @@
      "1": {
       "poly": true,
       "step": "stepped",
-      "why": "sigma.cpp names this input polyphonic; a rise on a channel starts that voice and a fall releases it"
+      "why": "sigma.cpp:1146 getChannels sizes the voice count and :1171 reads each channel with getVoltage(ch) >= 1V; the rise latches that channel's pitch and velocity"
      },
      "2": {
       "poly": true,
@@ -6478,7 +6479,7 @@
       "range": "0 to 10V",
       "negative": "ignored",
       "normal": "10V",
-      "why": "sigma.cpp names this input polyphonic; it crossfades the voice between the two spectra"
+      "why": "sigma.cpp:1207 clamps getPolyVoltage(c)*0.1 to 0 to 1, latched at the gate's rise; :1211 it sets that voice's level and :1268 morphs it between the two spectra; unpatched every note is full"
      },
      "3": {
       "poly": false,
@@ -6503,7 +6504,7 @@
      "12": {
       "poly": false,
       "step": "stepped",
-      "why": "sigma.cpp declares that oscillator's sync input, which restarts its phase"
+      "why": "sigma.cpp:1122 lfoSyncTrig.process crosses 2V, not 1V, and :1123 zeroes that LFO's phase"
      },
      "15": {
       "poly": false,
@@ -6610,40 +6611,40 @@
       "step": "continuous",
       "range": "1V per octave",
       "negative": "swings",
-      "why": "touch.cpp:133 names this the melody's volt per octave input, one note at a time"
+      "why": "touch.cpp:210 reads it with getVoltage as the note's pitch in volts (:228 req.pitchVolts); :218 a change of more than 0.04V under a held gate is itself a new note"
      },
      "1": {
       "poly": false,
       "step": "stepped",
-      "why": "touch.cpp:134 declares the gate; a rise starts a note and a fall ends it"
+      "why": "touch.cpp:213 gateTrig.process crosses 1V for a new note, and :212 a level above 1V is what lets a pitch change count as one; :223 with nothing patched the pitch changes alone drive it"
      },
      "2": {
       "poly": false,
       "step": "stepped",
-      "why": "touch.cpp:135 declares the accent, which forces a fresh attack"
+      "why": "touch.cpp:201 accentTrig.process crosses 1V and holds for 3ms; :255 that hold, or a level above 1V, sets req.forceAttack so the note is struck rather than slid into"
      },
      "3": {
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
       "negative": "ignored",
-      "normal": "0V",
-      "why": "touch.cpp:136 names it velocity, 0-10V"
+      "normal": "5V",
+      "why": "touch.cpp:249 divides it by 10 and clamps to 0 to 1 as req.accent, read once at each new note; unpatched every note takes 0.5, which is what 5V would give"
      },
      "4": {
       "poly": false,
       "step": "stepped",
-      "why": "touch.cpp:137 declares the clock, which supplies beat strength and the deadline for a glide"
+      "why": "touch.cpp:184 clockTrig.process crosses 1V, :188 one-poles the measured period and :190 counts the clocks; :242 that count gives the note its beat strength and :262 the period sets the glide's deadline"
      },
      "5": {
       "poly": false,
       "step": "stepped",
-      "why": "touch.cpp:138 declares the bar input, which marks the start of a phrase"
+      "why": "touch.cpp:192 barTrig.process crosses 1V and :195 takes clocksPerBar from the clocks counted since the last rise, then marks the next note a phrase start"
      },
      "6": {
       "poly": false,
       "step": "stepped",
-      "why": "touch.cpp:139 declares the reset"
+      "why": "touch.cpp:172 resetTrig.process crosses 1V and calls onReset"
      },
      "7": {
       "poly": false,
@@ -6902,7 +6903,7 @@
      "31": "cv",
      "32": "cv",
      "33": "cv",
-     "34": "pitch",
+     "34": "cv",
      "35": "cv",
      "36": "cv",
      "37": "cv",
@@ -6985,12 +6986,12 @@
      "8": {
       "poly": false,
       "step": "stepped",
-      "why": "wheel.cpp declares the coup trigger, which fires a stroke at full strength"
+      "why": "wheel.cpp:558 coupTrig.process crosses 1V and sets the stroke to 1.2, the hardest available, whatever DOG has set"
      },
      "9": {
       "poly": false,
       "step": "stepped",
-      "why": "wheel.cpp names it one revolution of the wheel per pulse"
+      "why": "wheel.cpp:517 clockTrig.process crosses 1V, :518 takes one revolution as the time since the last rise and :524 pulls the wheel phase toward zero rather than snapping it"
      },
      "10": {
       "poly": false,
@@ -7010,10 +7011,9 @@
      "34": {
       "poly": false,
       "step": "stepped",
-      "range": "1V per octave",
       "negative": "swings",
       "normal": "0V",
-      "why": "wheel.cpp names it one volt per octave for the root voice"
+      "why": "wheel.cpp:481 rounds getVoltage() to whole volts and :483 multiplies by scale.period for voice 1 — one volt per scale period, an octave only while that period is 12 semitones, so no range spelling fits"
      },
      "35": {
       "poly": false,

@@ -1,0 +1,143 @@
+# SynthesizersDotCom — what the manual says
+
+Author: Vult-DSP
+Declared manual: https://shop.synthesizers.com/collections/all-modules
+Source published: none
+
+Read `research/help/MANUAL-CHECK-BRIEF.md` before starting.
+
+133 ports below were settled from the binary. For each, record agrees / differs / silent.
+
+- Q105 in0 — poly=True, range=high above 1V
+- Q105 in1 — poly=True
+- Q105 out0 — poly=True
+- Q106 in0 — poly=True
+- Q106 in1 — poly=True
+- Q106 in2 — poly=True
+- Q106 in3 — poly=True, range=1V per octave
+- Q106 in4 — poly=True, range=1V per octave
+- Q106 in5 — poly=True
+- Q106 out0 — poly=True
+- Q106 out1 — poly=True
+- Q106 out2 — poly=True
+- Q106 out3 — poly=True
+- Q106 out4 — poly=True
+- Q107 in0 — poly=True, range=1V per octave
+- Q107 in1 — poly=True
+- Q107 in2 — poly=True
+- Q107 in3 — poly=True
+- Q107 in4 — poly=True
+- Q107 out0 — poly=True
+- Q107 out1 — poly=True
+- Q107 out2 — poly=True
+- Q107 out3 — poly=True
+- Q108 in0 — poly=True
+- Q108 in1 — poly=True
+- Q108 in2 — poly=True
+- Q108 in3 — poly=True
+- Q108 out0 — poly=True
+- Q108 out1 — poly=True
+- Q109 in0 — poly=True, range=high above 1.2V
+- Q109 out0 — poly=True
+- Q110 out0 — poly=False
+- Q110 out1 — poly=False
+- Q110 out2 — poly=False
+- Q111 in0 — poly=True
+- Q111 in1 — poly=True
+- Q111 in2 — poly=True
+- Q111 out0 — poly=True
+- Q111 out1 — poly=True
+- Q112 in0 — poly=True
+- Q112 in1 — poly=True
+- Q112 in2 — poly=True
+- Q112 in3 — poly=True
+- Q112 out0 — poly=True
+- Q115 in0 — poly=True
+- Q115 out0 — poly=False
+- Q117 in0 — poly=False
+- Q117 in1 — poly=False
+- Q117 out0 — poly=False
+- Q119A in0 — poly=False
+- Q119A in1 — poly=False
+- Q119A in2 — poly=False
+- Q119A in3 — poly=False
+- Q119A in4 — poly=False
+- Q119A out0 — poly=False
+- Q119A out1 — poly=False
+- Q119A out2 — poly=False
+- Q119A out3 — poly=False
+- Q119A out4 — poly=False
+- Q119A out5 — poly=False
+- Q119A out6 — poly=False
+- Q119A out7 — poly=False
+- Q119A out8 — poly=False
+- Q123 in0 — poly=True
+- Q123 out0 — poly=True
+- Q123 out1 — poly=True
+- Q125 in0 — poly=True
+- Q125 in1 — poly=True
+- Q125 out0 — poly=True
+- Q125 out1 — poly=True
+- Q127 in0 — poly=True
+- Q127 out0 — poly=True
+- Q128 in0 — poly=True
+- Q128 in1 — poly=True
+- Q128 in2 — poly=True
+- Q128 in3 — poly=True
+- Q128 in4 — poly=True, range=high above 2V
+- Q128 out0 — poly=True
+- Q128 out1 — poly=True
+- Q130 in0 — poly=True
+- Q130 in1 — poly=True
+- Q130 in2 — poly=True
+- Q130 out0 — poly=True
+- Q130 out1 — poly=True
+- Q130 out2 — poly=True
+- Q147 in0 — poly=True
+- Q147 out0 — poly=True
+- Q147 out1 — poly=True
+- Q147 out2 — poly=True
+- Q147 out3 — poly=True
+- Q167 in0 — poly=True, range=1V per octave
+- Q167 in1 — poly=True
+- Q167 in2 — poly=True
+- Q167 out0 — poly=True
+- Q171 in0 — poly=True
+- Q171 in1 — poly=True
+- Q171 in2 — poly=True
+- Q171 in3 — poly=True
+- Q171 in4 — poly=True
+- Q171 in5 — poly=True
+- Q171 out0 — poly=True
+- Q171 out1 — poly=True
+- Q171 out2 — poly=True
+- Q171 out3 — poly=True
+- Q171 out4 — poly=True
+- Q171 out5 — poly=True
+- Q173 in0 — poly=False
+- Q173 in1 — poly=False
+- Q173 in2 — poly=False
+- Q173 out0 — poly=False
+- Q173 out1 — poly=False
+- Q173 out2 — poly=False
+- Q173 out3 — poly=False
+- Q173 out4 — poly=False
+- Q174 in0 — poly=False
+- Q174 out0 — poly=False
+- Q174 out1 — poly=False
+- Q174 out2 — poly=False
+- Q174 out3 — poly=False
+- Q174 out4 — poly=False
+- Q174 out5 — poly=False
+- Q962 in0 — poly=True, range=high above 2V
+- Q962 in1 — poly=True, range=high above 2V
+- Q962 in2 — poly=True, range=high above 2V
+- Q962 in3 — poly=True, range=high above 2V
+- Q962 in4 — poly=True
+- Q962 in5 — poly=True
+- Q962 in6 — poly=True
+- Q962 out0 — poly=True
+- Q962 out1 — poly=True
+- Q962 out2 — poly=True
+- Q962 out3 — poly=True
+- Q962 out4 — poly=True

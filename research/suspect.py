@@ -32,19 +32,56 @@ PLUGINS = os.path.expanduser('~/Library/Application Support/Rack2/plugins-mac-ar
 # DOES. So: a verb, or a call, or an address.
 MECHANISM = re.compile(
     r'\b(reads?|loops?|clamps?|scales?|sums?|compares?|takes?|sets?|multipli|divid|adds?'
-    r'|writes?|walks?|tests?|checks?|normal|maps?|rounds?|floors?|wraps?|counts?)'
+    r'|writes?|walks?|tests?|checks?|normal|maps?|rounds?|floors?|wraps?|counts?'
+    # BOTH HALVES OF THE VERIFICATION PASS NAMED THE SAME LIMIT: whole plugins were flagged
+    # while naming their mechanism precisely, because the list did not know the ordinary verbs
+    # people reach for. Three quarters of 1,141 flags were false, and the verifiers' own
+    # rewrites went on tripping it by accident of vocabulary. The real test is "the citation
+    # names a place the mechanism is not", which is not the same as "the sentence lacks a verb".
+    r'|uses?|passes|runs?|falls? back|assigns?|rescales?|treats?|returns?|indexes'
+    r'|selects?|holds?|feeds?|drives?|latches|copies|averages?|inverts?|offsets?'
+    r'|quantis|quantiz|truncat|subtracts?|rectif|attenuat|crossfade|accumulat)'
     r'|[A-Za-z_]\w*\(|\bis[A-Z]\w+|\bget[A-Z]\w+|\bset[A-Z]\w+|0x[0-9a-f]{4,}',
     re.I)
 # Words in a port's own line that say what kind of signal it is, to be set against the fields.
 # "clock" was in this list and should not have been: a clock RATE input is a continuous CV and
 # the word appears in its line. Only the words that describe a signal which is a state.
 SAYS_GATE = re.compile(r'rising edge|falling edge|\btrigger|\bgate\b|\bpulse|goes high', re.I)
+# THE EDGE BELONGS TO A DIFFERENT JACK. "sampled at the instant the trigger arrives", "written
+# into the step when a trigger reaches WRITE", "taken when the gate beside it is high" — this
+# jack carries the value being sampled, and the gate word is describing its neighbour. Fifty-eight
+# of one verifier's false alarms were this one shape, and all thirty-three ports of Venom's merge
+# modules came in on it.
+OTHERS_GATE = re.compile(
+    r'\b(when|whenever|on each|at the (moment|instant)|sampled|captured|while)\b[^.]{0,40}'
+    r'\b(trigger|gate|pulse|edge)\b'
+    r'|\b(its|whose|the) (gate|trigger) (beside|it|is|goes|reaches)', re.I)
 # "whatever level this reads" is how a logic buffer's line describes a HIGH or a LOW, and it
 # tripped this rule twenty-two times in one plugin. A level that is set, scaled or attenuated is
 # a value; a level that is merely read or copied may be a state.
-SAYS_LEVEL = re.compile(r'\bamount\b|\bdepth\b|\b(?<!whatever )level\b(?! this reads)'
-                        r'|scales|attenuat|\bmix\b'
-                        r'|per volt|volt per|covering|doubling|\btempo\b|\bchance\b', re.I)
+#
+# A VERIFIER READ ALL 461 OF THESE AND FOUND FOUR. Four hundred and fifty-seven false alarms is
+# not a heuristic, it is a way of spending a day, so the noise it named is filtered below:
+# `per volt` and `tempo` were dropped for the same reason `clock` was — they name a scaling or
+# the knob beside the jack, and a scaling is as natural on a stepped control as on a continuous
+# one. `level` now has to be the signal rather than the thing being chosen.
+SAYS_LEVEL = re.compile(r'\bamount\b|\bdepth\b'
+                        r'|\b(?<!whatever )level\b(?!\s+(this reads|read into|that|for that|is used))'
+                        r'|scales the|scales it|attenuat|\bmix\b'
+                        r'|covering|doubling|\bchance\b'
+                        # A GATE WORD INSIDE A QUANTITY'S NAME. "pulse width" is a level and never
+                        # an edge — sixty false alarms on its own. "Gate length", "gate spread",
+                        # "gate threshold" are a time or a level *about* a gate. A low-pass gate is
+                        # a VCA. And a count of pulses is a number.
+                        r'|pulse[- ]width|low.?pass gate'
+                        r'|gate (length|width|spread|hold|attack|release|threshold|time|level)'
+                        r'|(number of|how many) pulses|pulses per', re.I)
+# THE VALUE IS ALREADY SAID TO BE DISCRETE, so nothing is in doubt. Over two hundred of those
+# false alarms were lines reading "one octave per volt, rounded to the nearest whole octave", or
+# citations naming `snapEnabled` and `static_cast<int>` — the very evidence the test wants,
+# sitting in the record it was about to flag.
+DISCRETE = re.compile(r'\bround|\bfloor|truncat|quantis|quantiz|\bindex|nearest|whole\b'
+                      r'|integer|\(int\)|\bsnap', re.I)
 
 
 def tags():
@@ -79,10 +116,23 @@ def main():
             only = a
 
     tagged = tags()
+    # HOW MUCH THIS MAKER'S SILENCE IS WORTH: the fraction of their own modules they tag
+    # Polyphonic. Computed from the installed manifests, which is where the tags live.
+    counts = collections.Counter()
+    polys = collections.Counter()
+    for (plug, _model), t in tagged.items():
+        counts[plug] += 1
+        if 'polyphonic' in t or 'poly' in t:
+            polys[plug] += 1
+    tagrate = {p: polys[p] / counts[p] for p in counts if counts[p]}
     found = collections.defaultdict(list)
 
     for name in sorted(os.listdir(HELP)):
         if not name.endswith('.json'):
+            continue
+        # NOT EVERY JSON FILE HERE IS A PLUGIN — UNINSTALLED.json holds entries for models their
+        # plugin no longer registers, and nothing in it can be shown, so nothing in it can be wrong.
+        if name == 'UNINSTALLED.json':
             continue
         with open(os.path.join(HELP, name)) as f:
             doc = json.load(f)
@@ -110,7 +160,17 @@ def main():
                 if settled and ('polyphonic' in t or 'poly' in t) and not anypoly:
                     found['the maker calls it polyphonic; every input we settled is mono'].append(where)
                 if settled and anypoly and 'polyphonic' not in t and 'poly' not in t:
-                    found['we found polyphonic inputs; the maker does not tag it'].append(where)
+                    # A MAKER WHO HAS NEVER USED THE TAG IS NOT DISAGREEING WITH US. A verifier
+                    # settled all 342 of these and corrected nothing: every one was a stale tag.
+                    # But 288 of them sat in plugins where the tag carries no information at all —
+                    # 4ms tags none of its fifty modules and half of them derive from a polyphonic
+                    # base class. Only a maker who tags most of their modules and skips this one is
+                    # making a claim worth checking, so the rate is shown and the silent makers
+                    # are dropped.
+                    rate = tagrate.get(plugin, 0.0)
+                    if rate > 0.0:
+                        found['we found polyphonic inputs; the maker does not tag it'].append(
+                            '%s (this maker tags %.0f%% of their modules)' % (where, rate * 100))
 
             for port, one in props.items():
                 at = '%s in%s' % (where, port)
@@ -124,11 +184,21 @@ def main():
                 if li is not None and 0 <= int(li) < len(lines):
                     text = lines[int(li)]
                     if one.get('step') == 'continuous' and SAYS_GATE.search(text) \
-                            and not SAYS_LEVEL.search(text):
+                            and not SAYS_LEVEL.search(text) \
+                            and not OTHERS_GATE.search(text):
                         found['called continuous, but its line describes a gate'].append(
                             '%s — %s' % (at, text[:70]))
+                    # A TRIGGER PORT'S STEP FIELD IS NEVER IN DOUBT, whatever words its line
+                    # happens to carry — eighty of these were Schmitt-triggered gates whose lines
+                    # mention a level, an amount or a chance. The family is read a few lines down
+                    # already; consulting it here costs one condition.
+                    # And a value read only on a clock edge is NOT stepped: that is a
+                    # sample-and-hold in time, not a discrete value, and it is what produced the
+                    # one real error in this category that nobody would have guessed.
                     if one.get('step') == 'stepped' and SAYS_LEVEL.search(text) \
-                            and not SAYS_GATE.search(text):
+                            and not SAYS_GATE.search(text) \
+                            and fam.get(port) != 'trigger' \
+                            and not DISCRETE.search(text) and not DISCRETE.search(why):
                         found['called stepped, but its line describes a level'].append(
                             '%s — %s' % (at, text[:70]))
                 # A FAMILY AND A FIELD THAT CANNOT BOTH BE RIGHT.

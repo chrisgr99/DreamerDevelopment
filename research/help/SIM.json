@@ -179,23 +179,23 @@
      "1": {
       "poly": false,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "Phi.cpp:111 names it phasor or clock and the README says Phi always needs a clock here"
+      "why": "Phi.cpp:272 getNormalPolyVoltage reads this jack and :226 clockTracker.process passes it to a SchmittTrigger crossing 1V to time one step; with Use Phasor as input on, :279 reads it as a 0 to 10V ramp instead"
      },
      "2": {
       "poly": false,
       "range": "high above 1V",
-      "step": "continuous",
-      "normal": "0V",
-      "why": "Phi.cpp:112 names it a trigger to advance to the next step"
+      "step": "stepped",
+      "normal": "the phasor or clock input",
+      "why": "Phi.cpp:233 nextTrigger.process crosses 1V to advance one step; :234 with nothing patched here the advance is taken from the phasor or clock input instead"
      },
      "3": {
       "poly": false,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "Phi.cpp:113 names it Reset"
+      "why": "Phi.cpp:327 resetTrigger.process crosses 1V and :332 sets every channel's step detector back to step 0"
      }
     },
     "out": {
@@ -273,23 +273,23 @@
      "0": {
       "poly": false,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "Spike.cpp:125 names it Phasor or clock and the README says Spike always needs a clock here"
+      "why": "Spike.cpp:314 getNormalPolyVoltage reads this jack and :272 clockTracker.process passes it to a SchmittTrigger crossing 1V to time one step; with Use Phasor as input on, :318 reads it as a 0 to 10V ramp instead"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
-      "step": "continuous",
-      "normal": "0V",
-      "why": "Spike.cpp:126 names it a trigger to advance to the next step"
+      "step": "stepped",
+      "normal": "the phasor or clock input",
+      "why": "Spike.cpp:280 nextTrigger.process crosses 1V to advance one step; with nothing patched here the advance is taken from the phasor or clock input instead"
      },
      "2": {
       "poly": false,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "Spike.cpp:127 names it Reset"
+      "why": "Spike.cpp:368 resetTrigger.process crosses 1V and :374 sets every channel's step detector back to step 0"
      },
      "3": {
       "poly": true,
@@ -531,14 +531,16 @@
      "0": {
       "poly": true,
       "step": "stepped",
+      "range": "0 to 10V",
       "normal": "the start knob",
-      "why": "the README states the start and length buttons do not act as attenuverters with their CV inputs, and that the CV inputs are polyphonic"
+      "why": "ReX.hpp:111 getStart reads this jack with getPolyVoltage, rescales 0V to 10V across the sixteen gates, casts the result to int and clamps it, ignoring the start knob entirely while a cable is in"
      },
      "1": {
       "poly": true,
       "step": "stepped",
+      "range": "0 to 10V",
       "normal": "the length knob",
-      "why": "the README states the start and length buttons do not act as attenuverters with their CV inputs, and that the CV inputs are polyphonic"
+      "why": "ReX.hpp:100 getLength reads this jack with getVoltage(channel), rescales 0V to 10V across 1 to 16 gates, casts the result to int and clamps it, ignoring the length knob entirely while a cable is in"
      }
     }
    }
@@ -922,14 +924,14 @@
       "range": "1V per octave",
       "step": "continuous",
       "normal": "0V",
-      "why": "Tie.cpp:72 names it V/Oct; line 105 stops every output when this jack is unpatched"
+      "why": "Tie.cpp:127 getPolyVoltage reads this jack per channel and :162 writes it to the pitch output, glided; :105 gives every output no channels while it is unpatched"
      },
      "2": {
       "poly": true,
       "range": "high above 1V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "0V",
-      "why": "Tie.cpp:127 treats a value below 1V as no gate"
+      "why": "Tie.cpp:126 reads below 1V as no gate and :125 any rise above the previous sample as a new note; :114 with nothing patched the pitch passes through unglided"
      }
     },
     "out": {

@@ -1,0 +1,149 @@
+# NANOModules — what the manual says
+
+Author: Jorge Gutierrez
+Declared manual: http://nano-modules.com
+Source published: none
+
+Read `research/help/MANUAL-CHECK-BRIEF.md` before starting.
+
+139 ports below were settled from the binary. For each, record agrees / differs / silent.
+
+- ALT in0 — poly=False, range=±10V, step=continuous
+- ALT in1 — poly=False, range=±10V, step=continuous
+- ALT in2 — poly=False, range=±10V, step=continuous
+- ALT in3 — poly=False, range=±10V, step=continuous
+- ALT in4 — poly=False, range=0 to 5V, step=continuous, negative=subtracts
+- ALT in5 — poly=False, range=0 to 5V, step=continuous, negative=subtracts
+- ALT in6 — poly=False, range=0 to 5V, step=continuous, negative=subtracts
+- ALT in7 — poly=False, range=0 to 5V, step=continuous, negative=ignored, normal=5V, the amplifier fully open
+- ALT out0 — poly=False
+- ALT out1 — poly=False
+- ALT out2 — poly=False
+- ALT out3 — poly=False
+- ARC in0 — poly=False, step=stepped
+- ARC in1 — poly=False, step=continuous
+- ARC in2 — poly=False, step=continuous, negative=swings
+- ARC in3 — poly=False, step=continuous, negative=swings
+- ARC in4 — poly=False, step=continuous, negative=swings
+- ARC in5 — poly=False, range=high above 2V, step=stepped
+- ARC in6 — poly=False, range=±5V, step=continuous
+- ARC in7 — poly=False, step=stepped
+- ARC in8 — poly=False, step=continuous
+- ARC in9 — poly=False, step=continuous, negative=swings
+- ARC in10 — poly=False, step=continuous, negative=swings
+- ARC in11 — poly=False, step=continuous, negative=swings
+- ARC in12 — poly=False, range=high above 2V, step=stepped
+- ARC in13 — poly=False, range=±5V, step=continuous
+- ARC out0 — poly=False
+- ARC out1 — poly=False
+- ARC out2 — poly=False
+- ARC out3 — poly=False
+- ARC out4 — poly=False
+- ARC out5 — poly=False
+- ARC out6 — poly=False
+- ARC out7 — poly=False
+- ARC out8 — poly=False
+- ARC out9 — poly=False
+- CEQ in0 — poly=False, range=±10V, step=continuous
+- CEQ in1 — poly=False, range=±10V, step=continuous, normal=the left input
+- EXP4 in0 — poly=False, range=high above 2V, step=stepped
+- EXP4 in1 — poly=False, range=high above 2V, step=stepped
+- EXP4 in2 — poly=False, range=high above 2V, step=stepped
+- EXP4 in3 — poly=False, range=high above 2V, step=stepped
+- EXP4 in4 — poly=False, step=continuous
+- EXP4 in5 — poly=False, step=continuous
+- EXP4 out0 — poly=False
+- EXP4 out1 — poly=False
+- EXP4 out2 — poly=False
+- EXP4 out3 — poly=False
+- EXP4 out4 — poly=False
+- EXP4 out5 — poly=False
+- EXP4 out6 — poly=False
+- EXP4 out7 — poly=False
+- FONT in0 — poly=False, step=continuous
+- FONT in1 — poly=False, range=1V per octave, step=continuous
+- FONT in2 — poly=False, step=continuous
+- FONT in3 — poly=False, range=±10V, step=continuous
+- MAR in0 — poly=False, range=±10V, step=continuous
+- MAR in1 — poly=False, range=±10V, step=continuous, normal=the sum of the four X inputs
+- MAR in2 — poly=False, range=±10V, step=continuous
+- MAR in3 — poly=False, range=±10V, step=continuous
+- MAR in4 — poly=False, range=±10V, step=continuous
+- MAR in5 — poly=False, range=±10V, step=continuous
+- MAR in6 — poly=False, range=±10V, step=continuous
+- MAR in7 — poly=False, range=±10V, step=continuous
+- MAR out0 — poly=False
+- MAR out1 — poly=False
+- MAR out2 — poly=False
+- MAR out3 — poly=False
+- OCTA in0 — poly=False, step=stepped
+- OCTA in1 — poly=False, step=stepped
+- OCTA in2 — poly=False, step=stepped
+- OCTA in3 — poly=False, step=stepped
+- OCTA in4 — poly=False, step=continuous
+- OCTA in5 — poly=False, step=continuous
+- OCTA in6 — poly=False, step=continuous
+- OCTA in7 — poly=False, step=continuous
+- OCTA out0 — poly=False
+- OCTA out1 — poly=False
+- OCTA out2 — poly=False
+- OCTA out3 — poly=False
+- OCTA out4 — poly=False
+- OCTA out5 — poly=False
+- ONA out0 — poly=False
+- ONA out1 — poly=False
+- ONA out2 — poly=False
+- ONA out3 — poly=False
+- ONA out4 — poly=False
+- ONA out5 — poly=False
+- ONA out6 — poly=False
+- ONA out7 — poly=False
+- PerformanceMixer out5 — poly=True
+- QUART in0 — poly=False, range=high above 2V, step=stepped
+- QUART in1 — poly=False, range=high above 2V, step=stepped
+- QUART in2 — poly=False, range=high above 2V, step=stepped
+- QUART in3 — poly=False, range=high above 2V, step=stepped
+- QUART out0 — poly=False
+- QUART out1 — poly=False
+- QUART out2 — poly=False
+- QUART out3 — poly=False
+- SERRA in0 — poly=False, step=stepped
+- SERRA in1 — poly=False, step=stepped, normal=the gate input
+- SERRA in3 — poly=False, step=continuous, negative=swings
+- SERRA in4 — poly=False, step=continuous, negative=swings
+- SERRA in5 — poly=False, step=continuous, negative=swings
+- SERRA in6 — poly=False, step=continuous, negative=swings
+- STFONT in0 — poly=False, range=±10V, step=continuous
+- STFONT in1 — poly=False, range=±10V, step=continuous, normal=the left input
+- STFONT in2 — poly=False, step=continuous
+- STFONT in3 — poly=False, step=continuous
+- STFONT in4 — poly=False, step=continuous
+- STFONT in5 — poly=False, step=continuous
+- STFONT in6 — poly=False, range=1V per octave, step=continuous
+- STFONT in7 — poly=False, step=continuous
+- STFONT in8 — poly=False, step=continuous
+- STFONT in9 — poly=False, step=continuous
+- STFONT out0 — poly=False, range=±10V
+- STFONT out1 — poly=False, range=±10V
+- STMAR in0 — poly=False, step=continuous
+- STMAR in1 — poly=False, step=continuous, normal=the left input of that channel
+- STMAR in2 — poly=False, step=continuous
+- STMAR in3 — poly=False, step=continuous, normal=the left input of that channel
+- STMAR in4 — poly=False, step=continuous
+- STMAR in5 — poly=False, step=continuous, normal=the left input of that channel
+- STMAR in6 — poly=False, step=continuous
+- STMAR in7 — poly=False, step=continuous
+- STMAR in8 — poly=False, step=continuous
+- STMAR out0 — poly=False
+- STMAR out1 — poly=False
+- VCVRANDOM in0 — poly=False, step=continuous
+- VCVRANDOM in1 — poly=False, step=continuous
+- VCVRANDOM in2 — poly=False, step=continuous
+- VCVRANDOM in3 — poly=False, step=continuous
+- VCVRANDOM in4 — poly=False, step=stepped
+- VCVRANDOM in5 — poly=False, step=continuous
+- VCVRANDOM out0 — poly=False
+- VCVRANDOM out1 — poly=False
+- VCVRANDOM out2 — poly=False
+- VCVRANDOM out3 — poly=False
+- VCVRANDOM out4 — poly=False

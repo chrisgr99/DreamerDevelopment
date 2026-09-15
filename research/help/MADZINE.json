@@ -82,7 +82,7 @@
      "3": {
       "poly": false,
       "range": "high above 2V",
-      "why": "src/SwingLFO.cpp:170-178, resetTrigger >= 2.0f && prevResetTrigger < 2.0f"
+      "why": "src/SwingLFO.cpp:170-178, read only while patched; a rise through 2V, with the previous sample below it, sets the first wave's phase to zero and the second to the swing offset"
      },
      "4": {
       "poly": false,
@@ -205,12 +205,12 @@
      "0": {
       "poly": false,
       "range": "high above 1V",
-      "why": "src/EuclideanRhythm.cpp:456-459, dsp::SchmittTrigger at Rack's default 0V and 1V thresholds"
+      "why": "src/EuclideanRhythm.cpp:458-466, read only while patched; a rising edge through 1V on a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds times the interval since the last edge and steps every track"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
-      "why": "src/EuclideanRhythm.cpp:461-463, dsp::SchmittTrigger at Rack's default thresholds"
+      "why": "src/EuclideanRhythm.cpp:468-477, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds, in parallel with the RESET button; a rising edge calls onReset and the rest of that sample's processing is skipped"
      },
      "2": {
       "poly": false,
@@ -235,39 +235,39 @@
       "poly": false,
       "step": "stepped",
       "negative": "subtracts",
-      "why": "src/EuclideanRhythm.cpp:497-506, the same code with i = 1"
+      "why": "src/EuclideanRhythm.cpp:497-506 with i = 1, reading TRACK2_LENGTH_CV_INPUT: length = round(clamp(lengthParam + getVoltage()*atten, 1, 32)), one step per volt at the attenuator's full travel"
      },
      "6": {
       "poly": false,
       "range": "±10V",
       "step": "stepped",
       "negative": "subtracts",
-      "why": "src/EuclideanRhythm.cpp:508-518, the same code with i = 1"
+      "why": "src/EuclideanRhythm.cpp:508-518 with i = 1, reading TRACK2_FILL_CV_INPUT: fillCV = getVoltage()*atten*10 added to the fill percentage, then clamp(0, 100) and rounded to a whole number of steps"
      },
      "7": {
       "poly": false,
       "step": "stepped",
       "negative": "subtracts",
-      "why": "src/EuclideanRhythm.cpp:520-530, the same code with i = 1"
+      "why": "src/EuclideanRhythm.cpp:520-530 with i = 1, reading TRACK2_SHIFT_CV_INPUT: shift = round(clamp(shiftParam + getVoltage()*atten, 0, length-1))"
      },
      "8": {
       "poly": false,
       "step": "stepped",
       "negative": "subtracts",
-      "why": "src/EuclideanRhythm.cpp:497-506, the same code with i = 2"
+      "why": "src/EuclideanRhythm.cpp:497-506 with i = 2, reading TRACK3_LENGTH_CV_INPUT: length = round(clamp(lengthParam + getVoltage()*atten, 1, 32)), one step per volt at the attenuator's full travel"
      },
      "9": {
       "poly": false,
       "range": "±10V",
       "step": "stepped",
       "negative": "subtracts",
-      "why": "src/EuclideanRhythm.cpp:508-518, the same code with i = 2"
+      "why": "src/EuclideanRhythm.cpp:508-518 with i = 2, reading TRACK3_FILL_CV_INPUT: fillCV = getVoltage()*atten*10 added to the fill percentage, then clamp(0, 100) and rounded to a whole number of steps"
      },
      "10": {
       "poly": false,
       "step": "stepped",
       "negative": "subtracts",
-      "why": "src/EuclideanRhythm.cpp:520-530, the same code with i = 2"
+      "why": "src/EuclideanRhythm.cpp:520-530 with i = 2, reading TRACK3_SHIFT_CV_INPUT: shift = round(clamp(shiftParam + getVoltage()*atten, 0, length-1))"
      }
     },
     "out": {
@@ -363,19 +363,19 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/ADGenerator.cpp:473-476, dsp::SchmittTrigger at Rack's default 0V and 1V thresholds"
+      "why": "src/ADGenerator.cpp:473-476 and 681, the voltage goes to a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds and a rising edge starts track 1's attack, ignored while that envelope is still running; with track 1's BPF on it is band-passed and followed as a level instead"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/ADGenerator.cpp:473-476, the same trigger for track 2"
+      "why": "src/ADGenerator.cpp:675-683, track 2 reads this jack only while AUTO ROUTE is off; AUTO ROUTE starts on, and track 2 then takes the track 1 jack and this one is read nowhere. When it is read, a rising edge through 1V on a dsp::SchmittTrigger at Rack's defaults starts track 2's attack"
      },
      "2": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/ADGenerator.cpp:473-476, the same trigger for track 3"
+      "why": "src/ADGenerator.cpp:675-683, track 3 reads this jack only while AUTO ROUTE is off; AUTO ROUTE starts on, and track 3 then takes the track 1 jack and this one is read nowhere. When it is read, a rising edge through 1V on a dsp::SchmittTrigger at Rack's defaults starts track 3's attack"
      }
     },
     "out": {
@@ -465,7 +465,7 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/Pinpple.cpp:389-395, dsp::SchmittTrigger at Rack's default 0V and 1V thresholds"
+      "why": "src/Pinpple.cpp:389-395 and 545-550, the voltage goes to a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds; a rising edge fires a 2ms pulse that pings the filter and opens the VCA envelope, and re-randomises the per-hit drift"
      },
      "4": {
       "poly": false,
@@ -547,13 +547,13 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/PPaTTTerning.cpp:318, dsp::SchmittTrigger at Rack's default 0V and 1V thresholds"
+      "why": "src/PPaTTTerning.cpp:318-325, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds; each rising edge takes the voltage of the knob this step is mapped to and moves on to the next step"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/PPaTTTerning.cpp:286, dsp::SchmittTrigger at Rack's default thresholds"
+      "why": "src/PPaTTTerning.cpp:286-295, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds; a rising edge returns the sequence to its first step, rebuilds the step mapping and clears the delay buffer"
      },
      "2": {
       "poly": false,
@@ -678,7 +678,7 @@
       "poly": false,
       "range": "high above 2V",
       "negative": "ignored",
-      "why": "src/MADDY.cpp:1162-1166, resetTrigger >= 2.0f && prevResetTrigger < 2.0f"
+      "why": "src/MADDY.cpp:1162-1166, the voltage is compared with the previous sample's: a rise through 2V restarts the clock phase and every track; unpatched the jack reads 0V, so it never fires"
      }
     },
     "out": {
@@ -804,13 +804,13 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/TWNC.cpp:686, clockTrigger.process at Rack's default 0V and 1V thresholds"
+      "why": "src/TWNC.cpp:682-688, read only while patched; a rising edge through 1V on a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds times the interval since the last edge and steps both tracks"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/TWNC.cpp:693, resetTrigger.process at Rack's default thresholds"
+      "why": "src/TWNC.cpp:693-701, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds, in parallel with the RESET button; a rising edge calls onReset and the rest of that sample's processing is skipped"
      },
      "2": {
       "poly": false,
@@ -1188,13 +1188,13 @@
       "poly": false,
       "range": "high above 2V",
       "negative": "ignored",
-      "why": "src/QQ.cpp:212, the same call for track 2"
+      "why": "src/QQ.cpp:212-220 with i = 1, reading TRACK2_TRIG_INPUT: trigTrigger.process(getVoltage(), 0.1f, 2.f), and every rising edge through 2V restarts track 2's decay from the top"
      },
      "2": {
       "poly": false,
       "range": "high above 2V",
       "negative": "ignored",
-      "why": "src/QQ.cpp:212, the same call for track 3"
+      "why": "src/QQ.cpp:212-220 with i = 2, reading TRACK3_TRIG_INPUT: trigTrigger.process(getVoltage(), 0.1f, 2.f), and every rising edge through 2V restarts track 3's decay from the top"
      },
      "3": {
       "poly": false,
@@ -1208,14 +1208,14 @@
       "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
-      "why": "src/QQ.cpp:242-246, the same arithmetic for track 2"
+      "why": "src/QQ.cpp:242-246, reading TRACK2_DECAY_CV_INPUT: decayTime += getVoltage()/10 * 2 * atten, then clamp(0.01, 2)"
      },
      "5": {
       "poly": false,
       "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
-      "why": "src/QQ.cpp:255-259, the same arithmetic for track 3"
+      "why": "src/QQ.cpp:255-259, reading TRACK3_DECAY_CV_INPUT: decayTime += getVoltage()/10 * 2 * atten, then clamp(0.01, 2)"
      }
     },
     "out": {
@@ -1634,7 +1634,7 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/KIMO.cpp:422, clockTrigger.process at Rack's default 0V and 1V thresholds"
+      "why": "src/KIMO.cpp:419-425, read only while patched; a rising edge through 1V on a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds times the interval since the last edge and steps the pattern"
      },
      "1": {
       "poly": false,
@@ -1826,14 +1826,14 @@
       "range": "±5V",
       "step": "continuous",
       "negative": "swings",
-      "why": "src/Pyramid.cpp:197-203, the same arithmetic for Y"
+      "why": "src/Pyramid.cpp:197-203, reading Y_CV_INPUT: y += getVoltage()*0.2 on the -1 to 1 knob, then clamp(-1, 1), so 5V is the full half-travel"
      },
      "3": {
       "poly": false,
       "range": "±5V",
       "step": "continuous",
       "negative": "swings",
-      "why": "src/Pyramid.cpp:204-210, the same arithmetic for Z"
+      "why": "src/Pyramid.cpp:204-210, reading Z_CV_INPUT: z += getVoltage()*0.2 on the -1 to 1 knob, then clamp(-1, 1), so 5V is the full half-travel"
      },
      "4": {
       "poly": false,
@@ -2127,7 +2127,7 @@
       "poly": false,
       "range": "±10V",
       "normal": "that track’s own input",
-      "why": "src/DECAPyramid.cpp:302-304, patched, audioIn is replaced by this jack; unpatched it is left as the track input"
+      "why": "src/DECAPyramid.cpp:298-304, the track's signal is put out at INSERT SEND and, while this jack is patched, replaced by what arrives here before the LEVEL knob; unpatched the track's own input carries on"
      },
      "40": {
       "poly": false,
@@ -3002,19 +3002,19 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/Runshow.cpp:267, clockTrigger.process at Rack's default 0V and 1V thresholds"
+      "why": "src/Runshow.cpp:265-269, read only while the timer is running; a rising edge through 1V on a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds counts one beat and times the interval since the last edge"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/Runshow.cpp:211, resetTrigger.process at Rack's default thresholds"
+      "why": "src/Runshow.cpp:211-213, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds, in parallel with the RESET button; a rising edge zeroes the clock count, the bar and the elapsed time"
      },
      "2": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/Runshow.cpp:214, startStopTrigger.process at Rack's default thresholds"
+      "why": "src/Runshow.cpp:214-224, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds, in parallel with the START/STOP button; each rising edge flips the timer between running and stopped"
      }
     },
     "out": {
@@ -3404,6 +3404,7 @@
      },
      "5": {
       "poly": false,
+      "sumRange": "±8V",
       "step": "continuous",
       "negative": "swings",
       "why": "src/weiiidocumenta.cpp:907-911, playbackSpeed += getVoltage(), then clamp(-8, 8)"
@@ -3431,18 +3432,18 @@
      "9": {
       "poly": false,
       "range": "±10V",
-      "why": "src/weiiidocumenta.cpp:1113-1115, patched, outputL is replaced by this jack"
+      "why": "src/weiiidocumenta.cpp:1109-1115, the left signal ahead of the equaliser is put out at SEND L and, while this jack is patched, replaced by what arrives here, inside the feedback path"
      },
      "10": {
       "poly": false,
       "range": "±10V",
-      "why": "src/weiiidocumenta.cpp:1116-1118, patched, outputR is replaced by this jack"
+      "why": "src/weiiidocumenta.cpp:1110-1118, the right signal ahead of the equaliser is put out at SEND R and, while this jack is patched, replaced by what arrives here, inside the feedback path"
      },
      "11": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/weiiidocumenta.cpp:624, the jack voltage is added to the button and read by a SchmittTrigger at Rack’s defaults"
+      "why": "src/weiiidocumenta.cpp:624, the jack voltage is added to the button and read by a SchmittTrigger at Rack's defaults"
      },
      "12": {
       "poly": false,
@@ -3699,19 +3700,19 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/UniversalRhythm.cpp:1868, clockTrigger.process at Rack’s default 0V and 1V thresholds"
+      "why": "src/UniversalRhythm.cpp:1868-1876, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds; each rising edge advances the pattern by 4 divided by the PPQN setting steps"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/UniversalRhythm.cpp:1849, resetTrigger.process at Rack's default 0V and 1V thresholds"
+      "why": "src/UniversalRhythm.cpp:1849-1853, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds, in parallel with the RESET button; a rising edge puts every role back to its first step"
      },
      "2": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/UniversalRhythm.cpp:1773, regenerateTrigger.process at Rack's default 0V and 1V thresholds"
+      "why": "src/UniversalRhythm.cpp:1773-1776, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds, in parallel with the REGEN button; a rising edge marks every pattern to be generated again"
      },
      "3": {
       "poly": false,
@@ -3723,7 +3724,7 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/UniversalRhythm.cpp:1857, fillTrigger.process at Rack’s default thresholds"
+      "why": "src/UniversalRhythm.cpp:1857-1863, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds; a rising edge writes fill patterns at the FILL knob's setting, and nothing at all while that knob is at zero"
      },
      "5": {
       "poly": false,
@@ -3982,19 +3983,19 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/UniRhythm.cpp:2071, clockTrigger.process at Rack's default 0V and 1V thresholds"
+      "why": "src/UniRhythm.cpp:2071-2079, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds; each rising edge advances the pattern by 4 divided by the PPQN setting steps"
      },
      "1": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/UniRhythm.cpp:2052, resetTrigger.process at Rack's default 0V and 1V thresholds"
+      "why": "src/UniRhythm.cpp:2052-2056, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds, in parallel with the RESET button; a rising edge puts every role back to its first step"
      },
      "2": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/UniRhythm.cpp:1976, regenerateTrigger.process at Rack's default 0V and 1V thresholds"
+      "why": "src/UniRhythm.cpp:1976-1979, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds, in parallel with the REGEN button; a rising edge marks every pattern to be generated again"
      },
      "3": {
       "poly": false,
@@ -4006,7 +4007,7 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/UniRhythm.cpp:2060, fillTrigger.process at Rack's default 0V and 1V thresholds"
+      "why": "src/UniRhythm.cpp:2060-2066, a dsp::SchmittTrigger at Rack's default 0V and 1V thresholds; a rising edge writes fill patterns at the FILL knob's setting, and nothing at all while that knob is at zero"
      },
      "5": {
       "poly": false,
@@ -4349,13 +4350,13 @@
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/Launchpad.cpp:755-765, a SchmittTrigger per scene at Rack's default thresholds"
+      "why": "src/Launchpad.cpp:755-765, one dsp::SchmittTrigger per scene, process(getVoltage(), 0.1f, 1.f); a rising edge through 1V launches the first scene at once while QUANTIZE is off, and queues it to the next quantise point otherwise"
      },
      "10": {
       "poly": false,
       "range": "high above 1V",
       "negative": "ignored",
-      "why": "src/Launchpad.cpp:740-752, a SchmittTrigger at Rack's default thresholds"
+      "why": "src/Launchpad.cpp:740-752, a dsp::SchmittTrigger, process(getVoltage(), 0.1f, 1.f); a rising edge through 1V stops every playing cell at once while QUANTIZE is off, and queues the stop to the next quantise point otherwise"
      },
      "11": {
       "poly": false,
@@ -4946,7 +4947,7 @@
       "poly": true,
       "range": "±10V",
       "normal": "the left jack, 20ms late",
-      "why": "src/ALEXANDERPLATZ.cpp:385-397, unpatched, the right side is a 20ms delayed copy of the left"
+      "why": "src/ALEXANDERPLATZ.cpp:385-399, patched, getPolyVoltage(c) is that track's right channel and its channel count feeds the output's; with only the left jack patched the right side is that left signal 20ms late; with neither patched it is 0V"
      },
      "8": {
       "poly": true,
@@ -5193,7 +5194,7 @@
       "poly": true,
       "range": "±10V",
       "normal": "the left jack, 20ms late",
-      "why": "src/SHINJUKU.cpp:388-399, unpatched, the right side is a 20ms delayed copy of the left"
+      "why": "src/SHINJUKU.cpp:387-401, patched, getPolyVoltage(c) is that track's right channel and its channel count feeds the output's; with only the left jack patched the right side is that left signal 20ms late; with neither patched it is 0V"
      },
      "16": {
       "poly": true,
@@ -5335,7 +5336,7 @@
      "1": {
       "poly": true,
       "range": "±10V",
-      "why": "src/Portal.cpp:529-548, the same sixteen channels from the second deck"
+      "why": "src/Portal.cpp:525-549, for each of the four roles getVoltage() reads channels 4r to 4r+3 as audio, gate, pitch and velocity envelope, each multiplied by the crossfader's B gain and added to the same channel of deck A"
      },
      "2": {
       "poly": false,
@@ -5611,6 +5612,7 @@
      },
      "5": {
       "poly": false,
+      "sumRange": "0 to 10V",
       "step": "continuous",
       "negative": "subtracts",
       "why": "src/theKICK.cpp:544-549, fold += getVoltage(), clamp(0, 10)"
@@ -5623,12 +5625,14 @@
      },
      "7": {
       "poly": false,
+      "sumRange": "0 to 10V",
       "step": "continuous",
       "negative": "subtracts",
       "why": "src/theKICK.cpp:565-570, toneKnob += getVoltage(), clamp(0, 10)"
      },
      "8": {
       "poly": false,
+      "sumRange": "0 to 10V",
       "step": "continuous",
       "negative": "subtracts",
       "why": "src/theKICK.cpp:551-556, sampleMix += getVoltage(), clamp(0, 10)"

@@ -1,0 +1,193 @@
+# Moffenzeef — what the manual says
+
+Author: Ross Fish
+Declared manual: https://moffenzeefmodular.com
+Source published: none
+
+Read `research/help/MANUAL-CHECK-BRIEF.md` before starting.
+
+183 ports below were settled from the binary. For each, record agrees / differs / silent.
+
+- BadIdea1800 in0 — poly=False, range=high above 0.5V
+- BadIdea1800 in1 — poly=False, range=high above 0.5V
+- BadIdea1800 in2 — poly=False, range=high above 0.5V
+- BadIdea1800 in3 — poly=False, range=high above 0.5V
+- BadIdea1800 in4 — poly=False, range=high above 0.5V
+- BadIdea1800 in5 — poly=False, range=high above 0.5V
+- BadIdea1800 in6 — poly=False, range=high above 0.5V
+- BadIdea1800 in7 — poly=False, range=high above 0.5V
+- BadIdea1800 in8 — poly=False, range=high above 0.5V
+- BadIdea1800 in9 — poly=False, range=high above 0.5V
+- BadIdea1800 in10 — poly=False, range=high above 0.5V
+- BadIdea1800 in11 — poly=False, range=high above 0.5V
+- BadIdea9 in0 — poly=False, range=0 to 5V, negative=ignored
+- Bobcat in0 — poly=False, range=high above 0.5V
+- Bobcat in1 — poly=False, range=0 to 10V, negative=subtracts
+- Bobcat in2 — poly=False, range=0 to 10V, negative=subtracts
+- Bobcat in3 — poly=False, range=high above 0.5V
+- Bobcat in4 — poly=False, range=0 to 10V, negative=subtracts
+- Bobcat in5 — poly=False, range=0 to 10V, negative=subtracts
+- Count in0 — poly=False, range=0 to 10V, negative=subtracts
+- Count in1 — poly=False, range=0 to 10V, negative=subtracts
+- Deviant in0 — poly=False, range=high above 0.5V
+- Deviant in1 — poly=False, range=±5V, negative=subtracts
+- Deviant in2 — poly=False, range=±5V, negative=subtracts
+- Deviant in3 — poly=False, range=high above 0.5V, normal=the BANG! jack above it
+- Deviant in4 — poly=False, range=±5V, negative=subtracts
+- Deviant in5 — poly=False, range=±5V, negative=subtracts
+- DialUp in0 — poly=False, range=high above 0.5V
+- DialUp in1 — poly=False, range=0 to 10V, negative=subtracts
+- DitDit in0 — poly=False, range=high above 1V
+- DitDit in1 — poly=False, range=high above 1V
+- DitDit in2 — poly=False, range=high above 1V
+- GMO in0 — poly=False, range=high above 0.5V
+- GMO in1 — poly=False, range=0 to 10V, negative=subtracts
+- GMO in2 — poly=False, range=0 to 10V, negative=subtracts
+- GMO in3 — poly=False, range=high above 0.5V
+- GMO in4 — poly=False, range=0 to 10V, negative=subtracts
+- GMO in5 — poly=False, range=0 to 10V, negative=subtracts
+- INTENSIFIES in0 — poly=False, range=0 to 10V, negative=subtracts
+- INTENSIFIES in1 — poly=False, range=0 to 10V, negative=subtracts
+- INTENSIFIES in2 — poly=False, range=0 to 10V, negative=subtracts
+- INTENSIFIES in3 — poly=False, range=0 to 10V, negative=subtracts
+- INTENSIFIES in4 — poly=False, range=±5V
+- INTENSIFIES in5 — poly=False, range=±5V
+- INTENSIFIES in6 — poly=False, range=0 to 10V, negative=subtracts
+- INTENSIFIES in7 — poly=False, range=high above 0.5V
+- INTENSIFIES in8 — poly=False, range=high above 0.5V
+- Kleztizer in0 — poly=False, range=0 to 10V, negative=subtracts
+- Kleztizer in1 — poly=False, range=0 to 10V, negative=subtracts
+- Kleztizer in2 — poly=False, range=0 to 5V, negative=subtracts
+- Kleztizer in3 — poly=False, range=0 to 5V, negative=subtracts
+- Kleztizer in4 — poly=False
+- Kleztizer in5 — poly=False, range=1V per octave
+- Kleztizer in6 — poly=False
+- Kleztizer in7 — poly=False, range=1V per octave
+- Kleztizer in8 — poly=False
+- Kleztizer out4 — poly=True
+- Kriket in0 — poly=False, range=high above 0.5V
+- Kriket in1 — poly=False, range=high above 0.5V
+- Kriket in2 — poly=False, range=high above 0.5V
+- Kriket in3 — poly=False, range=high above 0.5V
+- Kriket in4 — poly=False, range=0 to 5V, negative=ignored
+- Mito in0 — poly=False, range=high above 0.5V
+- Mito in1 — poly=False, range=high above 0.5V
+- Mito in2 — poly=False, range=0 to 10V, negative=subtracts
+- Mito in3 — poly=False, range=0 to 10V, negative=subtracts
+- Mito in4 — poly=False, range=0 to 10V, negative=subtracts
+- Mito in5 — poly=False, range=0 to 10V, negative=subtracts
+- Mito in6 — poly=False, range=0 to 10V, negative=subtracts
+- Mito in7 — poly=False, range=0 to 10V, negative=subtracts
+- Mito in8 — poly=False, range=0 to 10V, negative=subtracts
+- Mito in9 — poly=False, range=0 to 10V, negative=subtracts
+- Moffenmix in0 — poly=False, range=±5V
+- Moffenmix in1 — poly=False, range=±5V
+- Moffenmix in2 — poly=False, range=±5V
+- Moffenmix in3 — poly=False, range=±5V
+- Moffenmix in4 — poly=False, range=±5V
+- Mongrel in0 — poly=False, range=high above 0.5V
+- Mongrel in1 — poly=False, range=0 to 10V, negative=subtracts
+- Mongrel in2 — poly=False, range=0 to 10V, negative=subtracts
+- Mongrel in3 — poly=False, range=0 to 10V, negative=subtracts
+- Mongrel in4 — poly=False, range=high above 0.5V
+- Mongrel in5 — poly=False, range=0 to 10V, negative=subtracts
+- Muskrat in0 — poly=False, range=high above 0.5V
+- Muskrat in1 — poly=False, range=0 to 10V, negative=subtracts
+- Muskrat in2 — poly=False, range=0 to 10V, negative=subtracts
+- Muskrat in3 — poly=False, range=0 to 10V, negative=subtracts
+- Muskrat in4 — poly=False, range=high above 0.5V
+- Particles in0 — poly=False
+- Particles in1 — poly=False
+- Particles in2 — poly=False
+- Particles in3 — poly=False
+- Particles in4 — poly=False
+- Particles in5 — poly=False
+- QuadDeviant in0 — poly=False, range=high above 0.5V, normal=nothing
+- QuadDeviant in1 — poly=False, range=high above 0.5V, normal=the clock jack to its left
+- QuadDeviant in2 — poly=False, range=high above 0.5V, normal=the clock jack to its left
+- QuadDeviant in3 — poly=False, range=high above 0.5V, normal=the clock jack to its left
+- QuadDeviant in4 — poly=False, range=±5V, negative=subtracts
+- QuadDeviant in5 — poly=False, range=±5V, negative=subtracts
+- QuadDeviant in6 — poly=False, range=±5V, negative=subtracts
+- QuadDeviant in7 — poly=False, range=±5V, negative=subtracts
+- QuadDeviant in8 — poly=False, range=±5V, negative=subtracts
+- QuadDeviant in9 — poly=False, range=±5V, negative=subtracts
+- QuadDeviant in10 — poly=False, range=±5V, negative=subtracts
+- QuadDeviant in11 — poly=False, range=±5V, negative=subtracts
+- Simplify in0 — poly=False, range=high above 0.5V
+- Simplify in1 — poly=False, range=high above 0.5V
+- Simplify in2 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in0 — poly=False, range=1V per octave, negative=swings
+- Stargazer in1 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in2 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in3 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in4 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in5 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in6 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in7 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in8 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in9 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in10 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in11 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in12 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in13 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in14 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in15 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in16 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in17 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in18 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in19 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in20 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in21 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in22 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in23 — poly=False, range=0 to 10V, negative=subtracts
+- Stargazer in24 — poly=False, range=±5V
+- Swarm in0 — poly=False, range=±5V, negative=subtracts
+- Swarm in1 — poly=False, range=0 to 10V, negative=subtracts
+- Tantz in0 — poly=False, range=high above 0.5V
+- Tantz in1 — poly=False, range=0 to 10V, negative=subtracts
+- Tantz in2 — poly=False, range=0 to 10V, negative=subtracts
+- Tantz in3 — poly=False, range=0 to 10V, negative=subtracts
+- Tantz in4 — poly=False, range=0 to 10V, negative=subtracts
+- Tantz in5 — poly=False, range=0 to 10V, negative=subtracts
+- Tantz in6 — poly=False, range=0 to 10V, negative=subtracts
+- Tantz in7 — poly=False, range=high above 0.5V
+- Tantz in8 — poly=False, range=0 to 10V, negative=subtracts
+- Tantz in9 — poly=False, range=0 to 10V, negative=subtracts
+- Tantz in10 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in0 — poly=False, range=±5V
+- Tehom in1 — poly=False, range=±5V
+- Tehom in2 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in3 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in4 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in5 — poly=False, range=±5V
+- Tehom in6 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in7 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in8 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in9 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in10 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in11 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in12 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in13 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in14 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in15 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in16 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in17 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in18 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in19 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in20 — poly=False, range=high above 0.5V
+- Tehom in21 — poly=False, range=high above 0.5V
+- Tehom in22 — poly=False, range=high above 0.5V
+- Tehom in23 — poly=False, range=high above 0.5V
+- Tehom in24 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in25 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in26 — poly=False, range=0 to 10V, negative=subtracts
+- Tehom in27 — poly=False, range=0 to 10V, negative=subtracts
+- TheRunner in0 — poly=False, range=0 to 10V, negative=subtracts
+- TheRunner in1 — poly=False, range=0 to 10V, negative=subtracts
+- TheRunner in2 — poly=False, range=0 to 10V, negative=subtracts
+- TheRunner in3 — poly=False, range=0 to 10V, negative=subtracts
+- TheRunner in4 — poly=False, range=0 to 10V, negative=subtracts
+- TheRunner in5 — poly=False, range=0 to 10V, negative=subtracts
+- TheRunner in6 — poly=False, range=0 to 10V, negative=subtracts
+- TheRunner in7 — poly=False, range=1V per octave, negative=swings

@@ -1,0 +1,204 @@
+# VultModulesFree — what the manual says
+
+Author: Vult-DSP
+Declared manual: https://modlfo.github.io/VultModules
+Source published: none
+
+Read `research/help/MANUAL-CHECK-BRIEF.md` before starting.
+
+194 ports below were settled from the binary. For each, record agrees / differs / silent.
+
+- Arp46and2 in0 — poly=True
+- Arp46and2 in1 — poly=True, range=1V per octave
+- Arp46and2 in2 — poly=True
+- Arp46and2 in3 — poly=True
+- Basal in0 — poly=True
+- Basal in1 — poly=True
+- Basal in2 — poly=True
+- Bleak in0 — poly=True
+- Bleak in1 — poly=True
+- Bleak in2 — poly=True
+- Boomstick in0 — poly=True
+- Boomstick in1 — poly=True
+- Boomstick in2 — poly=True
+- Caudal in0 — poly=True
+- Caudal in1 — poly=True
+- Caudal in2 — poly=True
+- Caudal in3 — poly=True
+- Caudal in4 — poly=True
+- Caudal in5 — poly=True
+- Debriatus in0 — poly=True
+- Debriatus in1 — poly=True
+- Debriatus in2 — poly=True
+- Debriatus in3 — poly=True
+- Debriatus in4 — poly=True
+- Debriatus in5 — poly=True
+- Decline in0 — poly=True
+- Decline in1 — poly=True
+- Disjoint in0 — poly=True
+- Disjoint in1 — poly=True
+- Disjoint in2 — poly=True
+- Disjoint in3 — poly=True
+- Flux in0 — poly=True
+- Flux in1 — poly=True
+- Flux in2 — poly=True
+- Flux in3 — poly=True
+- Flux in4 — poly=True
+- Flux in5 — poly=True
+- Flux in6 — poly=True
+- Flux in7 — poly=True
+- Flux in8 — poly=True
+- Flux in9 — poly=True
+- Flux in10 — poly=True
+- Flux in11 — poly=True
+- Flux in12 — poly=True
+- Flux in13 — poly=True
+- Flux in14 — poly=True
+- Fuser in0 — poly=True
+- Fuser in1 — poly=True
+- Fuser in2 — poly=True
+- Fuser in3 — poly=True
+- Fuser in4 — poly=True
+- Fuser in5 — poly=True
+- Jorus in0 — poly=True
+- Jorus in1 — poly=True
+- Jorus in2 — poly=True
+- Jorus in3 — poly=True
+- Jorus in4 — poly=True
+- Julste in0 — poly=True
+- Julste in1 — poly=True
+- Julste in2 — poly=True
+- Julste in3 — poly=True
+- Julste in4 — poly=True
+- Julste in5 — poly=True
+- Lateralus in0 — poly=True
+- Lateralus in1 — poly=True
+- Lateralus in2 — poly=True
+- Lateralus in3 — poly=True
+- Leakage in0 — poly=True
+- Leakage in1 — poly=True
+- Leakage in2 — poly=True
+- Leakage in3 — poly=True
+- Nitrous in0 — poly=True
+- Nitrous in1 — poly=True
+- Nitrous in2 — poly=True
+- Nopskate in0 — poly=True
+- Nopskate in1 — poly=True
+- Nopskate in2 — poly=True
+- Nopskate in3 — poly=True
+- Nopskate in4 — poly=True
+- Nopskate in5 — poly=True
+- Opulus in0 — poly=True
+- Opulus in1 — poly=True
+- Opulus in2 — poly=True
+- Opulus in3 — poly=True
+- Opulus in4 — poly=True
+- Opulus in5 — poly=True
+- OpulusMicro in0 — poly=True
+- OpulusMicro in1 — poly=True
+- OpulusMicro in2 — poly=True
+- OpulusMicro in3 — poly=True
+- Overon in0 — poly=True, range=1V per octave, normal=the main CV input
+- Overon in1 — poly=True
+- Overon in2 — poly=True, range=1V per octave, normal=the main CV input
+- Overon in3 — poly=True
+- Overon in4 — poly=True, range=1V per octave
+- Overon in5 — poly=True
+- Overon in6 — poly=True, normal=the internal noise generator
+- Overon in7 — poly=True, normal=a 440Hz tuning tone
+- Overon in8 — poly=True
+- Overon in9 — poly=True, normal=full scale
+- Overon in10 — poly=True, normal=the main gate input
+- Overon in11 — poly=True, normal=the main gate input
+- Overon in12 — poly=True, range=1V per octave
+- Overon in13 — poly=True
+- Punch in0 — poly=True
+- Punch in1 — poly=True
+- Punch in2 — poly=True
+- Rescomb in0 — poly=True
+- Rescomb in1 — poly=True
+- Rescomb in2 — poly=True
+- Rescomb in3 — poly=True
+- Rescomb in4 — poly=True
+- Slap in0 — poly=True
+- Slap in1 — poly=True
+- Slap in2 — poly=True
+- Slap in3 — poly=True
+- Slap in4 — poly=True
+- Slap in5 — poly=True
+- Slap in6 — poly=True
+- Spank in0 — poly=True
+- Spank in1 — poly=True
+- Spank in2 — poly=True
+- Spank in3 — poly=True
+- Spank in4 — poly=True
+- Spank in5 — poly=True
+- Splie in0 — poly=True
+- Splie in1 — poly=True
+- Stabile in0 — poly=True
+- Stabile in1 — poly=True
+- Stabile in2 — poly=True
+- Stabile in3 — poly=True
+- Tangents in0 — poly=True
+- Tangents in1 — poly=True
+- Tangents in2 — poly=True
+- Tangents in3 — poly=True
+- Tangents in4 — poly=True
+- Tangents in5 — poly=True
+- Tohe in0 — poly=True
+- Tohe in1 — poly=True
+- Tohe in2 — poly=True
+- Trummor in0 — poly=True
+- Trummor in1 — poly=True
+- Trummor in2 — poly=True
+- Trummor in3 — poly=True
+- Trummor in4 — poly=True
+- Trummor2 in0 — poly=True
+- Trummor2 in1 — poly=True
+- Trummor2 in2 — poly=True
+- Trummor2 in7 — poly=True
+- Trummor2 in8 — poly=True
+- TrummorFM in0 — poly=True
+- TrummorFM in1 — poly=True
+- TrummorFM in2 — poly=True
+- TrummorFM in7 — poly=True
+- TrummorFM in8 — poly=True
+- Unstabile in0 — poly=True
+- Unstabile in1 — poly=True
+- Unstabile in2 — poly=True
+- Unstabile in3 — poly=True
+- Unstabile in4 — poly=True
+- UtilBypass in0 — poly=True
+- UtilBypass in1 — poly=True
+- UtilBypass in2 — poly=True
+- UtilBypass in3 — poly=True
+- UtilBypass in4 — poly=True
+- UtilKnobs in0 — poly=True
+- UtilKnobs in1 — poly=True
+- UtilKnobs in2 — poly=True
+- UtilKnobs in3 — poly=True
+- UtilKnobs in4 — poly=True
+- UtilKnobs in5 — poly=True
+- UtilKnobs in6 — poly=True
+- UtilKnobs in7 — poly=True
+- UtilSend in0 — poly=True
+- UtilSend in1 — poly=True
+- UtilSend in2 — poly=True
+- UtilSend in3 — poly=True
+- UtilSend in4 — poly=True
+- Vessek in0 — poly=True
+- Vessek in1 — poly=True
+- Vessek in2 — poly=True
+- Vessek in3 — poly=True
+- Vessek in4 — poly=True
+- Vessek in5 — poly=True
+- Vessek in6 — poly=True
+- Vessek in7 — poly=True
+- Vessek in8 — poly=True
+- Vultari in0 — poly=True
+- Vultari in1 — poly=True
+- Vultari in2 — poly=True
+- Vultari in3 — poly=True
+- Wolv in0 — poly=True
+- Wolv in1 — poly=True
+- Wolv in2 — poly=True

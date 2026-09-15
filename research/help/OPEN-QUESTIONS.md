@@ -169,3 +169,21 @@ So Geodesics' PDFs are readable whenever somebody wants them, and every maker wh
 ## Sources that did not exist
 
 Several plugins ship no presets and no demo patches at all, so that source added nothing: Amalgamated Harmonics, RPJ, CharredDesert, LifeFormModular, QuantalAudio, FehlerFabrik. CharredDesert and LifeFormModular also define no context menus anywhere, so the "Right-click the panel for:" heading never appears for them.
+
+## One document that could not be read, and should be tried again
+
+The manual-check pass asks, for every port settled from a binary, whether the maker's own documentation says the same thing. Two of those documents could not be reached at all, and that is a different finding from a document that says nothing.
+
+**DarkProcessIndustries** — `https://darkprocessindustries.com/vcv-rack/`, the URL the installed manifest declares, returns a WordPress failure page: "There has been a critical error on this website." Tried repeatedly, with and without a browser user agent, on both `http` and `https`, and the site root fails the same way. The site is down rather than empty, so all 62 of its ports are recorded silent for the wrong reason. **Worth rerunning when the site is back**, because nothing is yet known about what that page documents.
+
+**24conditions** — `http://j-he.net/24condmain` is a genuine 404, confirmed twice. The rest of the site renders and has no 24conditions entry anywhere, so this is a page that was removed rather than a server at fault. Its 43 ports are honestly silent. Note also that `24conditions.json` cites `https://library.vcvrack.com/24conditions` as its source, which is a VCV library listing rather than anything the maker wrote — the declared manual being dead, there is nothing better to cite, but it is not a maker document and should not be read as one.
+
+## One field changed today that wants a second reading
+
+**Hugelton K108, the Resonance CV (input 3).** The folded-bipolar pass changed it from `negative: "subtracts"` to `"swings"`, on the grounds that `K108::process` clamps the scaled voltage to −1 and +1 before it reaches the two resonance parameters — the author deciding, and deciding to carry negatives through.
+
+Re-reading the disassembly, the jack's own clamp is real and symmetric (`fminnm` against 1.0, `fmaxnm` against −1.0 at 0xb1f8–0xb200). But the *sum* is clamped again immediately afterwards, at 0xb20c–0xb210, and `negative: "subtracts"` is defined in `validate_help.py` as exactly that case — subtracted from the knob until the total hits its floor. Whether `swings` is right therefore depends on what the second clamp's lower bound is, which is a two-wide vector compare against a register loaded from the parameter block rather than against a constant, and I did not settle it.
+
+The same shape governs inputs 1 and 2, the filter cutoff CVs, which the pass flagged as needing the same change and correctly left alone as out of scope. Those two are recorded `1V per octave`, not the `0 to 10V` the pass was hunting, so they were never in the suspect set — the clamp shape and the range field are two different questions and the flag ran them together.
+
+Hugelton publishes no source, so settling this means finishing the vector path in the binary. Low stakes — the lines say "10V covers the whole of that knob's travel" either way — but the three fields should agree with each other, and right now input 3 says `swings` while its two neighbours say `subtracts` on identical code.

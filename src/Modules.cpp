@@ -46,7 +46,6 @@ optional and can be switched off per user.
 #include "Dark.hpp"
 #include "Census.hpp"
 #include "Probe.hpp"
-#include "Help.hpp"
 
 #include <map>
 #include <set>
@@ -151,7 +150,12 @@ struct Clarity : Module {
 		P_ANIMATE_CLICKS, P_SHOW_VALUES,
 		// APPENDED, NEVER INSERTED. Rack saves a param by its number, so a new one in the
 		// middle would move everything after it and load somebody's saved patch wrong.
-		P_HELP,
+		//
+		// HELP MOVED OUT TO ITS OWN PLUGIN, so that a rack can have help without having Clarity
+		// and vice versa. The number is left where it was rather than closed up, so a patch
+		// saved while Clarity still carried the switch still loads. Same reason Darkener keeps
+		// its two.
+		P_UNUSED_HELP,
 		NUM_PARAMS
 	};
 
@@ -191,13 +195,6 @@ struct Clarity : Module {
 		// filmed — it is the one part of this that answers "what did I just set that to"
 		// without leaning towards the panel. So it does not depend on the pointer being drawn.
 		configSwitch(P_SHOW_VALUES, 0.f, 1.f, 0.f, "Show pop-up on adjust", {"Off", "On"});
-		// OFF BY DEFAULT, because it claims a gesture on everybody else's panel. Cmd-shift-click
-		// is unbound in Rack today, but it is not ours, and a plugin that silently takes a
-		// modifier over somebody's whole rack the moment it is placed is the kind of thing that
-		// gets reported as a bug in a third plugin. Off also makes the gesture discoverable
-		// through this switch rather than by accident.
-		configSwitch(P_HELP, 0.f, 1.f, 0.f,
-			"Help on " HELP_MOD_NAME "-click", {"Off", "On"});
 	}
 
 	/** Copies the params into the flags the overlays read. Called from the widget's step, on
@@ -1446,11 +1443,6 @@ struct ClarityWidget : DRUIWidgetBase {
 			// anything will never touch, and a panel should read in the order it matters.
 			{Clarity::P_ANIMATE_CLICKS, "Animate",      "clicks"},
 			{Clarity::P_SHOW_VALUES,    "Show pop-up",  "on adjust"},
-			// LAST, AND OFF: the only switch here that changes what a click does rather than
-			// what the rack looks like. Two lines is all a row has, so the panel says the short
-			// form and the param's own name — what a hover and the right-click menu show —
-			// says the whole of it.
-			{Clarity::P_HELP,           "Help on",      HELP_MOD_NAME "-click"},
 		};
 		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
@@ -1483,19 +1475,6 @@ struct ClarityWidget : DRUIWidgetBase {
 		// here every frame. Without this the buttons moved and nothing else did.
 		m->syncOptions();
 		installOverlays();
-		helpStep(m->params[Clarity::P_HELP].getValue() > 0.5f);
-		// SPEECH IS NOT A SWITCH, because it is not a feature of this plugin — it is `say` on a
-		// Mac, and a button for it would be dead weight on every panel that is not this one.
-		// A file says who wants it: put an empty file called `speak-help` in the plugin's own
-		// folder under Rack's user directory and the note reads itself out when clicked.
-		// Looked for once, not every frame.
-		static bool asked = false;
-		static bool speak = false;
-		if (!asked) {
-			asked = true;
-			speak = system::isFile(asset::user("DreamerDevelopment/speak-help"));
-		}
-		helpSetSpeak(speak);
 		ModuleWidget::step();
 	}
 
@@ -1647,10 +1626,10 @@ need their titles written back are decided in Dark.cpp, where they can be argued
 rather than in a menu. The one control is whether it is doing anything at all, which is worth
 having because seeing the difference is most of the work of judging it. */
 struct Darkener : Module {
-	// HELP MOVED TO CLARITY. It is a thing a rack has once and it acts on every module, which
-	// is what Clarity is; Dark only ever held it because Dark was where the tools that reach
-	// into everybody else's widgets already lived. The numbers are left as they were rather
-	// than closed up, so a patch saved with the old three-switch Dark still loads.
+	// HELP MOVED OUT, first to Clarity and then to a plugin of its own. Dark only ever held it
+	// because Dark was where the tools that reach into everybody else's widgets already lived.
+	// The numbers are left as they were rather than closed up, so a patch saved with the old
+	// three-switch Dark still loads.
 	enum ParamId { P_ON, P_UNUSED_HELP, P_UNUSED_SPEAK, NUM_PARAMS };
 
 	Darkener() {
@@ -1709,7 +1688,6 @@ struct DarkenerWidget : DRUIWidgetBase {
 		gDarkenerCount--;
 		if (gDarkenerCount <= 0) {
 			darkRestoreAll();
-			helpRemoveAll();
 		}
 	}
 

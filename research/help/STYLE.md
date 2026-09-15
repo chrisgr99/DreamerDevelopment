@@ -122,7 +122,7 @@ RENDER EVERY PANEL. It is not a check on the manual, it is a source in its own r
 
 A maker's `main` branch documents the version they are working on, not the one in the rack. Check the installed version in the plugin's `plugin.json` and read the matching tag.
 
-This is not pedantry. Venom's installed build is 2.15.0 while `main` is 2.16.2, and the documentation was restructured in between; Fundamental's installed build is 2.6.4 while the website documents 2.6.5, which changed a filter's range. Both were caught by checking. Cite the manual URL as `source`, and say in your report which version you actually read.
+This is not pedantry. Fundamental's installed build is 2.6.4 while the website documents 2.6.5, which changed a filter's range; that was caught by checking. Venom used to be the other example here — installed 2.15.0 against a 2.16.2 `main` whose documentation had been restructured — and it has since been updated, so the installed build is now 2.16.2 itself. **Which is the point: a version written into this file is a fact about one afternoon.** Read the installed `plugin.json` rather than trusting any version named in the briefs, including this one. Cite the manual URL as `source`, and say in your report which version you actually read.
 
 ## Read the maker's source where there is any
 

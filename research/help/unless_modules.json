@@ -153,9 +153,9 @@
      },
      "6": {
       "poly": false,
-      "step": "stepped",
       "range": "high above 2V",
-      "why": "piong.cpp:179 halves this input into a Schmitt trigger, so it fires above 2V"
+      "step": "stepped",
+      "why": "piong.cpp:179 gateTrigger.process reads this input halved against SchmittTrigger's 1V, so a rising edge past 2V calls spawnBall"
      },
      "7": {
       "poly": false,
@@ -306,7 +306,7 @@
      },
      "2": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -315,17 +315,20 @@
      "3": {
       "poly": false,
       "range": "1V per octave",
-      "why": "markov.cpp:254 converts this input to a midi note number"
+      "step": "stepped",
+      "why": "markov.cpp:255 hands this input to cvToMidi, which at :230 adds 5V and rounds 0 to 10.58V onto midi note 0 to 127"
      },
      "4": {
       "poly": false,
+      "range": "high above 0.1V",
       "step": "stepped",
-      "why": "markov.cpp:246 puts this input through a trigger switch"
+      "why": "markov.cpp:246 gate_trigger.update crosses utils.hpp:246's 0.1V threshold; :288 then sets the chain to the note at the CV input, or :272 adds it while learning"
      },
      "5": {
       "poly": false,
+      "range": "high above 0.1V",
       "step": "stepped",
-      "why": "markov.cpp:245 puts this input through a trigger switch"
+      "why": "markov.cpp:245 trigger_trigger.update crosses utils.hpp:246's 0.1V threshold; :278 steps the chain and :284 holds the gate output at 10V while it stays high"
      }
     },
     "out": {
@@ -505,19 +508,19 @@
      },
      "18": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "swings",
       "normal": "0V",
-      "why": "atoms.cpp:357-361 rescales this input from -10V to 10V onto a turn of -1 to 1"
+      "why": "atoms.cpp:357-361 update_offset rescales this input from -10 to 10V onto input_offset of -1 to 1, and :188 adds that to every electron position, a whole turn of the ring per 10V"
      },
      "19": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "swings",
       "normal": "0V",
-      "why": "atoms.cpp:357-361 rescales this input from -10V to 10V onto a turn of -1 to 1"
+      "why": "atoms.cpp:357-361 update_offset rescales this input from -10 to 10V onto input_offset of -1 to 1, and :188 adds that to every electron position, a whole turn of the ring per 10V"
      },
      "20": {
       "poly": false,
@@ -775,7 +778,7 @@
      },
      "5": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -783,7 +786,7 @@
      },
      "6": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -791,7 +794,7 @@
      },
      "7": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -799,7 +802,7 @@
      },
      "8": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -807,7 +810,7 @@
      },
      "9": {
       "poly": false,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -1006,22 +1009,23 @@
     "in": {
      "0": {
       "poly": false,
+      "range": "high above 0.1V",
       "step": "stepped",
-      "why": "snake.cpp:545 puts this input through a trigger switch"
+      "why": "snake.cpp:541 clock_trigger.update crosses utils.hpp:246's 0.1V threshold and advances the game one frame"
      },
      "1": {
       "poly": false,
       "range": "0 to 10V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "a random column",
-      "why": "snake.cpp:492 rescales this input from 0-10V onto the screen width when it is connected"
+      "why": "snake.cpp:492 rescales this input from 0-10V onto 0 to map_width-1 and :247 spawn_food takes it as an int column index; unconnected it passes -1, which :206 pos_outside_snake reads as random"
      },
      "2": {
       "poly": false,
       "range": "0 to 10V",
-      "step": "continuous",
+      "step": "stepped",
       "normal": "a random row",
-      "why": "snake.cpp:493 rescales this input from 0-10V onto the screen height when it is connected"
+      "why": "snake.cpp:493 rescales this input from 0-10V onto 0 to map_height-1 and :247 spawn_food takes it as an int row index; unconnected it passes -1, which :206 pos_outside_snake reads as random"
      },
      "6": {
       "poly": false,
@@ -1045,8 +1049,9 @@
      },
      "10": {
       "poly": false,
+      "range": "high above 0.1V",
       "step": "stepped",
-      "why": "snake.cpp:520 puts this input through a trigger switch"
+      "why": "snake.cpp:520 food_trigger.update crosses utils.hpp:246's 0.1V threshold and :522 calls spawn_food_with_inputs"
      }
     },
     "out": {
@@ -1229,7 +1234,7 @@
     "in": {
      "0": {
       "poly": true,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -1238,7 +1243,7 @@
      },
      "1": {
       "poly": true,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "subtracts",
       "normal": "0V",
@@ -1247,7 +1252,7 @@
      },
      "2": {
       "poly": true,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "swings",
       "normal": "5V",
@@ -1255,7 +1260,7 @@
      },
      "3": {
       "poly": true,
-      "range": "-10 to 10V",
+      "range": "±10V",
       "step": "continuous",
       "negative": "swings",
       "normal": "5V",
@@ -1263,13 +1268,15 @@
      },
      "4": {
       "poly": true,
+      "range": "high above 0.1V",
       "step": "stepped",
-      "why": "towers.cpp:263-274 puts each channel of this input through its own trigger switch"
+      "why": "towers.cpp:271-275 adds the copy button to each channel of this input and crosses 0.1V per channel to write that channel's IN voltage to its fader; :292 randomises the bank instead when IN is unpatched"
      },
      "5": {
       "poly": true,
+      "range": "high above 0.1V",
       "step": "stepped",
-      "why": "towers.cpp:263-274 puts each channel of this input through its own trigger switch"
+      "why": "towers.cpp:271-275 adds the copy button to each channel of this input and crosses 0.1V per channel to write that channel's IN voltage to its fader; :292 randomises the bank instead when IN is unpatched"
      }
     },
     "out": {
@@ -1487,9 +1494,10 @@
      },
      "1": {
       "poly": false,
+      "range": "high above 0.1V",
       "step": "stepped",
-      "normal": "a new note every cycle",
-      "why": "avoider.cpp:298 puts this input through a trigger switch and recalculates every cycle when it is unpatched"
+      "normal": "a new note every processed sample",
+      "why": "avoider.cpp:303 trigger.update crosses utils.hpp:246's 0.1V threshold to set calculate; unpatched, calculate is true on every processed sample"
      },
      "2": {
       "poly": true,

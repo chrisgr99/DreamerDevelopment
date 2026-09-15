@@ -1820,7 +1820,7 @@
      "7": {
       "poly": false,
       "step": "stepped",
-      "why": "GrainFx.hpp:258 assigns this input's voltage to the buffer's bool frozen flag, so any voltage other than 0V freezes the buffer"
+      "why": "GrainFx.hpp:258 assigns this input's voltage to audio_buffer.frozen, a bool, so any voltage other than 0V sets it and audio_buffer.hpp:39 then stops pushing new audio into the buffer; unpatched, :262 takes the flag from the FREEZE switch instead, so no voltage is read"
      },
      "8": {
       "poly": false,
@@ -2156,49 +2156,49 @@
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
-      "why": "SamplerX8.hpp:111 rescales this input from 0V..10V onto the 0 to 1 start position when the matching trigger fires"
+      "why": "SamplerX8.hpp:107 fires sample 1's trigger, and :111 then rescales this jack from 0 to 10V onto the 0 to 1 start position handed to SamplePlayer.hpp:35, which multiplies it by the sample length; unpatched, :115 calls trigger() with its default start of 0.0, the same place 0V gives"
      },
      "9": {
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
-      "why": "SamplerX8.hpp:111 rescales this input from 0V..10V onto the 0 to 1 start position when the matching trigger fires"
+      "why": "SamplerX8.hpp:107 fires sample 2's trigger, and :111 then rescales this jack from 0 to 10V onto the 0 to 1 start position handed to SamplePlayer.hpp:35, which multiplies it by the sample length; unpatched, :115 calls trigger() with its default start of 0.0, the same place 0V gives"
      },
      "10": {
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
-      "why": "SamplerX8.hpp:111 rescales this input from 0V..10V onto the 0 to 1 start position when the matching trigger fires"
+      "why": "SamplerX8.hpp:107 fires sample 3's trigger, and :111 then rescales this jack from 0 to 10V onto the 0 to 1 start position handed to SamplePlayer.hpp:35, which multiplies it by the sample length; unpatched, :115 calls trigger() with its default start of 0.0, the same place 0V gives"
      },
      "11": {
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
-      "why": "SamplerX8.hpp:111 rescales this input from 0V..10V onto the 0 to 1 start position when the matching trigger fires"
+      "why": "SamplerX8.hpp:107 fires sample 4's trigger, and :111 then rescales this jack from 0 to 10V onto the 0 to 1 start position handed to SamplePlayer.hpp:35, which multiplies it by the sample length; unpatched, :115 calls trigger() with its default start of 0.0, the same place 0V gives"
      },
      "12": {
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
-      "why": "SamplerX8.hpp:111 rescales this input from 0V..10V onto the 0 to 1 start position when the matching trigger fires"
+      "why": "SamplerX8.hpp:107 fires sample 5's trigger, and :111 then rescales this jack from 0 to 10V onto the 0 to 1 start position handed to SamplePlayer.hpp:35, which multiplies it by the sample length; unpatched, :115 calls trigger() with its default start of 0.0, the same place 0V gives"
      },
      "13": {
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
-      "why": "SamplerX8.hpp:111 rescales this input from 0V..10V onto the 0 to 1 start position when the matching trigger fires"
+      "why": "SamplerX8.hpp:107 fires sample 6's trigger, and :111 then rescales this jack from 0 to 10V onto the 0 to 1 start position handed to SamplePlayer.hpp:35, which multiplies it by the sample length; unpatched, :115 calls trigger() with its default start of 0.0, the same place 0V gives"
      },
      "14": {
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
-      "why": "SamplerX8.hpp:111 rescales this input from 0V..10V onto the 0 to 1 start position when the matching trigger fires"
+      "why": "SamplerX8.hpp:107 fires sample 7's trigger, and :111 then rescales this jack from 0 to 10V onto the 0 to 1 start position handed to SamplePlayer.hpp:35, which multiplies it by the sample length; unpatched, :115 calls trigger() with its default start of 0.0, the same place 0V gives"
      },
      "15": {
       "poly": false,
       "step": "continuous",
       "range": "0 to 10V",
-      "why": "SamplerX8.hpp:111 rescales this input from 0V..10V onto the 0 to 1 start position when the matching trigger fires"
+      "why": "SamplerX8.hpp:107 fires sample 8's trigger, and :111 then rescales this jack from 0 to 10V onto the 0 to 1 start position handed to SamplePlayer.hpp:35, which multiplies it by the sample length; unpatched, :115 calls trigger() with its default start of 0.0, the same place 0V gives"
      }
     }
    }
@@ -3395,50 +3395,42 @@
      "0": {
       "poly": false,
       "step": "stepped",
-      "range": "0 to 10V",
-      "why": "GrooveBoxExpander.hpp:137 rescales this input from 0V..10V onto 0 to 1 and assigns it to a bool, so any voltage other than 0V mutes that track"
+      "why": "GrooveBoxExpander.hpp:137 rescales this jack 0 to 10V onto 0 to 1 and assigns the result to a bool, so any voltage other than 0V — negative or a fraction of a volt included — counts, which is why no range is recorded; :138 ORs it with the Mute Track 1 button, so it can mute that track but never unmute it"
      },
      "1": {
       "poly": false,
       "step": "stepped",
-      "range": "0 to 10V",
-      "why": "GrooveBoxExpander.hpp:137 rescales this input from 0V..10V onto 0 to 1 and assigns it to a bool, so any voltage other than 0V mutes that track"
+      "why": "GrooveBoxExpander.hpp:137 rescales this jack 0 to 10V onto 0 to 1 and assigns the result to a bool, so any voltage other than 0V — negative or a fraction of a volt included — counts, which is why no range is recorded; :138 ORs it with the Mute Track 2 button, so it can mute that track but never unmute it"
      },
      "2": {
       "poly": false,
       "step": "stepped",
-      "range": "0 to 10V",
-      "why": "GrooveBoxExpander.hpp:137 rescales this input from 0V..10V onto 0 to 1 and assigns it to a bool, so any voltage other than 0V mutes that track"
+      "why": "GrooveBoxExpander.hpp:137 rescales this jack 0 to 10V onto 0 to 1 and assigns the result to a bool, so any voltage other than 0V — negative or a fraction of a volt included — counts, which is why no range is recorded; :138 ORs it with the Mute Track 3 button, so it can mute that track but never unmute it"
      },
      "3": {
       "poly": false,
       "step": "stepped",
-      "range": "0 to 10V",
-      "why": "GrooveBoxExpander.hpp:137 rescales this input from 0V..10V onto 0 to 1 and assigns it to a bool, so any voltage other than 0V mutes that track"
+      "why": "GrooveBoxExpander.hpp:137 rescales this jack 0 to 10V onto 0 to 1 and assigns the result to a bool, so any voltage other than 0V — negative or a fraction of a volt included — counts, which is why no range is recorded; :138 ORs it with the Mute Track 4 button, so it can mute that track but never unmute it"
      },
      "4": {
       "poly": false,
       "step": "stepped",
-      "range": "0 to 10V",
-      "why": "GrooveBoxExpander.hpp:137 rescales this input from 0V..10V onto 0 to 1 and assigns it to a bool, so any voltage other than 0V mutes that track"
+      "why": "GrooveBoxExpander.hpp:137 rescales this jack 0 to 10V onto 0 to 1 and assigns the result to a bool, so any voltage other than 0V — negative or a fraction of a volt included — counts, which is why no range is recorded; :138 ORs it with the Mute Track 5 button, so it can mute that track but never unmute it"
      },
      "5": {
       "poly": false,
       "step": "stepped",
-      "range": "0 to 10V",
-      "why": "GrooveBoxExpander.hpp:137 rescales this input from 0V..10V onto 0 to 1 and assigns it to a bool, so any voltage other than 0V mutes that track"
+      "why": "GrooveBoxExpander.hpp:137 rescales this jack 0 to 10V onto 0 to 1 and assigns the result to a bool, so any voltage other than 0V — negative or a fraction of a volt included — counts, which is why no range is recorded; :138 ORs it with the Mute Track 6 button, so it can mute that track but never unmute it"
      },
      "6": {
       "poly": false,
       "step": "stepped",
-      "range": "0 to 10V",
-      "why": "GrooveBoxExpander.hpp:137 rescales this input from 0V..10V onto 0 to 1 and assigns it to a bool, so any voltage other than 0V mutes that track"
+      "why": "GrooveBoxExpander.hpp:137 rescales this jack 0 to 10V onto 0 to 1 and assigns the result to a bool, so any voltage other than 0V — negative or a fraction of a volt included — counts, which is why no range is recorded; :138 ORs it with the Mute Track 7 button, so it can mute that track but never unmute it"
      },
      "7": {
       "poly": false,
       "step": "stepped",
-      "range": "0 to 10V",
-      "why": "GrooveBoxExpander.hpp:137 rescales this input from 0V..10V onto 0 to 1 and assigns it to a bool, so any voltage other than 0V mutes that track"
+      "why": "GrooveBoxExpander.hpp:137 rescales this jack 0 to 10V onto 0 to 1 and assigns the result to a bool, so any voltage other than 0V — negative or a fraction of a volt included — counts, which is why no range is recorded; :138 ORs it with the Mute Track 8 button, so it can mute that track but never unmute it"
      }
     }
    }

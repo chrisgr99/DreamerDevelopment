@@ -186,15 +186,13 @@
      },
      "3": {
       "poly": false,
-      "range": "high above 2V",
       "step": "stepped",
-      "why": "docs/modules/FranKe/Manual.md, INPUT JACKS: held +10V gate; monophonic as above"
+      "why": "no published source; FranKeModule::process at 0x84f30 in plugin.dylib compares this jack to exactly 10.0V and stores the result as the reverse flag, so a 5V gate does nothing and no range spelling fits"
      },
      "4": {
       "poly": false,
-      "range": "high above 2V",
       "step": "stepped",
-      "why": "docs/modules/FranKe/Manual.md, INPUT JACKS: held +10V gate"
+      "why": "no published source; FranKeModule::process at 0x84f8c in plugin.dylib compares this jack to exactly 10.0V and stores the result as the pendulum flag, so a 5V gate does nothing and no range spelling fits"
      },
      "7": {
       "poly": false,
@@ -326,13 +324,13 @@
       "poly": false,
       "range": "high above 2V",
       "step": "stepped",
-      "why": "docs/modules/FroeZe/Manual.md gives +2V as the gate and trigger minimum for this group of jacks"
+      "why": "no published source; FroeZeModule::process at 0xe3734 in plugin.dylib rescales this jack by (v - 0.1) / 1.9 and trips a Schmitt trigger at 1, so it fires above 2V and rearms below 0.1V"
      },
      "2": {
       "poly": false,
       "range": "high above 2V",
       "step": "stepped",
-      "why": "docs/modules/FroeZe/Manual.md, same +2V minimum"
+      "why": "no published source; FroeZeModule::process at 0xe38a4 in plugin.dylib rescales this jack by (v - 0.1) / 1.9 and trips a Schmitt trigger at 1, so it fires above 2V and rearms below 0.1V"
      },
      "3": {
       "poly": false,
@@ -352,13 +350,13 @@
       "poly": false,
       "range": "high above 2V",
       "step": "stepped",
-      "why": "docs/modules/FroeZe/Manual.md, REVerse: applied gate-voltage held, +2V minimum"
+      "why": "no published source; FroeZeModule::process at 0xe3bb0 in plugin.dylib compares this jack straight against 2.0V every sample and reverses playback while it is at or above it"
      },
      "6": {
       "poly": false,
       "range": "high above 2V",
       "step": "stepped",
-      "why": "docs/modules/FroeZe/Manual.md, PENDULum: held gate, minimum +2V"
+      "why": "no published source; FroeZeModule::process at 0xe3d14 in plugin.dylib compares this jack straight against 2.0V every sample and runs the pattern as a pendulum while it is at or above it"
      },
      "7": {
       "poly": false,
@@ -370,9 +368,9 @@
      "8": {
       "poly": false,
       "range": "0 to 10V",
-      "step": "continuous",
+      "step": "stepped",
       "negative": "ignored",
-      "why": "docs/modules/FroeZe/Manual.md: trigger for previous pattern, or 0V/+10V absolute pattern number when the NEXT jack is empty"
+      "why": "no published source; FroeZeModule::process at 0xe0f00 in plugin.dylib drops the jack below 0V and at or above 10V, then truncates voltage times 12.8 to a whole pattern number; at 0xe00a8 the same jack is instead a 2V trigger for the previous pattern"
      },
      "9": {
       "poly": false,
@@ -674,7 +672,7 @@
       "poly": false,
       "range": "high above 2V",
       "step": "stepped",
-      "why": "KlokSpidMkIIModule::process at 0x13ef68 compares the jack against 2.0 and at 0x13eff4 against 0x3dcccccd, which is 0.1; no setChannels anywhere in that function"
+      "why": "KlokSpidMkIIModule::process at 0x13ef68 compares the jack against 2.0 and at 0x13eff4 against 0x3dcccccd, which is 0.1; no setChannels anywhere in that function; docs/modules/KlokSpidMkII/Manual.md gives the same +2V rising and +0.1V falling pair for CLK, RUN and RESET, internal or on the KX expander"
      },
      "1": {
       "poly": false,
@@ -760,33 +758,33 @@
       "poly": false,
       "range": "high above 2V",
       "step": "stepped",
-      "why": "the expander's jacks are read by KlokSpidMkIIModule::process on the same path as the internal ones, which compares against 2.0 at 0x13ef68 and 0.1 at 0x13eff4"
+      "why": "the expander's jacks are read by KlokSpidMkIIModule::process on the same path as the internal ones, which compares against 2.0 at 0x13ef68 and 0.1 at 0x13eff4; docs/modules/KlokSpidMkII/Manual.md gives the same +2V rising and +0.1V falling pair for CLK, RUN and RESET, internal or on the KX expander"
      },
      "1": {
       "poly": false,
       "range": "high above 2V",
       "step": "stepped",
-      "why": "same thresholds; docs/modules/KlokSpidMkII/Manual.md says the KX jacks behave exactly as the internal ones"
+      "why": "no published source; KXModule::process at 0x16dc80 in plugin.dylib copies this jack into the KlokSpid MkII block it expands, and that module rescales its own clock jack by (v - 0.1) / 1.9 at 0x140800, firing above 2V; the threshold itself was not followed through the host"
      },
      "2": {
       "poly": false,
       "range": "high above 2V",
       "step": "stepped",
-      "why": "same thresholds; docs/modules/KlokSpidMkII/Manual.md, KX paragraph"
+      "why": "no published source; KXModule::process at 0x16dc9c in plugin.dylib copies this jack into the KlokSpid MkII block it expands, which rescales its own clock jack by (v - 0.1) / 1.9 at 0x140800, firing above 2V; the threshold itself was not followed through the host"
      },
      "3": {
       "poly": false,
       "range": "±5V",
       "step": "continuous",
-      "negative": "subtracts",
-      "why": "census input name 'Quantizers: pre-offset (OFS.1) bipolar -5V/+5V CV'; the manual says it can increase or decrease the output voltage before quantization"
+      "negative": "swings",
+      "why": "no published source; KXModule::process at 0x16dcb4 in plugin.dylib clamps this jack itself to -5V and 5V before handing it to the quantizer, with no floor at zero"
      },
      "4": {
       "poly": false,
       "range": "±5V",
       "step": "continuous",
-      "negative": "subtracts",
-      "why": "census input name 'Quantizers: pre-offset (OFS.2) bipolar -5V/+5V CV'"
+      "negative": "swings",
+      "why": "no published source; KXModule::process at 0x16dce0 in plugin.dylib clamps this jack itself to -5V and 5V before handing it to the quantizer, with no floor at zero"
      }
     }
    },
@@ -819,7 +817,7 @@
       "range": "1V per octave",
       "step": "continuous",
       "negative": "swings",
-      "why": "KordZModule::process at 0x165d20-0x165d98 takes the smaller of inputs[0] and inputs[1] channel counts as a loop bound and reads voltages[i] of both in that loop"
+      "why": "KordZModule::process at 0x165d20-0x165d98 takes the smaller of inputs[0] and inputs[1] channel counts as a loop bound and reads voltages[i] of both in that loop; the README's module list calls KordZ a V/Oct.-based display module"
      },
      "1": {
       "poly": true,
@@ -882,25 +880,25 @@
       "poly": false,
       "range": "high above 1.7V",
       "step": "stepped",
-      "why": "QuadPercsModule::process at 0x1727e4 multiplies the jack by 0x3f2aaaab and adds 0xbe088889, which is rescale from 0.2 to 1.7, then compares against 1.0 and against 0 on the way down; it reads voltages[0] only"
+      "why": "QuadPercsModule::process at 0x1727e4 multiplies the jack by 0x3f2aaaab and adds 0xbe088889, which is rescale from 0.2 to 1.7, then compares against 1.0 and against 0 on the way down; it reads voltages[0] only; the README's QuadPercs Quicky Guide gives the same +1.7V minimum trigger voltage, and says the module supports monophonic cables only"
      },
      "1": {
       "poly": false,
       "range": "high above 1.7V",
       "step": "stepped",
-      "why": "QuadPercsModule::process at 0x1727e4 multiplies the jack by 0x3f2aaaab and adds 0xbe088889, which is rescale from 0.2 to 1.7, then compares against 1.0 and against 0 on the way down; it reads voltages[0] only"
+      "why": "QuadPercsModule::process at 0x1727e4 multiplies the jack by 0x3f2aaaab and adds 0xbe088889, which is rescale from 0.2 to 1.7, then compares against 1.0 and against 0 on the way down; it reads voltages[0] only; the README's QuadPercs Quicky Guide gives the same +1.7V minimum trigger voltage, and says the module supports monophonic cables only"
      },
      "2": {
       "poly": false,
       "range": "high above 1.7V",
       "step": "stepped",
-      "why": "QuadPercsModule::process at 0x1727e4 multiplies the jack by 0x3f2aaaab and adds 0xbe088889, which is rescale from 0.2 to 1.7, then compares against 1.0 and against 0 on the way down; it reads voltages[0] only"
+      "why": "QuadPercsModule::process at 0x1727e4 multiplies the jack by 0x3f2aaaab and adds 0xbe088889, which is rescale from 0.2 to 1.7, then compares against 1.0 and against 0 on the way down; it reads voltages[0] only; the README's QuadPercs Quicky Guide gives the same +1.7V minimum trigger voltage, and says the module supports monophonic cables only"
      },
      "3": {
       "poly": false,
       "range": "high above 1.7V",
       "step": "stepped",
-      "why": "QuadPercsModule::process at 0x1727e4 multiplies the jack by 0x3f2aaaab and adds 0xbe088889, which is rescale from 0.2 to 1.7, then compares against 1.0 and against 0 on the way down; it reads voltages[0] only"
+      "why": "QuadPercsModule::process at 0x1727e4 multiplies the jack by 0x3f2aaaab and adds 0xbe088889, which is rescale from 0.2 to 1.7, then compares against 1.0 and against 0 on the way down; it reads voltages[0] only; the README's QuadPercs Quicky Guide gives the same +1.7V minimum trigger voltage, and says the module supports monophonic cables only"
      }
     },
     "out": {
@@ -1018,31 +1016,31 @@
      },
      "1": {
       "poly": false,
-      "range": "0 to 10V",
+      "range": "0 to 8.505V",
       "step": "stepped",
       "negative": "ignored",
-      "why": "docs/modules/Vektor/Manual.md, PROGRAMS: +1V to +8.5V, +0.5V per program, below +1V ignored and above +8.5V program 16"
+      "why": "no published source; VektorModule::process at 0x19bfc8 in plugin.dylib clamps this jack to 0V and 8.505V before the program ladder, so nothing above that changes the program; the manual gives +1V to +8.5V at half a volt per program"
      },
      "2": {
       "poly": false,
       "range": "±5V",
       "step": "continuous",
       "negative": "swings",
-      "why": "census input name 'Modulation around joystick X (-5V/+5V)'"
+      "why": "no published source; VektorModule::process at 0x19c304 in plugin.dylib scales this jack by 0.2, so 5V is a full swing of the X axis, and clamps the result symmetrically at 0x19c310"
      },
      "3": {
       "poly": false,
       "range": "±5V",
       "step": "continuous",
       "negative": "swings",
-      "why": "census input name 'Modulation around joystick Y (-5V/+5V)'"
+      "why": "no published source; VektorModule::process at 0x19c348 in plugin.dylib scales this jack by 0.2, so 5V is a full swing of the Y axis, and clamps the result symmetrically at 0x19c354"
      },
      "4": {
       "poly": false,
       "range": "±5V",
       "step": "continuous",
       "negative": "swings",
-      "why": "census input name 'FM (Linear Through-Zero FM) -5V/+5V'"
+      "why": "no published source; VektorModule::process at 0x19aaa4 in plugin.dylib clamps this jack to -5V and 5V, then multiplies it by 2.61626 as the modulation index"
      },
      "5": {
       "poly": true,
@@ -1055,27 +1053,27 @@
      "0": {
       "poly": true,
       "range": "±5V",
-      "why": "VektorModule::process at 0x19b824 onwards reads each output's channel byte, zeroes the channels above the voice count and writes the new count back, for each of the five outputs in turn; the -5V to +5V range is in docs/modules/Vektor/Manual.md, VEKTOR MODULE TECHNICAL SPECIFICATIONS"
+      "why": "VektorModule::process at 0x19b824 onwards reads each output's channel byte, zeroes the channels above the voice count and writes the new count back, for each of the five outputs in turn; the -5V to +5V range is in docs/modules/Vektor/Manual.md, VEKTOR MODULE TECHNICAL SPECIFICATIONS; the same VEKTOR MODULE TECHNICAL SPECIFICATIONS page says all five outputs are mono but polyphonic"
      },
      "1": {
       "poly": true,
       "range": "±5V",
-      "why": "VektorModule::process at 0x19b824 onwards reads each output's channel byte, zeroes the channels above the voice count and writes the new count back, for each of the five outputs in turn; the -5V to +5V range is in docs/modules/Vektor/Manual.md, VEKTOR MODULE TECHNICAL SPECIFICATIONS"
+      "why": "VektorModule::process at 0x19b824 onwards reads each output's channel byte, zeroes the channels above the voice count and writes the new count back, for each of the five outputs in turn; the -5V to +5V range is in docs/modules/Vektor/Manual.md, VEKTOR MODULE TECHNICAL SPECIFICATIONS; the same VEKTOR MODULE TECHNICAL SPECIFICATIONS page says all five outputs are mono but polyphonic"
      },
      "2": {
       "poly": true,
       "range": "±5V",
-      "why": "VektorModule::process at 0x19b824 onwards reads each output's channel byte, zeroes the channels above the voice count and writes the new count back, for each of the five outputs in turn; the -5V to +5V range is in docs/modules/Vektor/Manual.md, VEKTOR MODULE TECHNICAL SPECIFICATIONS"
+      "why": "VektorModule::process at 0x19b824 onwards reads each output's channel byte, zeroes the channels above the voice count and writes the new count back, for each of the five outputs in turn; the -5V to +5V range is in docs/modules/Vektor/Manual.md, VEKTOR MODULE TECHNICAL SPECIFICATIONS; the same VEKTOR MODULE TECHNICAL SPECIFICATIONS page says all five outputs are mono but polyphonic"
      },
      "3": {
       "poly": true,
       "range": "±5V",
-      "why": "VektorModule::process at 0x19b824 onwards reads each output's channel byte, zeroes the channels above the voice count and writes the new count back, for each of the five outputs in turn; the -5V to +5V range is in docs/modules/Vektor/Manual.md, VEKTOR MODULE TECHNICAL SPECIFICATIONS"
+      "why": "VektorModule::process at 0x19b824 onwards reads each output's channel byte, zeroes the channels above the voice count and writes the new count back, for each of the five outputs in turn; the -5V to +5V range is in docs/modules/Vektor/Manual.md, VEKTOR MODULE TECHNICAL SPECIFICATIONS; the same VEKTOR MODULE TECHNICAL SPECIFICATIONS page says all five outputs are mono but polyphonic"
      },
      "4": {
       "poly": true,
       "range": "±5V",
-      "why": "VektorModule::process at 0x19b824 onwards reads each output's channel byte, zeroes the channels above the voice count and writes the new count back, for each of the five outputs in turn; the -5V to +5V range is in docs/modules/Vektor/Manual.md, VEKTOR MODULE TECHNICAL SPECIFICATIONS"
+      "why": "VektorModule::process at 0x19b824 onwards reads each output's channel byte, zeroes the channels above the voice count and writes the new count back, for each of the five outputs in turn; the -5V to +5V range is in docs/modules/Vektor/Manual.md, VEKTOR MODULE TECHNICAL SPECIFICATIONS; the same VEKTOR MODULE TECHNICAL SPECIFICATIONS page says all five outputs are mono but polyphonic"
      }
     }
    },
@@ -1431,7 +1429,7 @@
       "range": "1V per octave",
       "step": "continuous",
       "negative": "swings",
-      "why": "SixOpDXModule::process at 0xdb0c onwards reads each output's channel byte, zeroes the channels above a voice count and writes the count back, which is a real polyphonic voice allocation; the census names the jack Pitch (V/OCT.)"
+      "why": "SixOpDXModule::process at 0xdb0c onwards reads each output's channel byte, zeroes the channels above a voice count and writes the count back, which is a real polyphonic voice allocation; the census names the jack Pitch (V/OCT.); docs/modules/DeXtral/Manual.md, DEXTRAL SPECIFICATIONS, lists V/OCT among the module's sixteen input jacks"
      },
      "1": {
       "poly": true,
@@ -1441,39 +1439,39 @@
     "out": {
      "0": {
       "poly": true,
-      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn"
+      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn; docs/modules/DeXtral/Manual.md, DEXTRAL SPECIFICATIONS, says all nine outputs are mono but polyphonic, up to 16 channels"
      },
      "1": {
       "poly": true,
-      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn"
+      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn; docs/modules/DeXtral/Manual.md, DEXTRAL SPECIFICATIONS, says all nine outputs are mono but polyphonic, up to 16 channels"
      },
      "2": {
       "poly": true,
-      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn"
+      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn; docs/modules/DeXtral/Manual.md, DEXTRAL SPECIFICATIONS, says all nine outputs are mono but polyphonic, up to 16 channels"
      },
      "3": {
       "poly": true,
-      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn"
+      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn; docs/modules/DeXtral/Manual.md, DEXTRAL SPECIFICATIONS, says all nine outputs are mono but polyphonic, up to 16 channels"
      },
      "4": {
       "poly": true,
-      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn"
+      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn; docs/modules/DeXtral/Manual.md, DEXTRAL SPECIFICATIONS, says all nine outputs are mono but polyphonic, up to 16 channels"
      },
      "5": {
       "poly": true,
-      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn"
+      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn; docs/modules/DeXtral/Manual.md, DEXTRAL SPECIFICATIONS, says all nine outputs are mono but polyphonic, up to 16 channels"
      },
      "6": {
       "poly": true,
-      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn"
+      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn; docs/modules/DeXtral/Manual.md, DEXTRAL SPECIFICATIONS, says all nine outputs are mono but polyphonic, up to 16 channels"
      },
      "7": {
       "poly": true,
-      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn"
+      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn; docs/modules/DeXtral/Manual.md, DEXTRAL SPECIFICATIONS, says all nine outputs are mono but polyphonic, up to 16 channels"
      },
      "8": {
       "poly": true,
-      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn"
+      "why": "SixOpDXModule::process at 0xdb0c, 0xdb48, 0xdb8c, 0xdbd0, 0xdc14, 0xdc58, 0xdc9c, 0xdcdc and 0xdd20 sets the channel count on each of the nine outputs in turn; docs/modules/DeXtral/Manual.md, DEXTRAL SPECIFICATIONS, says all nine outputs are mono but polyphonic, up to 16 channels"
      }
     }
    },

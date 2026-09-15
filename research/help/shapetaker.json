@@ -117,42 +117,39 @@
      },
      "6": {
       "poly": true,
-      "range": "0 to 10V",
       "step": "continuous",
       "negative": "swings",
       "normal": "0V",
-      "why": "docs/manuals/Evocation.md records 10V as one whole phase turn, and the per-lane phase CV is smoothed for every voice"
+      "why": "evocation.cpp:2494 adds this jack's getPolyVoltage over VOLTAGE_RANGE (:359, 10) to that output's phase offset, so 10V is one whole turn; nothing clamps it and :2505 wraps, so no range spelling fits"
      },
      "7": {
       "poly": true,
-      "range": "0 to 10V",
       "step": "continuous",
       "negative": "swings",
       "normal": "0V",
-      "why": "docs/manuals/Evocation.md records 10V as one whole phase turn, and the per-lane phase CV is smoothed for every voice"
+      "why": "evocation.cpp:2494 adds this jack's getPolyVoltage over VOLTAGE_RANGE (:359, 10) to that output's phase offset, so 10V is one whole turn; nothing clamps it and :2505 wraps, so no range spelling fits"
      },
      "8": {
       "poly": true,
-      "range": "0 to 10V",
       "step": "continuous",
       "negative": "swings",
       "normal": "0V",
-      "why": "docs/manuals/Evocation.md records 10V as one whole phase turn, and the per-lane phase CV is smoothed for every voice"
+      "why": "evocation.cpp:2494 adds this jack's getPolyVoltage over VOLTAGE_RANGE (:359, 10) to that output's phase offset, so 10V is one whole turn; nothing clamps it and :2505 wraps, so no range spelling fits"
      },
      "9": {
       "poly": true,
-      "range": "0 to 10V",
       "step": "continuous",
       "negative": "swings",
       "normal": "0V",
-      "why": "docs/manuals/Evocation.md records 10V as one whole phase turn, and the per-lane phase CV is smoothed for every voice"
+      "why": "evocation.cpp:2494 adds this jack's getPolyVoltage over VOLTAGE_RANGE (:359, 10) to that output's phase offset, so 10V is one whole turn; nothing clamps it and :2505 wraps, so no range spelling fits"
      },
      "10": {
       "poly": false,
+      "range": "high above 2V",
       "step": "stepped",
       "negative": "ignored",
       "normal": "0V",
-      "why": "docs/manuals/Evocation.md states the clock input is monophonic and only the first channel is used"
+      "why": "evocation.cpp:677 clockInputTrigger.process(getVoltage(), 0.1, 2) reads one channel and times the interval between rising edges crossing 2V"
      }
     },
     "out": {
@@ -424,7 +421,7 @@
       "step": "continuous",
       "negative": "swings",
       "normal": "0V",
-      "why": "docs/manuals/Clairaudient.md gives this jack as 1 volt per octave, polyphonic, and a mono cable is broadcast to every voice"
+      "why": "clairaudient.cpp:838 getPolyVoltage for that voice is added straight to the cached base pitch at :844, one volt per octave"
      },
      "1": {
       "poly": true,
@@ -450,28 +447,34 @@
       "negative": "subtracts",
       "sumRange": "0 to 10V",
       "normal": "0V",
-      "why": "docs/manuals/Clairaudient.md gives 0-10V sweeping the full 0 to 200 percent width range at full positive attenuation"
+      "why": "clairaudient.cpp:861 applyAttenuvertedCv adds getPolyVoltage times the attenuverter over CV_FORMANT_SCALE (:17, one tenth) to the width knob, and :338 clamps the sum to 0 to 1"
      },
      "4": {
       "poly": true,
+      "range": "0 to 5V",
       "step": "continuous",
-      "negative": "swings",
+      "negative": "subtracts",
+      "sumRange": "0 to 5V",
       "normal": "0V",
-      "why": "docs/manuals/Clairaudient.md lists this as a polyphonic shape CV input with a bipolar attenuverter, audio rate allowed"
+      "why": "clairaudient.cpp:865 applyAttenuvertedCv adds getPolyVoltage times the attenuverter over CV_SHAPE_SCALE (:16, one fifth) to the shape knob, and :338 clamps the SUM to 0 to 1, so a negative pulls the knob down rather than swinging"
      },
      "5": {
       "poly": true,
+      "range": "0 to 5V",
       "step": "continuous",
-      "negative": "swings",
+      "negative": "subtracts",
+      "sumRange": "0 to 5V",
       "normal": "0V",
-      "why": "docs/manuals/Clairaudient.md lists this as a polyphonic shape CV input with a bipolar attenuverter, audio rate allowed"
+      "why": "clairaudient.cpp:866 applyAttenuvertedCv adds getPolyVoltage times the attenuverter over CV_SHAPE_SCALE (:16, one fifth) to the shape knob, and :338 clamps the SUM to 0 to 1, so a negative pulls the knob down rather than swinging"
      },
      "6": {
       "poly": true,
+      "range": "0 to 10V",
       "step": "continuous",
-      "negative": "swings",
+      "negative": "subtracts",
+      "sumRange": "0 to 10V",
       "normal": "0V",
-      "why": "docs/manuals/Clairaudient.md lists this as the CV input for the master mixing stage, with its own attenuverter"
+      "why": "clairaudient.cpp:873 applyAttenuvertedCv adds getPolyVoltage times the attenuverter over CV_XFADE_SCALE (:18, one tenth) to the crossfade knob, and :338 clamps the SUM to 0 to 1"
      },
      "7": {
       "poly": true,
@@ -646,7 +649,7 @@
       "negative": "subtracts",
       "sumRange": "0 to 10V",
       "normal": "0V",
-      "why": "docs/manuals/Involution.md gives couple, form and depth CV as polyphonic with 10V spanning the full range"
+      "why": "involution.cpp:622 applyUnitCv adds getPolyOrMonoVoltage for that voice times CV_NORMALIZED_SCALE (:115, one tenth) to the couple knob, and :623 clamps the sum to 0 to 1"
      },
      "7": {
       "poly": true,
@@ -655,7 +658,7 @@
       "negative": "subtracts",
       "sumRange": "0 to 10V",
       "normal": "0V",
-      "why": "docs/manuals/Involution.md gives couple, form and depth CV as polyphonic with 10V spanning the full range"
+      "why": "involution.cpp:622 applyUnitCv adds getPolyOrMonoVoltage for that voice times CV_NORMALIZED_SCALE (:115, one tenth) to the chaos depth knob, and :623 clamps the sum to 0 to 1"
      },
      "8": {
       "poly": true,
@@ -664,7 +667,7 @@
       "negative": "subtracts",
       "sumRange": "0 to 10V",
       "normal": "0V",
-      "why": "docs/manuals/Involution.md gives couple, form and depth CV as polyphonic with 10V spanning the full range"
+      "why": "involution.cpp:622 applyUnitCv adds getPolyOrMonoVoltage for that voice times CV_NORMALIZED_SCALE (:115, one tenth) to the form knob, and :623 clamps the sum to 0 to 1"
      },
      "9": {
       "poly": false,
@@ -688,7 +691,7 @@
       "step": "stepped",
       "negative": "ignored",
       "normal": "0V",
-      "why": "docs/manuals/Involution.md states the freeze gate is shared and freezes both attractors at 1V or higher"
+      "why": "involution.cpp:553 tests getVoltage on channel one against 1V as a level every sample; :555 then holds the Lorenz and drift generators still while it is high"
      }
     },
     "out": {

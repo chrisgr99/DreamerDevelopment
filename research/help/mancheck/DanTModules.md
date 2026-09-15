@@ -1,0 +1,210 @@
+# DanTModules — what the manual says
+
+Author: dtilley
+Declared manual: https://miff-real.github.io/DanTModules-Manual/
+Source published: none
+
+Read `research/help/MANUAL-CHECK-BRIEF.md` before starting.
+
+200 ports below were settled from the binary. For each, record agrees / differs / silent.
+
+- 5Splice in0 — poly=False, range=high above 1V, step=stepped
+- 5Splice in1 — poly=False
+- 5Splice in2 — poly=False
+- 5Splice in3 — poly=False
+- 5Splice in4 — poly=False
+- 5Splice in5 — poly=False
+- 5Splice in6 — poly=False
+- BillyG8s in0 — poly=False
+- BillyG8s in1 — poly=False, range=high above 0V, step=stepped
+- BillyG8s in2 — poly=False
+- BillyG8s in3 — poly=False
+- BillyG8s in4 — poly=False
+- BillyG8s in5 — poly=False
+- BillyG8s in6 — poly=False, range=high above 0V, step=stepped
+- BillyG8s in7 — poly=False
+- BillyG8s in8 — poly=False
+- BillyG8s in9 — poly=False
+- BillyG8s in10 — poly=False
+- BillyG8s in11 — poly=False, range=high above 0V, step=stepped
+- BillyG8s in12 — poly=False
+- BillyG8s in13 — poly=False
+- BillyG8s in14 — poly=False
+- BillyG8s in16 — poly=False, range=high above 0V, step=stepped
+- BillyG8s in17 — poly=False
+- BillyG8s in18 — poly=False
+- BillyG8s in19 — poly=False
+- BillyG8s in21 — poly=False, range=high above 0V, step=stepped
+- BillyG8s in22 — poly=False
+- BillyG8s in23 — poly=False
+- BillyG8s in24 — poly=False
+- BillyG8s in25 — poly=False
+- BillyG8s in26 — poly=False
+- BillyG8s in27 — poly=False
+- BrightIdea in0 — poly=False, range=high above 1V, step=stepped
+- BrightIdea in1 — poly=False
+- BrightIdea in2 — poly=False
+- BrightIdea in3 — poly=False
+- BrightIdea in4 — poly=False
+- BrightIdea in5 — poly=False, range=high above 1V, step=stepped
+- BrightIdea in6 — poly=False
+- BrightIdea in7 — poly=False
+- CharlieFoxtrot in0 — poly=False, range=high above 1V, step=stepped
+- CharlieFoxtrot in1 — poly=False, range=high above 1V, step=stepped
+- CharlieFoxtrot in2 — poly=True, range=high above 1V, step=stepped
+- CharlieFoxtrot in3 — poly=True
+- CharlieFoxtrot in4 — poly=True
+- CharlieFoxtrot in5 — poly=True
+- CharlieFoxtrot in6 — poly=True
+- CharlieFoxtrot in7 — poly=True
+- CharlieFoxtrot in8 — poly=True
+- CharlieFoxtrot in9 — poly=True
+- CharlieFoxtrot in10 — poly=True
+- Chromagica in0 — poly=False
+- Chromagica in1 — poly=False
+- Chromagica in2 — poly=False
+- Chromagica in3 — poly=False
+- Kalkatron in0 — poly=False
+- Kalkatron in1 — poly=True
+- Kalkatron in2 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in3 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in4 — poly=True
+- Kalkatron in5 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in6 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in7 — poly=True
+- Kalkatron in8 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in9 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in10 — poly=True
+- Kalkatron in11 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in12 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in13 — poly=True
+- Kalkatron in14 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in15 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in16 — poly=True
+- Kalkatron in17 — poly=True
+- Kalkatron in18 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in19 — poly=True, range=high above 1V, step=stepped
+- Kalkatron in20 — poly=False
+- Kanal in0 — poly=False
+- Kanal in1 — poly=False
+- Kanal in2 — poly=False
+- Kanal in3 — poly=False
+- Kanal in4 — poly=False
+- Kanal in5 — poly=False
+- Kanal out0 — range=±5V
+- Kapow in0 — poly=True, range=1V per octave
+- Kapow in1 — poly=True, range=high above 1V, step=stepped
+- Kapow in2 — poly=False
+- Kapow in3 — poly=False
+- Kapow in4 — poly=False
+- Kapow in5 — poly=False
+- Kapow in6 — poly=False
+- Kapow in7 — poly=False
+- Kapow in8 — poly=False
+- Kapow in9 — poly=False
+- Kapow in10 — poly=False
+- Kapow in11 — poly=False
+- Kapow in12 — poly=False, range=high above 0V, step=stepped
+- Kapow in13 — poly=False, range=high above 1V, step=stepped
+- Kapow in14 — poly=True
+- Kapow out0 — poly=True
+- Kapow out1 — poly=True
+- LittlePig in0 — poly=False
+- LittlePig in1 — poly=False
+- LittlePig in2 — poly=False
+- LittlePig in3 — poly=False
+- LittlePig in4 — poly=False
+- LittlePig in5 — poly=False, range=1V per octave
+- MoarCowbell in0 — poly=False
+- MoarCowbell in1 — poly=False
+- MoarCowbell in2 — poly=False
+- MoarCowbell in3 — poly=False
+- MoarCowbell in4 — poly=False
+- MoarCowbell in5 — poly=False
+- MoarCowbell in6 — poly=False
+- MoarCowbell in7 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in0 — poly=True
+- Nonaquant in1 — poly=True, range=high above 1V, step=stepped
+- Nonaquant in2 — poly=True, range=0 to 5V
+- Nonaquant in3 — poly=True, range=±5V
+- Nonaquant in4 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in5 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in6 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in7 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in8 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in9 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in10 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in11 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in12 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in13 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in14 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in15 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in16 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in17 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in18 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in19 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in20 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in21 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in22 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in23 — poly=False, range=high above 1V, step=stepped
+- Nonaquant in24 — poly=True
+- Nonaquant in25 — poly=True
+- Nonaquant out0 — poly=True
+- Nonaquant out1 — poly=True
+- PKorre in0 — poly=False
+- PKorre in1 — poly=False
+- PKorre in2 — poly=False
+- PKorre in3 — poly=False
+- PKorre in4 — poly=False
+- Pitchness in0 — poly=True, range=1V per octave
+- Pitchness in1 — poly=True, range=high above 1V, step=stepped
+- Pitchness in2 — poly=False
+- Pitchness out16 — poly=True
+- PolySplice in0 — poly=True
+- PolySplice in1 — poly=False, range=high above 1V, step=stepped
+- PolySplice in2 — poly=False, range=high above 1V, step=stepped
+- PolySplice in3 — poly=False
+- PolySplice in4 — poly=False
+- PolySplice in5 — poly=False
+- PolySplice in6 — poly=False
+- SeizureTrigger in0 — poly=True
+- SeizureTrigger in1 — poly=True
+- SeizureTrigger in2 — poly=True
+- SeizureTrigger in3 — poly=True
+- SeizureTrigger in4 — poly=True
+- TMNT in0 — poly=False
+- TMNT in1 — poly=False
+- TMNT in2 — poly=False
+- TMNT in3 — poly=False, range=high above 1V, step=stepped
+- TMNT in4 — poly=False, range=high above 1V, step=stepped
+- TMNT in37 — poly=False
+- TMNT in38 — poly=False, range=high above 1V, step=stepped
+- TMNT in39 — poly=False, range=high above 1V, step=stepped
+- TMNT in40 — poly=False, range=high above 1V, step=stepped
+- TMNT in41 — poly=False, range=high above 1V, step=stepped
+- TMNT in42 — poly=False, range=high above 1V, step=stepped
+- TNM in0 — poly=False, range=high above 1V, step=stepped
+- TNM in1 — poly=False, range=high above 1V, step=stepped
+- TimeLord in0 — poly=False, range=high above 1V, step=stepped
+- TimeLord in1 — poly=False, range=high above 1V, step=stepped
+- TimeLord in2 — poly=False, range=high above 1V, step=stepped
+- TimeLord in3 — poly=False, range=high above 1V, step=stepped
+- TimeLord in4 — poly=False, range=high above 1V, step=stepped
+- TimeLord in5 — poly=False, range=high above 1V, step=stepped
+- TimeLord in6 — poly=False, range=high above 1V, step=stepped
+- TimeLord in7 — poly=False, range=high above 1V, step=stepped
+- Wavulike in0 — poly=False, range=±5V
+- Wavulike in1 — poly=False, range=±5V
+- Wavulike in2 — poly=False, range=±5V
+- Wavulike in3 — poly=False, range=±5V
+- Wavulike in4 — poly=False, range=±5V
+- Wavulike in5 — poly=False, range=±5V
+- Wavulike in6 — poly=False, range=±5V
+- Wavulike in7 — poly=False, range=±5V
+- Wavulike in8 — poly=False, range=±5V
+- Wavulike in9 — poly=False, range=±5V
+- Wavulike in10 — poly=False, range=±5V
+- Wavulike in11 — poly=False, range=±5V
+- Wavulike in12 — poly=False
+- Wavulike in13 — poly=False
+- Wavulike in14 — poly=False, range=1V per octave
