@@ -59,36 +59,6 @@ that follows the pointer, leaving the wheel as the only practical route.
 True when there is no terminal under the press at all, and true as well when there is one but
 the pill is drawn nearer to the press than the terminal's own centre — measured in the rack's
 coordinates, so it holds at any zoom. */
-/** Whether a DreamerHelp Help module is in the patch with its switch on.
-
-WHO OWNS OPTION-CLICK WHEN BOTH PLUGINS ARE INSTALLED. Help used to live in this plugin, and the
-question settled itself: the help check came first in this function and the port menu after it.
-Now they are separate plugins with an overlay each, and both overlays want to be the scene's last
-child — so whichever is last wins, and the user gets whichever of two answers the child list
-happens to be in.
-
-So the precedence is stated rather than raced for. A Help module in the patch with its switch on
-is somebody asking for option-click to answer questions; this plugin's own uses of the gesture
-stand down while that is true. Asked only on the click, not per frame — walking the engine's
-modules is cheap once and wasteful sixty times a second.
-
-Found by slug rather than by linking against anything, so this compiles and runs whether or not
-that plugin is installed. */
-static bool helpWantsTheClick() {
-	for (int64_t id : APP->engine->getModuleIds()) {
-		engine::Module* m = APP->engine->getModule(id);
-		if (!m || !m->model || !m->model->plugin)
-			continue;
-		if (m->model->plugin->slug != "DreamerHelp" || m->model->slug != "Help")
-			continue;
-		// Param 0 is its on/off switch. A module with no params is not one of ours.
-		if (m->params.size() > 0 && m->params[0].getValue() > 0.5f)
-			return true;
-	}
-	return false;
-}
-
-
 static bool pillBeatsPortAt(math::Vec pos) {
 	app::PortWidget* port = widgetAt<app::PortWidget>(APP->scene, pos);
 	if (!port)
@@ -1052,10 +1022,12 @@ struct InterceptOverlay : widget::Widget {
 
 		// Whatever modifier is held, named. A viewer cannot see a key being pressed, and half
 		// of what this plugin does hangs off Option.
-		// ONLY Option. It is the modifier this plugin's own gestures use, and it is the one a
-		// viewer needs told. The others are not shown deliberately: a screen magnifier holds
-		// keys of its own, and a recording captioned SHIFT or CONTROL every few seconds would
-		// be describing the accessibility tooling rather than the software.
+		// ONLY Option. This plugin no longer claims the modifier for anything, but it is still
+		// the one a viewer needs told, because it is what the help gesture uses and what a
+		// recording is most likely to be demonstrating. The others are not shown deliberately:
+		// a screen magnifier holds keys of its own, and a recording captioned SHIFT or CONTROL
+		// every few seconds would be describing the accessibility tooling rather than the
+		// software.
 		if (clicks && (APP->window->getMods() & GLFW_MOD_ALT))
 			drawPointerLabel(args, p, "OPTION", nvgRGB(0xff, 0xd8, 0x66), 26.f);
 	}
@@ -1507,39 +1479,13 @@ struct InterceptOverlay : widget::Widget {
 			cableFocusClear();
 		}
 
-		if (e.action != GLFW_PRESS || e.button != GLFW_MOUSE_BUTTON_LEFT
-			|| (e.mods & RACK_MOD_MASK) != GLFW_MOD_ALT) {
-			widget::Widget::onButton(e);
-			return;
-		}
-
-		// HELP FIRST, WHERE IT IS SWITCHED ON. See helpWantsTheClick.
-		if (helpWantsTheClick()) {
-			widget::Widget::onButton(e);
-			return;
-		}
-
-		app::PortWidget* port = clipFamilyAt(e.pos)
-			? NULL : widgetAt<app::PortWidget>(APP->scene, e.pos);
-		if (!port) {
-			widget::Widget::onButton(e);
-			return;
-		}
-
-		WeakPtr<app::PortWidget> weakPort = port;
-		const bool scopesOn = offerScopes && *offerScopes;
-		const bool widgetsOn = offerWidgets && *offerWidgets;
-		if (!scopesOn && !widgetsOn) {
-			widget::Widget::onButton(e);
-			return;
-		}
-
-		// No heading: the list is self-explanatory, and a label only makes it taller.
-		ui::Menu* menu = createMenu();
-		addClipOnItems(menu, port, scopesOn, widgetsOn);
-
-		e.consume(this);
-		e.stopPropagating();
+		// OPTION-CLICK IS NOT OURS ANY MORE. It used to open the clip-on menu on a jack, which
+		// was never the documented way in: that is a right-click on the port, with the
+		// instruments at the top of the menu. Two ways in meant this plugin was quietly holding a
+		// modifier across everybody's panels for a shortcut nobody was told about — and once help
+		// moved to a plugin of its own, it meant two plugins racing to be the scene's last child
+		// for the same gesture, with the winner deciding what a click did.
+		widget::Widget::onButton(e);
 	}
 
 	/** Escape deposits a scope riding the pointer. It has to be reachable from here because a
