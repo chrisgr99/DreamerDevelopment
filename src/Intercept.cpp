@@ -59,6 +59,36 @@ that follows the pointer, leaving the wheel as the only practical route.
 True when there is no terminal under the press at all, and true as well when there is one but
 the pill is drawn nearer to the press than the terminal's own centre — measured in the rack's
 coordinates, so it holds at any zoom. */
+/** Whether a DreamerHelp Help module is in the patch with its switch on.
+
+WHO OWNS OPTION-CLICK WHEN BOTH PLUGINS ARE INSTALLED. Help used to live in this plugin, and the
+question settled itself: the help check came first in this function and the port menu after it.
+Now they are separate plugins with an overlay each, and both overlays want to be the scene's last
+child — so whichever is last wins, and the user gets whichever of two answers the child list
+happens to be in.
+
+So the precedence is stated rather than raced for. A Help module in the patch with its switch on
+is somebody asking for option-click to answer questions; this plugin's own uses of the gesture
+stand down while that is true. Asked only on the click, not per frame — walking the engine's
+modules is cheap once and wasteful sixty times a second.
+
+Found by slug rather than by linking against anything, so this compiles and runs whether or not
+that plugin is installed. */
+static bool helpWantsTheClick() {
+	for (int64_t id : APP->engine->getModuleIds()) {
+		engine::Module* m = APP->engine->getModule(id);
+		if (!m || !m->model || !m->model->plugin)
+			continue;
+		if (m->model->plugin->slug != "DreamerHelp" || m->model->slug != "Help")
+			continue;
+		// Param 0 is its on/off switch. A module with no params is not one of ours.
+		if (m->params.size() > 0 && m->params[0].getValue() > 0.5f)
+			return true;
+	}
+	return false;
+}
+
+
 static bool pillBeatsPortAt(math::Vec pos) {
 	app::PortWidget* port = widgetAt<app::PortWidget>(APP->scene, pos);
 	if (!port)
@@ -1479,6 +1509,12 @@ struct InterceptOverlay : widget::Widget {
 
 		if (e.action != GLFW_PRESS || e.button != GLFW_MOUSE_BUTTON_LEFT
 			|| (e.mods & RACK_MOD_MASK) != GLFW_MOD_ALT) {
+			widget::Widget::onButton(e);
+			return;
+		}
+
+		// HELP FIRST, WHERE IT IS SWITCHED ON. See helpWantsTheClick.
+		if (helpWantsTheClick()) {
 			widget::Widget::onButton(e);
 			return;
 		}

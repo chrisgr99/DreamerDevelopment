@@ -1,7 +1,7 @@
 /** GENERATED — do not edit.
 
     Port families for Clarity's colouring, from the help database.
-    Source: DreamerHelp at unknown revision
+    Source: DreamerHelp at 4315e52
     Regenerate: make families (or tools/families.py <checkout>)
 
     THE DATABASE IS AUTHORITATIVE. If a colour here is wrong, fix it there and
