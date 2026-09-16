@@ -2,7 +2,7 @@
 
 Newest first.
 
-## 2.0.9 — unreleased
+## 2.0.9 — 15 September 2026
 
 ### Added
 - **Dark** — a third module. Darkens the panels of makers who ship only light artwork, in memory, from the drawing Rack has already loaded. Nothing is written to disk and removing the module puts every panel back. Near-white areas become the ground, small dark shapes become light so lettering survives, and a panel that is not light all over is left alone. VCV's own panels keep their artwork; only the white patch behind their output jacks is toned down to a middle grey, which still says "these are the outputs" without glaring on a dark rack.
