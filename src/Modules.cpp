@@ -90,6 +90,10 @@ cable on behalf of a module that was not there. */
 struct Options {
 	bool jacks = false;
 	bool knobs = false;
+	/** THE VALUE OF EVERY KNOB, AS AN ARC OUTSIDE IT. Separate from the knob style above: one
+	replaces how a knob looks, this adds what it is set to, and either is useful without the
+	other. */
+	bool knobArcs = false;
 	bool cableColor = false;
 	bool cableFlow = false;
 	bool pinchZoom = false;
@@ -123,7 +127,7 @@ static int gClarityCount = 0;
 static int gTestGearCount = 0;
 
 static void clearClarityOptions() {
-	gOpt.jacks = gOpt.knobs = gOpt.cableColor = gOpt.cableFlow = false;
+	gOpt.jacks = gOpt.knobs = gOpt.knobArcs = gOpt.cableColor = gOpt.cableFlow = false;
 	gOpt.pinchZoom = gOpt.sliderScroll = gOpt.clickCables = gOpt.trace = false;
 	// THE DRAWN POINTER TOO. Clarity's syncOptions sets ten flags and this cleared eight, so a
 	// rack that had once had a Clarity in it kept the recording pointer and its value readout
@@ -156,6 +160,7 @@ struct Clarity : Module {
 		// saved while Clarity still carried the switch still loads. Same reason Darkener keeps
 		// its two.
 		P_UNUSED_HELP,
+		P_KNOB_ARCS,
 		NUM_PARAMS
 	};
 
@@ -168,6 +173,11 @@ struct Clarity : Module {
 		// decision that was not its to take.
 		configSwitch(P_CABLE_COLOR, 0.f, 1.f, 0.f, "Colour code cables", {"Off", "On"});
 		configSwitch(P_KNOBS, 0.f, 1.f, 1.f, "Consistent knob style", {"Off", "On"});
+		// IN THE MENU RATHER THAN ON THE PANEL, and off until it has been lived with. Everything
+		// on the face is something the module is known for; this is new, it draws on every module
+		// in the rack, and nobody has asked for it yet. It is still a param, so it is saved with
+		// the patch and can be mapped like the rest.
+		configSwitch(P_KNOB_ARCS, 0.f, 1.f, 0.f, "Show knob value arcs", {"Off", "On"});
 		configSwitch(P_CABLE_FLOW, 0.f, 1.f, 1.f, "Animate cable directions", {"Off", "On"});
 		configSwitch(P_PINCH, 0.f, 1.f, 1.f, "Pinch to zoom", {"Off", "On"});
 		configSwitch(P_TRACE, 0.f, 1.f, 1.f, "Cable trace assist", {"Off", "On"});
@@ -202,6 +212,7 @@ struct Clarity : Module {
 	void syncOptions() {
 		gOpt.jacks = params[P_JACKS].getValue() > 0.5f;
 		gOpt.knobs = params[P_KNOBS].getValue() > 0.5f;
+		gOpt.knobArcs = params[P_KNOB_ARCS].getValue() > 0.5f;
 		gOpt.cableColor = params[P_CABLE_COLOR].getValue() > 0.5f;
 		gOpt.cableFlow = params[P_CABLE_FLOW].getValue() > 0.5f;
 		gOpt.pinchZoom = params[P_PINCH].getValue() > 0.5f;
@@ -524,6 +535,86 @@ static void drawCapDome(NVGcontext* vg, math::Vec c, float cap) {
 	nvgCircle(vg, c.x, c.y, cap * 0.4f);
 	nvgFillPaint(vg, nvgRadialGradient(vg, c.x, c.y, 0.f, cap * 0.4f, s0, s1));
 	nvgFill(vg);
+}
+
+
+/** THE VALUE OF A KNOB, AS AN ARC ON ITS FACE — on anybody's module, not only ours.
+
+INSIDE THE KNOB, JUST WITHIN THE RIM. Outside it, an arc lands on whatever the maker drew round
+their knob — their ticks, their numbers — and since this is drawn last, over every module in the
+rack, there is no drawing underneath them to be had. Inside, it touches nothing but the knob
+itself, on every panel ever made. That is also why it can be solid rather than translucent: there
+is nothing beneath it that anybody needs to read.
+
+IT SITS OUTSIDE THE POINTER. A pointer reaches about four fifths of the way out on most knobs,
+including Rack's own and ours, so a ring in the last fifth reads as a separate thing rather than
+as part of the pointer.
+
+WHERE IT STARTS. A knob whose range crosses zero fills outward from the top, because its middle
+is its neutral setting and an arc from the far left would show half a ring on a control that is
+doing nothing. So does one whose default sits at the middle of its range, which is how a pan or a
+balance knob is usually built — the range alone does not say so. Everything else fills from its
+minimum.
+
+SIZED FROM THE KNOB, because a rack holds knobs from four millimetres across to twenty. */
+static void druiDrawArc(NVGcontext* vg, math::Vec c, float r, app::Knob* knob, float frac) {
+	const float mm = RACK_GRID_WIDTH / 5.08f;         // pixels per millimetre
+	const float width = math::clamp(r * 0.16f, 0.5f * mm, 1.4f * mm);
+	const float rad = r * 0.95f - width / 2.f;
+
+	bool fromCentre = false;
+	if (engine::ParamQuantity* pq = knob->getParamQuantity()) {
+		const float lo = pq->getMinValue(), hi = pq->getMaxValue(), def = pq->getDefaultValue();
+		if (hi > lo)
+			fromCentre = (lo < 0.f && hi > 0.f)
+				|| std::fabs(def - (lo + hi) / 2.f) < (hi - lo) * 0.02f;
+	}
+
+	// NanoVG measures from three o'clock; a knob's sweep is measured from twelve.
+	const float a0 = knob->minAngle - M_PI / 2.f, a1 = knob->maxAngle - M_PI / 2.f;
+	const float here = a0 + (a1 - a0) * frac;
+	const float from = fromCentre ? (a0 + a1) / 2.f : a0;
+
+	nvgLineCap(vg, NVG_BUTT);
+	// The track, so the arc says something at nought and shows how much travel is left.
+	nvgBeginPath(vg);
+	nvgArc(vg, c.x, c.y, rad, a0, a1, NVG_CW);
+	nvgStrokeColor(vg, nvgRGBA(0x10, 0x14, 0x1a, 0xb4));
+	nvgStrokeWidth(vg, width);
+	nvgStroke(vg);
+
+	if (std::fabs(here - from) > 0.001f) {
+		nvgBeginPath(vg);
+		nvgArc(vg, c.x, c.y, rad, std::fmin(from, here), std::fmax(from, here), NVG_CW);
+		nvgStrokeColor(vg, nvgRGB(0xe8, 0xa8, 0x3c));
+		nvgStrokeWidth(vg, width);
+		nvgStroke(vg);
+	}
+
+	// THE POSITION, CARRIED OUTSIDE THE KNOB. The arc says how far round a knob is turned; this
+	// says exactly where it is pointing, at the one place a small knob at a low zoom can still be
+	// read — clear of the metal, where nothing else is drawn by the knob itself.
+	//
+	// IT DOES LAND ON WHATEVER THE MAKER DREW THERE, and there is no way for an overlay to avoid
+	// that. It is kept thin and it stops 2 mm out, which on a crowded panel is short of the next
+	// control and on ours is short of the words round the knob.
+	//
+	// SHORTER ON A SMALL KNOB, because 2 mm beyond a four-millimetre trimmer is longer than the
+	// trimmer and would read as a spoke rather than as a mark.
+	{
+		const float reach = std::fmin(2.f * mm, r * 0.9f);
+		const float dx = std::cos(here), dy = std::sin(here);
+		nvgBeginPath(vg);
+		// FROM THE ARC'S INNER EDGE, so the mark crosses the arc and the rim and reaches beyond
+		// as one stroke. Starting it at the rim left a hairline of knob showing between the two,
+		// which read as a mark that had come adrift from the arc it belongs to.
+		nvgMoveTo(vg, c.x + dx * (rad - width / 2.f), c.y + dy * (rad - width / 2.f));
+		nvgLineTo(vg, c.x + dx * (r + reach), c.y + dy * (r + reach));
+		nvgStrokeColor(vg, nvgRGB(0xe8, 0xa8, 0x3c));
+		nvgStrokeWidth(vg, std::fmax(1.f, 0.5f * mm));
+		nvgLineCap(vg, NVG_ROUND);
+		nvgStroke(vg);
+	}
 }
 
 
@@ -962,7 +1053,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 			}
 		}
 
-		if (o.knobs) {
+		if (o.knobs || o.knobArcs) {
 			std::vector<ParamWidget*> params = mw->getParams();
 			for (ParamWidget* pw : params) {
 				Knob* knob = dynamic_cast<Knob*>(pw);
@@ -991,7 +1082,12 @@ struct DRUIOverlay : widget::TransparentWidget {
 					frac = math::clamp(pq->getScaledValue(), 0.f, 1.f);
 				// The knob's OWN angle range, so it still sweeps the arc its author intended.
 				const float angle = knob->minAngle + frac * (knob->maxAngle - knob->minAngle);
-				druiDrawKnob(args.vg, c, r, angle, 7);
+				if (o.knobs)
+					druiDrawKnob(args.vg, c, r, angle, 7);
+				// AFTER THE KNOB, because the arc is on its face: drawn first it would be buried
+				// by the replacement knob above.
+				if (o.knobArcs)
+					druiDrawArc(args.vg, c, r, knob, frac);
 			}
 		}
 	}
@@ -1508,6 +1604,21 @@ struct ClarityWidget : DRUIWidgetBase {
 			// under a name, with the colours it would save on the screen in front of you.
 			sub->addChild(createMenuItem("Custom colours\u2026", "", []() { paletteShow(); }));
 		}));
+
+		menu->addChild(new MenuSeparator);
+		{
+			Clarity* m = dynamic_cast<Clarity*>(module);
+			menu->addChild(createCheckMenuItem("Show knob value arcs", "",
+				[=]() { return m && m->params[Clarity::P_KNOB_ARCS].getValue() > 0.5f; },
+				[=]() {
+					if (!m)
+						return;
+					Param& p = m->params[Clarity::P_KNOB_ARCS];
+					p.setValue(p.getValue() > 0.5f ? 0.f : 1.f);
+				}));
+			menu->addChild(createMenuLabel("An arc outside every knob in the rack,"));
+			menu->addChild(createMenuLabel("showing what it is set to."));
+		}
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createMenuLabel("Knobs draw over LED rings on some"));

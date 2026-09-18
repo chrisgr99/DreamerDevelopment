@@ -2,6 +2,11 @@
 
 Newest first.
 
+## Unreleased
+
+### Added
+- **Knob value arcs**, in Clarity's right-click menu. An amber arc on the face of every knob in the rack, just inside the rim, showing what it is set to, with a mark at the value that crosses the rim and reaches two millimetres beyond the knob. A pointer says where a knob is only if you stop and look at it; an arc says it at a glance, and a column of knobs can be compared without reading any of them. A knob whose range crosses zero fills outward from the top rather than from the left, as does one whose default sits at the middle of its range — that is how a pan or a balance knob is usually built, and an arc from the far left on one would show half a ring on a control that is doing nothing. Off by default, and separate from the knob style switch: either is useful without the other. It is in the menu rather than on the panel while it is being lived with.
+
 ## 2.0.9 — 15 September 2026
 
 ### Added
