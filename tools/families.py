@@ -14,11 +14,10 @@ records which version of the database it came from. If a colour is wrong, it is 
 The Makefile calls this automatically when a database file is newer than the table, so the
 only thing a person has to remember is to pull the help repository.
 """
+import json
 import os
 import subprocess
 import sys
-
-import yaml
 
 FAMILIES = ('audio', 'cv', 'trigger', 'pitch')
 
@@ -40,29 +39,29 @@ def main():
     if len(sys.argv) < 2:
         raise SystemExit('usage: families.py <path to a DreamerHelp checkout>')
     repo = os.path.abspath(os.path.expanduser(sys.argv[1]))
-    src = os.path.join(repo, 'data', 'plugins')
+    src = os.path.join(repo, 'data', 'research')
     if not os.path.isdir(src):
-        raise SystemExit('no data/plugins in %s — is that a DreamerHelp checkout?' % repo)
+        raise SystemExit('no data/research in %s — is that a DreamerHelp checkout?' % repo)
 
+    # THE RESEARCH, NOT THE HELP. Each jack's family is kept with the facts behind the help, in
+    # data/research/<Plugin>/<Module>.json, which DreamerHelp does not ship.
     rows = []
     ports = 0
-    for name in sorted(os.listdir(src)):
-        if not name.endswith('.yaml'):
+    for plugin in sorted(os.listdir(src)):
+        folder = os.path.join(src, plugin)
+        if not os.path.isdir(folder):
             continue
-        with open(os.path.join(src, name)) as f:
-            doc = yaml.safe_load(f)
-        if not isinstance(doc, dict):
-            continue
-        plugin = doc.get('plugin')
-        if not plugin:
-            continue
-        for model, entry in sorted((doc.get('modules') or {}).items()):
-            if not isinstance(entry, dict):
+        for name in sorted(os.listdir(folder)):
+            if not name.endswith('.json') or name.startswith('.'):
                 continue
-            fam = entry.get('family') or {}
+            with open(os.path.join(folder, name), encoding='utf-8') as f:
+                doc = json.load(f)
+            model = doc.get('module') or name[:-5]
+            facts = doc.get('facts') or {}
             ins, outs = [], []
-            for kind, out in (('in', ins), ('out', outs)):
-                m = fam.get(kind) or {}
+            for kind, out in (('inputs', ins), ('outputs', outs)):
+                m = {k: v['family'] for k, v in (facts.get(kind) or {}).items()
+                     if isinstance(v, dict) and 'family' in v}
                 if not m:
                     continue
                 highest = max(int(k) for k in m)
@@ -74,6 +73,10 @@ def main():
             if ins or outs:
                 rows.append((plugin, model, ins, outs))
                 ports += sum(1 for v in ins + outs if v >= 0)
+
+    # By plugin, then module. Clarity reads the table from start to finish, so the order is only
+    # for a person reading it, and for a regeneration that changes nothing to diff as nothing.
+    rows.sort(key=lambda r: (r[0], r[1]))
 
     def arr(name, vals):
         if not vals:

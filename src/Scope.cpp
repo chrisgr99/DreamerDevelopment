@@ -27,9 +27,13 @@ static const int V_DIV_COUNT = 11;
 
 static const float T_DIVS[] = {
 	0.00002f, 0.00005f, 0.0001f, 0.0002f, 0.0005f, 0.001f, 0.002f, 0.005f,
-	0.01f, 0.02f, 0.05f, 0.1f, 0.2f, 0.5f,
+	0.01f, 0.02f, 0.05f, 0.1f, 0.2f, 0.5f, 1.f, 2.f, 5.f,
 };
-static const int T_DIV_COUNT = 14;
+static const int T_DIV_COUNT = 17;
+/** The most samples a window is read and drawn one by one. Longer than this, it is read as
+columns — the lowest, highest and mean of each — so a view of ten seconds costs about what one of
+a tenth does. See tapEnvelope. */
+static const int DIRECT_MAX = 32768;
 
 // Roughly 10 by 4, the aspect the spec calls for.
 /** A division is a FIXED size on screen, not a fraction of the face.
@@ -116,9 +120,6 @@ the one a newcomer needs and the one that is hardest to guess from a letter, so 
 two buttons to its right move along to make room. */
 static const float AUTO_W = 30.f;
 static const float TRIG_STRIP_REACH = 10.f;
-/** How far in from an edge still counts as grabbing it to resize. */
-static const float RESIZE_EDGE = 6.f;
-static const float LEFT_RESIZE_EDGE = 3.f;
 /** Wide enough for the bottom row: the trigger strip, the transport, AUTO, AC and G, with a
 pad between each. A face narrower than its own controls is a face whose controls overlap. */
 static const float MIN_W = 100.f, MIN_H = 40.f;
@@ -331,8 +332,6 @@ struct ScopeWidget : ClipWidget {
 	/** The spot beside its terminal that the home button returns it to. */
 	math::Vec homeOffset = math::Vec(30, -70);
 	/** Which edge or corner is being dragged, as (x, y) in {-1, 0, 1}. */
-	math::Vec resizeDir;
-	bool resizing = false;
 
 	std::vector<float> scratch;
 	/** What the tap held at the moment of pausing. Panning a paused scope has to re-window
@@ -345,6 +344,18 @@ struct ScopeWidget : ClipWidget {
 	/** The last captured sweep, kept so a frozen scope still has something to show. */
 	std::vector<float> lastWin;
 	int lastCount = 0;
+	/** A LONG WINDOW, AS COLUMNS: lastWin then holds each column's mean, and these its lowest and
+	highest. `lastStride` is how many stored samples each entry of lastWin stands for — one for a
+	window read sample by sample — and `colFill` how much of the face's width the columns cover,
+	less than all of it only while the history is shorter than the window. */
+	bool columnar = false;
+	std::vector<float> colLo, colHi;
+	/** The history the trigger searches, as columns, before the window is cut from it. */
+	std::vector<float> envLo, envHi, envMean, envTrig, envTrigHi, envTrigMean;
+	float lastStride = 1.f;
+	float colFill = 1.f;
+	/** Frames spent waiting for a slow signal to show two whole cycles to autoset. */
+	int slowWait = 0;
 	/** Measured from the last drawn window, for the values box. */
 	float measMin = 0.f, measMax = 0.f, measMean = 0.f, measFreq = 0.f;
 
@@ -363,7 +374,7 @@ struct ScopeWidget : ClipWidget {
 		// Small on purpose. A scope is usually a peek at a signal, and a small one hides less of
 		// the rack; drag an edge when you want to see more.
 		box.size = math::Vec(faceWidth, faceHeight);
-		// A working window, not the whole history. The buffer now holds eleven seconds, and
+		// A working window, not the whole history. The buffer now holds twenty-two seconds, and
 		// copying and searching two megabytes every frame for every scope would cost far more
 		// than the feature is worth.
 		scratch.resize(SEARCH_CHUNK);
@@ -496,7 +507,10 @@ struct ScopeWidget : ClipWidget {
 		const int perDiv = std::max(1, (int) (wanted / divsX()));
 		const int pan = (int) (timeShift * perDiv);
 		// Enough to hold the window, room to find an edge ahead of it, and the pan itself.
-		const int chunk = std::min((int) scratch.size(), wanted * 2 + pan + 64);
+		const int chunk = wanted * 2 + pan + 64;
+		// Grown as a slower time base or a wider face asks for more, and kept.
+		if ((int) scratch.size() < chunk)
+			scratch.resize(chunk);
 
 		int have;
 		if (frozen && frozenCount > 0) {
@@ -683,7 +697,7 @@ struct ScopeWidget : ClipWidget {
 		}
 		if (crossings >= 2 && last > first) {
 			const float periodSamples = (float) (last - first) / (crossings - 1);
-			const float sampleRate = APP->engine->getSampleRate();
+			const float sampleRate = tapSampleRate();
 			const float wantSpan = periodSamples / sampleRate * 3.f;   // about three cycles
 			const float wantT = wantSpan / divsX();
 			tDivIndex = T_DIV_COUNT - 1;
@@ -694,6 +708,12 @@ struct ScopeWidget : ClipWidget {
 				}
 			}
 		}
+		// TOO SLOW TO SEE IN THIS WINDOW: fewer than two cycles in eighty-five milliseconds. An
+		// LFO is looked for in the longer history instead; until two of its cycles have been
+		// captured, this stays armed and looks again.
+		else if (autosetSlow())
+			return;
+		slowWait = 0;
 		autosetPending = false;
 
 		// Deliberately logged. This is the only evidence available that the audio-thread tap
@@ -703,6 +723,69 @@ struct ScopeWidget : ClipWidget {
 		INFO("Scope autoset: %d samples, min %.3f max %.3f mid %.3f -> %g V/div, %g s/div, %llu frames captured",
 			have, lo, hi, mid, V_DIVS[vDivIndex], T_DIVS[tDivIndex],
 			(unsigned long long) tapFrameCount(tapSlot));
+	}
+
+	/** AUTOSET FOR A SLOW SIGNAL: up to eight seconds of history, as columns, framed and timed as
+	the short window is. Returns true to keep waiting — the history is still filling and has not
+	yet shown two cycles — and false once it has decided, or given up. */
+	bool autosetSlow() {
+		const float sampleRate = tapSampleRate();
+		const int longest = (int) (8.f * sampleRate);
+		const int count = std::min(tapAvailable(tapSlot), longest);
+		const int columns = 4096;
+		if (count < columns * 2)
+			return ++slowWait < 300;
+		std::vector<float> lo(columns), hi(columns), mean(columns);
+		const int covered = tapEnvelope(tapSlot, count, 0, columns, lo.data(), hi.data(), mean.data());
+		const float stride = (float) covered / columns;
+		float l = lo[0], hgh = hi[0], sum = 0.f;
+		for (int i = 0; i < columns; i++) {
+			l = std::fmin(l, lo[i]);
+			hgh = std::fmax(hgh, hi[i]);
+			sum += mean[i];
+		}
+		const float mid = sum / columns;
+		const float peak = std::fmax(std::fabs(hgh - mid), std::fabs(l - mid));
+		if (peak < 1e-4f)
+			return ++slowWait < 300;
+		// The scale from the whole swing, which the short window never saw.
+		const float wantPerDiv = peak / ((divsY() / 2.f) * 0.9f);
+		vDivIndex = 0;
+		for (int i = 0; i < V_DIV_COUNT; i++) {
+			vDivIndex = i;
+			if (V_DIVS[i] >= wantPerDiv)
+				break;
+		}
+		triggerLevel = mid;
+		vPos = mid;
+		triggerHyst = peak * 0.25f;
+		int crossings = 0, first = -1, last = -1;
+		bool armed = false;
+		for (int i = 1; i < columns; i++) {
+			if (mean[i] < mid - triggerHyst)
+				armed = true;
+			else if (armed && mean[i - 1] < mid && mean[i] >= mid) {
+				if (first < 0)
+					first = i;
+				last = i;
+				crossings++;
+				armed = false;
+			}
+		}
+		if (crossings < 2 || last <= first)
+			return count < longest && ++slowWait < 300;
+		const float periodSeconds = (float) (last - first) / (crossings - 1) * stride / sampleRate;
+		const float wantT = periodSeconds * 3.f / divsX();
+		tDivIndex = T_DIV_COUNT - 1;
+		for (int i = 0; i < T_DIV_COUNT; i++) {
+			if (T_DIVS[i] >= wantT) {
+				tDivIndex = i;
+				break;
+			}
+		}
+		INFO("Scope autoset: slow signal, period %.3f s -> %g V/div, %g s/div", periodSeconds,
+			V_DIVS[vDivIndex], T_DIVS[tDivIndex]);
+		return false;
 	}
 
 	/** Where the callout's ring sits, in this widget's coordinates. */
@@ -818,7 +901,7 @@ struct ScopeWidget : ClipWidget {
 	/** Measures the drawn window for the values box. Frequency comes from the mean interval
 	between rising crossings of the mean, which is the same estimate autoset uses to pick a
 	time base — it simply was not surfaced before. */
-	void measure(const float* win, int count) {
+	void measure(const float* win, int count, float stride = 1.f) {
 		if (count < 2)
 			return;
 		float lo = win[0], hi = win[0], sum = 0.f;
@@ -842,12 +925,126 @@ struct ScopeWidget : ClipWidget {
 		}
 		if (crossings >= 2 && last > first) {
 			const float periodSamples = (float) (last - first) / (crossings - 1);
-			const float sampleRate = APP->engine->getSampleRate();
-			measFreq = (periodSamples > 0.f) ? sampleRate / periodSamples : 0.f;
+			const float sampleRate = tapSampleRate();
+			measFreq = (periodSamples > 0.f) ? sampleRate / (periodSamples * stride) : 0.f;
 		}
 		else {
 			measFreq = 0.f;
 		}
+		// A column's mean is not the signal's extreme: the lowest and highest are its own.
+		if (columnar && (int) colLo.size() >= count) {
+			measMin = *std::min_element(colLo.begin(), colLo.begin() + count);
+			measMax = *std::max_element(colHi.begin(), colHi.begin() + count);
+		}
+	}
+
+	/** A LONG WINDOW, AS COLUMNS, TRIGGERED AS A SHORT ONE IS.
+
+	The same rules as gather: the edge must have a whole window after it, the pan slides the window
+	from the edge, and with the trigger off or no edge found it is the newest window. The search
+	runs over the columns' means (the external trigger's highs, so a pulse narrower than a column
+	still counts), which is all the resolution the face can show anyway.
+
+	The columns are cut on multiples of their own length counted from the first sample captured,
+	not from the newest. Counted from the newest, every column held slightly different samples
+	each frame and a still trace shimmered. */
+	int gatherColumns(int wanted) {
+		if (tapSlot < 0 || retargeting)
+			return 0;
+		const int columns = math::clamp((int) std::lround(faceW()), 16, 4096);
+		const int per = std::max(1, (int) std::lround((double) wanted / columns));
+		const int perDivCols = std::max(1, (int) std::lround(columns / divsX()));
+		const int panCols = (int) std::lround(timeShift * perDivCols);
+		const int pre = perDivCols;
+
+		const bool held = frozen && frozenCount > 0;
+		const int avail = held ? frozenCount : tapAvailable(tapSlot);
+		// Enough to hold the window, room ahead of it for an edge, and the pan.
+		int total = std::min(columns * 2 + panCols + 8, avail / per);
+		if (total < 2)
+			return 0;
+		const int span = total * per;
+		envLo.resize(total);
+		envHi.resize(total);
+		envMean.resize(total);
+		int offset = 0;
+		if (held) {
+			envelopeOf(frozenBuf.data() + (frozenCount - span), span, total,
+				envLo.data(), envHi.data(), envMean.data());
+		}
+		else {
+			offset = (int) (tapFrameCount(tapSlot) % (uint64_t) per);
+			if (avail - offset < span) {
+				total--;
+				if (total < 2)
+					return 0;
+			}
+			tapEnvelope(tapSlot, total * per, offset, total, envLo.data(), envHi.data(),
+				envMean.data());
+		}
+
+		const int latest = total - (columns - pre);
+		int edge = -1;
+		bool armed = false;
+		if (triggerOn && externalTrigger()) {
+			envTrig.resize(total);
+			envTrigHi.resize(total);
+			envTrigMean.resize(total);
+			// A trigger tap younger than the window cannot be lined up with it: no edge.
+			const int got = tapEnvelope(trigTapSlot, total * per, offset, total, envTrig.data(),
+				envTrigHi.data(), envTrigMean.data());
+			for (int i = 1; got == total * per && i <= latest; i++) {
+				const float a = envTrigHi[i - 1], b = envTrigHi[i];
+				if (b < EXT_TRIG_ARM)
+					armed = true;
+				else if (armed && a < EXT_TRIG_LEVEL && b >= EXT_TRIG_LEVEL) {
+					edge = i;
+					armed = false;
+				}
+			}
+		}
+		else if (triggerOn) {
+			const float hyst = std::fmax(triggerHyst, 1e-4f);
+			for (int i = 1; i <= latest; i++) {
+				const float a = envMean[i - 1], b = envMean[i];
+				if (triggerRising) {
+					if (b < triggerLevel - hyst)
+						armed = true;
+					else if (armed && a < triggerLevel && b >= triggerLevel) {
+						edge = i;
+						armed = false;
+					}
+				}
+				else {
+					if (b > triggerLevel + hyst)
+						armed = true;
+					else if (armed && a > triggerLevel && b <= triggerLevel) {
+						edge = i;
+						armed = false;
+					}
+				}
+			}
+		}
+
+		const int lastStart = std::max(0, total - columns);
+		int start;
+		if (triggerOn && edge >= 0)
+			start = math::clamp(edge - pre - panCols, 0, lastStart);
+		else if (triggerOn)
+			start = lastStart;
+		else
+			start = math::clamp(total - columns - panCols, 0, lastStart);
+
+		const int count = std::min(columns, total - start);
+		colLo.resize(columns);
+		colHi.resize(columns);
+		lastWin.resize(columns);
+		std::copy(envLo.begin() + start, envLo.begin() + start + count, colLo.begin());
+		std::copy(envHi.begin() + start, envHi.begin() + start + count, colHi.begin());
+		std::copy(envMean.begin() + start, envMean.begin() + start + count, lastWin.begin());
+		lastStride = (float) per;
+		colFill = (float) count / (float) columns;
+		return count;
 	}
 
 	std::string valuesText() {
@@ -861,7 +1058,9 @@ struct ScopeWidget : ClipWidget {
 		if (valueMode == 2)
 			return string::f("min %.2f  mean %.2f  max %.2f", measMin, measMean, measMax);
 		return string::f("%g V/div    %s/div", V_DIVS[vDivIndex],
-			T_DIVS[tDivIndex] >= 0.001f
+			T_DIVS[tDivIndex] >= 1.f
+				? string::f("%g s", T_DIVS[tDivIndex]).c_str()
+				: T_DIVS[tDivIndex] >= 0.001f
 				? string::f("%g ms", T_DIVS[tDivIndex] * 1000.f).c_str()
 				: string::f("%g us", T_DIVS[tDivIndex] * 1000000.f).c_str());
 	}
@@ -924,39 +1123,6 @@ struct ScopeWidget : ClipWidget {
 
 	bool atHome() {
 		return offset.minus(homeOffset).norm() < 1.f;
-	}
-
-	/** Which edge or corner the pointer is on, as (x, y) in {-1, 0, 1}. Zero means neither. */
-	math::Vec resizeZoneAt(math::Vec pos) {
-		math::Vec dir;
-		if (minimized)
-			return dir;
-		// The LEFT edge resizes from its outermost few pixels only. The trigger strip owns the
-		// rest of that column, and the press test below reaches the resize check first — so a
-		// full-width resize zone there would swallow every click meant for the strip. Three
-		// pixels is enough to grab and leaves the strip most of its width.
-		if (pos.x <= LEFT_RESIZE_EDGE)
-			dir.x = -1;
-		else if (pos.x >= faceWidth - RESIZE_EDGE)
-			dir.x = 1;
-		if (pos.y <= RESIZE_EDGE)
-			dir.y = -1;
-		else if (pos.y >= faceHeight - RESIZE_EDGE)
-			dir.y = 1;
-		// Inside the face proper, not on a border.
-		if (pos.y > faceHeight)
-			return math::Vec();
-		return dir;
-	}
-
-	static int cursorForZone(math::Vec dir) {
-		if (dir.x != 0.f && dir.y != 0.f)
-			return (dir.x * dir.y > 0.f) ? GLFW_RESIZE_NWSE_CURSOR : GLFW_RESIZE_NESW_CURSOR;
-		if (dir.x != 0.f)
-			return GLFW_RESIZE_EW_CURSOR;
-		if (dir.y != 0.f)
-			return GLFW_RESIZE_NS_CURSOR;
-		return GLFW_ARROW_CURSOR;
 	}
 
 	math::Rect transportBox() {
@@ -1285,15 +1451,23 @@ struct ScopeWidget : ClipWidget {
 
 		// Re-window every frame whether running or paused: paused still has to answer a pan.
 		if (tapSlot >= 0) {
-			const float sampleRate = APP->engine->getSampleRate();
+			const float sampleRate = tapSampleRate();
 			const float span = T_DIVS[tDivIndex] * divsX();
 			int wanted = (int) (span * sampleRate);
-			wanted = math::clamp(wanted, 8, TAP_BUFFER_SIZE / 2);
+			wanted = math::clamp(wanted, 8, TAP_BUFFER_SIZE - 1);
 
-			lastWin.resize(wanted);
-			lastCount = gather(lastWin.data(), wanted);
+			columnar = wanted > DIRECT_MAX;
+			if (columnar) {
+				lastCount = gatherColumns(wanted);
+			}
+			else {
+				lastWin.resize(wanted);
+				lastCount = gather(lastWin.data(), wanted);
+				lastStride = 1.f;
+				colFill = 1.f;
+			}
 			if (lastCount > 1)
-				measure(lastWin.data(), lastCount);
+				measure(lastWin.data(), lastCount, lastStride);
 		}
 
 		// Draw whatever the last captured sweep was, frozen or running.
@@ -1317,16 +1491,34 @@ struct ScopeWidget : ClipWidget {
 			nvgScissor(args.vg, 0, 0, w, h);
 
 			nvgBeginPath(args.vg);
-			for (int i = 0; i < count; i++) {
-				const float x = w * i / (count - 1);
-				float y = h / 2 - (lastWin[i] - centreV) * scale;
-				// Still bounded, but far outside the face: nanovg does not need absurd
-				// coordinates, and the scissor decides what is actually seen.
-				y = math::clamp(y, -4.f * h, 5.f * h);
-				if (i == 0)
-					nvgMoveTo(args.vg, x, y);
-				else
-					nvgLineTo(args.vg, x, y);
+			if (columnar && (int) colLo.size() >= count) {
+				// A COLUMN AT A TIME, from its lowest to its highest: a smooth signal draws as a
+				// line, and a fast one inside a slow window as the band it fills — which is what
+				// a hundred cycles squeezed into one pixel look like on any scope.
+				const float x1 = w * colFill;
+				for (int i = 0; i < count; i++) {
+					const float x = x1 * i / std::max(1, count - 1);
+					const float ylo = math::clamp(h / 2 - (colLo[i] - centreV) * scale, -4.f * h, 5.f * h);
+					const float yhi = math::clamp(h / 2 - (colHi[i] - centreV) * scale, -4.f * h, 5.f * h);
+					if (i == 0)
+						nvgMoveTo(args.vg, x, yhi);
+					else
+						nvgLineTo(args.vg, x, yhi);
+					nvgLineTo(args.vg, x, ylo);
+				}
+			}
+			else {
+				for (int i = 0; i < count; i++) {
+					const float x = w * i / (count - 1);
+					float y = h / 2 - (lastWin[i] - centreV) * scale;
+					// Still bounded, but far outside the face: nanovg does not need absurd
+					// coordinates, and the scissor decides what is actually seen.
+					y = math::clamp(y, -4.f * h, 5.f * h);
+					if (i == 0)
+						nvgMoveTo(args.vg, x, y);
+					else
+						nvgLineTo(args.vg, x, y);
+				}
 			}
 			nvgStrokeColor(args.vg, nvgRGB(0xff, 0xff, 0xff));
 			nvgStrokeWidth(args.vg, 1.2f);
@@ -1492,15 +1684,47 @@ struct ScopeWidget : ClipWidget {
 		tooltipText.clear();
 	}
 
+	/** WHETHER A POINT IS ON SOMETHING OF THE SCOPE'S THAT CAN BE SEEN: the face, or the readout
+	under it. The box is a rectangle as wide as the wider of the two, so where the readout is wider
+	than the face, the box takes in empty rack beside the face — and a port lying there answered a
+	right-click with the scope's menu instead of its own. Reported from testing. Anywhere else in
+	the box, events pass through to whatever is under it. */
+	bool resizable() override {
+		return true;
+	}
+
+	/** A minimised scope is a token holding two buttons: there is nothing to pull bigger. */
+	bool resizableNow() override {
+		return !minimized;
+	}
+
+	math::Vec minFace() override {
+		return math::Vec(MIN_W, MIN_H);
+	}
+
+	/** THE FRAME'S OWN COLOUR, green running and red paused, so the handles belong to the scope
+	they are on rather than looking like something laid over it. */
+	NVGcolor gripColor() override {
+		return frozen ? FRAME_PAUSED : FRAME_RUN;
+	}
+
+	bool onVisiblePart(math::Vec p) override {
+		if (minimized)
+			return true;
+		if (p.x >= 0.f && p.x <= faceWidth && p.y >= 0.f && p.y <= faceHeight)
+			return true;
+		return valuesShown && valuesBox().contains(p);
+	}
+
 	void onHover(const HoverEvent& e) override {
 		// Click-through while following, so the scope never blocks the knob you are heading
 		// for: not consuming the hover lets the widget beneath receive it.
-		if (following) {
+		if (following || !onVisiblePart(e.pos)) {
 			destroyTooltip();
 			return;
 		}
 		updateTooltip(e.pos);
-		setCursorShape(cursorForZone(resizeZoneAt(e.pos)));
+		showGrips();
 		OpaqueWidget::onHover(e);
 	}
 
@@ -1547,8 +1771,6 @@ struct ScopeWidget : ClipWidget {
 		}
 		pressedOnFace = false;
 
-		resizing = false;
-		resizeDir = math::Vec();
 	}
 
 	void onDragMove(const DragMoveEvent& e) override {
@@ -1566,34 +1788,15 @@ struct ScopeWidget : ClipWidget {
 			return;
 		}
 
-		if (!resizing) {
-			// Plain drag moves the scope. Held-drag is accepted here: it is short, and the
-			// alternative would put a mode in front of a positioning nudge.
-			offset = offset.plus(d);
-			return;
-		}
-
-		// Dragging the left or top edge has to move the scope as well as resize it, or the
-		// far edge would walk across the rack while you pull the near one.
-		if (resizeDir.x > 0.f) {
-			faceWidth = std::fmax(MIN_W, faceWidth + d.x);
-		}
-		else if (resizeDir.x < 0.f) {
-			const float newW = std::fmax(MIN_W, faceWidth - d.x);
-			offset.x += faceWidth - newW;
-			faceWidth = newW;
-		}
-		if (resizeDir.y > 0.f) {
-			faceHeight = std::fmax(MIN_H, faceHeight + d.y);
-		}
-		else if (resizeDir.y < 0.f) {
-			const float newH = std::fmax(MIN_H, faceHeight - d.y);
-			offset.y += faceHeight - newH;
-			faceHeight = newH;
-		}
+		// A drag of the face MOVES the scope. Resizing is the handles' work, and they are
+		// separate widgets: see ClipGripWidget.
+		offset = offset.plus(d);
 	}
 
 	void onButton(const ButtonEvent& e) override {
+		// Through to whatever is beneath, off the face and the readout: see onVisiblePart.
+		if (!following && !onVisiblePart(e.pos))
+			return;
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT
 			&& inTrigStrip(e.pos) && externalTrigger()) {
 			dropExternalTrigger();
@@ -1677,17 +1880,9 @@ struct ScopeWidget : ClipWidget {
 				return;
 			}
 
-			// An edge or corner starts a resize rather than a move.
-			const math::Vec zone = resizeZoneAt(e.pos);
-			if (zone.x != 0.f || zone.y != 0.f) {
-				resizing = true;
-				resizeDir = zone;
-				e.consume(this);
-				return;
-			}
-			resizing = false;
 			// The transport button runs and pauses. Freeze is NOT on the face click: an
-			// earlier draft of the Wcoast spec said it was, which was misleading.
+			// earlier draft of the Wcoast spec said it was, which was misleading. BEFORE the
+			// resize test, since it sits in the corner the wider resize edge now reaches.
 			if (transportBox().contains(e.pos)) {
 				// Running again means running from now, not from wherever the pan had reached.
 				if (frozen)
@@ -1756,6 +1951,8 @@ struct ScopeWidget : ClipWidget {
 	}
 
 	void onHoverScroll(const HoverScrollEvent& e) override {
+		if (!onVisiblePart(e.pos))
+			return;
 		const math::Vec delta = scrollDeltaFor(e);
 
 		// Over the trigger strip, scroll sets the LEVEL. A twentieth of a division per step, so
@@ -1829,7 +2026,7 @@ struct ScopeWidget : ClipWidget {
 		// breaks the very relationship the trigger marks describe — the crossing stops being
 		// where they say it is. Paused, there is nothing to anchor to and panning is the point.
 		if (scrollAxis == 1 && frozen) {
-			const float perDiv = std::fmax(1.f, T_DIVS[tDivIndex] * APP->engine->getSampleRate());
+			const float perDiv = std::fmax(1.f, T_DIVS[tDivIndex] * tapSampleRate());
 			const float reach = (float) frozenCount;
 			const float maxShift = std::fmax(0.f, reach / perDiv - divsX());
 			// Negated: scrolling left pulls the trace left, as dragging the paper under a pen
@@ -1969,6 +2166,7 @@ void scopeCreate(PortWidget* port, bool place) {
 	APP->scene->rack->addChild(scope);
 
 	clipAddHandle(scope);
+	clipAddGrips(scope);
 
 	// The trigger link's tab. Made with the scope and kept for its lifetime — it hides itself
 	// when there is no link, which is simpler than making and destroying it as links come

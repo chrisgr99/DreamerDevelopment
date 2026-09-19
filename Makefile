@@ -39,8 +39,8 @@ endif
 # that quietly did that would be a build you could ship without noticing.
 HELP_REPO ?= ../DreamerHelp
 
-ifneq ($(wildcard $(HELP_REPO)/data/plugins),)
-src/PortFamilies.cpp: $(wildcard $(HELP_REPO)/data/plugins/*.yaml) tools/families.py
+ifneq ($(wildcard $(HELP_REPO)/data/research),)
+src/PortFamilies.cpp: $(wildcard $(HELP_REPO)/data/research/*/*.json) tools/families.py
 	@echo "regenerating src/PortFamilies.cpp from $(HELP_REPO)"
 	@python3 tools/families.py $(HELP_REPO)
 endif

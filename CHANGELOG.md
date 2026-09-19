@@ -5,7 +5,28 @@ Newest first.
 ## Unreleased
 
 ### Added
-- **Knob value arcs**, in Clarity's right-click menu. An amber arc on the face of every knob in the rack, just inside the rim, showing what it is set to, with a mark at the value that crosses the rim and reaches two millimetres beyond the knob. A pointer says where a knob is only if you stop and look at it; an arc says it at a glance, and a column of knobs can be compared without reading any of them. A knob whose range crosses zero fills outward from the top rather than from the left, as does one whose default sits at the middle of its range — that is how a pan or a balance knob is usually built, and an arc from the far left on one would show half a ring on a control that is doing nothing. Off by default, and separate from the knob style switch: either is useful without the other. It is in the menu rather than on the panel while it is being lived with.
+- **Tooltip readability**, a new button on Clarity's panel. Rack's own tooltips — a control's name, value and its maker's description, a port's live voltage and connections — drawn larger, in high contrast, and directly below the control instead of down and to the right of the pointer. The text size, from 100% to 300%, and the colours, white on black by default or the classic light yellow, are in the right-click menu.
+- **Restore default rules**, under Colour and rule sets: the built-in rules back in colours.json without touching the colours. The file now opens with an explanation of every field a rule can have. Asked for by DaveVenom.
+- **Scroll wheel adjusts sliders** is in the right-click menu, where it was always said to be.
+- **Knob clarity**, the button that was Consistent knob style: every knob in the rack drawn in one style and now showing its value too: an amber arc on its face, just inside the rim, showing what it is set to, with the pointer carried past the rim to the end of the arc. A pointer says where a knob is only if you stop and look at it; an arc says it at a glance, and a column of knobs can be compared without reading any of them. A knob whose range crosses zero fills outward from the top rather than from the left, as does one whose default sits at the middle of its range, which is how a pan or balance knob is usually built. Part of Knob clarity rather than an option of its own.
+
+### Fixed
+- **A widget on a jack that gets hidden goes with it.** A module that shows a different set of controls as it is configured — Venom's Envelope Factory hides the stages above the number in use — left any widget clipped to one of those jacks sitting in mid air, reading a port that is no longer part of the module. A mute removed this way puts back the cables it was holding.
+
+### Changed
+- **The scope shows slow signals.** Time bases to 5 seconds per division; slow time bases are triggered like fast ones rather than scrolling; a long window is drawn a column per pixel, from each column's lowest to highest value; AUTO on a slow signal looks back up to eight seconds and waits for two cycles. The history is twice as long, about twenty-two seconds, and above 48 kHz it is kept at 48 kHz so it holds the same time at any engine rate. It is resized by handles that appear just outside it while the pointer is on it, one at the middle of each edge and one at each corner, in the frame's own colour; the analyser has them too. Reported by DaveVenom.
+- **The voltmeter shows the lowest and highest** under the voltage now, each held for a second. It no longer changes between the voltage and the peak on a click.
+- **Oscillator** replaces VCO and Note, which was the same oscillator dialled by note; **Constant voltage** replaces DC level and Volt/oct, shown in volts or as a note name. Asked for by DaveVenom.
+- **Bypassing Test Gear hides its widgets** and takes Widgets… out of the port menus, as though it had been removed; unbypassing brings the widgets back as they were. Widgets… is offered only while a Test Gear module is in the rack: it was offered in a rack that had never had one, where nothing could connect.
+- **Mute** is the switch's new name, and its light is now on when it is muting, as a mixer's mute is. Asked for by DaveVenom.
+- **The mute and the attenuverter work on outputs**: the mute takes out every cable leaving one, and the attenuverter scales what arrives at every input it feeds. Asked for by DaveVenom.
+- **Bypassing Clarity switches it off**, as though it had been removed, leaving every button as it was set; unbypassing brings everything back. With a second Clarity in the rack, that one goes on working.
+- A traced cable is put out by a click on empty rack as well as on bare panel. A click on a control or a port keeps it lit.
+- **Show pop-up on adjust is gone.** Tooltip readability shows a control's name and value, large, while it is turned, and says more besides.
+- No screws on the panels. They sat over the lettering. Asked for by DaveVenom.
+
+### Fixed
+- A drag from a port with a generator clipped onto it moved the generator's hidden cable instead of starting a cable, so the first drag seemed to do nothing. A drag never picks up Test Gear's own cables now, and dropping a cable on such a port leaves the generator's in place. Reported by DaveVenom.
 
 ## 2.0.9 — 15 September 2026
 

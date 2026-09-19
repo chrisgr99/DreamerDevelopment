@@ -763,6 +763,26 @@ static void paletteLoad() {
 /** The palette, the rules and the overrides as a document. */
 static json_t* paletteToJson() {
 	json_t* rootJ = json_object();
+	// WHAT THE FILE MEANS, IN THE FILE. JSON has no comments, so the explanation is a field the
+	// reader ignores, written first so it is the first thing anybody opening the file sees.
+	// Asked for by DaveVenom, who could not work out how to write a rule.
+	json_t* aboutJ = json_array();
+	static const char* ABOUT[] = {
+		"Clarity's port colours. Rack reads this file once, so restart Rack after editing it by hand.",
+		"audio, cv, trigger, pitch, mpx: the colour of each family, as #rrggbb.",
+		"rules: which family a port belongs to, asked in order; the first rule that fits decides. Restore default rules, in the same menu, puts the built-in list back without changing the colours.",
+		"A rule has a family and any of these conditions, all of which must hold:",
+		"  match: text in the port's name, ignoring case. word: true to match only a whole word.",
+		"  except: a word, or a list of words, that stops the rule applying.",
+		"  module: text in the plugin slug, module slug or module name.",
+		"  tag: a tag the module carries in the module browser, such as LFO or Filter.",
+		"  dir: in or out, for a rule about one side of a module only.",
+		"Example: {\"match\": \"CLOCK\", \"word\": true, \"dir\": \"in\", \"family\": \"trigger\"}",
+		"ports: one exact port of one exact module, as plugin/module/in or out/number, set from the port's own right-click menu. These win over every rule.",
+	};
+	for (const char* line : ABOUT)
+		json_array_append_new(aboutJ, json_string(line));
+	json_object_set_new(rootJ, "about", aboutJ);
 	json_object_set_new(rootJ, "version", json_integer(PAL_RULES_VERSION));
 	for (int i = 0; i < NUM_FAMILIES; i++)
 		json_object_set_new(rootJ, PAL_KEY[i], json_string(toHex(palette[i]).c_str()));
@@ -1068,6 +1088,15 @@ static void paletteRulesToDefault() {
 	paletteRules.clear();
 	for (const DefaultRule& d : defaultRules())
 		paletteRules.push_back(d.rule);
+}
+
+void paletteRestoreDefaultRules() {
+	if (!paletteLoaded)
+		paletteLoad();
+	// The rules only: the colours and each port's own override are the user's and stay.
+	paletteRulesToDefault();
+	paletteGen++;
+	paletteSave();
 }
 
 void paletteApplyScheme(const char* key) {

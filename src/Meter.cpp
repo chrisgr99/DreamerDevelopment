@@ -1,14 +1,14 @@
 /** Voltmeters clipped onto terminals.
 
-WHAT IT SHOWS, AND WHY IT IS ONE NUMBER. A meter wants to answer two questions: what is on this
-terminal now, and how far does it go. Two numbers stacked would answer both at once and make the
-widget twice the height of every other readout in this plugin — so it shows one, and a click
-turns it over. The small word above it says which, so nothing has to be remembered.
+WHAT IT SHOWS. The voltage now, large, and beneath it the lowest and the highest it has been
+lately, small. A meter answers what is on this terminal now and how far it goes, and a signal
+that swings both ways — an LFO from minus five to plus five — needs both ends to say how far.
+Asked for by DaveVenom; it was one number that a click turned between now and the peak.
 
-THE PEAK IS FOUND ON THE AUDIO THREAD. Sampled once a frame, a meter looking at an audio signal
-would catch one sample in eight hundred and report a number that depends on when it happened to
-look. The peak is taken every sample and held for a quarter of a second, which is long enough to
-read and short enough to follow.
+THE EXTREMES ARE FOUND ON THE AUDIO THREAD. Sampled once a frame, a meter looking at an audio
+signal would catch one sample in eight hundred and report a number that depends on when it
+happened to look. Each is taken every sample and held for a second after the signal last
+reached it, long enough to read and short enough to follow.
 
 WIDTH NEVER CHANGES. A sign, two digits, a point and two more digits: +05.00, -10.00. A reading
 past ninety-nine volts is held there rather than allowed a third digit, because a number that
@@ -33,22 +33,24 @@ struct MeterSlot {
 	std::atomic<int> tap{-1};
 	/** What the terminal is carrying, and the largest it has carried lately. */
 	std::atomic<float> now{0.f};
-	std::atomic<float> peak{0.f};
+	std::atomic<float> lo{0.f};
+	std::atomic<float> hi{0.f};
 	/** How many channels the terminal is carrying, so a reading taken from the first one does
 	not pass for the whole of a chord. */
 	std::atomic<int> channels{1};
 
 	// Audio thread only.
-	float held = 0.f;
-	float heldFor = 0.f;
+	float heldLo = 0.f, heldHi = 0.f;
+	float loFor = 0.f, hiFor = 0.f;
+	bool started = false;
 };
 
 static MeterSlot slots[METER_MAX];
 static std::atomic<int> activeCount{0};
 
-/** How long a peak is held before it is let go. Long enough to read, short enough that the
-number still follows the music rather than reporting something that happened a while ago. */
-static const float PEAK_SECONDS = 0.25f;
+/** How long an extreme is held after the signal last reached it. Long enough to read, short
+enough that the numbers still follow the music rather than reporting something from a while ago. */
+static const float HOLD_SECONDS = 1.f;
 
 
 void meterProcess(float sampleTime) {
@@ -67,22 +69,31 @@ void meterProcess(float sampleTime) {
 		slot.now.store(v, std::memory_order_relaxed);
 		slot.channels.store(tapChannels(tap), std::memory_order_relaxed);
 
-		// LARGEST BY SIZE, SHOWN WITH ITS SIGN. A signal that swings to minus eight has a peak
-		// of minus eight, not of whatever small positive number it also passed through.
-		if (std::fabs(v) >= std::fabs(slot.held)) {
-			slot.held = v;
-			slot.heldFor = 0.f;
+		// EACH EXTREME HELD until a second has passed without the signal reaching it, then let
+		// go to what is there now rather than decaying towards it: a meter that slides is
+		// reporting a number that was never true.
+		if (!slot.started) {
+			slot.heldLo = slot.heldHi = v;
+			slot.started = true;
 		}
-		else {
-			slot.heldFor += sampleTime;
-			if (slot.heldFor >= PEAK_SECONDS) {
-				// Let go and start again from what is there now, rather than decaying towards
-				// it: a meter that slides down is reporting a number that was never true.
-				slot.held = v;
-				slot.heldFor = 0.f;
-			}
+		if (v <= slot.heldLo) {
+			slot.heldLo = v;
+			slot.loFor = 0.f;
 		}
-		slot.peak.store(slot.held, std::memory_order_relaxed);
+		else if ((slot.loFor += sampleTime) >= HOLD_SECONDS) {
+			slot.heldLo = v;
+			slot.loFor = 0.f;
+		}
+		if (v >= slot.heldHi) {
+			slot.heldHi = v;
+			slot.hiFor = 0.f;
+		}
+		else if ((slot.hiFor += sampleTime) >= HOLD_SECONDS) {
+			slot.heldHi = v;
+			slot.hiFor = 0.f;
+		}
+		slot.lo.store(slot.heldLo, std::memory_order_relaxed);
+		slot.hi.store(slot.heldHi, std::memory_order_relaxed);
 	}
 }
 
@@ -93,9 +104,10 @@ static int slotAcquire() {
 			continue;
 		slots[i].tap.store(-1, std::memory_order_relaxed);
 		slots[i].now.store(0.f, std::memory_order_relaxed);
-		slots[i].peak.store(0.f, std::memory_order_relaxed);
-		slots[i].held = 0.f;
-		slots[i].heldFor = 0.f;
+		slots[i].lo.store(0.f, std::memory_order_relaxed);
+		slots[i].hi.store(0.f, std::memory_order_relaxed);
+		slots[i].started = false;
+		slots[i].loFor = slots[i].hiFor = 0.f;
 		slots[i].active.store(true, std::memory_order_release);
 		activeCount.fetch_add(1, std::memory_order_release);
 		busyAdd(1);
@@ -118,6 +130,8 @@ static const NVGcolor MET_GREEN = nvgRGB(0x3d, 0xe0, 0x7a);
 that the two sit together as one kind of thing. Six characters in the injectors' 56 pixels left
 the type too small to be worth having. */
 static const float MET_W = 78.f, MET_H = 32.f;
+/** The band under the reading that carries the lowest and highest. */
+static const float MET_RANGE_H = 11.f;
 
 
 struct MeterWidget : ClipWidget {
@@ -131,8 +145,6 @@ struct MeterWidget : ClipWidget {
 	void setSuspended(bool suspended) override {
 		tapSuspend(tapSlot, suspended);
 	}
-	/** Which of the two readings is on show. */
-	bool showPeak = false;
 	/** Where a press landed and how far it has travelled, so a drag that moves the widget is
 	not also read as the click that turns it over. */
 	math::Vec pressPos;
@@ -140,8 +152,8 @@ struct MeterWidget : ClipWidget {
 
 	MeterWidget() {
 		faceWidth = MET_W;
-		faceHeight = MET_H;
-		box.size = math::Vec(MET_W, MET_H);
+		faceHeight = MET_H + MET_RANGE_H;
+		box.size = math::Vec(MET_W, MET_H + MET_RANGE_H);
 	}
 
 	~MeterWidget() {
@@ -154,8 +166,7 @@ struct MeterWidget : ClipWidget {
 	float reading() {
 		if (slot < 0)
 			return 0.f;
-		return showPeak ? slots[slot].peak.load(std::memory_order_relaxed)
-			: slots[slot].now.load(std::memory_order_relaxed);
+		return slots[slot].now.load(std::memory_order_relaxed);
 	}
 
 	/** Either end of a cable. What ARRIVES at an input is as worth reading as what leaves an
@@ -213,7 +224,7 @@ struct MeterWidget : ClipWidget {
 		drawCallout(args.vg);
 
 		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, 0, 0, MET_W, MET_H, 3);
+		nvgRoundedRect(args.vg, 0, 0, MET_W, MET_H + MET_RANGE_H, 3);
 		nvgFillColor(args.vg, nvgRGB(0x10, 0x12, 0x16));
 		nvgFill(args.vg);
 		nvgStrokeColor(args.vg, MET_GREEN);
@@ -238,7 +249,7 @@ struct MeterWidget : ClipWidget {
 		// a number that quietly describes one note of a chord while looking like the whole
 		// thing is worse than no number.
 		const int n = (slot >= 0) ? slots[slot].channels.load(std::memory_order_relaxed) : 1;
-		const std::string word = std::string(showPeak ? "PEAK" : "METER")
+		const std::string word = std::string("METER")
 			+ ((n > 1) ? string::f(" 1/%d", n) : "");
 		// Bold by overdrawing, exactly as the injector's name is: there is no bold monospace to
 		// hand, and a single pass of this face at this size is too thin to read at a glance.
@@ -281,6 +292,19 @@ struct MeterWidget : ClipWidget {
 		const float digitsY = top + availH / 2.f - (ink[1] + ink[3]) / 2.f;
 		for (int i = 0; i < 3; i++)
 			nvgText(args.vg, MET_W / 2.f + i * 0.35f, digitsY, digits.c_str(), NULL);
+
+		// THE LOWEST AND THE HIGHEST, small, under the reading, at the same fixed width so they
+		// hold still as they change.
+		if (slot >= 0) {
+			const float lo = math::clamp(slots[slot].lo.load(std::memory_order_relaxed), -99.99f, 99.99f);
+			const float hi = math::clamp(slots[slot].hi.load(std::memory_order_relaxed), -99.99f, 99.99f);
+			nvgFontSize(args.vg, 9.5f);
+			nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+			const std::string range = string::f("%+06.2f  %+06.2f", lo, hi);
+			const float y = MET_H + MET_RANGE_H / 2.f - 1.f;
+			nvgFillColor(args.vg, nvgRGBA(0x3d, 0xe0, 0x7a, 0xb0));
+			nvgText(args.vg, MET_W / 2.f, y, range.c_str(), NULL);
+		}
 	}
 
 	void onButton(const ButtonEvent& e) override {
@@ -292,8 +316,7 @@ struct MeterWidget : ClipWidget {
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
 			ui::Menu* menu = createMenu();
 			menu->addChild(createMenuLabel("Voltmeter"));
-			menu->addChild(createMenuItem(showPeak ? "Show the voltage now" : "Show the peak",
-				"", [this]() { showPeak = !showPeak; }));
+			menu->addChild(createMenuLabel("Now, and the lowest and highest"));
 			menu->addChild(new ui::MenuSeparator);
 			menu->addChild(createMenuItem("Remove", "", [this]() { detach(); }));
 			e.consume(this);
@@ -321,8 +344,6 @@ struct MeterWidget : ClipWidget {
 	/** TURNED OVER ON RELEASE, not on the press. Every drag begins with a press, so acting on
 	the press meant nudging a meter into place also flipped it. */
 	void onDragEnd(const DragEndEvent& e) override {
-		if (travelled < 2.f)
-			showPeak = !showPeak;
 		travelled = 0.f;
 	}
 
@@ -336,7 +357,6 @@ struct MeterWidget : ClipWidget {
 		}
 		json_object_set_new(rootJ, "offsetX", json_real(offset.x));
 		json_object_set_new(rootJ, "offsetY", json_real(offset.y));
-		json_object_set_new(rootJ, "peak", json_boolean(showPeak));
 		return rootJ;
 	}
 
@@ -345,8 +365,6 @@ struct MeterWidget : ClipWidget {
 			offset.x = json_number_value(j);
 		if (json_t* j = json_object_get(rootJ, "offsetY"))
 			offset.y = json_number_value(j);
-		if (json_t* j = json_object_get(rootJ, "peak"))
-			showPeak = json_boolean_value(j);
 	}
 };
 

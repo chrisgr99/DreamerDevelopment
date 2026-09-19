@@ -78,6 +78,8 @@ look like, and the rules decide what belongs to each. Choosing one and keeping t
 would be a state nobody asked for. Per-port overrides are left alone — they name particular
 ports of particular modules and are true whatever the colours are. */
 void paletteApplyScheme(const char* key);
+/** Puts the built-in rules back in colours.json, keeping the colours and the per-port overrides. */
+void paletteRestoreDefaultRules();
 /** The sets on offer: keys and display names, ending in a NULL key. */
 struct PaletteScheme { const char* key; const char* name; };
 const PaletteScheme* paletteSchemes();

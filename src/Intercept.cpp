@@ -92,7 +92,6 @@ struct InterceptOverlay : widget::Widget {
 	*/
 	bool* demoPointer = NULL;
 	/** The value readout, switched separately from both. */
-	bool* demoValues = NULL;
 	double pressTime = -1e9;
 	bool pressed = false;
 	int pressedButton = 0;
@@ -120,19 +119,6 @@ struct InterceptOverlay : widget::Widget {
 	Rack decides the wheel should do to a knob in some later version. */
 	float scrollParamWas = 0.f;
 	bool scrollParamMoved = false;
-	/** The readout that lingers: what it said, when it was last true, and where it sat. */
-	std::string valueText;
-	double valueTime = -1e9;
-	math::Vec valuePos;
-	/** THE WIDEST IT HAS BEEN for the control being turned, and which control that is.
-
-	A unit lives on the end of the value — "1.2 V" — so padding the part after the point to a
-	fixed number of characters does not hold the width: two decimals and a unit is already wider
-	than the pad, and the plate grew and shrank as Rack changed its mind about how many figures
-	to show. A high-water mark holds it. The plate widens once, the first time a value needs the
-	room, and then stays there for as long as you are on that control. */
-	WeakPtr<app::ParamWidget> valueOwner;
-	size_t valueWidth = 0;
 	/** True between the click that picks a cable up and the click that puts it down. Rack
 	believes a drag is in progress the whole time. */
 	bool carrying = false;
@@ -231,6 +217,31 @@ struct InterceptOverlay : widget::Widget {
 		endCycle();
 	}
 
+	/** WHETHER A CABLE IS ONE OF TEST GEAR'S OWN: an injector's, from one of the module's hidden
+	outputs into the port it drives. It is hidden, and it is not the user's — so a drag from the
+	port must never pick it up, and a cable dropped on the port must never replace it. Picking it
+	up was the bug DaveVenom reported: the first drag after an injector was attached took its
+	invisible cable and nothing seemed to happen, and only once that cable had been moved out of
+	the way did a drag start a cable again. */
+	static bool isTestGearCable(app::CableWidget* cw) {
+		return cw && cw->cable && cw->cable->outputModule
+			&& cw->cable->outputModule->model == modelTestGear;
+	}
+
+	/** The user's cables on a port, top first: Test Gear's own left out. */
+	static std::vector<app::CableWidget*> userCablesOn(app::PortWidget* port) {
+		std::vector<app::CableWidget*> cables = APP->scene->rack->getCompleteCablesOnPort(port);
+		cables.erase(std::remove_if(cables.begin(), cables.end(), isTestGearCable), cables.end());
+		std::reverse(cables.begin(), cables.end());
+		return cables;
+	}
+
+	/** Whether the top cable on this port is Test Gear's. */
+	static bool topIsTestGear(app::PortWidget* port) {
+		std::vector<app::CableWidget*> cables = APP->scene->rack->getCompleteCablesOnPort(port);
+		return !cables.empty() && isTestGearCable(cables.back());
+	}
+
 	/** Picks up the top cable on this port, or starts a new one from it. */
 	void pickUp(app::PortWidget* port) {
 		if (!port || !port->module)
@@ -241,10 +252,9 @@ struct InterceptOverlay : widget::Widget {
 		// was being held, and the next click stepped past it to a new cable. The cable on top
 		// has to be index 0 of the same list the cycle walks.
 		cyclePort = port;
-		cycleCables = APP->scene->rack->getCompleteCablesOnPort(port);
 		// Top first: Rack keeps them in the order they were made, and the last is the one a
-		// click lands on.
-		std::reverse(cycleCables.begin(), cycleCables.end());
+		// click lands on. Never Test Gear's own: see isTestGearCable.
+		cycleCables = userCablesOn(port);
 		cycleIndex = 0;
 		cycleAt = APP->scene->getMousePos();
 
@@ -343,8 +353,7 @@ struct InterceptOverlay : widget::Widget {
 		const int cables = (int) cycleCables.size();
 		cycleIndex++;
 		if (cycleIndex > cables + 1) {
-			cycleCables = APP->scene->rack->getCompleteCablesOnPort(port);
-			std::reverse(cycleCables.begin(), cycleCables.end());
+			cycleCables = userCablesOn(port);
 			cycleIndex = 0;
 		}
 
@@ -386,7 +395,7 @@ struct InterceptOverlay : widget::Widget {
 		// An input takes one cable. Rack replaces what is there when you drop on an occupied
 		// input, so this does the same rather than inventing a third behaviour.
 		if (port->type == engine::Port::INPUT) {
-			for (app::CableWidget* other : APP->scene->rack->getCompleteCablesOnPort(port)) {
+			for (app::CableWidget* other : userCablesOn(port)) {
 				history::CableRemove* h = new history::CableRemove;
 				h->setCable(other);
 				APP->history->push(h);
@@ -649,8 +658,6 @@ struct InterceptOverlay : widget::Widget {
 			pressed = true;
 			pressedButton = e.button;
 			pressTime = APP->window->getFrameTime();
-			// Whatever the last value was, it is not what this click is about.
-			valueText.clear();
 		}
 		else if (e.action == GLFW_RELEASE) {
 			pressed = false;
@@ -661,100 +668,6 @@ struct InterceptOverlay : widget::Widget {
 	NVGcolor pointerAccent() {
 		return (pressedButton == GLFW_MOUSE_BUTTON_RIGHT)
 			? nvgRGB(0x6c, 0xb8, 0xff) : nvgRGB(0xff, 0xd8, 0x66);
-	}
-
-	/** The param being turned, named and valued.
-
-	A knob moving three degrees is invisible on video, so tutorials put the number beside the
-	pointer instead. Rack will format it for us — the same string its own tooltip shows — so
-	this is the real value rather than an approximation of it.
-	*/
-	/** PADS A NUMBER SO ITS DECIMAL POINT DOES NOT MOVE.
-
-	Rack formats a value to a number of significant figures, not to a number of decimal places,
-	so turning one knob walks through 9.99, 10.0, 10.05 — three different widths. The readout is
-	centred over the pointer, so every one of those re-centred the whole plate: the number
-	shuffled left and right while you were trying to read it, which is the one thing it must not
-	do.
-
-	The face is ShareTechMono, in which every character is the same width, so this is a matter
-	of counting rather than of measuring.
-
-	AND THE COUNT COMES FROM THE CONTROL, not from a number picked once and applied to
-	everything. Padding every value to six characters left of the point suited a knob that runs
-	to thousands and pushed a knob that runs from nought to one a long way off to the right for
-	no reason at all. The parameter knows its own ends, and the same arithmetic Rack uses to
-	turn a value into a displayed one turns those ends into the widest integer part this control
-	can ever show. */
-	static float displayValueOf(engine::ParamQuantity* pq, float v) {
-		if (pq->displayBase == 0.f) {
-			// Linear.
-		}
-		else if (pq->displayBase < 0.f)
-			v = std::log(v) / std::log(-pq->displayBase);
-		else
-			v = std::pow(pq->displayBase, v);
-		return v * pq->displayMultiplier + pq->displayOffset;
-	}
-
-	/** How many characters the part before the point can ever need, sign included. */
-	static int integerWidthOf(engine::ParamQuantity* pq) {
-		const float ends[2] = {
-			displayValueOf(pq, pq->getMinValue()),
-			displayValueOf(pq, pq->getMaxValue()),
-		};
-		int width = 1;
-		for (int i = 0; i < 2; i++) {
-			if (!std::isfinite(ends[i]))
-				continue;
-			int digits = 1;
-			float a = std::fabs(ends[i]);
-			while (a >= 10.f && digits < 8) {
-				a /= 10.f;
-				digits++;
-			}
-			if (ends[i] < 0.f)
-				digits++;      // room for the sign
-			width = std::max(width, digits);
-		}
-		return width;
-	}
-
-	static std::string alignAroundPoint(const std::string& value, int headWidth) {
-		size_t dot = std::string::npos;
-		for (size_t i = 0; i + 1 < value.size(); i++) {
-			if (value[i] == '.' && std::isdigit((unsigned char) value[i + 1])) {
-				dot = i;
-				break;
-			}
-		}
-		if (dot == std::string::npos)
-			return value;
-		std::string head = value.substr(0, dot);
-		std::string tail = value.substr(dot);
-		while ((int) head.size() < headWidth)
-			head = " " + head;
-		// The right side only has to stop the string changing length; four covers a point and
-		// three decimals, and a unit simply makes it longer for every value alike.
-		while (tail.size() < 4)
-			tail += " ";
-		return head + tail;
-	}
-
-	static std::string paramText(app::ParamWidget* pw) {
-		if (!pw)
-			return "";
-		engine::ParamQuantity* pq = pw->getParamQuantity();
-		if (!pq)
-			return "";
-		const std::string label = pq->getLabel();
-		const std::string value = alignAroundPoint(
-			pq->getDisplayValueString() + pq->getUnit(), integerWidthOf(pq));
-		return label.empty() ? value : (label + "  " + value);
-	}
-
-	std::string draggedParamText() {
-		return paramText(dynamic_cast<app::ParamWidget*>(APP->event->getDraggedWidget()));
 	}
 
 	/** One chevron, pointing along `dir`, centred at `c`. */
@@ -874,8 +787,7 @@ struct InterceptOverlay : widget::Widget {
 		// system offers pointer trails already, and doing the same thing worse inside one
 		// plugin is not worth the switch it would need.
 		const bool clicks = demoPointer && *demoPointer;
-		const bool values = demoValues && *demoValues;
-		if (!clicks && !values)
+		if (!clicks)
 			return;
 		// Our box sits at the scene's origin, so the scene's mouse position is ours.
 		const math::Vec p = APP->scene->mousePos;
@@ -962,64 +874,6 @@ struct InterceptOverlay : widget::Widget {
 		nvgStroke(args.vg);
 		}
 
-		// WHAT IS BEING TURNED. A knob moves too little to see on video; its name and value do
-		// not. Shown above the modifier line so both can be up at once.
-		//
-		// NOT WHILE A MENU IS OPEN, and not for the right button. A right press on a knob makes
-		// it the dragged widget for as long as the button is held, and Rack opens the knob's own
-		// menu under the pointer at the same moment — so the readout was laid over the menu it
-		// was competing with. Reported by DaveVenom on Windows. Neither case is one the readout
-		// is for: it is there to show a value being changed, and a menu being opened changes
-		// nothing.
-		// IT STAYS FOR A SECOND AND THEN FADES, rather than vanishing the instant the knob is
-		// let go. Letting go is when you look at what you set it to, and a readout that is gone
-		// by then has been shown for exactly the part of the gesture where you were watching
-		// your hand instead. A second at full strength, then half a second going.
-		//
-		// UNLESS SOMETHING ELSE HAPPENS. Turning another control replaces it at once, and any
-		// press anywhere clears it — a click is somebody attending to something else, and a
-		// value hanging over the thing they are now doing is in the way.
-		//
-		// It also stops following the pointer once the hand has left: it stays over the control
-		// it belongs to rather than drifting across the rack with the cursor.
-		if (values && !menuIsOpen()) {
-			app::ParamWidget* active = NULL;
-			if (pressedButton != GLFW_MOUSE_BUTTON_RIGHT)
-				active = dynamic_cast<app::ParamWidget*>(APP->event->getDraggedWidget());
-			if (!active && scrollAge < 0.5 && scrollParam && scrollParamMoved)
-				active = scrollParam;
-			if (active) {
-				if (active != valueOwner) {
-					valueOwner = active;
-					valueWidth = 0;   // A different control starts its own measure.
-				}
-				std::string text = paramText(active);
-				if (text.size() > valueWidth)
-					valueWidth = text.size();
-				while (text.size() < valueWidth)
-					text += " ";
-				valueText = text;
-				valueTime = now;
-				// ABOVE THE CONTROL, not above the pointer. What you are reading belongs to the
-				// knob, and a plate that hangs over the cursor moves with every twitch of the
-				// hand while the thing it describes stays still. Anchored to the middle of the
-				// control's top edge it sits in one place for the whole gesture, and it is
-				// obvious which control it is talking about when several are close together.
-				//
-				// Asked of the widget rather than worked out, so the rack's zoom is already in
-				// it: the offset comes back in the scene's own coordinates, which are ours.
-				valuePos = active->getAbsoluteOffset(
-					math::Vec(active->box.size.x / 2.f, 0.f));
-			}
-			const double age = now - valueTime;
-			if (!valueText.empty() && age < 1.5) {
-				const float alpha = (age <= 1.0) ? 1.f
-					: (float) ((1.5 - age) / 0.5);
-				drawPointerLabel(args, valuePos, valueText,
-					nvgRGB(0x3d, 0xe0, 0x7a), -10.f, true, alpha);
-			}
-		}
-
 		// Whatever modifier is held, named. A viewer cannot see a key being pressed, and half
 		// of what this plugin does hangs off Option.
 		// ONLY Option. This plugin no longer claims the modifier for anything, but it is still
@@ -1067,35 +921,40 @@ struct InterceptOverlay : widget::Widget {
 					meterCreate(weakPort);
 			}));
 			// And a frequency meter, which reads either end of a cable in the same way.
-			menu->addChild(createMenuItem("Frequency", "", [weakPort]() {
+			menu->addChild(createMenuItem("Frequency meter", "", [weakPort]() {
 				if (weakPort)
 					freqCreate(weakPort);
 			}));
 		}
-		if (!widgetsOn || !injectorAcceptsPort(port))
+		if (!widgetsOn || !port || !port->module)
 			return;
 
 		struct Entry { const char* name; InjectorType type; bool noteMode; };
-		// THE ORDER IS THE ORDER THEY ARE REACHED FOR. The switch follows the instruments
+		// THE ORDER IS THE ORDER THEY ARE REACHED FOR. The mute follows the instruments
 		// because, like them, it is about a signal that is already there rather than one being
 		// made; then the two oscillators, which are the sources wanted most often. The rest
 		// follow in the order they always have.
 		static const Entry entries[] = {
-			{"Switch", INJECT_SWITCH, false},
+			{"Mute", INJECT_SWITCH, false},
 			{"LFO", INJECT_LFO, false},
-			{"VCO", INJECT_AUDIO, false},
+			// NOT A VCO: nothing controls its frequency by voltage. Its own menu dials it by
+			// frequency or by note, so there is one entry for it rather than two.
+			{"Oscillator", INJECT_AUDIO, false},
 			{"Gate button", INJECT_GATE, false},
 			{"Pulse button", INJECT_PULSE, false},
 			{"Clock", INJECT_CLOCK, false},
-			{"DC level", INJECT_DC, false},
-			{"Note", INJECT_AUDIO, true},
-			{"Volt/oct", INJECT_NOTE, false},
+			// ONE STEADY VOLTAGE, shown as volts or as a note name from its own menu. DC level and
+			// Volt/oct were the same thing twice, differing only in how it was read.
+			{"Constant voltage", INJECT_DC, false},
 			{"Noise", INJECT_NOISE, false},
 			{"Attenuverter", INJECT_AV, false},
 		};
 		for (const Entry& entry : entries) {
 			const InjectorType type = entry.type;
 			const bool noteMode = entry.noteMode;
+			// An output takes only a switch and an attenuverter: nothing is injected into it.
+			if (!injectorAcceptsPortFor(port, type))
+				continue;
 			menu->addChild(createMenuItem(entry.name, "", [weakPort, type, noteMode]() {
 				if (weakPort)
 					injectorCreate(weakPort, type, noteMode);
@@ -1425,11 +1284,18 @@ struct InterceptOverlay : widget::Widget {
 		// NOT through a widget. A scope or an injector sitting over a jack is what the pointer is
 		// on; searching for a PortWidget alone found the jack underneath it and picked up its
 		// cable, so clicking a widget to drag it pulled a cable out from beneath.
-		if (clickCables && *clickCables && !carrying
+		// A PORT WHOSE TOP CABLE IS AN INJECTOR'S is taken here whether or not click-to-patch is
+		// on: left to Rack, its own drag would lift that hidden cable. See isTestGearCable.
+		app::PortWidget* pressedPort = (e.action == GLFW_PRESS
+			&& e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0
+			&& !carrying && !clipFamilyAt(e.pos))
+			? widgetAt<app::PortWidget>(APP->scene, e.pos) : NULL;
+		const bool injectorOnTop = pressedPort && topIsTestGear(pressedPort);
+		if (((clickCables && *clickCables) || injectorOnTop) && !carrying
 			&& e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& (e.mods & RACK_MOD_MASK) == 0
 			&& !clipFamilyAt(e.pos)) {
-			if (app::PortWidget* port = widgetAt<app::PortWidget>(APP->scene, e.pos)) {
+			if (app::PortWidget* port = pressedPort) {
 				// Empty-handed but still on the jack we were cycling: this is the next step
 				// round, not a new gesture, or the cycle could never come back to its start.
 				if (cyclePort && port == cyclePort) {
@@ -1473,9 +1339,14 @@ struct InterceptOverlay : widget::Widget {
 		// on top of it, so the hovered widget IS the module only when the pointer is on panel
 		// rather than on a knob, a jack, a screen or a button. NOT consumed — the click goes on
 		// to do whatever it would have done, which on a panel is to drag the module.
+		// AND SO DOES A CLICK ON EMPTY RACK, between the modules: the same kind of click on
+		// nothing. A click on a control, a port or the pill keeps the cable lit, so it can be
+		// watched while something is adjusted.
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& (e.mods & RACK_MOD_MASK) == 0 && cableFocusActive()
-			&& dynamic_cast<app::ModuleWidget*>(APP->event->hoveredWidget)) {
+			&& (dynamic_cast<app::ModuleWidget*>(APP->event->hoveredWidget)
+				|| dynamic_cast<app::RackWidget*>(APP->event->hoveredWidget)
+				|| dynamic_cast<app::RailWidget*>(APP->event->hoveredWidget))) {
 			cableFocusClear();
 		}
 
@@ -1515,8 +1386,7 @@ struct InterceptOverlay : widget::Widget {
 
 
 widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
-	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer,
-	bool* demoValues) {
+	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer) {
 
 	InterceptOverlay* overlay = new InterceptOverlay;
 	overlay->sliderScroll = sliderScroll;
@@ -1525,6 +1395,5 @@ widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
 	overlay->offerWidgets = offerWidgets;
 	overlay->trace = trace;
 	overlay->demoPointer = demoPointer;
-	overlay->demoValues = demoValues;
 	return overlay;
 }

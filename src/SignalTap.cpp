@@ -44,7 +44,7 @@ struct SignalTap {
 
 	/** Allocated only when the tap is asked for history, and never freed while the plugin
 	lives: freeing it would have to be co-ordinated with an audio thread that may be reading
-	it, and 2 MB held per slot that has ever carried a scope is the cheaper problem. */
+	it, and 4 MB held per slot that has ever carried a scope is the cheaper problem. */
 	std::vector<float> buffer;
 	/** Total samples captured; the ring position is this masked. Released by the audio thread
 	after each sample is written and acquired by the UI thread before reading, which is what
@@ -58,6 +58,11 @@ struct SignalTap {
 	Kept beside `active` rather than folded into it, so that suspending twice cannot take the
 	count down twice and showing something that was never hidden cannot put it up. */
 	bool suspended = false;
+
+	/** AUDIO THREAD ONLY. The samples summed toward the next one stored, when the engine runs
+	faster than the history is kept — see gDecimate. */
+	float acc = 0.f;
+	int accN = 0;
 };
 
 
@@ -70,6 +75,13 @@ sample — at 48 kHz that would be 1.5 million pointless loads a second. */
 static std::atomic<int> activeCount{0};
 
 static std::atomic<float> lastSampleRate{48000.f};
+/** HOW MANY ENGINE SAMPLES MAKE ONE STORED SAMPLE. History is kept at 48 kHz or a little under,
+whatever the engine runs at: at 96 kHz each stored sample is the mean of two, at 192 of four. A
+scope shows the same stretch of time at any engine rate, and twenty-two seconds of it rather than
+eleven or five. Averaging rather than dropping samples keeps what lies between them from folding
+back into what is shown. Only the history: a monitor or a meter reads the live sample, at the
+engine's own rate. */
+static std::atomic<int> gDecimate{1};
 
 
 /** Whether the engine still holds this tap's handle, bound where we last bound it.
@@ -237,6 +249,13 @@ void tapCaptureAll() {
 
 		if (tap.buffer.empty())
 			continue;   // A tap with no history: nothing to store.
+		const int k = gDecimate.load(std::memory_order_relaxed);
+		tap.acc += v;
+		if (++tap.accN < k)
+			continue;
+		v = tap.acc / (float) tap.accN;
+		tap.acc = 0.f;
+		tap.accN = 0;
 		const uint64_t w = tap.written.load(std::memory_order_relaxed);
 		tap.buffer[w & (TAP_BUFFER_SIZE - 1)] = v;
 		tap.written.store(w + 1, std::memory_order_release);
@@ -305,10 +324,79 @@ int tapReadAt(int slot, float* out, int count, int offset) {
 		count = (int) end;
 
 	// Oldest first, newest last. The audio thread may overwrite the oldest of these while we
-	// copy, but only after eleven seconds have gone by, which no frame takes.
+	// copy, but only after twenty-two seconds have gone by, which no frame takes.
 	const uint64_t start = end - count;
 	for (int i = 0; i < count; i++)
 		out[i] = tap.buffer[(start + i) & (TAP_BUFFER_SIZE - 1)];
+	return count;
+}
+
+
+void envelopeOf(const float* samples, int count, int columns, float* lo, float* hi, float* mean) {
+	if (columns <= 0)
+		return;
+	for (int c = 0; c < columns; c++) {
+		const int a = (int) ((int64_t) count * c / columns);
+		int b = (int) ((int64_t) count * (c + 1) / columns);
+		if (b <= a)
+			b = a + 1;
+		float l = 0.f, h = 0.f, sum = 0.f;
+		int n = 0;
+		for (int i = a; i < b && i < count; i++) {
+			const float v = samples[i];
+			if (n == 0 || v < l)
+				l = v;
+			if (n == 0 || v > h)
+				h = v;
+			sum += v;
+			n++;
+		}
+		lo[c] = l;
+		hi[c] = h;
+		mean[c] = n > 0 ? sum / n : 0.f;
+	}
+}
+
+
+int tapEnvelope(int slot, int count, int offset, int columns, float* lo, float* hi, float* mean) {
+	if (slot < 0 || slot >= TAP_MAX || count <= 0 || columns <= 0)
+		return 0;
+	SignalTap& tap = taps[slot];
+	if (tap.buffer.empty())
+		return 0;
+	if (count > TAP_BUFFER_SIZE)
+		count = TAP_BUFFER_SIZE;
+	if (offset < 0)
+		offset = 0;
+	const uint64_t w = tap.written.load(std::memory_order_acquire);
+	if (w == 0)
+		return 0;
+	uint64_t end = ((uint64_t) offset >= w) ? 0 : w - offset;
+	if (end == 0)
+		return 0;
+	if ((uint64_t) count > end)
+		count = (int) end;
+	const uint64_t start = end - count;
+	for (int c = 0; c < columns; c++) {
+		const uint64_t a = start + (uint64_t) count * c / columns;
+		uint64_t b = start + (uint64_t) count * (c + 1) / columns;
+		if (b <= a)
+			b = a + 1;
+		float l = 0.f, h = 0.f, sum = 0.f;
+		int n = 0;
+		for (uint64_t i = a; i < b && i < end; i++) {
+			const float v = tap.buffer[i & (TAP_BUFFER_SIZE - 1)];
+			if (n == 0 || v < l)
+				l = v;
+			if (n == 0 || v > h)
+				h = v;
+			sum += v;
+			n++;
+		}
+		lo[c] = l;
+		hi[c] = h;
+		mean[c] = n > 0 ? sum / n : 0.f;
+	}
 	return count;
 }
 
@@ -337,11 +425,14 @@ uint64_t tapFrameCount(int slot) {
 
 
 float tapSampleRate() {
-	return lastSampleRate.load(std::memory_order_relaxed);
+	return lastSampleRate.load(std::memory_order_relaxed)
+		/ (float) gDecimate.load(std::memory_order_relaxed);
 }
 
 
 void tapSetSampleRate(float sr) {
-	if (sr > 0.f)
+	if (sr > 0.f) {
 		lastSampleRate.store(sr, std::memory_order_relaxed);
+		gDecimate.store(std::max(1, (int) std::lround(sr / 48000.f)), std::memory_order_relaxed);
+	}
 }

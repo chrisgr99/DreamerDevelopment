@@ -322,6 +322,14 @@ bool injectorAcceptsPort(app::PortWidget* port) {
 	return port && port->module && port->type == engine::Port::INPUT;
 }
 
+bool injectorAcceptsPortFor(app::PortWidget* port, InjectorType type) {
+	if (!port || !port->module)
+		return false;
+	if (port->type == engine::Port::INPUT)
+		return true;
+	return type == INJECT_SWITCH || type == INJECT_AV;
+}
+
 
 /** The Widgets module, found by the output ports we gave it. There is only ever one that
 matters: injectors are cabled from it. */
@@ -418,6 +426,14 @@ struct InjectorWidget : ClipWidget {
 	float wantHeight = READ_H;
 	/** The cable carrying this injector's signal. Owned by Rack, not by us. */
 	WeakPtr<app::CableWidget> cable;
+
+	/** ON AN OUTPUT, for a switch and an attenuverter only — asked for by DaveVenom. Nothing is
+	injected INTO an output, which its own module drives. A switch there takes out every cable
+	leaving it. An attenuverter reads the output and lays a hidden cable of its own into each
+	input that output feeds, carrying the difference that scales what arrives there — kept in
+	step every frame as cables are added and removed. `outCables` are those; `cable` is unused. */
+	bool onOutput = false;
+	std::vector<WeakPtr<app::CableWidget>> outCables;
 
 	InjectorWidget() {
 		setShape();
@@ -556,7 +572,78 @@ struct InjectorWidget : ClipWidget {
 	}
 
 	bool acceptsPort(app::PortWidget* target) override {
-		return injectorAcceptsPort(target);
+		return injectorAcceptsPortFor(target, type);
+	}
+
+	/** Every hidden cable an attenuverter on an output has laid, taken away. */
+	void removeOutCables() {
+		for (WeakPtr<app::CableWidget>& w : outCables) {
+			if (app::CableWidget* cw = w) {
+				APP->scene->rack->removeCable(cw);
+				delete cw;
+			}
+		}
+		outCables.clear();
+	}
+
+	/** KEEPS ONE HIDDEN CABLE IN EACH INPUT THE OUTPUT FEEDS, from this injector's Test Gear output,
+	so each of them receives the difference that scales what arrives there. */
+	void syncOutCables() {
+		Module* drui = findDruiModule();
+		app::PortWidget* source = findDruiOutputWidget(slot);
+		if (!drui || !source || !port) {
+			removeOutCables();
+			return;
+		}
+		std::vector<app::PortWidget*> dests;
+		for (app::CableWidget* cw : APP->scene->rack->getCompleteCables()) {
+			if (!cw->cable || cw->outputPort != port || cw->cable->outputModule == drui)
+				continue;
+			if (std::find(dests.begin(), dests.end(), cw->inputPort) == dests.end())
+				dests.push_back(cw->inputPort);
+		}
+		// Gone, or no longer fed: taken away.
+		std::vector<WeakPtr<app::CableWidget>> keep;
+		for (WeakPtr<app::CableWidget>& w : outCables) {
+			app::CableWidget* cw = w;
+			if (!cw)
+				continue;
+			if (std::find(dests.begin(), dests.end(), cw->inputPort) == dests.end()) {
+				APP->scene->rack->removeCable(cw);
+				delete cw;
+				continue;
+			}
+			keep.push_back(w);
+		}
+		outCables = keep;
+		// Newly fed: one laid.
+		for (app::PortWidget* dest : dests) {
+			bool have = false;
+			for (WeakPtr<app::CableWidget>& w : outCables) {
+				app::CableWidget* cw = w;
+				if (cw && cw->inputPort == dest)
+					have = true;
+			}
+			if (have || !dest->module)
+				continue;
+			engine::Cable* c = new engine::Cable;
+			c->outputModule = drui;
+			c->outputId = slot;
+			c->inputModule = dest->module;
+			c->inputId = dest->portId;
+			APP->engine->addCable(c);
+			app::CableWidget* cw = new app::CableWidget;
+			cw->setCable(c);
+			cw->outputPort = source;
+			cw->inputPort = dest;
+			APP->scene->rack->addCable(cw);
+			hideCable(cw);
+			outCables.push_back(cw);
+		}
+		for (WeakPtr<app::CableWidget>& w : outCables) {
+			if (app::CableWidget* cw = w)
+				hideCable(cw);
+		}
 	}
 
 	/** Removing the widget is not enough: RackWidget::removeCable only detaches it from the
@@ -626,7 +713,12 @@ struct InjectorWidget : ClipWidget {
 		if (!held.empty())
 			restoreCables();
 		removeCable();
+		removeOutCables();
 		port = target;
+		onOutput = (target->type == engine::Port::OUTPUT);
+		// NOTHING TO LAY INTO AN OUTPUT: see onOutput.
+		if (onOutput)
+			return true;
 		if (!connectTo(target)) {
 			WARN("Injector: could not connect to the new port");
 			detach();
@@ -641,6 +733,7 @@ struct InjectorWidget : ClipWidget {
 		if (!held.empty())
 			restoreCables();
 		removeCable();
+		removeOutCables();
 		port = NULL;
 	}
 
@@ -650,11 +743,12 @@ struct InjectorWidget : ClipWidget {
 	— and an attenuverter clipped on before the cable is patched should simply start working
 	when it arrives, not need to be attached again.
 	*/
-	/** THE LIGHT IS ON WHEN THE SWITCH IS ON, and on means the signal is getting through.
-	
-	The other way round reads as a mute, and a mute is the wrong idea for most of what travels
-	down a cable: nobody mutes a gate, they switch it off. One word and one polarity that mean
-	the same thing whatever the signal is. */
+	/** WHETHER THE SIGNAL IS GETTING THROUGH. The button is a MUTE, so its light is lit when
+	this is false — lit means muted, as a mixer's mute does, and the drawn cables are stubs.
+
+	Called a mute rather than a switch although it takes the cables out rather than silencing a
+	signal, and although nobody mutes a gate: mute is the word everybody already has for a
+	control that stops one point in a patch while the rest plays. Asked for by DaveVenom. */
 	bool isOn() {
 		return slot < 0 || slots[slot].enabled.load(std::memory_order_relaxed);
 	}
@@ -680,7 +774,8 @@ struct InjectorWidget : ClipWidget {
 		Module* drui = findDruiModule();
 		std::vector<app::CableWidget*> take;
 		for (app::CableWidget* cw : APP->scene->rack->getCompleteCables()) {
-			if (!cw->cable || cw->inputPort != port)
+			// ON AN OUTPUT, every cable leaving it; on an input, every one arriving.
+			if (!cw->cable || (onOutput ? cw->outputPort != port : cw->inputPort != port))
 				continue;
 			if (cw->cable->outputModule == drui)
 				continue;   // our own injector's cable is not what is being muted
@@ -731,7 +826,12 @@ struct InjectorWidget : ClipWidget {
 
 		Module* drui = findDruiModule();
 		std::vector<std::pair<int64_t, int> > keys;
+		// ON AN OUTPUT the signal to scale is the output's own.
+		if (onOutput && port->module)
+			keys.push_back(std::make_pair(port->module->id, port->portId));
 		for (app::CableWidget* cw : APP->scene->rack->getCompleteCables()) {
+			if (onOutput)
+				break;
 			if (!cw->cable || cw->inputPort != port)
 				continue;
 			// Our own injection is not part of what is arriving from elsewhere.
@@ -780,6 +880,8 @@ struct InjectorWidget : ClipWidget {
 
 	void step() override {
 		updateSourceTap();
+		if (onOutput && type == INJECT_AV && !retargeting)
+			syncOutCables();
 		// A mute is not a signal: it is the presence or absence of cables, kept in step with
 		// the button every frame.
 		if (type == INJECT_SWITCH) {
@@ -859,7 +961,7 @@ struct InjectorWidget : ClipWidget {
 			case INJECT_CLOCK: return "CLK";
 			case INJECT_NOTE: return string::f("%.2f", level);
 			case INJECT_LFO: return "LFO";
-			case INJECT_AUDIO: return noteMode ? "PITCH" : "VCO";
+			case INJECT_AUDIO: return noteMode ? "PITCH" : "OSC";
 			default: return "";
 		}
 	}
@@ -896,7 +998,7 @@ struct InjectorWidget : ClipWidget {
 
 	std::string buttonLabel() {
 		if (type == INJECT_SWITCH)
-			return "SWITCH";
+			return "MUTE";
 		return (type == INJECT_GATE) ? "GATE" : "PULSE";
 	}
 
@@ -1126,12 +1228,12 @@ struct InjectorWidget : ClipWidget {
 		nvgStroke(args.vg);
 
 		// The lamp is on when the button is DOING something: a gate held high, or a mute
-		// cancelling what the cables are delivering.
+		// holding its port's cables out of the rack.
 		bool lit = false;
 		if (slot >= 0 && type == INJECT_GATE)
 			lit = slots[slot].gate.load(std::memory_order_relaxed);
 		else if (type == INJECT_SWITCH)
-			lit = isOn();
+			lit = !isOn();
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, c.x, c.y - 3.f, r * 0.52f);
 		nvgFillColor(args.vg, lit ? LIT_GREEN : nvgRGB(0x3d, 0x42, 0x4a));
@@ -1346,8 +1448,8 @@ struct InjectorWidget : ClipWidget {
 	void onDragEnd(const DragEndEvent& e) override {
 		if (slot >= 0 && type == INJECT_GATE)
 			slots[slot].gate.store(false, std::memory_order_relaxed);
-		// The switch, on the same terms: a click that did not travel throws it, a drag only
-		// moves it. The injector's own enabled flag is the switch, so the connection is broken
+		// The mute, on the same terms: a click that did not travel throws it, a drag only
+		// moves it. The injector's own enabled flag is the mute, so the connection is broken
 		// and remade on the same few-millisecond ramp as everything else and never clicks.
 		if (!dragged && type == INJECT_SWITCH && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& slot >= 0) {
@@ -1512,7 +1614,8 @@ struct InjectorWidget : ClipWidget {
 
 	/** The widget's own properties, and nothing else.
 
-	Changing an injector's TYPE has gone from here deliberately. The type is chosen when the
+	Changing an injector's TYPE has gone from here deliberately — except between the two ways of
+	reading one constant voltage, which are one tool to whoever is using it. The type is chosen when the
 	widget is made, from the Option-click menu on the jack, so this menu is free to carry what
 	each kind of injector actually needs — a waveform, a way of reading a pitch — rather than
 	spending its first six lines on a list that is settled by then.
@@ -1561,6 +1664,20 @@ struct InjectorWidget : ClipWidget {
 			}
 		}
 
+		// A CONSTANT VOLTAGE READ AS VOLTS OR AS A NOTE: the same voltage either way, and the
+		// same scroll steps the number or the note. Changing to a note snaps it to the nearest
+		// one, so what is shown is what is sent.
+		if (type == INJECT_DC || type == INJECT_NOTE) {
+			menu->addChild(new ui::MenuSeparator);
+			menu->addChild(createMenuLabel("Show as"));
+			menu->addChild(createCheckMenuItem("Volts", "",
+				[this]() { return type == INJECT_DC; },
+				[this]() { setType(INJECT_DC); }));
+			menu->addChild(createCheckMenuItem("Note name", "",
+				[this]() { return type == INJECT_NOTE; },
+				[this]() { setType(INJECT_NOTE); }));
+		}
+
 		if (type == INJECT_AUDIO) {
 			menu->addChild(new ui::MenuSeparator);
 			menu->addChild(createMenuLabel("Dial by"));
@@ -1597,6 +1714,7 @@ struct InjectorWidget : ClipWidget {
 		if (port && port->module) {
 			json_object_set_new(rootJ, "moduleId", json_integer(port->module->id));
 			json_object_set_new(rootJ, "portId", json_integer(port->portId));
+			json_object_set_new(rootJ, "isOutput", json_boolean(onOutput));
 		}
 		json_object_set_new(rootJ, "type", json_integer(type));
 		json_object_set_new(rootJ, "wave", json_integer(wave));
@@ -1690,8 +1808,14 @@ struct InjectorWidget : ClipWidget {
 static bool cableIsOwned(app::CableWidget* cw) {
 	for (widget::Widget* child : APP->scene->rack->children) {
 		InjectorWidget* inj = dynamic_cast<InjectorWidget*>(child);
-		if (inj && inj->cable == cw)
+		if (!inj)
+			continue;
+		if (inj->cable == cw)
 			return true;
+		for (WeakPtr<app::CableWidget>& w : inj->outCables) {
+			if (w == cw)
+				return true;
+		}
 	}
 	return false;
 }
@@ -1722,8 +1846,9 @@ The engine sums cables on an input, which is the whole reason injectors work thi
 stacking a DC offset under a waveform is exactly what that is for. */
 static InjectorWidget* injectorMake(app::PortWidget* port, InjectorType type,
 	bool adopt = false, bool place = true) {
-	if (!injectorAcceptsPort(port))
+	if (!injectorAcceptsPortFor(port, type))
 		return NULL;
+	const bool onOutput = (port->type == engine::Port::OUTPUT);
 	Module* drui = findDruiModule();
 	if (!drui) {
 		WARN("Injector: no Test Gear module in the patch to inject from");
@@ -1731,7 +1856,9 @@ static InjectorWidget* injectorMake(app::PortWidget* port, InjectorType type,
 	}
 
 	InjectorWidget* inj = new InjectorWidget;
-	app::CableWidget* existing = adopt ? existingInjectorCable(port, drui) : NULL;
+	// An output has no cable of ours to adopt: an attenuverter there lays its own fresh, and the
+	// ones saved with the patch are swept up as strays.
+	app::CableWidget* existing = (adopt && !onOutput) ? existingInjectorCable(port, drui) : NULL;
 	if (existing && existing->cable) {
 		// Adopt the restored cable, and with it the slot it was already using.
 		const int slot = existing->cable->outputId;
@@ -1745,14 +1872,31 @@ static InjectorWidget* injectorMake(app::PortWidget* port, InjectorType type,
 		InjectorWidget::hideCable(existing);
 	}
 	else {
-		const int slot = slotAcquire();
+		int slot = -1;
+		if (onOutput) {
+			// A SLOT NO SAVED CABLE IS USING. While a patch is being restored, an input injector
+			// not yet re-attached is still waiting to reclaim the slot its saved cable names;
+			// taking that slot here would leave it with nowhere to go.
+			for (int i = 0; i < INJECT_MAX && slot < 0; i++) {
+				bool used = false;
+				for (app::CableWidget* cw : APP->scene->rack->getCompleteCables()) {
+					if (cw->cable && cw->cable->outputModule == drui && cw->cable->outputId == i)
+						used = true;
+				}
+				if (!used && slotAcquireAt(i))
+					slot = i;
+			}
+		}
+		else {
+			slot = slotAcquire();
+		}
 		if (slot < 0) {
 			WARN("Injector: all %d slots are in use", INJECT_MAX);
 			delete inj;
 			return NULL;
 		}
 		inj->slot = slot;
-		if (!inj->connectTo(port)) {
+		if (!onOutput && !inj->connectTo(port)) {
 			WARN("Injector: could not lay its cable");
 			slotRelease(slot);
 			delete inj;
@@ -1761,6 +1905,7 @@ static InjectorWidget* injectorMake(app::PortWidget* port, InjectorType type,
 	}
 
 	inj->port = port;
+	inj->onOutput = onOutput;
 	inj->setType(type);
 	// Carried until it is put down — but not when a patch is being restored, since those
 	// already have a place.
@@ -1788,6 +1933,7 @@ void injectorCreate(app::PortWidget* port, InjectorType type, bool noteMode) {
 struct PendingInjector {
 	int64_t moduleId = -1;
 	int portId = 0;
+	bool isOutput = false;
 	json_t* stateJ = NULL;
 	int budget = 300;
 };
@@ -1829,18 +1975,20 @@ void injectorFromJson(json_t* arrayJ) {
 		p.moduleId = json_integer_value(moduleIdJ);
 		if (json_t* j = json_object_get(injJ, "portId"))
 			p.portId = json_integer_value(j);
+		if (json_t* j = json_object_get(injJ, "isOutput"))
+			p.isOutput = json_boolean_value(j);
 		p.stateJ = json_incref(injJ);
 		pendingInjectors.push_back(p);
 	}
 }
 
 
-static app::PortWidget* findInputPort(int64_t moduleId, int portId) {
+static app::PortWidget* findSavedPort(int64_t moduleId, int portId, bool isOutput) {
 	for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
 		if (!mw->module || mw->module->id != moduleId)
 			continue;
 		for (app::PortWidget* p : mw->getPorts()) {
-			if (p->type == engine::Port::INPUT && p->portId == portId)
+			if ((p->type == engine::Port::OUTPUT) == isOutput && p->portId == portId)
 				return p;
 		}
 		return NULL;
@@ -1914,9 +2062,13 @@ void injectorRestoreStep() {
 
 	for (size_t i = 0; i < pendingInjectors.size();) {
 		PendingInjector& p = pendingInjectors[i];
-		app::PortWidget* port = findInputPort(p.moduleId, p.portId);
+		app::PortWidget* port = findSavedPort(p.moduleId, p.portId, p.isOutput);
 		if (port && findDruiModule()) {
-			if (InjectorWidget* inj = injectorMake(port, INJECT_GATE, true, false))
+			// Made as its saved type from the start, since an output takes only two of them.
+			InjectorType type = INJECT_GATE;
+			if (json_t* j = json_object_get(p.stateJ, "type"))
+				type = (InjectorType) json_integer_value(j);
+			if (InjectorWidget* inj = injectorMake(port, type, true, false))
 				inj->fromJson(p.stateJ);
 			json_decref(p.stateJ);
 			pendingInjectors.erase(pendingInjectors.begin() + i);

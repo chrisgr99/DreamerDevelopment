@@ -41,6 +41,7 @@ optional and can be switched off per user.
 #include "Sink.hpp"
 #include "Busy.hpp"
 #include "Diag.hpp"
+#include "Settings.hpp"
 
 #include "Palette.hpp"
 #include "Dark.hpp"
@@ -90,10 +91,6 @@ cable on behalf of a module that was not there. */
 struct Options {
 	bool jacks = false;
 	bool knobs = false;
-	/** THE VALUE OF EVERY KNOB, AS AN ARC OUTSIDE IT. Separate from the knob style above: one
-	replaces how a knob looks, this adds what it is set to, and either is useful without the
-	other. */
-	bool knobArcs = false;
 	bool cableColor = false;
 	bool cableFlow = false;
 	bool pinchZoom = false;
@@ -102,13 +99,16 @@ struct Options {
 	Off by default: it changes the most basic gesture in Rack. */
 	bool clickCables = false;
 	bool trace = false;
-	bool scopes = true;
-	bool widgets = true;
+	/** OFF TOO, and set by Test Gear alone. They started on, so in a rack that had never had a
+	Test Gear module the port menu offered Widgets… that could not work: Test Gear captures every
+	scope's signal and makes every generator's, and without it nothing connects. */
+	bool scopes = false;
+	bool widgets = false;
 	/** Draws a pointer into the rack, for videos recorded with VCV Recorder — which cannot see
 	the real cursor. A recording aid rather than a feature, so it lives in the menu. */
 	bool demoPointer = false;
-	/** The name and value of whatever is being turned, above the pointer. */
-	bool demoValues = false;
+	/** Rack's own tooltips drawn large and below the control — see Tooltips.cpp. */
+	bool tooltips = false;
 };
 
 
@@ -124,15 +124,26 @@ static Options gOpt;
 
 /** How many of each module are in the rack, counted by their widgets. */
 static int gClarityCount = 0;
+/** HOW MANY CLARITY MODULES ARE DOING ANYTHING: in the rack and not bypassed. A bypassed Clarity
+keeps its buttons as they are and does nothing, exactly as though it had been removed — so its
+features are off while this is nought, and come back as its buttons say when it is unbypassed.
+With two in the rack and one bypassed, the other goes on as it would if the first were gone. */
+static int gClarityActive = 0;
+/** AND THE SAME FOR TEST GEAR: in the rack and not bypassed. A bypassed Test Gear hides every
+widget clipped on, silences the generators and takes Widgets… out of the port menus, as though it
+had been removed — but keeps the widgets, which come back as they were when it is unbypassed.
+Only deleting the last one takes the widgets away for good. */
+static int gTestGearActive = 0;
 static int gTestGearCount = 0;
 
 static void clearClarityOptions() {
-	gOpt.jacks = gOpt.knobs = gOpt.knobArcs = gOpt.cableColor = gOpt.cableFlow = false;
+	gOpt.jacks = gOpt.knobs = gOpt.cableColor = gOpt.cableFlow = false;
 	gOpt.pinchZoom = gOpt.sliderScroll = gOpt.clickCables = gOpt.trace = false;
 	// THE DRAWN POINTER TOO. Clarity's syncOptions sets ten flags and this cleared eight, so a
 	// rack that had once had a Clarity in it kept the recording pointer and its value readout
 	// after the module was deleted.
-	gOpt.demoPointer = gOpt.demoValues = false;
+	gOpt.demoPointer = false;
+	gOpt.tooltips = false;
 }
 
 static void clearWidgetOptions() {
@@ -151,6 +162,8 @@ struct Clarity : Module {
 	enum ParamId {
 		P_JACKS, P_CABLE_COLOR, P_KNOBS, P_CABLE_FLOW,
 		P_PINCH, P_TRACE, P_CLICK_CABLES, P_SLIDER_SCROLL,
+		/** P_SHOW_VALUES is no longer a switch: Tooltip readability does what it did. The number
+		is kept so patches saved with it still load. */
 		P_ANIMATE_CLICKS, P_SHOW_VALUES,
 		// APPENDED, NEVER INSERTED. Rack saves a param by its number, so a new one in the
 		// middle would move everything after it and load somebody's saved patch wrong.
@@ -160,7 +173,11 @@ struct Clarity : Module {
 		// saved while Clarity still carried the switch still loads. Same reason Darkener keeps
 		// its two.
 		P_UNUSED_HELP,
+		/** NO LONGER A SWITCH: the value arcs are part of every consistent knob now. The number
+		is kept so patches saved with it still load. */
 		P_KNOB_ARCS,
+		/** Rack's own tooltips, large, high in contrast and below the control. */
+		P_TOOLTIPS,
 		NUM_PARAMS
 	};
 
@@ -172,12 +189,7 @@ struct Clarity : Module {
 		// patch. A module that alters somebody's work the moment it is placed has taken a
 		// decision that was not its to take.
 		configSwitch(P_CABLE_COLOR, 0.f, 1.f, 0.f, "Colour code cables", {"Off", "On"});
-		configSwitch(P_KNOBS, 0.f, 1.f, 1.f, "Consistent knob style", {"Off", "On"});
-		// IN THE MENU RATHER THAN ON THE PANEL, and off until it has been lived with. Everything
-		// on the face is something the module is known for; this is new, it draws on every module
-		// in the rack, and nobody has asked for it yet. It is still a param, so it is saved with
-		// the patch and can be mapped like the rest.
-		configSwitch(P_KNOB_ARCS, 0.f, 1.f, 0.f, "Show knob value arcs", {"Off", "On"});
+		configSwitch(P_KNOBS, 0.f, 1.f, 1.f, "Knob clarity", {"Off", "On"});
 		configSwitch(P_CABLE_FLOW, 0.f, 1.f, 1.f, "Animate cable directions", {"Off", "On"});
 		configSwitch(P_PINCH, 0.f, 1.f, 1.f, "Pinch to zoom", {"Off", "On"});
 		configSwitch(P_TRACE, 0.f, 1.f, 1.f, "Cable trace assist", {"Off", "On"});
@@ -197,14 +209,10 @@ struct Clarity : Module {
 		// item cannot. This panel is also the list of what the module does, and two of the
 		// things it does were not on it.
 		configSwitch(P_ANIMATE_CLICKS, 0.f, 1.f, 0.f, "Animate clicks", {"Off", "On"});
-		// BOTH OFF. They are drawn over somebody's rack and neither is wanted until it is
-		// asked for; a module that starts animating the pointer the moment it is placed has
-		// decided something that was not its to decide.
-		// ITS OWN SWITCH, and not only for recordings. A knob's name and value set large above
-		// the pointer while it is being turned is worth having whether or not anything is being
-		// filmed — it is the one part of this that answers "what did I just set that to"
-		// without leaning towards the panel. So it does not depend on the pointer being drawn.
-		configSwitch(P_SHOW_VALUES, 0.f, 1.f, 0.f, "Show pop-up on adjust", {"Off", "On"});
+		// OFF UNTIL ASKED FOR: it replaces something of Rack's own on every module in the rack.
+		// It also does what the value pop-up used to — a control's name and value, large, while
+		// it is turned — so that switch is gone.
+		configSwitch(P_TOOLTIPS, 0.f, 1.f, 0.f, "Tooltip readability", {"Off", "On"});
 	}
 
 	/** Copies the params into the flags the overlays read. Called from the widget's step, on
@@ -212,7 +220,6 @@ struct Clarity : Module {
 	void syncOptions() {
 		gOpt.jacks = params[P_JACKS].getValue() > 0.5f;
 		gOpt.knobs = params[P_KNOBS].getValue() > 0.5f;
-		gOpt.knobArcs = params[P_KNOB_ARCS].getValue() > 0.5f;
 		gOpt.cableColor = params[P_CABLE_COLOR].getValue() > 0.5f;
 		gOpt.cableFlow = params[P_CABLE_FLOW].getValue() > 0.5f;
 		gOpt.pinchZoom = params[P_PINCH].getValue() > 0.5f;
@@ -220,7 +227,7 @@ struct Clarity : Module {
 		gOpt.clickCables = params[P_CLICK_CABLES].getValue() > 0.5f;
 		gOpt.sliderScroll = params[P_SLIDER_SCROLL].getValue() > 0.5f;
 		gOpt.demoPointer = params[P_ANIMATE_CLICKS].getValue() > 0.5f;
-		gOpt.demoValues = params[P_SHOW_VALUES].getValue() > 0.5f;
+		gOpt.tooltips = params[P_TOOLTIPS].getValue() > 0.5f;
 	}
 
 	json_t* dataToJson() override {
@@ -237,10 +244,7 @@ struct Clarity : Module {
 	void dataFromJson(json_t* rootJ) override {
 		// Patches written before these became parameters carried them here instead.
 		if (json_t* j = json_object_get(rootJ, "demoPointer")) {
-			// One switch became three. Anybody who had the pointer drawn was getting the value
-			// readout with it, so they keep it.
 			params[P_ANIMATE_CLICKS].setValue(json_boolean_value(j) ? 1.f : 0.f);
-			params[P_SHOW_VALUES].setValue(json_boolean_value(j) ? 1.f : 0.f);
 		}
 	}
 };
@@ -812,12 +816,12 @@ struct DRUIOverlay : widget::TransparentWidget {
 	whatever the order. */
 	Options options() {
 		Options o = gOpt;
-		if (gClarityCount <= 0) {
+		if (gClarityActive <= 0) {
 			o.jacks = o.knobs = o.cableColor = o.cableFlow = false;
 			o.pinchZoom = o.sliderScroll = o.clickCables = o.trace = false;
-			o.demoPointer = o.demoValues = false;
+			o.demoPointer = o.tooltips = false;
 		}
-		if (gTestGearCount <= 0)
+		if (gTestGearActive <= 0)
 			o.scopes = o.widgets = false;
 		return o;
 	}
@@ -849,7 +853,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 		// step, so the values it draws from are the ones Clarity set. The count is not reset per
 		// frame — a widget counts itself in once — so this is only ever true when there really
 		// is no Clarity.
-		if (gClarityCount <= 0)
+		if (gClarityActive <= 0)
 			clearClarityOptions();
 
 		const Options o = options();
@@ -1053,7 +1057,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 			}
 		}
 
-		if (o.knobs || o.knobArcs) {
+		if (o.knobs) {
 			std::vector<ParamWidget*> params = mw->getParams();
 			for (ParamWidget* pw : params) {
 				Knob* knob = dynamic_cast<Knob*>(pw);
@@ -1082,12 +1086,12 @@ struct DRUIOverlay : widget::TransparentWidget {
 					frac = math::clamp(pq->getScaledValue(), 0.f, 1.f);
 				// The knob's OWN angle range, so it still sweeps the arc its author intended.
 				const float angle = knob->minAngle + frac * (knob->maxAngle - knob->minAngle);
-				if (o.knobs)
-					druiDrawKnob(args.vg, c, r, angle, 7);
-				// AFTER THE KNOB, because the arc is on its face: drawn first it would be buried
-				// by the replacement knob above.
-				if (o.knobArcs)
-					druiDrawArc(args.vg, c, r, knob, frac);
+				druiDrawKnob(args.vg, c, r, angle, 7);
+				// THE VALUE AS AN ARC, AND THE POINTER CARRIED PAST THE RIM, ON EVERY KNOB. They
+				// were an option in the menu while they were new; they are how a knob is drawn now,
+				// because a knob read at a glance is the point of drawing them alike. After the
+				// knob, because the arc is on its face: drawn first it would be buried.
+				druiDrawArc(args.vg, c, r, knob, frac);
 			}
 		}
 	}
@@ -1409,6 +1413,7 @@ time on quit, reaching through a half-destroyed rack to do it.
 static WeakPtr<DRUIOverlay> gRackOverlay;
 static WeakPtr<widget::Widget> gPinchOverlay;
 static WeakPtr<widget::Widget> gInterceptOverlay;
+static WeakPtr<widget::Widget> gTooltipOverlay;
 
 
 static void installOverlays() {
@@ -1427,10 +1432,14 @@ static void installOverlays() {
 	}
 	if (!gInterceptOverlay) {
 		widget::Widget* o = createInterceptOverlay(&gOpt.sliderScroll, &gOpt.clickCables,
-			&gOpt.scopes, &gOpt.widgets, &gOpt.trace, &gOpt.demoPointer,
-			&gOpt.demoValues);
+			&gOpt.scopes, &gOpt.widgets, &gOpt.trace, &gOpt.demoPointer);
 		APP->scene->addChild(o);
 		gInterceptOverlay = o;
+	}
+	if (!gTooltipOverlay) {
+		widget::Widget* o = createTooltipOverlay(&gOpt.tooltips);
+		APP->scene->addChild(o);
+		gTooltipOverlay = o;
 	}
 }
 
@@ -1458,9 +1467,11 @@ static void removeOverlaysIfIdle() {
 	dropOverlay(gRackOverlay);
 	dropOverlay(gPinchOverlay);
 	dropOverlay(gInterceptOverlay);
+	dropOverlay(gTooltipOverlay);
 	gRackOverlay = NULL;
 	gPinchOverlay = NULL;
 	gInterceptOverlay = NULL;
+	gTooltipOverlay = NULL;
 }
 
 
@@ -1489,9 +1500,8 @@ struct DRUIWidgetBase : ModuleWidget {
 		panel->legend = legend;
 		panel->jackLabel = jackLabel;
 		setPanel(panel);
-
-		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		// NO SCREWS. They sat over the panel lettering, and a rack drawn in software has nothing
+		// for them to hold. Asked for by DaveVenom.
 	}
 
 	void addRow(int index, int paramId, const char* a, const char* b) {
@@ -1523,7 +1533,7 @@ struct ClarityWidget : DRUIWidgetBase {
 		static const Row rows[] = {
 			{Clarity::P_JACKS,         "Colour code",   "ports"},
 			{Clarity::P_CABLE_COLOR,   "Colour code",   "cables"},
-			{Clarity::P_KNOBS,         "Consistent",    "knob style"},
+			{Clarity::P_KNOBS,         "Knob clarity",  ""},
 			{Clarity::P_CABLE_FLOW,    "Animate cable", "directions"},
 			{Clarity::P_PINCH,         "Pinch to zoom", ""},
 			{Clarity::P_TRACE,         "Cable trace",   "assist"},
@@ -1538,7 +1548,7 @@ struct ClarityWidget : DRUIWidgetBase {
 			// The recording aids, last: they are the two switches somebody who never records
 			// anything will never touch, and a panel should read in the order it matters.
 			{Clarity::P_ANIMATE_CLICKS, "Animate",      "clicks"},
-			{Clarity::P_SHOW_VALUES,    "Show pop-up",  "on adjust"},
+			{Clarity::P_TOOLTIPS,       "Tooltip",      "readability"},
 		};
 		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
@@ -1555,10 +1565,17 @@ struct ClarityWidget : DRUIWidgetBase {
 		if (!counted)
 			return;
 		gClarityCount--;
-		if (gClarityCount <= 0)
+		if (active) {
+			gClarityActive--;
+			active = false;
+		}
+		if (gClarityActive <= 0)
 			clearClarityOptions();
 		removeOverlaysIfIdle();
 	}
+
+	/** Whether this one is counted in gClarityActive. */
+	bool active = false;
 
 	void step() override {
 		Clarity* m = dynamic_cast<Clarity*>(module);
@@ -1567,9 +1584,22 @@ struct ClarityWidget : DRUIWidgetBase {
 			return;
 		}
 		countIn(gClarityCount);
+		// BYPASSED IS REMOVED, AS FAR AS WHAT IT DOES. The buttons stay as they are — Rack draws
+		// the module faded, and unbypassing brings everything back as the buttons say — but a
+		// bypassed Clarity writes nothing, and with no other Clarity active the features go off
+		// exactly as they do when the last one is deleted. Asked of the module every frame,
+		// since Rack has no event for it.
+		const bool nowActive = !m->isBypassed();
+		if (nowActive != active) {
+			active = nowActive;
+			gClarityActive += active ? 1 : -1;
+			if (gClarityActive <= 0)
+				clearClarityOptions();
+		}
 		// The params are the truth; the flags the overlays read are a copy of them, refreshed
 		// here every frame. Without this the buttons moved and nothing else did.
-		m->syncOptions();
+		if (active)
+			m->syncOptions();
 		installOverlays();
 		ModuleWidget::step();
 	}
@@ -1603,21 +1633,48 @@ struct ClarityWidget : DRUIWidgetBase {
 			// The chooser, which is where a set of your own comes from — and where it is saved
 			// under a name, with the colours it would save on the screen in front of you.
 			sub->addChild(createMenuItem("Custom colours\u2026", "", []() { paletteShow(); }));
+			// THE RULES BACK WITHOUT THE COLOURS. Choosing a set puts both back; somebody whose
+			// rule edits went wrong wants their colours kept. Asked for by DaveVenom.
+			sub->addChild(createMenuItem("Restore default rules", "", []() {
+				paletteRestoreDefaultRules();
+			}));
 		}));
+
+		// HOW BIG THE TOOLTIPS ARE, kept for you rather than with the patch. Fixed steps, because
+		// a slider asks for a small target dragged accurately.
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createSubmenuItem("Tooltip readability text size",
+			string::f("%.0f%%", settingsTooltipScale() * 100.f), [](Menu* sub) {
+				static const float sizes[] = {1.f, 1.25f, 1.5f, 2.f, 2.5f, 3.f};
+				for (float f : sizes) {
+					sub->addChild(createCheckMenuItem(string::f("%.0f%%", f * 100.f), "",
+						[=]() { return std::fabs(settingsTooltipScale() - f) < 0.01f; },
+						[=]() { settingsSetTooltipScale(f); }));
+				}
+			}));
+		menu->addChild(createSubmenuItem("Tooltip readability colours",
+			settingsTooltipClassic() ? "Light yellow" : "White on black", [](Menu* sub) {
+				sub->addChild(createCheckMenuItem("White on black", "",
+					[]() { return !settingsTooltipClassic(); },
+					[]() { settingsSetTooltipClassic(false); }));
+				sub->addChild(createCheckMenuItem("Light yellow", "",
+					[]() { return settingsTooltipClassic(); },
+					[]() { settingsSetTooltipClassic(true); }));
+			}));
 
 		menu->addChild(new MenuSeparator);
 		{
 			Clarity* m = dynamic_cast<Clarity*>(module);
-			menu->addChild(createCheckMenuItem("Show knob value arcs", "",
-				[=]() { return m && m->params[Clarity::P_KNOB_ARCS].getValue() > 0.5f; },
+			// IN THE MENU, as its comment on the panel has always said it was — though nothing had
+			// put it here, so the only way to it was a mapped controller.
+			menu->addChild(createCheckMenuItem("Scroll wheel adjusts sliders", "",
+				[=]() { return m && m->params[Clarity::P_SLIDER_SCROLL].getValue() > 0.5f; },
 				[=]() {
 					if (!m)
 						return;
-					Param& p = m->params[Clarity::P_KNOB_ARCS];
+					Param& p = m->params[Clarity::P_SLIDER_SCROLL];
 					p.setValue(p.getValue() > 0.5f ? 0.f : 1.f);
 				}));
-			menu->addChild(createMenuLabel("An arc outside every knob in the rack,"));
-			menu->addChild(createMenuLabel("showing what it is set to."));
 		}
 
 		menu->addChild(new MenuSeparator);
@@ -1636,10 +1693,9 @@ struct TestGearWidget : DRUIWidgetBase {
 			{"Right-click any", "port and select", "\"Widgets\". It follows",
 			"the pointer. Click", "to place it."}, {
 			{"Scope", false}, {"Analyser", false}, {"Audio monitor", false},
-			{"Voltmeter", false}, {"Frequency", false}, {"Switch", false},
-			{"LFO", false}, {"VCO", false},
-			{"Gate", false}, {"Pulse", false}, {"Clock", false}, {"DC level", false},
-			{"Note", false}, {"Volt/oct", false},
+			{"Voltmeter", false}, {"Frequency meter", false}, {"Mute", false},
+			{"LFO", false}, {"Oscillator", false},
+			{"Gate", false}, {"Pulse", false}, {"Clock", false}, {"Constant voltage", false},
 			{"Noise", false}, {"Attenuverter", false},
 		}, "Monitor out", "Widgets");
 
@@ -1668,14 +1724,22 @@ struct TestGearWidget : DRUIWidgetBase {
 		}
 	}
 
+	/** Whether this one is counted in gTestGearActive. */
+	bool active = false;
+
 	/** Nothing from a browser preview. See the note on ClarityWidget's destructor: a preview has
 	no module, never counted itself in, and is destroyed in the middle of the scene going away. */
 	~TestGearWidget() {
 		if (!counted)
 			return;
 		gTestGearCount--;
-		if (gTestGearCount <= 0) {
+		if (active) {
+			gTestGearActive--;
+			active = false;
+		}
+		if (gTestGearActive <= 0)
 			clearWidgetOptions();
+		if (gTestGearCount <= 0) {
 			// THE LAST ONE OUT TAKES THE CLIPS WITH IT. A scope, a voltmeter or an injector is
 			// worked by this module — it is what captures the signal, what mixes the monitors,
 			// and what writes them all into the patch — so with no Test Gear left they are
@@ -1713,7 +1777,16 @@ struct TestGearWidget : DRUIWidgetBase {
 			return;
 		}
 		countIn(gTestGearCount);
-		m->syncOptions();
+		// BYPASSED IS REMOVED, as far as the widgets go: see gTestGearActive.
+		const bool nowActive = !m->isBypassed();
+		if (nowActive != active) {
+			active = nowActive;
+			gTestGearActive += active ? 1 : -1;
+			if (gTestGearActive <= 0)
+				clearWidgetOptions();
+		}
+		if (active)
+			m->syncOptions();
 		installOverlays();
 		ModuleWidget::step();
 	}

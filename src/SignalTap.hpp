@@ -27,12 +27,13 @@ a mapping some other module has made on that module's params.
 
 /** Samples held per tap. A power of two so the ring wraps with a mask rather than a modulo.
 
-2^19 is about eleven seconds at 48 kHz, or five and a half at 96 — enough to pause a scope and
-scroll back through what led up to whatever caught your eye. It costs 2 MB per tap, which is
-why the buffer is allocated only for taps that ask for history: an attenuverter reads the
-current sample and never looks back, so it takes none.
+2^20 is about twenty-two seconds at 48 kHz, or eleven at 96 — enough for a scope to show several
+cycles of a slow LFO at its slowest time bases, and to pause it and scroll back through what led
+up to whatever caught your eye. It costs 4 MB per tap, which is why the buffer is allocated only
+for taps that ask for history: an attenuverter reads the current sample and never looks back, so
+it takes none.
 */
-static const int TAP_BUFFER_SIZE = 1 << 19;
+static const int TAP_BUFFER_SIZE = 1 << 20;
 
 /** Maximum simultaneous taps. Fixed so the audio thread walks a plain array and the UI
 thread never resizes anything underneath it. */
@@ -73,8 +74,18 @@ how many were written, which is `count` unless the tap has not filled that far y
 int tapRead(int slot, float* out, int count);
 
 /** UI THREAD. The same, but ending `offset` samples before the newest — which is how a scope
-pans back through the history without reading all eleven seconds of it every frame. */
+pans back through the history without reading all twenty-two seconds of it every frame. */
 int tapReadAt(int slot, float* out, int count, int offset);
+
+/** UI THREAD. A LONG STRETCH, AS COLUMNS: the `count` samples ending `offset` before the newest,
+divided into `columns` equal parts, and the lowest, highest and mean of each. Read straight from
+the ring without copying, so a scope showing ten seconds costs about what one showing a tenth
+does. Returns how many samples it covered, fewer than `count` where the tap has not filled that
+far — in which case the columns cover what there is. */
+int tapEnvelope(int slot, int count, int offset, int columns, float* lo, float* hi, float* mean);
+
+/** The same, over samples already copied out — for a paused scope's frozen copy. */
+void envelopeOf(const float* samples, int count, int columns, float* lo, float* hi, float* mean);
 
 /** How many samples this tap holds that are still worth reading. */
 int tapAvailable(int slot);
@@ -83,7 +94,8 @@ int tapAvailable(int slot);
 tap, and is the evidence that capture is running at audio rate rather than frame rate. */
 uint64_t tapFrameCount(int slot);
 
-/** The engine sample rate seen by the last capture, for converting samples to seconds. */
+/** THE RATE THE HISTORY IS KEPT AT, for converting stored samples to seconds: the engine's own
+rate up to 48 kHz, and 48 kHz or near it above that — see gDecimate in SignalTap.cpp. */
 float tapSampleRate();
 
 /** AUDIO THREAD. Records the engine's current rate, so the UI can turn samples into time. */

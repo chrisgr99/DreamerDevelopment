@@ -52,6 +52,10 @@ struct ClipWidget : widget::OpaqueWidget {
 	forty pixels across has no room to spare for a control that is used once. */
 	ClipCloseWidget* closeButton = NULL;
 
+	/** The resize handles just outside the box, shown while the pointer is on the widget. Like
+	the tab and the X they are the rack's children, kept here so they go when the clip does. */
+	std::vector<widget::Widget*> grips;
+
 	/** While the tab is being dragged the callout points here, in rack coordinates, instead
 	of at the port, so the loop follows the pointer to wherever it is being taken. */
 	bool retargeting = false;
@@ -98,6 +102,83 @@ struct ClipWidget : widget::OpaqueWidget {
 	frequency counter — have anything to stop. */
 	virtual void setSuspended(bool suspended) {
 		(void) suspended;
+	}
+
+	/** WHETHER THIS KIND OF CLIP CAN BE DRAGGED BIGGER. Only the two that show a picture — the
+	scope and the analyser — can; a voltmeter is the size of its reading. */
+	virtual bool resizable() {
+		return false;
+	}
+
+	/** And whether it can be right now: a minimised scope is a token with nothing to resize. */
+	virtual bool resizableNow() {
+		return resizable();
+	}
+
+	/** The smallest the face may be dragged, which each kind sets from its own controls. */
+	virtual math::Vec minFace() {
+		return math::Vec(40.f, 30.f);
+	}
+
+	/** The handles take the colour of the frame they sit on, so they read as part of it. */
+	virtual NVGcolor gripColor() {
+		return nvgRGB(0x2f, 0xd0, 0x6a);
+	}
+
+	/** FRAMES ITS PORT HAS BEEN OUT OF SIGHT. A module that shows a different set of controls
+	as it is configured — Venom's Envelope Factory, whose unused stages are hidden — leaves a clip
+	attached to a jack nobody can see any more. See clipPurgeDead. */
+	int portHidden = 0;
+
+	/** When the handles stop being shown. THEY LINGER after the pointer leaves the face, because
+	they are drawn OUTSIDE it: leaving the face is how you reach them, and handles that went the
+	moment you set off for one could never be caught. */
+	double gripsUntil = 0.0;
+
+	void showGrips() {
+		gripsUntil = system::getTime() + 1.0;
+	}
+
+	bool gripsShowing() {
+		return visible && resizableNow() && !following && !retargeting
+			&& system::getTime() < gripsUntil;
+	}
+
+	/** Drags one edge or corner, `dir` being (x, y) in {-1, 0, 1}.
+
+	Pulling the left or top edge MOVES the clip as well as resizing it. Without that the far edge
+	walks across the rack while the near one is being pulled, which is not what dragging an edge
+	means anywhere else. */
+	/** Anything a clip must put right once its face has changed size. */
+	virtual void afterResize() {}
+
+	void resizeBy(math::Vec d, math::Vec dir) {
+		const math::Vec least = minFace();
+		if (dir.x > 0.f) {
+			faceWidth = std::fmax(least.x, faceWidth + d.x);
+		}
+		else if (dir.x < 0.f) {
+			const float newW = std::fmax(least.x, faceWidth - d.x);
+			offset.x += faceWidth - newW;
+			faceWidth = newW;
+		}
+		if (dir.y > 0.f) {
+			faceHeight = std::fmax(least.y, faceHeight + d.y);
+		}
+		else if (dir.y < 0.f) {
+			const float newH = std::fmax(least.y, faceHeight - d.y);
+			offset.y += faceHeight - newH;
+			faceHeight = newH;
+		}
+		afterResize();
+	}
+
+	/** Whether a point in this widget's box is on something of it that can be seen. The box is
+	a rectangle, and a clip whose parts are not (a scope with a readout wider than its face)
+	leaves empty rack inside it. Clicks there belong to whatever is underneath. */
+	virtual bool onVisiblePart(math::Vec p) {
+		(void) p;
+		return true;
 	}
 
 	/** Anchors to the port. Call from step(). */
@@ -267,6 +348,9 @@ void clipAddHandle(ClipWidget* clip);
 
 /** Gives a clip an X centred on its top-left corner, always visible. */
 void clipAddClose(ClipWidget* clip);
+
+/** Gives a resizable clip its seven handles. Nothing happens for one that is not resizable. */
+void clipAddGrips(ClipWidget* clip);
 
 /** Shows or hides a clip AND its grab handle together. The handle is a separate widget owned
 by the rack, so hiding a clip alone would leave its tab floating at the jack. */

@@ -75,7 +75,7 @@ The family is guessed from the port's name, and a name does not always say. A po
 
 **Right-click the port** and use **Signal family** to set it, or **Automatic** to go back to guessing. The choice is stored against the module's model rather than against the patch, so a port corrected once is correct in every patch that uses that module.
 
-To categorise by name instead, add a `rules` list to `colours.json`. Each rule gives a piece of text to look for in the port's name and the family a port matching it belongs to. Rules are tested in the order written, before the built-in list, and the text is matched anywhere in the name without regard to case.
+To categorise by name instead, edit the `rules` list in `colours.json`. The file starts with the built-in rules written out, in the order they are asked, and an `about` section at the top explains every field. The first rule that fits a port decides its family. A rule has a `family` and any of these conditions, all of which must hold: `match`, text in the port's name, ignoring case, with `word` set to true to match only a whole word; `except`, a word or list of words that stops the rule applying; `module`, text in the plugin slug, module slug or module name; `tag`, a tag the module carries in the module browser; and `dir`, `in` or `out`. **Restore default rules**, under **Colour and rule sets** in the right-click menu, puts the built-in list back without changing the colours.
 
 ```json
 {
@@ -85,7 +85,7 @@ To categorise by name instead, add a `rules` list to `colours.json`. Each rule g
   "pitch": "#c9b70e",
   "mpx": "#ff3cc8",
   "rules": [
-    { "match": "bpm", "family": "pitch" },
+    { "match": "clock", "word": true, "dir": "in", "family": "trigger" },
     { "match": "rate", "family": "cv" }
   ],
   "ports": {
@@ -98,7 +98,7 @@ The family names are `audio`, `cv`, `trigger`, `pitch` and `mpx`. The `ports` bl
 
 The file is read once, when the first colour is needed. Rack must be restarted after editing it by hand.
 
-### Consistent knob style
+### Knob clarity
 
 Draws one knob face over every knob in the rack, whatever the plugin.
 
@@ -109,6 +109,8 @@ Draws one knob face over every knob in the rack, whatever the plugin.
 <img src="images/clarity-knobs-crop.jpg" width="620" alt="Close up on the knobs of two Fundamental modules and an Instruo tona, every one of them drawn with the same face.">
 
 *Two Fundamental modules and an Instruo, drawn the same way.*
+
+Every knob it draws also shows its value: an amber arc on its face, just inside the rim, from the start of its travel to where it is set, with the pointer carried past the rim to the end of the arc. A knob whose range crosses zero, or whose default is the middle of its range, fills outward from the top, as a pan or balance knob is read.
 
 Knobs are drawn over each module, so a module that draws an illuminated ring around a knob will have that ring obscured. Disable this feature in that case; the same note appears in the right-click menu.
 
@@ -128,7 +130,7 @@ The drift indicates direction only. It is not synchronised with the signal and d
 
 ### Cable trace assist
 
-Hovering either end of a cable displays a small handle on it. Clicking the handle leaves that cable at full opacity and hides every other cable in the rack. Clicking any module panel restores them.
+Hovering either end of a cable displays a small handle on it. Clicking the handle leaves that cable at full opacity and hides every other cable in the rack. The cable stays lit while controls and ports are used, so it can be watched while something is adjusted. A click on bare module panel or on empty rack, or Escape, restores the others.
 
 <img src="images/cable-trace.gif" width="420" alt="Six cables cross each other. The pointer reaches a cable end, a handle appears on it, and a click leaves that one cable on screen alone. A click on a module panel brings the others back.">
 
@@ -188,20 +190,17 @@ Draws a pointer into the rack, marking clicks, drags and scrolling. A screen rec
 
 Off unless it is asked for: it is drawn over somebody's rack, and a module that starts animating the pointer the moment it is placed has decided something that was not its to decide.
 
-## Show pop-up on adjust
+## Tooltip readability
 
-While a control is being turned, its name and value are set above it, centred on the control rather than beside the pointer — the tip of the pointer is where the eye already is, and a plate off to the side means looking away from the thing being adjusted to read what it now says.
+Shows Rack's own tooltips — a control's name, value and the description its maker wrote; a port's name, its live voltage and what it is connected to — larger, in high contrast, and directly below the control rather than down and to the right of the pointer. The text is Rack's, so it says exactly what Rack's tooltip would; only the size, colours and position change. It also answers "what did I just set that to" while a control is turned, and shows it on a recording.
 
-It is set large, as a caption rather than a label: this is read at a glance while attention is on the control, and on a magnified or recorded screen a small one is something you have to stop and look for.
-
-It has its own switch and does not depend on the pointer being drawn. It answers "what did I just set that to" whether or not anything is being filmed.
+**Tooltip readability text size** in the right-click menu sets the size, from 100% to 300% of Rack's own, and **Tooltip readability colours** chooses white on black, which is the default, or the classic light yellow with black lettering. The tooltip fades in over half a second and out over a quarter. Both are kept for you rather than in the patch. Rack's own tooltips must be switched on, in Rack's View menu, for there to be anything to show.
 
 ## The right-click menu
 
-- **Show hints again** — brings back the hints that are shown once and then dismissed.
-- **Port and cable colours…** — the colour chooser, described above.
-- **Colour scheme** — replaces all five colours with a named scheme.
-- **Put cable colours back** — restores every cable to the colour it had before Clarity coloured it.
+- **Colour and rule sets** — the built-in sets, any set saved to a file, **Custom colours…** for the chooser described above, and **Restore default rules**.
+- **Tooltip readability text size** and **Tooltip readability colours** — described above.
+- **Scroll wheel adjusts sliders** — the wheel moves a slider the pointer is over.
 
 ---
 
@@ -209,6 +208,8 @@ It has its own switch and does not depend on the pointer being drawn. It answers
 
 **One module is sufficient.** A second has no effect; removing the last one disables the features.
 
-**No audio processing.** Clarity has no ports and performs no processing. Bypassing it has no effect.
+**No audio processing.** Clarity has no ports and performs no processing.
+
+**Bypassing it switches it off.** A bypassed Clarity does nothing, as though it had been removed, and every button keeps its setting, so unbypassing brings everything back as it was. With a second Clarity in the rack, that one goes on working.
 
 **The features are parameters**, so they are saved with the patch, can be mapped to a controller, and appear in Rack's own right-click menu for each switch.

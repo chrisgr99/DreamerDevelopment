@@ -1,7 +1,7 @@
 /** GENERATED — do not edit.
 
     Port families for Clarity's colouring, from the help database.
-    Source: DreamerHelp at 105dc46-dirty
+    Source: DreamerHelp at bc86f38
     Regenerate: make families (or tools/families.py <checkout>)
 
     THE DATABASE IS AUTHORITATIVE. If a colour here is wrong, fix it there and
@@ -3877,42 +3877,42 @@ static const signed char fi2134[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
 static const signed char fo2134[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 3, 1};
 static const signed char fi2135[] = {1, 1, 1, 1, 1, 2, 2, 1};
 static const signed char fo2135[] = {2, 2, 2, 2, 2, 1, 1, 1, 1, 2};
-static const signed char fi2136[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-static const signed char fo2136[] = {2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-static const signed char fi2137[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-static const signed char fo2137[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2};
-static const signed char fi2138[] = {-1, 2, 1, 1, 1, 1, 1, 1};
-static const signed char fo2138[] = {2, 2, 2, 2, 3, 2};
-static const signed char fi2139[] = {3, 2, 1};
-static const signed char fo2139[] = {0, 1};
-static const signed char fi2140[] = {1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2};
-static const signed char fo2140[] = {0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2};
-static const signed char fi2141[] = {2, 2, 2, 2, 2, 2, 2, 2};
-static const signed char fo2141[] = {3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-static const signed char fi2142[] = {1, 1, 1, 1, 1, 1, 1, 2, 2, 1};
-static const signed char fo2142[] = {2, 3, 2, 2, 2};
-static const signed char fi2143[] = {2, 2, 1, 1, 1, 1};
-static const signed char fo2143[] = {2, 3, 2, 2, 2};
-static const signed char fi2144[] = {2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-static const signed char fo2144[] = {2, 3};
-static const signed char fi2145[] = {1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1};
-static const signed char fo2145[] = {2, 2, 2, 2, 2, 3, 2, 2, 2};
-static const signed char fi2146[] = {2, 2, 2, 2};
-static const signed char fi2147[] = {2, 2, 2, 2, 2, 2, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-static const signed char fo2147[] = {0, 0, 0, 0, 0, 0, 0, 0};
-static const signed char fi2148[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-static const signed char fo2148[] = {2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-static const signed char fi2149[] = {0, 2, 2, 1, -1, 1, 1, 1, 1, 0};
-static const signed char fo2149[] = {0, 0};
-static const signed char fi2150[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 2};
-static const signed char fo2150[] = {1, 1, 1, 1, 1};
-static const signed char fi2151[] = {2, 2, 2, 1};
-static const signed char fo2151[] = {2, 2, 2, 1};
-static const signed char fi2152[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-static const signed char fo2152[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-static const signed char fi2153[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-static const signed char fi2154[] = {2, 2, 1, 1, 1, 1, 1, 1, 1};
-static const signed char fo2154[] = {2, 2, 2, 2, 2, 2, 2};
+static const signed char fi2136[] = {2, 2, 2, 2, 2, 2, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+static const signed char fo2136[] = {0, 0, 0, 0, 0, 0, 0, 0};
+static const signed char fi2137[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+static const signed char fo2137[] = {2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+static const signed char fi2138[] = {0, 2, 2, 1, -1, 1, 1, 1, 1, 0};
+static const signed char fo2138[] = {0, 0};
+static const signed char fi2139[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 2};
+static const signed char fo2139[] = {1, 1, 1, 1, 1};
+static const signed char fi2140[] = {2, 2, 2, 1};
+static const signed char fo2140[] = {2, 2, 2, 1};
+static const signed char fi2141[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+static const signed char fo2141[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+static const signed char fi2142[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+static const signed char fi2143[] = {2, 2, 1, 1, 1, 1, 1, 1, 1};
+static const signed char fo2143[] = {2, 2, 2, 2, 2, 2, 2};
+static const signed char fi2144[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+static const signed char fo2144[] = {2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+static const signed char fi2145[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+static const signed char fo2145[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2};
+static const signed char fi2146[] = {-1, 2, 1, 1, 1, 1, 1, 1};
+static const signed char fo2146[] = {2, 2, 2, 2, 3, 2};
+static const signed char fi2147[] = {3, 2, 1};
+static const signed char fo2147[] = {0, 1};
+static const signed char fi2148[] = {1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2};
+static const signed char fo2148[] = {0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2};
+static const signed char fi2149[] = {2, 2, 2, 2, 2, 2, 2, 2};
+static const signed char fo2149[] = {3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+static const signed char fi2150[] = {1, 1, 1, 1, 1, 1, 1, 2, 2, 1};
+static const signed char fo2150[] = {2, 3, 2, 2, 2};
+static const signed char fi2151[] = {2, 2, 1, 1, 1, 1};
+static const signed char fo2151[] = {2, 3, 2, 2, 2};
+static const signed char fi2152[] = {2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+static const signed char fo2152[] = {2, 3};
+static const signed char fi2153[] = {1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1};
+static const signed char fo2153[] = {2, 2, 2, 2, 2, 3, 2, 2, 2};
+static const signed char fi2154[] = {2, 2, 2, 2};
 static const signed char fi2155[] = {1, -1, -1, 2};
 static const signed char fi2156[] = {2, 1, 2};
 static const signed char fo2156[] = {1, 2, 2, 2};
@@ -4532,10 +4532,10 @@ static const signed char fo2496[] = {0, 2, 0, 2};
 static const signed char fi2497[] = {3, 3, 1, 1, 1, 2, 3, 1, 3, 1};
 static const signed char fo2497[] = {2, 0, 2, 0, 2, 0, 2, 0};
 static const signed char fi2498[] = {1, 1, 1, 1};
-static const signed char fo2499[] = {2, 2, 2};
-static const signed char fo2500[] = {2, 2, -1, 1};
-static const signed char fi2501[] = {2, 2, 1, 1};
-static const signed char fo2501[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -1, 1, 0, 1};
+static const signed char fi2499[] = {2, 2, 1, 1};
+static const signed char fo2499[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -1, 1, 0, 1};
+static const signed char fo2500[] = {2, 2, 2};
+static const signed char fo2501[] = {2, 2, -1, 1};
 static const signed char fi2502[] = {2, 2};
 static const signed char fo2502[] = {2};
 static const signed char fi2503[] = {-1, -1, -1, -1, 2};
@@ -8740,25 +8740,25 @@ const PortFamilyEntry PORT_FAMILIES[] = {
 	{"PatchableDevices", "NonlinearIntegrator", 4, fi2133, 4, fo2133},
 	{"PatchableDevices", "VoltageSequencer", 14, fi2134, 16, fo2134},
 	{"PatchableDevices", "WindowGenerators", 8, fi2135, 10, fo2135},
-	{"PathSet-GlassShard", "GlassShard", 18, fi2136, 18, fo2136},
-	{"PathSet-Infinity", "Orchestrator", 11, fi2137, 25, fo2137},
-	{"PathSet-Infinity", "QuantumCompass", 8, fi2138, 6, fo2138},
-	{"PathSet-Infinity", "Shuttle", 3, fi2139, 2, fo2139},
-	{"PathSet-Infinity", "WarpDrive", 26, fi2140, 14, fo2140},
-	{"PathSet-Rainbows", "4Expander", 8, fi2141, 20, fo2141},
-	{"PathSet-Rainbows", "Bridge", 10, fi2142, 5, fo2142},
-	{"PathSet-Rainbows", "Crossing", 6, fi2143, 5, fo2143},
-	{"PathSet-Rainbows", "Grid", 11, fi2144, 2, fo2144},
-	{"PathSet-Rainbows", "Ring", 34, fi2145, 9, fo2145},
-	{"PathSet-Rainbows", "RndExpander", 4, fi2146, 0, NULL},
-	{"PathSet", "AstroVibe", 21, fi2147, 8, fo2147},
-	{"PathSet", "GlassPane", 50, fi2148, 50, fo2148},
-	{"PathSet", "IceTray", 10, fi2149, 2, fo2149},
-	{"PathSet", "Nudge", 10, fi2150, 5, fo2150},
-	{"PathSet", "OneShot", 4, fi2151, 4, fo2151},
-	{"PathSet", "PlusPane", 24, fi2152, 24, fo2152},
-	{"PathSet", "ShiftyExpander", 18, fi2153, 0, NULL},
-	{"PathSet", "ShiftyMod", 9, fi2154, 7, fo2154},
+	{"PathSet", "AstroVibe", 21, fi2136, 8, fo2136},
+	{"PathSet", "GlassPane", 50, fi2137, 50, fo2137},
+	{"PathSet", "IceTray", 10, fi2138, 2, fo2138},
+	{"PathSet", "Nudge", 10, fi2139, 5, fo2139},
+	{"PathSet", "OneShot", 4, fi2140, 4, fo2140},
+	{"PathSet", "PlusPane", 24, fi2141, 24, fo2141},
+	{"PathSet", "ShiftyExpander", 18, fi2142, 0, NULL},
+	{"PathSet", "ShiftyMod", 9, fi2143, 7, fo2143},
+	{"PathSet-GlassShard", "GlassShard", 18, fi2144, 18, fo2144},
+	{"PathSet-Infinity", "Orchestrator", 11, fi2145, 25, fo2145},
+	{"PathSet-Infinity", "QuantumCompass", 8, fi2146, 6, fo2146},
+	{"PathSet-Infinity", "Shuttle", 3, fi2147, 2, fo2147},
+	{"PathSet-Infinity", "WarpDrive", 26, fi2148, 14, fo2148},
+	{"PathSet-Rainbows", "4Expander", 8, fi2149, 20, fo2149},
+	{"PathSet-Rainbows", "Bridge", 10, fi2150, 5, fo2150},
+	{"PathSet-Rainbows", "Crossing", 6, fi2151, 5, fo2151},
+	{"PathSet-Rainbows", "Grid", 11, fi2152, 2, fo2152},
+	{"PathSet-Rainbows", "Ring", 34, fi2153, 9, fo2153},
+	{"PathSet-Rainbows", "RndExpander", 4, fi2154, 0, NULL},
 	{"PdArray", "Array", 4, fi2155, 0, NULL},
 	{"PdArray", "Miniramp", 3, fi2156, 4, fo2156},
 	{"PdArray", "Ministep", 4, fi2157, 1, fo2157},
@@ -9103,9 +9103,9 @@ const PortFamilyEntry PORT_FAMILIES[] = {
 	{"Starling_Via", "SYNC3", 7, fi2496, 4, fo2496},
 	{"Starling_Via", "SYNC3XL", 10, fi2497, 8, fo2497},
 	{"Starling_Via", "SYNC3XLLEVELS", 4, fi2498, 0, NULL},
-	{"StellareModular-Link", "Link", 0, NULL, 3, fo2499},
-	{"StellareModular-Link", "Link2", 0, NULL, 4, fo2500},
-	{"StellareModular", "TuringMachine", 4, fi2501, 15, fo2501},
+	{"StellareModular", "TuringMachine", 4, fi2499, 15, fo2499},
+	{"StellareModular-Link", "Link", 0, NULL, 3, fo2500},
+	{"StellareModular-Link", "Link2", 0, NULL, 4, fo2501},
 	{"Sticksy", "SticksyFlipbook", 2, fi2502, 1, fo2502},
 	{"StochasticTelegraph", "BASICally", 5, fi2503, 0, NULL},
 	{"StochasticTelegraph", "Brainwash", 5, fi2504, 0, NULL},

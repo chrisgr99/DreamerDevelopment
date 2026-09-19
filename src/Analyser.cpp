@@ -70,16 +70,15 @@ static const int WF_ROWS = 160;
 
 /** Resize borders and the smallest useful face, as on the scope — the same numbers, so a
 grab that works on one works on the other. */
-static const float ANA_RESIZE_EDGE = 6.f;
 static const float ANA_MIN_W = 90.f, ANA_MIN_H = 50.f;
 /** How far the widget's box extends BEYOND its drawn face.
 
 Rack offers a press to a widget whose box contains the point, and a box that ends exactly at the
 drawn edge does not contain that edge — `Rect::contains` is half-open. So a press aimed at the
 right or bottom border landed outside the analyser and reached the module underneath, which then
-began a module drag. The face is drawn at the same size as before; the widget simply claims a
-few pixels more, and the resize borders now sit comfortably inside it. */
-static const float ANA_GRAB = 6.f;
+began a module drag. The face is drawn at the same size as before; the widget simply claims one
+pixel more. Only one, so the resize handles just outside the box hug the drawn face. */
+static const float ANA_GRAB = 1.f;
 
 /** The transport, in the same place and at the same size as the scope's. */
 static const float ANA_TRANSPORT = 15.f;
@@ -309,31 +308,6 @@ struct AnalyserWidget : ClipWidget {
 	math::Rect wfBox() {
 		return math::Rect(math::Vec(ANA_EDGE + ANA_TRANSPORT + 4.f, faceHeight - 21.f),
 			math::Vec(13.f, 13.f));
-	}
-
-	/** Which edge or corner the pointer is on, exactly as the scope decides it: any of the
-	four, or a corner for two at once. */
-	math::Vec resizeZoneAt(math::Vec pos) {
-		math::Vec dir;
-		if (pos.x <= ANA_RESIZE_EDGE)
-			dir.x = -1;
-		else if (pos.x >= faceWidth - ANA_RESIZE_EDGE)
-			dir.x = 1;
-		if (pos.y <= ANA_RESIZE_EDGE)
-			dir.y = -1;
-		else if (pos.y >= faceHeight - ANA_RESIZE_EDGE)
-			dir.y = 1;
-		return dir;
-	}
-
-	static int cursorForZone(math::Vec dir) {
-		if (dir.x != 0.f && dir.y != 0.f)
-			return (dir.x * dir.y > 0.f) ? GLFW_RESIZE_NWSE_CURSOR : GLFW_RESIZE_NESW_CURSOR;
-		if (dir.x != 0.f)
-			return GLFW_RESIZE_EW_CURSOR;
-		if (dir.y != 0.f)
-			return GLFW_RESIZE_NS_CURSOR;
-		return GLFW_ARROW_CURSOR;
 	}
 
 	/** The whole range the analyser could show: everything the sample rate makes real. */
@@ -609,7 +583,7 @@ struct AnalyserWidget : ClipWidget {
 			return;
 		}
 		updateTooltip(e.pos);
-		druiSetCursorShape(cursorForZone(resizeZoneAt(e.pos)));
+		showGrips();
 		widget::OpaqueWidget::onHover(e);
 	}
 
@@ -685,37 +659,29 @@ struct AnalyserWidget : ClipWidget {
 		nvgText(vg, r.pos.x + r.size.x / 2, r.pos.y + r.size.y / 2, "W", NULL);
 	}
 
-	/** Dragged by its face, resized from its right and bottom edges. */
+	/** Dragged by its face. Resizing belongs to the handles outside it: see ClipGripWidget. */
 	void onDragMove(const DragMoveEvent& e) override {
-		const math::Vec d = e.mouseDelta.div(getAbsoluteZoom());
-		if (!resizing) {
-			offset = offset.plus(d);
-			return;
-		}
-
-		// Dragging the left or top edge has to move the face as well as resize it, or the far
-		// edge would walk across the rack while you pull the near one.
-		if (resizeDir.x > 0.f) {
-			faceWidth = std::fmax(ANA_MIN_W, faceWidth + d.x);
-		}
-		else if (resizeDir.x < 0.f) {
-			const float newW = std::fmax(ANA_MIN_W, faceWidth - d.x);
-			offset.x += faceWidth - newW;
-			faceWidth = newW;
-		}
-		if (resizeDir.y > 0.f) {
-			faceHeight = std::fmax(ANA_MIN_H, faceHeight + d.y);
-		}
-		else if (resizeDir.y < 0.f) {
-			const float newH = std::fmax(ANA_MIN_H, faceHeight - d.y);
-			offset.y += faceHeight - newH;
-			faceHeight = newH;
-		}
-		sizeBox();
+		offset = offset.plus(e.mouseDelta.div(getAbsoluteZoom()));
 	}
 
-	bool resizing = false;
-	math::Vec resizeDir;
+	bool resizable() override {
+		return true;
+	}
+
+	math::Vec minFace() override {
+		return math::Vec(ANA_MIN_W, ANA_MIN_H);
+	}
+
+	/** The frame's own colour, as the scope's handles take the scope's. The analyser's frame
+	stays green when it is paused, so these do too. */
+	NVGcolor gripColor() override {
+		return ANA_GREEN;
+	}
+
+	/** The box is the face plus its one pixel, and the handles hang off the box. */
+	void afterResize() override {
+		sizeBox();
+	}
 
 	void onButton(const ButtonEvent& e) override {
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
@@ -749,8 +715,6 @@ struct AnalyserWidget : ClipWidget {
 			return;
 		}
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
-			resizeDir = resizeZoneAt(e.pos);
-			resizing = (resizeDir.x != 0.f || resizeDir.y != 0.f);
 			e.consume(this);
 			return;
 		}
@@ -759,11 +723,6 @@ struct AnalyserWidget : ClipWidget {
 
 	void onDragStart(const DragStartEvent& e) override {
 		e.consume(this);
-	}
-
-	void onDragEnd(const DragEndEvent& e) override {
-		resizing = false;
-		resizeDir = math::Vec();
 	}
 
 	json_t* toJson() {
@@ -828,6 +787,7 @@ void analyserCreate(app::PortWidget* port, bool place) {
 	APP->scene->rack->addChild(a);
 	clipAddHandle(a);
 	clipAddClose(a);
+	clipAddGrips(a);
 	INFO("Analyser: attached to port %d", port->portId);
 }
 

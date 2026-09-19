@@ -70,6 +70,9 @@ void injectorCreate(app::PortWidget* port, InjectorType type, bool noteMode = fa
 /** True if a port can take an injector: inputs only, since a signal is injected INTO
 something. An output is driven by its own module and nothing else may write to it. */
 bool injectorAcceptsPort(app::PortWidget* port);
+/** Whether a port can take this TYPE of injector: any input, and an output for a switch or an
+attenuverter only. */
+bool injectorAcceptsPortFor(app::PortWidget* port, InjectorType type);
 
 /** Every injector's attachment and settings, for saving with the patch. */
 json_t* injectorToJson();

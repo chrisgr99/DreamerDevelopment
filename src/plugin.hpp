@@ -10,13 +10,14 @@ extern Model* modelDarkener;
 
 /** The pinch-zoom overlay, added to the Scene so it works in screen coordinates. */
 widget::Widget* createPinchZoomOverlay(bool* enabled);
+/** Rack's tooltips drawn large and below the control while *on — see Tooltips.cpp. */
+widget::Widget* createTooltipOverlay(bool* on);
 
 /** Gestures that must be seen before anything else: scroll-wheel adjustment of sliders, and
 Option-click to clip a scope onto a jack. Added to the Scene and kept as its LAST child, so
 it is offered events ahead of any open menu. */
 widget::Widget* createInterceptOverlay(bool* sliderScroll, bool* clickCables,
-	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer,
-	bool* demoValues);
+	bool* offerScopes, bool* offerWidgets, bool* trace, bool* demoPointer);
 
 /** The plugin's knob face, shared so an injector's dial matches the knobs it sits among. */
 void druiDrawKnob(NVGcontext* vg, math::Vec c, float r, float angle, int ticks);
