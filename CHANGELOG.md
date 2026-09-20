@@ -2,13 +2,15 @@
 
 Newest first.
 
-## Unreleased
+## 2.1.0 — 19 September 2026
 
 ### Added
 - **Tooltip readability**, a new button on Clarity's panel. Rack's own tooltips — a control's name, value and its maker's description, a port's live voltage and connections — drawn larger, in high contrast, and directly below the control instead of down and to the right of the pointer. The text size, from 100% to 300%, and the colours, white on black by default or the classic light yellow, are in the right-click menu.
 - **Restore default rules**, under Colour and rule sets: the built-in rules back in colours.json without touching the colours. The file now opens with an explanation of every field a rule can have. Asked for by DaveVenom.
 - **Scroll wheel adjusts sliders** is in the right-click menu, where it was always said to be.
 - **Knob clarity**, the button that was Consistent knob style: every knob in the rack drawn in one style and now showing its value too: an amber arc on its face, just inside the rim, showing what it is set to, with the pointer carried past the rim to the end of the arc. A pointer says where a knob is only if you stop and look at it; an arc says it at a glance, and a column of knobs can be compared without reading any of them. A knob whose range crosses zero fills outward from the top rather than from the left, as does one whose default sits at the middle of its range, which is how a pan or balance knob is usually built. Part of Knob clarity rather than an option of its own.
+
+- **Dark chooses which makers it touches.** Its right-click menu lists every plugin with a module in the rack, each ticked; unticking one puts that maker's panels back at once. The choice is kept beside Rack's own settings, so a plugin whose panels come out badly stays off in every patch. Deciding what a shape is from the drawing alone is wrong for a whole maker at a time when it is wrong at all, and this is the way out of it while that is worked on. Reported by DaveVenom.
 
 ### Fixed
 - **A widget on a jack that gets hidden goes with it.** A module that shows a different set of controls as it is configured — Venom's Envelope Factory hides the stages above the number in use — left any widget clipped to one of those jacks sitting in mid air, reading a port that is no longer part of the module. A mute removed this way puts back the cables it was holding.

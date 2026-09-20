@@ -45,3 +45,18 @@ void darkStep(bool enabled);
 /** Puts every panel back. Called when the last Darkener leaves, so nothing outlives the module
 that asked for it. */
 void darkRestoreAll();
+
+/** WHICH MAKERS IT TOUCHES, chosen by the person rather than by us.
+
+Deciding what a shape on a panel is from the drawing alone gets it right often and wrong
+sometimes, and when it is wrong it is wrong for a whole maker at once — a house style, not one
+panel. So every plugin is darkened unless it has been turned off here, and the choice is kept
+beside Rack's own settings rather than in the patch: a maker whose panels come out badly should
+stay off in every patch. */
+bool darkPluginOn(const std::string& slug);
+void darkSetPluginOn(const std::string& slug, bool on);
+
+/** Every plugin with a module in the rack, as slug and name, in the order they read best: by
+name, without repeats. What the menu lists — the whole library would be hundreds of lines, and
+these are the ones in front of the person. */
+void darkPluginsInRack(std::vector<std::pair<std::string, std::string> >& out);

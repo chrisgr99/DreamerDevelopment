@@ -1876,6 +1876,26 @@ struct DarkenerWidget : DRUIWidgetBase {
 	}
 
 	void appendContextMenu(Menu* menu) override {
+		// WHICH MAKERS IT TOUCHES. Everything in the rack is listed, ticked, and unticking one
+		// puts that maker's panels back at once — which is the answer for a panel that comes out
+		// badly, without switching the whole thing off. The rack rather than the library: the
+		// library is hundreds of lines and these are the ones in front of you.
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createSubmenuItem("Plugins", "", [](Menu* sub) {
+			std::vector<std::pair<std::string, std::string> > plugins;
+			darkPluginsInRack(plugins);
+			if (plugins.empty()) {
+				sub->addChild(createMenuLabel("No other plugins in the rack"));
+				return;
+			}
+			for (size_t i = 0; i < plugins.size(); i++) {
+				const std::string slug = plugins[i].first;
+				sub->addChild(createCheckMenuItem(plugins[i].second, "",
+					[slug]() { return darkPluginOn(slug); },
+					[slug]() { darkSetPluginOn(slug, !darkPluginOn(slug)); }));
+			}
+		}));
+
 		// THE PORT CENSUS. Nothing to do with darkening; it is here because it needs a home and
 		// this module is the one that is always in the rack while the rules are being worked on.
 		// Offered only where the file asks for it — see Census.hpp.

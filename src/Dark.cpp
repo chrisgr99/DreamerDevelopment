@@ -6,6 +6,7 @@
 #include <settings.hpp>
 #include <window/Svg.hpp>
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <string>
@@ -107,6 +108,59 @@ static DarkRule darkRuleFor(const std::string& pluginSlug) {
 /** Whether a maker is left alone entirely. Ours are: every panel we draw is dark already. */
 static bool darkSkips(const std::string& pluginSlug) {
 	return pluginSlug.compare(0, 7, "Dreamer") == 0;
+}
+
+
+// ---- which makers the person wants darkened --------------------------------------------------
+
+/** The plugins turned OFF. Held as the exceptions rather than as the whole list, so a plugin
+installed later is darkened like everything else without anybody having to go and tick it. */
+static std::set<std::string> gExcluded;
+
+static std::string darkSettingsPath() {
+	return asset::user("DreamerDevelopment/dark.json");
+}
+
+/** Read once, the first time anything asks. A missing file leaves every plugin darkened. */
+static void darkSettingsLoad() {
+	static bool loaded = false;
+	if (loaded)
+		return;
+	loaded = true;
+	json_error_t err;
+	json_t* rootJ = json_load_file(darkSettingsPath().c_str(), 0, &err);
+	if (!rootJ)
+		return;
+	if (json_t* offJ = json_object_get(rootJ, "off")) {
+		size_t i;
+		json_t* j;
+		json_array_foreach(offJ, i, j) {
+			if (const char* slug = json_string_value(j))
+				gExcluded.insert(slug);
+		}
+	}
+	json_decref(rootJ);
+}
+
+/** Written whole whenever one changes. Failure is silent: an unwritable settings folder is not
+a reason to interrupt anybody, and the choice still holds for this session. */
+static void darkSettingsSave() {
+	json_t* rootJ = json_object();
+	json_t* offJ = json_array();
+	for (std::set<std::string>::const_iterator it = gExcluded.begin(); it != gExcluded.end(); ++it)
+		json_array_append_new(offJ, json_string(it->c_str()));
+	json_object_set_new(rootJ, "off", offJ);
+	system::createDirectories(asset::user("DreamerDevelopment"));
+	if (FILE* f = std::fopen(darkSettingsPath().c_str(), "w")) {
+		json_dumpf(rootJ, f, JSON_INDENT(2));
+		std::fclose(f);
+	}
+	json_decref(rootJ);
+}
+
+bool darkPluginOn(const std::string& slug) {
+	darkSettingsLoad();
+	return gExcluded.count(slug) == 0;
 }
 
 
@@ -527,6 +581,46 @@ void darkRestoreAll() {
 	gLastCount = 0;
 }
 
+void darkSetPluginOn(const std::string& slug, bool on) {
+	darkSettingsLoad();
+	if (on)
+		gExcluded.erase(slug);
+	else
+		gExcluded.insert(slug);
+	darkSettingsSave();
+	// EVERYTHING BACK, AND PAINTED AGAIN NEXT FRAME. A drawing is shared by every module of its
+	// model and what was changed is remembered per drawing, so there is no way to put back one
+	// maker's panels alone that is not simply this. It costs one frame, once, on a click.
+	darkRestoreAll();
+	gDirty = true;
+}
+
+
+void darkPluginsInRack(std::vector<std::pair<std::string, std::string> >& out) {
+	out.clear();
+	if (!APP->scene || !APP->scene->rack)
+		return;
+	std::set<std::string> seen;
+	for (app::ModuleWidget* mw : APP->scene->rack->getModules()) {
+		if (!mw->model || !mw->model->plugin)
+			continue;
+		const std::string slug = mw->model->plugin->slug;
+		// The ones it will never touch are not offered: a tick that does nothing is worse than
+		// no tick at all.
+		if (darkSkips(slug) || !seen.insert(slug).second)
+			continue;
+		const std::string name = mw->model->plugin->name.empty()
+			? slug : mw->model->plugin->name;
+		out.push_back(std::make_pair(slug, name));
+	}
+	std::sort(out.begin(), out.end(),
+		[](const std::pair<std::string, std::string>& a,
+			const std::pair<std::string, std::string>& b) {
+			return string::lowercase(a.second) < string::lowercase(b.second);
+		});
+}
+
+
 void darkStep(bool enabled) {
 	if (!APP->scene || !APP->scene->rack)
 		return;
@@ -561,7 +655,7 @@ void darkStep(bool enabled) {
 		if (!mw->model || !mw->model->plugin)
 			continue;
 		const std::string slug = mw->model->plugin->slug;
-		if (darkSkips(slug))
+		if (darkSkips(slug) || !darkPluginOn(slug))
 			continue;
 		std::vector<widget::SvgWidget*> faces;
 		std::vector<app::SvgPanel*> panels;
