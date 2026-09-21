@@ -16,8 +16,8 @@ Clicking again, WITHOUT having turned it, steps the rate: full, a tenth, a hundr
 full. Those are Rack's own fine and ultra-fine divisors, the ones Cmd and Cmd-Shift give, so the
 feel is the one people already know. Turning it puts it back to full.
 
-The armed control wears a green disc at its centre — the green of our buttons — full size at full
-rate, two thirds at a tenth, one third at a hundredth. The size says the rate; there is nothing to
+The armed control is marked with a green disc at its centre — the green of our buttons — full
+size at full rate, two thirds at a tenth, one third at a hundredth. The size says the rate; there is nothing to
 read. It fades over half a second when the control is disarmed. */
 #include "plugin.hpp"
 
@@ -38,10 +38,11 @@ void knobArmClickedAway();
 /** A wheel over this point. True if an armed control took it. */
 bool knobArmScroll(app::ParamWidget* under, float dy);
 
-/** Whether this control is a slider, which wears a bar rather than a disc and has one rate. */
+/** Whether this control is a slider, which is marked with a bar rather than a disc and has one
+rate. */
 bool knobArmIsSlider(app::ParamWidget* pw);
 
-/** The control wearing the highlight, or nothing. Its rate step is 1, 2 or 3, and the alpha
+/** The control the highlight is drawn on, or nothing. Its rate step is 1, 2 or 3, and the alpha
 carries the fade out. */
 app::ParamWidget* knobArmWidget();
 int knobArmLevel();

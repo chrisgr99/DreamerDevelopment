@@ -2,13 +2,17 @@
 
 Newest first.
 
-## Unreleased
+## 2.1.1 — 21 September 2026
 
 ### Added
-- **Click to arm a knob**, a new Clarity button, off by default. Click a control and the wheel turns that one; anywhere else the wheel moves the view, so scrolling the rack and turning a knob can never be confused. An armed control wears a green mark — a disc at a knob's centre, a bar down a slider's track — which goes when the pointer leaves it. Clicking a knob again, without having turned it, steps the rate through full, a tenth and a hundredth, which are Rack's own fine and ultra-fine divisors; the disc shrinks to two thirds and then to one third to say which. Turning it returns it to full, and a double click still resets the control to its default.
+- **Click to arm a knob**, a new Clarity button, off by default. It avoids an inconvenience of setting knobs to be adjusted with the scroll wheel: a scroll meant for the view can end up turning whatever control the pointer is over. Since a knob must be clicked before the wheel adjusts it, you are free to scroll the rack in either direction without the hazard of changing a control by accident. It also puts fine control on the wheel without a modifier key: clicking again gives a tenth of the rate, and again a hundredth, which are Rack's own fine and ultra-fine divisors. An armed knob is marked with a green disc, a slider with a green bar, and the mark goes when the pointer leaves. After the control has been turned, the next click returns it to the coarse rate rather than stepping to a finer one. A double click still resets it. The button is greyed out and held off while Rack's setting is off.
+
+### Changed
+- **Dark says what it is.** Its panel reads "work in progress, may obscure text on some modules", and its description says it attempts to synthesize a dark mode for modules whose makers ship only light panels, and works well on only a few families so far.
+- Shorter plugin and module descriptions in the manifest, and the plugin description no longer says "two modules" when there are three.
 
 ### Fixed
-- An attenuverter on an output had its cables swept up and remade on every frame. The purge that removes unclaimed cables from a Test Gear output looked only at the single cable an injector holds, and an attenuverter on an output holds one per destination.
+- An attenuverter on an output had its cables swept up and remade on every frame, which also filled the log. The purge that removes unclaimed cables from a Test Gear output looked only at the single cable an injector holds, and an attenuverter on an output holds one per destination.
 
 ## 2.1.0 — 19 September 2026
 

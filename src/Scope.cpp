@@ -123,7 +123,7 @@ static const float TRIG_STRIP_REACH = 10.f;
 /** Wide enough for the bottom row: the trigger strip, the transport, AUTO, AC and G, with a
 pad between each. A face narrower than its own controls is a face whose controls overlap. */
 static const float MIN_W = 100.f, MIN_H = 40.f;
-/** A paused scope wears a red frame, so a held trace can never be mistaken for a live one. */
+/** A paused scope is framed in red, so a held trace can never be mistaken for a live one. */
 static const NVGcolor FRAME_RUN = nvgRGB(0x2f, 0xd0, 0x6a);
 static const NVGcolor FRAME_PAUSED = nvgRGB(0xe0, 0x3b, 0x3b);
 
@@ -1381,7 +1381,7 @@ struct ScopeWidget : ClipWidget {
 		nvgRoundedRect(args.vg, 0, 0, w, h, 3);
 		nvgFillColor(args.vg, nvgRGB(0x10, 0x12, 0x16));
 		nvgFill(args.vg);
-		// A paused scope wears a RED frame. A held trace looks exactly like a live one, so the
+		// A paused scope is framed in RED. A held trace looks exactly like a live one, so the
 		// frame is the only thing that can tell you which you are reading.
 		nvgStrokeColor(args.vg, frozen ? FRAME_PAUSED : FRAME_RUN);
 		nvgStrokeWidth(args.vg, 1.5f);

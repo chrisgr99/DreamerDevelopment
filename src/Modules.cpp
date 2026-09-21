@@ -224,6 +224,11 @@ struct Clarity : Module {
 		// it is turned — so that switch is gone.
 		configSwitch(P_TOOLTIPS, 0.f, 1.f, 0.f, "Tooltip readability", {"Off", "On"});
 		configSwitch(P_KNOB_ARM, 0.f, 1.f, 0.f, "Click to arm a knob", {"Off", "On"});
+		paramQuantities[P_KNOB_ARM]->description =
+			"A knob must be clicked once before the scroll wheel can adjust it. Click again for "
+			"finer motion, and again for finer still; turning it returns to the coarse rate, and "
+			"a double click resets the knob as usual. Only works when Rack's \"scroll wheel "
+			"adjusts knobs\" is enabled.";
 	}
 
 	/** Copies the params into the flags the overlays read. Called from the widget's step, on
@@ -239,7 +244,9 @@ struct Clarity : Module {
 		gOpt.sliderScroll = params[P_SLIDER_SCROLL].getValue() > 0.5f;
 		gOpt.demoPointer = params[P_ANIMATE_CLICKS].getValue() > 0.5f;
 		gOpt.tooltips = params[P_TOOLTIPS].getValue() > 0.5f;
-		gOpt.knobArm = params[P_KNOB_ARM].getValue() > 0.5f;
+		// SET UP FOR IT OR NOT. With Rack's own wheel-turns-knobs off, the wheel never turns a
+		// knob, so arming governs nothing and is held off — the button is greyed to say so.
+		gOpt.knobArm = settings::knobScroll && params[P_KNOB_ARM].getValue() > 0.5f;
 	}
 
 	json_t* dataToJson() override {
@@ -1421,6 +1428,10 @@ anyone aim when the label belongs to the same control and the row is otherwise e
 */
 struct FeatureButton : app::Switch {
 	std::string label;
+	/** GREYED OUT WHEN RACK IS NOT SET UP FOR IT. Click to arm a knob is about the mouse wheel,
+	and Rack has a setting that says whether the wheel turns knobs at all. With that off there is
+	nothing for arming to govern, so the button says so rather than doing nothing quietly. */
+	bool (*available)() = NULL;
 	/** A second line, used only where a caption is too long for the panel's width. Wrapping the
 	few that need it keeps the module narrow, which matters more than uniform captions. */
 	std::string label2;
@@ -1429,8 +1440,38 @@ struct FeatureButton : app::Switch {
 		box.size = math::Vec(PANEL_W - ROW_X * 2, ROW_H - 2.f);
 	}
 
+	bool refuses() {
+		return available && !available();
+	}
+
+	/** A GREYED BUTTON DOES NOT PRESS.
+	
+	THREE HANDLERS, not one. Rack's Switch does its work on the DRAG, not on the button event —
+	onDragStart is what moves the value — so refusing the press alone left the switch toggling
+	exactly as before, which is what testing found. */
+	void onButton(const ButtonEvent& e) override {
+		if (refuses() && e.action == GLFW_PRESS) {
+			e.consume(this);
+			return;
+		}
+		app::Switch::onButton(e);
+	}
+
+	void onDragStart(const DragStartEvent& e) override {
+		if (refuses())
+			return;
+		app::Switch::onDragStart(e);
+	}
+
+	void onDragEnd(const DragEndEvent& e) override {
+		if (refuses())
+			return;
+		app::Switch::onDragEnd(e);
+	}
+
 	void draw(const DrawArgs& args) override {
-		const bool on = getParamQuantity() && getParamQuantity()->getValue() > 0.5f;
+		const bool usable = !available || available();
+		const bool on = usable && getParamQuantity() && getParamQuantity()->getValue() > 0.5f;
 		const float cy = box.size.y / 2.f;
 
 		// A cap with a rim and a lit face, so it reads as something that has been pressed in
@@ -1455,7 +1496,8 @@ struct FeatureButton : app::Switch {
 			return;
 		nvgFontFaceId(args.vg, font->handle);
 		nvgFontSize(args.vg, 8.5f);
-		nvgFillColor(args.vg, on ? PANEL_INK : nvgRGB(0x83, 0x89, 0x93));
+		nvgFillColor(args.vg, on ? PANEL_INK
+			: usable ? nvgRGB(0x83, 0x89, 0x93) : nvgRGB(0x4e, 0x53, 0x5b));
 		nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 		const float tx = CAP_CX + CAP_R + 5.f;
 		if (label2.empty()) {
@@ -1577,6 +1619,10 @@ struct DRUIWidgetBase : ModuleWidget {
 			Vec(ROW_X, ROW_TOP + ROW_H * index), module, paramId);
 		button->label = a;
 		button->label2 = b;
+		// Arming is about the wheel, so it is greyed out while Rack's own "scroll wheel adjusts
+		// knobs" is off: with the wheel not turning knobs at all, there is nothing to arm.
+		if (paramId == Clarity::P_KNOB_ARM)
+			button->available = []() { return settings::knobScroll; };
 		addParam(button);
 	}
 
@@ -1665,6 +1711,11 @@ struct ClarityWidget : DRUIWidgetBase {
 			if (gClarityActive <= 0)
 				clearClarityOptions();
 		}
+		// HELD OFF, NOT MERELY IGNORED. Arming needs Rack's wheel-turns-knobs setting; with that
+		// off the switch is greyed, and the param is put back to off so a patch saved with it on
+		// does not come back claiming a feature that cannot work.
+		if (!settings::knobScroll)
+			m->params[Clarity::P_KNOB_ARM].setValue(0.f);
 		// The params are the truth; the flags the overlays read are a copy of them, refreshed
 		// here every frame. Without this the buttons moved and nothing else did.
 		if (active)
@@ -1916,6 +1967,31 @@ struct CensusProgress : widget::Widget {
 	}
 };
 
+/** TWO WORDS UNDER THE TITLE. Dark is honest about what it is: it works well on a few families of
+panels and imperfectly on the rest, and somebody meeting it for the first time should be told that
+by the module rather than by the result. Same grey as the rest of the lettering, so it reads as a
+caption and not as a warning light. */
+struct DarkenerNote : widget::Widget {
+	void draw(const DrawArgs& args) override {
+		std::shared_ptr<window::Font> font = panelFont();
+		if (!font || font->handle < 0)
+			return;
+		nvgFontFaceId(args.vg, font->handle);
+		nvgFontSize(args.vg, 8.f);
+		// WHITE, not the grey the captions use. It is a caption by position and a warning by
+		// content, and at eight points the grey was too faint to read at a glance.
+		nvgFillColor(args.vg, nvgRGB(0xff, 0xff, 0xff));
+		nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
+		nvgTextLineHeight(args.vg, 1.15f);
+		// Wrapped, because the panel is four units wide and the sentence is not — and inset from
+		// both sides, so no line reaches the panel's border.
+		const float pad = 4.f;
+		nvgTextBox(args.vg, pad, 0.f, box.size.x - pad * 2.f,
+			"work in progress\nmay obscure text on some modules", NULL);
+	}
+};
+
+
 struct DarkenerWidget : DRUIWidgetBase {
 	DarkenerWidget(Darkener* module) {
 		setModule(module);
@@ -1927,8 +2003,13 @@ struct DarkenerWidget : DRUIWidgetBase {
 		button->label2 = "panels";
 		addParam(button);
 
+		DarkenerNote* note = new DarkenerNote;
+		note->box.pos = math::Vec(0.f, ROW_TOP + ROW_H + 1.f);
+		note->box.size = math::Vec(box.size.x, 46.f);
+		addChild(note);
+
 		CensusProgress* progress = new CensusProgress;
-		progress->box.pos = math::Vec(2.f, ROW_TOP + ROW_H + 8.f);
+		progress->box.pos = math::Vec(2.f, ROW_TOP + ROW_H + 52.f);
 		progress->box.size = math::Vec(box.size.x - 4.f, 40.f);
 		addChild(progress);
 	}
