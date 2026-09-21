@@ -2,6 +2,14 @@
 
 Newest first.
 
+## Unreleased
+
+### Added
+- **Click to arm a knob**, a new Clarity button, off by default. Click a control and the wheel turns that one; anywhere else the wheel moves the view, so scrolling the rack and turning a knob can never be confused. An armed control wears a green mark — a disc at a knob's centre, a bar down a slider's track — which goes when the pointer leaves it. Clicking a knob again, without having turned it, steps the rate through full, a tenth and a hundredth, which are Rack's own fine and ultra-fine divisors; the disc shrinks to two thirds and then to one third to say which. Turning it returns it to full, and a double click still resets the control to its default.
+
+### Fixed
+- An attenuverter on an output had its cables swept up and remade on every frame. The purge that removes unclaimed cables from a Test Gear output looked only at the single cable an injector holds, and an attenuverter on an output holds one per destination.
+
 ## 2.1.0 — 19 September 2026
 
 ### Added

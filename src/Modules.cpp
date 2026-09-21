@@ -42,6 +42,7 @@ optional and can be switched off per user.
 #include "Busy.hpp"
 #include "Diag.hpp"
 #include "Settings.hpp"
+#include "KnobArm.hpp"
 
 #include "Palette.hpp"
 #include "Dark.hpp"
@@ -109,6 +110,8 @@ struct Options {
 	bool demoPointer = false;
 	/** Rack's own tooltips drawn large and below the control — see Tooltips.cpp. */
 	bool tooltips = false;
+	/** Click a knob to arm it for the wheel — see KnobArm.hpp. */
+	bool knobArm = false;
 };
 
 
@@ -144,6 +147,7 @@ static void clearClarityOptions() {
 	// after the module was deleted.
 	gOpt.demoPointer = false;
 	gOpt.tooltips = false;
+	gOpt.knobArm = false;
 }
 
 static void clearWidgetOptions() {
@@ -178,6 +182,12 @@ struct Clarity : Module {
 		P_KNOB_ARCS,
 		/** Rack's own tooltips, large, high in contrast and below the control. */
 		P_TOOLTIPS,
+		/** WAS "Snap to rows": a whole number of rack rows in the window. Tried and taken out
+		again — Rack moves the view from several places at once and holding it on a boundary meant
+		fighting all of them. The number is kept so patches saved while it existed still load. */
+		P_UNUSED_ROW_SNAP,
+		/** Click a knob to arm it, and the wheel turns that one — see KnobArm.hpp. */
+		P_KNOB_ARM,
 		NUM_PARAMS
 	};
 
@@ -213,6 +223,7 @@ struct Clarity : Module {
 		// It also does what the value pop-up used to — a control's name and value, large, while
 		// it is turned — so that switch is gone.
 		configSwitch(P_TOOLTIPS, 0.f, 1.f, 0.f, "Tooltip readability", {"Off", "On"});
+		configSwitch(P_KNOB_ARM, 0.f, 1.f, 0.f, "Click to arm a knob", {"Off", "On"});
 	}
 
 	/** Copies the params into the flags the overlays read. Called from the widget's step, on
@@ -228,6 +239,7 @@ struct Clarity : Module {
 		gOpt.sliderScroll = params[P_SLIDER_SCROLL].getValue() > 0.5f;
 		gOpt.demoPointer = params[P_ANIMATE_CLICKS].getValue() > 0.5f;
 		gOpt.tooltips = params[P_TOOLTIPS].getValue() > 0.5f;
+		gOpt.knobArm = params[P_KNOB_ARM].getValue() > 0.5f;
 	}
 
 	json_t* dataToJson() override {
@@ -819,7 +831,7 @@ struct DRUIOverlay : widget::TransparentWidget {
 		if (gClarityActive <= 0) {
 			o.jacks = o.knobs = o.cableColor = o.cableFlow = false;
 			o.pinchZoom = o.sliderScroll = o.clickCables = o.trace = false;
-			o.demoPointer = o.tooltips = false;
+			o.demoPointer = o.tooltips = o.knobArm = false;
 		}
 		if (gTestGearActive <= 0)
 			o.scopes = o.widgets = false;
@@ -869,6 +881,10 @@ struct DRUIOverlay : widget::TransparentWidget {
 		// After this frame's events, so a shape claimed during one is seen before it is given
 		// back. See druiCursorStep.
 		druiCursorStep();
+
+		// The view settles after whatever moved it last — a gesture, a resize, this being
+		// switched on. Cheap while off.
+		knobArmStep(o.knobArm);
 
 		if (!o.cableColor && colouredLastFrame) {
 			restoreCableColors();
@@ -1103,8 +1119,60 @@ struct DRUIOverlay : widget::TransparentWidget {
 			for (ModuleWidget* mw : APP->scene->rack->getModules())
 				drawControlsOf(mw, args, o);
 		}
+		drawArmedKnob(args);
 
 		widget::TransparentWidget::draw(args);
+	}
+
+	/** THE GREEN DISC ON AN ARMED CONTROL, and the size of it is the rate.
+
+	Full across the middle of the knob at full rate, two thirds at a tenth, one third at a
+	hundredth — so the rate is read from the size rather than from a number or a colour. The green
+	is the one our buttons light with, which is what says the mark is ours.
+
+	Sized from the knob's own radius, so a 4 HP knob and a big one both get a mark in proportion
+	to themselves. */
+	void drawArmedKnob(const DrawArgs& args) {
+		ParamWidget* pw = knobArmWidget();
+		const float alpha = knobArmAlpha();
+		if (!pw || alpha <= 0.f || !reallyVisible(pw, pw->getAncestorOfType<ModuleWidget>()))
+			return;
+		const int level = math::clamp(knobArmLevel(), 1, 3);
+		const NVGcolor green = nvgRGBAf(0x3d / 255.f, 0xe0 / 255.f, 0x7a / 255.f, 0.85f * alpha);
+
+		// A SLIDER WEARS A BAR DOWN THE MIDDLE of its track, along whichever way it runs. Not on
+		// the handle: a handle is often lit to show the signal passing through, and a mark there
+		// would be read as part of that. One bar, no rate: a slider has a single rate.
+		if (knobArmIsSlider(pw)) {
+			const math::Vec c = centreOf(pw);
+			const bool upright = pw->box.size.y >= pw->box.size.x;
+			const float along = (upright ? pw->box.size.y : pw->box.size.x) - 6.f;
+			const float across = std::fmax(2.f,
+				std::fmin(3.f, (upright ? pw->box.size.x : pw->box.size.y) * 0.25f));
+			if (along <= 2.f)
+				return;
+			nvgBeginPath(args.vg);
+			if (upright)
+				nvgRect(args.vg, c.x - across / 2.f, c.y - along / 2.f, across, along);
+			else
+				nvgRect(args.vg, c.x - along / 2.f, c.y - across / 2.f, along, across);
+			nvgFillColor(args.vg, green);
+			nvgFill(args.vg);
+			return;
+		}
+
+		const float r = std::fmin(pw->box.size.x, pw->box.size.y) / 2.f;
+		if (r <= 1.f)
+			return;
+		// The full mark is a little over half the knob, which sits inside the value arc Knob
+		// clarity draws just inside the rim rather than fighting it.
+		const float full = r * 0.55f;
+		const float scale = (level == 1) ? 1.f : (level == 2) ? (2.f / 3.f) : (1.f / 3.f);
+		const math::Vec c = centreOf(pw);
+		nvgBeginPath(args.vg);
+		nvgCircle(args.vg, c.x, c.y, full * scale);
+		nvgFillColor(args.vg, green);
+		nvgFill(args.vg);
 	}
 
 	/** The flow dashes are drawn here rather than in draw(), because cables are not drawn in
@@ -1549,6 +1617,7 @@ struct ClarityWidget : DRUIWidgetBase {
 			// anything will never touch, and a panel should read in the order it matters.
 			{Clarity::P_ANIMATE_CLICKS, "Animate",      "clicks"},
 			{Clarity::P_TOOLTIPS,       "Tooltip",      "readability"},
+			{Clarity::P_KNOB_ARM,       "Click to arm", "a knob"},
 		};
 		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);

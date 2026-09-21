@@ -25,18 +25,21 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "plugin.hpp"
 
 #include <ui/Slider.hpp>
+#include <ui/TextField.hpp>
 #include <ui/Menu.hpp>
 #include <ui/MenuOverlay.hpp>
 #include <app/ParamWidget.hpp>
 #include <ui/ScrollWidget.hpp>
 #include <app/CableWidget.hpp>
 #include <history.hpp>
+#include <settings.hpp>
 #include <ui/ScrollWidget.hpp>
 #include <app/PortWidget.hpp>
 
 #include "Injector.hpp"
 #include "WidgetAt.hpp"
 #include "Clip.hpp"
+#include "KnobArm.hpp"
 #include "Monitor.hpp"
 #include "Meter.hpp"
 #include "Freq.hpp"
@@ -615,6 +618,52 @@ struct InterceptOverlay : widget::Widget {
 			}
 		}
 
+		// A VERTICAL SCROLL MOVES A WHOLE ROW while Snap to rows is on, rather than sliding the
+		// view off its boundary and being rounded back. Sideways is untouched, and so is a scroll
+		// with a modifier held, which is a zoom.
+		//
+		// WHAT RACK WOULD HAVE DONE WITH IT decides whether we take it: a scroll that would have
+		// zoomed is left to zoom. Rack zooms when Cmd is held, and the other way round for
+		// somebody who has set the wheel to zoom by default — so the same test is made here
+		// rather than assuming a bare wheel.
+		int wheelMods = APP->window->getMods();
+		bool wouldZoom = (wheelMods & RACK_MOD_CTRL) != 0;
+		if (settings::mouseWheelZoom)
+			wouldZoom = !wouldZoom;
+		// AND ONLY WHERE THE SCROLL HAD NOWHERE ELSE TO GO. A wheel over a knob turns it when
+		// Rack is set to do that, a wheel over one of our own instruments is that instrument's,
+		// and a wheel over a menu or a window scrolls it. Taking every vertical scroll for the
+		// view made all three impossible. Reported from testing: knobs stopped answering the
+		// wheel while snapping was on.
+		// AN ARMED CONTROL TAKES THE WHEEL, and only that one. See KnobArm.hpp.
+		if (knobArmEnabled() && !menuIsOpen() && !clipFamilyAt(e.pos)
+			&& !coveredByAWindow(e.pos)) {
+
+			app::ParamWidget* under = widgetAt<app::ParamWidget>(APP->scene, e.pos);
+			if (knobArmScroll(under, e.scrollDelta.y)) {
+				e.consume(this);
+				e.stopPropagating();
+				return;
+			}
+			// AN UNARMED CONTROL DOES NOT TURN. The wheel over one moves the view, exactly as it
+			// does over bare panel — which is the whole point of arming. Taken here rather than
+			// let through, because the control would otherwise take it on the way down.
+			int armMods = APP->window->getMods();
+			bool armZoom = (armMods & RACK_MOD_CTRL) != 0;
+			if (settings::mouseWheelZoom)
+				armZoom = !armZoom;
+			if (under && !armZoom) {
+				// Rack's own panning, done here because the event stops with us.
+				if (app::RackScrollWidget* rs = APP->scene->rackScroll)
+					rs->offset = rs->offset.minus(e.scrollDelta);
+				e.consume(this);
+				e.stopPropagating();
+				return;
+			}
+		}
+
+		const bool onControl = !knobArmEnabled() && settings::knobScroll
+			&& widgetAt<app::ParamWidget>(APP->scene, e.pos) != NULL;
 		if (panSideways(e)) {
 			e.consume(this);
 			e.stopPropagating();
@@ -1178,6 +1227,21 @@ struct InterceptOverlay : widget::Widget {
 			return;
 		}
 
+		// CLICK A CONTROL TO ARM IT for the wheel, and click anything else to put it away.
+		//
+		// ON THE PRESS, and NOT CONSUMED: the press is also the start of a drag, and taking it
+		// would stop knobs being turned by hand. Arming changes nothing but which control the
+		// wheel is for, so a press that turns into a drag having armed it costs nothing — and
+		// turning a control puts its rate back to full anyway.
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
+			&& (e.mods & RACK_MOD_MASK) == 0 && knobArmEnabled() && !menuIsOpen()) {
+			app::ParamWidget* pw = widgetAt<app::ParamWidget>(APP->scene, e.pos);
+			if (pw)
+				knobArmClick(pw);
+			else if (!clipFamilyAt(e.pos))
+				knobArmClickedAway();
+		}
+
 		// A right-click on a jack: Rack is about to open its port menu, and ours is added to it
 		// on the next frame or two. NOT consumed — the port's own menu is the point.
 		//
@@ -1380,6 +1444,7 @@ struct InterceptOverlay : widget::Widget {
 			e.stopPropagating();
 			return;
 		}
+
 		widget::Widget::onHoverKey(e);
 	}
 };

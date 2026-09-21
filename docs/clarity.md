@@ -184,6 +184,18 @@ Pinching with the pointer over an analyser zooms that analyser's frequency axis 
 
 ---
 
+## Click to arm a knob
+
+Off by default. With it on, the mouse wheel turns a control only after you have clicked that control; everywhere else the wheel moves the view. Scrolling the rack and turning a knob are then two different gestures rather than one gesture that depends on where the pointer happened to land.
+
+- **Click a control to arm it.** A knob shows a green disc at its centre; a slider shows a green bar down the middle of its track, never on the handle, which is often lit to show the signal passing through.
+- **The wheel turns the armed control**, and nothing else answers the wheel.
+- **Moving the pointer off the control disarms it**, and the mark fades over a quarter of a second.
+- **Clicking an armed knob again, without having turned it, makes it finer**: full rate, then a tenth, then a hundredth, then back to full. Those are the same divisors Rack gives for Cmd and Cmd with Shift. The disc shrinks to two thirds and then to one third to say which rate is set.
+- **Turning it puts the rate back to full**, so a click after scrolling is always the coarse rate again.
+- **A double click still resets the control** to its default, and does not change the rate.
+- **A slider has one rate**, so clicking it again does nothing.
+
 ## Animate clicks
 
 Draws a pointer into the rack, marking clicks, drags and scrolling. A screen recorder captures the window's contents and not the system's cursor, so without this a recording shows controls moving with nothing touching them.

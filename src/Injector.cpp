@@ -2039,10 +2039,24 @@ void injectorPurgeStrayCables() {
 		bool owned = false;
 		for (widget::Widget* child : APP->scene->rack->children) {
 			InjectorWidget* inj = dynamic_cast<InjectorWidget*>(child);
-			if (inj && inj->cable == cw) {
+			if (!inj)
+				continue;
+			if (inj->cable == cw) {
 				owned = true;
 				break;
 			}
+			// AND THE ATTENUVERTER'S OWN CABLES. On an output it lays one into every input that
+			// output feeds, and keeps them in `outCables` rather than in `cable` — which this
+			// did not look at, so every one of them was swept up as unowned and made again on
+			// the next frame, for as long as the attenuverter was there.
+			for (WeakPtr<app::CableWidget>& w : inj->outCables) {
+				if (w == cw) {
+					owned = true;
+					break;
+				}
+			}
+			if (owned)
+				break;
 		}
 		if (!owned)
 			strays.push_back(cw);
