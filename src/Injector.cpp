@@ -925,6 +925,7 @@ struct InjectorWidget : ClipWidget {
 			sized = true;
 		}
 		followPort();
+		dwellStep();
 		// Rack hides the plugs on creation, but a cable rebuilds them when its ports change,
 		// so this keeps them hidden rather than assuming they stayed that way.
 		if (cable)
@@ -1343,6 +1344,8 @@ struct InjectorWidget : ClipWidget {
 
 	void onHoverScroll(const HoverScrollEvent& e) override {
 		if (e.scrollDelta.y == 0.f || slot < 0 || !isReadout())
+			return;
+		if (!acceptScroll())
 			return;
 
 		// A semitone is a large step compared with a hundredth of a volt, so notes need nine

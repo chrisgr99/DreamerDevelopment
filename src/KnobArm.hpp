@@ -29,14 +29,23 @@ void knobArmStep(bool enabled);
 /** Whether the feature is on right now. */
 bool knobArmEnabled();
 
+/** Whether this control can be armed at all: a knob, a slider or a stepped control, never a button
+or a switch. */
+bool knobArmAccepts(app::ParamWidget* pw);
+
+/** A parameter control that is neither a knob nor a button: a numbered plate, a lamp column. */
+bool knobArmIsStepped(app::ParamWidget* pw);
+
 /** A click that did not travel, on this control. True if it armed or stepped it. */
 bool knobArmClick(app::ParamWidget* pw);
 
 /** A click on something that is not a control: puts the armed one away. */
 void knobArmClickedAway();
 
-/** A wheel over this point. True if an armed control took it. */
-bool knobArmScroll(app::ParamWidget* under, float dy);
+/** What happened to a wheel over this point: nothing of ours, adjusted here, or — for an armed
+stepped control — to be let through so the control steps itself. */
+enum { ARM_NONE, ARM_TAKEN, ARM_PASS };
+int knobArmScroll(app::ParamWidget* under, float dy);
 
 /** Whether this control is a slider, which is marked with a bar rather than a disc and has one
 rate. */

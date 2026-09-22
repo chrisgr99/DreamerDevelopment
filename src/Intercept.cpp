@@ -640,11 +640,15 @@ struct InterceptOverlay : widget::Widget {
 			&& !coveredByAWindow(e.pos)) {
 
 			app::ParamWidget* under = widgetAt<app::ParamWidget>(APP->scene, e.pos);
-			if (knobArmScroll(under, e.scrollDelta.y)) {
+			const int armed = knobArmScroll(under, e.scrollDelta.y);
+			if (armed == ARM_TAKEN) {
 				e.consume(this);
 				e.stopPropagating();
 				return;
 			}
+			// An armed stepped control steps itself: the wheel goes on to it untouched.
+			if (armed == ARM_PASS)
+				return;
 			// AN UNARMED CONTROL DOES NOT TURN. The wheel over one moves the view, exactly as it
 			// does over bare panel — which is the whole point of arming. Taken here rather than
 			// let through, because the control would otherwise take it on the way down.
@@ -652,7 +656,10 @@ struct InterceptOverlay : widget::Widget {
 			bool armZoom = (armMods & RACK_MOD_CTRL) != 0;
 			if (settings::mouseWheelZoom)
 				armZoom = !armZoom;
-			if (under && !armZoom) {
+			// ONLY A KNOB OR A SLIDER IS HELD BACK. A control that is not continuous — a button, a
+			// switch, a selector that steps — does not need arming, and one that answers the wheel
+			// in its own way keeps it.
+			if (knobArmAccepts(under) && !armZoom) {
 				// Rack's own panning, done here because the event stops with us.
 				if (app::RackScrollWidget* rs = APP->scene->rackScroll)
 					rs->offset = rs->offset.minus(e.scrollDelta);
@@ -1235,8 +1242,10 @@ struct InterceptOverlay : widget::Widget {
 		// turning a control puts its rate back to full anyway.
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& (e.mods & RACK_MOD_MASK) == 0 && knobArmEnabled() && !menuIsOpen()) {
+			// A KNOB OR A SLIDER ARMS. Anything else — a button, a switch, bare panel — puts away
+			// whatever was armed, since the click was plainly about something else.
 			app::ParamWidget* pw = widgetAt<app::ParamWidget>(APP->scene, e.pos);
-			if (pw)
+			if (knobArmAccepts(pw))
 				knobArmClick(pw);
 			else if (!clipFamilyAt(e.pos))
 				knobArmClickedAway();

@@ -421,6 +421,7 @@ struct ScopeWidget : ClipWidget {
 	void step() override {
 		// Anchored to the port, not to the screen, so the scope follows if the module moves.
 		followPort();
+		dwellStep();
 
 		// If the trigger source has gone — its module deleted — fall back to triggering on the
 		// scope's own signal rather than sitting there never triggering.
@@ -1708,6 +1709,12 @@ struct ScopeWidget : ClipWidget {
 		return frozen ? FRAME_PAUSED : FRAME_RUN;
 	}
 
+	math::Rect wheelRect() override {
+		if (minimized)
+			return box.zeroPos();
+		return math::Rect(0.f, 0.f, faceWidth, faceHeight);
+	}
+
 	bool onVisiblePart(math::Vec p) override {
 		if (minimized)
 			return true;
@@ -1724,7 +1731,7 @@ struct ScopeWidget : ClipWidget {
 			return;
 		}
 		updateTooltip(e.pos);
-		showGrips();
+		showGripsAfterDelay();
 		OpaqueWidget::onHover(e);
 	}
 
@@ -1952,6 +1959,8 @@ struct ScopeWidget : ClipWidget {
 
 	void onHoverScroll(const HoverScrollEvent& e) override {
 		if (!onVisiblePart(e.pos))
+			return;
+		if (!acceptScroll())
 			return;
 		const math::Vec delta = scrollDeltaFor(e);
 

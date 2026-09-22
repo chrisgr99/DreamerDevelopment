@@ -1127,8 +1127,26 @@ struct DRUIOverlay : widget::TransparentWidget {
 				drawControlsOf(mw, args, o);
 		}
 		drawArmedKnob(args);
+		drawWheelReady(args);
 
 		widget::TransparentWidget::draw(args);
+	}
+
+	/** A THIN GREEN OUTLINE round a Test Gear widget that will now take the wheel: the pointer
+	has rested on it for half a second. See ClipWidget::acceptScroll. */
+	void drawWheelReady(const DrawArgs& args) {
+		for (widget::Widget* child : APP->scene->rack->children) {
+			ClipWidget* clip = dynamic_cast<ClipWidget*>(child);
+			if (!clip || !clip->isVisible() || !clip->dwellReady())
+				continue;
+			const math::Rect r = clip->wheelRect();
+			const math::Vec at = clip->getRelativeOffset(r.pos, APP->scene->rack);
+			nvgBeginPath(args.vg);
+			nvgRoundedRect(args.vg, at.x - 2.f, at.y - 2.f, r.size.x + 4.f, r.size.y + 4.f, 2.f);
+			nvgStrokeColor(args.vg, nvgRGBAf(0x3d / 255.f, 0xe0 / 255.f, 0x7a / 255.f, 0.85f));
+			nvgStrokeWidth(args.vg, 1.f);
+			nvgStroke(args.vg);
+		}
 	}
 
 	/** THE GREEN DISC ON AN ARMED CONTROL, and the size of it is the rate.
@@ -1146,6 +1164,20 @@ struct DRUIOverlay : widget::TransparentWidget {
 			return;
 		const int level = math::clamp(knobArmLevel(), 1, 3);
 		const NVGcolor green = nvgRGBAf(0x3d / 255.f, 0xe0 / 255.f, 0x7a / 255.f, 0.85f * alpha);
+
+		// A STEPPED CONTROL IS OUTLINED, not marked in the middle: its middle is the number it
+		// shows, and a disc there would hide the very thing being set.
+		if (knobArmIsStepped(pw)) {
+			const math::Vec c = centreOf(pw);
+			const math::Vec half = pw->box.size.div(2.f);
+			nvgBeginPath(args.vg);
+			nvgRoundedRect(args.vg, c.x - half.x - 1.5f, c.y - half.y - 1.5f,
+				pw->box.size.x + 3.f, pw->box.size.y + 3.f, 2.f);
+			nvgStrokeColor(args.vg, green);
+			nvgStrokeWidth(args.vg, 1.5f);
+			nvgStroke(args.vg);
+			return;
+		}
 
 		// A SLIDER WEARS A BAR DOWN THE MIDDLE of its track, along whichever way it runs. Not on
 		// the handle: a handle is often lit to show the signal passing through, and a mark there

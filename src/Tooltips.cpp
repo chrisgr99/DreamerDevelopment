@@ -17,6 +17,10 @@ when this one moves it; after, its step puts it back — so it is moved again in
 which comes before the tooltip's own draw in that order. Either way Rack's is never drawn where
 it can be seen, and nothing has to fight over being the scene's last child.
 */
+// Before Rack's headers, whose Rect would otherwise clash with the system's.
+#if defined(__APPLE__)
+#include <CoreFoundation/CoreFoundation.h>
+#endif
 #include "plugin.hpp"
 #include "Settings.hpp"
 
@@ -24,6 +28,28 @@ it can be seen, and nothing has to fight over being the scene's last child.
 
 #include <cctype>
 #include <vector>
+
+
+/** HOW LARGE THE SYSTEM DRAWS THE POINTER, as a multiple of its normal size. macOS lets the
+pointer be enlarged in its accessibility settings, and the tooltip has to clear the tail of the
+pointer as it is actually drawn. Read when a tooltip appears, so a change takes effect at the
+next one. Elsewhere, 1. */
+static float pointerScale() {
+#ifdef ARCH_MAC
+	CFStringRef app = CFSTR("com.apple.universalaccess");
+	CFPreferencesAppSynchronize(app);
+	CFPropertyListRef v = CFPreferencesCopyAppValue(CFSTR("mouseDriverCursorSize"), app);
+	float scale = 1.f;
+	if (v) {
+		if (CFGetTypeID(v) == CFNumberGetTypeID())
+			CFNumberGetValue((CFNumberRef) v, kCFNumberFloatType, &scale);
+		CFRelease(v);
+	}
+	return math::clamp(scale, 1.f, 4.f);
+#else
+	return 1.f;
+#endif
+}
 
 
 struct TooltipReadabilityOverlay : widget::Widget {
@@ -48,9 +74,13 @@ struct TooltipReadabilityOverlay : widget::Widget {
 	then holds, until the pointer moves to another control. */
 	float widest = 0.f;
 	float tallest = 0.f;
+	/** How far below the pointer's tip its tail reaches, in the scene's units. */
+	float tailBelow = 24.f;
 
 	static constexpr double FADE_IN = 0.5;
 	static constexpr double FADE_OUT = 0.25;
+	/** The margin between the letters and the frame, at Rack's own size. */
+	static constexpr float PAD = 1.25f;
 
 	void step() override {
 		widget::Widget::step();
@@ -74,6 +104,11 @@ struct TooltipReadabilityOverlay : widget::Widget {
 				shownAt = now;
 				hiddenAt = -1.0;
 				widest = tallest = 0.f;
+				// The arrow reaches about 16 points below its tip at the normal size. A scene unit
+				// is a point unless Rack's own interface scale is changed.
+				const float pointsPerUnit = (APP->window && APP->window->windowRatio > 0.f)
+					? APP->window->pixelRatio / APP->window->windowRatio : 1.f;
+				tailBelow = 16.f * pointerScale() / (pointsPerUnit > 0.f ? pointsPerUnit : 1.f);
 				widestWhole.clear();
 				widestFrac.clear();
 				linePrefix.clear();
@@ -174,8 +209,14 @@ struct TooltipReadabilityOverlay : widget::Widget {
 		float h = 0.f;
 		/** The width a line of words was measured wrapping at, and so must be drawn wrapping at. */
 		float wrapW = 0.f;
+		/** Where the line's last row starts, down from the line's top. */
+		float lastRowTop = 0.f;
 	};
 	std::vector<Line> lines;
+	/** HOW FAR BELOW THE LINE'S TOP THE LETTERS BEGIN. Text set from the top of its line is set
+	from the font's ascender, which leaves room above the capitals for accents; the box starts at
+	the capitals instead. */
+	float inkTop = 0.f;
 	/** THE WIDEST EACH LINE'S NUMBER HAS BEEN, by line, for as long as the pointer stays on one
 	control and the words before the number stay the same. */
 	std::vector<float> widestWhole, widestFrac;
@@ -204,13 +245,25 @@ struct TooltipReadabilityOverlay : widget::Widget {
 		const float size = 13.f * scale;
 		// A THIN MARGIN, so the frame sits close around the words and covers as little as
 		// possible of what is behind it.
-		const float pad = 2.5f * scale;
+		const float pad = PAD * scale;
 		const float maxW = std::min(420.f * scale, box.size.x * 0.6f);
 
 		nvgFontFaceId(args.vg, font->handle);
 		nvgFontSize(args.vg, size);
 		nvgTextLineHeight(args.vg, 1.2f);
 		nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+		float ascender = 0.f, descender = 0.f, fontLineH = 0.f;
+		nvgTextMetrics(args.vg, &ascender, &descender, &fontLineH);
+		// The capitals and the tall lower-case letters reach this far above the baseline, in
+		// DejaVu Sans. In ems, not in the font size: the font is scaled so that its ascender and
+		// descender together are the size, and DejaVu's span 1.164 ems.
+		const float em = (ascender - descender) / 1.164f;
+		const float capTop = 0.76f * em;
+		// THE FOOT OF THE FRAME CROSSES THE TAILS of g, p and y, which reach 0.24 em below the
+		// baseline, rather than leaving room under them that most lines never use. The margin is
+		// taken off so the foot is here whatever the margin.
+		const float tailBottom = 0.15f * em - pad;
+		inkTop = std::max(0.f, ascender - capTop);
 
 		// EVERY LINE IN TURN: one with a number in it is laid out in parts, and one without is
 		// wrapped as Rack's own would be.
@@ -255,29 +308,35 @@ struct TooltipReadabilityOverlay : widget::Widget {
 				contentW = std::max(contentW, bounds[2]);
 				ln.wrapW = maxW;
 				ln.h = bounds[3] - bounds[1];
+				// The measure runs to the last row's descender, a row's full height below its top.
+				ln.lastRowTop = std::max(0.f, ln.h - (ascender - descender));
 			}
 			else {
 				ln.h = lineH;
 			}
-			contentH += ln.h;
 			lines.push_back(ln);
-			if (br == std::string::npos)
+			if (br == std::string::npos) {
+				// THE LAST LINE ENDS AT ITS TAILS, not at the foot of its line.
+				contentH += ln.lastRowTop + ascender + tailBottom - inkTop;
 				break;
+			}
+			contentH += ln.h;
 			at0 = br + 1;
 		}
 		widest = std::max(widest, contentW + 2.f * pad);
 		tallest = std::max(tallest, contentH + 2.f * pad);
 		const float w = widest, h = tallest;
 
-		// CENTRED UNDER THE CONTROL, and no further down than just under the pointer's tail. On a
-		// knob that is directly beneath the knob; on a tall slider, whose foot can be a long way
-		// below the hand, it is beside the pointer instead, where the eye already is. The top
-		// edge slightly overlaps the tail of the arrow, which is about eighteen pixels long.
+		// CENTRED UNDER THE CONTROL and just below the tail of the pointer, which would otherwise
+		// cover its first line. Under the pointer rather than under the control: a tall slider's
+		// foot can be a long way below the hand, and the eye is where the pointer is.
 		const math::Vec mouse = APP->scene->mousePos;
-		math::Vec at = mouse.plus(math::Vec(-w / 2.f, 14.f));
+		// Slightly over the tail, so the box reads as belonging to the pointer.
+		const float underTail = mouse.y + tailBelow - 1.5f;
+		math::Vec at = math::Vec(mouse.x - w / 2.f, underTail);
 		if (haveAnchor) {
 			at.x = anchor.pos.x + anchor.size.x / 2.f - w / 2.f;
-			at.y = std::min(anchor.pos.y + anchor.size.y + 2.f, mouse.y + 14.f);
+			at.y = underTail;
 			// NO ROOM BELOW: directly above the control, never on top of it.
 			if (at.y + h > box.size.y - 2.f)
 				at.y = anchor.pos.y - h - 2.f;
@@ -299,23 +358,24 @@ struct TooltipReadabilityOverlay : widget::Widget {
 			return;
 		const float scale = settingsTooltipScale();
 		const bool classic = settingsTooltipClassic();
-		const float pad = 2.5f * scale;
+		const float pad = PAD * scale;
 		nvgSave(args.vg);
 		nvgGlobalAlpha(args.vg, alpha);
 		nvgBeginPath(args.vg);
 		// SLIGHTLY ROUNDED, with a thin light frame on the black, which marks the box off from a
 		// dark panel behind it.
-		nvgRoundedRect(args.vg, r.pos.x, r.pos.y, r.size.x, r.size.y, 3.f * scale);
+		nvgRoundedRect(args.vg, r.pos.x, r.pos.y, r.size.x, r.size.y, 1.5f * scale);
 		nvgFillColor(args.vg, classic ? nvgRGB(0xff, 0xff, 0xe1) : nvgRGB(0x00, 0x00, 0x00));
 		nvgFill(args.vg);
 		nvgStrokeColor(args.vg, classic ? nvgRGB(0x76, 0x76, 0x76) : nvgRGB(0xc8, 0xc8, 0xc8));
-		nvgStrokeWidth(args.vg, 1.f);
+		// Half a unit, which is one pixel on a high-density screen.
+		nvgStrokeWidth(args.vg, 0.5f);
 		nvgStroke(args.vg);
 		nvgFontFaceId(args.vg, font->handle);
 		nvgFontSize(args.vg, 13.f * scale);
 		nvgTextLineHeight(args.vg, 1.2f);
 		nvgFillColor(args.vg, classic ? nvgRGB(0x00, 0x00, 0x00) : nvgRGB(0xff, 0xff, 0xff));
-		float y = r.pos.y + pad;
+		float y = r.pos.y + pad - inkTop;
 		const float x = r.pos.x + pad;
 		for (const Line& ln : lines) {
 			nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);

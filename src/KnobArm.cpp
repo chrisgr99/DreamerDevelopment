@@ -4,6 +4,8 @@
 
 #include <app/ModuleWidget.hpp>
 #include <app/SliderKnob.hpp>
+#include <app/Knob.hpp>
+#include <app/Switch.hpp>
 #include <settings.hpp>
 #include <cmath>
 
@@ -93,8 +95,29 @@ void knobArmStep(bool enabled) {
 }
 
 
+/** ONLY WHAT TURNS. A knob, or a slider — Rack builds its sliders as a kind of knob, so one test
+covers both. A button, a toggle or a rotary switch is a ParamWidget as well, but nothing about it
+is continuous, and arming one put the green disc on a push button, which said the wheel would turn
+it. Reported from testing. */
+bool knobArmAccepts(app::ParamWidget* pw) {
+	if (!pw || !pw->getParamQuantity())
+		return false;
+	return dynamic_cast<app::Knob*>(pw) != NULL || knobArmIsStepped(pw);
+}
+
+
+/** A STEPPED CONTROL: a parameter control that is neither a knob nor a button — a numbered plate,
+a column of lamps. It answers the wheel in whole steps of its own, so it is armed like a knob but
+does its own stepping, and it has one rate, since a step is already as fine as it goes. Found by
+what it is not, which is what lets this reach the plates on another maker's panel as well as ours. */
+bool knobArmIsStepped(app::ParamWidget* pw) {
+	return pw && pw->getParamQuantity() && dynamic_cast<app::Knob*>(pw) == NULL
+		&& dynamic_cast<app::Switch*>(pw) == NULL;
+}
+
+
 bool knobArmClick(app::ParamWidget* pw) {
-	if (!gEnabled || !pw || !pw->getParamQuantity())
+	if (!gEnabled || !knobArmAccepts(pw))
 		return false;
 	const double t = now();
 	if (gArmed == pw) {
@@ -107,7 +130,8 @@ bool knobArmClick(app::ParamWidget* pw) {
 		// A SLIDER HAS ONE RATE. Its mark is a bar down the middle of the track with nothing to
 		// vary, so clicking it again says nothing — and a double click still reaches Rack, which
 		// puts the control back to its default.
-		gLevel = (doubleClick || gTurned || knobArmIsSlider(pw)) ? 1 : (gLevel % 3) + 1;
+		gLevel = (doubleClick || gTurned || knobArmIsSlider(pw) || knobArmIsStepped(pw))
+			? 1 : (gLevel % 3) + 1;
 		gTurned = false;
 		gSnapAcc = 0.f;
 		return true;
@@ -128,16 +152,21 @@ void knobArmClickedAway() {
 }
 
 
-bool knobArmScroll(app::ParamWidget* under, float dy) {
+int knobArmScroll(app::ParamWidget* under, float dy) {
 	if (!gEnabled || !gArmed || dy == 0.f)
-		return false;
+		return ARM_NONE;
 	// THE POINTER HAS TO BE ON IT. Arming says which control the wheel is for; it does not follow
 	// the wheel around the rack.
 	if (under != gArmed.get())
-		return false;
+		return ARM_NONE;
+	// A stepped control steps itself: the wheel is let through to it.
+	if (knobArmIsStepped(under)) {
+		gTurned = true;
+		return ARM_PASS;
+	}
 	engine::ParamQuantity* pq = gArmed->getParamQuantity();
 	if (!pq)
-		return false;
+		return ARM_NONE;
 
 	// Rack's own arithmetic for a wheel over a knob: the sensitivity setting, the parameter's
 	// range, and the rate this control is set to.
@@ -152,7 +181,7 @@ bool knobArmScroll(app::ParamWidget* under, float dy) {
 	if (delta != 0.f)
 		pq->setValue(pq->getValue() + delta);
 	gTurned = true;
-	return true;
+	return ARM_TAKEN;
 }
 
 

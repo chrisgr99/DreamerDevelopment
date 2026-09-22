@@ -173,6 +173,7 @@ struct AnalyserWidget : ClipWidget {
 
 	void step() override {
 		followPort();
+		dwellStep();
 		analyse();
 		ClipWidget::step();
 	}
@@ -548,6 +549,8 @@ struct AnalyserWidget : ClipWidget {
 	double lastScrollTime = 0.0;
 
 	void onHoverScroll(const HoverScrollEvent& e) override {
+		if (!acceptScroll())
+			return;
 		math::Vec delta = e.scrollDelta;
 #if !defined ARCH_MAC
 		if ((APP->window->getMods() & RACK_MOD_MASK) & GLFW_MOD_SHIFT)
@@ -583,7 +586,7 @@ struct AnalyserWidget : ClipWidget {
 			return;
 		}
 		updateTooltip(e.pos);
-		showGrips();
+		showGripsAfterDelay();
 		widget::OpaqueWidget::onHover(e);
 	}
 

@@ -139,6 +139,16 @@ struct ClipWidget : widget::OpaqueWidget {
 		gripsUntil = system::getTime() + 1.0;
 	}
 
+	/** When the pointer came onto the clip, or below zero while it is off. Set by dwellStep. */
+	double hoverSince = -1.0;
+
+	/** THE HANDLES WAIT HALF A SECOND before they first appear, so a pointer carried across the
+	clip by a scroll of the view does not flash them. Once shown they linger as before. */
+	void showGripsAfterDelay() {
+		if (gripsShowing() || (hoverSince >= 0.0 && system::getTime() - hoverSince >= 0.5))
+			showGrips();
+	}
+
 	bool gripsShowing() {
 		return visible && resizableNow() && !following && !retargeting
 			&& system::getTime() < gripsUntil;
@@ -178,6 +188,75 @@ struct ClipWidget : widget::OpaqueWidget {
 	leaves empty rack inside it. Clicks there belong to whatever is underneath. */
 	virtual bool onVisiblePart(math::Vec p) {
 		(void) p;
+		return true;
+	}
+
+	/** THE WHEEL WAITS FOR A STILL POINTER. A view scrolled past a clip, or a pointer on its way
+	across one, would otherwise have the wheel taken by the clip it happened to cross. A clip
+	answers the wheel only once the pointer has rested on it, relative to the clip, for half a
+	second;
+	until then the wheel scrolls the view. Once the wheel has been taken it stays taken while the
+	scrolling goes on, and a pause of half a second or a move off the clip ends it. */
+	math::Vec dwellAt;
+	double dwellSince = -1.0;
+	double wheelLast = -1.0;
+
+	/** Where the pointer is in this clip's own coordinates, or false if it is not on the clip. */
+	bool pointerHere(math::Vec* local) {
+		widget::Widget* rackWidget = APP->scene->rack;
+		if (!rackWidget || !parent)
+			return false;
+		const float rackZoom = rackWidget->getAbsoluteZoom();
+		const math::Vec mouse = APP->scene->mousePos
+			.minus(rackWidget->getAbsoluteOffset(math::Vec(0.f, 0.f)))
+			.div(rackZoom > 0.f ? rackZoom : 1.f);
+		const math::Vec at = mouse.minus(getRelativeOffset(math::Vec(0.f, 0.f), rackWidget));
+		*local = at;
+		return visible && box.zeroPos().contains(at) && onVisiblePart(at);
+	}
+
+	/** Tracks the pointer's rest. Call from step(). */
+	void dwellStep() {
+		const double now = system::getTime();
+		math::Vec at;
+		if (!pointerHere(&at)) {
+			dwellSince = -1.0;
+			wheelLast = -1.0;
+			hoverSince = -1.0;
+			return;
+		}
+		if (hoverSince < 0.0)
+			hoverSince = now;
+		// Hover events come only when the pointer moves, so a pointer that stops on the clip
+		// before the half second is up would otherwise never bring the handles.
+		if (!following && now - hoverSince >= 0.5)
+			showGrips();
+		if (wheelLast >= 0.0 && now - wheelLast < 0.5)
+			return;
+		wheelLast = -1.0;
+		if (dwellSince < 0.0 || at.minus(dwellAt).norm() > 2.f) {
+			dwellAt = at;
+			dwellSince = now;
+		}
+	}
+
+	bool dwellReady() {
+		const double now = system::getTime();
+		if (wheelLast >= 0.0 && now - wheelLast < 0.5)
+			return true;
+		return dwellSince >= 0.0 && now - dwellSince >= 0.5;
+	}
+
+	/** The part the ready outline goes round. */
+	virtual math::Rect wheelRect() {
+		return box.zeroPos();
+	}
+
+	/** Call at the top of onHoverScroll: false means leave the wheel to the view. */
+	bool acceptScroll() {
+		if (!dwellReady())
+			return false;
+		wheelLast = system::getTime();
 		return true;
 	}
 

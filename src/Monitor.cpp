@@ -203,6 +203,7 @@ struct MonitorWidget : ClipWidget {
 
 	void step() override {
 		followPort();
+		dwellStep();
 		ClipWidget::step();
 	}
 
@@ -252,6 +253,8 @@ struct MonitorWidget : ClipWidget {
 	sources against each other, coarse enough to cross the useful range in a short glide. */
 	void onHoverScroll(const HoverScrollEvent& e) override {
 		if (slot < 0)
+			return;
+		if (!acceptScroll())
 			return;
 		setLevelDb(levelDb() + ((e.scrollDelta.y > 0.f) ? 1.5f : -1.5f));
 		e.consume(this);
