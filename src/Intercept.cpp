@@ -470,10 +470,44 @@ struct InterceptOverlay : widget::Widget {
 		scroll->offset = scroll->offset.plus(push.div(margin).mult(speed));
 	}
 
+	/** KEEPS A MENU INSIDE THE WINDOW. A menu opened near the foot of the window can hang off the
+	bottom of it, and the only way to the items down there is to move the view. Any menu whose foot
+	is below the window is lifted until it fits; one taller than the window starts at the top, and
+	Rack's own scrolling of a long menu is untouched.
+
+	Done here because this overlay is the scene's last child and is stepped after the menus, so
+	what it sets is what is drawn. */
+	void keepMenusInside(widget::Widget* parent, float height) {
+		for (widget::Widget* child : parent->children) {
+			ui::Menu* menu = dynamic_cast<ui::Menu*>(child);
+			if (!menu)
+				continue;
+			const float top = menu->getAbsoluteOffset(math::Vec()).y;
+			const float foot = top + menu->box.size.y;
+			float lift = 0.f;
+			if (foot > height - 2.f)
+				lift = height - 2.f - foot;
+			if (top + lift < 2.f)
+				lift = 2.f - top;
+			if (lift != 0.f)
+				menu->box.pos.y += lift;
+			keepMenusInside(menu, height);
+		}
+	}
+
 	void step() override {
 		// Cover the scene, or the event system will not offer us events outside our box.
 		if (parent)
 			box.size = parent->box.size;
+
+		if (APP->scene) {
+			const float height = APP->scene->box.size.y;
+			for (widget::Widget* child : APP->scene->children) {
+				ui::MenuOverlay* over = dynamic_cast<ui::MenuOverlay*>(child);
+				if (over && over->isVisible())
+					keepMenusInside(over, height);
+			}
+		}
 
 		// WHETHER A BUTTON IS ACTUALLY DOWN, asked of the window rather than counted from
 		// events.
