@@ -2,6 +2,22 @@
 
 Newest first.
 
+## 2.1.2 — 22 September 2026
+
+### Added
+- Tooltip readability can show the tooltip above the pointer instead of below it. The choice is in Clarity's right-click menu.
+- Click to enable adjust knobs also covers stepped controls, such as numbered readouts. An armed one is outlined in green.
+- Test Gear widgets take the scroll wheel only after the pointer has rested on them for half a second, shown by a green outline. Until then the wheel scrolls the view.
+
+### Changed
+- Click to arm a knob is renamed Click to enable adjust knobs.
+- Tooltip readability frames are smaller, with a thinner border.
+- Tooltips below the pointer sit just below its tail, whatever size the pointer is.
+- The scope and analyser resize handles appear after the pointer has been on the widget for half a second.
+
+### Fixed
+- With Click to enable adjust knobs on, only controls the scroll wheel adjusts need a click first. Buttons, switches and radio buttons work on the first click, without showing the green disc.
+
 ## 2.1.1 — 21 September 2026
 
 ### Added
