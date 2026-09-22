@@ -42,6 +42,7 @@ optional and can be switched off per user.
 #include "Busy.hpp"
 #include "Diag.hpp"
 #include "Settings.hpp"
+#include "RowView.hpp"
 #include "KnobArm.hpp"
 
 #include "Palette.hpp"
@@ -112,6 +113,8 @@ struct Options {
 	bool tooltips = false;
 	/** Click a knob to arm it for the wheel — see KnobArm.hpp. */
 	bool knobArm = false;
+	/** Whole rack rows in the window — see RowView.hpp. */
+	bool rowView = false;
 };
 
 
@@ -148,6 +151,7 @@ static void clearClarityOptions() {
 	gOpt.demoPointer = false;
 	gOpt.tooltips = false;
 	gOpt.knobArm = false;
+	gOpt.rowView = false;
 }
 
 static void clearWidgetOptions() {
@@ -182,10 +186,8 @@ struct Clarity : Module {
 		P_KNOB_ARCS,
 		/** Rack's own tooltips, large, high in contrast and below the control. */
 		P_TOOLTIPS,
-		/** WAS "Snap to rows": a whole number of rack rows in the window. Tried and taken out
-		again — Rack moves the view from several places at once and holding it on a boundary meant
-		fighting all of them. The number is kept so patches saved while it existed still load. */
-		P_UNUSED_ROW_SNAP,
+		/** A chosen number of whole rack rows in the window — see RowView.hpp. */
+		P_ROW_VIEW,
 		/** Click a knob to arm it, and the wheel turns that one — see KnobArm.hpp. */
 		P_KNOB_ARM,
 		NUM_PARAMS
@@ -224,6 +226,7 @@ struct Clarity : Module {
 		// it is turned — so that switch is gone.
 		configSwitch(P_TOOLTIPS, 0.f, 1.f, 0.f, "Tooltip readability", {"Off", "On"});
 		configSwitch(P_KNOB_ARM, 0.f, 1.f, 0.f, "Click to enable adjust knobs", {"Off", "On"});
+		configSwitch(P_ROW_VIEW, 0.f, 1.f, 0.f, "Whole rows in the window", {"Off", "On"});
 	}
 
 	/** Copies the params into the flags the overlays read. Called from the widget's step, on
@@ -242,6 +245,7 @@ struct Clarity : Module {
 		// SET UP FOR IT OR NOT. With Rack's own wheel-turns-knobs off, the wheel never turns a
 		// knob, so arming governs nothing and is held off — the button is greyed to say so.
 		gOpt.knobArm = settings::knobScroll && params[P_KNOB_ARM].getValue() > 0.5f;
+		gOpt.rowView = params[P_ROW_VIEW].getValue() > 0.5f;
 	}
 
 	json_t* dataToJson() override {
@@ -1691,6 +1695,7 @@ struct ClarityWidget : DRUIWidgetBase {
 			{Clarity::P_ANIMATE_CLICKS, "Animate",      "clicks"},
 			{Clarity::P_TOOLTIPS,       "Tooltip",      "readability"},
 			{Clarity::P_KNOB_ARM,       "Click to enable", "adjust knobs"},
+			{Clarity::P_ROW_VIEW,       "Whole rows",   "in the window"},
 		};
 		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
@@ -1747,6 +1752,7 @@ struct ClarityWidget : DRUIWidgetBase {
 		// here every frame. Without this the buttons moved and nothing else did.
 		if (active)
 			m->syncOptions();
+		rowViewStep(active && gOpt.rowView);
 		installOverlays();
 		ModuleWidget::step();
 	}
@@ -1807,6 +1813,15 @@ struct ClarityWidget : DRUIWidgetBase {
 				sub->addChild(createCheckMenuItem("Light yellow", "",
 					[]() { return settingsTooltipClassic(); },
 					[]() { settingsSetTooltipClassic(true); }));
+			}));
+		menu->addChild(createSubmenuItem("Whole rows in the window",
+			string::f("%d", settingsRowViewRows()), [](Menu* sub) {
+				for (int n = 1; n <= 5; n++) {
+					sub->addChild(createCheckMenuItem(
+						n == 1 ? "1 row" : string::f("%d rows", n), "",
+						[=]() { return settingsRowViewRows() == n; },
+						[=]() { settingsSetRowViewRows(n); }));
+				}
 			}));
 		menu->addChild(createSubmenuItem("Tooltip readability position",
 			settingsTooltipAbove() ? "Above the pointer" : "Below the pointer", [](Menu* sub) {

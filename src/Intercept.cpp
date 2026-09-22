@@ -40,6 +40,7 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "WidgetAt.hpp"
 #include "Clip.hpp"
 #include "KnobArm.hpp"
+#include "RowView.hpp"
 #include "Monitor.hpp"
 #include "Meter.hpp"
 #include "Freq.hpp"
@@ -671,6 +672,16 @@ struct InterceptOverlay : widget::Widget {
 
 		const bool onControl = !knobArmEnabled() && settings::knobScroll
 			&& widgetAt<app::ParamWidget>(APP->scene, e.pos) != NULL;
+		// WHOLE ROWS: the wheel walks the view a row at a time — see RowView.hpp. Not over a
+		// menu, a window or one of our own instruments, and not over a control the wheel is
+		// meant to turn, all of which keep the wheel as they had it.
+		if (rowViewOn() && !onControl && !menuIsOpen() && !clipFamilyAt(e.pos)
+			&& !coveredByAWindow(e.pos)
+			&& rowViewScroll(e.scrollDelta.x, e.scrollDelta.y)) {
+			e.consume(this);
+			e.stopPropagating();
+			return;
+		}
 		if (panSideways(e)) {
 			e.consume(this);
 			e.stopPropagating();

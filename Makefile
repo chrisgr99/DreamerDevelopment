@@ -52,6 +52,11 @@ families:
 # NO res DIRECTORY. Every panel and every face is drawn in code, so the plugin ships no
 # artwork. Listing res here worked on this machine, where an empty res/ happened to exist, and
 # failed on a clean checkout — which is what the VCV Library builds from.
+# OUR OWN HELP TRAVELS WITH THE PLUGIN. DreamerHelp reads a maker's files from the `help` folder
+# of their installed plugin before anything in its own database, so help for these modules is
+# written here and ships on our releases — no DreamerHelp release for a change to our own text.
+DISTRIBUTABLES += help
+
 DISTRIBUTABLES += $(wildcard LICENSE*)
 
 include $(RACK_DIR)/plugin.mk
@@ -86,6 +91,8 @@ dev: $(TARGET)
 	@rm -f "$(PLUGIN_DIR)/plugin.dylib"
 	@cp $(TARGET) "$(PLUGIN_DIR)/plugin.dylib"
 	@cp plugin.json "$(PLUGIN_DIR)/"
+	@rm -rf "$(PLUGIN_DIR)/help"
+	@cp -R help "$(PLUGIN_DIR)/" 2>/dev/null || true
 	@cp LICENSE "$(PLUGIN_DIR)/" 2>/dev/null || true
 	@xattr -c "$(PLUGIN_DIR)/plugin.dylib" 2>/dev/null || true
 	@codesign -v "$(PLUGIN_DIR)/plugin.dylib" && echo "signature valid"
