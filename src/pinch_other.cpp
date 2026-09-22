@@ -29,3 +29,7 @@ double pinchIdleTime() {
 }
 
 #endif
+
+void pinchSetSwallow(bool on) {
+	(void) on;
+}

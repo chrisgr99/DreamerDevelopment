@@ -12,6 +12,10 @@ trade a bitmap always offers: it scales for free.
 */
 #include "plugin.hpp"
 #include "pinch.hpp"
+#include "RowView.hpp"
+#include "Settings.hpp"
+
+#include <cmath>
 
 using namespace rack;
 
@@ -63,12 +67,19 @@ struct PinchZoomOverlay : widget::TransparentWidget {
 	}
 
 	void step() override {
-		if (!enabled || !*enabled) {
+		// HELD ON ROWS, A PINCH IS OURS whether or not the pinch button is on: the gesture then
+		// changes how many rows are shown, and the button is about zooming.
+		const bool rows = rowViewOn();
+		if ((!enabled || !*enabled) && !rows) {
 			finish();
+			drui::pinchSetSwallow(false);
 			widget::TransparentWidget::step();
 			return;
 		}
 		drui::pinchInit();
+		// NOBODY ELSE ACTS ON THE SAME GESTURE. Rack's own window is given the pinch as well, and
+		// zoomed the rack under us while a gesture was being read here.
+		drui::pinchSetSwallow(true);
 
 		const float mag = drui::pinchTake();
 		// AN ANALYSER UNDER THE POINTER TAKES THE PINCH FIRST, and zooms its frequency axis
@@ -76,6 +87,14 @@ struct PinchZoomOverlay : widget::TransparentWidget {
 		// same gesture meaning the same thing one level in — and zooming the rack instead
 		// makes the picture bigger without showing any more of it.
 		if (mag != 0.f && !active && analyserPinch(mag)) {
+			widget::TransparentWidget::step();
+			return;
+		}
+		// HELD ON ROWS, A PINCH DOES NOTHING. The zoom belongs to the row count. The gesture is
+		// still taken, and taken away from Rack, so nothing else zooms the rack either.
+		if (rows) {
+			finish();
+			(void) mag;
 			widget::TransparentWidget::step();
 			return;
 		}

@@ -17,6 +17,11 @@ namespace drui {
 static std::atomic<double> pending{0.0};
 static std::atomic<double> lastEventTime{0.0};
 static id monitor = nil;
+static std::atomic<bool> swallow{false};
+
+void pinchSetSwallow(bool on) {
+	swallow.store(on, std::memory_order_relaxed);
+}
 
 static double nowSeconds() {
 	using namespace std::chrono;
@@ -33,7 +38,7 @@ void pinchInit() {
 			pending.store(pending.load(std::memory_order_relaxed) + [event magnification],
 				std::memory_order_relaxed);
 			lastEventTime.store(nowSeconds(), std::memory_order_relaxed);
-			return event;
+			return swallow.load(std::memory_order_relaxed) ? nil : event;
 		}];
 }
 

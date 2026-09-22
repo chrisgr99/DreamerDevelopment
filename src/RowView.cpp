@@ -32,6 +32,8 @@ static float gLastY = 0.f;
 of the wheel must not be waiting to be added to the next, or how far you have to turn depends on
 what you did a minute ago. */
 static double gScrollAt = 0.0;
+/** And when the wheel last moved up or down at all, which ends one gesture and begins the next. */
+static double gVertAt = 0.0;
 /** When a drag last pushed the view past a row, and how long before it may again. */
 static double gDragStepAt = 0.0;
 static const double DRAG_STEP = 0.35;
@@ -66,6 +68,13 @@ static int gKeyHeld = 0;
 static double gKeyAt = 0.0;
 static bool gKeyRepeating = false;
 static bool gKeyCounting = false;
+/** How many rows were on show last frame, so a change can be noticed. */
+static int gRowsShown = 0;
+/** A change of row count waiting for Rack to settle the zoom, and where the pointer was. */
+static bool gPending = false;
+static math::Vec gPendingAt;
+/** The zoom last asked of Rack, so it is asked once and not every frame on the way there. */
+static float gZoomAsked = 0.f;
 
 static bool somethingElseIsListening() {
 	if (APP->event && dynamic_cast<ui::TextField*>(APP->event->selectedWidget))
@@ -142,6 +151,36 @@ static void putPointerAtRow(app::RackScrollWidget* rs, float rackRow) {
 }
 
 
+/** Where the pointer is on the rack, in rows and in HP across, which is what the offsets are
+counted in. */
+static math::Vec pointerOnRack(app::RackScrollWidget* rs) {
+	// WORKED OUT FROM THE VIEW, not asked of the rack: the rack remembers where the pointer was
+	// when it last had a hover event, which is a stale answer the moment the zoom changes.
+	const math::Vec origin = rs->getAbsoluteOffset(math::Vec());
+	const math::Vec grid = rs->getGridOffset();
+	const float z = rs->getZoom();
+	if (z <= 0.f)
+		return grid;
+	const math::Vec from = APP->scene->mousePos.minus(origin);
+	return math::Vec(grid.x + from.x / (z * RACK_GRID_WIDTH),
+		grid.y + from.y / (z * RACK_GRID_HEIGHT));
+}
+
+
+/** Whether something in the rack is being dragged: a cable in flight, or a widget belonging to
+the rack rather than to the menu bar or a menu. */
+static bool draggingInRack() {
+	if (APP->scene->rack && !APP->scene->rack->getIncompleteCables().empty())
+		return true;
+	widget::Widget* dragged = APP->event ? APP->event->draggedWidget : NULL;
+	for (widget::Widget* w = dragged; w; w = w->parent) {
+		if (w == APP->scene->rack)
+			return true;
+	}
+	return false;
+}
+
+
 void rowViewStep(bool on) {
 	gOn = on;
 	app::RackScrollWidget* rs = APP->scene ? APP->scene->rackScroll : NULL;
@@ -151,10 +190,46 @@ void rowViewStep(bool on) {
 	}
 
 	// THE ZOOM THE ROW COUNT ASKS FOR, held against anything else that sets it.
-	const float rows = (float) settingsRowViewRows();
-	const float want = rs->box.size.y / ((rows + 2.f * PEEK) * RACK_GRID_HEIGHT);
-	if (std::fabs(rs->getZoom() - want) > 0.0005f)
+	const int rowCount = settingsRowViewRows();
+	const float want = rs->box.size.y
+		/ (((float) rowCount + 2.f * PEEK) * RACK_GRID_HEIGHT);
+
+	// SHOWING A DIFFERENT NUMBER OF ROWS KEEPS WHAT IS UNDER THE POINTER. The zoom pivots on the
+	// middle of the window, so the module being looked at slid away as rows were added. Where the
+	// pointer is on the rack is noted before the zoom changes, and put back under it afterwards,
+	// across and down alike.
+	//
+	// AFTERWARDS IS NOT THE SAME FRAME. Rack carries a zoom of its own and applies it in its own
+	// step, after ours, with its own pivot — an offset put right before that is thrown away, by a
+	// long way. So the zoom is asked for, the view is left alone while Rack settles it, and the
+	// pointer is put back on the first frame where the zoom is the one that was asked for.
+	if (gHave && rowCount != gRowsShown) {
+		gPendingAt = pointerOnRack(rs);
+		gPending = true;
+	}
+	gRowsShown = rowCount;
+	const bool zoomSettled = std::fabs(rs->getZoom() - want) <= 0.0005f;
+	// ASKED FOR ONCE. Rack moves to a new zoom over several frames, and asking again each frame
+	// re-pivots it on the middle of the window every time, which is the shudder this had.
+	if (!zoomSettled && std::fabs(want - gZoomAsked) > 0.0005f) {
+		gZoomAsked = want;
 		rs->setZoom(want);
+	}
+	if (gPending) {
+		// Nothing is touched until Rack has settled the zoom; then the place that was under the
+		// pointer is put back under it, across and down alike, to the nearest row.
+		if (!zoomSettled) {
+			gLastY = rs->getGridOffset().y;
+			return;
+		}
+		gPending = false;
+		const math::Vec now = pointerOnRack(rs);
+		const math::Vec grid = rs->getGridOffset();
+		gRow = (int) std::lround(gPendingAt.y + PEEK - (now.y - grid.y));
+		gLastY = topOf(gRow);
+		rs->setGridOffset(math::Vec(grid.x + (gPendingAt.x - now.x), gLastY));
+		return;
+	}
 
 	const math::Vec at = rs->getGridOffset();
 	const float moved = gHave ? at.y - gLastY : 0.f;
@@ -168,15 +243,18 @@ void rowViewStep(bool on) {
 	// along only when the pointer is within a few pixels of the window, and the rows on show end
 	// well inside that. A cable carried up out of the top row, or down out of the bottom one,
 	// moves the view a row, so the row it is being carried into comes into view.
-	const bool dragging = (APP->event && APP->event->draggedWidget != NULL)
-		|| (APP->scene->rack && !APP->scene->rack->getIncompleteCables().empty());
+	// AND ONLY A DRAG IN THE RACK. A press on the menu bar makes that button the dragged widget,
+	// and the pointer is then nowhere near the rows — which walked the view a row at a time for
+	// as long as the button was held.
+	const bool dragging = draggingInRack()
+		&& rs->box.contains(APP->scene->mousePos);
 	int push = 0;
 	if (gHave && dragging) {
 		const float pointerRow = (APP->scene->rack->getMousePos().y - RACK_OFFSET.y)
 			/ RACK_GRID_HEIGHT;
 		if (pointerRow < (float) gRow)
 			push = -1;
-		else if (pointerRow > (float) (gRow + settingsRowViewRows()))
+		else if (pointerRow > (float) (gRow + rowCount))
 			push = 1;
 	}
 	if (push != 0 && now - gDragStepAt >= DRAG_STEP) {
@@ -187,7 +265,7 @@ void rowViewStep(bool on) {
 		// the pointer would still be outside the rows on show, and the view would walk row after
 		// row for as long as the cable was held there.
 		const float land = (push < 0)
-			? (float) gRow + 0.85f : (float) (gRow + settingsRowViewRows()) - 0.15f;
+			? (float) gRow + 0.85f : (float) (gRow + rowCount) - 0.15f;
 		putPointerAtRow(rs, land);
 	}
 	// A MOVE THAT WAS NOT OURS settles on the nearest row: that is the scroll bar, an
@@ -222,11 +300,15 @@ bool rowViewScroll(float dx, float dy) {
 	app::RackScrollWidget* rs = APP->scene ? APP->scene->rackScroll : NULL;
 	if (!rs)
 		return false;
-	// THE WAIT RUNS FROM THE ROW THAT MOVED, not from the last movement of the wheel. Only a
-	// movement that actually moved a row starts it; everything since then is swallowed rather
-	// than passed on, or the view would scroll freely for the rest of the turn.
+	// ONE TURN OF THE WHEEL, ONE ROW. A turn arrives as a stream of movements: the first moves a
+	// row and the rest are swallowed, rather than passed on, or the view would scroll freely for
+	// the remainder of the turn. Another row needs both a fresh turn — the wheel still for a
+	// while — and that long since the last row moved. Sideways movement never counts towards
+	// either, so a wobble across cannot hold the next row off.
 	const double now = system::getTime();
-	if (now - gScrollAt <= SCROLL_GAP)
+	const bool freshTurn = (now - gVertAt) > SCROLL_GAP;
+	gVertAt = now;
+	if (!freshTurn || now - gScrollAt <= SCROLL_GAP)
 		return true;
 	gScrollAt = now;
 	// A wheel turned away from you goes UP the rack, which is what Rack does too.

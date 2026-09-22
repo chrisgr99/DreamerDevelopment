@@ -675,12 +675,22 @@ struct InterceptOverlay : widget::Widget {
 		// WHOLE ROWS: the wheel walks the view a row at a time — see RowView.hpp. Not over a
 		// menu, a window or one of our own instruments, and not over a control the wheel is
 		// meant to turn, all of which keep the wheel as they had it.
-		if (rowViewOn() && !onControl && !menuIsOpen() && !clipFamilyAt(e.pos)
-			&& !coveredByAWindow(e.pos)
-			&& rowViewScroll(e.scrollDelta.x, e.scrollDelta.y)) {
-			e.consume(this);
-			e.stopPropagating();
-			return;
+		// A WHEEL THAT WOULD HAVE ZOOMED MOVES A ROW INSTEAD. With Rack set to zoom on a bare
+		// wheel, zooming does nothing while the view is held on rows, so the wheel would have
+		// flickered the view and been put back; and a control under the pointer does not hold it
+		// back, because a wheel meaning zoom was never that control's.
+		if (rowViewOn() && (!onControl || wouldZoom) && !menuIsOpen() && !clipFamilyAt(e.pos)
+			&& !coveredByAWindow(e.pos)) {
+			// A WHEEL THAT MEANS ZOOM DOES NOTHING, and is taken all the same: left to Rack it
+			// zooms the rack, which is then put back by the row count, and the view shudders.
+			const bool took = wouldZoom
+				? true
+				: rowViewScroll(e.scrollDelta.x, e.scrollDelta.y);
+			if (took) {
+				e.consume(this);
+				e.stopPropagating();
+				return;
+			}
 		}
 		if (panSideways(e)) {
 			e.consume(this);
