@@ -223,12 +223,7 @@ struct Clarity : Module {
 		// It also does what the value pop-up used to — a control's name and value, large, while
 		// it is turned — so that switch is gone.
 		configSwitch(P_TOOLTIPS, 0.f, 1.f, 0.f, "Tooltip readability", {"Off", "On"});
-		configSwitch(P_KNOB_ARM, 0.f, 1.f, 0.f, "Click to arm a knob", {"Off", "On"});
-		paramQuantities[P_KNOB_ARM]->description =
-			"A knob must be clicked once before the scroll wheel can adjust it. Click again for "
-			"finer motion, and again for finer still; turning it returns to the coarse rate, and "
-			"a double click resets the knob as usual. Only works when Rack's \"scroll wheel "
-			"adjusts knobs\" is enabled.";
+		configSwitch(P_KNOB_ARM, 0.f, 1.f, 0.f, "Click to enable adjust knobs", {"Off", "On"});
 	}
 
 	/** Copies the params into the flags the overlays read. Called from the widget's step, on
@@ -1695,7 +1690,7 @@ struct ClarityWidget : DRUIWidgetBase {
 			// anything will never touch, and a panel should read in the order it matters.
 			{Clarity::P_ANIMATE_CLICKS, "Animate",      "clicks"},
 			{Clarity::P_TOOLTIPS,       "Tooltip",      "readability"},
-			{Clarity::P_KNOB_ARM,       "Click to arm", "a knob"},
+			{Clarity::P_KNOB_ARM,       "Click to enable", "adjust knobs"},
 		};
 		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
@@ -1812,6 +1807,15 @@ struct ClarityWidget : DRUIWidgetBase {
 				sub->addChild(createCheckMenuItem("Light yellow", "",
 					[]() { return settingsTooltipClassic(); },
 					[]() { settingsSetTooltipClassic(true); }));
+			}));
+		menu->addChild(createSubmenuItem("Tooltip readability position",
+			settingsTooltipAbove() ? "Above the pointer" : "Below the pointer", [](Menu* sub) {
+				sub->addChild(createCheckMenuItem("Below the pointer", "",
+					[]() { return !settingsTooltipAbove(); },
+					[]() { settingsSetTooltipAbove(false); }));
+				sub->addChild(createCheckMenuItem("Above the pointer", "",
+					[]() { return settingsTooltipAbove(); },
+					[]() { settingsSetTooltipAbove(true); }));
 			}));
 
 		menu->addChild(new MenuSeparator);

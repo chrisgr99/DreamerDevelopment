@@ -6,6 +6,8 @@
 static float gTooltipScale = 1.5f;
 /** White on black, unless changed in the menu. */
 static bool gTooltipClassic = false;
+/** Below the pointer, unless changed in the menu. */
+static bool gTooltipAbove = false;
 
 static std::string settingsPath() {
 	return asset::user("DreamerDevelopment/clarity.json");
@@ -25,6 +27,8 @@ static void settingsLoad() {
 		gTooltipScale = math::clamp((float) json_number_value(j), 1.f, 4.f);
 	if (json_t* j = json_object_get(rootJ, "tooltipClassic"))
 		gTooltipClassic = json_is_true(j);
+	if (json_t* j = json_object_get(rootJ, "tooltipAbove"))
+		gTooltipAbove = json_is_true(j);
 	json_decref(rootJ);
 }
 
@@ -34,6 +38,7 @@ static void settingsSave() {
 	json_t* rootJ = json_object();
 	json_object_set_new(rootJ, "tooltipScale", json_real(gTooltipScale));
 	json_object_set_new(rootJ, "tooltipClassic", json_boolean(gTooltipClassic));
+	json_object_set_new(rootJ, "tooltipAbove", json_boolean(gTooltipAbove));
 	system::createDirectories(asset::user("DreamerDevelopment"));
 	if (FILE* f = std::fopen(settingsPath().c_str(), "w")) {
 		json_dumpf(rootJ, f, JSON_INDENT(2));
@@ -61,5 +66,16 @@ bool settingsTooltipClassic() {
 void settingsSetTooltipClassic(bool classic) {
 	settingsLoad();
 	gTooltipClassic = classic;
+	settingsSave();
+}
+
+bool settingsTooltipAbove() {
+	settingsLoad();
+	return gTooltipAbove;
+}
+
+void settingsSetTooltipAbove(bool above) {
+	settingsLoad();
+	gTooltipAbove = above;
 	settingsSave();
 }

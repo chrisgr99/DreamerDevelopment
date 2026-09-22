@@ -30,6 +30,20 @@ it can be seen, and nothing has to fight over being the scene's last child.
 #include <vector>
 
 
+/** SCREEN POINTS IN A MILLIMETRE, from the size the display reports for itself. A display that
+reports no size gets a typical one. */
+static float pointsPerMillimetre() {
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	int wmm = 0, hmm = 0;
+	if (monitor)
+		glfwGetMonitorPhysicalSize(monitor, &wmm, &hmm);
+	const GLFWvidmode* mode = monitor ? glfwGetVideoMode(monitor) : NULL;
+	if (!mode || wmm <= 0)
+		return 4.f;
+	return math::clamp((float) mode->width / (float) wmm, 2.f, 8.f);
+}
+
+
 /** HOW LARGE THE SYSTEM DRAWS THE POINTER, as a multiple of its normal size. macOS lets the
 pointer be enlarged in its accessibility settings, and the tooltip has to clear the tail of the
 pointer as it is actually drawn. Read when a tooltip appears, so a change takes effect at the
@@ -76,6 +90,8 @@ struct TooltipReadabilityOverlay : widget::Widget {
 	float tallest = 0.f;
 	/** How far below the pointer's tip its tail reaches, in the scene's units. */
 	float tailBelow = 24.f;
+	/** Two millimetres on the screen, in the scene's units: the gap left above the pointer. */
+	float aboveGap = 6.f;
 
 	static constexpr double FADE_IN = 0.5;
 	static constexpr double FADE_OUT = 0.25;
@@ -109,6 +125,7 @@ struct TooltipReadabilityOverlay : widget::Widget {
 				const float pointsPerUnit = (APP->window && APP->window->windowRatio > 0.f)
 					? APP->window->pixelRatio / APP->window->windowRatio : 1.f;
 				tailBelow = 16.f * pointerScale() / (pointsPerUnit > 0.f ? pointsPerUnit : 1.f);
+				aboveGap = 2.f * pointsPerMillimetre() / (pointsPerUnit > 0.f ? pointsPerUnit : 1.f);
 				widestWhole.clear();
 				widestFrac.clear();
 				linePrefix.clear();
@@ -340,6 +357,13 @@ struct TooltipReadabilityOverlay : widget::Widget {
 			// NO ROOM BELOW: directly above the control, never on top of it.
 			if (at.y + h > box.size.y - 2.f)
 				at.y = anchor.pos.y - h - 2.f;
+		}
+		// ABOVE, WHEN CHOSEN: centred on the pointer, its foot two millimetres above the pointer's
+		// tip, which is the one part of the pointer that never covers it. Below after all when
+		// there is no room.
+		if (settingsTooltipAbove() && mouse.y - h - aboveGap >= 2.f) {
+			at.x = mouse.x - w / 2.f;
+			at.y = mouse.y - h - aboveGap;
 		}
 		at.x = math::clamp(at.x, 2.f, std::max(2.f, box.size.x - w - 2.f));
 		at.y = math::clamp(at.y, 2.f, std::max(2.f, box.size.y - h - 2.f));

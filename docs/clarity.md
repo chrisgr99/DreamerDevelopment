@@ -184,7 +184,7 @@ Pinching with the pointer over an analyser zooms that analyser's frequency axis 
 
 ---
 
-## Click to arm a knob
+## Click to enable adjust knobs
 
 Off by default. With it on, the mouse wheel turns a control only after you have clicked that control; everywhere else the wheel moves the view. Scrolling the rack and turning a knob are then two different gestures rather than one gesture that depends on where the pointer happened to land.
 

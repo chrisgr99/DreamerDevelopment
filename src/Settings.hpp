@@ -15,3 +15,8 @@ void settingsSetTooltipScale(float scale);
 black. */
 bool settingsTooltipClassic();
 void settingsSetTooltipClassic(bool classic);
+
+/** Tooltips drawn centred above the pointer, their foot touching its tip, rather than below the
+pointer's tail. */
+bool settingsTooltipAbove();
+void settingsSetTooltipAbove(bool above);
