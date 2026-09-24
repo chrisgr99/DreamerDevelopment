@@ -88,6 +88,17 @@ struct TooltipReadabilityOverlay : widget::Widget {
 	then holds, until the pointer moves to another control. */
 	float widest = 0.f;
 	float tallest = 0.f;
+	/** RACK'S OWN TOOLTIP, HIDDEN RATHER THAN MOVED, and which one that is so it can be put back.
+
+	This used to park it a hundred thousand points outside the window, which worked in the sense
+	that nobody saw it and cost Rack nothing to go on updating. It also crashed Rack. Geometry that
+	far out is handed to the graphics driver like any other, and three crash reports on two
+	different days faulted at the same address every time — the bytes of which, read as two
+	numbers, are minus a hundred thousand. A thing drawn nowhere is still drawn.
+
+	Hiding it does the same job honestly. Rack steps every child whether or not it is visible, so
+	the words go on being written for us to read, and nothing is drawn at all. */
+	ui::Tooltip* hiddenTip = NULL;
 	/** How far below the pointer's tip its tail reaches, in the scene's units. */
 	float tailBelow = 24.f;
 	/** Two millimetres on the screen, in the scene's units: the gap left above the pointer. */
@@ -98,20 +109,53 @@ struct TooltipReadabilityOverlay : widget::Widget {
 	/** The margin between the letters and the frame, at Rack's own size. */
 	static constexpr float PAD = 1.25f;
 
+	/** Whether a tooltip we hid is still a child of the scene. Pointers only: one Rack has deleted
+	is compared, never read. */
+	bool stillInScene(ui::Tooltip* t) {
+		if (!t || !APP->scene)
+			return false;
+		for (widget::Widget* w : APP->scene->children)
+			if (w == t)
+				return true;
+		return false;
+	}
+
+	/** Puts back whatever we hid. Called whenever we stop drawing in its place — the tooltip going,
+	another taking its turn, or the setting being switched off — so Rack's own is never left
+	invisible by us. */
+	void showRacksAgain() {
+		if (hiddenTip && stillInScene(hiddenTip))
+			hiddenTip->show();
+		hiddenTip = NULL;
+	}
+
+	/** The tooltip Rack has up, which is the one it has just shown or the one we have hidden. */
+	ui::Tooltip* tooltipInScene() {
+		if (!APP->scene)
+			return NULL;
+		ui::Tooltip* found = NULL;
+		for (widget::Widget* w : APP->scene->children) {
+			ui::Tooltip* t = dynamic_cast<ui::Tooltip*>(w);
+			if (!t || t->requestedDelete)
+				continue;
+			// The newest wins, Rack adding each to the end of the list.
+			if (t->isVisible() || t == hiddenTip)
+				found = t;
+		}
+		return found;
+	}
+
 	void step() override {
 		widget::Widget::step();
 		tip = NULL;
 		haveAnchor = false;
 		if (APP->scene)
 			box.size = APP->scene->box.size;
-		if (!on || !*on || !APP->scene)
+		if (!on || !*on || !APP->scene) {
+			showRacksAgain();
 			return;
-		for (widget::Widget* w : APP->scene->children) {
-			if (ui::Tooltip* t = dynamic_cast<ui::Tooltip*>(w)) {
-				if (t->isVisible())
-					tip = t;
-			}
 		}
+		tip = tooltipInScene();
 		const double now = APP->window ? APP->window->getFrameTime() : 0.0;
 		if (tip != lastTip) {
 			if (tip) {
@@ -136,11 +180,16 @@ struct TooltipReadabilityOverlay : widget::Widget {
 			}
 			lastTip = tip;
 		}
-		if (!tip)
+		if (!tip) {
+			showRacksAgain();
 			return;
+		}
 		text = tip->text;
-		// OFF THE SCREEN, where it goes on updating its text for us to read.
-		tip->box.pos = math::Vec(-100000.f, -100000.f);
+		// HIDDEN, where it goes on updating its text for us to read.
+		if (hiddenTip != tip)
+			showRacksAgain();
+		tip->hide();
+		hiddenTip = tip;
 		// WHAT IT IS ABOUT: the widget under the pointer, in the scene's coordinates, which are
 		// ours. The zoom is applied on the way up, so the box is the size it is drawn.
 		widget::Widget* hovered = APP->event ? APP->event->hoveredWidget : NULL;
@@ -252,7 +301,7 @@ struct TooltipReadabilityOverlay : widget::Widget {
 			return;
 		}
 		// AGAIN, for a tooltip after this one in the scene, whose step has put it back.
-		tip->box.pos = math::Vec(-100000.f, -100000.f);
+		tip->hide();
 		std::shared_ptr<window::Font> font =
 			APP->window->loadFont(asset::system("res/fonts/DejaVuSans.ttf"));
 		if (!font || font->handle < 0)
