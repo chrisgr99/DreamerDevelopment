@@ -1,7 +1,7 @@
 /** GENERATED — do not edit.
 
     Port families for Clarity's colouring, from the help database.
-    Source: DreamerHelp at bc86f38
+    Source: DreamerHelp at v2.1.2-4-g5216240
     Regenerate: make families (or tools/families.py <checkout>)
 
     THE DATABASE IS AUTHORITATIVE. If a colour here is wrong, fix it there and
@@ -1692,17 +1692,17 @@ static const signed char fi927[] = {1};
 static const signed char fo927[] = {1, 1, 1, 1};
 static const signed char fi928[] = {1, 1, 1, 0};
 static const signed char fo928[] = {0};
-static const signed char fi929[] = {-1, 1};
-static const signed char fo929[] = {2, 3, 1, 1, 1, 1, 1};
+static const signed char fi929[] = {2, 2};
+static const signed char fo929[] = {-1, 3, 3, 3};
 static const signed char fi930[] = {2, 2};
-static const signed char fo930[] = {-1, 3, 3, 3};
-static const signed char fi931[] = {2, 2};
+static const signed char fi931[] = {2, 3, 1, 1, 1, 1, 1};
 static const signed char fi932[] = {-1, 1, 1};
 static const signed char fi933[] = {-1, 1};
-static const signed char fi934[] = {2, 2};
-static const signed char fi935[] = {0, 1, 1, 1};
-static const signed char fo935[] = {0, 0};
-static const signed char fi936[] = {2, 3, 1, 1, 1, 1, 1};
+static const signed char fo933[] = {2, 3, 1, 1, 1, 1, 1};
+static const signed char fi934[] = {-1, 1};
+static const signed char fi935[] = {2, 2};
+static const signed char fi936[] = {0, 1, 1, 1};
+static const signed char fo936[] = {0, 0};
 static const signed char fi937[] = {2, 1, 1, 1, 1, 1};
 static const signed char fo937[] = {1};
 static const signed char fi938[] = {1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1};
@@ -7533,14 +7533,14 @@ const PortFamilyEntry PORT_FAMILIES[] = {
 	{"DogmanDevices", "TriParDel", 6, fi926, 5, fo926},
 	{"DogmanDevices", "TripLFO", 1, fi927, 4, fo927},
 	{"DogmanDevices", "Water", 4, fi928, 1, fo928},
-	{"DreamerMPX", "mpxOut", 2, fi929, 7, fo929},
-	{"DreamerMPX", "mpxChart", 2, fi930, 4, fo930},
-	{"DreamerMPX", "mpxEuclid", 2, fi931, 0, NULL},
+	{"DreamerMPX", "mpxChart", 2, fi929, 4, fo929},
+	{"DreamerMPX", "mpxEuclid", 2, fi930, 0, NULL},
+	{"DreamerMPX", "mpxIn", 7, fi931, 0, NULL},
 	{"DreamerMPX", "mpxMelodyVoice", 3, fi932, 0, NULL},
-	{"DreamerMPX", "mpxPhrase", 2, fi933, 0, NULL},
-	{"DreamerMPX", "mpxProgression", 2, fi934, 0, NULL},
-	{"DreamerMPX", "polyToStereo", 4, fi935, 2, fo935},
-	{"DreamerMPX", "mpxIn", 7, fi936, 0, NULL},
+	{"DreamerMPX", "mpxOut", 2, fi933, 7, fo933},
+	{"DreamerMPX", "mpxPhrase", 2, fi934, 0, NULL},
+	{"DreamerMPX", "mpxProgression", 2, fi935, 0, NULL},
+	{"DreamerMPX", "polyToStereo", 4, fi936, 2, fo936},
 	{"DrumKit", "Baronial", 6, fi937, 1, fo937},
 	{"DrumKit", "BassDrum9", 34, fi938, 2, fo938},
 	{"DrumKit", "CR78", 34, fi939, 2, fo939},
