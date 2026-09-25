@@ -40,6 +40,7 @@ that follows the pointer, leaving the wheel as the only practical route.
 #include "WidgetAt.hpp"
 #include "Clip.hpp"
 #include "KnobArm.hpp"
+#include "RowView.hpp"
 #include "Monitor.hpp"
 #include "Meter.hpp"
 #include "Freq.hpp"
@@ -226,9 +227,17 @@ struct InterceptOverlay : widget::Widget {
 	up was the bug DaveVenom reported: the first drag after an injector was attached took its
 	invisible cable and nothing seemed to happen, and only once that cable had been moved out of
 	the way did a drag start a cable again. */
+	/** A CABLE TEST GEAR MADE FOR ITSELF, rather than one somebody patched from it.
+
+	IT IS THE HIDING THAT SAYS SO, not where it comes from. Test Gear's own cables are the ones it
+	lays to carry a signal to an instrument, and it makes them invisible because nobody is meant to
+	see or touch them. Asking instead whether a cable LEAVES Test Gear caught every cable anybody
+	had patched out of a Test Gear output as well — so a perfectly ordinary cable from Test Gear to
+	an audio interface could not be picked up, and clicking its jack started a new cable instead.
+	Reported: the left input of an audio module would not give up its cable while the right one
+	would, the only difference between them being which module the far end was on. */
 	static bool isTestGearCable(app::CableWidget* cw) {
-		return cw && cw->cable && cw->cable->outputModule
-			&& cw->cable->outputModule->model == modelTestGear;
+		return cw && !cw->visible;
 	}
 
 	/** The user's cables on a port, top first: Test Gear's own left out. */
@@ -469,10 +478,59 @@ struct InterceptOverlay : widget::Widget {
 		scroll->offset = scroll->offset.plus(push.div(margin).mult(speed));
 	}
 
+	/** KEEPS A MENU INSIDE THE WINDOW. A menu opened near the foot of the window can hang off the
+	bottom of it, and the only way to the items down there is to move the view. Any menu whose foot
+	is below the window is lifted until it fits; one taller than the window starts at the top, and
+	Rack's own scrolling of a long menu is untouched.
+
+	Done here because this overlay is the scene's last child and is stepped after the menus, so
+	what it sets is what is drawn. */
+	void keepMenusInside(widget::Widget* parent, float height) {
+		for (widget::Widget* child : parent->children) {
+			ui::Menu* menu = dynamic_cast<ui::Menu*>(child);
+			if (!menu)
+				continue;
+			// A MENU TOO TALL FOR THE WINDOW IS LEFT ENTIRELY ALONE.
+			//
+			// Rack scrolls such a menu by MOVING IT: the wheel slides the whole list up so that
+			// its lower entries come into view. Pulling it back so that its top edge sits just
+			// inside the window — which is what the lines below do, and the right thing for a
+			// menu that fits — undoes that on the very next frame. The list could be scrolled and
+			// went nowhere, and the foot of a long one could never be reached at all. The module
+			// browser's own lists are the longest in Rack, which is where it showed.
+			//
+			// Nothing is lost by standing back: a menu taller than the window cannot be made to
+			// fit inside it, which is the only thing this was for.
+			if (menu->box.size.y > height - 4.f) {
+				keepMenusInside(menu, height);
+				continue;
+			}
+			const float top = menu->getAbsoluteOffset(math::Vec()).y;
+			const float foot = top + menu->box.size.y;
+			float lift = 0.f;
+			if (foot > height - 2.f)
+				lift = height - 2.f - foot;
+			if (top + lift < 2.f)
+				lift = 2.f - top;
+			if (lift != 0.f)
+				menu->box.pos.y += lift;
+			keepMenusInside(menu, height);
+		}
+	}
+
 	void step() override {
 		// Cover the scene, or the event system will not offer us events outside our box.
 		if (parent)
 			box.size = parent->box.size;
+
+		if (APP->scene) {
+			const float height = APP->scene->box.size.y;
+			for (widget::Widget* child : APP->scene->children) {
+				ui::MenuOverlay* over = dynamic_cast<ui::MenuOverlay*>(child);
+				if (over && over->isVisible())
+					keepMenusInside(over, height);
+			}
+		}
 
 		// WHETHER A BUTTON IS ACTUALLY DOWN, asked of the window rather than counted from
 		// events.
@@ -556,6 +614,16 @@ struct InterceptOverlay : widget::Widget {
 		if (!scroll)
 			return false;
 		if (clipFamilyAt(e.pos))
+			return false;
+		// NOT WHILE A MENU IS OPEN, which every other branch of the scroll handler already knew
+		// and this one did not. A MENU IS A LIST THAT SCROLLS, and the module browser is the
+		// longest of them: taking the wheel there left it unscrollable.
+		//
+		// IT BIT ON A TRACKPAD RATHER THAN A WHEEL. A wheel has no sideways component at all, so
+		// this never fired for one; a trackpad glide that is meant to be straight down is ragged,
+		// and wherever a few of its events happened to be more sideways than down they were taken
+		// for the rack and the list stuttered instead of scrolling.
+		if (menuIsOpen() || coveredByAWindow(e.pos))
 			return false;
 
 		// Rack's own step, so panning feels the same in either wheel mode.
@@ -671,6 +739,26 @@ struct InterceptOverlay : widget::Widget {
 
 		const bool onControl = !knobArmEnabled() && settings::knobScroll
 			&& widgetAt<app::ParamWidget>(APP->scene, e.pos) != NULL;
+		// WHOLE ROWS: the wheel walks the view a row at a time — see RowView.hpp. Not over a
+		// menu, a window or one of our own instruments, and not over a control the wheel is
+		// meant to turn, all of which keep the wheel as they had it.
+		// A WHEEL THAT WOULD HAVE ZOOMED MOVES A ROW INSTEAD. With Rack set to zoom on a bare
+		// wheel, zooming does nothing while the view is held on rows, so the wheel would have
+		// flickered the view and been put back; and a control under the pointer does not hold it
+		// back, because a wheel meaning zoom was never that control's.
+		if (rowViewOn() && (!onControl || wouldZoom) && !menuIsOpen() && !clipFamilyAt(e.pos)
+			&& !coveredByAWindow(e.pos)) {
+			// A WHEEL THAT MEANS ZOOM DOES NOTHING, and is taken all the same: left to Rack it
+			// zooms the rack, which is then put back by the row count, and the view shudders.
+			const bool took = wouldZoom
+				? true
+				: rowViewScroll(e.scrollDelta.x, e.scrollDelta.y);
+			if (took) {
+				e.consume(this);
+				e.stopPropagating();
+				return;
+			}
+		}
 		if (panSideways(e)) {
 			e.consume(this);
 			e.stopPropagating();

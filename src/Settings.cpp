@@ -8,6 +8,8 @@ static float gTooltipScale = 1.5f;
 static bool gTooltipClassic = false;
 /** Below the pointer, unless changed in the menu. */
 static bool gTooltipAbove = false;
+/** Two rows, unless changed in the menu. */
+static int gRowViewRows = 2;
 
 static std::string settingsPath() {
 	return asset::user("DreamerDevelopment/clarity.json");
@@ -29,6 +31,8 @@ static void settingsLoad() {
 		gTooltipClassic = json_is_true(j);
 	if (json_t* j = json_object_get(rootJ, "tooltipAbove"))
 		gTooltipAbove = json_is_true(j);
+	if (json_t* j = json_object_get(rootJ, "rowViewRows"))
+		gRowViewRows = math::clamp((int) json_integer_value(j), 1, 5);
 	json_decref(rootJ);
 }
 
@@ -39,6 +43,7 @@ static void settingsSave() {
 	json_object_set_new(rootJ, "tooltipScale", json_real(gTooltipScale));
 	json_object_set_new(rootJ, "tooltipClassic", json_boolean(gTooltipClassic));
 	json_object_set_new(rootJ, "tooltipAbove", json_boolean(gTooltipAbove));
+	json_object_set_new(rootJ, "rowViewRows", json_integer(gRowViewRows));
 	system::createDirectories(asset::user("DreamerDevelopment"));
 	if (FILE* f = std::fopen(settingsPath().c_str(), "w")) {
 		json_dumpf(rootJ, f, JSON_INDENT(2));
@@ -77,5 +82,16 @@ bool settingsTooltipAbove() {
 void settingsSetTooltipAbove(bool above) {
 	settingsLoad();
 	gTooltipAbove = above;
+	settingsSave();
+}
+
+int settingsRowViewRows() {
+	settingsLoad();
+	return gRowViewRows;
+}
+
+void settingsSetRowViewRows(int rows) {
+	settingsLoad();
+	gRowViewRows = math::clamp(rows, 1, 5);
 	settingsSave();
 }
