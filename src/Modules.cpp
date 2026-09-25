@@ -226,7 +226,7 @@ struct Clarity : Module {
 		// it is turned — so that switch is gone.
 		configSwitch(P_TOOLTIPS, 0.f, 1.f, 0.f, "Tooltip readability", {"Off", "On"});
 		configSwitch(P_KNOB_ARM, 0.f, 1.f, 0.f, "Click to enable adjust knobs", {"Off", "On"});
-		configSwitch(P_ROW_VIEW, 0.f, 1.f, 0.f, "Whole rows in the window", {"Off", "On"});
+		configSwitch(P_ROW_VIEW, 0.f, 1.f, 0.f, "Snap to rows", {"Off", "On"});
 	}
 
 	/** Copies the params into the flags the overlays read. Called from the widget's step, on
@@ -1695,7 +1695,7 @@ struct ClarityWidget : DRUIWidgetBase {
 			{Clarity::P_ANIMATE_CLICKS, "Animate",      "clicks"},
 			{Clarity::P_TOOLTIPS,       "Tooltip",      "readability"},
 			{Clarity::P_KNOB_ARM,       "Click to enable", "adjust knobs"},
-			{Clarity::P_ROW_VIEW,       "Whole rows",   "in the window"},
+			{Clarity::P_ROW_VIEW,       "Snap to rows", ""},
 		};
 		for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)
 			addRow((int) i, rows[i].param, rows[i].a, rows[i].b);
@@ -1814,15 +1814,22 @@ struct ClarityWidget : DRUIWidgetBase {
 					[]() { return settingsTooltipClassic(); },
 					[]() { settingsSetTooltipClassic(true); }));
 			}));
-		menu->addChild(createSubmenuItem("Whole rows in the window",
-			string::f("%d", settingsRowViewRows()), [](Menu* sub) {
-				for (int n = 1; n <= 5; n++) {
-					sub->addChild(createCheckMenuItem(
-						n == 1 ? "1 row" : string::f("%d rows", n), "",
-						[=]() { return settingsRowViewRows() == n; },
-						[=]() { settingsSetRowViewRows(n); }));
-				}
-			}));
+		// GREYED OUT WHILE SNAPPING IS OFF, as the arming button is while Rack's own wheel setting
+		// is. With the view not held on rows there is nothing for a row count to mean, and an
+		// entry that can be chosen and does nothing is worse than one that says it is not in use.
+		{
+			ui::MenuItem* rows = createSubmenuItem("Snap to rows — number of rows",
+				string::f("%d", settingsRowViewRows()), [](Menu* sub) {
+					for (int n = 1; n <= 5; n++) {
+						sub->addChild(createCheckMenuItem(
+							n == 1 ? "1 row" : string::f("%d rows", n), "",
+							[=]() { return settingsRowViewRows() == n; },
+							[=]() { settingsSetRowViewRows(n); }));
+					}
+				});
+			rows->disabled = !gOpt.rowView;
+			menu->addChild(rows);
+		}
 		menu->addChild(createSubmenuItem("Tooltip readability position",
 			settingsTooltipAbove() ? "Above the pointer" : "Below the pointer", [](Menu* sub) {
 				sub->addChild(createCheckMenuItem("Below the pointer", "",

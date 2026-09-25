@@ -24,6 +24,9 @@ it can be seen, and nothing has to fight over being the scene's last child.
 #include "plugin.hpp"
 #include "Settings.hpp"
 
+#include <ui/Menu.hpp>
+#include <ui/MenuOverlay.hpp>
+
 #include <ui/Tooltip.hpp>
 
 #include <cctype>
@@ -397,6 +400,30 @@ struct TooltipReadabilityOverlay : widget::Widget {
 		// cover its first line. Under the pointer rather than under the control: a tall slider's
 		// foot can be a long way below the hand, and the eye is where the pointer is.
 		const math::Vec mouse = APP->scene->mousePos;
+		// THE MODULE BROWSER ALWAYS GETS IT BELOW, whatever the setting says.
+		//
+		// Browsing is looking, and what is being looked at is the row of modules the pointer is
+		// moving along. A note placed above the pointer lands squarely on the modules not yet
+		// reached — so the longer the note, the more of the thing being chosen it hides, and the
+		// browser's notes are the longest anywhere. Below the pointer it covers what has already
+		// been passed, which is nothing anybody is reading.
+		//
+		// TOLD APART BY SHAPE, not by name: Rack's browser lives in one of the same overlays a
+		// menu does, but a menu overlay holds a menu and the browser's does not. So a full-screen
+		// overlay with no menu inside it is the browser, and a list of which widgets belong to
+		// Rack is not needed and cannot go stale.
+		bool browsing = false;
+		for (widget::Widget* child : APP->scene->children) {
+			ui::MenuOverlay* over = dynamic_cast<ui::MenuOverlay*>(child);
+			if (!over || !over->visible || over->requestedDelete)
+				continue;
+			bool holdsMenu = false;
+			for (widget::Widget* inner : over->children)
+				if (dynamic_cast<ui::Menu*>(inner))
+					holdsMenu = true;
+			if (!holdsMenu)
+				browsing = true;
+		}
 		// Slightly over the tail, so the box reads as belonging to the pointer.
 		const float underTail = mouse.y + tailBelow - 1.5f;
 		math::Vec at = math::Vec(mouse.x - w / 2.f, underTail);
@@ -410,7 +437,7 @@ struct TooltipReadabilityOverlay : widget::Widget {
 		// ABOVE, WHEN CHOSEN: centred on the pointer, its foot two millimetres above the pointer's
 		// tip, which is the one part of the pointer that never covers it. Below after all when
 		// there is no room.
-		if (settingsTooltipAbove() && mouse.y - h - aboveGap >= 2.f) {
+		if (!browsing && settingsTooltipAbove() && mouse.y - h - aboveGap >= 2.f) {
 			at.x = mouse.x - w / 2.f;
 			at.y = mouse.y - h - aboveGap;
 		}
