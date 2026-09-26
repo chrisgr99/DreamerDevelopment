@@ -26,10 +26,16 @@ double pinchIdleTime() {
 	return 1e9;
 }
 
-}
+/** INSIDE THE NAMESPACE AND INSIDE THE GUARD, both of which it was outside.
 
-#endif
-
+It compiled everywhere and linked only on macOS, where pinch.mm supplies the real one — so a
+local build was clean and the Windows and Linux builds failed at the link with an undefined
+drui::pinchSetSwallow. There was nothing wrong with the declaration or the call; the definition
+was simply in the global namespace, where nobody was looking for it. */
 void pinchSetSwallow(bool on) {
 	(void) on;
 }
+
+}
+
+#endif
