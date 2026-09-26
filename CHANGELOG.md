@@ -13,7 +13,7 @@ A new button on Clarity's panel. Scrolling the rack snaps between a set number o
 - Dragging a cable past the top or bottom edge steps one row and carries the pointer with it, so a cable can be run to a module that is off the screen.
 
 ### Also new
-- Clarity, Test Gear and Dark now carry their own help inside the plugin, so Dreamer Help describes the most recent version of their help rather than the older version in its own database.
+- Clarity, Test Gear and Dark now carry their own help inside the plugin, so Dreamer Help describes the most recent version of their help rather than the older version in the Dreamer Help module's database.
 
 ### Changed
 - The setting that places tooltips above the pointer also applied in the module browser, where the tooltips covered the module descriptions. In the module browser, tooltips now always appear in the usual place below the pointer.
