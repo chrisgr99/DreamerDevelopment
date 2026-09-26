@@ -1555,6 +1555,7 @@ static WeakPtr<DRUIOverlay> gRackOverlay;
 static WeakPtr<widget::Widget> gPinchOverlay;
 static WeakPtr<widget::Widget> gInterceptOverlay;
 static WeakPtr<widget::Widget> gTooltipOverlay;
+static WeakPtr<widget::Widget> gRowFreezeOverlay;
 
 
 static void installOverlays() {
@@ -1581,6 +1582,13 @@ static void installOverlays() {
 		widget::Widget* o = createTooltipOverlay(&gOpt.tooltips);
 		APP->scene->addChild(o);
 		gTooltipOverlay = o;
+	}
+	// LAST OF ALL, so the photograph it puts up while the row count changes covers everything
+	// else drawn over the rack — see RowView.hpp.
+	if (!gRowFreezeOverlay) {
+		widget::Widget* o = createRowViewOverlay();
+		APP->scene->addChild(o);
+		gRowFreezeOverlay = o;
 	}
 }
 
@@ -1609,10 +1617,12 @@ static void removeOverlaysIfIdle() {
 	dropOverlay(gPinchOverlay);
 	dropOverlay(gInterceptOverlay);
 	dropOverlay(gTooltipOverlay);
+	dropOverlay(gRowFreezeOverlay);
 	gRackOverlay = NULL;
 	gPinchOverlay = NULL;
 	gInterceptOverlay = NULL;
 	gTooltipOverlay = NULL;
+	gRowFreezeOverlay = NULL;
 }
 
 

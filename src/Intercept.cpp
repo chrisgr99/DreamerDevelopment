@@ -748,10 +748,12 @@ struct InterceptOverlay : widget::Widget {
 		// back, because a wheel meaning zoom was never that control's.
 		if (rowViewOn() && (!onControl || wouldZoom) && !menuIsOpen() && !clipFamilyAt(e.pos)
 			&& !coveredByAWindow(e.pos)) {
-			// A WHEEL THAT MEANS ZOOM DOES NOTHING, and is taken all the same: left to Rack it
-			// zooms the rack, which is then put back by the row count, and the view shudders.
+			// A WHEEL THAT MEANS ZOOM CHANGES HOW MANY ROWS ARE ON SHOW, which is what zooming
+			// means while the view is held on rows: not how big the modules are, but how much of
+			// the rack is in the window. Whichever gesture Rack zooms with — a bare wheel, or
+			// Command and the wheel — is the one that does it.
 			const bool took = wouldZoom
-				? true
+				? rowViewZoom(e.scrollDelta.x, e.scrollDelta.y)
 				: rowViewScroll(e.scrollDelta.x, e.scrollDelta.y);
 			if (took) {
 				e.consume(this);
