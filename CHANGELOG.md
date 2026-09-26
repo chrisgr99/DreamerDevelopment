@@ -2,20 +2,23 @@
 
 Newest first.
 
-## 2.1.3 — 25 September 2026
+## 2.1.3 — 26 September 2026
 
-### Added
-- **Snap to rows.** A new button on Clarity's panel. Scrolling the rack snaps between a given number of rows of modules you can see fully — one to five of them, with a fifth of a row showing above and below for a peek at what is there. One row per scroll gesture, with a short gate between them, so a long swipe moves one row and not four. The up and down arrow keys move a row. You can increase or decrease the number of rows visible with Command and the up and down arrow keys, or from Snap to rows, number of rows, in the right-click menu. Zooming and pinching do nothing while it is on, the row count being what sets the zoom. Dragging a cable past the top or bottom edge steps a row and carries the pointer with it, so a cable can be run to a module off the screen.
-- Help for our own modules ships with the plugin, so Clarity, Test Gear and Dark describe their own controls through Dreamer Help.
+### New: Snap to rows
+A new button on Clarity's panel. Scrolling the rack snaps between a set number of fully visible rows of modules, from one to five. A fifth of a row shows above and below so you can see what is there.
+
+- Rows are scrolled with either the scroll wheel or the up and down arrow keys, each scroll action shifting the visible rows up or down by a single row.
+- Increase or decrease the number of rows visible with Command plus the up or down arrow key, or use the right-click menu to set the number of rows you want to see.
+- Normal zooming is disabled while this feature is on, because you zoom by increasing or decreasing the number of rows.
+- Dragging a cable past the top or bottom edge steps one row and carries the pointer with it, so a cable can be run to a module that is off the screen.
 
 ### Changed
-- Menus no longer run off the bottom of the window.
-- In the module browser, tooltips always appear below the pointer, whatever the position setting says.
+- The setting that places tooltips above the pointer also applied in the module browser, where the tooltips covered the module descriptions. In the module browser, tooltips now always appear in the usual place below the pointer.
 
 ### Fixed
-- Rack could crash when a module was added from the browser, with Tooltip readability on.
-- The module browser's lists could not be scrolled.
-- Scrolling a menu with a trackpad could stutter, with the scroll wheel set to zoom.
+- With Tooltip readability on, adding a module from the module browser could sometimes crash Rack. This is fixed.
+- Lists in the module browser sometimes could not be scrolled. This is fixed.
+- With the scroll wheel set to zoom, scrolling a menu with a trackpad could stutter.
 - A cable patched from a Test Gear output could not be picked up by clicking its jack; a new cable was started instead.
 
 ## 2.1.2 — 22 September 2026
