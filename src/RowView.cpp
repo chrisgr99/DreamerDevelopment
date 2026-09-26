@@ -66,6 +66,22 @@ static const double FREEZE_HOLD = 0.06;
 not being drawn at all. */
 static const double FREEZE_WAIT = 0.25;
 
+/** A top row asked for from outside, waiting to be applied. ASKED FOR RATHER THAN SET, because
+the caller may be a plugin whose own step runs before this one's, in the same frame as a patch is
+loaded — with the view not yet held on rows, and about to be moved again by whatever framed the
+patch. Remembered here and applied on the next step, which is the frame after the load and so
+the first frame anybody sees. */
+/** WHETHER THE NEXT COUNT CHANGE PIVOTS ON THE POINTER. A change made by a hand — the wheel, or
+Command and an arrow — keeps what is under the pointer under it, which is the whole point of
+pivoting there. A change asked for from outside has no hand behind it and no reason to believe
+the pointer is anywhere in particular; it pivots on the middle of the window instead. Set at the
+load of a patch, the pointer was wherever it had been left and the rack was thrown off to one
+side of the window. */
+static bool gPivotOnPointer = true;
+
+static bool gWantTop = false;
+static int gWantTopRow = 0;
+
 static double gDragStepAt = 0.0;
 static const double DRAG_STEP = 0.35;
 static bool gOn = false;
@@ -208,6 +224,25 @@ static void putPointerAtRow(app::RackScrollWidget* rs, float rackRow) {
 	GLFWwindow* win = APP->window ? APP->window->win : NULL;
 	if (!win)
 		return;
+	// NOT WHEN THE POINTER IS NOT THE HAND'S. A scripted demonstration drives Rack by feeding
+	// it pointer positions of its own while the real cursor lies wherever it was left; warping
+	// that cursor then moves nothing the viewer can see, but Rack takes it as the pointer from
+	// the next frame on — and the cable being carried jumps across the window to it.
+	//
+	// Told apart by asking where the real cursor is: when it is not where Rack believes the
+	// pointer to be, the pointer belongs to something else and is that thing's to move. The
+	// view still steps; only the warp is skipped, and the pointer, being held at the edge,
+	// simply steps it again.
+	{
+		const float scale = (APP->window->windowRatio > 0.f)
+			? APP->window->pixelRatio / APP->window->windowRatio : 1.f;
+		double rx = 0.0, ry = 0.0;
+		glfwGetCursorPos(win, &rx, &ry);
+		const math::Vec real = math::Vec((float) rx, (float) ry)
+			.div(scale > 0.f ? scale : 1.f);
+		if (real.minus(APP->scene->mousePos).square() > 4.f * 4.f)
+			return;
+	}
 	const float zoom = rs->getZoom();
 	const float sceneY = rs->getAbsoluteOffset(math::Vec()).y
 		+ (rackRow - topOf(gRow)) * zoom * RACK_GRID_HEIGHT;
@@ -233,6 +268,31 @@ static bool draggingInRack() {
 			return true;
 	}
 	return false;
+}
+
+
+/** THE SCROLL AREA, WORKED OUT AGAIN FOR A ZOOM WE HAVE JUST SET.
+
+The scroll widget works out how far the view may be scrolled at the top of its own step and
+clamps the offset to it at the end — and a module's step runs between those two. So a zoom set
+from here is followed, in the same frame, by a clamp against the bound belonging to the zoom it
+replaced. Zoomed in, the offset the view wants is off the end of that bound and the clamp drags
+the rack to the edge of the window.
+
+The same sum the scroll widget does, so the clamp that follows is the right one and leaves the
+view where it was put. */
+static void refitScrollArea(app::RackScrollWidget* rs, float zoom) {
+	if (!rs || !rs->zoomWidget || !rs->rackWidget || zoom <= 0.f)
+		return;
+	math::Rect moduleBox = rs->rackWidget->getModuleContainer()->getChildrenBoundingBox();
+	if (!moduleBox.size.isFinite())
+		moduleBox = math::Rect(RACK_OFFSET, math::Vec(0.f, 0.f));
+	math::Rect scrollBox = moduleBox;
+	scrollBox.pos = scrollBox.pos.mult(zoom);
+	scrollBox.size = scrollBox.size.mult(zoom);
+	scrollBox = scrollBox.grow(rs->box.size.mult(0.9f));
+	rs->zoomWidget->box = scrollBox;
+	rs->rackWidget->box.pos = scrollBox.pos.div(zoom).neg();
 }
 
 
@@ -282,44 +342,31 @@ void rowViewStep(bool on) {
 		// ON THE MIDDLE OF THE WINDOW when the pointer is somewhere else — a menu, the toolbar,
 		// another display — since there is nothing under it to keep.
 		math::Vec pivot = rs->box.size.div(2.f);
-		if (rs->box.contains(APP->scene->mousePos))
+		if (gPivotOnPointer && rs->box.contains(APP->scene->mousePos))
 			pivot = APP->scene->mousePos.minus(rs->box.pos);
+		gPivotOnPointer = true;
 		rs->setZoom(want, pivot);
 		gRow = clampRow(rowAt(rs->getGridOffset().y));
 		gLastY = topOf(gRow);
 		rs->setGridOffset(math::Vec(rs->getGridOffset().x, gLastY));
-		// AND THE SCROLL AREA WITH IT, or the offset just set is thrown away before it is drawn.
-		//
-		// THIS is what defeated doing it in one frame before. A module's step runs from inside
-		// the scroll widget's own step, which works out how far the view may be scrolled BEFORE
-		// stepping its children and clamps the offset to it AFTERWARDS — so the bound in force
-		// when our new offset is clamped was worked out for the zoom we have just replaced. With
-		// the zoom raised, the offset it wants is off the end of the old bound, and the clamp
-		// drags the view to the edge: the corner this shot off to.
-		//
-		// The bound is worked out here the same way the scroll widget works it out, from the
-		// modules at the new zoom, so the clamp at the end of this frame is the right one and
-		// leaves the view alone.
-		if (rs->zoomWidget && rs->rackWidget) {
-			math::Rect moduleBox = rs->rackWidget->getModuleContainer()->getChildrenBoundingBox();
-			if (!moduleBox.size.isFinite())
-				moduleBox = math::Rect(RACK_OFFSET, math::Vec(0.f, 0.f));
-			math::Rect scrollBox = moduleBox;
-			scrollBox.pos = scrollBox.pos.mult(want);
-			scrollBox.size = scrollBox.size.mult(want);
-			scrollBox = scrollBox.grow(rs->box.size.mult(0.9f));
-			rs->zoomWidget->box = scrollBox;
-			rs->rackWidget->box.pos = scrollBox.pos.div(want).neg();
-		}
+		// AND THE SCROLL AREA WITH IT, or the offset just set is thrown away before it is
+		// drawn — see refitScrollArea.
+		refitScrollArea(rs, want);
 		return;
 	}
 	gRowsShown = rowCount;
-	// THE ZOOM HELD AGAINST ANYTHING ELSE THAT SETS IT, and asked for once rather than every
-	// frame: asking again each frame re-pivots it on the middle of the window every time.
-	if (std::fabs(rs->getZoom() - want) > 0.0005f
-		&& std::fabs(want - gZoomAsked) > 0.0005f) {
+	// THE ZOOM HELD AGAINST ANYTHING ELSE THAT SETS IT, every frame it is wrong.
+	//
+	// It used to be asked for once and then not again until the wanted zoom itself changed, to
+	// keep from re-pivoting on the middle of the window frame after frame while Rack settled
+	// it. Rack does not settle it — a zoom is applied the moment it is set — and the one-shot
+	// rule meant that anything else which moved the zoom afterwards was simply left alone. A
+	// patch loaded by a program that frames the whole rack came up showing four rows, or two,
+	// depending on which of the two ran first that time.
+	if (std::fabs(rs->getZoom() - want) > 0.0005f) {
 		gZoomAsked = want;
 		rs->setZoom(want);
+		refitScrollArea(rs, want);
 	}
 
 	const math::Vec at = rs->getGridOffset();
@@ -375,6 +422,12 @@ void rowViewStep(bool on) {
 	else if (!gHave || std::fabs(moved) > 0.02f) {
 		gRow = clampRow(rowAt(at.y));
 	}
+	// A TOP ROW ASKED FOR FROM OUTSIDE WINS over wherever the view happens to have landed.
+	if (gWantTop) {
+		gWantTop = false;
+		gRow = clampRow(gWantTopRow);
+		gScrollAcc = 0.f;
+	}
 	gHave = true;
 	gLastY = topOf(gRow);
 	if (std::fabs(at.y - gLastY) > 0.0005f)
@@ -404,20 +457,25 @@ extern "C" bool drRowViewCommand(int move, int count) {
 }
 
 
+extern "C" bool drRowViewWhere(int* topRow, int* rows) {
+	if (topRow)
+		*topRow = gRow;
+	if (rows)
+		*rows = settingsRowViewRows();
+	return gOn && gHave;
+}
+
+
 extern "C" void drRowViewRows(int rows) {
+	if (rows != settingsRowViewRows())
+		gPivotOnPointer = false;
 	settingsSetRowViewRows(rows);
 }
 
 
 extern "C" void drRowViewTop(int row) {
-	app::RackScrollWidget* rs = APP->scene ? APP->scene->rackScroll : NULL;
-	if (!gOn || !rs)
-		return;
-	gRow = clampRow(row);
-	gScrollAcc = 0.f;
-	gLastY = topOf(gRow);
-	gHave = true;
-	rs->setGridOffset(math::Vec(rs->getGridOffset().x, gLastY));
+	gWantTop = true;
+	gWantTopRow = row;
 }
 
 

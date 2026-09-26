@@ -74,6 +74,15 @@ Declared extern "C" so it can be found by name at run time with dlsym. Nothing i
 calls it. */
 extern "C" bool drRowViewCommand(int move, int count);
 
+/** WHERE THE VIEW IS: the row at the top of the window and how many rows are on show. False
+when the view is not being held on rows, in which case neither number means anything.
+
+FOR SOMETHING WATCHING RATHER THAN DRIVING. A take recorded by hand has to be captioned
+afterwards, and what makes a caption is not that a button went down but that something changed —
+the view moved a row, the count went to three. Read once a frame by the recorder, this turns a
+search through the film into a dozen lines of text with exact times on them. */
+extern "C" bool drRowViewWhere(int* topRow, int* rows);
+
 /** WHICH ROW IS AT THE TOP OF THE WINDOW, set outright. Setting up, like the one below: a demo
 that has to show a particular row cannot get there by counting arrow presses from wherever the
 view happened to open. Does nothing when the view is not being held on rows. */
