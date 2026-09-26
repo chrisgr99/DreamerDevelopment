@@ -12,6 +12,9 @@ A new button on Clarity's panel. Scrolling the rack snaps between a set number o
 - Normal zooming is disabled while this feature is on, because you zoom by increasing or decreasing the number of rows.
 - Dragging a cable past the top or bottom edge steps one row and carries the pointer with it, so a cable can be run to a module that is off the screen.
 
+### Also new
+- Clarity, Test Gear and Dark now carry their own help inside the plugin, so Dreamer Help describes their controls from the maker rather than from its own database.
+
 ### Changed
 - The setting that places tooltips above the pointer also applied in the module browser, where the tooltips covered the module descriptions. In the module browser, tooltips now always appear in the usual place below the pointer.
 
