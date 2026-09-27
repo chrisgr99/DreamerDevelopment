@@ -2,6 +2,13 @@
 
 Newest first.
 
+## 2.1.4 — 26 September 2026
+
+### Changed: Snap to rows
+- Previously it was necessary to wait after each scroll action before scrolling the next row. Now a continuous rolling of the scroll wheel steps up or down through multiple rows.
+- You can adjust the number of rows visible in the same way as you would zoom: either Command plus wheel, or plain wheel, depending on your scroll setting in Rack.
+- Pulling a cable off the top or bottom of the visible rows causes the next row to snap into place, allowing smooth dragging of cables across the top and bottom boundaries.
+
 ## 2.1.3 — 26 September 2026
 
 ### New: Snap to rows
