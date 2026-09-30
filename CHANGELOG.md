@@ -2,6 +2,23 @@
 
 Newest first.
 
+## Unreleased
+
+### Changed: Snap to rows
+- Which way you are scrolling is now judged over the last half second rather than from a single movement, so a sideways scroll with a little up and down in it no longer steps a row.
+- Changing the number of rows keeps the row under the pointer where it is.
+- Scrolling now goes one row past the end of the patch, so the last row of modules can be the fraction peeking in at the edge.
+- Command with the up and down arrow keys can be reversed in the right-click menu, if you would rather up showed more rows than fewer.
+
+### Changed: Buttons
+- A button that is on is now red rather than green, so the one thing that has changed is not the same colour as the panel's own border and rule.
+- A button that is off now has a light ring round it, and its caption is at full strength rather than dimmed.
+
+### Fixed
+- Small movements of the scroll wheel could step a row when you had not meant to scroll at all, and a fast flick of the wheel did it more readily than a slow turn of the same distance. A scroll now has to be worth about a row before the first row moves, and how fast the wheel was turned no longer decides whether it does.
+- Picking up a cable from a port near the edge of the window started the view scrolling immediately, before you had moved the mouse at all. The view now waits until you have pulled the cable towards that edge.
+- With Snap to rows on, the same thing stepped a whole row when you clicked a port in the part row at the top or bottom of the window. It waits in the same way.
+
 ## 2.1.4 — 26 September 2026
 
 ### Changed: Snap to rows
