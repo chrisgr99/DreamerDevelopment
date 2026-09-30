@@ -1278,6 +1278,12 @@ static const float CAP_CX = 11.f;
 static const NVGcolor PANEL_BG = nvgRGB(0x16, 0x1a, 0x20);
 static const NVGcolor PANEL_INK = nvgRGB(0xe6, 0xe8, 0xec);
 static const NVGcolor LAMP_ON = nvgRGB(0x3d, 0xe0, 0x7a);
+/** A BUTTON THAT IS ON IS RED, and the green stays the house colour of the panel itself — the
+border and the rule under the title. They were the same green, which made a switched-on button
+one more green thing among several rather than the thing that had changed. */
+static const NVGcolor BUTTON_ON = nvgRGB(0xe8, 0x38, 0x28);
+static const NVGcolor BUTTON_ON_TOP = nvgRGB(0xff, 0x8f, 0x80);
+static const NVGcolor BUTTON_ON_LOW = nvgRGB(0xb5, 0x22, 0x16);
 
 /** PROPORTIONAL FACES, not the monospaced one Rack uses on its own panels.
 
@@ -1515,11 +1521,17 @@ struct FeatureButton : app::Switch {
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, CAP_CX, cy, CAP_R);
 		nvgFillPaint(args.vg, nvgRadialGradient(args.vg, CAP_CX, cy - 1.f, 0.5f, CAP_R,
-			on ? nvgRGB(0x7d, 0xff, 0xaa) : nvgRGB(0x4a, 0x50, 0x59),
-			on ? nvgRGB(0x24, 0xa8, 0x58) : nvgRGB(0x2a, 0x2f, 0x36)));
+			on ? BUTTON_ON_TOP : nvgRGB(0x4a, 0x50, 0x59),
+			on ? BUTTON_ON_LOW : nvgRGB(0x2a, 0x2f, 0x36)));
 		nvgFill(args.vg);
-		nvgStrokeColor(args.vg, on ? LAMP_ON : nvgRGB(0x1e, 0x22, 0x29));
-		nvgStrokeWidth(args.vg, 1.f);
+		// THE RIM OF AN OFF BUTTON IS LIGHT, not dark. A dark cap with a darker border on a
+		// dark panel is a button you have to know is there; this is the ring the demo module's
+		// buttons carry, which reads as an edge at a glance. A button that is greyed out
+		// because Rack is not set up for it keeps the dark rim, since that is the one case
+		// where being hard to see is the point.
+		nvgStrokeColor(args.vg, on ? BUTTON_ON
+			: usable ? nvgRGBA(0xcf, 0xcf, 0xcf, 0x90) : nvgRGB(0x1e, 0x22, 0x29));
+		nvgStrokeWidth(args.vg, (!on && usable) ? 1.3f : 1.f);
 		nvgStroke(args.vg);
 
 		std::shared_ptr<window::Font> font = panelFont();
@@ -1527,8 +1539,9 @@ struct FeatureButton : app::Switch {
 			return;
 		nvgFontFaceId(args.vg, font->handle);
 		nvgFontSize(args.vg, 8.5f);
-		nvgFillColor(args.vg, on ? PANEL_INK
-			: usable ? nvgRGB(0x83, 0x89, 0x93) : nvgRGB(0x4e, 0x53, 0x5b));
+		// AND ITS CAPTION IS FULL STRENGTH. Off is not disabled: the words say what the
+		// button would do, and they are as worth reading when it is off as when it is on.
+		nvgFillColor(args.vg, usable ? PANEL_INK : nvgRGB(0x4e, 0x53, 0x5b));
 		nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 		const float tx = CAP_CX + CAP_R + 5.f;
 		if (label2.empty()) {
