@@ -10,6 +10,10 @@ static bool gTooltipClassic = false;
 static bool gTooltipAbove = false;
 /** Two rows, unless changed in the menu. */
 static int gRowViewRows = 2;
+/** WHICH WAY COMMAND AND THE ARROWS GO. Off, Command and Up makes the modules bigger, which is
+one row fewer; on, it goes the other way. A setting because either reading is defensible — up for
+closer, or up for more — and which one feels right is not something to be argued out of. */
+static bool gRowKeysReversed = false;
 
 static std::string settingsPath() {
 	return asset::user("DreamerDevelopment/clarity.json");
@@ -31,6 +35,8 @@ static void settingsLoad() {
 		gTooltipClassic = json_is_true(j);
 	if (json_t* j = json_object_get(rootJ, "tooltipAbove"))
 		gTooltipAbove = json_is_true(j);
+	if (json_t* j = json_object_get(rootJ, "rowKeysReversed"))
+		gRowKeysReversed = json_boolean_value(j);
 	if (json_t* j = json_object_get(rootJ, "rowViewRows"))
 		gRowViewRows = math::clamp((int) json_integer_value(j), 1, 5);
 	json_decref(rootJ);
@@ -44,6 +50,7 @@ static void settingsSave() {
 	json_object_set_new(rootJ, "tooltipClassic", json_boolean(gTooltipClassic));
 	json_object_set_new(rootJ, "tooltipAbove", json_boolean(gTooltipAbove));
 	json_object_set_new(rootJ, "rowViewRows", json_integer(gRowViewRows));
+	json_object_set_new(rootJ, "rowKeysReversed", json_boolean(gRowKeysReversed));
 	system::createDirectories(asset::user("DreamerDevelopment"));
 	if (FILE* f = std::fopen(settingsPath().c_str(), "w")) {
 		json_dumpf(rootJ, f, JSON_INDENT(2));
@@ -88,6 +95,17 @@ void settingsSetTooltipAbove(bool above) {
 int settingsRowViewRows() {
 	settingsLoad();
 	return gRowViewRows;
+}
+
+bool settingsRowKeysReversed() {
+	settingsLoad();
+	return gRowKeysReversed;
+}
+
+void settingsSetRowKeysReversed(bool on) {
+	settingsLoad();
+	gRowKeysReversed = on;
+	settingsSave();
 }
 
 void settingsSetRowViewRows(int rows) {

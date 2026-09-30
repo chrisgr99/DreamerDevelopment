@@ -19,6 +19,9 @@ void settingsSetTooltipClassic(bool classic);
 /** How many whole rack rows the window shows while Whole rows is on: one to five. */
 int settingsRowViewRows();
 void settingsSetRowViewRows(int rows);
+/** Whether Command and the arrows go the other way: see the note in Settings.cpp. */
+bool settingsRowKeysReversed();
+void settingsSetRowKeysReversed(bool on);
 
 /** Tooltips drawn centred above the pointer, their foot touching its tip, rather than below the
 pointer's tail. */

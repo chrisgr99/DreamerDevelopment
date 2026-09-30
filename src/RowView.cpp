@@ -53,6 +53,9 @@ static float gLastY = 0.f;
 movement of it came in. */
 static float gScrollAcc = 0.f;
 static double gVertAt = 0.0;
+/** Whether this turn of the wheel has already moved a row. The first movement of a turn moves
+one at once; everything after it is paid for. */
+static bool gScrollTurning = false;
 /** When a drag last pushed the view past a row, and how long before it may again. */
 /** THE PHOTOGRAPH THAT HIDES A ROW-COUNT CHANGE — see the overlay at the foot of this file. */
 static bool gFreezeWant = false;
@@ -101,14 +104,17 @@ static int rowAt(float y) {
 }
 
 
-/** NEVER PAST THE LAST ROW THAT HAS ANYTHING ON IT.
+/** ONE ROW PAST THE END OF THE PATCH, AND NO FURTHER.
 
-Scrolling could carry the view off the end of the rack, until the window held one fifth of a row
-of modules along one edge and nothing else. There is no reason to look at that: the rack is empty
-in that direction and stays empty, and getting back to the patch meant scrolling the same distance
-again. So the view stops where at least one whole row of modules is still on show — at the limit,
-the last row of the patch sits alone at the top of the window, or the first row alone at the
-bottom.
+Scrolling could carry the view off into empty rack for as far as anybody cared to turn, and
+getting back meant turning the same distance again. But stopping while a whole row of modules was
+still on show stopped too soon: with one row in the window there was then no way to look at the
+empty row below the last one, which is where the next module goes.
+
+So the view may go one row beyond the rows the patch occupies, in either direction. At the limit
+the last row of the patch is the fifth of a row peeking in at the top edge, with empty rack below
+it — which is exactly the view you want when adding to the end of a patch — and the first row
+peeks in at the bottom.
 
 The rows the patch occupies, not the rows that exist: an empty row in the middle of a patch is
 scrolled past like any other, because what is above and below it is worth reaching. A rack with
@@ -134,13 +140,14 @@ static int clampRow(int row) {
 	if (!occupiedRows(&first, &last))
 		return row;
 	const int shown = settingsRowViewRows();
-	// The topmost row of the window may be as high as the first occupied row less all but one of
-	// the rows on show — which puts that row at the bottom — and as low as the last occupied row,
-	// which puts that one at the top.
-	const int lowest = first - (shown - 1);
-	if (last < lowest)
-		return row;   // fewer rows of modules than the window holds; leave it alone
-	return math::clamp(row, lowest, last);
+	// The topmost row of the window may be as high as one row past the first occupied one, which
+	// leaves that row peeking in at the bottom edge, and as low as one row past the last, which
+	// leaves that one peeking in at the top.
+	const int lowest = first - shown;
+	const int highest = last + 1;
+	if (highest < lowest)
+		return row;
+	return math::clamp(row, lowest, highest);
 }
 
 /** THE ARROW KEYS, READ FROM THE KEYBOARD RATHER THAN WAITED FOR.
@@ -195,12 +202,18 @@ static void rowViewKeys() {
 		gKeyHeld = 0;
 		return;
 	}
-	// The count goes the other way round from the view: Command and Up shows one more row.
+	// COMMAND AND UP MAKES THE MODULES BIGGER, which is one row FEWER: the keys read as a
+	// zoom, since that is what changing the count amounts to. Turned round in the menu for
+	// anyone who reads them as up for more rather than up for closer.
 	auto act = [&]() {
-		if (counting)
-			settingsSetRowViewRows(settingsRowViewRows() + (key < 0 ? 1 : -1));
-		else
+		if (counting) {
+			const int bigger = (key < 0) ? -1 : 1;   // key < 0 is Up
+			settingsSetRowViewRows(settingsRowViewRows()
+				+ (settingsRowKeysReversed() ? -bigger : bigger));
+		}
+		else {
 			rowViewMove(key);
+		}
 	};
 	if (key != gKeyHeld || counting != gKeyCounting) {
 		gKeyHeld = key;
@@ -342,11 +355,26 @@ void rowViewStep(bool on) {
 		// ON THE MIDDLE OF THE WINDOW when the pointer is somewhere else — a menu, the toolbar,
 		// another display — since there is nothing under it to keep.
 		math::Vec pivot = rs->box.size.div(2.f);
-		if (gPivotOnPointer && rs->box.contains(APP->scene->mousePos))
+		const bool onRack = rs->box.contains(APP->scene->mousePos);
+		if (gPivotOnPointer && onRack)
 			pivot = APP->scene->mousePos.minus(rs->box.pos);
 		gPivotOnPointer = true;
+		// WHICH ROW THE POINTER IS OVER, before the zoom moves everything.
+		const float zoomWas = rs->getZoom();
+		const int under = (zoomWas > 0.f && onRack)
+			? (int) std::floor(rs->getGridOffset().y
+				+ (APP->scene->mousePos.y - rs->box.pos.y) / (zoomWas * RACK_GRID_HEIGHT))
+			: 0;
 		rs->setZoom(want, pivot);
-		gRow = clampRow(rowAt(rs->getGridOffset().y));
+		gRow = rowAt(rs->getGridOffset().y);
+		// AND IT IS STILL ON SHOW AFTERWARDS. The pivot keeps the point under the pointer where
+		// it was, but the view is then settled on the nearest row, and half a row of rounding is
+		// enough to put the row you were looking at off the top — with one row on show, that
+		// leaves you looking at the empty row above the module you were working on. The rounding
+		// is allowed to settle anywhere that still has that row in the window.
+		if (onRack)
+			gRow = math::clamp(gRow, under - (rowCount - 1), under);
+		gRow = clampRow(gRow);
 		gLastY = topOf(gRow);
 		rs->setGridOffset(math::Vec(rs->getGridOffset().x, gLastY));
 		// AND THE SCROLL AREA WITH IT, or the offset just set is thrown away before it is
@@ -485,6 +513,78 @@ that turning the wheel to change the count feels like turning it to move the vie
 static float gZoomAcc = 0.f;
 static double gZoomAt = 0.0;
 
+/** WHICH WAY A SCROLLING HAND IS GOING, judged over the last half second or so.
+
+A SINGLE MOVEMENT CANNOT BE JUDGED. A gesture arrives as a stream of small deltas and the ratio
+between them wobbles from one to the next, so even a firmly vertical swipe throws off a few that
+are nearly horizontal. Judged one at a time, each of those was declined — and declining hands it
+to Rack, which slides the rack a few pixels sideways. That is the sideways drift while scrolling
+rows: not a wrong angle, but a test with no memory.
+
+So how much has gone across and how much up and down are each kept as a running total that
+decays with a half-life of a quarter of a second: roughly the last half second counts, and what
+came before fades out rather than dropping off a cliff. The axis is whichever total is larger.
+
+CLAIMED, THEN HELD AGAINST A REVERSAL. The opening movement of a gesture is not worth much, so
+the axis it suggests stands only provisionally until enough movement has arrived to be worth
+judging; after that it takes a two-to-one lead the other way to change it. That is what stops it
+flapping about at the boundary. It CAN still change — a gesture that starts down the rack and
+turns into a sideways one is a real thing a hand does, and this follows it a few events later
+rather than refusing to.
+
+A quarter of a second with no scrolling ends the gesture, and the next one starts from nothing.
+
+THE SIDEWAYS PART OF A VERTICAL GESTURE IS SWALLOWED, by the caller: being vertical means the
+whole movement is ours, and only its up and down is used. Passing the sideways part on is the
+very thing this exists to stop. */
+static const double AXIS_HALF_LIFE = 0.25;
+static const double AXIS_END = 0.25;
+static const float AXIS_CLAIM = 20.f;
+static float gAxisAcross = 0.f, gAxisDown = 0.f;
+static double gAxisAt = 0.0;
+static bool gAxisClaimed = false;
+static bool gAxisVertical = true;
+
+static bool axisIsVertical(float dx, float dy) {
+	const double now = system::getTime();
+	const double gap = now - gAxisAt;
+	gAxisAt = now;
+	if (gap > AXIS_END) {
+		gAxisAcross = gAxisDown = 0.f;
+		gAxisClaimed = false;
+	}
+	else {
+		const float fade = (float) std::pow(0.5, gap / AXIS_HALF_LIFE);
+		gAxisAcross *= fade;
+		gAxisDown *= fade;
+	}
+	gAxisAcross += std::fabs(dx);
+	gAxisDown += std::fabs(dy);
+
+	if (!gAxisClaimed) {
+		// VERTICAL UNTIL PROVED OTHERWISE. The opening movement of a gesture is a few pixels
+		// and its direction means nothing; taking it at face value meant a swipe that began
+		// with a hair more across than down was handed to Rack, which panned the rack before
+		// the gesture had said what it was. Held as ours until there is enough movement to
+		// judge, a sideways gesture loses about a notch of panning at its start, which is not
+		// a thing anybody can see.
+		gAxisVertical = true;
+		if (gAxisAcross + gAxisDown >= AXIS_CLAIM) {
+			gAxisClaimed = true;
+			gAxisVertical = gAxisDown >= gAxisAcross;
+		}
+	}
+	else if (gAxisVertical) {
+		if (gAxisAcross > 2.f * gAxisDown)
+			gAxisVertical = false;
+	}
+	else if (gAxisDown > 2.f * gAxisAcross) {
+		gAxisVertical = true;
+	}
+	return gAxisVertical;
+}
+
+
 bool rowViewZoom(float dx, float dy) {
 	if (!gOn)
 		return false;
@@ -526,9 +626,15 @@ bool rowViewZoom(float dx, float dy) {
 bool rowViewScroll(float dx, float dy) {
 	if (!gOn || !gHave)
 		return false;
-	// SIDEWAYS IS RACK'S: only a movement more up and down than across is ours.
-	if (dy == 0.f || std::fabs(dy) <= std::fabs(dx))
+	// WHICH WAY THE HAND IS GOING, TAKEN OVER THE LAST HALF SECOND rather than from this one
+	// movement. See axisIsVertical.
+	if (!axisIsVertical(dx, dy)) {
+		// Sideways: Rack's, and nothing of this turn is kept.
+		gScrollAcc = 0.f;
 		return false;
+	}
+	if (dy == 0.f)
+		return true;
 	app::RackScrollWidget* rs = APP->scene ? APP->scene->rackScroll : NULL;
 	if (!rs)
 		return false;
@@ -536,9 +642,34 @@ bool rowViewScroll(float dx, float dy) {
 	const double now = system::getTime();
 	// A FRESH TURN STARTS FROM NOTHING. The wheel standing still for a moment ends the one
 	// before it, and so does turning the other way.
-	if (now - gVertAt > SCROLL_END || (gScrollAcc != 0.f && (gScrollAcc > 0.f) != (dy > 0.f)))
+	if (now - gVertAt > SCROLL_END || (gScrollAcc != 0.f && (gScrollAcc > 0.f) != (dy > 0.f))) {
 		gScrollAcc = 0.f;
+		gScrollTurning = false;
+	}
 	gVertAt = now;
+
+	// THE FIRST ROW OF A TURN IS CHEAP. A row costs four notches so that a continuous turn walks
+	// the rack at a readable speed — but making the FIRST row cost that too meant every scroll
+	// began with a stretch where the wheel turned and nothing happened, and a stretch where
+	// nothing happens is a stretch in which a hand can wander. The first movement of a
+	// fresh turn moves a row at once; the rest of the turn is paced as before.
+	if (!gScrollTurning) {
+		// BUT NOT UNTIL THE GESTURE HAS SAID WHAT IT IS. A free first row meant a sideways
+		// scroll that opened with a hair of vertical in it stepped a row before the axis had
+		// been judged — a row you did not ask for, and the harder of the two mistakes to undo.
+		// Until there is enough movement to judge, the gesture is held as ours and counted, and
+		// the row waits.
+		if (!gAxisClaimed) {
+			gScrollAcc += dy;
+			return true;
+		}
+		gScrollTurning = true;
+		gScrollAcc = 0.f;
+		gRow = clampRow(gRow + ((dy > 0.f) ? -1 : 1));
+		gLastY = topOf(gRow);
+		rs->setGridOffset(math::Vec(rs->getGridOffset().x, gLastY));
+		return true;
+	}
 
 	gScrollAcc += dy;
 	if (std::fabs(gScrollAcc) >= SCROLL_PER_ROW) {

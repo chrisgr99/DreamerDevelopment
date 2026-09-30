@@ -1852,6 +1852,14 @@ struct ClarityWidget : DRUIWidgetBase {
 				});
 			rows->disabled = !gOpt.rowView;
 			menu->addChild(rows);
+			// WHICH WAY COMMAND AND THE ARROWS GO. Up makes the modules bigger, which is one
+			// row fewer; this turns that round for anyone who reads the keys as up for more.
+			ui::MenuItem* flip = createCheckMenuItem(
+				"Snap to rows — Command and up shows more rows", "",
+				[]() { return settingsRowKeysReversed(); },
+				[]() { settingsSetRowKeysReversed(!settingsRowKeysReversed()); });
+			flip->disabled = !gOpt.rowView;
+			menu->addChild(flip);
 		}
 		menu->addChild(createSubmenuItem("Tooltip readability position",
 			settingsTooltipAbove() ? "Above the pointer" : "Below the pointer", [](Menu* sub) {
