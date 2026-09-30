@@ -135,6 +135,13 @@ struct InterceptOverlay : widget::Widget {
 	Nobody has to know which mode they are in, because both are true at once.
 	*/
 	math::Vec carryStart;
+
+	/** HOLDING THE VIEW STILL UNTIL THE HAND ASKS FOR IT. See holdTheView. */
+	bool edgeHave = false;          /**< Whether a cable is in flight and an origin is recorded. */
+	math::Vec edgeFrom;             /**< Where the pointer was when it was picked up. */
+	bool edgeArmed[4] = {};         /**< Left, right, top, bottom: pulled towards since then. */
+	bool edgeHolding = false;
+	math::Vec edgeHeld;
 	/** A jack that was just right-clicked, and how many frames we will wait for Rack's own
 	menu to appear so ours can be added to it. */
 	WeakPtr<app::PortWidget> menuPort;
@@ -518,10 +525,89 @@ struct InterceptOverlay : widget::Widget {
 		}
 	}
 
+	/** RACK MOVES THE VIEW WHEN A CABLE IS NEAR THE EDGE OF THE WINDOW, and it asks only where
+	the pointer IS, not where it is going. A jack close to an edge therefore sets the whole view
+	sliding the moment its cable is picked up, before the hand has moved at all — and with
+	click-to-patch the cable stays in flight while you think, so the rack walks away underneath
+	it.
+
+	WHAT WAS MEANT BY IT is carrying a cable OFF that side of the window, and that is a movement
+	rather than a position. So the edge does nothing until the pointer has been pulled towards it
+	since the cable was taken: twenty pixels, which is a deliberate movement and not a tremor.
+	Once an edge has been asked for it stays asked for until the cable is put down, so pulling
+	back and forth along one does not keep switching it off.
+
+	HELD RATHER THAN PREVENTED. Rack does this in its own step and there is no way to reach into
+	it, so the view is put back where it was for as long as the push is unwanted — which is what
+	holding it still amounts to.
+
+	UP AND DOWN ONLY WHEN THE ROWS ARE NOT ALREADY HOLDING IT. Snapping to rows puts the view
+	back on its row every frame for the same reason, and two hands on the same wheel is one hand
+	too many. Sideways is untouched by that and is held here whatever the rows are doing. */
+	void holdTheView() {
+		app::RackScrollWidget* rs = APP->scene ? APP->scene->rackScroll : NULL;
+		if (!rs)
+			return;
+		const bool inFlight = carrying
+			|| (APP->scene->rack && !APP->scene->rack->getIncompleteCables().empty());
+		if (!inFlight) {
+			edgeHave = false;
+			edgeHolding = false;
+			return;
+		}
+
+		const math::Vec now = APP->scene->getMousePos();
+		if (!edgeHave) {
+			edgeHave = true;
+			edgeFrom = now;
+			for (int i = 0; i < 4; i++)
+				edgeArmed[i] = false;
+			edgeHolding = false;
+		}
+		// A deliberate pull towards one side, measured from where the cable was taken.
+		static const float PULL = 20.f;
+		if (now.x < edgeFrom.x - PULL) edgeArmed[0] = true;
+		if (now.x > edgeFrom.x + PULL) edgeArmed[1] = true;
+		if (now.y < edgeFrom.y - PULL) edgeArmed[2] = true;
+		if (now.y > edgeFrom.y + PULL) edgeArmed[3] = true;
+
+		// A little wider than the margin Rack pushes within, so the hold covers all of it.
+		static const float MARGIN = 26.f;
+		const math::Rect view = rs->box;
+		const bool holdX = (now.x <= view.pos.x + MARGIN && !edgeArmed[0])
+			|| (now.x >= view.pos.x + view.size.x - MARGIN && !edgeArmed[1]);
+		const bool holdY = !rowViewOn()
+			&& ((now.y <= view.pos.y + MARGIN && !edgeArmed[2])
+				|| (now.y >= view.pos.y + view.size.y - MARGIN && !edgeArmed[3]));
+
+		if (!holdX && !holdY) {
+			edgeHolding = false;
+			return;
+		}
+		math::Vec at = rs->getGridOffset();
+		if (!edgeHolding) {
+			edgeHeld = at;
+			edgeHolding = true;
+		}
+		// Only the axis being pushed: a cable held at the left edge must still be free to move
+		// the view up and down if the hand asks for that.
+		if (holdX)
+			at.x = edgeHeld.x;
+		else
+			edgeHeld.x = at.x;
+		if (holdY)
+			at.y = edgeHeld.y;
+		else
+			edgeHeld.y = at.y;
+		rs->setGridOffset(at);
+	}
+
 	void step() override {
 		// Cover the scene, or the event system will not offer us events outside our box.
 		if (parent)
 			box.size = parent->box.size;
+
+		holdTheView();
 
 		if (APP->scene) {
 			const float height = APP->scene->box.size.y;

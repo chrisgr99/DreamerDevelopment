@@ -44,6 +44,33 @@ depended on what you had done a moment before. Reversing direction clears it for
 reason. */
 static const double SCROLL_END = 0.25;
 
+/** WHAT THE FIRST ROW OF A TURN COSTS, which is less than a row and more than nothing.
+
+It was nothing at all, so that a scroll did not begin with a stretch where the wheel turned and
+the rack stood still. That was right about the waiting and wrong about the twitching: a small
+movement, of the kind a hand makes while resting on a wheel, was enough to be judged vertical and
+therefore enough to step a row nobody asked for.
+
+Just under a whole row is where it settled, by ear: a turn anybody means still moves before the
+wheel has gone a full row, and a hand jogging it does not move the rack at all. */
+static const float SCROLL_FIRST_ROW = 37.5f;
+
+/** HOW MUCH OF ONE MOVEMENT COUNTS TOWARDS THAT FIRST ROW.
+
+macOS scales a scroll by how fast the wheel is turning, so the same distance arrives as one large
+number when it is flicked and as several small ones when it is turned. A threshold counting those
+numbers is therefore crossed sooner by a fast twitch than by a slow one, which is the opposite of
+what anybody means: a jog of the wheel is a jog however quickly it happened.
+
+So no single movement counts for more than a notch towards the first row. What the threshold then
+measures is how LONG the wheel was turned rather than how hard it was hit, and the system's
+acceleration stops having a say in whether a row moves. A deliberate flick is several movements
+and still moves at once; a single sharp jog is one, and does not.
+
+Nothing after the first row is capped this way. By then the turn has been established, and there
+the acceleration is welcome: it is what lets a long flick walk the rack quickly. */
+static const float SCROLL_NOTCH = 10.f;
+
 /** Which row is at the top, and what we last put the view at, so a move made by anything else can
 be told from our own and answered by settling on the nearest row. */
 static bool gHave = false;
@@ -56,6 +83,18 @@ static double gVertAt = 0.0;
 /** Whether this turn of the wheel has already moved a row. The first movement of a turn moves
 one at once; everything after it is paid for. */
 static bool gScrollTurning = false;
+/** HOW FAR A CABLE MUST BE PULLED TOWARDS AN EDGE before the row follows it there.
+
+A cable is picked up where its jack is, and a jack in the fraction of a row peeking in at the top
+or the foot of the window is already outside the whole rows — so the row stepped the instant the
+cable was taken, before the hand had moved at all. What was meant by carrying a cable off the
+bottom of the window is a movement, not a position.
+
+Twenty pixels, the same as the window's own edges use: a deliberate pull and not a tremor. Once an
+edge has been asked for it stays asked for until the cable is put down, so a cable carried back
+and forth across a boundary does not keep having to ask again. */
+static const float DRAG_PULL = 20.f;
+
 /** When a drag last pushed the view past a row, and how long before it may again. */
 /** THE PHOTOGRAPH THAT HIDES A ROW-COUNT CHANGE — see the overlay at the foot of this file. */
 static bool gFreezeWant = false;
@@ -86,6 +125,10 @@ static bool gWantTop = false;
 static int gWantTopRow = 0;
 
 static double gDragStepAt = 0.0;
+/** Where the pointer was when this drag began, and which way it has since been pulled. */
+static bool gDragHave = false;
+static float gDragFromY = 0.f;
+static bool gDragUp = false, gDragDown = false;
 static const double DRAG_STEP = 0.35;
 static bool gOn = false;
 
@@ -415,12 +458,29 @@ void rowViewStep(bool on) {
 	const bool dragging = draggingInRack()
 		&& rs->box.contains(APP->scene->mousePos);
 	int push = 0;
+	if (!dragging) {
+		gDragHave = false;
+		gDragUp = gDragDown = false;
+	}
 	if (gHave && dragging) {
+		// WHERE THE HAND STARTED, so that carrying a cable off an edge can be told from having
+		// picked one up near it. See DRAG_PULL.
+		const float pointerY = APP->scene->getMousePos().y;
+		if (!gDragHave) {
+			gDragHave = true;
+			gDragFromY = pointerY;
+			gDragUp = gDragDown = false;
+		}
+		if (pointerY < gDragFromY - DRAG_PULL)
+			gDragUp = true;
+		if (pointerY > gDragFromY + DRAG_PULL)
+			gDragDown = true;
+
 		const float pointerRow = (APP->scene->rack->getMousePos().y - RACK_OFFSET.y)
 			/ RACK_GRID_HEIGHT;
-		if (pointerRow < (float) gRow)
+		if (pointerRow < (float) gRow && gDragUp)
 			push = -1;
-		else if (pointerRow > (float) (gRow + rowCount))
+		else if (pointerRow > (float) (gRow + rowCount) && gDragDown)
 			push = 1;
 	}
 	// NOTHING AT ALL WHEN THE VIEW CANNOT GO THAT WAY. At the end of the patch the row does not
@@ -651,18 +711,24 @@ bool rowViewScroll(float dx, float dy) {
 	// THE FIRST ROW OF A TURN IS CHEAP. A row costs four notches so that a continuous turn walks
 	// the rack at a readable speed — but making the FIRST row cost that too meant every scroll
 	// began with a stretch where the wheel turned and nothing happened, and a stretch where
-	// nothing happens is a stretch in which a hand can wander. The first movement of a
-	// fresh turn moves a row at once; the rest of the turn is paced as before.
+	// nothing happens is a stretch in which a hand can wander. So the first row costs a little
+	// less than a whole one rather than nothing at all — see SCROLL_FIRST_ROW, which was found
+	// by turning the wheel rather than by reasoning about it.
 	if (!gScrollTurning) {
 		// BUT NOT UNTIL THE GESTURE HAS SAID WHAT IT IS. A free first row meant a sideways
 		// scroll that opened with a hair of vertical in it stepped a row before the axis had
 		// been judged — a row you did not ask for, and the harder of the two mistakes to undo.
 		// Until there is enough movement to judge, the gesture is held as ours and counted, and
 		// the row waits.
-		if (!gAxisClaimed) {
-			gScrollAcc += dy;
+		// A NOTCH AT MOST FROM ANY ONE MOVEMENT, so that how fast the wheel was hit does not
+		// decide whether a row moves. See SCROLL_NOTCH.
+		gScrollAcc += math::clamp(dy, -SCROLL_NOTCH, SCROLL_NOTCH);
+		if (!gAxisClaimed)
 			return true;
-		}
+		// AND NOT UNTIL THE TURN IS WORTH A ROW. See SCROLL_FIRST_ROW: being judged vertical is
+		// not the same as having been turned.
+		if (std::fabs(gScrollAcc) < SCROLL_FIRST_ROW)
+			return true;
 		gScrollTurning = true;
 		gScrollAcc = 0.f;
 		gRow = clampRow(gRow + ((dy > 0.f) ? -1 : 1));
