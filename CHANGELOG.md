@@ -2,7 +2,7 @@
 
 Newest first.
 
-## Unreleased
+## 2.1.5 — 1 October 2026
 
 ### Changed: Snap to rows
 - Which way you are scrolling is now judged over the last half second rather than from a single movement, so a sideways scroll with a little up and down in it no longer steps a row.
