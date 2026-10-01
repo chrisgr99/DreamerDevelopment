@@ -690,12 +690,19 @@ struct InjectorWidget : ClipWidget {
 	}
 
 	/** The attachment the user should see is the callout, not a patch lead running across the
-	rack — so the cable and the plugs at both its ends are hidden. The engine cable underneath
-	is untouched and carries the signal exactly as any other does. */
+	rack — so the cable is hidden, and so is its plug in the Test Gear module, which is not
+	where anybody is looking. The engine cable underneath is untouched and carries the signal
+	exactly as any other does.
+
+	THE PLUG IN THE JACK IT FEEDS STAYS. Rack puts a light in every plug — green for a positive
+	voltage, red for a negative one, blue for a polyphonic cable — and hidden, the plug took its
+	light with it: an LFO from here into a mixer showed a dark jack while a real LFO's cable
+	lit the same jack. A plug sitting in the jack also says plainly that something is patched
+	there. */
 	static void hideCable(app::CableWidget* cw) {
 		cw->visible = false;
 		if (cw->inputPlug)
-			cw->inputPlug->visible = false;
+			cw->inputPlug->visible = true;
 		if (cw->outputPlug)
 			cw->outputPlug->visible = false;
 	}
@@ -926,8 +933,8 @@ struct InjectorWidget : ClipWidget {
 		}
 		followPort();
 		dwellStep();
-		// Rack hides the plugs on creation, but a cable rebuilds them when its ports change,
-		// so this keeps them hidden rather than assuming they stayed that way.
+		// A cable rebuilds its plugs when its ports change, so this keeps the one in the Test
+		// Gear module hidden rather than assuming it stayed that way.
 		if (cable)
 			hideCable(cable);
 		ClipWidget::step();
