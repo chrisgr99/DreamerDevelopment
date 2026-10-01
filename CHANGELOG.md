@@ -20,6 +20,7 @@ Newest first.
 - With Snap to rows on, the same thing stepped a whole row when you clicked a port in the part row at the top or bottom of the window. It waits in the same way.
 - Scrolling could step two rows in quick succession when you meant one: the end of the movement that stepped the first row went on to pay for the next. A row now settles for an eighth of a second before scrolling counts towards the next one.
 - Turning the wheel back slightly just after a row stepped could step a row back at once. Reversing now always starts a fresh scroll, which has to be worth about a row before anything moves.
+- A Test Gear widget attached to an input hid the plug in that jack, so the jack's signal light never showed: an LFO from Test Gear into a mixer left the input dark where a cable from a real LFO lit it. The plug in the jack the widget feeds is now shown, with its light.
 
 ## 2.1.4 — 26 September 2026
 
