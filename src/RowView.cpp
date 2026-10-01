@@ -83,6 +83,19 @@ static double gVertAt = 0.0;
 /** Whether this turn of the wheel has already moved a row. The first movement of a turn moves
 one at once; everything after it is paid for. */
 static bool gScrollTurning = false;
+/** WHICH WAY THE TURN IS GOING, kept for itself rather than read off what is left over. The
+leftover is nothing just after a row moves, and a reversal tested against nothing was not seen
+as one: a slight turn back then counted as the same turn, with no notch limit, and stepped a row
+back at once. */
+static int gScrollDir = 0;
+/** When the last row moved. */
+static double gStepAt = 0.0;
+/** A ROW SETTLES BEFORE THE NEXT ONE IS PAID FOR. The movement that carried one row over its
+threshold carries on for a moment — a wheel slowing down, and macOS sending it in large pieces
+because it was turning fast — and counted, it paid for the next row a few hundredths of a second
+later. So what arrives in the first eighth of a second after a row moves is spent on nothing, and
+the next row is earned by turning on. */
+static const double ROW_SETTLE = 0.125;
 /** HOW FAR A CABLE MUST BE PULLED TOWARDS AN EDGE before the row follows it there.
 
 A cable is picked up where its jack is, and a jack in the fraction of a row peeking in at the top
@@ -701,11 +714,13 @@ bool rowViewScroll(float dx, float dy) {
 
 	const double now = system::getTime();
 	// A FRESH TURN STARTS FROM NOTHING. The wheel standing still for a moment ends the one
-	// before it, and so does turning the other way.
-	if (now - gVertAt > SCROLL_END || (gScrollAcc != 0.f && (gScrollAcc > 0.f) != (dy > 0.f))) {
+	// before it, and so does turning the other way — however little, and whatever is left over.
+	const int dir = (dy > 0.f) ? 1 : -1;
+	if (now - gVertAt > SCROLL_END || (gScrollDir != 0 && dir != gScrollDir)) {
 		gScrollAcc = 0.f;
 		gScrollTurning = false;
 	}
+	gScrollDir = dir;
 	gVertAt = now;
 
 	// THE FIRST ROW OF A TURN IS CHEAP. A row costs four notches so that a continuous turn walks
@@ -731,14 +746,19 @@ bool rowViewScroll(float dx, float dy) {
 			return true;
 		gScrollTurning = true;
 		gScrollAcc = 0.f;
+		gStepAt = now;
 		gRow = clampRow(gRow + ((dy > 0.f) ? -1 : 1));
 		gLastY = topOf(gRow);
 		rs->setGridOffset(math::Vec(rs->getGridOffset().x, gLastY));
 		return true;
 	}
 
+	// See ROW_SETTLE. Taken, so it does not reach Rack either.
+	if (now - gStepAt < ROW_SETTLE)
+		return true;
 	gScrollAcc += dy;
 	if (std::fabs(gScrollAcc) >= SCROLL_PER_ROW) {
+		gStepAt = now;
 		// A wheel turned away from you goes UP the rack, which is what Rack does too.
 		gRow = clampRow(gRow + ((gScrollAcc > 0.f) ? -1 : 1));
 		gScrollAcc -= (gScrollAcc > 0.f) ? SCROLL_PER_ROW : -SCROLL_PER_ROW;

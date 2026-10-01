@@ -18,6 +18,8 @@ Newest first.
 - Small movements of the scroll wheel could step a row when you had not meant to scroll at all, and a fast flick of the wheel did it more readily than a slow turn of the same distance. A scroll now has to be worth about a row before the first row moves, and how fast the wheel was turned no longer decides whether it does.
 - Picking up a cable from a port near the edge of the window started the view scrolling immediately, before you had moved the mouse at all. The view now waits until you have pulled the cable towards that edge.
 - With Snap to rows on, the same thing stepped a whole row when you clicked a port in the part row at the top or bottom of the window. It waits in the same way.
+- Scrolling could step two rows in quick succession when you meant one: the end of the movement that stepped the first row went on to pay for the next. A row now settles for an eighth of a second before scrolling counts towards the next one.
+- Turning the wheel back slightly just after a row stepped could step a row back at once. Reversing now always starts a fresh scroll, which has to be worth about a row before anything moves.
 
 ## 2.1.4 — 26 September 2026
 
